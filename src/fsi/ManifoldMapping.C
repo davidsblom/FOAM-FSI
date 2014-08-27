@@ -1,0 +1,406 @@
+
+/*
+ * Author
+ *   David Blom, TU Delft. All rights reserved.
+ */
+
+#include "ManifoldMapping.H"
+
+extern "C" void dgesdd_(
+  const char * JOBZ,
+  const int * M,
+  const int * N,
+  double * A,
+  const int * LDA,
+  double * S,
+  double * U,
+  const int * LDU,
+  double * VT,
+  const int * LDVT,
+  double * WORK,
+  const int * LWORK,
+  int * IWORK,
+  int * INFO
+  );
+
+using namespace fsi;
+
+// Singular value decomposition LAPACK
+void DSYEVD(
+  fsi::matrix & A,
+  fsi::vector & S,
+  fsi::matrix & VT,
+  fsi::matrix & U
+  )
+{
+  assert( A.rows() > 0 );
+  assert( A.cols() > 0 );
+
+  // Copy the matrix A
+  fsi::matrix Acopy = A;
+
+  // The number of rows of the input matrix A.  M >= 0.
+  int M = Acopy.rows();
+
+  // The number of columns of the input matrix A.  N >= 0.
+  int N = Acopy.cols();
+
+  // The leading dimension of the array A.  LDA >= max(1,M).
+  int LDA = Acopy.outerStride();
+
+  assert( Acopy.rows() == LDA );
+  assert( Acopy.cols() == N );
+
+  // The singular values of A, sorted so that S(i) >= S(i+1).
+  S.resize( std::min( M, N ) );
+  S.setZero();
+
+  // Vectors
+  int UCOL = std::min( M, N );
+
+  // The leading dimension of the array U.  LDU >= 1; if
+  // JOBZ = 'S' or 'A' or JOBZ = 'O' and M < N, LDU >= M.
+  int LDU = M;
+  U.resize( LDU, UCOL );
+  U.setZero();
+
+  // The leading dimension of the array VT.  LDVT >= 1;
+  // if JOBZ = 'S', LDVT >= min(M,N).
+  int LDVT = std::min( M, N );
+
+  // if JOBZ = 'S', VT contains the first min(M,N) rows of
+  // V**T (the right singular vectors, stored rowwise);
+  VT.resize( LDVT, N );
+  VT.setZero();
+
+  // The dimension of the array WORK. LWORK >= 1.
+  // If JOBZ = 'S' or 'A'
+  // LWORK >= 3*min(M,N)*min(M,N) +
+  //    max(max(M,N),4*min(M,N)*min(M,N)+4*min(M,N)).
+  // For good performance, LWORK should generally be larger.
+  // If LWORK = -1 but other input arguments are legal, WORK(1)
+  // returns the optimal LWORK.
+  int LWORK = -1;
+
+  // (workspace/output) DOUBLE PRECISION array, dimension (MAX(1,LWORK))
+  fsi::vector WORK( std::max( 1, LWORK ) );
+  WORK.setZero();
+
+  // (workspace) INTEGER array, dimension (8*min(M,N))
+  Eigen::VectorXi IWORK( 8 * std::min( M, N ) );
+
+  // (output) INTEGER
+  // = 0:  successful exit.
+  // < 0:  if INFO = -i, the i-th argument had an illegal value.
+  // > 0:  DBDSDC did not converge, updating process failed.
+  int INFO = 0;
+
+  dgesdd_( "S", &M, &N, Acopy.data(), &LDA, S.data(), U.data(), &LDU, VT.data(), &LDVT, WORK.data(), &LWORK, IWORK.data(), &INFO );
+
+  assert( INFO == 0 );
+
+  LWORK = WORK( 0 );
+
+  WORK.resize( std::max( 1, LWORK ) );
+  WORK.setZero();
+
+  dgesdd_( "S", &M, &N, Acopy.data(), &LDA, S.data(), U.data(), &LDU, VT.data(), &LDVT, WORK.data(), &LWORK, IWORK.data(), &INFO );
+
+  assert( INFO == 0 );
+}
+
+ManifoldMapping::ManifoldMapping(
+  shared_ptr<SurrogateModel> fineModel,
+  shared_ptr<SurrogateModel> coarseModel,
+  int maxIter,
+  double singularityLimit,
+  int nbReuse,
+  int reuseInformationStartingFromTimeIndex
+  )
+  :
+  SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex ),
+  singularityLimit( singularityLimit ),
+  iter( 0 )
+{
+  assert( singularityLimit > 0 );
+  assert( singularityLimit < 1 );
+}
+
+ManifoldMapping::~ManifoldMapping()
+{}
+
+void ManifoldMapping::performPostProcessing(
+  const vector & y,
+  const vector & x0,
+  vector & xk,
+  bool residualCriterium
+  )
+{
+  assert( x0.rows() == xk.rows() );
+
+  // Initialize variables
+
+  int m = y.rows();
+  int n = x0.rows();
+  vector yk( m ), output( m ), R( m );
+  xk = x0;
+  vector xkprev = x0;
+  output.setZero();
+  R.setZero();
+  coarseResiduals.resize( m, 1 );
+  coarseResiduals.setZero();
+  fineResiduals.resize( m, 1 );
+  fineResiduals.setZero();
+  iter = 0;
+
+  // Determine optimum of coarse model xstar
+  if ( residualCriterium )
+  {
+    assert( y.norm() < 1.0e-14 );
+    coarseModel->optimize( x0, xk );
+  }
+
+  if ( !residualCriterium )
+    coarseModel->optimize( y, x0, xk );
+
+  if ( !coarseModel->allConverged() )
+    throw std::string( "Manifold mapping: coarse model is not converged. Unable to continue optimization." );
+
+  assert( xk.rows() == n );
+  assert( x0.rows() == n );
+
+  // Initialize coarse model and fine model responses
+
+  // Coarse model evaluation
+
+  coarseModel->evaluate( xk, output, R );
+  coarseResiduals.col( 0 ) = R;
+  assert( xk.rows() == n );
+  assert( output.rows() == m );
+  assert( R.rows() == m );
+
+  // Fine model evaluation
+
+  fineModel->evaluate( xk, output, R );
+  fineResiduals.col( 0 ) = R;
+  assert( output.rows() == m );
+  assert( R.rows() == m );
+
+  iter++;
+
+  // Check convergence criteria
+  if ( isConvergence( xk, xkprev, residualCriterium ) )
+  {
+    assert( fineModel->allConverged() );
+    iterationsConverged();
+    return;
+  }
+
+  assert( xk.rows() == n );
+
+  for ( int k = 0; k < maxIter - 1; k++ )
+  {
+    xkprev = xk;
+
+    // Determine the number of columns used to calculate the mapping matrix
+
+    int nbCols = std::min( k, n );
+    int nbColsCurrentTimeStep = nbCols;
+
+    // Include information from previous time steps
+
+    for ( std::deque<matrix>::iterator it = fineResidualsList.begin(); it != fineResidualsList.end(); ++it )
+      nbCols += it->cols() - 1;
+
+    nbCols = std::min( nbCols, n );
+
+    if ( nbCols == 0 )
+      // Update the design specification yk
+      yk = coarseResiduals.col( k ) - (fineResiduals.col( k ) - y);
+
+    if ( nbCols >= 1 )
+    {
+      // Update the mapping matrix
+
+      matrix DeltaF( m, nbCols ), DeltaC( m, nbCols );
+
+      int colIndex = 0;
+
+      for ( int i = 0; i < nbColsCurrentTimeStep; i++ )
+      {
+        DeltaF.col( i ) = fineResiduals.col( k ) - fineResiduals.col( k - 1 - i );
+        DeltaC.col( i ) = coarseResiduals.col( k ) - coarseResiduals.col( k - 1 - i );
+        colIndex++;
+      }
+
+      // Include information from previous time steps
+
+      int tmpIndex = colIndex;
+
+      for ( std::deque<matrix>::iterator it = fineResidualsList.begin(); it != fineResidualsList.end(); ++it )
+      {
+        assert( it->cols() >= 2 );
+
+        for ( int i = 0; i < it->cols() - 1; i++ )
+        {
+          if ( colIndex >= DeltaF.cols() )
+            continue;
+
+          DeltaF.col( colIndex ) = it->col( it->cols() - 1 ) - it->col( it->cols() - 2 - i );
+          colIndex++;
+        }
+      }
+
+      assert( colIndex == nbCols );
+
+      colIndex = tmpIndex;
+
+      for ( std::deque<matrix>::iterator it = coarseResidualsList.begin(); it != coarseResidualsList.end(); ++it )
+      {
+        assert( it->cols() >= 2 );
+
+        for ( int i = 0; i < it->cols() - 1; i++ )
+        {
+          if ( colIndex >= DeltaC.cols() )
+            continue;
+
+          DeltaC.col( colIndex ) = it->col( it->cols() - 1 ) - it->col( it->cols() - 2 - i );
+          colIndex++;
+        }
+      }
+
+      assert( colIndex == nbCols );
+
+      Info << "Manifold mapping with ";
+      Info << nbCols;
+      Info << " cols for the Jacobian" << endl;
+
+      // Initialize variables for singular value decomposition
+
+      vector S_F, S_C;
+      matrix V_F, U_F, V_C, U_C, Sigma_F, pseudoSigma_F;
+
+      // Remove dependent columns of DeltaC and DeltaF
+
+      int nbRemoveCols = 1;
+
+      while ( nbRemoveCols > 0 )
+      {
+        nbRemoveCols = 0;
+
+        if ( DeltaF.cols() == 0 )
+          break;
+
+        // Calculate singular value decomposition with LAPACK
+        DSYEVD( DeltaF, S_F, V_F, U_F );
+
+        Sigma_F = S_F.asDiagonal();
+        pseudoSigma_F = Sigma_F;
+
+        for ( int i = 0; i < Sigma_F.cols(); i++ )
+        {
+          if ( std::abs( pseudoSigma_F( i, i ) ) <= singularityLimit )
+          {
+            // Remove the column from DeltaC and DeltaF
+            removeColumnFromMatrix( DeltaC, i - nbRemoveCols );
+            removeColumnFromMatrix( DeltaF, i - nbRemoveCols );
+
+            nbRemoveCols++;
+          }
+        }
+
+        if ( nbRemoveCols )
+          Info << "Manifold mapping: remove " << nbRemoveCols << " columns from the Jacobian matrices" << endl;
+      }
+
+      assert( DeltaC.cols() == DeltaF.cols() );
+
+      if ( DeltaF.cols() > 0 )
+      {
+        // Calculate singular value decomposition with LAPACK
+        DSYEVD( DeltaF, S_F, V_F, U_F );
+        DSYEVD( DeltaC, S_C, V_C, U_C );
+
+        Sigma_F = S_F.asDiagonal();
+
+        pseudoSigma_F = Sigma_F;
+
+        for ( int i = 0; i < Sigma_F.cols(); i++ )
+          pseudoSigma_F( i, i ) = 1.0 / pseudoSigma_F( i, i );
+
+        matrix pseudoDeltaF = V_F.transpose() * pseudoSigma_F * U_F.transpose();
+
+        // Update the design specification yk
+
+        // matrix I = Eigen::MatrixXd::Identity( m, m );
+        // matrix Tk = DeltaC * pseudoDeltaF + ( I - U_C * U_C.transpose() ) * ( I - U_F * U_F.transpose() );
+        // yk = coarseResiduals.col( k ) - Tk * ( fineResiduals.col(k) - y );
+
+        yk = coarseResiduals.col( k );
+        yk -= DeltaC * ( pseudoDeltaF * (fineResiduals.col( k ) - y) );
+        yk += U_F * ( U_F.transpose() * (fineResiduals.col( k ) - y) );
+        yk += U_C * ( U_C.transpose() * (fineResiduals.col( k ) - y) );
+        yk -= fineResiduals.col( k ) - y;
+        yk -= U_C * ( U_C.transpose() * ( U_F * ( U_F.transpose() * (fineResiduals.col( k ) - y) ) ) );
+      }
+
+      if ( DeltaF.cols() == 0 )
+      {
+        // Update the design specification yk
+        yk = coarseResiduals.col( k ) - (fineResiduals.col( k ) - y);
+      }
+    }
+
+    // Update the fine model optimum
+    output.resize( n );
+    coarseModel->optimize( yk, xk, output );
+    assert( output.rows() == n );
+    assert( yk.rows() == m );
+    assert( xk.rows() == n );
+
+    if ( !coarseModel->allConverged() )
+      throw std::string( "Manifold mapping: coarse model is not converged. Unable to continue optimization." );
+
+    xk = output;
+
+    // Coarse model evaluation
+    output.resize( m );
+    coarseModel->evaluate( xk, output, R );
+    assert( xk.rows() == n );
+    assert( output.rows() == m );
+    assert( R.rows() == m );
+    coarseResiduals.conservativeResize( coarseResiduals.rows(), coarseResiduals.cols() + 1 );
+    coarseResiduals.col( coarseResiduals.cols() - 1 ) = R;
+
+    // Fine model evaluation
+
+    fineModel->evaluate( xk, output, R );
+    assert( xk.rows() == n );
+    assert( output.rows() == m );
+    assert( R.rows() == m );
+    fineResiduals.conservativeResize( fineResiduals.rows(), fineResiduals.cols() + 1 );
+    fineResiduals.col( fineResiduals.cols() - 1 ) = R;
+
+    iter++;
+
+    // Check convergence criteria
+    if ( isConvergence( xk, xkprev, residualCriterium ) )
+    {
+      assert( fineModel->allConverged() );
+      break;
+    }
+  }
+
+  iterationsConverged();
+}
+
+void ManifoldMapping::removeColumnFromMatrix(
+  matrix & A,
+  int col
+  )
+{
+  for ( int j = col; j < A.cols() - 1; j++ )
+    A.col( j ) = A.col( j + 1 );
+
+  A.conservativeResize( A.rows(), A.cols() - 1 );
+}

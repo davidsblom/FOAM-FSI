@@ -1,0 +1,14 @@
+RBFFunctionsTG/RBFFunctionTG/RBFFunctionTG.C
+RBFFunctionsTG/RBFFunctionTG/newRBFFunctionTG.C
+RBFFunctionsTG/W2/W2.C
+RBFFunctionsTG/Gauss/Gauss.C
+RBFFunctionsTG/TPS/TPS.C
+RBFFunctionsTG/IMQB/IMQB.C
+RBFFunctionsTG/CPC2/CPC2.C
+
+RBFInterpolationReduced/RBFInterpolationReduced.C
+
+RBFMotionSolverExt/twoDPointCorrectorRBF.C
+RBFMotionSolverExt/RBFMotionSolverExt.C
+
+LIB = $(FOAM_USER_LIBBIN)/libRBFmeshInterpolation

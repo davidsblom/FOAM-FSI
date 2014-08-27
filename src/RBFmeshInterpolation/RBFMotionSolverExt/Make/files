@@ -1,0 +1,4 @@
+RBFMotionSolverExt.C
+twoDPointCorrectorRBF.C
+
+LIB = $(FOAM_USER_LIBBIN)/libRBFMotionSolverExt

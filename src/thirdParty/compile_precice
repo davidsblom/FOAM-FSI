@@ -1,0 +1,40 @@
+#!/bin/bash
+
+set -e
+
+find . -name '*~' -exec rm -rf {} \;
+
+# Define which versions of the different packages are used
+
+export BOOST_VERSION=1_50_0
+export BOOST_VERSION_DOT=1.50.0
+
+# Download Boost
+
+wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
+
+# Remove old build files
+
+rm -rf boost_${BOOST_VERSION}
+rm -rf precice
+
+# Unpack third party packages
+
+tar jxf boost_${BOOST_VERSION}.tar.bz2
+
+rm -f boost_${BOOST_VERSION}.tar.bz2
+
+# Set environment variables necessary for building preCICE
+
+export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
+export PRECICE_BOOST_ROOT=${BOOST_ROOT}
+export PRECICE_PYTHON_LIB=python2.7
+export PRECICE_MPI_LIB=mpi
+export PRECICE_MPI_LIB_PATH=${MPI_HOME}/lib
+export PRECICE_MPI_INC_PATH=${MPI_HOME}/include
+
+# Build preCICE
+
+git clone git@vmbungartz6.informatik.tu-muenchen.de:gatzhamm/precice.git
+cd precice
+scons -j `grep -c ^processor /proc/cpuinfo` build=release

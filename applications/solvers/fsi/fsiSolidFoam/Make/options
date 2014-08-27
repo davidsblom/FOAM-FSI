@@ -1,0 +1,47 @@
+EXE_INC = -std=c++0x \
+    -I$(WM_PROJECT_USER_DIR)/src/fsi/lnInclude \
+    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/eigen \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/transportModels \
+    -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
+    -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/solidModels/lnInclude \
+    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/boost \
+    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/precice/src \
+    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/boost \
+    -I$(WM_PROJECT_USER_DIR)/src/thirdParty \
+    $(WM_DECOMP_INC) \
+    -I$(LIB_SRC)/tetFiniteElement/lnInclude
+
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -L$(WM_PROJECT_USER_DIR)/src/thirdParty/precice/build/release \
+    -L$(HOME)/Apps/Python/ActivePython-2.7/lib \
+    -lfsi \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lmeshTools \
+    -llapack \
+    -lblas \
+    -lfiniteVolume \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -llduSolvers \
+    -lsolidModels \
+    -lmySchemes \
+    -lmyBoundaries \
+    -lsolidModels \
+    -lsampling \
+    -llagrangian \
+    -lprecice \
+    -lpython2.7 \
+    -lRBFmeshInterpolation \
+    -ltetFiniteElement \
+    -lVectorN

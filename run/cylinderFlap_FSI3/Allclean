@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+
+cd fluid
+cleanCase
+cd -
+
+cd solid
+cleanCase
+cd -

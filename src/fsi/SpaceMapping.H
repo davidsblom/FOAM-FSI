@@ -1,0 +1,73 @@
+
+/*
+ * Author
+ *   David Blom, TU Delft. All rights reserved.
+ */
+
+#ifndef SpaceMapping_H
+#define SpaceMapping_H
+
+#include <deque>
+
+#include "SurrogateModel.H"
+#include "fvCFD.H"
+
+using namespace fsi;
+
+class SpaceMapping
+{
+public:
+
+  SpaceMapping(
+    shared_ptr<SurrogateModel> fineModel,
+    shared_ptr<SurrogateModel> coarseModel,
+    int maxIter,
+    int nbReuse,
+    int reuseInformationStartingFromTimeIndex
+    );
+
+  virtual ~SpaceMapping(){}
+
+  virtual void finalizeTimeStep();
+
+  virtual bool isConvergence(
+    const fsi::vector & xk,
+    const fsi::vector & xkprev,
+    bool residualCriterium
+    );
+
+  virtual void iterationsConverged();
+
+  virtual void performPostProcessing(
+    const fsi::vector & x0,
+    fsi::vector & xk
+    );
+
+  virtual void performPostProcessing(
+    const fsi::vector & y,
+    const fsi::vector & x0,
+    fsi::vector & xk
+    );
+
+  virtual void performPostProcessing(
+    const fsi::vector & y,
+    const fsi::vector & x0,
+    fsi::vector & xk,
+    bool residualCriterium
+    ) = 0;
+
+  shared_ptr<SurrogateModel> fineModel;
+  shared_ptr<SurrogateModel> coarseModel;
+
+  int maxIter;
+  int nbReuse;
+  int reuseInformationStartingFromTimeIndex;
+  int timeIndex;
+
+  matrix coarseResiduals;
+  matrix fineResiduals;
+  std::deque<matrix> coarseResidualsList;
+  std::deque<matrix> fineResidualsList;
+};
+
+#endif

@@ -1,0 +1,114 @@
+
+/*
+ * Class
+ *   CoupledFluidSolver
+ *
+ * Author
+ *   David Blom, TU Delft. All rights reserved.
+ */
+
+#ifndef CoupledFluidSolver_H
+#define CoupledFluidSolver_H
+
+#include <memory>
+
+#include "foamFluidSolver.H"
+#include "RASModel.H"
+#include "singlePhaseTransportModel.H"
+#include "VectorNFieldTypes.H"
+#include "blockLduSolvers.H"
+#include "blockVectorNMatrices.H"
+#include "volVectorNFields.H"
+#include "blockMatrixTools.H"
+
+#include "RBFMotionSolverExt.H"
+#include "faceTetPolyPatch.H"
+#include "fixedValuePointPatchFields.H"
+#include "fixedValueTetPolyPatchFields.H"
+#include "tetFemMatrices.H"
+#include "tetPointFields.H"
+#include "tetPolyPatchInterpolation.H"
+
+using namespace fsi;
+using std::shared_ptr;
+
+class CoupledFluidSolver : public foamFluidSolver
+{
+public:
+
+  CoupledFluidSolver(
+    string name,
+    shared_ptr<argList> args,
+    shared_ptr<Time> runTime
+    );
+
+  virtual ~CoupledFluidSolver();
+
+  virtual void getTractionLocal( matrix & traction );
+
+  virtual void initTimeStep();
+
+  virtual bool isRunning();
+
+  virtual void solve();
+
+private:
+
+  virtual void moveMesh( vectorField motion );
+
+  void checkTotalVolume();
+
+  void continuityErrs();
+
+  void courantNo();
+
+  void createFields();
+
+  void initialize();
+
+  void readBlockSolverControls();
+
+  // Fields
+  volScalarField p;
+  volVectorField U;
+  surfaceScalarField phi;
+  volVector4Field Up;
+
+  // Turbulence
+  singlePhaseTransportModel laminarTransport;
+  autoPtr<incompressible::turbulenceModel> turbulence;
+
+  // Continuity errors
+  scalar sumLocalContErr;
+  scalar globalContErr;
+  scalar cumulativeContErr;
+
+  // Pressure reference cell
+  label pRefCell;
+  scalar pRefValue;
+
+  // Dictionaries
+  IOdictionary transportProperties;
+
+  // Dimensioned scalars
+  dimensionedScalar nu;
+  dimensionedScalar rho;
+
+  // Convergence tolerance fluid domain
+  scalar convergenceTolerance;
+  label nOuterCorr;
+  scalar initResidual;
+  scalar currentResidual;
+  Foam::VectorN<double, 4> initialResidual;
+  Foam::VectorN<double, 4> currResidual;
+
+  // Total volume
+  scalar totalVolume;
+
+  // Courant no
+  scalar CoNum;
+  scalar meanCoNum;
+  scalar velMag;
+};
+
+#endif

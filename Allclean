@@ -1,0 +1,15 @@
+#! /bin/bash
+
+set -e
+
+wclean src/RBFmeshInterpolation
+wclean src/fvPatchFields
+wclean src/fvSchemes
+wclean src/fsi
+wclean applications/solvers/unsteadyDyMCoupledFoam
+wclean applications/solvers/unsteadyPUCoupledFoam
+wclean applications/solvers/fsi/fsiFoam
+wclean applications/solvers/fsi/fsiFluidFoam
+wclean applications/solvers/fsi/fsiSolidFoam
+wclean src/tests/app
+wclean src/tests/tubeflow

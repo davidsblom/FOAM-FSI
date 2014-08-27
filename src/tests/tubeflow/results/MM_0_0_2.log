@@ -1,0 +1,9 @@
+label = MM_0_0_2
+nbLevels = 2
+solver = MM
+nbReuse = 0
+parallel = 0
+elapsed time = 401.752
+nbTimeSteps = 100
+level 0 nbIter = 2928
+level 1 nbIter = 466

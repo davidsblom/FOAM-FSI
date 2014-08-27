@@ -1,0 +1,19 @@
+EXE_INC = \
+    -I$(LIB_SRC)/turbulenceModels \
+    -I$(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
+    -I$(LIB_SRC)/transportModels \
+    -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/VectorN/lnInclude
+
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -lincompressibleRASModels \
+    -lincompressibleTransportModels \
+    -lfiniteVolume \
+    -llduSolvers \
+    -lVectorN \
+    -ltopoChangerFvMesh \
+    -lmyBoundaries \
+    -lmySchemes \
+    -lsolidModels

@@ -1,0 +1,77 @@
+#!/bin/bash
+
+set -e
+
+find . -name '*~' -exec rm -rf {} \;
+
+# Define which versions of the different packages are used
+
+export SCONS_VERSION=2.3.2
+export BOOST_VERSION=1_50_0
+export BOOST_VERSION_DOT=1.50.0
+export PRECICE_VERSION=0_8
+export NUMPY_VERSION=1.7.2
+
+# Download numpy
+
+rm -rf numpy-${NUMPY_VERSION}.tar.gz
+wget -O numpy-${NUMPY_VERSION}.tar.gz http://downloads.sourceforge.net/project/numpy/NumPy/${NUMPY_VERSION}/numpy-${NUMPY_VERSION}.tar.gz
+
+# Download SCons
+
+rm -rf scons-${SCONS_VERSION}.tar.gz
+wget -O scons-${SCONS_VERSION}.tar.gz http://downloads.sourceforge.net/project/scons/scons/${SCONS_VERSION}/scons-${SCONS_VERSION}.tar.gz
+
+# Download Boost
+
+rm -rf boost_${BOOST_VERSION}.tar.bz2
+wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
+
+# Remove old build files
+
+rm -rf boost_${BOOST_VERSION}
+rm -rf precice
+rm -rf numpy-${NUMPY_VERSION}
+rm -rf scons-${SCONS_VERSION}
+
+# Unpack third party packages
+
+tar jxf boost_${BOOST_VERSION}.tar.bz2
+tar -zxf scons-${SCONS_VERSION}.tar.gz
+tar -zxf numpy-${NUMPY_VERSION}.tar.gz
+
+# Install scons
+
+cd scons-${SCONS_VERSION}
+~/Apps/Python/ActivePython-2.7/bin/python setup.py install
+cd ..
+
+# Compile numpy
+
+cd numpy-${NUMPY_VERSION}
+~/Apps/Python/ActivePython-2.7/bin/python setup.py install
+cd ..
+
+# Set environment variables necessary for building preCICE
+
+export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
+export PRECICE_BOOST_ROOT=${BOOST_ROOT}
+export PRECICE_PYTHON_LIB=python2.7
+export PRECICE_PYTHON_INC_PATH=~/Apps/Python/ActivePython-2.7/include/python2.7
+export PRECICE_PYTHON_LIB_PATH=~/Apps/Python/ActivePython-2.7/lib
+export PRECICE_NUMPY_INC_PATH=~/Apps/Python/ActivePython-2.7/lib/python2.7/site-packages/numpy/core/include/numpy
+export PRECICE_MPI_LIB=mpi
+export PRECICE_MPI_LIB_PATH=${MPI_HOME}/lib
+export PRECICE_MPI_INC_PATH=${MPI_HOME}/include
+
+# Build preCICE
+
+git clone git@vmbungartz6.informatik.tu-muenchen.de:gatzhamm/precice.git
+cd precice
+scons -j `grep -c ^processor /proc/cpuinfo` build=release
+
+# Cleanup
+cd ..
+rm -rf boost_${BOOST_VERSION}.tar.bz2
+rm -rf scons-${SCONS_VERSION}.tar.gz
+rm -rf numpy-${NUMPY_VERSION}.tar.gz

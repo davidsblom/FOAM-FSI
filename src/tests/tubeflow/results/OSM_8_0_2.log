@@ -1,0 +1,9 @@
+label = OSM_8_0_2
+nbLevels = 2
+solver = OSM
+nbReuse = 8
+parallel = 0
+elapsed time = 3457
+nbTimeSteps = 100
+level 0 nbIter = 3713
+level 1 nbIter = 439

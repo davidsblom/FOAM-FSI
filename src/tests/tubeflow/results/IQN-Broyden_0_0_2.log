@@ -1,0 +1,8 @@
+label = IQN-Broyden_0_0_2
+nbLevels = 2
+solver = IQN-Broyden
+nbReuse = 0
+parallel = 0
+elapsed time = 888.133
+nbTimeSteps = 100
+nbIter = 1080

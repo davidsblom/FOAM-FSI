@@ -1,0 +1,9 @@
+label = ASM_4_0_2
+nbLevels = 2
+solver = ASM
+nbReuse = 4
+parallel = 0
+elapsed time = 322.124
+nbTimeSteps = 100
+level 0 nbIter = 1285
+level 1 nbIter = 351

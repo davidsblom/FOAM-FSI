@@ -1,0 +1,45 @@
+EXE_INC = -std=c++0x \
+    -I$(WM_PROJECT_USER_DIR)/src/fsi/lnInclude \
+    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/eigen \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/transportModels \
+    -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
+    -I$(LIB_SRC)/turbulenceModels \
+    -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
+    -I$(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/solidModels/lnInclude \
+    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/yaml-cpp/include \
+    -I$(WM_PROJECT_USER_DIR)/src/RBFmeshInterpolation/lnInclude/ \
+    $(WM_DECOMP_INC) \
+    -I$(LIB_SRC)/tetFiniteElement/lnInclude \
+    -I$(LIB_SRC)/VectorN/lnInclude
+
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -L$(WM_PROJECT_USER_DIR)/src/thirdParty/yaml-cpp/build/ \
+    -lfsi \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lmeshTools \
+    -llapack \
+    -lblas \
+    -lfiniteVolume \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -llduSolvers \
+    -lmySchemes \
+    -lmyBoundaries \
+    -lsolidModels \
+    -lsampling \
+    -llagrangian \
+    -lyaml-cpp \
+    -lRBFmeshInterpolation \
+    -ltetFiniteElement \
+    -lVectorN

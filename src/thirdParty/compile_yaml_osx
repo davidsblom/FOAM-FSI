@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+
+VERSION=0.5.1
+BOOST_VERSION=1_50_0
+
+rm -rf yaml-cpp
+
+rm -rf yaml-cpp-${VERSION}*
+
+wget -O yaml-cpp-${VERSION}.tar.gz https://yaml-cpp.googlecode.com/files/yaml-cpp-${VERSION}.tar.gz
+
+tar -zxvf yaml-cpp-${VERSION}.tar.gz
+rm -f yaml-cpp-${VERSION}.tar.gz
+
+ln -s yaml-cpp-${VERSION} yaml-cpp
+rm -f boost
+ln -s boost_${BOOST_VERSION} boost
+
+cd yaml-cpp-${VERSION}
+
+mkdir build
+
+cd build
+
+CC=gcc-mp-4.9 CXX=g++-mp-4.9 cmake ..
+
+make -j 8

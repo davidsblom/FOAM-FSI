@@ -1,0 +1,68 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.3                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "";
+    case            "";
+    instance        "";
+    local           "";
+
+    class           dictionary;
+    object          motionProperties;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dynamicFvMesh dynamicMotionSolverFvMesh;
+
+solver RBFMotionSolverExt;
+
+movingPatches ( plate );
+
+staticPatches ( cylinder outlet inlet top bottom );
+
+coarseningRatio 1;
+coarseningRatioStat 1;
+coarseningRatioMov 1;
+
+includeStaticPatches   yes;
+frozenInterpolation    yes;
+
+interpolation
+{
+    //RBF  IMQB;
+    RBF TPS;
+    focalPoint (2.5 0.2 0);
+    innerRadius 50;//5.0
+    outerRadius 125;
+    polynomials true;
+    Dim TwoD;
+
+    W2Coeffs
+    {
+        radius     1.0;
+    }
+    TPSCoeffs
+    {
+        radius     50;
+    }
+    GaussCoeffs
+    {
+        radius     50;
+    }
+    IMQBCoeffs
+    {
+        radius     0.001;
+    }
+}
+
+// ************************************************************************* //

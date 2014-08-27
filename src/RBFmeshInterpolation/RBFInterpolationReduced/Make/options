@@ -1,0 +1,10 @@
+EXE_INC = \
+    -I$(WM_THIRD_PARTY_DIR)/zlib-1.2.3 \
+    -I$(LIB_SRC)/OpenFOAM/lnInclude
+
+    
+LIB_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -lz \
+    -llapack \
+    -lblas

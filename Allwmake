@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+wmake libso src/RBFmeshInterpolation
+wmake libso src/fvPatchFields
+wmake libso src/fvSchemes
+wmake libso src/fsi
+wmake applications/solvers/unsteadyDyMCoupledFoam
+wmake applications/solvers/unsteadyPUCoupledFoam
+wmake applications/solvers/fsi/fsiFoam
+wmake src/tests/app
+wmake src/tests/tubeflow
+wmake applications/solvers/fsi/fsiFluidFoam
+wmake applications/solvers/fsi/fsiSolidFoam

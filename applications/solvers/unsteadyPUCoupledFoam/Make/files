@@ -1,0 +1,3 @@
+unsteadyPUCoupledFoam.C
+
+EXE = $(FOAM_APPBIN)/unsteadyPUCoupledFoam

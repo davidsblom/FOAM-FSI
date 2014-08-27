@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -e
+
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+cd fluid
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication decomposePar
+cd -
+
+cd solid
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication decomposePar
+cd -
+
+cp -r solid/0 fluid/0/solid
+cp -r solid/constant fluid/constant/solid
+cp -r solid/system fluid/system/solid
+
+cp -r solid/processor0/0 fluid/processor0/0/solid
+cp -r solid/processor0/constant fluid/processor0/constant/solid
+cp -r solid/processor1/0 fluid/processor1/0/solid
+cp -r solid/processor1/constant fluid/processor1/constant/solid
+cp -r solid/processor2/0 fluid/processor2/0/solid
+cp -r solid/processor2/constant fluid/processor2/constant/solid
+
+cd fluid
+runParallel fsiFoam 3

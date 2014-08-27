@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./compile_gtest
+./compile_precice
+./compile_yaml
