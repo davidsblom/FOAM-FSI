@@ -17,12 +17,8 @@ ASMILS::ASMILS(
   double singularityLimit
   )
   :
-  SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex ),
-  singularityLimit( singularityLimit )
-{
-  assert( singularityLimit > 0 );
-  assert( singularityLimit < 1 );
-}
+  SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit )
+{}
 
 ASMILS::~ASMILS()
 {}
@@ -69,7 +65,7 @@ void ASMILS::performPostProcessing(
     coarseModel->optimize( y, x0, zstar );
 
   if ( !coarseModel->allConverged() )
-    throw std::string( "ASM-ILS: coarse model is not converged. Unable to continue optimization." );
+    Warning << "Surrogate model optimization process is not converged." << endl;
 
   xk = zstar;
 
@@ -84,18 +80,18 @@ void ASMILS::performPostProcessing(
     return;
   }
 
+  fineResiduals.conservativeResize( fineResiduals.rows(), fineResiduals.cols() + 1 );
+  fineResiduals.col( fineResiduals.cols() - 1 ) = xk;
+
   // Parameter extraction
 
-  coarseModel->optimize( R, xk, zk );
+  coarseModel->optimize( R, zstar, zk );
 
   if ( !coarseModel->allConverged() )
-    throw std::string( "ASM-ILS: coarse model is not converged. Unable to continue optimization." );
+    Warning << "Surrogate model optimization process is not converged." << endl;
 
   coarseResiduals.conservativeResize( coarseResiduals.rows(), coarseResiduals.cols() + 1 );
   coarseResiduals.col( coarseResiduals.cols() - 1 ) = zk;
-
-  fineResiduals.conservativeResize( fineResiduals.rows(), fineResiduals.cols() + 1 );
-  fineResiduals.col( fineResiduals.cols() - 1 ) = output;
 
   for ( int k = 0; k < maxIter - 1; k++ )
   {
@@ -202,10 +198,10 @@ void ASMILS::performPostProcessing(
       {
         // SVD decomposition
         Eigen::JacobiSVD<matrix, Eigen::FullPivHouseholderQRPreconditioner> svd( V, Eigen::ComputeFullU | Eigen::ComputeFullV );
-        vector c = svd.solve( zstar - zk  );
+        vector c = svd.solve( zstar - zk );
 
         // Update solution x
-        xk += W * c + R - y;
+        xk += W * c + V * c + zk - zstar;
       }
     }
 
@@ -213,25 +209,25 @@ void ASMILS::performPostProcessing(
 
     fineModel->evaluate( xk, output, R );
 
+    fineResiduals.conservativeResize( fineResiduals.rows(), fineResiduals.cols() + 1 );
+    fineResiduals.col( fineResiduals.cols() - 1 ) = xk;
+
+    // Parameter extraction
+
+    coarseModel->optimize( R, zstar, zk );
+
+    if ( !coarseModel->allConverged() )
+      Warning << "Surrogate model optimization process is not converged." << endl;
+
+    coarseResiduals.conservativeResize( coarseResiduals.rows(), coarseResiduals.cols() + 1 );
+    coarseResiduals.col( coarseResiduals.cols() - 1 ) = zk;
+
     // Check convergence criteria
     if ( isConvergence( xk, xkprev, residualCriterium ) )
       break;
 
     if ( k == maxIter - 2 )
       break;
-
-    // Parameter extraction
-
-    coarseModel->optimize( R, xk, zk );
-
-    if ( !coarseModel->allConverged() )
-      throw std::string( "ASM-ILS: coarse model is not converged. Unable to continue optimization." );
-
-    coarseResiduals.conservativeResize( coarseResiduals.rows(), coarseResiduals.cols() + 1 );
-    coarseResiduals.col( coarseResiduals.cols() - 1 ) = zk;
-
-    fineResiduals.conservativeResize( fineResiduals.rows(), fineResiduals.cols() + 1 );
-    fineResiduals.col( fineResiduals.cols() - 1 ) = output;
   }
 
   iterationsConverged();

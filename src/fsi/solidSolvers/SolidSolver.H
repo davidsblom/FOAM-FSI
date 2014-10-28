@@ -11,6 +11,8 @@
 
 #include "foamSolidSolver.H"
 #include "constitutiveModel.H"
+#include "RBFInterpolation.H"
+#include "meshToMesh.H"
 
 using namespace fsi;
 
@@ -30,9 +32,13 @@ public:
 
   virtual bool isRunning();
 
+  virtual void resetSolution();
+
   virtual void solve();
 
-private:
+  virtual void interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> fineModel );
+
+protected:
 
   void calculateEpsilonSigma();
 
@@ -60,6 +66,8 @@ private:
 
   // Dictionaries
   IOdictionary couplingProperties;
+
+  fsi::RBFInterpolation interpolator;
 };
 
 #endif

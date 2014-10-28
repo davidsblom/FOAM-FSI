@@ -17,14 +17,17 @@ public:
 
     BroydenPostProcessing(
       shared_ptr<MultiLevelFsiSolver> fsi,
-      double initialRelaxation,
       int maxIter,
+      double initialRelaxation,
       int maxUsedIterations,
       int nbReuse,
+      double singularityLimit,
       int reuseInformationStartingFromTimeIndex
       );
 
     virtual ~BroydenPostProcessing();
+
+    virtual void finalizeTimeStep();
 
     void performPostProcessing(
       const vector & x0,
@@ -43,6 +46,18 @@ public:
       vector & xk,
       bool residualCriterium
       );
+
+    virtual void performPostProcessing(
+      const vector & y,
+      const vector & x0,
+      vector & xk,
+      const matrix & B,
+      const fsi::vector & xktilde,
+      const fsi::vector & xkp
+      );
+
+    matrix J;
+    double singularityLimit;
   };
 }
 

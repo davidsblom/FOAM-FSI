@@ -165,6 +165,20 @@ void SpaceMappingSolver::optimize(
   spaceMapping->performPostProcessing( y, x0, xk );
 }
 
+void SpaceMappingSolver::optimize(
+  const fsi::vector & y,
+  const fsi::vector & x0,
+  fsi::vector & xk,
+  const matrix & B,
+  const fsi::vector & xktilde,
+  const fsi::vector & xkp
+  )
+{
+  fineModel->fsi->newMeasurementSeries();
+
+  spaceMapping->performPostProcessing( y, x0, xk, B, xktilde, xkp );
+}
+
 void SpaceMappingSolver::run()
 {
   assert( !init );

@@ -13,10 +13,11 @@ AggressiveSpaceMapping::AggressiveSpaceMapping(
   shared_ptr<SurrogateModel> coarseModel,
   int maxIter,
   int nbReuse,
-  int reuseInformationStartingFromTimeIndex
+  int reuseInformationStartingFromTimeIndex,
+  double singularityLimit
   )
   :
-  SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex )
+  SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit )
 {}
 
 AggressiveSpaceMapping::~AggressiveSpaceMapping()
@@ -53,7 +54,7 @@ void AggressiveSpaceMapping::performPostProcessing(
     coarseModel->optimize( y, x0, zstar );
 
   if ( !coarseModel->allConverged() )
-    throw std::string( "Aggressive space mapping: coarse model is not converged. Unable to continue optimization." );
+    Warning << "Surrogate model optimization process is not converged." << endl;
 
   xk = zstar;
 
@@ -70,10 +71,10 @@ void AggressiveSpaceMapping::performPostProcessing(
 
   // Parameter extraction
 
-  coarseModel->optimize( R, xk, zk );
+  coarseModel->optimize( R, zstar, zk );
 
   if ( !coarseModel->allConverged() )
-    throw std::string( "Aggressive space mapping: coarse model is not converged. Unable to continue optimization." );
+    Warning << "Surrogate model optimization process is not converged." << endl;
 
   coarseResiduals.conservativeResize( coarseResiduals.rows(), coarseResiduals.cols() + 1 );
   coarseResiduals.col( coarseResiduals.cols() - 1 ) = zk;
@@ -111,15 +112,18 @@ void AggressiveSpaceMapping::performPostProcessing(
 
         for ( int j = 0; j < fineResidualsList.at( i ).cols() - 1; j++ )
         {
+          colIndex++;
+
           vector deltax, deltaz;
 
           deltax = fineResidualsList.at( i ).col( j + 1 ) - fineResidualsList.at( i ).col( j );
           deltaz = coarseResidualsList.at( i ).col( j + 1 ) - coarseResidualsList.at( i ).col( j );
 
-          // Sherman–Morrison formula
-          J += (deltax - J * deltaz) / (deltax.transpose() * J * deltaz) * (deltax.transpose() * J);
-
-          colIndex++;
+          if ( deltax.norm() >= singularityLimit )
+          {
+            // Sherman–Morrison formula
+            J += (deltax - J * deltaz) / (deltax.transpose() * J * deltaz) * (deltax.transpose() * J);
+          }
         }
       }
 
@@ -127,15 +131,18 @@ void AggressiveSpaceMapping::performPostProcessing(
 
       for ( int i = 0; i < nbColsCurrentTimeStep; i++ )
       {
+        colIndex++;
+
         vector deltax, deltaz;
 
         deltax = fineResiduals.col( i + 1 ) - fineResiduals.col( i );
         deltaz = coarseResiduals.col( i + 1 ) - coarseResiduals.col( i );
 
-        // Sherman–Morrison formula
-        J += (deltax - J * deltaz) / (deltax.transpose() * J * deltaz) * (deltax.transpose() * J);
-
-        colIndex++;
+        if ( deltax.norm() >= singularityLimit )
+        {
+          // Sherman–Morrison formula
+          J += (deltax - J * deltaz) / (deltax.transpose() * J * deltaz) * (deltax.transpose() * J);
+        }
       }
 
       assert( colIndex == nbCols );
@@ -155,10 +162,10 @@ void AggressiveSpaceMapping::performPostProcessing(
 
     // Parameter extraction
 
-    coarseModel->optimize( R, xk, zk );
+    coarseModel->optimize( R, zstar, zk );
 
     if ( !coarseModel->allConverged() )
-      throw std::string( "Aggressive space mapping: coarse model is not converged. Unable to continue optimization." );
+      Warning << "Surrogate model optimization process is not converged." << endl;
 
     coarseResiduals.conservativeResize( coarseResiduals.rows(), coarseResiduals.cols() + 1 );
     coarseResiduals.col( coarseResiduals.cols() - 1 ) = zk;

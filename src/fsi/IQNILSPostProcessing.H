@@ -36,22 +36,31 @@ public:
       vector & yk
       );
 
-    void performPostProcessing(
+    virtual void performPostProcessing(
       const vector & x0,
       vector & xk
       );
 
-    void performPostProcessing(
+    virtual void performPostProcessing(
       const vector & y,
       const vector & x0,
       vector & xk
       );
 
-    void performPostProcessing(
+    virtual void performPostProcessing(
       const vector & y,
       const vector & x0,
       vector & xk,
       bool residualCriterium
+      );
+
+    virtual void performPostProcessing(
+      const vector & y,
+      const vector & x0,
+      vector & xk,
+      const matrix & B,
+      const fsi::vector & xktilde,
+      const fsi::vector & xkp
       );
 
     void removeColumnFromMatrix(

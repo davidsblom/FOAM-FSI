@@ -19,7 +19,8 @@ public:
 
   MultiLevelSpaceMappingSolver(
     shared_ptr< std::deque<shared_ptr<SpaceMappingSolver> > > solvers,
-    shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models
+    shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
+    bool synchronization
     );
 
   virtual void run();
@@ -38,6 +39,7 @@ public:
   shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models;
   shared_ptr<ImplicitMultiLevelFsiSolver> fineModel;
   bool init;
+  bool synchronization;
 };
 
 #endif

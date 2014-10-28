@@ -19,7 +19,8 @@ MultiLevelFsiSolver::MultiLevelFsiSolver(
   FsiSolver( fluidSolver->solver, solidSolver->solver, convergenceMeasures, parallel, extrapolationOrder ),
   fluidSolver( fluidSolver ),
   solidSolver( solidSolver ),
-  useJacobian( false )
+  useJacobian( false ),
+  iterCurrentTimeStep( 0 )
 {
   assert( this->fluid );
   assert( this->solid );
@@ -85,6 +86,13 @@ void MultiLevelFsiSolver::evaluate(
 
   Info << endl << "Time = " << fluidSolver->solver->t << ", iteration = " << iter + 1 << ", level = " << fluidSolver->level << endl;
 
+  // Reset solution of fluid and solid solver to solution of previous time step
+  if ( iterCurrentTimeStep < 3 )
+  {
+    fluidSolver->solver->resetSolution();
+    solidSolver->solver->resetSolution();
+  }
+
   matrix a = Eigen::Map<const matrix> ( input.head( solidSolver->couplingGridSize * solid->dim ).data(), solidSolver->couplingGridSize, solid->dim );
 
   if ( !parallel )
@@ -132,6 +140,7 @@ void MultiLevelFsiSolver::evaluate(
   // Increment iterators
   iter++;
   nbIter++;
+  iterCurrentTimeStep++;
 
   x = input;
 
@@ -151,6 +160,8 @@ void MultiLevelFsiSolver::initTimeStep()
 {
   assert( !init );
 
+  iterCurrentTimeStep = 0;
+
   FsiSolver::initTimeStep();
 }
 
@@ -166,7 +177,7 @@ bool MultiLevelFsiSolver::isConvergence()
   {
     // Initialize variables
     std::shared_ptr<ConvergenceMeasure> measure = *iterator;
-    fsi::vector oldValues, newValues;
+    fsi::vector oldValues, newValues, valuesPreviousTimeStep;
 
     assert( measure->dataId == 0 || measure->dataId == 1 );
 
@@ -176,8 +187,13 @@ bool MultiLevelFsiSolver::isConvergence()
       oldValues = Eigen::Map<fsi::vector> ( solid->couplingData.dataprev.data(), solid->couplingData.dataprev.rows() * solid->couplingData.dataprev.cols() );
       newValues = Eigen::Map<fsi::vector> ( solid->couplingData.data.data(), solid->couplingData.data.rows() * solid->couplingData.dataprev.cols() );
 
-      oldValues.array() -= solid->initialValue;
-      newValues.array() -= solid->initialValue;
+      valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( solid->couplingData.dataPreviousTimeStep.data(), solid->couplingData.dataPreviousTimeStep.rows() * solid->couplingData.dataPreviousTimeStep.cols() );
+
+      if ( solid->initialValue > 0 )
+      {
+        valuesPreviousTimeStep.setZero();
+        valuesPreviousTimeStep.array() += solid->initialValue;
+      }
     }
 
     if ( measure->dataId == 1 )
@@ -185,9 +201,17 @@ bool MultiLevelFsiSolver::isConvergence()
       oldValues = Eigen::Map<fsi::vector> ( fluid->couplingData.dataprev.data(), fluid->couplingData.dataprev.rows() * fluid->couplingData.dataprev.cols() );
       newValues = Eigen::Map<fsi::vector> ( fluid->couplingData.data.data(), fluid->couplingData.data.rows() * fluid->couplingData.dataprev.cols() );
 
-      oldValues.array() -= fluid->initialValue;
-      newValues.array() -= fluid->initialValue;
+      valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( fluid->couplingData.dataPreviousTimeStep.data(), fluid->couplingData.dataPreviousTimeStep.rows() * fluid->couplingData.dataPreviousTimeStep.cols() );
+
+      if ( fluid->initialValue > 0 )
+      {
+        valuesPreviousTimeStep.setZero();
+        valuesPreviousTimeStep.array() += fluid->initialValue;
+      }
     }
+
+    oldValues -= valuesPreviousTimeStep;
+    newValues -= valuesPreviousTimeStep;
 
     // Measure convergence
     measure->measure( oldValues, newValues );
@@ -226,17 +250,27 @@ bool MultiLevelFsiSolver::isConvergence(
   {
     // Initialize variables
     std::shared_ptr<ConvergenceMeasure> measure = *iterator;
-    fsi::vector oldValues, newValues;
+    fsi::vector oldValues, newValues, valuesPreviousTimeStep;
 
     // Subtract initial values
     if ( measure->dataId == 0 )
     {
-      oldValues = xprev.head( solidSolver->couplingGridSize * solid->dim ).array() - solid->initialValue;
-      newValues = x.head( solidSolver->couplingGridSize * solid->dim ).array() - solid->initialValue;
+      oldValues = xprev.head( solidSolver->couplingGridSize * solid->dim );
+      newValues = x.head( solidSolver->couplingGridSize * solid->dim );
+
+      valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( solid->couplingData.dataPreviousTimeStep.data(), solid->couplingData.dataPreviousTimeStep.rows() * solid->couplingData.dataPreviousTimeStep.cols() );
+
+      if ( solid->initialValue > 0 )
+      {
+        valuesPreviousTimeStep.setZero();
+        valuesPreviousTimeStep.array() += solid->initialValue;
+      }
     }
 
     if ( measure->dataId == 1 )
     {
+      valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( fluid->couplingData.dataPreviousTimeStep.data(), fluid->couplingData.dataPreviousTimeStep.rows() * fluid->couplingData.dataPreviousTimeStep.cols() );
+
       if ( parallel )
       {
         assert( xprev.rows() == fluidSolver->couplingGridSize * fluid->dim + solidSolver->couplingGridSize * solid->dim );
@@ -251,9 +285,15 @@ bool MultiLevelFsiSolver::isConvergence(
         newValues = Eigen::Map<fsi::vector> ( fluid->couplingData.data.data(), fluid->couplingData.data.rows() * fluid->couplingData.dataprev.cols() );
       }
 
-      oldValues.array() -= fluid->initialValue;
-      newValues.array() -= fluid->initialValue;
+      if ( fluid->initialValue > 0 )
+      {
+        valuesPreviousTimeStep.setZero();
+        valuesPreviousTimeStep.array() += fluid->initialValue;
+      }
     }
+
+    oldValues -= valuesPreviousTimeStep;
+    newValues -= valuesPreviousTimeStep;
 
     // Measure convergence
     measure->measure( oldValues, newValues );

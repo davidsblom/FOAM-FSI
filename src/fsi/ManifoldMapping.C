@@ -6,125 +6,20 @@
 
 #include "ManifoldMapping.H"
 
-extern "C" void dgesdd_(
-  const char * JOBZ,
-  const int * M,
-  const int * N,
-  double * A,
-  const int * LDA,
-  double * S,
-  double * U,
-  const int * LDU,
-  double * VT,
-  const int * LDVT,
-  double * WORK,
-  const int * LWORK,
-  int * IWORK,
-  int * INFO
-  );
-
 using namespace fsi;
-
-// Singular value decomposition LAPACK
-void DSYEVD(
-  fsi::matrix & A,
-  fsi::vector & S,
-  fsi::matrix & VT,
-  fsi::matrix & U
-  )
-{
-  assert( A.rows() > 0 );
-  assert( A.cols() > 0 );
-
-  // Copy the matrix A
-  fsi::matrix Acopy = A;
-
-  // The number of rows of the input matrix A.  M >= 0.
-  int M = Acopy.rows();
-
-  // The number of columns of the input matrix A.  N >= 0.
-  int N = Acopy.cols();
-
-  // The leading dimension of the array A.  LDA >= max(1,M).
-  int LDA = Acopy.outerStride();
-
-  assert( Acopy.rows() == LDA );
-  assert( Acopy.cols() == N );
-
-  // The singular values of A, sorted so that S(i) >= S(i+1).
-  S.resize( std::min( M, N ) );
-  S.setZero();
-
-  // Vectors
-  int UCOL = std::min( M, N );
-
-  // The leading dimension of the array U.  LDU >= 1; if
-  // JOBZ = 'S' or 'A' or JOBZ = 'O' and M < N, LDU >= M.
-  int LDU = M;
-  U.resize( LDU, UCOL );
-  U.setZero();
-
-  // The leading dimension of the array VT.  LDVT >= 1;
-  // if JOBZ = 'S', LDVT >= min(M,N).
-  int LDVT = std::min( M, N );
-
-  // if JOBZ = 'S', VT contains the first min(M,N) rows of
-  // V**T (the right singular vectors, stored rowwise);
-  VT.resize( LDVT, N );
-  VT.setZero();
-
-  // The dimension of the array WORK. LWORK >= 1.
-  // If JOBZ = 'S' or 'A'
-  // LWORK >= 3*min(M,N)*min(M,N) +
-  //    max(max(M,N),4*min(M,N)*min(M,N)+4*min(M,N)).
-  // For good performance, LWORK should generally be larger.
-  // If LWORK = -1 but other input arguments are legal, WORK(1)
-  // returns the optimal LWORK.
-  int LWORK = -1;
-
-  // (workspace/output) DOUBLE PRECISION array, dimension (MAX(1,LWORK))
-  fsi::vector WORK( std::max( 1, LWORK ) );
-  WORK.setZero();
-
-  // (workspace) INTEGER array, dimension (8*min(M,N))
-  Eigen::VectorXi IWORK( 8 * std::min( M, N ) );
-
-  // (output) INTEGER
-  // = 0:  successful exit.
-  // < 0:  if INFO = -i, the i-th argument had an illegal value.
-  // > 0:  DBDSDC did not converge, updating process failed.
-  int INFO = 0;
-
-  dgesdd_( "S", &M, &N, Acopy.data(), &LDA, S.data(), U.data(), &LDU, VT.data(), &LDVT, WORK.data(), &LWORK, IWORK.data(), &INFO );
-
-  assert( INFO == 0 );
-
-  LWORK = WORK( 0 );
-
-  WORK.resize( std::max( 1, LWORK ) );
-  WORK.setZero();
-
-  dgesdd_( "S", &M, &N, Acopy.data(), &LDA, S.data(), U.data(), &LDU, VT.data(), &LDVT, WORK.data(), &LWORK, IWORK.data(), &INFO );
-
-  assert( INFO == 0 );
-}
 
 ManifoldMapping::ManifoldMapping(
   shared_ptr<SurrogateModel> fineModel,
   shared_ptr<SurrogateModel> coarseModel,
   int maxIter,
-  double singularityLimit,
   int nbReuse,
-  int reuseInformationStartingFromTimeIndex
+  int reuseInformationStartingFromTimeIndex,
+  double singularityLimit
   )
   :
-  SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex ),
-  singularityLimit( singularityLimit ),
+  SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
   iter( 0 )
-{
-  assert( singularityLimit > 0 );
-  assert( singularityLimit < 1 );
-}
+{}
 
 ManifoldMapping::~ManifoldMapping()
 {}
@@ -164,7 +59,7 @@ void ManifoldMapping::performPostProcessing(
     coarseModel->optimize( y, x0, xk );
 
   if ( !coarseModel->allConverged() )
-    throw std::string( "Manifold mapping: coarse model is not converged. Unable to continue optimization." );
+    Warning << "Surrogate model optimization process is not converged." << endl;
 
   assert( xk.rows() == n );
   assert( x0.rows() == n );
@@ -291,15 +186,15 @@ void ManifoldMapping::performPostProcessing(
         if ( DeltaF.cols() == 0 )
           break;
 
-        // Calculate singular value decomposition with LAPACK
-        DSYEVD( DeltaF, S_F, V_F, U_F );
+        // Calculate singular value decomposition with Eigen
 
-        Sigma_F = S_F.asDiagonal();
-        pseudoSigma_F = Sigma_F;
+        Eigen::JacobiSVD<matrix> svd( DeltaF, Eigen::ComputeThinU | Eigen::ComputeThinV );
 
-        for ( int i = 0; i < Sigma_F.cols(); i++ )
+        vector singularValues = svd.singularValues();
+
+        for ( int i = 0; i < singularValues.rows(); i++ )
         {
-          if ( std::abs( pseudoSigma_F( i, i ) ) <= singularityLimit )
+          if ( std::abs( singularValues( i ) ) <= singularityLimit )
           {
             // Remove the column from DeltaC and DeltaF
             removeColumnFromMatrix( DeltaC, i - nbRemoveCols );
@@ -317,20 +212,22 @@ void ManifoldMapping::performPostProcessing(
 
       if ( DeltaF.cols() > 0 )
       {
-        // Calculate singular value decomposition with LAPACK
-        DSYEVD( DeltaF, S_F, V_F, U_F );
-        DSYEVD( DeltaC, S_C, V_C, U_C );
+        // Calculate singular value decomposition with Eigen
 
-        Sigma_F = S_F.asDiagonal();
+        Eigen::JacobiSVD<matrix> svd_F( DeltaF, Eigen::ComputeThinU | Eigen::ComputeThinV );
+        Eigen::JacobiSVD<matrix> svd_C( DeltaC, Eigen::ComputeThinU | Eigen::ComputeThinV );
 
-        pseudoSigma_F = Sigma_F;
+        matrix pseudoSigma_F = svd_F.singularValues().asDiagonal();
 
-        for ( int i = 0; i < Sigma_F.cols(); i++ )
+        for ( int i = 0; i < pseudoSigma_F.cols(); i++ )
           pseudoSigma_F( i, i ) = 1.0 / pseudoSigma_F( i, i );
 
-        matrix pseudoDeltaF = V_F.transpose() * pseudoSigma_F * U_F.transpose();
+        matrix pseudoDeltaF = svd_F.matrixV() * pseudoSigma_F * svd_F.matrixU().transpose();
 
         // Update the design specification yk
+
+        U_F = svd_F.matrixU();
+        U_C = svd_C.matrixU();
 
         // matrix I = Eigen::MatrixXd::Identity( m, m );
         // matrix Tk = DeltaC * pseudoDeltaF + ( I - U_C * U_C.transpose() ) * ( I - U_F * U_F.transpose() );
@@ -359,7 +256,7 @@ void ManifoldMapping::performPostProcessing(
     assert( xk.rows() == n );
 
     if ( !coarseModel->allConverged() )
-      throw std::string( "Manifold mapping: coarse model is not converged. Unable to continue optimization." );
+      Warning << "Surrogate model optimization process is not converged." << endl;
 
     xk = output;
 

@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <iostream>
 #include <math.h>
+#include <memory>
 #include "DataValues.H"
 
 namespace fsi
@@ -48,10 +49,14 @@ public:
 
     virtual bool isRunning() = 0;
 
+    virtual void resetSolution() = 0;
+
     virtual void solve(
       const matrix & input,
       matrix & output
       ) = 0;
+
+    virtual void interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> solver ){}
 
     int N;
     bool init;

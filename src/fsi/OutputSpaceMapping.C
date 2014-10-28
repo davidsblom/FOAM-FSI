@@ -13,12 +13,18 @@ OutputSpaceMapping::OutputSpaceMapping(
   shared_ptr<SurrogateModel> surrogateModel,
   int maxIter,
   int nbReuse,
-  int reuseInformationStartingFromTimeIndex
+  int reuseInformationStartingFromTimeIndex,
+  double singularityLimit,
+  int order
   )
   :
-  SpaceMapping( fineModel, surrogateModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex ),
-  surrogateModel( surrogateModel )
-{}
+  SpaceMapping( fineModel, surrogateModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
+  surrogateModel( surrogateModel ),
+  order( order )
+{
+  assert( surrogateModel );
+  assert( order == 0 || order == 1 );
+}
 
 OutputSpaceMapping::~OutputSpaceMapping()
 {}
@@ -78,7 +84,7 @@ void OutputSpaceMapping::performPostProcessing(
     surrogateModel->optimize( y, x0, xk );
 
   if ( !surrogateModel->allConverged() )
-    throw std::string( "Output space mapping: coarse model is not converged. Unable to continue optimization." );
+    Warning << "Surrogate model optimization process is not converged." << endl;
 
   assert( xk.rows() == n );
   assert( x0.rows() == n );
@@ -126,13 +132,10 @@ void OutputSpaceMapping::performPostProcessing(
     for ( unsigned i = 0; i < solsList.size(); i++ )
       nbCols += solsList.at( i ).size() - 1;
 
-    int indexCounter = nbCols;
-    nbCols = std::min( static_cast<int>( xk.rows() ), nbCols );
-
     // Update the design specification yk
     yk = coarseResiduals.col( k ) - (fineResiduals.col( k ) - y);
 
-    if ( nbCols > 0 )
+    if ( nbCols > 0 && order == 1 )
     {
       assert( fineResiduals.cols() == coarseResiduals.cols() );
       assert( static_cast<int>( sols.size() ) == fineResiduals.cols() );
@@ -144,9 +147,9 @@ void OutputSpaceMapping::performPostProcessing(
       fsi::vector d, dprev, deltad, deltax;
       int colIndex = 0;
 
-      std::cout << "Output space mapping with ";
-      std::cout << nbCols;
-      std::cout << " cols for the Jacobian" << std::endl;
+      Info << "Output space mapping with ";
+      Info << nbCols;
+      Info << " cols for the Jacobian" << endl;
 
       // Include information from previous time steps
 
@@ -154,10 +157,7 @@ void OutputSpaceMapping::performPostProcessing(
       {
         for ( unsigned j = 0; j < solsList.at( i ).size() - 1; j++ )
         {
-          indexCounter--;
-
-          if ( indexCounter >= nbCols )
-            continue;
+          colIndex++;
 
           d = fineResidualsList.at( i ).col( j + 1 ) - coarseResidualsList.at( i ).col( j + 1 );
           dprev = fineResidualsList.at( i ).col( j ) - coarseResidualsList.at( i ).col( j );
@@ -166,18 +166,16 @@ void OutputSpaceMapping::performPostProcessing(
 
           // Broyden update for the Jacobian matrix
 
-          J += (deltad - J * deltax) / deltax.squaredNorm() * deltax.transpose();
+          if ( deltax.norm() < singularityLimit )
+            continue;
 
-          colIndex++;
+          J += (deltad - J * deltax) / deltax.squaredNorm() * deltax.transpose();
         }
       }
 
       for ( int i = 0; i < nbColsCurrentTimeStep; i++ )
       {
-        indexCounter--;
-
-        if ( indexCounter >= nbCols )
-          continue;
+        colIndex++;
 
         d = fineResiduals.col( i + 1 ) - coarseResiduals.col( i + 1 );
         dprev = fineResiduals.col( i ) - coarseResiduals.col( i );
@@ -186,12 +184,12 @@ void OutputSpaceMapping::performPostProcessing(
 
         // Broyden update for the Jacobian matrix
 
-        J += (deltad - J * deltax) / deltax.squaredNorm() * deltax.transpose();
+        if ( deltax.norm() < singularityLimit )
+          continue;
 
-        colIndex++;
+        J += (deltad - J * deltax) / deltax.squaredNorm() * deltax.transpose();
       }
 
-      assert( indexCounter == 0 );
       assert( colIndex == nbCols );
 
       surrogateModel->setUseJacobian( true );
@@ -208,7 +206,7 @@ void OutputSpaceMapping::performPostProcessing(
     assert( xk.rows() == n );
 
     if ( !surrogateModel->allConverged() )
-      throw std::string( "Output space mapping: coarse model is not converged. Unable to continue optimization." );
+      Warning << "Surrogate model optimization process is not converged." << endl;
 
     xk = output;
 

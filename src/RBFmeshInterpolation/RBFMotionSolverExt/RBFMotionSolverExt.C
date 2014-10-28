@@ -170,9 +170,9 @@ namespace Foam
     {
       // If internal: marker=0 or -5 (not marked or marked as neighbour side proc patch, but not on either static or moving patches)
       if ( (markedPoints[i] == 0 || markedPoints[i] == -5) && twoDPointCorrectorRBF_.marker()[i] == 0 )
-
-      // if(markedPoints[i] == 0 || markedPoints[i] == -5)
       {
+        // if(markedPoints[i] == 0 || markedPoints[i] == -5)
+
         // Set internal ID and points
         internalIDs_[nInternalPoints] = i;
         internalPoints_[nInternalPoints] = points[i];
@@ -317,7 +317,8 @@ namespace Foam
     }
   }
 
-  void RBFMotionSolverExt::setAndOrderPatchIDs(){
+  void RBFMotionSolverExt::setAndOrderPatchIDs()
+  {
     // Find IDs of staticPatches_
     forAll( staticPatches_, patchI )
     {
@@ -427,7 +428,6 @@ namespace Foam
       startingIndStat[i] = startingIndStat[i - 1] + (nControlPoints[i - 1] - nGlobalMovingControlPoints_[i - 1]);
       startingIndMov[i] = startingIndMov[i - 1] + nGlobalMovingControlPoints_[i - 1];
     }
-
 
     // Set control points at right lcoation in globalControlPoint vector
     vectorField globalControlPoints( nTotalControlPoints, vector::zero );

@@ -18,12 +18,19 @@ BroydenPostProcessing.C
 ASMILS.C
 AitkenPostProcessing.C
 DataValues.C
+IDWInterpolation.C
+RBFInterpolationCoarsening.C
+AndersonPostProcessing.C
+ResponseParameterMapping.C
 
 fluidSolvers/CoupledFluidSolver.C
+fluidSolvers/steadyCoupledFluidSolver.C
 fluidSolvers/FluidSolver.C
 fluidSolvers/foamFluidSolver.C
+fluidSolvers/PODSolver.C
 
 solidSolvers/foamSolidSolver.C
 solidSolvers/SolidSolver.C
+solidSolvers/steadySolidSolver.C
 
 LIB = $(FOAM_USER_LIBBIN)/libfsi

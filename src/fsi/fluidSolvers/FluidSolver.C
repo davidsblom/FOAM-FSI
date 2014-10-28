@@ -568,6 +568,13 @@ void FluidSolver::readTimeControls()
   maxDeltaT = runTime->controlDict().lookupOrDefault<scalar>( "maxDeltaT", GREAT );
 }
 
+void FluidSolver::resetSolution()
+{
+  U == U.oldTime();
+  p == p.oldTime();
+  phi == phi.oldTime();
+}
+
 void FluidSolver::setDeltaT()
 {
   if ( adjustTimeStep )
@@ -612,17 +619,12 @@ void FluidSolver::solve()
 {
   Info << "Solve fluid domain" << endl;
 
-  scalar initialResidualMomentum = 1;
-  scalar initialResidualPressure = 1;
-  lduMatrix::solverPerformance solverPerfMomentum;
-  lduMatrix::solverPerformance solverPerfPressure;
   int ocorr = 0;
+  scalar relativeResidual;
+  scalar residualPressure;
+  scalar residualVelocity;
 
   lduMatrix::debug = 0;
-
-  U == U.oldTime();
-  phi == phi.oldTime();
-  p == p.oldTime();
 
   // --- PIMPLE loop
   do
@@ -630,10 +632,8 @@ void FluidSolver::solve()
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative( phi, U );
 
-    if ( nOuterCorr != 1 )
-    {
-      p.storePrevIter();
-    }
+    p.storePrevIter();
+    U.storePrevIter();
 
     fvVectorMatrix UEqn
     (
@@ -643,19 +643,10 @@ void FluidSolver::solve()
     );
 
     if ( ocorr != nOuterCorr - 1 )
-    {
       UEqn.relax();
-    }
 
     if ( momentumPredictor )
-    {
-      solverPerfMomentum = Foam::solve( UEqn == -fvc::grad( p ) );
-
-      if ( ocorr == 0 )
-      {
-        initialResidualMomentum = solverPerfMomentum.initialResidual();
-      }
-    }
+      Foam::solve( UEqn == -fvc::grad( p ) );
 
     // --- PISO loop
     for ( int corr = 0; corr < nCorr; corr++ )
@@ -693,19 +684,7 @@ void FluidSolver::solve()
 
         pEqn.setReference( pRefCell, pRefValue );
 
-        if ( nonOrth == 0 && corr == 0 )
-        {
-          solverPerfPressure = pEqn.solve( mesh.solutionDict().solver( p.name() ) );
-
-          if ( ocorr == 0 )
-          {
-            initialResidualPressure = solverPerfPressure.initialResidual();
-          }
-        }
-        else
-        {
-          pEqn.solve( mesh.solutionDict().solver( p.name() ) );
-        }
+        pEqn.solve( mesh.solutionDict().solver( p.name() ) );
 
         if ( nonOrth == nNonOrthCorr )
         {
@@ -730,22 +709,24 @@ void FluidSolver::solve()
 
     // Make the fluxes absolute to the mesh motion
     fvc::makeAbsolute( phi, U );
+
+    residualPressure = gSumMag( p.internalField() - p.prevIter().internalField() ) / (gSumMag( p.internalField() ) + SMALL);
+    residualVelocity = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
+
+    relativeResidual = max( residualPressure, residualVelocity );
   }
   while
   (
-    (solverPerfMomentum.initialResidual() > convergenceTolerance
-      || solverPerfPressure.initialResidual() > convergenceTolerance)
+    relativeResidual > convergenceTolerance
     && ++ocorr < nOuterCorr
   );
 
   Info << "Solving for " << U.name()
-       << ", Initial residual = " << initialResidualMomentum
-       << ", Final residual = " << solverPerfMomentum.initialResidual()
+       << ", Final residual = " << residualVelocity
        << ", No outer iterations " << ocorr + 1 << endl;
 
   Info << "Solving for " << p.name()
-       << ", Initial residual = " << initialResidualPressure
-       << ", Final residual = " << solverPerfPressure.initialResidual()
+       << ", Final residual = " << residualPressure
        << ", No outer iterations " << ocorr + 1 << endl;
 
   continuityErrs();

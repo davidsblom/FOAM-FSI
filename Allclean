@@ -6,7 +6,8 @@ wclean src/RBFmeshInterpolation
 wclean src/fvPatchFields
 wclean src/fvSchemes
 wclean src/fsi
-wclean applications/solvers/unsteadyDyMCoupledFoam
+wclean src/IDWmeshDeformation
+wclean applications/solvers/unsteadyPUDyMCoupledFoam
 wclean applications/solvers/unsteadyPUCoupledFoam
 wclean applications/solvers/fsi/fsiFoam
 wclean applications/solvers/fsi/fsiFluidFoam

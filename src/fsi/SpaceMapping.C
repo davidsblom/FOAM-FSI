@@ -13,7 +13,8 @@ SpaceMapping::SpaceMapping(
   shared_ptr<SurrogateModel> coarseModel,
   int maxIter,
   int nbReuse,
-  int reuseInformationStartingFromTimeIndex
+  int reuseInformationStartingFromTimeIndex,
+  double singularityLimit
   )
   :
   fineModel( fineModel ),
@@ -21,6 +22,7 @@ SpaceMapping::SpaceMapping(
   maxIter( maxIter ),
   nbReuse( nbReuse ),
   reuseInformationStartingFromTimeIndex( reuseInformationStartingFromTimeIndex ),
+  singularityLimit( singularityLimit ),
   timeIndex( 0 ),
   coarseResiduals(),
   fineResiduals(),
@@ -32,6 +34,8 @@ SpaceMapping::SpaceMapping(
   assert( maxIter > 0 );
   assert( nbReuse >= 0 );
   assert( reuseInformationStartingFromTimeIndex >= 0 );
+  assert( singularityLimit > 0 );
+  assert( singularityLimit < 1 );
 };
 
 void SpaceMapping::finalizeTimeStep()
@@ -95,4 +99,16 @@ void SpaceMapping::performPostProcessing(
   )
 {
   performPostProcessing( y, x0, xk, false );
+}
+
+void SpaceMapping::performPostProcessing(
+  const fsi::vector & y,
+  const fsi::vector & x0,
+  fsi::vector & xk,
+  const matrix & B,
+  const fsi::vector & xktilde,
+  const fsi::vector & xkp
+  )
+{
+  assert( false );
 }

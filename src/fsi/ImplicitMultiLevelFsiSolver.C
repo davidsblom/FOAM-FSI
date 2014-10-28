@@ -164,6 +164,20 @@ void ImplicitMultiLevelFsiSolver::optimize(
   postProcessing->performPostProcessing( y, x0, xk );
 }
 
+void ImplicitMultiLevelFsiSolver::optimize(
+  const fsi::vector & y,
+  const fsi::vector & x0,
+  fsi::vector & xk,
+  const matrix & B,
+  const fsi::vector & xktilde,
+  const fsi::vector & xkp
+  )
+{
+  fsi->newMeasurementSeries();
+
+  postProcessing->performPostProcessing( y, x0, xk, B, xktilde, xkp );
+}
+
 void ImplicitMultiLevelFsiSolver::run()
 {
   assert( !init );

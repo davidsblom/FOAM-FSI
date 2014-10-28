@@ -8,11 +8,15 @@
 
 using namespace fsi;
 
-MLIQNILSSolver::MLIQNILSSolver( shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models )
+MLIQNILSSolver::MLIQNILSSolver(
+  shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
+  bool synchronization
+  )
   :
   models( models ),
   fineModel( models->back() ),
-  init( false )
+  init( false ),
+  synchronization( synchronization )
 {
   assert( models );
   assert( models->size() >= 2 );
@@ -42,25 +46,35 @@ void MLIQNILSSolver::finalizeTimeStep()
   {
     shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
 
-    if ( level < static_cast<int>( models->size() ) )
+    if ( synchronization )
     {
-      assert( model->fsi->x.rows() == fineModel->fsi->x.rows() );
+      if ( level < static_cast<int>( models->size() ) )
+      {
+        assert( model->fsi->x.rows() == fineModel->fsi->x.rows() );
 
-      matrix input = Eigen::Map<const matrix> ( fineModel->fsi->x.head( model->fsi->solidSolver->couplingGridSize * model->fsi->solid->dim ).data(), model->fsi->solidSolver->couplingGridSize, model->fsi->solid->dim );
+        matrix input = Eigen::Map<const matrix> ( fineModel->fsi->x.head( model->fsi->solidSolver->couplingGridSize * model->fsi->solid->dim ).data(), model->fsi->solidSolver->couplingGridSize, model->fsi->solid->dim );
 
-      matrix output( fineModel->fsi->solid->data.rows(), fineModel->fsi->solid->data.cols() );
-      model->fsi->fluidSolver->solve( input, output );
+        matrix output( fineModel->fsi->solid->data.rows(), fineModel->fsi->solid->data.cols() );
+        model->fsi->fluidSolver->solve( input, output );
 
-      if ( model->fsi->parallel )
-        input = Eigen::Map<const matrix> ( fineModel->fsi->x.tail( model->fsi->fluidSolver->couplingGridSize * model->fsi->fluid->dim ).data(), model->fsi->fluidSolver->couplingGridSize, model->fsi->fluid->dim );
+        if ( model->fsi->parallel )
+          input = Eigen::Map<const matrix> ( fineModel->fsi->x.tail( model->fsi->fluidSolver->couplingGridSize * model->fsi->fluid->dim ).data(), model->fsi->fluidSolver->couplingGridSize, model->fsi->fluid->dim );
 
-      if ( !model->fsi->parallel )
-        input = fineModel->fsi->fluid->data;
+        if ( !model->fsi->parallel )
+          input = fineModel->fsi->fluid->data;
 
-      output.resize( fineModel->fsi->fluid->data.rows(), fineModel->fsi->fluid->data.cols() );
-      model->fsi->solidSolver->solve( input, output );
+        output.resize( fineModel->fsi->fluid->data.rows(), fineModel->fsi->fluid->data.cols() );
+        model->fsi->solidSolver->solve( input, output );
 
-      model->fsi->x = fineModel->fsi->x;
+        model->fsi->x = fineModel->fsi->x;
+
+        model->fsi->solid->interpolateVolField( fineModel->fsi->solid );
+      }
+    }
+
+    if ( !synchronization )
+    {
+      model->solve();
     }
 
     model->finalizeTimeStep();

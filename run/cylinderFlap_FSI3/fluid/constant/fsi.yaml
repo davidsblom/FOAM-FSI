@@ -1,3 +1,5 @@
+fluid-solver: coupled-pressure-velocity-solver
+solid-solver: segregated-solver
 parallel-coupling: false
 coupling-scheme-implicit:
   extrapolation-order: 2
@@ -7,8 +9,10 @@ coupling-scheme-implicit:
         data-id: 0
   max-iterations: 50
   post-processing:
-    algorithm: IQN-ILS
+    algorithm: Anderson
+    beta: 0.5
     initial-relaxation: 1.0e-3
     timesteps-reused: 4
     singularity-limit: 1.0e-15
     reuse-information-starting-from-time-index: 10
+    max-used-iterations: 50

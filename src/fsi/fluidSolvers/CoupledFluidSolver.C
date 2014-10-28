@@ -99,6 +99,8 @@ CoupledFluidSolver::CoupledFluidSolver(
   data.setZero();
 
   initialize();
+
+  Info << "nu = " << nu << endl;
 }
 
 CoupledFluidSolver::~CoupledFluidSolver(){}
@@ -227,10 +229,14 @@ void CoupledFluidSolver::moveMesh( vectorField motion )
   bool rbfMotionSolver =
     mesh.objectRegistry::foundObject<RBFMotionSolverExt>( "dynamicMeshDict" );
 
+  bool idwMotionSolver =
+    mesh.objectRegistry::foundObject<IDWMotionSolver>( "dynamicMeshDict" );
+
   if ( fvMotionSolver )
   {
     assert( !rbfMotionSolver );
     assert( !feMotionSolver );
+    assert( !idwMotionSolver );
 
     // Move whole fluid mesh
     pointField newPoints = mesh.allPoints();
@@ -271,6 +277,7 @@ void CoupledFluidSolver::moveMesh( vectorField motion )
   {
     assert( !rbfMotionSolver );
     assert( !fvMotionSolver );
+    assert( !idwMotionSolver );
 
     // Move whole fluid mesh
     pointField newPoints = mesh.allPoints();
@@ -320,6 +327,7 @@ void CoupledFluidSolver::moveMesh( vectorField motion )
   {
     assert( !fvMotionSolver );
     assert( !feMotionSolver );
+    assert( !idwMotionSolver );
 
     RBFMotionSolverExt & motionSolver =
       const_cast<RBFMotionSolverExt &>
@@ -332,7 +340,24 @@ void CoupledFluidSolver::moveMesh( vectorField motion )
     motionSolver.setMotion( patches );
   }
 
-  assert( rbfMotionSolver || fvMotionSolver || feMotionSolver );
+  if ( idwMotionSolver )
+  {
+    assert( !fvMotionSolver );
+    assert( !feMotionSolver );
+    assert( !rbfMotionSolver );
+
+    IDWMotionSolver & motionSolver =
+      const_cast<IDWMotionSolver &>
+      (
+      mesh.lookupObject<IDWMotionSolver>( "dynamicMeshDict" )
+      );
+
+    Field<vectorField> patches( mesh.boundaryMesh().size(), vectorField( 0 ) );
+    patches[fluidPatchID] = motion;
+    motionSolver.setMotion( patches );
+  }
+
+  assert( rbfMotionSolver || fvMotionSolver || feMotionSolver || idwMotionSolver );
 
   mesh.update();
 }
@@ -342,15 +367,22 @@ void CoupledFluidSolver::readBlockSolverControls()
   setRefCell( p, mesh.solutionDict().subDict( "blockSolver" ), pRefCell, pRefValue );
 }
 
+void CoupledFluidSolver::resetSolution()
+{
+  U == U.oldTime();
+  p == p.oldTime();
+  phi == phi.oldTime();
+}
+
 void CoupledFluidSolver::solve()
 {
   Info << "Solve fluid domain" << endl;
 
   int oCorr;
-
-  U == U.oldTime();
-  phi == phi.oldTime();
-  p == p.oldTime();
+  scalar initialResidual = 1;
+  scalar relativeResidual = 1;
+  scalar residualPressure = 1;
+  scalar residualVelocity = 1;
 
   // Outer correction loop to solve the non-linear system
   for ( oCorr = 0; oCorr < nOuterCorr; oCorr++ )
@@ -373,10 +405,8 @@ void CoupledFluidSolver::solve()
     // Set block interfaces properly
     A.interfaces() = Up.boundaryField().blockInterfaces();
 
-    if ( nOuterCorr != 1 )
-    {
-      p.storePrevIter();
-    }
+    p.storePrevIter();
+    U.storePrevIter();
 
     // Assemble and insert momentum equation
 
@@ -433,23 +463,7 @@ void CoupledFluidSolver::solve()
       A,
       mesh.solutionDict().solver( "Up" )
       )->solve( Up, b );
-
-    // solverPerf.print();
-
-    if ( oCorr == 0 )
-    {
-      initialResidual = solverPerf.initialResidual();
-      initResidual = 0;
-
-      for ( int i = 0; i < 4; i++ )
-        initResidual += initialResidual[i];
-    }
-
-    currResidual = solverPerf.initialResidual();
-    currentResidual = 0;
-
-    for ( int i = 0; i < 4; i++ )
-      currentResidual += currResidual[i];
+    solverPerf.print();
 
     // Retrieve solution
     blockMatrixTools::retrieveSolution( 0, U.internalField(), Up );
@@ -460,12 +474,7 @@ void CoupledFluidSolver::solve()
 
     phi = ( fvc::interpolate( U ) & mesh.Sf() ) + pEqn.flux() + presSource;
 
-    if ( oCorr != nOuterCorr - 1 )
-    {
-      p.relax();
-    }
-
-    // continuityErrs();
+    p.relax();
 
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative( phi, U );
@@ -475,13 +484,28 @@ void CoupledFluidSolver::solve()
     // Make the fluxes absolute
     fvc::makeAbsolute( phi, U );
 
-    if ( currentResidual < convergenceTolerance )
+    residualPressure = gSumMag( p.internalField() - p.prevIter().internalField() ) / (gSumMag( p.internalField() ) + SMALL);
+    residualVelocity = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
+    relativeResidual = max( residualPressure, residualVelocity );
+
+    scalar initResidual = 0;
+    forAll( solverPerf.initialResidual(), i )
+    {
+      initResidual += solverPerf.initialResidual()[i];
+    }
+
+    relativeResidual = min( relativeResidual, initResidual );
+
+    if ( oCorr == 0 )
+      initialResidual = relativeResidual;
+
+    if ( relativeResidual < convergenceTolerance && oCorr > 1 )
       break;
   }
 
+  Info << "Solving for Up, Initial residual = " << initialResidual;
+  Info << ", Final residual = " << relativeResidual;
+  Info << ", No outer iterations = " << oCorr + 1 << endl;
+
   continuityErrs();
-
-  Info << "Solving for Up, Initial residual = " << initialResidual << ", Final residual = " << currResidual << ", No outer iterations = " << oCorr + 1 << endl;
-
-  // lduMatrix::debug = 1;
 }

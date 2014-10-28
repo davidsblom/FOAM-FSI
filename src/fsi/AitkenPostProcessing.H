@@ -44,6 +44,15 @@ public:
       bool residualCriterium
       );
 
+    virtual void performPostProcessing(
+      const vector & y,
+      const vector & x0,
+      vector & xk,
+      const matrix & B,
+      const fsi::vector & xktilde,
+      const fsi::vector & xkp
+      );
+
     double aitkenFactor;
   };
 }

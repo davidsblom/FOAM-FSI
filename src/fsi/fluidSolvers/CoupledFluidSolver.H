@@ -22,6 +22,7 @@
 #include "blockMatrixTools.H"
 
 #include "RBFMotionSolverExt.H"
+#include "IDWMotionSolver.H"
 #include "faceTetPolyPatch.H"
 #include "fixedValuePointPatchFields.H"
 #include "fixedValueTetPolyPatchFields.H"
@@ -50,9 +51,11 @@ public:
 
   virtual bool isRunning();
 
+  virtual void resetSolution();
+
   virtual void solve();
 
-private:
+protected:
 
   virtual void moveMesh( vectorField motion );
 
@@ -97,8 +100,6 @@ private:
   // Convergence tolerance fluid domain
   scalar convergenceTolerance;
   label nOuterCorr;
-  scalar initResidual;
-  scalar currentResidual;
   Foam::VectorN<double, 4> initialResidual;
   Foam::VectorN<double, 4> currResidual;
 

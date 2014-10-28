@@ -82,10 +82,10 @@ bool PostProcessing::isConvergence(
   return fsi->isConvergence( xk, xkprev );
 }
 
-void PostProcessing::iterationsConverged()
+void PostProcessing::iterationsConverged( bool keepIterations )
 {
   // Save input/output information for next solve
-  if ( residuals.size() >= 2 )
+  if ( residuals.size() >= 2 && keepIterations )
   {
     assert( residuals.size() == sols.size() );
 

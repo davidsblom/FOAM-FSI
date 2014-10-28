@@ -50,6 +50,15 @@ public:
     fsi::vector & xk
     );
 
+  virtual void optimize(
+    const fsi::vector & y,
+    const fsi::vector & x0,
+    fsi::vector & xk,
+    const matrix & B,
+    const fsi::vector & xktilde,
+    const fsi::vector & xkp
+    );
+
   virtual void run();
 
   virtual void setSurrogateData(

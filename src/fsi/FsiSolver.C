@@ -161,7 +161,6 @@ namespace fsi
 
       x = 2.0 * previousSolutions.at( 0 ).array() - previousSolutions.at( 1 ).array();
     }
-
     else
     if ( secondOrderExtrapolation )
     {
@@ -181,6 +180,9 @@ namespace fsi
   void FsiSolver::finalizeTimeStep()
   {
     assert( init );
+
+    fluid->couplingData.finalizeTimeStep();
+    solid->couplingData.finalizeTimeStep();
 
     fluid->finalizeTimeStep();
     solid->finalizeTimeStep();

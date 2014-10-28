@@ -45,8 +45,6 @@ public:
       matrix & A,
       int col
       );
-
-    double singularityLimit;
   };
 }
 

@@ -21,9 +21,9 @@ public:
       shared_ptr<SurrogateModel> fineModel,
       shared_ptr<SurrogateModel> coarseModel,
       int maxIter,
-      double singularityLimit,
       int nbReuse,
-      int reuseInformationStartingFromTimeIndex
+      int reuseInformationStartingFromTimeIndex,
+      double singularityLimit
       );
 
     virtual ~ManifoldMapping();
@@ -40,7 +40,6 @@ public:
       int col
       );
 
-    double singularityLimit;
     int iter;
   };
 }

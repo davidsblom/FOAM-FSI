@@ -82,7 +82,8 @@ void AitkenPostProcessing::performPostProcessing(
   // Check convergence criteria
   if ( isConvergence( xk, xkprev, residualCriterium ) )
   {
-    iterationsConverged();
+    bool keepIterations = residualCriterium;
+    iterationsConverged( keepIterations );
     return;
   }
 
@@ -123,5 +124,89 @@ void AitkenPostProcessing::performPostProcessing(
     assert( fsi->iter <= maxIter );
   }
 
-  iterationsConverged();
+  bool keepIterations = residualCriterium;
+  iterationsConverged( keepIterations );
+}
+
+void AitkenPostProcessing::performPostProcessing(
+  const vector & y,
+  const vector & x0,
+  vector & xk,
+  const matrix & B,
+  const fsi::vector & xktilde,
+  const fsi::vector & xkp
+  )
+{
+  assert( xk.rows() > 0 );
+  assert( fsi->fluid->init );
+  assert( fsi->solid->init );
+  assert( y.rows() == x0.rows() );
+  assert( y.rows() == xk.rows() );
+
+  // Initialize variables
+  vector xkprev = x0;
+  xk = x0;
+  residuals.clear();
+  sols.clear();
+  vector yk = y;
+  aitkenFactor = initialRelaxation;
+  bool residualCriterium = false;
+
+  // Fsi evaluation
+  vector output( xk.rows() ), R( xk.rows() ), Rprev;
+  output.setZero();
+  R.setZero();
+
+  fsi->evaluate( xktilde + B * (x0 - xkp), output, R );
+
+  assert( x0.rows() == output.rows() );
+  assert( x0.rows() == R.rows() );
+
+  // Check convergence criteria
+  if ( isConvergence( xk, xkprev, residualCriterium ) )
+  {
+    bool keepIterations = residualCriterium;
+    iterationsConverged( keepIterations );
+    return;
+  }
+
+  for ( int iter = 0; iter < maxIter - 1; iter++ )
+  {
+    if ( iter == 0 )
+      xk += initialRelaxation * (R - yk);
+
+    if ( iter > 0 )
+    {
+      vector deltaR = R - Rprev;
+
+      aitkenFactor *= -deltaR.dot( Rprev ) / deltaR.squaredNorm();
+
+      // Safe guards for the aitken relaxation factor
+      aitkenFactor = std::max( aitkenFactor, initialRelaxation );
+      aitkenFactor = std::min( aitkenFactor, 2.0 );
+
+      assert( !std::isnan( aitkenFactor ) );
+
+      xk += aitkenFactor * (R - yk);
+    }
+
+    Info << "Aitken post processing with factor " << aitkenFactor << endl;
+
+    Rprev = R;
+
+    // Fsi evaluation
+    fsi->evaluate( xktilde + B * (xk - xkp), output, R );
+
+    assert( x0.rows() == output.rows() );
+    assert( x0.rows() == R.rows() );
+
+    // Check convergence criteria
+    if ( isConvergence( xk, xkprev, residualCriterium ) )
+      break;
+
+    assert( fsi->iter <= maxIter );
+  }
+
+  bool keepIterations = residualCriterium;
+  iterationsConverged( keepIterations );
 }

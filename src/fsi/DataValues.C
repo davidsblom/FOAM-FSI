@@ -14,6 +14,11 @@ DataValues::DataValues()
 DataValues::~DataValues()
 {}
 
+void DataValues::finalizeTimeStep()
+{
+  dataPreviousTimeStep = data;
+}
+
 void DataValues::setData( matrix & data )
 {
   this->data = data;
@@ -22,6 +27,12 @@ void DataValues::setData( matrix & data )
   {
     this->dataprev = this->data;
     this->dataprev.setZero();
+  }
+
+  if ( dataPreviousTimeStep.cols() == 0 && data.cols() > 0 )
+  {
+    dataPreviousTimeStep = data;
+    dataPreviousTimeStep.setZero();
   }
 }
 
@@ -33,5 +44,11 @@ void DataValues::setDataOld( matrix & data )
   {
     this->dataprev = this->data;
     this->dataprev.setZero();
+  }
+
+  if ( dataPreviousTimeStep.cols() == 0 && dataprev.cols() > 0 )
+  {
+    dataPreviousTimeStep = dataprev;
+    dataPreviousTimeStep.setZero();
   }
 }

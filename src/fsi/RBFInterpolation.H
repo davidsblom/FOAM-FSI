@@ -20,6 +20,11 @@ public:
     RBFInterpolation();
 
     RBFInterpolation(
+      const std::string & function,
+      const double radius
+      );
+
+    RBFInterpolation(
       const matrix & positions,
       const matrix & positionsInterpolation,
       const std::string & function,
@@ -38,7 +43,22 @@ public:
       matrix & valuesInterpolation
       );
 
+    void interpolate(
+      const matrix & positions,
+      const matrix & positionsInterpolation,
+      const matrix & values,
+      matrix & valuesInterpolation
+      );
+
+    void interpolate(
+      const matrix & positions,
+      const matrix & positionsInterpolation,
+      matrix & valuesInterpolation
+      );
+
     double TPS( const double x );
+
+    double WendlandC2( const double x );
 
     bool computed;
     int n_A;
@@ -47,6 +67,7 @@ public:
     double radius;
     std::string function;
     matrix Hhat;
+    matrix B;
   };
 }
 

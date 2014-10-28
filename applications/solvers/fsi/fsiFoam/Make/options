@@ -1,6 +1,6 @@
 EXE_INC = -std=c++0x \
-    -I$(WM_PROJECT_USER_DIR)/src/fsi/lnInclude \
-    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/eigen \
+    -I../../../../src/fsi/lnInclude \
+    -I../../../../src/thirdParty/eigen \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
@@ -11,23 +11,25 @@ EXE_INC = -std=c++0x \
     -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
     -I$(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
     -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/solidModels/lnInclude \
-    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/yaml-cpp/include \
-    -I$(WM_PROJECT_USER_DIR)/src/RBFmeshInterpolation/lnInclude/ \
+    -I../../../../src/thirdParty/yaml-cpp/include \
+    -I../../../../src/RBFmeshInterpolation/lnInclude/ \
+    -I../../../../src/IDWmeshDeformation/lnInclude/ \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
-    -I$(LIB_SRC)/VectorN/lnInclude
+    -I$(LIB_SRC)/VectorN/lnInclude \
+    -I../../../../src/thirdParty/boost
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -L$(WM_PROJECT_USER_DIR)/src/thirdParty/yaml-cpp/build/ \
+    -L../../../../src/thirdParty/yaml-cpp/build/ \
     -lfsi \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
     -lmeshTools \
-    -llapack \
-    -lblas \
+    $(LIBLAPACK) \
     -lfiniteVolume \
     -lincompressibleTransportModels \
     -lincompressibleTurbulenceModel \
@@ -41,5 +43,6 @@ EXE_LIBS = \
     -llagrangian \
     -lyaml-cpp \
     -lRBFmeshInterpolation \
+    -lIDWmeshDeformation \
     -ltetFiniteElement \
     -lVectorN

@@ -25,8 +25,11 @@ public:
 
     void setDataOld( matrix & data );
 
+    void finalizeTimeStep();
+
     matrix data;
     matrix dataprev;
+    matrix dataPreviousTimeStep;
   };
 }
 

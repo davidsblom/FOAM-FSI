@@ -20,6 +20,8 @@ namespace fsi
   {
     assert( convergenceLimit > 0 );
     assert( convergenceLimit < 1 );
+
+    epsilon = std::sqrt( SMALL );
   }
 
   void RelativeConvergenceMeasure::measure(
@@ -34,7 +36,7 @@ namespace fsi
     normDiff = diff.norm();
     norm = newValues.norm();
 
-    isConvergence_ = norm * convergenceLimit > normDiff;
+    isConvergence_ = (epsilon + norm) * convergenceLimit > normDiff;
   }
 
   void RelativeConvergenceMeasure::newMeasurementSeries()
@@ -52,7 +54,7 @@ namespace fsi
     Info << "relative convergence measure: two-norm diff = "
          << normDiff
          << ", limit = "
-         << norm * convergenceLimit
+         << (epsilon + norm) * convergenceLimit
          << ", conv = ";
 
     if ( isConvergence_ )

@@ -55,6 +55,7 @@ public:
   fsi::vector xf;
   matrix J;
   bool useJacobian;
+  int iterCurrentTimeStep;
 };
 
 #endif

@@ -27,7 +27,9 @@ public:
       shared_ptr<SurrogateModel> coarseModel,
       int maxIter,
       int nbReuse,
-      int reuseInformationStartingFromTimeIndex
+      int reuseInformationStartingFromTimeIndex,
+      double singularityLimit,
+      int order
       );
 
     virtual ~OutputSpaceMapping();
@@ -44,6 +46,8 @@ public:
     shared_ptr<SurrogateModel> surrogateModel;
     deque<vector> sols;
     deque<deque<vector> > solsList;
+
+    int order;
   };
 }
 

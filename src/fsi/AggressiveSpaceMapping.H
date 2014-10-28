@@ -22,7 +22,8 @@ public:
       shared_ptr<SurrogateModel> coarseModel,
       int maxIter,
       int nbReuse,
-      int reuseInformationStartingFromTimeIndex
+      int reuseInformationStartingFromTimeIndex,
+      double singularityLimit
       );
 
     virtual ~AggressiveSpaceMapping();

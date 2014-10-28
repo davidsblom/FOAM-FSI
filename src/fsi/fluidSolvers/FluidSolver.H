@@ -47,6 +47,8 @@ public:
 
   virtual bool isRunning();
 
+  virtual void resetSolution();
+
   virtual void solve();
 
 private:

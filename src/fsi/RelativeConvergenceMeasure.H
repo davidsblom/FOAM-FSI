@@ -35,6 +35,7 @@ public:
     double normDiff;
     double norm;
     double convergenceLimit;
+    double epsilon;
   };
 }
 
