@@ -2,6 +2,8 @@
 
 set -e
 
+export LIBLAPACK="-llapack -lblas"
+
 wmakeLnInclude src/RBFmeshInterpolation
 wmakeLnInclude src/fvPatchFields
 wmakeLnInclude src/fvSchemes
