@@ -37,6 +37,10 @@ ln -s yaml-cpp-${VERSION} yaml-cpp
 rm -f boost
 ln -s boost_${BOOST_VERSION} boost
 
+export BOOST_DIR=`pwd`/boost
+
+export PATH=$BOOST_DIR:$PATH
+
 cd yaml-cpp-${VERSION}
 
 mkdir build
