@@ -209,6 +209,12 @@ void CoupledFluidSolver::initTimeStep()
 
 bool CoupledFluidSolver::isRunning()
 {
+  runTime->write();
+
+    Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
+         << "  ClockTime = " << runTime->elapsedClockTime() << " s"
+         << endl << endl;
+         
   return runTime->loop();
 }
 
