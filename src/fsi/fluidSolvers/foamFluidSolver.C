@@ -66,15 +66,6 @@ void foamFluidSolver::finalizeTimeStep()
 {
   assert( init );
 
-  if ( name == fvMesh::defaultRegion || name == "fluid-level-0" )
-  {
-    runTime->write();
-
-    Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
-         << "  ClockTime = " << runTime->elapsedClockTime() << " s"
-         << endl << endl;
-  }
-
   init = false;
 }
 
