@@ -74,15 +74,6 @@ void foamSolidSolver::finalizeTimeStep()
 {
   assert( init );
 
-  if ( name == fvMesh::defaultRegion )
-  {
-    runTime->write();
-
-    Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
-         << "  ClockTime = " << runTime->elapsedClockTime() << " s"
-         << endl << endl;
-  }
-
   init = false;
 }
 
