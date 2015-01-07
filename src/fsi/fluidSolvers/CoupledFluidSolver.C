@@ -48,7 +48,7 @@ CoupledFluidSolver::CoupledFluidSolver(
     runTime->timeName(),
     mesh,
     IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
+    IOobject::NO_WRITE
   ),
   linearInterpolate( U ) & mesh.Sf()
   ),
@@ -60,7 +60,7 @@ CoupledFluidSolver::CoupledFluidSolver(
     runTime->timeName(),
     mesh,
     IOobject::NO_READ,
-    IOobject::AUTO_WRITE
+    IOobject::NO_WRITE
   ),
   mesh,
   dimensionedVector4( "zero", dimless, vector4::zero )
@@ -214,7 +214,7 @@ bool CoupledFluidSolver::isRunning()
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
          << "  ClockTime = " << runTime->elapsedClockTime() << " s"
          << endl << endl;
-         
+
   return runTime->loop();
 }
 
