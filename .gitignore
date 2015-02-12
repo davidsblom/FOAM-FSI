@@ -24,6 +24,7 @@
 # OpenFOAM
 lnInclude
 linux64GccDPOpt
+darwinIntel64GccDPOpt
 
 # Specific files
 formatCode
