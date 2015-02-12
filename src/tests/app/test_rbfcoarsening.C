@@ -71,23 +71,6 @@ protected:
 
 INSTANTIATE_TEST_CASE_P( RBFTest, RBFCoarseningParametrizedTest, ::testing::Combine( Bool(), Values( 0, 1, 2, 3, 4 ), Values( 10, 25 ), Values( 25, 100 ) ) );
 
-TEST_P( RBFCoarseningParametrizedTest, rbf3d_directly_interpolate )
-{
-  // Check that the RBF function interpolates through the nodes (2D)
-
-  matrix x, y, ynew;
-
-  x = Eigen::MatrixXd::Random( 50, 3 ).array() * 4 - 2;
-  y = Eigen::MatrixXd::Random( 50, 3 ).array() * 4 - 2;
-
-  rbf->compute( x, x );
-  rbf->interpolate( y, ynew );
-
-  for ( int i = 0; i < y.rows(); i++ )
-    for ( int j = 0; j < y.cols(); j++ )
-      ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-6 );
-}
-
 TEST_P( RBFCoarseningParametrizedTest, rbf1d_regularity )
 {
   // Check that the RBF function approximates a smooth function well
