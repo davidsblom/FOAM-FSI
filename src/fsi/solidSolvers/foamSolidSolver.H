@@ -56,6 +56,8 @@ public:
 
   void getWritePositionsLocal( matrix & writePositions );
 
+  void run();
+
   void setTractionLocal( const matrix & traction );
 
   string name;

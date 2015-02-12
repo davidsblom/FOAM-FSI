@@ -16,7 +16,6 @@
 #include "ConvergenceMeasure.H"
 #include "FluidSolver.H"
 #include "CoupledFluidSolver.H"
-#include "steadyCoupledFluidSolver.H"
 #include "FsiSolver.H"
 #include "AndersonPostProcessing.H"
 #include "ImplicitMultiLevelFsiSolver.H"
@@ -31,7 +30,6 @@
 #include "RBFInterpolation.H"
 #include "RelativeConvergenceMeasure.H"
 #include "SolidSolver.H"
-#include "steadySolidSolver.H"
 #include "SpaceMappingSolver.H"
 #include "CompressibleFluidSolver.H"
 #include "TPS.H"
@@ -133,8 +131,8 @@ int main(
   std::string fluidSolver = config["fluid-solver"].as<std::string>();
   std::string solidSolver = config["solid-solver"].as<std::string>();
 
-  assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "steady-state-coupled-pressure-velocity-solver" || fluidSolver == "compressible-solver" );
-  assert( solidSolver == "segregated-solver" || solidSolver == "steady-state-segregated-solver" );
+  assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" );
+  assert( solidSolver == "segregated-solver" );
 
   assert( configInterpolation["coarsening"] );
   assert( configInterpolation["coarsening"]["enabled"] );
@@ -245,24 +243,23 @@ int main(
     if ( fluidSolver == "pimple-solver" )
       fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
 
-    if ( fluidSolver == "steady-state-coupled-pressure-velocity-solver" )
-      fluid = std::shared_ptr<foamFluidSolver> ( new steadyCoupledFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
-
     if ( fluidSolver == "compressible-solver" )
       fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
 
     if ( solidSolver == "segregated-solver" )
-      solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid-level-" + std::to_string( level ), args, runTime ) );
+    {
+      std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
 
-    if ( solidSolver == "steady-state-segregated-solver" )
-      solid = std::shared_ptr<foamSolidSolver> ( new steadySolidSolver( "solid-level-" + std::to_string( level ), args, runTime ) );
+      std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+      solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid-level-" + std::to_string( level ), args, runTime, interpolator ) );
+    }
 
     // Convergence measures
     convergenceMeasures = std::shared_ptr<list<std::shared_ptr<ConvergenceMeasure> > >( new list<std::shared_ptr<ConvergenceMeasure> > );
 
     setConvergenceMeasures( configMeasures, convergenceMeasures );
 
-    std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
     std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator;
     std::shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
     std::shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;
@@ -336,24 +333,23 @@ int main(
       if ( fluidSolver == "pimple-solver" )
         fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
 
-      if ( fluidSolver == "steady-state-coupled-pressure-velocity-solver" )
-        fluid = std::shared_ptr<foamFluidSolver> ( new steadyCoupledFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
-
       if ( fluidSolver == "compressible-solver" )
         fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
 
       if ( solidSolver == "segregated-solver" )
-        solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid-level-" + std::to_string( level ), args, runTime ) );
+      {
+        std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
 
-      if ( solidSolver == "steady-state-segregated-solver" )
-        solid = std::shared_ptr<foamSolidSolver> ( new steadySolidSolver( "solid-level-" + std::to_string( level ), args, runTime ) );
+        std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+        solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid-level-" + std::to_string( level ), args, runTime, interpolator ) );
+      }
 
       // Convergence measures
       convergenceMeasures = std::shared_ptr<list<std::shared_ptr<ConvergenceMeasure> > >( new list<std::shared_ptr<ConvergenceMeasure> > );
 
       setConvergenceMeasures( configMeasures, convergenceMeasures );
 
-      std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
       std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator;
       std::shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
       std::shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;
@@ -516,24 +512,23 @@ int main(
     if ( fluidSolver == "pimple-solver" )
       fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
-    if ( fluidSolver == "steady-state-coupled-pressure-velocity-solver" )
-      fluid = std::shared_ptr<foamFluidSolver> ( new steadyCoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
-
     if ( fluidSolver == "compressible-solver" )
       fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
     if ( solidSolver == "segregated-solver" )
-      solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid", args, runTime ) );
+    {
+      std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
 
-    if ( solidSolver == "steady-state-segregated-solver" )
-      solid = std::shared_ptr<foamSolidSolver> ( new steadySolidSolver( "solid", args, runTime ) );
+      std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+      solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid", args, runTime, interpolator ) );
+    }
 
     // Convergence measures
     convergenceMeasures = std::shared_ptr<list<std::shared_ptr<ConvergenceMeasure> > >( new list<std::shared_ptr<ConvergenceMeasure> > );
 
     setConvergenceMeasures( configMeasures, convergenceMeasures );
 
-    std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
     std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator;
     std::shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
     std::shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;

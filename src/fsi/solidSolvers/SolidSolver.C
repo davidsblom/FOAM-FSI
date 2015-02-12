@@ -9,7 +9,8 @@
 SolidSolver::SolidSolver (
   string name,
   std::shared_ptr<argList> args,
-  std::shared_ptr<Time> runTime
+  std::shared_ptr<Time> runTime,
+  std::shared_ptr<rbf::RBFCoarsening> interpolator
   )
   :
   foamSolidSolver( name, args, runTime ),
@@ -58,7 +59,7 @@ SolidSolver::SolidSolver (
     IOobject::NO_WRITE
   )
   ),
-  interpolator( std::shared_ptr<RBFFunctionInterface>( new TPSFunction() ) )
+  interpolator( interpolator )
 {}
 
 SolidSolver::~SolidSolver()
@@ -130,7 +131,7 @@ bool SolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> sol
 
   reduce( cellCentresSourceSize, sumOp<labelList>() );
 
-  if ( !interpolator.computed )
+  if ( !interpolator->rbf->computed )
   {
     // Gather all the cell centers of the source
 
@@ -159,7 +160,7 @@ bool SolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> sol
       for ( int j = 0; j < positionsInterpolation.cols(); j++ )
         positionsInterpolation( i, j ) = cellCentresTarget[i][j];
 
-    interpolator.compute( positions, positionsInterpolation );
+    interpolator->compute( positions, positionsInterpolation );
   }
 
   vectorField globalFieldSource( fineModel->mesh.globalData().nTotalCells(), Foam::vector::zero );
@@ -183,7 +184,7 @@ bool SolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> sol
     for ( int j = 0; j < values.cols(); j++ )
       values( i, j ) = globalFieldSource[i][j];
 
-  interpolator.interpolate( values, valuesInterpolation );
+  interpolator->interpolate( values, valuesInterpolation );
 
   for ( int i = 0; i < valuesInterpolation.rows(); i++ )
     for ( int j = 0; j < valuesInterpolation.cols(); j++ )

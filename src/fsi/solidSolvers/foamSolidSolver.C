@@ -200,6 +200,16 @@ void foamSolidSolver::setTractionLocal( const matrix & traction )
   tForce->traction() = tractionSolid;
 }
 
+void foamSolidSolver::run()
+{
+  while ( isRunning() )
+  {
+    initTimeStep();
+    solve();
+    finalizeTimeStep();
+  }
+}
+
 void foamSolidSolver::solve(
   const matrix & input,
   matrix & output

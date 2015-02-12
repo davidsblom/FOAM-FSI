@@ -11,9 +11,8 @@
 
 #include "foamSolidSolver.H"
 #include "constitutiveModel.H"
-#include "RBFInterpolation.H"
+#include "RBFCoarsening.H"
 #include "meshToMesh.H"
-#include "TPSFunction.H"
 
 using namespace fsi;
 using namespace rbf;
@@ -25,7 +24,8 @@ public:
   SolidSolver(
     string name,
     std::shared_ptr<argList> args,
-    std::shared_ptr<Time> runTime
+    std::shared_ptr<Time> runTime,
+    std::shared_ptr<rbf::RBFCoarsening> interpolator
     );
 
   virtual ~SolidSolver();
@@ -69,7 +69,7 @@ protected:
   // Dictionaries
   IOdictionary couplingProperties;
 
-  RBFInterpolation interpolator;
+  std::shared_ptr<rbf::RBFCoarsening> interpolator;
 };
 
 #endif

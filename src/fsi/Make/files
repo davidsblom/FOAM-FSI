@@ -20,13 +20,11 @@ IDWInterpolation.C
 AndersonPostProcessing.C
 
 fluidSolvers/CoupledFluidSolver.C
-fluidSolvers/steadyCoupledFluidSolver.C
 fluidSolvers/FluidSolver.C
 fluidSolvers/foamFluidSolver.C
 fluidSolvers/CompressibleFluidSolver.C
 
 solidSolvers/foamSolidSolver.C
 solidSolvers/SolidSolver.C
-solidSolvers/steadySolidSolver.C
 
 LIB = $(FOAM_USER_LIBBIN)/libfsi

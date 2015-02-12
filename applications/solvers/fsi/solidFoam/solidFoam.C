@@ -5,8 +5,6 @@
  */
 
 #include <memory>
-
-#include "PreciceSolidSolver.H"
 #include "SolidSolver.H"
 #include "TPSFunction.H"
 
@@ -35,16 +33,11 @@ int main(
 
   std::shared_ptr<foamSolidSolver> solid( new SolidSolver( fvMesh::defaultRegion, args, runTime, interpolator ) );
 
-  PreciceSolidSolver solver( solid );
-
-  solver.run();
+  solid->run();
 
   Info << "End\n" << endl;
 
-  label tmp = Pstream::myProcNo();
-  reduce( tmp, sumOp<label>() );
-
-  return (0);
+  return 0;
 }
 
 // ************************************************************************* //
