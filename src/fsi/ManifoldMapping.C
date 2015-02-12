@@ -14,15 +14,64 @@ ManifoldMapping::ManifoldMapping(
   int maxIter,
   int nbReuse,
   int reuseInformationStartingFromTimeIndex,
-  double singularityLimit
+  double singularityLimit,
+  bool updateJacobian
   )
   :
   SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
-  iter( 0 )
+  updateJacobian( updateJacobian ),
+  scaling( false ),
+  iter( 0 ),
+  scalingFactors( Eigen::VectorXd::Ones( 2 ) ),
+  sizeVar0( 0 ),
+  sizeVar1( 0 )
 {}
 
 ManifoldMapping::~ManifoldMapping()
 {}
+
+void ManifoldMapping::applyScaling( vector & vec )
+{
+  vec.head( sizeVar0 ) /= scalingFactors( 0 );
+  vec.tail( sizeVar1 ) /= scalingFactors( 1 );
+}
+
+void ManifoldMapping::applyScaling( matrix & mat )
+{
+  mat.topLeftCorner( sizeVar0, mat.cols() ).array() /= scalingFactors( 0 );
+  mat.bottomLeftCorner( sizeVar1, mat.cols() ).array() /= scalingFactors( 1 );
+}
+
+void ManifoldMapping::determineScalingFactors( const vector & output )
+{
+  std::shared_ptr<ImplicitMultiLevelFsiSolver> fsi;
+  fsi = std::dynamic_pointer_cast<ImplicitMultiLevelFsiSolver>( fineModel );
+
+  if ( fsi )
+    scaling = fsi->fsi->parallel;
+
+  if ( scaling && timeIndex <= reuseInformationStartingFromTimeIndex )
+  {
+    // Use scaling if the fluid and solid are coupled in parallel
+    sizeVar0 = fsi->fsi->solidSolver->couplingGridSize * fsi->fsi->solid->dim;
+    sizeVar1 = fsi->fsi->fluidSolver->couplingGridSize * fsi->fsi->fluid->dim;
+
+    assert( output.rows() == sizeVar0 + sizeVar1 );
+
+    scalingFactors( 0 ) = output.head( sizeVar0 ).norm();
+    scalingFactors( 1 ) = output.tail( sizeVar1 ).norm();
+
+    for ( int i = 0; i < scalingFactors.rows(); i++ )
+      if ( std::abs( scalingFactors( i ) ) < 1.0e-13 )
+        scalingFactors( i ) = 1;
+
+    Info << "Parallel coupling of fluid and solid solvers with scaling factors ";
+    Info << scalingFactors( 0 ) << " and " << scalingFactors( 1 ) << endl;
+
+    // Reset the mapping matrix Tprev since a different scaling factor is used
+    Tkprev.resize( 0, 0 );
+  }
+}
 
 void ManifoldMapping::performPostProcessing(
   const vector & y,
@@ -47,19 +96,23 @@ void ManifoldMapping::performPostProcessing(
   fineResiduals.resize( m, 1 );
   fineResiduals.setZero();
   iter = 0;
+  matrix Tk;
 
-  // Determine optimum of coarse model xstar
-  if ( residualCriterium )
+  if ( timeIndex == 0 )
   {
-    assert( y.norm() < 1.0e-14 );
-    coarseModel->optimize( x0, xk );
+    // Determine optimum of coarse model xstar
+    if ( residualCriterium )
+    {
+      assert( y.norm() < 1.0e-14 );
+      coarseModel->optimize( x0, xk );
+    }
+
+    if ( !residualCriterium )
+      coarseModel->optimize( y, x0, xk );
+
+    if ( !coarseModel->allConverged() )
+      Warning << "Surrogate model optimization process is not converged." << endl;
   }
-
-  if ( !residualCriterium )
-    coarseModel->optimize( y, x0, xk );
-
-  if ( !coarseModel->allConverged() )
-    Warning << "Surrogate model optimization process is not converged." << endl;
 
   assert( xk.rows() == n );
   assert( x0.rows() == n );
@@ -80,6 +133,8 @@ void ManifoldMapping::performPostProcessing(
   fineResiduals.col( 0 ) = R;
   assert( output.rows() == m );
   assert( R.rows() == m );
+
+  determineScalingFactors( output );
 
   iter++;
 
@@ -104,14 +159,32 @@ void ManifoldMapping::performPostProcessing(
 
     // Include information from previous time steps
 
-    for ( std::deque<matrix>::iterator it = fineResidualsList.begin(); it != fineResidualsList.end(); ++it )
-      nbCols += it->cols() - 1;
+    for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
+      nbCols += fineResidualsList.at( i ).cols() - 1;
 
     nbCols = std::min( nbCols, n );
 
+    // Update the design specification yk
+
+    vector alpha = fineResiduals.col( k ) - y;
+    yk = coarseResiduals.col( k );
+
+    // Apply scaling
+    if ( scaling )
+    {
+      applyScaling( alpha );
+      applyScaling( yk );
+    }
+
     if ( nbCols == 0 )
+    {
       // Update the design specification yk
-      yk = coarseResiduals.col( k ) - (fineResiduals.col( k ) - y);
+
+      if ( updateJacobian && Tkprev.rows() == m )
+        yk -= Tkprev * alpha;
+      else
+        yk -= alpha;
+    }
 
     if ( nbCols >= 1 )
     {
@@ -130,41 +203,29 @@ void ManifoldMapping::performPostProcessing(
 
       // Include information from previous time steps
 
-      int tmpIndex = colIndex;
-
-      for ( std::deque<matrix>::iterator it = fineResidualsList.begin(); it != fineResidualsList.end(); ++it )
+      for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
       {
-        assert( it->cols() >= 2 );
+        assert( fineResidualsList.at( i ).cols() >= 2 );
 
-        for ( int i = 0; i < it->cols() - 1; i++ )
+        for ( unsigned j = 0; j < fineResidualsList.at( i ).cols() - 1; j++ )
         {
           if ( colIndex >= DeltaF.cols() )
             continue;
 
-          DeltaF.col( colIndex ) = it->col( it->cols() - 1 ) - it->col( it->cols() - 2 - i );
+          DeltaF.col( colIndex ) = fineResidualsList.at( i ).col( fineResidualsList.at( i ).cols() - 1 ) - fineResidualsList.at( i ).col( fineResidualsList.at( i ).cols() - 2 - j );
+          DeltaC.col( colIndex ) = coarseResidualsList.at( i ).col( coarseResidualsList.at( i ).cols() - 1 ) - coarseResidualsList.at( i ).col( coarseResidualsList.at( i ).cols() - 2 - j );
           colIndex++;
         }
       }
 
       assert( colIndex == nbCols );
 
-      colIndex = tmpIndex;
-
-      for ( std::deque<matrix>::iterator it = coarseResidualsList.begin(); it != coarseResidualsList.end(); ++it )
+      // Apply scaling
+      if ( scaling )
       {
-        assert( it->cols() >= 2 );
-
-        for ( int i = 0; i < it->cols() - 1; i++ )
-        {
-          if ( colIndex >= DeltaC.cols() )
-            continue;
-
-          DeltaC.col( colIndex ) = it->col( it->cols() - 1 ) - it->col( it->cols() - 2 - i );
-          colIndex++;
-        }
+        applyScaling( DeltaF );
+        applyScaling( DeltaC );
       }
-
-      assert( colIndex == nbCols );
 
       Info << "Manifold mapping with ";
       Info << nbCols;
@@ -214,8 +275,8 @@ void ManifoldMapping::performPostProcessing(
       {
         // Calculate singular value decomposition with Eigen
 
-        Eigen::JacobiSVD<matrix> svd_F( DeltaF, Eigen::ComputeThinU | Eigen::ComputeThinV );
         Eigen::JacobiSVD<matrix> svd_C( DeltaC, Eigen::ComputeThinU | Eigen::ComputeThinV );
+        Eigen::JacobiSVD<matrix> svd_F( DeltaF, Eigen::ComputeThinU | Eigen::ComputeThinV );
 
         matrix pseudoSigma_F = svd_F.singularValues().asDiagonal();
 
@@ -224,28 +285,48 @@ void ManifoldMapping::performPostProcessing(
 
         matrix pseudoDeltaF = svd_F.matrixV() * pseudoSigma_F * svd_F.matrixU().transpose();
 
-        // Update the design specification yk
-
         U_F = svd_F.matrixU();
         U_C = svd_C.matrixU();
 
-        // matrix I = Eigen::MatrixXd::Identity( m, m );
-        // matrix Tk = DeltaC * pseudoDeltaF + ( I - U_C * U_C.transpose() ) * ( I - U_F * U_F.transpose() );
-        // yk = coarseResiduals.col( k ) - Tk * ( fineResiduals.col(k) - y );
+        if ( !updateJacobian )
+        {
+          vector beta = U_F * (U_F.transpose() * alpha);
 
-        yk = coarseResiduals.col( k );
-        yk -= DeltaC * ( pseudoDeltaF * (fineResiduals.col( k ) - y) );
-        yk += U_F * ( U_F.transpose() * (fineResiduals.col( k ) - y) );
-        yk += U_C * ( U_C.transpose() * (fineResiduals.col( k ) - y) );
-        yk -= fineResiduals.col( k ) - y;
-        yk -= U_C * ( U_C.transpose() * ( U_F * ( U_F.transpose() * (fineResiduals.col( k ) - y) ) ) );
+          yk -= alpha;
+          yk -= DeltaC * (pseudoDeltaF * alpha);
+          yk += U_C * ( U_C.transpose() * (alpha - beta) );
+          yk += beta;
+        }
+
+        if ( updateJacobian )
+        {
+          matrix I = Eigen::MatrixXd::Identity( DeltaF.rows(), DeltaF.rows() );
+
+          if ( Tkprev.rows() == DeltaF.rows() )
+            Tk = Tkprev + (DeltaC - Tkprev * DeltaF) * pseudoDeltaF;
+          else
+            Tk = DeltaC * pseudoDeltaF + ( I - U_C * U_C.transpose() ) * ( I - U_F * U_F.transpose() );
+
+          yk -= Tk * alpha;
+        }
       }
 
       if ( DeltaF.cols() == 0 )
       {
         // Update the design specification yk
-        yk = coarseResiduals.col( k ) - (fineResiduals.col( k ) - y);
+
+        if ( updateJacobian && Tkprev.rows() == m )
+          yk -= Tkprev * alpha;
+        else
+          yk -= alpha;
       }
+    }
+
+    // Apply scaling
+    if ( scaling )
+    {
+      yk.head( sizeVar0 ) *= scalingFactors( 0 );
+      yk.tail( sizeVar1 ) *= scalingFactors( 1 );
     }
 
     // Update the fine model optimum
@@ -278,12 +359,18 @@ void ManifoldMapping::performPostProcessing(
     fineResiduals.conservativeResize( fineResiduals.rows(), fineResiduals.cols() + 1 );
     fineResiduals.col( fineResiduals.cols() - 1 ) = R;
 
+    determineScalingFactors( output );
+
     iter++;
 
     // Check convergence criteria
     if ( isConvergence( xk, xkprev, residualCriterium ) )
     {
       assert( fineModel->allConverged() );
+
+      if ( updateJacobian && Tk.cols() > 0 && timeIndex >= reuseInformationStartingFromTimeIndex )
+        Tkprev = Tk;
+
       break;
     }
   }

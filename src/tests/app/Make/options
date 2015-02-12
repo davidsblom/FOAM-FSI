@@ -1,21 +1,26 @@
-EXE_INC = --coverage -fprofile-arcs -ftest-coverage -g -std=c++0x \
+EXE_INC = --coverage -fprofile-arcs -ftest-coverage -g -std=c++11 \
+    -I../../RBFmeshInterpolation/lnInclude/ \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
+    -I$(LIB_SRC)/turbulenceModels \
     -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
-    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/eigen \
-    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/gtest/include \
+    -I$(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
+    -I../../thirdParty/eigen \
+    -I../../thirdParty/gtest/include \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
-    -I$(WM_PROJECT_USER_DIR)/src/RBFmeshInterpolation/lnInclude/ \
-    -I$(LIB_SRC)/meshTools/lnInclude
+    -I../../RBFMeshMotionSolver/lnInclude/ \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/solidModels/lnInclude \
+    -I$(LIB_SRC)/VectorN/lnInclude
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -L$(WM_PROJECT_USER_DIR)/src/thirdParty/gtest \
+    -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
@@ -27,11 +32,12 @@ EXE_LIBS = \
     -lincompressibleLESModels \
     -lfiniteVolume \
     -llduSolvers \
-    -L$(WM_PROJECT_USER_DIR)/src/thirdParty/precice/build/release -lprecice \
-    -L$(HOME)/Apps/Python/ActivePython-2.7/lib -lpython2.7 \
     -lsolidModels \
     -lsampling \
-    -llapack \
-    -lblas \
     -lgcov \
-    -ltetFiniteElement
+    -ltetFiniteElement \
+    -lRBFMeshMotionSolver \
+    -ltetFiniteElement \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels

@@ -9,7 +9,7 @@ surfaceScalarField rUAf
 surfaceScalarField presSource
 (
   "presSource",
-  rUAf * ( fvc::interpolate( fvc::grad( p ) ) & mesh.Sf() )
+  rUAf * ( fvc::interpolate( fvc::grad( p, "grad(pSource)" ) ) & mesh.Sf() )
 );
 
 fvScalarMatrix pEqn
@@ -21,4 +21,4 @@ fvScalarMatrix pEqn
 
 pEqn.setReference( pRefCell, pRefValue );
 
-blockMatrixTools::insertEquation( 3, pEqn, A, x, b );
+UpEqn.insertEquation( 3, pEqn );

@@ -13,7 +13,9 @@ PreciceSolidSolver::PreciceSolidSolver( shared_ptr<foamSolidSolver> solver )
   solver( solver ),
   precice( shared_ptr<precice::SolverInterface> ( new precice::SolverInterface( "Structure_Solver", Pstream::myProcNo(), Pstream::nProcs() ) ) ),
   idsReadPositions(),
-  idsWritePositions()
+  idsWritePositions(),
+  totalRunTime( 0 ),
+  totalNbIterations( 0 )
 {
   assert( solver );
 
@@ -21,17 +23,21 @@ PreciceSolidSolver::PreciceSolidSolver( shared_ptr<foamSolidSolver> solver )
 }
 
 PreciceSolidSolver::~PreciceSolidSolver()
-{}
+{
+  precice->finalize();
+}
 
 void PreciceSolidSolver::init()
 {
   string filename = static_cast<std::string>( solver->args->rootPath() ) + "/" + static_cast<std::string>( solver->args->globalCaseName() ) + "/constant/preCICE.xml";
   precice->configure( filename );
 
-  assert( precice->getDimensions() == 3 );
+  label tmp = Pstream::myProcNo();
+  reduce( tmp, sumOp<label>() );
+
+  assert( precice->getDimensions() == solver->mesh.nGeometricD() );
 
   setReadPositions();
-
   setWritePositions();
 
   precice->initialize();
@@ -63,13 +69,14 @@ void PreciceSolidSolver::run()
 
     while ( precice->isCouplingOngoing() )
     {
+      std::clock_t t = std::clock();
+
       Info << endl << "Time = " << solver->runTime->timeName() << ", iteration = " << iter + 1 << endl;
 
       matrix input( solver->getInterfaceCentersSizeLocal(), precice->getDimensions() ), output;
       input.setZero();
 
-      if ( precice->isReadDataAvailable() )
-        readData( input );
+      readData( input );
 
       if ( precice->isActionRequired( precice::constants::actionReadIterationCheckpoint() ) )
         precice->fulfilledAction( precice::constants::actionReadIterationCheckpoint() );
@@ -78,11 +85,18 @@ void PreciceSolidSolver::run()
       solver->solve();
       solver->getDisplacementLocal( output );
 
-      if ( precice->isWriteDataRequired( solver->runTime->deltaT().value() ) )
-        writeData( output );
+      writeData( output );
 
       if ( precice->isActionRequired( precice::constants::actionWriteIterationCheckpoint() ) )
         precice->fulfilledAction( precice::constants::actionWriteIterationCheckpoint() );
+
+      t = std::clock() - t;
+      double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+      totalRunTime += runTime;
+      totalNbIterations++;
+      Info << "runtime = " << runTime << " s" << endl;
+      Info << "average runtime = " << totalRunTime / totalNbIterations << " s" << endl;
+      Info << "total runtime = " << totalRunTime << " s" << endl;
 
       precice->advance( solver->runTime->deltaT().value() );
 
@@ -108,6 +122,8 @@ void PreciceSolidSolver::setReadPositions()
   // Store the positions in row-major for preCICE. Eigen uses column major by default.
   readPositions = readPositionsColumnMajor;
 
+  assert( readPositions.cols() == precice->getDimensions() );
+
   // Get the mesh id
   int meshId = precice->getMeshID( "Structure_CellCenters" );
 
@@ -131,6 +147,8 @@ void PreciceSolidSolver::setWritePositions()
   // Store the positions in row-major for preCICE. Eigen uses column major by default.
   writePositions = writePositionsColumnMajor;
 
+  assert( writePositions.cols() == precice->getDimensions() );
+
   // Get the mesh id
   int meshId = precice->getMeshID( "Structure_Nodes" );
 
@@ -149,6 +167,8 @@ void PreciceSolidSolver::writeData( const matrix & data )
 
   int meshId = precice->getMeshID( "Structure_Nodes" );
   int dataId = precice->getDataID( "Displacements", meshId );
+
+  assert( data.cols() == precice->getDimensions() );
 
   if ( dataRowMajor.rows() > 0 )
     precice->writeBlockVectorData( dataId, dataRowMajor.rows(), idsWritePositions.data(), dataRowMajor.data() );

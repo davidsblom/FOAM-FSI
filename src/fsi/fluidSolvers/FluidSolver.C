@@ -319,6 +319,21 @@ void FluidSolver::createSf()
   }
 }
 
+void FluidSolver::getAcousticsDensityLocal( matrix & data )
+{
+  assert( false );
+}
+
+void FluidSolver::getAcousticsVelocityLocal( matrix & data )
+{
+  assert( false );
+}
+
+void FluidSolver::getAcousticsPressureLocal( matrix & data )
+{
+  assert( false );
+}
+
 void FluidSolver::getTractionLocal( matrix & traction )
 {
   vectorField tractionField = -rhoFluid.value() * nu.value()
@@ -333,6 +348,11 @@ void FluidSolver::getTractionLocal( matrix & traction )
   for ( int i = 0; i < traction.rows(); i++ )
     for ( int j = 0; j < traction.cols(); j++ )
       traction( i, j ) = tractionField[i][j];
+}
+
+void FluidSolver::getWritePositionsLocalAcoustics( matrix & writePositions )
+{
+  assert( false );
 }
 
 void FluidSolver::initContinuityErrs()
@@ -385,141 +405,13 @@ void FluidSolver::initTotalVolume()
 
 bool FluidSolver::isRunning()
 {
+  runTime->write();
+
+  Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
+       << "  ClockTime = " << runTime->elapsedClockTime() << " s"
+       << endl << endl;
+
   return runTime->loop();
-}
-
-void FluidSolver::moveMesh( vectorField motion )
-{
-  bool fvMotionSolver =
-    mesh.objectRegistry::foundObject<pointVectorField>
-    (
-    "pointMotionU"
-    );
-
-  bool feMotionSolver =
-    mesh.objectRegistry::foundObject<tetPointVectorField>
-    (
-    "motionU"
-    );
-
-  bool rbfMotionSolver =
-    mesh.objectRegistry::foundObject<RBFMotionSolverExt>( "dynamicMeshDict" );
-
-  if ( fvMotionSolver )
-  {
-    assert( !rbfMotionSolver );
-    assert( !feMotionSolver );
-
-    // Move whole fluid mesh
-    pointField newPoints = mesh.allPoints();
-
-    const labelList & meshPoints = mesh.boundaryMesh()[fluidPatchID].meshPoints();
-
-    forAll( motion, pointI )
-    {
-      newPoints[meshPoints[pointI]] -= motion[pointI];
-    }
-
-    twoDPointCorrector twoDCorrector( mesh );
-
-    twoDCorrector.correctPoints( newPoints );
-
-    mesh.movePoints( newPoints );
-
-    pointVectorField & motionU =
-      const_cast<pointVectorField &>
-      (
-      mesh.objectRegistry::
-      lookupObject<pointVectorField>
-      (
-        "pointMotionU"
-      )
-      );
-
-    fixedValuePointPatchVectorField & motionUFluidPatch =
-      refCast<fixedValuePointPatchVectorField>
-      (
-      motionU.boundaryField()[fluidPatchID]
-      );
-
-    motionUFluidPatch == motion / runTime->deltaT().value();
-  }
-
-  if ( feMotionSolver )
-  {
-    assert( !rbfMotionSolver );
-    assert( !fvMotionSolver );
-
-    // Move whole fluid mesh
-    pointField newPoints = mesh.allPoints();
-
-    const labelList & meshPoints = mesh.boundaryMesh()[fluidPatchID].meshPoints();
-
-    forAll( motion, pointI )
-    {
-      newPoints[meshPoints[pointI]] -= motion[pointI];
-    }
-
-    twoDPointCorrector twoDCorrector( mesh );
-
-    twoDCorrector.correctPoints( newPoints );
-
-    mesh.movePoints( newPoints );
-
-    tetPointVectorField & motionU =
-      const_cast<tetPointVectorField &>
-      (
-      mesh.objectRegistry::
-      lookupObject<tetPointVectorField>
-      (
-        "motionU"
-      )
-      );
-
-    fixedValueTetPolyPatchVectorField & motionUFluidPatch =
-      refCast<fixedValueTetPolyPatchVectorField>
-      (
-      motionU.boundaryField()[fluidPatchID]
-      );
-
-    tetPolyPatchInterpolation tppi
-    (
-      refCast<const faceTetPolyPatch>( motionUFluidPatch.patch() )
-    );
-
-    motionUFluidPatch ==
-    tppi.pointToPointInterpolate
-    (
-      motion / runTime->deltaT().value()
-    );
-  }
-
-  if ( rbfMotionSolver )
-  {
-    assert( !fvMotionSolver );
-    assert( !feMotionSolver );
-
-    RBFMotionSolverExt & motionSolver =
-      const_cast<RBFMotionSolverExt &>
-      (
-      mesh.lookupObject<RBFMotionSolverExt>( "dynamicMeshDict" )
-      );
-
-    Field<vectorField> patches( mesh.boundaryMesh().size(), vectorField( 0 ) );
-    patches[fluidPatchID] = motion;
-    motionSolver.setMotion( patches );
-  }
-
-  assert( rbfMotionSolver || fvMotionSolver || feMotionSolver );
-
-  bool meshChanged = mesh.update();
-
-  updateSf();
-
-  if ( correctPhi && meshChanged )
-  {
-    correctPhiField();
-  }
 }
 
 void FluidSolver::postProcessing()

@@ -2,19 +2,19 @@
 
 set -e
 
-export LIBLAPACK="-llapack -lblas"
-
-wmakeLnInclude src/RBFmeshInterpolation
 wmakeLnInclude src/fvPatchFields
 wmakeLnInclude src/fvSchemes
 wmakeLnInclude src/fsi
-wmakeLnInclude src/IDWmeshDeformation
+wmakeLnInclude src/RBFMeshMotionSolver
 
-wmake libso src/RBFmeshInterpolation
 wmake libso src/fvPatchFields
 wmake libso src/fvSchemes
 wmake libso src/fsi
-wmake libso src/IDWmeshDeformation
-wmake applications/solvers/unsteadyPUDyMCoupledFoam
+wmake libso src/RBFMeshMotionSolver
 wmake applications/solvers/unsteadyPUCoupledFoam
 wmake applications/solvers/fsi/fsiFoam
+wmake applications/solvers/fsi/fluidFoam
+wmake src/tests/app
+wmake applications/solvers/fsi/fsiFluidFoam
+wmake applications/solvers/fsi/fsiSolidFoam
+wmake src/tests/tubeflow

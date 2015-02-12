@@ -13,15 +13,18 @@
 #include "SpaceMappingSolver.H"
 #include "TubeFlowFluidSolver.H"
 #include "TubeFlowSolidSolver.H"
+#include "AndersonPostProcessing.H"
 #include "gtest/gtest.h"
 
 using namespace tubeflow;
+using namespace rbf;
+using std::shared_ptr;
 using::testing::TestWithParam;
 using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class ManifoldMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int, bool, bool> >
+class ManifoldMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int, bool, bool, bool> >
 {
 protected:
 
@@ -47,11 +50,12 @@ protected:
 
     // Computational settings
     double tol = 1.0e-5;
-    int maxIter = 500;
+    int maxIter = 50;
     double initialRelaxation = 1.0e-3;
     double singularityLimit = 1.0e-11;
     int reuseInformationStartingFromTimeIndex = 0;
     bool scaling = false;
+    double beta = 1;
 
     // Parametrized settings
     bool parallel = std::tr1::get<0>( GetParam() );
@@ -61,6 +65,7 @@ protected:
     int couplingGridSize = std::tr1::get<4>( GetParam() );
     bool broyden = std::tr1::get<5>( GetParam() );
     bool convergenceMeasureTraction = std::tr1::get<6>( GetParam() );
+    bool updateJacobian = std::tr1::get<7>( GetParam() );
 
     ASSERT_NEAR( tau, 0.01, 1.0e-13 );
     ASSERT_NEAR( kappa, 10, 1.0e-13 );
@@ -85,8 +90,34 @@ protected:
 
     fluid = shared_ptr<TubeFlowFluidSolver> ( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, couplingGridSize, L, T, rho ) );
     solid = shared_ptr<TubeFlowSolidSolver> ( new TubeFlowSolidSolver( a0, cmk, p0, rho, L, couplingGridSize ) );
-    multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, 0, 1 ) );
-    multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, solid, 1, 1 ) );
+
+    shared_ptr<RBFFunctionInterface> rbfFunction;
+    shared_ptr<RBFInterpolation> rbfInterpolator;
+    shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
+    shared_ptr<RBFCoarsening> rbfInterpToMesh;
+    bool coarsening = false;
+    int coarseningMinPoints = 200;
+    int coarseningMaxPoints = 2000;
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 1 ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 1 ) );
 
     // Convergence measures
     convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
@@ -95,15 +126,15 @@ protected:
     convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
 
     if ( parallel || convergenceMeasureTraction )
-      convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
+      convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
 
     multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
     if ( broyden )
-      postProcessing = shared_ptr<PostProcessing> ( new BroydenPostProcessing( multiLevelFsiSolver, initialRelaxation, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex ) );
+      postProcessing = shared_ptr<PostProcessing> ( new BroydenPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex ) );
 
     if ( !broyden )
-      postProcessing = shared_ptr<PostProcessing> ( new IQNILSPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling ) );
+      postProcessing = shared_ptr<PostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
 
     fineModel = shared_ptr<ImplicitMultiLevelFsiSolver> ( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
 
@@ -117,31 +148,48 @@ protected:
     fluid = shared_ptr<TubeFlowFluidSolver> ( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
     solid = shared_ptr<TubeFlowSolidSolver> ( new TubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
 
-    multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fineModel->fsi->fluid, 0, 0 ) );
-    multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fineModel->fsi->solid, 1, 0 ) );
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fineModel->fsi->fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fineModel->fsi->solid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
 
     // Convergence measures
     convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
     convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
-    convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
+    convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, 0.1 * tol ) ) );
 
     if ( parallel || convergenceMeasureTraction )
-      convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
+      convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, 0.1 * tol ) ) );
 
     multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
     if ( broyden )
-      postProcessing = shared_ptr<PostProcessing> ( new BroydenPostProcessing( multiLevelFsiSolver, initialRelaxation, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex ) );
+      postProcessing = shared_ptr<PostProcessing> ( new BroydenPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex ) );
 
     if ( !broyden )
-      postProcessing = shared_ptr<PostProcessing> ( new IQNILSPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling ) );
+      postProcessing = shared_ptr<PostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
 
     shared_ptr<ImplicitMultiLevelFsiSolver> coarseModel( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
 
     // Create manifold mapping object
 
-    shared_ptr<ManifoldMapping> manifoldMapping( new ManifoldMapping( fineModel, coarseModel, maxIter, singularityLimit, nbReuse, reuseInformationStartingFromTimeIndex ) );
+    shared_ptr<ManifoldMapping> manifoldMapping( new ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
 
     // Create manifold mapping solver
     solver = new SpaceMappingSolver( fineModel, coarseModel, manifoldMapping );
@@ -168,7 +216,7 @@ protected:
   SpaceMappingSolver * solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, ManifoldMappingSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 1, 4 ), Values( 0 ), Values( 3 ), Values( 10, 20 ), Bool(), Bool() ) );
+INSTANTIATE_TEST_CASE_P( testParameters, ManifoldMappingSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 1, 4 ), Values( 1, 2 ), Values( 3 ), Values( 10, 20 ), Bool(), Bool(), Bool() ) );
 
 TEST_P( ManifoldMappingSolverParametrizedTest, object )
 {
@@ -182,12 +230,6 @@ TEST_P( ManifoldMappingSolverParametrizedTest, run )
   ASSERT_TRUE( solver->fineModel->fsi->allConverged );
   ASSERT_FALSE( solver->fineModel->fsi->fluid->isRunning() );
   ASSERT_GT( solver->coarseModel->fsi->nbIter, solver->fineModel->fsi->nbIter );
-
-  int couplingGridSize = std::tr1::get<4>( GetParam() );
-  bool convergenceMeasureTraction = std::tr1::get<6>( GetParam() );
-
-  if ( couplingGridSize == 10 && !convergenceMeasureTraction )
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 100 );
 
   ASSERT_GT( solver->timeElapsed(), 0 );
   ASSERT_EQ( solver->spaceMapping->timeIndex, 100 );
@@ -217,86 +259,6 @@ TEST_P( ManifoldMappingSolverParametrizedTest, monolithic )
     ASSERT_TRUE( monolithicSolver->pn.norm() > 0 );
   }
 }
-
-TEST_P( ManifoldMappingSolverParametrizedTest, postProcessingCoarseModel )
-{
-  int nbReuse = std::tr1::get<1>( GetParam() );
-  int nbIterFirstTimeStep = 0;
-  int nbIterPreviousTimestep = 0;
-
-  for ( int i = 0; i < 3; i++ )
-  {
-    solver->initTimeStep();
-    solver->solve();
-
-    // Determine the number of columns of the V and W matrices
-    int nbResiduals = solver->coarseModel->postProcessing->residuals.size();
-
-    // Include information from previous optimization solves
-    for ( std::deque<deque<fsi::vector> >::iterator it = solver->coarseModel->postProcessing->solsList.begin(); it != solver->coarseModel->postProcessing->solsList.end(); ++it )
-      nbResiduals += it->size();
-
-    // Include information from previous time steps
-    for ( std::deque< std::deque<deque<fsi::vector> > >::iterator solsIterator = solver->coarseModel->postProcessing->solsTimeList.begin(); solsIterator != solver->coarseModel->postProcessing->solsTimeList.end(); ++solsIterator )
-      for ( std::deque<deque<fsi::vector> >::iterator it = solsIterator->begin(); it != solsIterator->end(); ++it )
-        nbResiduals += it->size();
-
-    if ( i == 0 )
-      nbIterFirstTimeStep = solver->coarseModel->fsi->iter;
-
-    if ( nbReuse == 0 )
-      ASSERT_EQ( nbResiduals, solver->coarseModel->fsi->nbIter - solver->fineModel->fsi->iter - nbIterPreviousTimestep );
-
-    if ( nbReuse == 1 && i < 2 )
-      ASSERT_EQ( nbResiduals, solver->coarseModel->fsi->nbIter - solver->fineModel->fsi->nbIter );
-
-    if ( nbReuse == 1 && i == 2 )
-      ASSERT_EQ( nbResiduals, solver->coarseModel->fsi->nbIter - solver->fineModel->fsi->nbIter - nbIterFirstTimeStep );
-
-    if ( nbReuse > 1 )
-      ASSERT_EQ( nbResiduals, solver->coarseModel->fsi->nbIter - solver->fineModel->fsi->nbIter );
-
-    nbIterPreviousTimestep = solver->coarseModel->fsi->nbIter;
-
-    if ( i == 0 )
-      nbIterFirstTimeStep = solver->coarseModel->fsi->nbIter - solver->fineModel->fsi->nbIter;
-
-    solver->finalizeTimeStep();
-  }
-}
-
-TEST_P( ManifoldMappingSolverParametrizedTest, postProcessingFineModel )
-{
-  int nbReuse = std::tr1::get<1>( GetParam() );
-
-  for ( int i = 0; i < 3; i++ )
-  {
-    solver->initTimeStep();
-    solver->solve();
-
-    // Determine the number of columns of the V and W matrices
-    int nbResiduals = solver->spaceMapping->fineResiduals.cols();
-
-    // Include information from previous time steps
-    for ( std::deque<matrix>::iterator it = solver->spaceMapping->fineResidualsList.begin(); it != solver->spaceMapping->fineResidualsList.end(); ++it )
-      nbResiduals += it->cols();
-
-    if ( nbReuse == 0 )
-      ASSERT_EQ( nbResiduals, 0 );
-
-    if ( solver->fineModel->fsi->iter > 1 )
-    {
-      if ( nbReuse == 1 )
-        ASSERT_EQ( nbResiduals, solver->fineModel->fsi->iter );
-
-      if ( nbReuse > 1 )
-        ASSERT_EQ( nbResiduals, solver->fineModel->fsi->nbIter );
-    }
-
-    solver->finalizeTimeStep();
-  }
-}
-
 
 class ManifoldMappingSolverTest : public::testing::Test
 {
@@ -328,11 +290,13 @@ protected:
     double initialRelaxation = 1.0e-3;
     double singularityLimit = 1.0e-11;
     int reuseInformationStartingFromTimeIndex = 0;
+    double beta = 1;
+    bool updateJacobian = false;
 
     // Parametrized settings
     bool parallel = false;
     int nbReuse = 0;
-    int extrapolation = 0;
+    int extrapolation = 2;
     int minIter = 2;
     int couplingGridSize = 100;
     bool scaling = false;
@@ -357,8 +321,34 @@ protected:
 
     fineModelFluid = shared_ptr<TubeFlowFluidSolver> ( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, couplingGridSize, L, T, rho ) );
     solid = shared_ptr<TubeFlowSolidSolver> ( new TubeFlowSolidSolver( a0, cmk, p0, rho, L, couplingGridSize ) );
-    multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fineModelFluid, fineModelFluid, 0, 1 ) );
-    multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, solid, 1, 1 ) );
+
+    shared_ptr<RBFFunctionInterface> rbfFunction;
+    shared_ptr<RBFInterpolation> rbfInterpolator;
+    shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
+    shared_ptr<RBFCoarsening> rbfInterpToMesh;
+    bool coarsening = false;
+    int coarseningMinPoints = 200;
+    int coarseningMaxPoints = 2000;
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fineModelFluid, fineModelFluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 1 ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, solid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 1 ) );
 
     // Convergence measures
     convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
@@ -367,10 +357,10 @@ protected:
     convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
 
     if ( parallel )
-      convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
+      convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
 
     multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
-    postProcessing = shared_ptr<PostProcessing> ( new IQNILSPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling ) );
+    postProcessing = shared_ptr<PostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
 
     fineModel = shared_ptr<ImplicitMultiLevelFsiSolver> ( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
 
@@ -381,8 +371,25 @@ protected:
     fluid = shared_ptr<TubeFlowFluidSolver> ( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
     solid = shared_ptr<TubeFlowSolidSolver> ( new TubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
 
-    multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fineModel->fsi->fluid, 0, 0 ) );
-    multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fineModel->fsi->solid, 1, 0 ) );
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fineModel->fsi->fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fineModel->fsi->solid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
 
     // Convergence measures
     convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
@@ -391,17 +398,17 @@ protected:
     convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
 
     if ( parallel )
-      convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
+      convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
 
     multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
-    postProcessing = shared_ptr<PostProcessing> ( new IQNILSPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling ) );
+    postProcessing = shared_ptr<PostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
 
     shared_ptr<ImplicitMultiLevelFsiSolver> coarseModel( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
 
     // Create manifold mapping object
 
-    shared_ptr<ManifoldMapping> manifoldMapping( new ManifoldMapping( fineModel, coarseModel, maxIter, singularityLimit, nbReuse, reuseInformationStartingFromTimeIndex ) );
+    shared_ptr<ManifoldMapping> manifoldMapping( new ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
 
     // Create manifold mapping solver
     solver = new SpaceMappingSolver( fineModel, coarseModel, manifoldMapping );
@@ -439,30 +446,20 @@ TEST_F( ManifoldMappingSolverTest, solveTimeStep )
   solver->solveTimeStep();
 
   ASSERT_EQ( solver->fineModel->fsi->nbIter, 9 );
-  ASSERT_EQ( fineModelFluid->nbRes, 45 );
-  ASSERT_EQ( fineModelFluid->nbJac, 27 );
 
   solver->solveTimeStep();
 
-  ASSERT_EQ( solver->fineModel->fsi->nbIter, 18 );
-  ASSERT_EQ( fineModelFluid->nbRes, 90 );
-  ASSERT_EQ( fineModelFluid->nbJac, 54 );
+  ASSERT_EQ( solver->fineModel->fsi->nbIter, 17 );
 
   solver->solveTimeStep();
 
-  ASSERT_EQ( solver->fineModel->fsi->nbIter, 26 );
-  ASSERT_EQ( fineModelFluid->nbRes, 130 );
-  ASSERT_EQ( fineModelFluid->nbJac, 78 );
+  ASSERT_EQ( solver->fineModel->fsi->nbIter, 25 );
 
   solver->solveTimeStep();
 
-  ASSERT_EQ( solver->fineModel->fsi->nbIter, 34 );
-  ASSERT_EQ( fineModelFluid->nbRes, 170 );
-  ASSERT_EQ( fineModelFluid->nbJac, 102 );
+  ASSERT_EQ( solver->fineModel->fsi->nbIter, 33 );
 
   solver->solveTimeStep();
 
   ASSERT_EQ( solver->fineModel->fsi->nbIter, 41 );
-  ASSERT_EQ( fineModelFluid->nbRes, 205 );
-  ASSERT_EQ( fineModelFluid->nbJac, 123 );
 }

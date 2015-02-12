@@ -81,6 +81,9 @@ namespace tubeflow
     return true;
   }
 
+  void TubeFlowSolidSolver::resetSolution()
+  {}
+
   void TubeFlowSolidSolver::solve(
     const matrix & input,
     matrix & output

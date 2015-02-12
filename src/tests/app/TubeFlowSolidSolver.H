@@ -41,6 +41,8 @@ public:
 
     virtual bool isRunning();
 
+    virtual void resetSolution();
+
     virtual void solve(
       const matrix & input,
       matrix & output

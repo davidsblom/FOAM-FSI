@@ -24,45 +24,21 @@ FoamFile
 
 dynamicFvMesh dynamicMotionSolverFvMesh;
 
-solver RBFMotionSolverExt;
+solver RBFMeshMotionSolver;
 
 movingPatches ( plate );
 
 staticPatches ( cylinder outlet inlet top bottom );
 
-coarseningRatio 1;
-coarseningRatioStat 1;
-coarseningRatioMov 1;
-
-includeStaticPatches   yes;
-frozenInterpolation    yes;
+coarsening
+{
+  enabled true;
+  tol 1.0e-6;
+  minPoints 10;
+  maxPoints 2000;
+}
 
 interpolation
 {
-    //RBF  IMQB;
-    RBF TPS;
-    focalPoint (2.5 0.2 0);
-    innerRadius 50;//5.0
-    outerRadius 125;
-    polynomials true;
-    Dim TwoD;
-
-    W2Coeffs
-    {
-        radius     1.0;
-    }
-    TPSCoeffs
-    {
-        radius     50;
-    }
-    GaussCoeffs
-    {
-        radius     50;
-    }
-    IMQBCoeffs
-    {
-        radius     0.001;
-    }
+  function TPS;
 }
-
-// ************************************************************************* //

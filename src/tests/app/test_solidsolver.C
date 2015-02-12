@@ -61,7 +61,7 @@ TEST_F( SolidSolverTest, timestep )
   double r0 = 0.2;
   double a0 = M_PI * r0 * r0;
   int N = 5;
-  vector p( N ), a( N );
+  fsi::vector p( N ), a( N );
   p.setZero();
   a.setZero();
 
@@ -87,7 +87,7 @@ TEST_F( SolidSolverTest, po )
 
   // Initialize variables
   int N = 5;
-  vector p( N ), a( N );
+  fsi::vector p( N ), a( N );
   p.setZero();
   a.setZero();
 

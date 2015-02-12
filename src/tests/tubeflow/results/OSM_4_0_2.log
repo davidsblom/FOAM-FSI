@@ -1,9 +1,0 @@
-label = OSM_4_0_2
-nbLevels = 2
-solver = OSM
-nbReuse = 4
-parallel = 0
-elapsed time = 2482.94
-nbTimeSteps = 100
-level 0 nbIter = 4066
-level 1 nbIter = 484

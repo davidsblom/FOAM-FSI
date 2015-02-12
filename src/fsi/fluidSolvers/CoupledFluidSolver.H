@@ -20,9 +20,8 @@
 #include "blockVectorNMatrices.H"
 #include "volVectorNFields.H"
 #include "blockMatrixTools.H"
+#include "fvBlockMatrix.H"
 
-#include "RBFMotionSolverExt.H"
-#include "IDWMotionSolver.H"
 #include "faceTetPolyPatch.H"
 #include "fixedValuePointPatchFields.H"
 #include "fixedValueTetPolyPatchFields.H"
@@ -45,7 +44,15 @@ public:
 
   virtual ~CoupledFluidSolver();
 
+  virtual void getAcousticsDensityLocal( matrix & data );
+
+  virtual void getAcousticsVelocityLocal( matrix & data );
+
+  virtual void getAcousticsPressureLocal( matrix & data );
+
   virtual void getTractionLocal( matrix & traction );
+
+  virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
 
   virtual void initTimeStep();
 
@@ -56,8 +63,6 @@ public:
   virtual void solve();
 
 protected:
-
-  virtual void moveMesh( vectorField motion );
 
   void checkTotalVolume();
 

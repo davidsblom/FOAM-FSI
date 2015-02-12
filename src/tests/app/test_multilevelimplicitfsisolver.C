@@ -6,7 +6,7 @@
 
 #include "ConvergenceMeasure.H"
 #include "FsiSolver.H"
-#include "IQNILSPostProcessing.H"
+#include "AndersonPostProcessing.H"
 #include "ImplicitMultiLevelFsiSolver.H"
 #include "MinIterationConvergenceMeasure.H"
 #include "MonolithicFsiSolver.H"
@@ -53,6 +53,8 @@ protected:
     double singularityLimit = 1.0e-11;
     int reuseInformationStartingFromTimeIndex = 0;
     bool scaling = false;
+    double beta = 1;
+    bool updateJacobian = false;
 
     // Parametrized settings
     bool parallel = std::tr1::get<0>( GetParam() );
@@ -72,8 +74,33 @@ protected:
     shared_ptr<TubeFlowFluidSolver> fluid( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
     shared_ptr<TubeFlowSolidSolver> solid( new TubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
 
-    shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, 0, 0 ) );
-    shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, 1, 0 ) );
+    shared_ptr<RBFFunctionInterface> rbfFunction;
+    shared_ptr<RBFInterpolation> rbfInterpolator;
+    shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
+    shared_ptr<RBFCoarsening> rbfInterpToMesh;
+    bool coarsening = false;
+    int coarseningMinPoints = 200;
+    int coarseningMaxPoints = 2000;
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
 
     // Convergence measures
     std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
@@ -86,7 +113,7 @@ protected:
       convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 1, tol ) ) );
 
     shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
-    shared_ptr<IQNILSPostProcessing> postProcessing( new IQNILSPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling ) );
+    shared_ptr<AndersonPostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
     solver = new ImplicitMultiLevelFsiSolver( fsi, postProcessing );
     monolithicSolver = new MonolithicFsiSolver( a0, u0, p0, dt, cmk, N, L, T, rho );
   }

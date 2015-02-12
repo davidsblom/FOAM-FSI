@@ -7,74 +7,6 @@
 #include "TubeFlowFluidSolver.H"
 #include <iomanip>
 
-extern "C" void dgesv_(
-  const int * N,
-  const int * NRHS,
-  double * A,
-  const int * LDA,
-  double * IPIV,
-  double * B,
-  const int * LDB,
-  int * INFO
-  );
-
-// Solve linear system of equations with LAPACK
-
-void DGESV(
-  const matrix & A,
-  const fsi::vector & b,
-  fsi::vector & x
-  )
-{
-  // Verify input variables
-  assert( A.rows() == b.rows() );
-  assert( A.rows() == x.rows() );
-  x.setZero();
-
-  // (input/output) DOUBLE PRECISION array, dimension (LDA,N)
-  // On entry, the N-by-N coefficient matrix A.
-  // On exit, the factors L and U from the factorization
-  // A = P*L*U; the unit diagonal elements of L are not stored.
-
-  // Copy the matrix A
-  matrix Acopy = A;
-
-  // The number of linear equations, i.e., the order of the matrix A. N >= 0.
-  int N = A.rows();
-
-  // The number of right hand sides, i.e., the number of columns
-  // of the matrix B. NRHS >= 0
-  int NRHS = 1;
-
-  // The leading dimension of the array A.  LDA >= max(1,N).
-  int LDA = A.outerStride();
-
-  // The pivot indices that define the permutation matrix P;
-  // row i of the matrix was interchanged with row IPIV(i).
-  fsi::vector IPIV( N );
-  IPIV.setZero();
-
-  // On entry, the N-by-NRHS matrix of right hand side matrix B.
-  // On exit, if INFO = 0, the N-by-NRHS solution matrix X.
-  fsi::vector B = b;
-
-  // The leading dimension of the array B.  LDB >= max(1,N).
-  int LDB = b.rows();
-
-  //  = 0:  successful exit
-  // < 0:  if INFO = -i, the i-th argument had an illegal value
-  // > 0:  if INFO = i, U(i,i) is exactly zero.  The factorization
-  //       has been completed, but the factor U is exactly
-  //       singular, so the solution could not be computed.
-  int INFO = -1;
-
-  dgesv_( &N, &NRHS, Acopy.data(), &LDA, IPIV.data(), B.data(), &LDB, &INFO );
-
-  assert( INFO == 0 );
-
-  x = B;
-}
-
 namespace tubeflow
 {
   TubeFlowFluidSolver::TubeFlowFluidSolver(
@@ -154,7 +86,7 @@ namespace tubeflow
   {
     assert( init );
 
-    return u0 + u0 / 10.0 * std::pow( sin( M_PI * timeIndex * tau ), 2 );
+    return u0 + u0 / 10.0 * std::pow( std::sin( M_PI * timeIndex * tau ), 2 );
   }
 
   double TubeFlowFluidSolver::evaluateOutputPressureBoundaryCondition(
@@ -207,65 +139,65 @@ namespace tubeflow
       if ( i == 0 )
       {
         // Derivatives mass conservation
-        J( 0, 0 )   =  1.0;
+        J( 0, 0 ) = 1.0;
 
-        J( N, N )   =  1.0;
+        J( N, N ) = 1.0;
         J( N, N + 1 ) = -2.0;
-        J( N, N + 2 ) =  1.0;
+        J( N, N + 2 ) = 1.0;
       }
 
       if ( i == N - 1 )
       {
         // Derivatives mass conservation
-        J( N - 1, N - 3 )  =  1.0;
-        J( N - 1, N - 2 )  = -2.0;
-        J( N - 1, N - 1 )  =  1.0;
+        J( N - 1, N - 3 ) = 1.0;
+        J( N - 1, N - 2 ) = -2.0;
+        J( N - 1, N - 1 ) = 1.0;
 
-        J( 2 * N - 1, N - 3 )  = 0.5 * sqrt( 2 ) * sqrt( 2 * cmk * cmk * rho - p_outn ) * std::sqrt( rho );
+        J( 2 * N - 1, N - 3 ) = 0.5 * std::sqrt( 2 ) * std::sqrt( 2 * cmk * cmk * rho - p_outn ) * std::sqrt( rho );
         J( 2 * N - 1, N - 3 ) += -0.5 * u( N - 2 ) * rho;
         J( 2 * N - 1, N - 3 ) += 0.25 * u( N - 3 ) * rho;
         J( 2 * N - 1, N - 3 ) += 0.5 * un( N - 2 ) * rho;
         J( 2 * N - 1, N - 3 ) += -0.25 * un( N - 3 ) * rho;
 
-        J( 2 * N - 1, N - 2 )  = -sqrt( 2 ) * sqrt( 2 * cmk * cmk * rho - p_outn ) * std::sqrt( rho );
+        J( 2 * N - 1, N - 2 ) = -std::sqrt( 2 ) * std::sqrt( 2 * cmk * cmk * rho - p_outn ) * std::sqrt( rho );
         J( 2 * N - 1, N - 2 ) += u( N - 2 ) * rho;
         J( 2 * N - 1, N - 2 ) += -0.5 * u( N - 3 ) * rho;
         J( 2 * N - 1, N - 2 ) += -un( N - 2 ) * rho;
         J( 2 * N - 1, N - 2 ) += 0.5 * un( N - 3 ) * rho;
 
-        J( 2 * N - 1, 2 * N - 1 )  =  1.0;
+        J( 2 * N - 1, 2 * N - 1 ) = 1.0;
       }
 
       if ( i > 0 && i < N - 1 )
       {
         // Derivatives mass conservation
-        J( i, i - 1 )   = 0.25 * ( -a( i - 1 ) - a( i ) );
-        J( i, i )     = 0.25 * ( -a( i - 1 ) + a( i + 1 ) );
-        J( i, i + 1 )   = 0.25 * ( a( i )   + a( i + 1 ) );
+        J( i, i - 1 ) = 0.25 * ( -a( i - 1 ) - a( i ) );
+        J( i, i ) = 0.25 * ( -a( i - 1 ) + a( i + 1 ) );
+        J( i, i + 1 ) = 0.25 * ( a( i ) + a( i + 1 ) );
         J( i, N + i - 1 ) = -alpha / rho;
-        J( i, N + i )   = 2.0 * alpha / rho;
+        J( i, N + i ) = 2.0 * alpha / rho;
         J( i, N + i + 1 ) = -alpha / rho;
 
         // Derivatives momentum conservation
 
-        J( N + i, i - 1 )  = -0.5  * u( i - 1 ) * a( i - 1 );
-        J( N + i, i - 1 ) += -0.5  * u( i - 1 ) * a( i );
-        J( N + i, i - 1 ) += -0.25 * u( i )   * a( i - 1 );
-        J( N + i, i - 1 ) += -0.25 * u( i )   * a( i );
+        J( N + i, i - 1 ) = -0.5 * u( i - 1 ) * a( i - 1 );
+        J( N + i, i - 1 ) += -0.5 * u( i - 1 ) * a( i );
+        J( N + i, i - 1 ) += -0.25 * u( i ) * a( i - 1 );
+        J( N + i, i - 1 ) += -0.25 * u( i ) * a( i );
 
-        J( N + i, i )   = dx / dt * a( i );
-        J( N + i, i )  += 0.5  * u( i )   * a( i );
-        J( N + i, i )  += 0.25 * u( i + 1 ) * a( i );
-        J( N + i, i )  += 0.5  * u( i )   * a( i + 1 );
-        J( N + i, i )  += 0.25 * u( i + 1 ) * a( i + 1 );
-        J( N + i, i )  += -0.25 * u( i - 1 ) * a( i );
-        J( N + i, i )  += -0.25 * u( i - 1 ) * a( i - 1 );
+        J( N + i, i ) = dx / dt * a( i );
+        J( N + i, i ) += 0.5 * u( i ) * a( i );
+        J( N + i, i ) += 0.25 * u( i + 1 ) * a( i );
+        J( N + i, i ) += 0.5 * u( i ) * a( i + 1 );
+        J( N + i, i ) += 0.25 * u( i + 1 ) * a( i + 1 );
+        J( N + i, i ) += -0.25 * u( i - 1 ) * a( i );
+        J( N + i, i ) += -0.25 * u( i - 1 ) * a( i - 1 );
 
         J( N + i, i + 1 ) = 0.25 * u( i ) * a( i ) + 0.25 * u( i ) * a( i + 1 );
 
         J( N + i, N + i - 1 ) = 1.0 / rho * ( -0.25 * a( i - 1 ) - 0.25 * a( i ) );
-        J( N + i, N + i )   = 1.0 / rho * ( -0.25 * a( i + 1 ) + 0.25 * a( i - 1 ) );
-        J( N + i, N + i + 1 ) = 1.0 / rho * ( 0.25 * a( i )   + 0.25 * a( i + 1 ) );
+        J( N + i, N + i ) = 1.0 / rho * ( -0.25 * a( i + 1 ) + 0.25 * a( i - 1 ) );
+        J( N + i, N + i + 1 ) = 1.0 / rho * ( 0.25 * a( i ) + 0.25 * a( i + 1 ) );
       }
     }
   }
@@ -427,6 +359,9 @@ namespace tubeflow
     return t < T;
   }
 
+  void TubeFlowFluidSolver::resetSolution()
+  {}
+
   void TubeFlowFluidSolver::solve(
     const matrix & input,
     matrix & output
@@ -470,11 +405,13 @@ namespace tubeflow
       int values
       ) : m_inputs( inputs ), m_values( values ) {}
 
-    int inputs() const {
+    int inputs() const
+    {
       return m_inputs;
     }
 
-    int values() const {
+    int values() const
+    {
       return m_values;
     }
   };
@@ -564,12 +501,7 @@ namespace tubeflow
 
       evaluateJacobian( x, a, un, pn, an, J );
 
-      // dx = J.lu().solve( -R );
-
-      fsi::vector dx( 2 * N );
-      DGESV( J, -R, dx );
-
-      // dx = -dx;
+      dx = J.partialPivLu().solve( -R );
 
       evaluateResidual( x + dx, a, un, pn, an, Rtry );
 

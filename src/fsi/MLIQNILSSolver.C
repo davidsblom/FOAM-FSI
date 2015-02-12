@@ -64,11 +64,13 @@ void MLIQNILSSolver::finalizeTimeStep()
           input = fineModel->fsi->fluid->data;
 
         output.resize( fineModel->fsi->fluid->data.rows(), fineModel->fsi->fluid->data.cols() );
-        model->fsi->solidSolver->solve( input, output );
+
+        bool interpolated = model->fsi->solid->interpolateVolField( fineModel->fsi->solid );
+
+        if ( !interpolated )
+          model->fsi->solidSolver->solve( input, output );
 
         model->fsi->x = fineModel->fsi->x;
-
-        model->fsi->solid->interpolateVolField( fineModel->fsi->solid );
       }
     }
 

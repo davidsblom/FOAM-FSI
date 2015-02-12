@@ -6,7 +6,7 @@
 
 #include "ConvergenceMeasure.H"
 #include "FsiSolver.H"
-#include "IQNILSPostProcessing.H"
+#include "AndersonPostProcessing.H"
 #include "ImplicitMultiLevelFsiSolver.H"
 #include "MinIterationConvergenceMeasure.H"
 #include "MonolithicFsiSolver.H"
@@ -52,9 +52,11 @@ protected:
     int maxIter = 50;
     double initialRelaxation = 1.0e-3;
     double singularityLimit = 1.0e-11;
-    int reuseInformationStartingFromTimeIndex = 0;
+    int reuseInformationStartingFromTimeIndex = 10;
     int maxUsedIterations = 2 * N;
     bool scaling = true;
+    double beta = 1;
+    bool updateJacobian = false;
 
     // Parametrized settings
     bool parallel = true;
@@ -69,8 +71,33 @@ protected:
     fluid = shared_ptr<TubeFlowFluidSolver> ( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
     shared_ptr<TubeFlowSolidSolver> solid( new TubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
 
-    shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, 0, 0 ) );
-    shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, 1, 0 ) );
+    shared_ptr<RBFFunctionInterface> rbfFunction;
+    shared_ptr<RBFInterpolation> rbfInterpolator;
+    shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
+    shared_ptr<RBFCoarsening> rbfInterpToMesh;
+    bool coarsening = false;
+    int coarseningMinPoints = 200;
+    int coarseningMaxPoints = 2000;
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
 
     // Convergence measures
     std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
@@ -83,7 +110,7 @@ protected:
       convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 1, tol ) ) );
 
     shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
-    shared_ptr<IQNILSPostProcessing> postProcessing( new IQNILSPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling ) );
+    shared_ptr<AndersonPostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
     solver = new ImplicitMultiLevelFsiSolver( fsi, postProcessing );
   }
 
@@ -116,8 +143,9 @@ TEST_P( parallelCouplingParametrizedTest, timeStep )
 
   if ( N == 100 )
   {
-    ASSERT_EQ( fluid->nbRes, 95 );
-    ASSERT_EQ( fluid->nbJac, 57 );
+    ASSERT_EQ( solver->fsi->nbIter, 20 );
+    ASSERT_EQ( fluid->nbRes, 100 );
+    ASSERT_EQ( fluid->nbJac, 60 );
   }
 }
 
@@ -129,121 +157,43 @@ TEST_P( parallelCouplingParametrizedTest, timeSteps )
 
   if ( N == 100 )
   {
-    ASSERT_EQ( fluid->nbRes, 95 );
-    ASSERT_EQ( fluid->nbJac, 57 );
+    ASSERT_EQ( fluid->nbRes, 100 );
+    ASSERT_EQ( fluid->nbJac, 60 );
   }
 
   solver->solveTimeStep();
 
   if ( N == 100 )
   {
-    ASSERT_EQ( fluid->nbRes, 190 );
-    ASSERT_EQ( fluid->nbJac, 114 );
+    ASSERT_EQ( fluid->nbRes, 220 );
+    ASSERT_EQ( fluid->nbJac, 132 );
   }
 
   solver->solveTimeStep();
 
   if ( N == 100 )
   {
-    ASSERT_EQ( fluid->nbRes, 280 );
-    ASSERT_EQ( fluid->nbJac, 168 );
+    ASSERT_EQ( fluid->nbRes, 330 );
+    ASSERT_EQ( fluid->nbJac, 198 );
   }
 
   solver->solveTimeStep();
 
   if ( N == 100 )
   {
-    ASSERT_EQ( fluid->nbRes, 392 );
-    ASSERT_EQ( fluid->nbJac, 236 );
+    ASSERT_EQ( fluid->nbRes, 469 );
+    ASSERT_EQ( fluid->nbJac, 282 );
   }
 
   solver->solveTimeStep();
 
   if ( N == 100 )
   {
-    ASSERT_EQ( fluid->nbRes, 489 );
-    ASSERT_EQ( fluid->nbJac, 295 );
+    ASSERT_EQ( fluid->nbRes, 588 );
+    ASSERT_EQ( fluid->nbJac, 354 );
   }
 
   solver->solveTimeStep();
-
-  if ( N == 100 )
-  {
-    ASSERT_EQ( fluid->nbRes, 591 );
-    ASSERT_EQ( fluid->nbJac, 357 );
-  }
-
-  solver->solveTimeStep();
-
-  if ( N == 100 )
-  {
-    ASSERT_EQ( fluid->nbRes, 693 );
-    ASSERT_EQ( fluid->nbJac, 419 );
-  }
-
-  solver->solveTimeStep();
-
-  if ( N == 100 )
-  {
-    ASSERT_EQ( fluid->nbRes, 782 );
-    ASSERT_EQ( fluid->nbJac, 473 );
-  }
-
-  solver->solveTimeStep();
-
-  if ( N == 100 )
-  {
-    ASSERT_EQ( fluid->nbRes, 871 );
-    ASSERT_EQ( fluid->nbJac, 527 );
-  }
-
-  solver->solveTimeStep();
-
-  if ( N == 100 )
-  {
-    ASSERT_EQ( fluid->nbRes, 960 );
-    ASSERT_EQ( fluid->nbJac, 581 );
-  }
-
-  solver->solveTimeStep();
-
-  if ( N == 100 )
-  {
-    ASSERT_EQ( fluid->nbRes, 1049 );
-    ASSERT_EQ( fluid->nbJac, 635 );
-  }
-
-  solver->solveTimeStep();
-
-  if ( N == 100 )
-  {
-    ASSERT_EQ( fluid->nbRes, 1143 );
-    ASSERT_EQ( fluid->nbJac, 692 );
-  }
-
-  solver->solveTimeStep();
-
-  if ( N == 100 )
-  {
-    ASSERT_EQ( fluid->nbRes, 1243 );
-    ASSERT_EQ( fluid->nbJac, 753 );
-  }
-
-  solver->solveTimeStep();
-
-  if ( N == 100 )
-  {
-    ASSERT_EQ( fluid->nbRes, 1343 );
-    ASSERT_EQ( fluid->nbJac, 814 );
-  }
-
-  solver->solveTimeStep();
-
-  if ( N == 100 )
-  {
-    ASSERT_EQ( fluid->nbRes, 1448 );
-    ASSERT_EQ( fluid->nbJac, 878 );
-  }
 }
 
 TEST_P( parallelCouplingParametrizedTest, run )

@@ -11,10 +11,12 @@
 #include <memory>
 
 #include "BaseMultiLevelSolver.H"
-#include "RBFInterpolation.H"
+#include "RBFCoarsening.H"
 #include "fvCFD.H"
+#include "TPSFunction.H"
 
 using std::shared_ptr;
+using namespace rbf;
 
 namespace fsi
 {
@@ -25,6 +27,8 @@ public:
     MultiLevelSolver(
       shared_ptr<BaseMultiLevelSolver> solver,
       shared_ptr<BaseMultiLevelSolver> couplingGridSolver,
+      shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh,
+      shared_ptr<RBFCoarsening> rbfInterpToMesh,
       int participantId,
       int level
       );
@@ -48,8 +52,8 @@ public:
 
     shared_ptr<BaseMultiLevelSolver> solver;
     shared_ptr<BaseMultiLevelSolver> couplingGridSolver;
-    shared_ptr<RBFInterpolation> rbfInterpToCouplingMesh;
-    shared_ptr<RBFInterpolation> rbfInterpToMesh;
+    shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
+    shared_ptr<RBFCoarsening> rbfInterpToMesh;
     int participantId;
     int level;
     int couplingGridSize;

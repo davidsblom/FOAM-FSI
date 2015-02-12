@@ -41,6 +41,9 @@ public:
 
   Eigen::VectorXi idsReadPositions;
   Eigen::VectorXi idsWritePositions;
+
+  float totalRunTime;
+  int totalNbIterations;
 };
 
 #endif

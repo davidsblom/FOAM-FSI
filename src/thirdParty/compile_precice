@@ -6,8 +6,8 @@ find . -name '*~' -exec rm -rf {} \;
 
 # Define which versions of the different packages are used
 
-export BOOST_VERSION=1_50_0
-export BOOST_VERSION_DOT=1.50.0
+export BOOST_VERSION=1_53_0
+export BOOST_VERSION_DOT=1.53.0
 
 # Download Boost
 
@@ -28,7 +28,6 @@ rm -f boost_${BOOST_VERSION}.tar.bz2
 
 export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
 export PRECICE_BOOST_ROOT=${BOOST_ROOT}
-export PRECICE_PYTHON_LIB=python2.7
 export PRECICE_MPI_LIB=mpi
 export PRECICE_MPI_LIB_PATH=${MPI_HOME}/lib
 export PRECICE_MPI_INC_PATH=${MPI_HOME}/include
@@ -37,4 +36,6 @@ export PRECICE_MPI_INC_PATH=${MPI_HOME}/include
 
 git clone git@vmbungartz6.informatik.tu-muenchen.de:gatzhamm/precice.git
 cd precice
-scons -j `grep -c ^processor /proc/cpuinfo` build=release
+git checkout develop
+scons -j 4 build=release python=off petsc=off
+scons -j 4 build=debug python=off petsc=off

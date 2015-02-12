@@ -1,0 +1,78 @@
+#!/bin/bash
+
+set -e
+
+NB_CORES=3
+
+./Allclean
+
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+cp fluid-level-1/system/decomposeParDict solid-level-1/system/
+cp fluid-level-1/system/decomposeParDict solid-level-0/system/
+cp fluid-level-1/system/decomposeParDict fluid-level-0/system/
+cp fluid-level-1/system/controlDict fluid-level-0/system/
+cp fluid-level-1/system/controlDict solid-level-0/system/
+cp fluid-level-1/system/controlDict solid-level-1/system/
+
+cd fluid-level-0
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication decomposePar
+cd -
+
+cd fluid-level-1
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication decomposePar
+cd -
+
+cd solid-level-0
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication decomposePar
+cd -
+
+cd solid-level-1
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication decomposePar
+cd -
+
+ln -s ../../fluid-level-0/0 fluid-level-1/0/fluid-level-0
+ln -s ../../fluid-level-1/0 fluid-level-1/0/fluid-level-1
+ln -s ../../solid-level-0/0 fluid-level-1/0/solid-level-0
+ln -s ../../solid-level-1/0 fluid-level-1/0/solid-level-1
+
+ln -s ../../fluid-level-0/constant fluid-level-1/constant/fluid-level-0
+ln -s ../../fluid-level-1/constant fluid-level-1/constant/fluid-level-1
+ln -s ../../solid-level-0/constant fluid-level-1/constant/solid-level-0
+ln -s ../../solid-level-1/constant fluid-level-1/constant/solid-level-1
+
+ln -s ../../fluid-level-0/system fluid-level-1/system/fluid-level-0
+ln -s ../../fluid-level-1/system fluid-level-1/system/fluid-level-1
+ln -s ../../solid-level-0/system fluid-level-1/system/solid-level-0
+ln -s ../../solid-level-1/system fluid-level-1/system/solid-level-1
+
+CORE_COUNT=`expr $NB_CORES - 1`
+
+for i in `seq 0 $CORE_COUNT`
+  do
+    ln -s ../../../fluid-level-0/processor${i}/0 fluid-level-1/processor${i}/0/fluid-level-0
+    ln -s ../../../fluid-level-1/processor${i}/0 fluid-level-1/processor${i}/0/fluid-level-1
+    ln -s ../../../solid-level-0/processor${i}/0 fluid-level-1/processor${i}/0/solid-level-0
+    ln -s ../../../solid-level-1/processor${i}/0 fluid-level-1/processor${i}/0/solid-level-1
+
+    ln -s ../../../fluid-level-0/processor${i}/constant fluid-level-1/processor${i}/constant/fluid-level-0
+    ln -s ../../../fluid-level-1/processor${i}/constant fluid-level-1/processor${i}/constant/fluid-level-1
+    ln -s ../../../solid-level-0/processor${i}/constant fluid-level-1/processor${i}/constant/solid-level-0
+    ln -s ../../../solid-level-1/processor${i}/constant fluid-level-1/processor${i}/constant/solid-level-1
+  done
+
+cd fluid-level-1
+runParallel fsiFoam $NB_CORES
+#fsiFoam

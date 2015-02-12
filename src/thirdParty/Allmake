@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 ./compile_gtest
 ./compile_precice
 ./compile_yaml

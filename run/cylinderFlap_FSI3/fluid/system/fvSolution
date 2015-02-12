@@ -21,7 +21,7 @@ solvers
       preconditioner Cholesky;
 
       tolerance 1e-10;
-      relTol 0;
+      relTol 1.0e-3;
 
       minIter 1;
       maxIter 500;

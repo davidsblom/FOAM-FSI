@@ -1,7 +1,7 @@
-EXE_INC = -std=c++0x \
-    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/eigen \
-    -I$(WM_PROJECT_USER_DIR)/src/fsi/lnInclude \
-    -I$(WM_PROJECT_USER_DIR)/src/tests/app \
+EXE_INC = -std=c++11 -fopenmp \
+    -I../../thirdParty/eigen \
+    -I../../fsi/lnInclude \
+    -I../../tests/app \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
@@ -11,15 +11,12 @@ EXE_INC = -std=c++0x \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
     -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
-    -I$(WM_PROJECT_USER_DIR)/src/RBFmeshInterpolation/lnInclude/ \
+    -I../../RBFMeshMotionSolver/lnInclude/ \
     -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/solidModels/lnInclude \
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -L$(WM_PROJECT_USER_DIR)/src/thirdParty/precice/build/release \
-    -L$(HOME)/Apps/Python/ActivePython-2.7/lib \
-    -llapack \
-    -lblas \
     -lfsi \
     -lfiniteVolume \
     -lsolidModels \
@@ -30,7 +27,8 @@ EXE_LIBS = \
     -lincompressibleTurbulenceModel \
     -lincompressibleRASModels \
     -lincompressibleLESModels \
-    -lprecice \
-    -lpython2.7 \
-    -lRBFmeshInterpolation \
-    -lVectorN
+    -lRBFMeshMotionSolver \
+    -lsampling \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels

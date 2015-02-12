@@ -3,32 +3,13 @@
 set -e
 
 VERSION=0.5.1
-BOOST_VERSION=1_50_0
+BOOST_VERSION=1_53_0
 
 rm -rf yaml-cpp
 
 rm -rf yaml-cpp-${VERSION}*
 
 wget -O yaml-cpp-${VERSION}.tar.gz https://yaml-cpp.googlecode.com/files/yaml-cpp-${VERSION}.tar.gz
-
-# Define which versions of the different packages are used
-
-export BOOST_VERSION=1_50_0
-export BOOST_VERSION_DOT=1.50.0
-
-# Download Boost
-
-wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
-
-# Remove old build files
-
-rm -rf boost_${BOOST_VERSION}
-
-# Unpack third party packages
-
-tar jxf boost_${BOOST_VERSION}.tar.bz2
-
-rm -f boost_${BOOST_VERSION}.tar.bz2
 
 tar -zxvf yaml-cpp-${VERSION}.tar.gz
 rm -f yaml-cpp-${VERSION}.tar.gz
@@ -37,9 +18,7 @@ ln -s yaml-cpp-${VERSION} yaml-cpp
 rm -f boost
 ln -s boost_${BOOST_VERSION} boost
 
-export BOOST_DIR=`pwd`/boost
-
-export PATH=$BOOST_DIR:$PATH
+export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
 
 cd yaml-cpp-${VERSION}
 

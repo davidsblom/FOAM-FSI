@@ -36,6 +36,9 @@ int main(
 
   Info << "End\n" << endl;
 
+  label tmp = Pstream::myProcNo();
+  reduce( tmp, sumOp<label>() );
+
   return (0);
 }
 

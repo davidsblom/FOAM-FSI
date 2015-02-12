@@ -6,7 +6,6 @@
 
 #include "ConvergenceMeasure.H"
 #include "FsiSolver.H"
-#include "IQNILSPostProcessing.H"
 #include "RelativeConvergenceMeasure.H"
 #include "TubeFlowFluidSolver.H"
 #include "TubeFlowSolidSolver.H"

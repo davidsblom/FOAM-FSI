@@ -54,6 +54,7 @@ protected:
     int reuseInformationStartingFromTimeIndex = 0;
     int minIter = 1;
     int extrapolation = 2;
+    double singularityLimit = 1.0e-11;
 
     // Parametrized settings
     bool parallel = std::tr1::get<0>( GetParam() );
@@ -70,8 +71,33 @@ protected:
     shared_ptr<TubeFlowFluidSolver> fluid( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
     shared_ptr<TubeFlowSolidSolver> solid( new TubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
 
-    shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, 0, 0 ) );
-    shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, 1, 0 ) );
+    shared_ptr<RBFFunctionInterface> rbfFunction;
+    shared_ptr<RBFInterpolation> rbfInterpolator;
+    shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
+    shared_ptr<RBFCoarsening> rbfInterpToMesh;
+    bool coarsening = false;
+    int coarseningMinPoints = 200;
+    int coarseningMaxPoints = 2000;
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
 
     // Convergence measures
     std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
@@ -86,7 +112,7 @@ protected:
     shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
 
     shared_ptr<PostProcessing> postProcessing;
-    postProcessing = shared_ptr<PostProcessing>( new BroydenPostProcessing( fsi, initialRelaxation, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex ) );
+    postProcessing = shared_ptr<PostProcessing>( new BroydenPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex ) );
 
     solver = new ImplicitMultiLevelFsiSolver( fsi, postProcessing );
     monolithicSolver = new MonolithicFsiSolver( a0, u0, p0, dt, cmk, N, L, T, rho );
@@ -102,7 +128,7 @@ protected:
   MonolithicFsiSolver * monolithicSolver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, BroydenPostProcessingParametrizedTest, ::testing::Combine( Bool(), Values( 0, 1, 4 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, BroydenPostProcessingParametrizedTest, ::testing::Combine( Bool(), Values( 0, 1, 4, 8 ) ) );
 
 TEST_P( BroydenPostProcessingParametrizedTest, object )
 {
@@ -178,6 +204,38 @@ TEST_P( BroydenPostProcessingParametrizedTest, monolithic )
     ASSERT_TRUE( monolithicSolver->an.norm() > 0 );
     ASSERT_TRUE( monolithicSolver->pn.norm() > 0 );
   }
+}
+
+TEST_P( BroydenPostProcessingParametrizedTest, reuse )
+{
+  solver->run();
+
+  bool parallel = std::tr1::get<0>( GetParam() );
+  int nbReuse = std::tr1::get<1>( GetParam() );
+
+  if ( !parallel && nbReuse == 0 )
+    ASSERT_EQ( solver->fsi->nbIter, 1072 );
+
+  if ( !parallel && nbReuse == 1 )
+    ASSERT_EQ( solver->fsi->nbIter, 690 );
+
+  if ( !parallel && nbReuse == 4 )
+    ASSERT_EQ( solver->fsi->nbIter, 573 );
+
+  if ( !parallel && nbReuse == 8 )
+    ASSERT_EQ( solver->fsi->nbIter, 514 );
+
+  if ( parallel && nbReuse == 0 )
+    ASSERT_EQ( solver->fsi->nbIter, 1841 );
+
+  if ( parallel && nbReuse == 1 )
+    ASSERT_EQ( solver->fsi->nbIter, 1233 );
+
+  if ( parallel && nbReuse == 4 )
+    ASSERT_EQ( solver->fsi->nbIter, 954 );
+
+  if ( parallel && nbReuse == 8 )
+    ASSERT_EQ( solver->fsi->nbIter, 829 );
 }
 
 TEST_P( BroydenPostProcessingParametrizedTest, numberOfColumnsVIQN )

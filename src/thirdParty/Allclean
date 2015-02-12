@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -rf boost boost_1_*
+rm -rf gtest* precice yaml-cpp*

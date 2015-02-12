@@ -14,6 +14,7 @@
 #include "fvCFD.H"
 #include "solidTractionFvPatchVectorField.H"
 #include "leastSquaresVolPointInterpolation.H"
+#include <time.h>
 
 using namespace fsi;
 using std::shared_ptr;
@@ -84,6 +85,9 @@ protected:
   labelList nGlobalCenters;
   labelList globalPointsUnique;
   labelList globalPointsNonUnique;
+
+  float totalRunTime;
+  int totalNbIterations;
 };
 
 #endif

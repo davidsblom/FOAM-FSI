@@ -9,4 +9,4 @@ fvVectorMatrix UEqn
 
 UEqn.relax();
 
-blockMatrixTools::insertEquation( 0, UEqn, A, x, b );
+UpEqn.insertEquation( 0, UEqn );

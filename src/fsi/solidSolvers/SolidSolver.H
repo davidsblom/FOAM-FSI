@@ -13,8 +13,10 @@
 #include "constitutiveModel.H"
 #include "RBFInterpolation.H"
 #include "meshToMesh.H"
+#include "TPSFunction.H"
 
 using namespace fsi;
+using namespace rbf;
 
 class SolidSolver : public foamSolidSolver
 {
@@ -36,7 +38,7 @@ public:
 
   virtual void solve();
 
-  virtual void interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> fineModel );
+  virtual bool interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> fineModel );
 
 protected:
 
@@ -67,7 +69,7 @@ protected:
   // Dictionaries
   IOdictionary couplingProperties;
 
-  fsi::RBFInterpolation interpolator;
+  RBFInterpolation interpolator;
 };
 
 #endif

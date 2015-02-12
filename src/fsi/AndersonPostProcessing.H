@@ -28,7 +28,8 @@ public:
       double singularityLimit,
       int reuseInformationStartingFromTimeIndex,
       bool scaling,
-      double beta
+      double beta,
+      bool updateJacobian
       );
 
     void fixedUnderRelaxation(
@@ -55,24 +56,25 @@ public:
       bool residualCriterium
       );
 
-    virtual void performPostProcessing(
-      const vector & y,
-      const vector & x0,
-      vector & xk,
-      const matrix & B,
-      const fsi::vector & xktilde,
-      const fsi::vector & xkp
-      );
+    void applyScaling( vector & vec );
+
+    void applyScaling( matrix & mat );
 
     void removeColumnFromMatrix(
       matrix & A,
       int col
       );
 
+    void determineScalingFactors( const vector & output );
+
     bool scaling;
     double beta;
     double singularityLimit;
+    bool updateJacobian;
     vector scalingFactors;
+    matrix Jprev;
+    int sizeVar0;
+    int sizeVar1;
   };
 }
 

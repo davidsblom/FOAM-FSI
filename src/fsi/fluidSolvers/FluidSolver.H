@@ -18,7 +18,6 @@
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
 
-#include "RBFMotionSolverExt.H"
 #include "faceTetPolyPatch.H"
 #include "fixedValuePointPatchFields.H"
 #include "fixedValueTetPolyPatchFields.H"
@@ -41,7 +40,15 @@ public:
 
   virtual ~FluidSolver();
 
+  virtual void getAcousticsDensityLocal( matrix & data );
+
+  virtual void getAcousticsVelocityLocal( matrix & data );
+
+  virtual void getAcousticsPressureLocal( matrix & data );
+
   virtual void getTractionLocal( matrix & traction );
+
+  virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
 
   virtual void initTimeStep();
 
@@ -52,8 +59,6 @@ public:
   virtual void solve();
 
 private:
-
-  virtual void moveMesh( vectorField motion );
 
   void checkTimeDiscretisationScheme();
 

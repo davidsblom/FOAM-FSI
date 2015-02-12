@@ -179,7 +179,7 @@ void BroydenPostProcessing::performPostProcessing(
   sols.push_back( x0 );
 
   // Check convergence criteria
-  if ( isConvergence( xk, xkprev, residualCriterium ) )
+  if ( isConvergence( output, output + y - R, residualCriterium ) )
   {
     bool keepIterations = residualCriterium;
     iterationsConverged( keepIterations );
@@ -248,126 +248,7 @@ void BroydenPostProcessing::performPostProcessing(
     sols.push_back( xk );
 
     // Check convergence criteria
-    if ( isConvergence( xk, xkprev, residualCriterium ) )
-      break;
-
-    assert( sols.size() == residuals.size() );
-    assert( sols.at( 0 ).rows() == residuals.at( 0 ).rows() );
-    assert( fsi->iter <= maxIter );
-  }
-
-  bool keepIterations = residualCriterium;
-  iterationsConverged( keepIterations );
-}
-
-void BroydenPostProcessing::performPostProcessing(
-  const vector & y,
-  const vector & x0,
-  vector & xk,
-  const matrix & B,
-  const fsi::vector & xktilde,
-  const fsi::vector & xkp
-  )
-{
-  assert( xk.rows() > 0 );
-  assert( fsi->fluid->init );
-  assert( fsi->solid->init );
-  assert( y.rows() == x0.rows() );
-  assert( y.rows() == xk.rows() );
-
-  // Initialize variables
-  vector xkprev = x0;
-  xk = x0;
-  xkprev.setZero();
-  residuals.clear();
-  sols.clear();
-  bool residualCriterium = false;
-
-  // Fsi evaluation
-  vector output( xk.rows() ), R( xk.rows() );
-  output.setZero();
-  R.setZero();
-
-  fsi->evaluate( xktilde + B * (x0 - xkp), output, R );
-
-  assert( x0.rows() == output.rows() );
-  assert( x0.rows() == R.rows() );
-
-  // Save output and residual
-  residuals.push_back( R );
-  sols.push_back( x0 );
-
-  // Check convergence criteria
-  if ( isConvergence( xk, xkprev, residualCriterium ) )
-  {
-    bool keepIterations = residualCriterium;
-    iterationsConverged( keepIterations );
-    return;
-  }
-
-  if ( J.cols() != R.rows() || J.rows() != R.rows() )
-    J = -Eigen::MatrixXd::Identity( R.rows(), R.rows() );
-
-  for ( int iter = 0; iter < maxIter - 1; iter++ )
-  {
-    xkprev = xk;
-
-    // Determine the number of columns of the V and W matrices
-    int nbCols = residuals.size() - 1;
-    nbCols = std::max( nbCols, 0 );
-
-    // Include information from previous optimization solves
-    for ( unsigned i = 0; i < solsList.size(); i++ )
-      nbCols += solsList.at( i ).size() - 1;
-
-    // Include information from previous time steps
-    for ( unsigned i = 0; i < solsTimeList.size(); i++ )
-      for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
-        nbCols += solsTimeList.at( i ).at( j ).size() - 1;
-
-    int nbColsCurrentTimeStep = std::max( static_cast<int>(sols.size() - 1), 0 );
-
-    assert( nbCols >= 0 );
-
-    if ( nbCols == 0 )
-    {
-      // Use fixed under relaxation to startup the IQNILS algorithm
-
-      Info << "Fixed relaxation post processing with factor " << initialRelaxation << endl;
-
-      // Update solution x
-      xk += initialRelaxation * (R - y);
-    }
-
-    if ( nbCols > 0 )
-    {
-      Info << "Broyden post processing with " << nbCols << " cols for the Jacobian" << endl;
-
-      if ( nbColsCurrentTimeStep )
-      {
-        fsi::vector dx, dR;
-        dx = sols.at( sols.size() - 1 ) - sols.at( sols.size() - 2 );
-        dR = residuals.at( residuals.size() - 1 ) - residuals.at( residuals.size() - 2 );
-
-        if ( dx.norm() >= singularityLimit )
-          J += (dx - J * dR) / (dx.transpose() * J * dR) * (dx.transpose() * J);
-      }
-
-      xk += J * (y - R);
-    }
-
-    // Fsi evaluation
-    fsi->evaluate( xktilde + B * (xk - xkp), output, R );
-
-    assert( x0.rows() == output.rows() );
-    assert( x0.rows() == R.rows() );
-
-    // Save output and residual
-    residuals.push_back( R );
-    sols.push_back( xk );
-
-    // Check convergence criteria
-    if ( isConvergence( xk, xkprev, residualCriterium ) )
+    if ( isConvergence( output, output + y - R, residualCriterium ) )
       break;
 
     assert( sols.size() == residuals.size() );

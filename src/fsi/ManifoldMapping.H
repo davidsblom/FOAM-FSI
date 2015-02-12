@@ -8,6 +8,7 @@
 #define ManifoldMapping_H
 
 #include "SpaceMapping.H"
+#include "ImplicitMultiLevelFsiSolver.H"
 
 namespace fsi
 {
@@ -23,7 +24,8 @@ public:
       int maxIter,
       int nbReuse,
       int reuseInformationStartingFromTimeIndex,
-      double singularityLimit
+      double singularityLimit,
+      bool updateJacobian
       );
 
     virtual ~ManifoldMapping();
@@ -35,12 +37,24 @@ public:
       bool residualCriterium
       );
 
+    void applyScaling( vector & vec );
+
+    void applyScaling( matrix & mat );
+
+    void determineScalingFactors( const vector & output );
+
     void removeColumnFromMatrix(
       matrix & A,
       int col
       );
 
+    bool updateJacobian;
+    bool scaling;
     int iter;
+    vector scalingFactors;
+    matrix Tkprev;
+    int sizeVar0;
+    int sizeVar1;
   };
 }
 

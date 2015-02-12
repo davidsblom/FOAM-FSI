@@ -1,0 +1,49 @@
+fluid-solver: coupled-pressure-velocity-solver
+interpolation:
+  radial-basis-function:
+    function: thin-plate-spline
+  coarsening:
+    enabled: false
+    tol: 1.0e-6
+    min-points: 200
+    max-points: 2000
+multi-level-acceleration:
+  algorithm: manifold-mapping
+  levels:
+  - convergence-measures:
+    - min-iteration-convergence-measure:
+        min-iterations: 3
+    - relative-convergence-measure:
+        data-id: 0
+        limit: 1.0e-06
+    extrapolation-order: 2
+    level: 0
+    max-iterations: 200
+    post-processing:
+      beta: 1
+      initial-relaxation: 0.001
+      max-used-iterations: 50
+      reuse-information-starting-from-time-index: 10
+      singularity-limit: 1.0e-13
+      timesteps-reused: 0
+      update-jacobian: false
+  - convergence-measures:
+    - min-iteration-convergence-measure:
+        min-iterations: 1
+    - relative-convergence-measure:
+        data-id: 0
+        limit: 1.0e-05
+    extrapolation-order: 2
+    level: 1
+    max-iterations: 200
+    post-processing:
+      beta: 1
+      initial-relaxation: 0.001
+      max-used-iterations: 50
+      reuse-information-starting-from-time-index: 10
+      singularity-limit: 1.0e-13
+      timesteps-reused: 0
+      update-jacobian: false
+  synchronization: true
+parallel-coupling: false
+solid-solver: segregated-solver

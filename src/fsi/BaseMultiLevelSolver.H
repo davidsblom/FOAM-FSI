@@ -56,7 +56,10 @@ public:
       matrix & output
       ) = 0;
 
-    virtual void interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> solver ){}
+    virtual bool interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> solver )
+    {
+      return false;
+    }
 
     int N;
     bool init;

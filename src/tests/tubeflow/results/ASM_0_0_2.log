@@ -1,9 +1,0 @@
-label = ASM_0_0_2
-nbLevels = 2
-solver = ASM
-nbReuse = 0
-parallel = 0
-elapsed time = 498.043
-nbTimeSteps = 100
-level 0 nbIter = 2798
-level 1 nbIter = 571

@@ -7,7 +7,7 @@
 #ifndef ImplicitMultiLevelFsiSolver_H
 #define ImplicitMultiLevelFsiSolver_H
 
-#include "IQNILSPostProcessing.H"
+#include "PostProcessing.H"
 #include "MultiLevelFsiSolver.H"
 #include "Solver.H"
 #include "SurrogateModel.H"
@@ -49,15 +49,6 @@ public:
     const fsi::vector & y,
     const fsi::vector & x0,
     fsi::vector & xk
-    );
-
-  virtual void optimize(
-    const fsi::vector & y,
-    const fsi::vector & x0,
-    fsi::vector & xk,
-    const matrix & B,
-    const fsi::vector & xktilde,
-    const fsi::vector & xkp
     );
 
   virtual void run();

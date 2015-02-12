@@ -13,6 +13,8 @@
 #include "BaseMultiLevelSolver.H"
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
+#include "RBFMeshMotionSolver.H"
+#include <time.h>
 
 using namespace fsi;
 using std::shared_ptr;
@@ -29,13 +31,21 @@ public:
 
   ~foamFluidSolver();
 
+  virtual void getAcousticsDensityLocal( matrix & data ) = 0;
+
+  virtual void getAcousticsVelocityLocal( matrix & data ) = 0;
+
+  virtual void getAcousticsPressureLocal( matrix & data ) = 0;
+
+  virtual void getTractionLocal( matrix & traction ) = 0;
+
+  virtual void getWritePositionsLocalAcoustics( matrix & writePositions ) = 0;
+
   virtual void finalizeTimeStep();
 
   virtual void getReadPositions( matrix & readPositions );
 
   virtual void getWritePositions( matrix & writePositions );
-
-  virtual void getTractionLocal( matrix & traction ) = 0;
 
   virtual void solve() = 0;
 
@@ -56,17 +66,19 @@ public:
 
   void getWritePositionsLocal( matrix & writePositions );
 
+  void run();
+
   string name;
   shared_ptr<argList> args;
   shared_ptr<Time> runTime;
 
-protected:
-
-  virtual void moveMesh( vectorField motion ) = 0;
-
   // Mesh
   autoPtr<dynamicFvMesh> meshPtr;
   dynamicFvMesh & mesh;
+
+protected:
+
+  virtual void moveMesh( vectorField motion );
 
   // Dictionaries
   IOdictionary couplingProperties;
@@ -83,6 +95,9 @@ protected:
   labelList nGlobalCenters;
   labelList globalPointsUnique;
   labelList globalPointsNonUnique;
+
+  float totalRunTime;
+  int totalNbIterations;
 };
 
 #endif

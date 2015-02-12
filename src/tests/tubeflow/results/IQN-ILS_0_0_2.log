@@ -1,8 +1,0 @@
-label = IQN-ILS_0_0_2
-nbLevels = 2
-solver = IQN-ILS
-nbReuse = 0
-parallel = 0
-elapsed time = 810.715
-nbTimeSteps = 100
-nbIter = 998

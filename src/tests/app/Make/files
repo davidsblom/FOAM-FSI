@@ -1,13 +1,14 @@
 TubeFlowFluidSolver.C
 TubeFlowSolidSolver.C
+TubeFlowLinearizedSolidSolver.C
+TubeFlowLinearSolidSolver.C
+TubeFlowLinearizedFluidSolver.C
 MonolithicFsiSolver.C
 FsiSolver.C
 RelativeConvergenceMeasure.C
-IQNILSPostProcessing.C
 MinIterationConvergenceMeasure.C
 ManifoldMapping.C
 MultiLevelSolver.C
-RBFInterpolation.C
 SpaceMappingSolver.C
 ImplicitMultiLevelFsiSolver.C
 MultiLevelFsiSolver.C
@@ -21,19 +22,20 @@ AggressiveSpaceMapping.C
 ASMILS.C
 AitkenPostProcessing.C
 DataValues.C
+IDWInterpolation.C
+AndersonPostProcessing.C
 
 tests.C
+test_idwinterpolation.C
 test_fluidsolver.C
 test_solidsolver.C
 test_fsisolver.C
 test_implicitfsisolver.C
-test_iqnilspostprocessing.C
 test_manifoldmapping.C
 test_multilevelsolver.C
 test_rbfinterpolation.C
 test_monolithicfsisolver.C
 test_manifoldmappingsolver.C
-test_multilevelfsisolver.C
 test_relativeconvergencemeasure.C
 test_miniterationconvergencemeasure.C
 test_multilevelmanifoldmappingsolver.C
@@ -48,5 +50,14 @@ test_multilevelasmils.C
 test_aitkenpostprocessing.C
 test_outputspacemapping.C
 test_multileveloutputspacemappingsolver.C
+test_andersonpostprocessing.C
+test_linearizedsolidsolver.C
+test_linearsolidsolver.C
+test_fsilinearizedsolidsolver.C
+test_implicitfsilinearizedsolidsolver.C
+test_linearizedfluidsolver.C
+test_manifoldmappinglinearizedfsisolver.C
+test_rbfcoarsening.C
+test_multilevelspacemapping.C
 
 EXE = $(FOAM_USER_APPBIN)/tests

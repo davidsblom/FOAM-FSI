@@ -11,14 +11,16 @@ namespace fsi
   MultiLevelSolver::MultiLevelSolver(
     shared_ptr<BaseMultiLevelSolver> solver,
     shared_ptr<BaseMultiLevelSolver> couplingGridSolver,
+    shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh,
+    shared_ptr<RBFCoarsening> rbfInterpToMesh,
     int participantId,
     int level
     )
     :
     solver( solver ),
     couplingGridSolver( couplingGridSolver ),
-    rbfInterpToCouplingMesh( shared_ptr<RBFInterpolation>( new RBFInterpolation() ) ),
-    rbfInterpToMesh( shared_ptr<RBFInterpolation>( new RBFInterpolation() ) ),
+    rbfInterpToCouplingMesh( rbfInterpToCouplingMesh ),
+    rbfInterpToMesh( rbfInterpToMesh ),
     participantId( participantId ),
     level( level )
   {
@@ -26,6 +28,8 @@ namespace fsi
     assert( couplingGridSolver );
     assert( participantId == 0 || participantId == 1 );
     assert( level >= 0 );
+    assert( rbfInterpToCouplingMesh );
+    assert( rbfInterpToMesh );
 
     matrix couplingGridPositions;
 

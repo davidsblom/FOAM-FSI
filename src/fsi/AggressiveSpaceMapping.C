@@ -56,7 +56,8 @@ void AggressiveSpaceMapping::performPostProcessing(
   if ( !coarseModel->allConverged() )
     Warning << "Surrogate model optimization process is not converged." << endl;
 
-  xk = zstar;
+  if ( timeIndex == 0 )
+    xk = zstar;
 
   // Fine model evaluation
 

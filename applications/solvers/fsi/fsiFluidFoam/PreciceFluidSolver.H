@@ -32,13 +32,21 @@ public:
 
   void setWritePositions();
 
+  void setWritePositionsAcoustics();
+
   void writeData( const matrix & data );
+
+  void writeDataAcoustics();
 
   shared_ptr<foamFluidSolver> solver;
   shared_ptr<precice::SolverInterface> precice;
 
   Eigen::VectorXi idsReadPositions;
   Eigen::VectorXi idsWritePositions;
+  Eigen::VectorXi idsWritePositionsAcoustics;
+
+  float totalRunTime;
+  int totalNbIterations;
 };
 
 #endif

@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+
+cd fluid-level-0
+cleanCase
+cd -
+
+cd fluid-level-1
+cleanCase
+cd -
+
+cd solid-level-0
+cleanCase
+cd -
+
+cd solid-level-1
+cleanCase
+cd -
+
+rm -rf fluid-level-1/0/solid* fluid-level-1/0/fluid*
+rm -rf fluid-level-1/system/solid* fluid-level-1/system/fluid*
+rm -rf fluid-level-1/constant/solid* fluid-level-1/constant/fluid*
+rm -f fluid*/*.foam solid*/*.foam
+rm -f fluid*/constant/polyMesh/boundary solid*/constant/polyMesh/boundary
+rm -f solid*/system/decomposeParDict fluid-level-0/system/decomposeParDict
+rm -rf fluid-level-1/fluid-level*

@@ -1,0 +1,72 @@
+#!/bin/bash
+
+set -e
+
+# gtest
+
+GTEST_VERSION=1.7.0
+
+rm -rf gtest-${GTEST_VERSION}
+
+unzip gtest-${GTEST_VERSION}
+
+ln -s gtest-${GTEST_VERSION} gtest
+
+cd gtest-${GTEST_VERSION}
+
+cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CC_COMPILER=gcc
+
+make
+
+cd ../
+
+# precice
+
+BOOST_VERSION=1_53_0
+BOOST_VERSION_DOT=1.53.0
+
+rm -rf boost_${BOOST_VERSION}
+rm -rf precice
+
+tar jxfv boost_${BOOST_VERSION}.tar.bz2
+tar -zxvf precice.tar.gz
+
+# Set environment variables necessary for building preCICE
+
+export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
+export PRECICE_BOOST_ROOT=${BOOST_ROOT}
+export PRECICE_MPI_LIB=mpi
+export PRECICE_MPI_LIB_PATH=${MPI_BASE}/lib64
+export PRECICE_MPI_INC_PATH=${MPI_BASE}/include64
+
+cd precice
+python tools/python_scripts/insert_mpi_header.py
+scons -j 32 build=release python=off petsc=off compiler=mpicxx > >(tee make_precice.log) 2> >(tee make_precice_error.log >&2)
+scons -j 32 build=debug python=off petsc=off compiler=mpicxx > >(tee make_precice.log) 2> >(tee make_precice_error.log >&2)
+cd ..
+
+# YAML
+
+YAML_VERSION=0.5.1
+
+rm -rf yaml-cpp
+
+rm -rf yaml-cpp-${YAML_VERSION}
+
+tar -zxvf yaml-cpp-${YAML_VERSION}.tar.gz
+
+ln -s yaml-cpp-${YAML_VERSION} yaml-cpp
+
+ln -s boost_${BOOST_VERSION} boost
+
+export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
+
+cd yaml-cpp-${YAML_VERSION}
+
+mkdir build
+
+cd build
+
+cmake ..
+
+make -j 32

@@ -1,8 +1,0 @@
-label = IQN-Broyden_8_0_2
-nbLevels = 2
-solver = IQN-Broyden
-nbReuse = 8
-parallel = 0
-elapsed time = 431.842
-nbTimeSteps = 100
-nbIter = 471

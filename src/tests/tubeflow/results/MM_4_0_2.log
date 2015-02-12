@@ -1,9 +1,0 @@
-label = MM_4_0_2
-nbLevels = 2
-solver = MM
-nbReuse = 4
-parallel = 0
-elapsed time = 185.972
-nbTimeSteps = 100
-level 0 nbIter = 1031
-level 1 nbIter = 216

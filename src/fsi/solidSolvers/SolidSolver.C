@@ -57,7 +57,8 @@ SolidSolver::SolidSolver (
     IOobject::MUST_READ,
     IOobject::NO_WRITE
   )
-  )
+  ),
+  interpolator( std::shared_ptr<RBFFunctionInterface>( new TPSFunction() ) )
 {}
 
 SolidSolver::~SolidSolver()
@@ -86,7 +87,7 @@ void SolidSolver::initTimeStep()
   init = true;
 }
 
-void SolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> solver )
+bool SolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> solver )
 {
   std::shared_ptr<SolidSolver> fineModel;
   fineModel = std::dynamic_pointer_cast<SolidSolver>( solver );
@@ -98,101 +99,111 @@ void SolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> sol
 
   Info << "Mesh to mesh volume interpolation of field U for the solid domain" << endl;
 
-  // Create the interpolation scheme
-  meshToMesh meshToMeshInterp( fineModel->mesh, mesh );
-
   const volVectorField & fieldSource = fineModel->mesh.lookupObject<volVectorField>( "U" );
-
-  // Interpolate field
-  meshToMeshInterp.interpolate
-  (
-    U,
-    fieldSource,
-    meshToMesh::INTERPOLATE
-  );
 
   /*
    *
-   * // Gather all the cell centers of the source
+   * // Create the interpolation scheme
+   * meshToMesh meshToMeshInterp( fineModel->mesh, mesh );
    *
-   * labelList cellCentresSourceSize( Pstream::nProcs(), 0 );
    *
-   * const Foam::vectorField & cellCentresSource = fineModel->mesh.cellCentres();
    *
-   * cellCentresSourceSize[Pstream::myProcNo()] = cellCentresSource.size();
-   *
-   * // Reduce (gather, scatter) over procs
-   *
-   * reduce( cellCentresSourceSize, sumOp<labelList>() );
-   *
-   * if ( !interpolator.computed )
-   * {
-   * // Gather all the cell centers of the source
-   *
-   * const Foam::vectorField & cellCentresTarget = mesh.cellCentres();
-   *
-   * vectorField globalControlPoints( sum( cellCentresSourceSize ), Foam::vector::zero );
-   *
-   * label startIndex = 0;
-   *
-   * for ( int i = 0; i < Pstream::myProcNo(); i++ )
-   *  startIndex += cellCentresSourceSize[i];
-   *
-   * for ( int i = 0; i < cellCentresSourceSize[Pstream::myProcNo()]; i++ )
-   *  globalControlPoints[startIndex + i] = cellCentresSource[i];
-   *
-   * reduce( globalControlPoints, sumOp<vectorField>() );
-   *
-   * matrix positions( sum( cellCentresSourceSize ), 3 );
-   * matrix positionsInterpolation( cellCentresTarget.size(), 3 );
-   *
-   * for ( int i = 0; i < positions.rows(); i++ )
-   *  for ( int j = 0; j < positions.cols(); j++ )
-   *    positions( i, j ) = globalControlPoints[i][j];
-   *
-   * for ( int i = 0; i < positionsInterpolation.rows(); i++ )
-   *  for ( int j = 0; j < positionsInterpolation.cols(); j++ )
-   *    positionsInterpolation( i, j ) = cellCentresTarget[i][j];
-   *
-   * interpolator.compute( positions, positionsInterpolation );
-   * }
-   *
-   * vectorField globalFieldSource( fineModel->mesh.globalData().nTotalCells(), Foam::vector::zero );
-   *
-   * label startIndex = 0;
-   *
-   * for ( int i = 0; i < Pstream::myProcNo(); i++ )
-   * startIndex += cellCentresSourceSize[i];
-   *
-   * for ( int i = 0; i < cellCentresSourceSize[Pstream::myProcNo()]; i++ )
-   * globalFieldSource[startIndex + i] = fieldSource[i];
-   *
-   * reduce( globalFieldSource, sumOp<vectorField>() );
-   *
-   * // Initialize variables for interpolation
-   *
-   * matrix values( globalFieldSource.size(), 3 );
-   * matrix valuesInterpolation;
-   *
-   * for ( int i = 0; i < values.rows(); i++ )
-   * for ( int j = 0; j < values.cols(); j++ )
-   *  values( i, j ) = globalFieldSource[i][j];
-   *
-   * interpolator.interpolate( values, valuesInterpolation );
-   *
-   * for ( int i = 0; i < valuesInterpolation.rows(); i++ )
-   * for ( int j = 0; j < valuesInterpolation.cols(); j++ )
-   *  U[i][j] = valuesInterpolation( i, j );
+   * // Interpolate field
+   * meshToMeshInterp.interpolate
+   * (
+   * U,
+   * fieldSource,
+   * meshToMesh::INTERPOLATE
+   * );
    *
    */
+
+  // Gather all the cell centers of the source
+
+  labelList cellCentresSourceSize( Pstream::nProcs(), 0 );
+
+  const Foam::vectorField & cellCentresSource = fineModel->mesh.cellCentres();
+
+  cellCentresSourceSize[Pstream::myProcNo()] = cellCentresSource.size();
+
+  // Reduce (gather, scatter) over procs
+
+  reduce( cellCentresSourceSize, sumOp<labelList>() );
+
+  if ( !interpolator.computed )
+  {
+    // Gather all the cell centers of the source
+
+    const Foam::vectorField & cellCentresTarget = mesh.cellCentres();
+
+    vectorField globalControlPoints( sum( cellCentresSourceSize ), Foam::vector::zero );
+
+    label startIndex = 0;
+
+    for ( int i = 0; i < Pstream::myProcNo(); i++ )
+      startIndex += cellCentresSourceSize[i];
+
+    for ( int i = 0; i < cellCentresSourceSize[Pstream::myProcNo()]; i++ )
+      globalControlPoints[startIndex + i] = cellCentresSource[i];
+
+    reduce( globalControlPoints, sumOp<vectorField>() );
+
+    matrix positions( sum( cellCentresSourceSize ), 3 );
+    matrix positionsInterpolation( cellCentresTarget.size(), 3 );
+
+    for ( int i = 0; i < positions.rows(); i++ )
+      for ( int j = 0; j < positions.cols(); j++ )
+        positions( i, j ) = globalControlPoints[i][j];
+
+    for ( int i = 0; i < positionsInterpolation.rows(); i++ )
+      for ( int j = 0; j < positionsInterpolation.cols(); j++ )
+        positionsInterpolation( i, j ) = cellCentresTarget[i][j];
+
+    interpolator.compute( positions, positionsInterpolation );
+  }
+
+  vectorField globalFieldSource( fineModel->mesh.globalData().nTotalCells(), Foam::vector::zero );
+
+  label startIndex = 0;
+
+  for ( int i = 0; i < Pstream::myProcNo(); i++ )
+    startIndex += cellCentresSourceSize[i];
+
+  for ( int i = 0; i < cellCentresSourceSize[Pstream::myProcNo()]; i++ )
+    globalFieldSource[startIndex + i] = fieldSource[i];
+
+  reduce( globalFieldSource, sumOp<vectorField>() );
+
+  // Initialize variables for interpolation
+
+  matrix values( globalFieldSource.size(), 3 );
+  matrix valuesInterpolation;
+
+  for ( int i = 0; i < values.rows(); i++ )
+    for ( int j = 0; j < values.cols(); j++ )
+      values( i, j ) = globalFieldSource[i][j];
+
+  interpolator.interpolate( values, valuesInterpolation );
+
+  for ( int i = 0; i < valuesInterpolation.rows(); i++ )
+    for ( int j = 0; j < valuesInterpolation.cols(); j++ )
+      U[i][j] = valuesInterpolation( i, j );
 
   gradU = fvc::grad( U );
 
   calculateEpsilonSigma();
+
+  return true;
 }
 
 bool SolidSolver::isRunning()
 {
+  runTime->write();
+
+  Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
+       << "  ClockTime = " << runTime->elapsedClockTime() << " s"
+       << endl << endl;
+
   return runTime->loop();
 }
 

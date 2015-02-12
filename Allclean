@@ -1,16 +1,15 @@
 #! /bin/bash
 
-set -e
-
-wclean src/RBFmeshInterpolation
 wclean src/fvPatchFields
 wclean src/fvSchemes
 wclean src/fsi
-wclean src/IDWmeshDeformation
-wclean applications/solvers/unsteadyPUDyMCoupledFoam
+wclean src/RBFMeshMotionSolver
 wclean applications/solvers/unsteadyPUCoupledFoam
 wclean applications/solvers/fsi/fsiFoam
+wclean applications/solvers/fsi/fluidFoam
 wclean applications/solvers/fsi/fsiFluidFoam
 wclean applications/solvers/fsi/fsiSolidFoam
 wclean src/tests/app
 wclean src/tests/tubeflow
+rmdepall
+find . -name 'lnInclude' -exec rm -rf {} \;

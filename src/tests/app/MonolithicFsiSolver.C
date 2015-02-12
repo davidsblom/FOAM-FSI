@@ -56,7 +56,7 @@ namespace tubeflow
   {
     assert( init );
 
-    return u0 + u0 / 10.0 * std::pow( sin( M_PI * timeIndex * tau ), 2 );
+    return u0 + u0 / 10.0 * std::pow( std::sin( M_PI * timeIndex * tau ), 2 );
   }
 
   double MonolithicFsiSolver::evaluateOutputPressureBoundaryCondition(
@@ -67,7 +67,7 @@ namespace tubeflow
   {
     assert( init );
 
-    double value = sqrt( cmk * cmk - pout_n / (2.0 * rho) );
+    double value = std::sqrt( cmk * cmk - pout_n / (2.0 * rho) );
 
     value = 2 * rho * ( cmk * cmk - std::pow( value - (uout - uout_n) / 4.0, 2 ) );
 
@@ -222,11 +222,13 @@ namespace tubeflow
       int values
       ) : m_inputs( inputs ), m_values( values ) {}
 
-    int inputs() const {
+    int inputs() const
+    {
       return m_inputs;
     }
 
-    int values() const {
+    int values() const
+    {
       return m_values;
     }
   };

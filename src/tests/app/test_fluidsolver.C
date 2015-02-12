@@ -124,7 +124,7 @@ TEST_F( FluidSolverTest, residual )
   double u0 = 0.1;
   double p0 = 0;
 
-  vector R( 2 * N ), x( 2 * N ), a( N ), un( N ), pn( N ), an( N );
+  fsi::vector R( 2 * N ), x( 2 * N ), a( N ), un( N ), pn( N ), an( N );
   an.fill( a0 );
   pn.fill( p0 );
   un.fill( u0 );
@@ -162,11 +162,13 @@ struct Functor
     int values
     ) : m_inputs( inputs ), m_values( values ) {}
 
-  int inputs() const {
+  int inputs() const
+  {
     return m_inputs;
   }
 
-  int values() const {
+  int values() const
+  {
     return m_values;
   }
 };
@@ -175,10 +177,10 @@ struct residualFunctor : Functor<double>
 {
   residualFunctor(
     TubeFlowFluidSolver * fluid,
-    vector * a,
-    vector * un,
-    vector * pn,
-    vector * an
+    fsi::vector * a,
+    fsi::vector * un,
+    fsi::vector * pn,
+    fsi::vector * an
     )
     :
     Functor<double>( 2 * fluid->N, 2 * fluid->N ),
@@ -199,10 +201,10 @@ struct residualFunctor : Functor<double>
   }
 
   TubeFlowFluidSolver * fluid;
-  vector * a;
-  vector * un;
-  vector * pn;
-  vector * an;
+  fsi::vector * a;
+  fsi::vector * un;
+  fsi::vector * pn;
+  fsi::vector * an;
 };
 
 TEST_F( FluidSolverTest, jacobian )
@@ -215,7 +217,7 @@ TEST_F( FluidSolverTest, jacobian )
   double u0 = 0.1;
   double p0 = 0;
 
-  vector R( 2 * N ), x( 2 * N ), a( N ), un( N ), pn( N ), an( N );
+  fsi::vector R( 2 * N ), x( 2 * N ), a( N ), un( N ), pn( N ), an( N );
   matrix J( 2 * N, 2 * N );
   an.fill( a0 );
   pn.fill( p0 );

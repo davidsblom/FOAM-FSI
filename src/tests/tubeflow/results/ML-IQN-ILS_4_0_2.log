@@ -1,9 +1,0 @@
-label = ML-IQN-ILS_4_0_2
-nbLevels = 2
-solver = ML-IQN-ILS
-nbReuse = 4
-parallel = 0
-elapsed time = 299.497
-nbTimeSteps = 100
-level 0 nbIter = 427
-level 1 nbIter = 354

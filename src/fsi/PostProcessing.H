@@ -47,15 +47,6 @@ public:
       bool residualCriterium
       ) = 0;
 
-    virtual void performPostProcessing(
-      const vector & y,
-      const vector & x0,
-      vector & xk,
-      const matrix & B,
-      const fsi::vector & xktilde,
-      const fsi::vector & xkp
-      ) = 0;
-
     virtual void finalizeTimeStep();
 
     bool isConvergence(

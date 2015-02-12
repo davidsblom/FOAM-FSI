@@ -12,8 +12,6 @@ EXE_LIBS = \
     -lincompressibleTransportModels \
     -lfiniteVolume \
     -llduSolvers \
-    -lVectorN \
     -ltopoChangerFvMesh \
     -lmyBoundaries \
-    -lmySchemes \
-    -lsolidModels
+    -lmySchemes

@@ -1,3 +1,0 @@
-RBFInterpolationReduced.C
-
-LIB = $(FOAM_USER_LIBBIN)/libRBFInterpolationReduced

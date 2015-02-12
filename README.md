@@ -1,7 +1,7 @@
 FOAM-FSI
 ========
 
-First, compile foam-extend-3.1. Additionally, install the dependencies blas and lapack.
+First, compile foam-extend-3.1, the nextRelease branch.
 
 To compile the FSI library:
 

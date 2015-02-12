@@ -23,7 +23,7 @@ OutputSpaceMapping::OutputSpaceMapping(
   order( order )
 {
   assert( surrogateModel );
-  assert( order == 0 || order == 1 );
+  assert( order == 0 || order == 1 || order == 2 );
 }
 
 OutputSpaceMapping::~OutputSpaceMapping()
@@ -73,18 +73,21 @@ void OutputSpaceMapping::performPostProcessing(
   fineResiduals.resize( m, 1 );
   fineResiduals.setZero();
 
-  // Determine optimum of coarse model xstar
-  if ( residualCriterium )
+  if ( timeIndex == 0 )
   {
-    assert( y.norm() < 1.0e-14 );
-    surrogateModel->optimize( x0, xk );
+    // Determine optimum of coarse model xstar
+    if ( residualCriterium )
+    {
+      assert( y.norm() < 1.0e-14 );
+      surrogateModel->optimize( x0, xk );
+    }
+
+    if ( !residualCriterium )
+      surrogateModel->optimize( y, x0, xk );
+
+    if ( !surrogateModel->allConverged() )
+      Warning << "Surrogate model optimization process is not converged." << endl;
   }
-
-  if ( !residualCriterium )
-    surrogateModel->optimize( y, x0, xk );
-
-  if ( !surrogateModel->allConverged() )
-    Warning << "Surrogate model optimization process is not converged." << endl;
 
   assert( xk.rows() == n );
   assert( x0.rows() == n );
@@ -196,6 +199,93 @@ void OutputSpaceMapping::performPostProcessing(
       surrogateModel->setSurrogateData( xk, J );
     }
 
+    if ( nbCols > 0 && order == 2 )
+    {
+      nbCols = std::min( nbCols, n );
+
+      matrix DeltaF( m, nbCols ), DeltaX( m, nbCols );
+
+      int colIndex = 0;
+
+      // Include information from current time step
+
+      for ( int i = 0; i < nbColsCurrentTimeStep; i++ )
+      {
+        if ( colIndex >= DeltaF.cols() )
+          continue;
+
+        DeltaF.col( colIndex ) = fineResiduals.col( k ) - coarseResiduals.col( k );
+        DeltaF.col( colIndex ) -= fineResiduals.col( k - 1 - i ) - coarseResiduals.col( k - 1 - i );
+        DeltaX.col( colIndex ) = sols.at( k ) - sols.at( k - 1 - i );
+        colIndex++;
+      }
+
+      // Include information from previous time steps
+
+      for ( unsigned i = 0; i < solsList.size(); i++ )
+      {
+        for ( unsigned j = 0; j < solsList.at( i ).size() - 1; j++ )
+        {
+          if ( colIndex >= DeltaF.cols() )
+            continue;
+
+          DeltaF.col( colIndex ) = fineResidualsList.at( i ).col( fineResidualsList.at( i ).cols() - 1 ) - coarseResidualsList.at( i ).col( coarseResidualsList.at( i ).cols() - 1 );
+
+          DeltaF.col( colIndex ) -= fineResidualsList.at( i ).col( fineResidualsList.at( i ).cols() - 2 - j ) - coarseResidualsList.at( i ).col( coarseResidualsList.at( i ).cols() - 2 - j );
+
+          DeltaX.col( colIndex ) = solsList.at( i ).at( solsList.at( i ).size() - 1 ) - solsList.at( i ).at( solsList.at( i ).size() - 2 - j );
+
+          colIndex++;
+        }
+      }
+
+      assert( colIndex == nbCols );
+
+      // Remove dependent columns of DeltaC and DeltaF
+
+      int nbRemoveCols = 1;
+
+      while ( nbRemoveCols > 0 )
+      {
+        nbRemoveCols = 0;
+
+        if ( DeltaX.cols() == 1 )
+          break;
+
+        // Calculate singular value decomposition with Eigen
+
+        Eigen::JacobiSVD<matrix> svd( DeltaX, Eigen::ComputeThinU | Eigen::ComputeThinV );
+
+        vector singularValues = svd.singularValues();
+
+        for ( int i = 0; i < singularValues.rows(); i++ )
+        {
+          if ( std::abs( singularValues( i ) ) <= singularityLimit && DeltaX.cols() > 1 )
+          {
+            // Remove the column from DeltaC and DeltaF
+            removeColumnFromMatrix( DeltaX, i - nbRemoveCols );
+            removeColumnFromMatrix( DeltaF, i - nbRemoveCols );
+
+            nbRemoveCols++;
+          }
+        }
+
+        if ( nbRemoveCols )
+          Info << "Output space mapping: remove " << nbRemoveCols << " columns from the Jacobian matrices" << endl;
+      }
+
+      matrix I = Eigen::MatrixXd::Identity( m, m );
+
+      Eigen::JacobiSVD<matrix> svd( DeltaX, Eigen::ComputeThinU | Eigen::ComputeThinV );
+
+      matrix pseudoDeltaX = svd.matrixV() * svd.singularValues().asDiagonal().inverse() * svd.matrixU().transpose();
+
+      matrix J = -I + (DeltaF + DeltaX) * pseudoDeltaX;
+
+      surrogateModel->setUseJacobian( true );
+      surrogateModel->setSurrogateData( xk, J );
+    }
+
     xkprev = xk;
 
     // Update the fine model optimum
@@ -241,4 +331,15 @@ void OutputSpaceMapping::performPostProcessing(
   }
 
   iterationsConverged();
+}
+
+void OutputSpaceMapping::removeColumnFromMatrix(
+  matrix & A,
+  int col
+  )
+{
+  for ( int j = col; j < A.cols() - 1; j++ )
+    A.col( j ) = A.col( j + 1 );
+
+  A.conservativeResize( A.rows(), A.cols() - 1 );
 }

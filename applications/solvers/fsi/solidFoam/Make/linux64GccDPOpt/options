@@ -1,0 +1,55 @@
+# 1 "options"
+# 1 "<command-line>"
+
+
+# 1 "/usr/include/stdc-predef.h" 1 3 4
+
+# 17 "/usr/include/stdc-predef.h" 3 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 2 "<command-line>" 2
+# 1 "options"
+EXE_INC = -std=c++11     -I../../../../src/fsi/lnInclude     -I../../../../src/thirdParty/eigen     -I$(LIB_SRC)/finiteVolume/lnInclude     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude     -I$(LIB_SRC)/dynamicMesh/lnInclude     -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude     -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude     -I$(LIB_SRC)/transportModels     -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel     -I$(LIB_SRC)/turbulenceModels     -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel     -I$(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel     -I$(LIB_SRC)/turbulenceModels/compressible/RAS/RASModel     -I$(LIB_SRC)/meshTools/lnInclude     -I$(LIB_SRC)/sampling/lnInclude     -I$(LIB_SRC)/solidModels/lnInclude     -I../../../../src/thirdParty/yaml-cpp/include     -I../../../../src/RBFmeshInterpolation/lnInclude/     -I../../../../src/IDWmeshDeformation/lnInclude/     $(WM_DECOMP_INC)     -I$(LIB_SRC)/tetFiniteElement/lnInclude     -I../../../../src/thirdParty/boost
+# 24 "options"
+
+EXE_LIBS =     -L$(FOAM_USER_LIBBIN)     -L../../../../src/thirdParty/yaml-cpp/build/     -lfsi     -ldynamicFvMesh     -ltopoChangerFvMesh     -ldynamicMesh     -lmeshTools     $(LIBLAPACK)     -lfiniteVolume     -lincompressibleTransportModels     -lincompressibleTurbulenceModel     -lincompressibleRASModels     -lincompressibleLESModels     -llduSolvers     -lmySchemes     -lmyBoundaries     -lsolidModels     -lsampling     -llagrangian     -lyaml-cpp     -lRBFmeshInterpolation     -lIDWmeshDeformation     -ltetFiniteElement     -lbasicThermophysicalModels     -lspecie     -lcompressibleRASModels

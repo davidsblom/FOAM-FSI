@@ -20,3 +20,16 @@
 *.exe
 *.out
 *.app
+
+# OpenFOAM
+lnInclude
+linux64GccDPOpt
+
+# Specific files
+formatCode
+uncrustify.cfg
+runTests.sh
+src/thirdParty/boost*
+src/thirdParty/gtest*
+src/thirdParty/precice
+src/thirdParty/yaml-cpp*

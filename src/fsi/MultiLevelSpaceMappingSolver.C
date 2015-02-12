@@ -100,12 +100,13 @@ void MultiLevelSpaceMappingSolver::finalizeTimeStep()
 
         output.resize( fineModel->fsi->fluid->data.rows(), fineModel->fsi->fluid->data.cols() );
 
-        if ( std::abs( model->fsi->x.norm() - fineModel->fsi->x.norm() ) > 1.0e-14 || !model->fsi->parallel )
-          model->fsi->solidSolver->solve( input, output );
+        bool interpolated = model->fsi->solid->interpolateVolField( fineModel->fsi->solid );
+
+        if ( !interpolated )
+          if ( std::abs( model->fsi->x.norm() - fineModel->fsi->x.norm() ) > 1.0e-14 || !model->fsi->parallel )
+            model->fsi->solidSolver->solve( input, output );
 
         model->fsi->x = fineModel->fsi->x;
-
-        model->fsi->solid->interpolateVolField( fineModel->fsi->solid );
       }
 
       if ( !synchronization )

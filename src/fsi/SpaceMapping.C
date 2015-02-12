@@ -100,15 +100,3 @@ void SpaceMapping::performPostProcessing(
 {
   performPostProcessing( y, x0, xk, false );
 }
-
-void SpaceMapping::performPostProcessing(
-  const fsi::vector & y,
-  const fsi::vector & x0,
-  fsi::vector & xk,
-  const matrix & B,
-  const fsi::vector & xktilde,
-  const fsi::vector & xkp
-  )
-{
-  assert( false );
-}

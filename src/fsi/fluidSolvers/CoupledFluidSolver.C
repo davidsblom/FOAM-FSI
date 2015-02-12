@@ -93,14 +93,7 @@ CoupledFluidSolver::CoupledFluidSolver(
 {
   assert( fluidPatchID >= 0 );
 
-  N = getInterfaceCentersSize();
-  dim = 3;
-  data.resize( N, dim );
-  data.setZero();
-
   initialize();
-
-  Info << "nu = " << nu << endl;
 }
 
 CoupledFluidSolver::~CoupledFluidSolver(){}
@@ -176,6 +169,21 @@ void CoupledFluidSolver::initialize()
   createFields();
 }
 
+void CoupledFluidSolver::getAcousticsDensityLocal( matrix & data )
+{
+  assert( false );
+}
+
+void CoupledFluidSolver::getAcousticsVelocityLocal( matrix & data )
+{
+  assert( false );
+}
+
+void CoupledFluidSolver::getAcousticsPressureLocal( matrix & data )
+{
+  assert( false );
+}
+
 void CoupledFluidSolver::getTractionLocal( matrix & traction )
 {
   vectorField tractionField = -rho.value() * nu.value()
@@ -185,11 +193,16 @@ void CoupledFluidSolver::getTractionLocal( matrix & traction )
 
   assert( tractionField.size() == nGlobalCenters[Pstream::myProcNo()] );
 
-  traction.resize( tractionField.size(), 3 );
+  traction.resize( tractionField.size(), mesh.nGeometricD() );
 
   for ( int i = 0; i < traction.rows(); i++ )
     for ( int j = 0; j < traction.cols(); j++ )
       traction( i, j ) = tractionField[i][j];
+}
+
+void CoupledFluidSolver::getWritePositionsLocalAcoustics( matrix & writePositions )
+{
+  assert( false );
 }
 
 void CoupledFluidSolver::initTimeStep()
@@ -199,7 +212,7 @@ void CoupledFluidSolver::initTimeStep()
   timeIndex++;
   t = timeIndex * runTime->deltaT().value();
 
-  Info << "\nTime = " << t << endl;
+  Info << "\nTime = " << runTime->timeName() << endl;
 
   checkTotalVolume();
   courantNo();
@@ -211,161 +224,11 @@ bool CoupledFluidSolver::isRunning()
 {
   runTime->write();
 
-    Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
-         << "  ClockTime = " << runTime->elapsedClockTime() << " s"
-         << endl << endl;
+  Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
+       << "  ClockTime = " << runTime->elapsedClockTime() << " s"
+       << endl << endl;
 
   return runTime->loop();
-}
-
-void CoupledFluidSolver::moveMesh( vectorField motion )
-{
-  bool fvMotionSolver =
-    mesh.objectRegistry::foundObject<pointVectorField>
-    (
-    "pointMotionU"
-    );
-
-  bool feMotionSolver =
-    mesh.objectRegistry::foundObject<tetPointVectorField>
-    (
-    "motionU"
-    );
-
-  bool rbfMotionSolver =
-    mesh.objectRegistry::foundObject<RBFMotionSolverExt>( "dynamicMeshDict" );
-
-  bool idwMotionSolver =
-    mesh.objectRegistry::foundObject<IDWMotionSolver>( "dynamicMeshDict" );
-
-  if ( fvMotionSolver )
-  {
-    assert( !rbfMotionSolver );
-    assert( !feMotionSolver );
-    assert( !idwMotionSolver );
-
-    // Move whole fluid mesh
-    pointField newPoints = mesh.allPoints();
-
-    const labelList & meshPoints = mesh.boundaryMesh()[fluidPatchID].meshPoints();
-
-    forAll( motion, pointI )
-    {
-      newPoints[meshPoints[pointI]] -= motion[pointI];
-    }
-
-    twoDPointCorrector twoDCorrector( mesh );
-
-    twoDCorrector.correctPoints( newPoints );
-
-    mesh.movePoints( newPoints );
-
-    pointVectorField & motionU =
-      const_cast<pointVectorField &>
-      (
-      mesh.objectRegistry::
-      lookupObject<pointVectorField>
-      (
-        "pointMotionU"
-      )
-      );
-
-    fixedValuePointPatchVectorField & motionUFluidPatch =
-      refCast<fixedValuePointPatchVectorField>
-      (
-      motionU.boundaryField()[fluidPatchID]
-      );
-
-    motionUFluidPatch == motion / runTime->deltaT().value();
-  }
-
-  if ( feMotionSolver )
-  {
-    assert( !rbfMotionSolver );
-    assert( !fvMotionSolver );
-    assert( !idwMotionSolver );
-
-    // Move whole fluid mesh
-    pointField newPoints = mesh.allPoints();
-
-    const labelList & meshPoints = mesh.boundaryMesh()[fluidPatchID].meshPoints();
-
-    forAll( motion, pointI )
-    {
-      newPoints[meshPoints[pointI]] -= motion[pointI];
-    }
-
-    twoDPointCorrector twoDCorrector( mesh );
-
-    twoDCorrector.correctPoints( newPoints );
-
-    mesh.movePoints( newPoints );
-
-    tetPointVectorField & motionU =
-      const_cast<tetPointVectorField &>
-      (
-      mesh.objectRegistry::
-      lookupObject<tetPointVectorField>
-      (
-        "motionU"
-      )
-      );
-
-    fixedValueTetPolyPatchVectorField & motionUFluidPatch =
-      refCast<fixedValueTetPolyPatchVectorField>
-      (
-      motionU.boundaryField()[fluidPatchID]
-      );
-
-    tetPolyPatchInterpolation tppi
-    (
-      refCast<const faceTetPolyPatch>( motionUFluidPatch.patch() )
-    );
-
-    motionUFluidPatch ==
-    tppi.pointToPointInterpolate
-    (
-      motion / runTime->deltaT().value()
-    );
-  }
-
-  if ( rbfMotionSolver )
-  {
-    assert( !fvMotionSolver );
-    assert( !feMotionSolver );
-    assert( !idwMotionSolver );
-
-    RBFMotionSolverExt & motionSolver =
-      const_cast<RBFMotionSolverExt &>
-      (
-      mesh.lookupObject<RBFMotionSolverExt>( "dynamicMeshDict" )
-      );
-
-    Field<vectorField> patches( mesh.boundaryMesh().size(), vectorField( 0 ) );
-    patches[fluidPatchID] = motion;
-    motionSolver.setMotion( patches );
-  }
-
-  if ( idwMotionSolver )
-  {
-    assert( !fvMotionSolver );
-    assert( !feMotionSolver );
-    assert( !rbfMotionSolver );
-
-    IDWMotionSolver & motionSolver =
-      const_cast<IDWMotionSolver &>
-      (
-      mesh.lookupObject<IDWMotionSolver>( "dynamicMeshDict" )
-      );
-
-    Field<vectorField> patches( mesh.boundaryMesh().size(), vectorField( 0 ) );
-    patches[fluidPatchID] = motion;
-    motionSolver.setMotion( patches );
-  }
-
-  assert( rbfMotionSolver || fvMotionSolver || feMotionSolver || idwMotionSolver );
-
-  mesh.update();
 }
 
 void CoupledFluidSolver::readBlockSolverControls()
@@ -389,6 +252,7 @@ void CoupledFluidSolver::solve()
   scalar relativeResidual = 1;
   scalar residualPressure = 1;
   scalar residualVelocity = 1;
+  bool underrelaxation = true;
 
   // Outer correction loop to solve the non-linear system
   for ( oCorr = 0; oCorr < nOuterCorr; oCorr++ )
@@ -396,25 +260,11 @@ void CoupledFluidSolver::solve()
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative( phi, U );
 
-    blockVectorMatrix pInU( fvm::grad( p ) );
-    blockVectorMatrix UInp( fvm::div( U ) );
-
-    // Initialize block matrix
-
-    // Create block matrix
-    BlockLduMatrix<vector4> A( mesh );
-
-    // Block matrix - create x and b
-    vector4Field & x = Up.internalField();
-    vector4Field b( x.size(), vector4::zero );
-
-    // Set block interfaces properly
-    A.interfaces() = Up.boundaryField().blockInterfaces();
-
     p.storePrevIter();
     U.storePrevIter();
 
-    // Assemble and insert momentum equation
+    // Initialize the Up block system (matrix, source and reference to Up)
+    fvBlockMatrix<vector4> UpEqn( Up );
 
     // Momentum equation
     fvVectorMatrix UEqn
@@ -424,9 +274,10 @@ void CoupledFluidSolver::solve()
       + turbulence->divDevReff( U )
     );
 
-    UEqn.relax();
+    if ( underrelaxation )
+      UEqn.relax();
 
-    blockMatrixTools::insertEquation( 0, UEqn, A, x, b );
+    UpEqn.insertEquation( 0, UEqn );
 
     // Assemble and insert pressure equation
 
@@ -440,7 +291,7 @@ void CoupledFluidSolver::solve()
     surfaceScalarField presSource
     (
       "presSource",
-      rUAf * ( fvc::interpolate( fvc::grad( p ) ) & mesh.Sf() )
+      rUAf * ( fvc::interpolate( fvc::grad( p, "grad(pSource)" ) ) & mesh.Sf() )
     );
 
     fvScalarMatrix pEqn
@@ -452,35 +303,38 @@ void CoupledFluidSolver::solve()
 
     pEqn.setReference( pRefCell, pRefValue );
 
-    blockMatrixTools::insertEquation( 3, pEqn, A, x, b );
+    UpEqn.insertEquation( 3, pEqn );
 
-    // Insert coupling, updating the boundary contributions
-    // Last argument in insertBlockCoupling says if the first location
+    // Calculate grad p coupling matrix. Needs to be here if one uses
+    // gradient schemes with limiters.  VV, 9/June/2014
+    BlockLduSystem<Foam::vector, Foam::vector> pInU( fvm::grad( p ) );
+
+    // Calculate div U coupling.  Could be calculated only once since
+    // it is only geometry dependent.  VV, 9/June/2014
+    BlockLduSystem<Foam::vector, scalar> UInp( fvm::UDiv( U ) );
+
+    // Last argument in insertBlockCoupling says if the column direction
     // should be incremented. This is needed for arbitrary positioning
     // of U and p in the system. This could be better. VV, 30/April/2014
-    blockMatrixTools::insertBlockCoupling( 3, 0, UInp, U, A, b, false );
-    blockMatrixTools::insertBlockCoupling( 0, 3, pInU, p, A, b, true );
+    UpEqn.insertBlockCoupling( 0, 3, pInU, true );
+    UpEqn.insertBlockCoupling( 3, 0, UInp, false );
 
     // Solve the block matrix
-    BlockSolverPerformance<vector4> solverPerf =
-      BlockLduSolver<vector4>::New
-      (
-      word( "Up" ),
-      A,
-      mesh.solutionDict().solver( "Up" )
-      )->solve( Up, b );
-    solverPerf.print();
+    vector4 initialResidual4 = UpEqn.solve().initialResidual();
+
+    // UpEqn.initialResidual();
 
     // Retrieve solution
-    blockMatrixTools::retrieveSolution( 0, U.internalField(), Up );
-    blockMatrixTools::retrieveSolution( 3, p.internalField(), Up );
+    UpEqn.retrieveSolution( 0, U.internalField() );
+    UpEqn.retrieveSolution( 3, p.internalField() );
 
     U.correctBoundaryConditions();
     p.correctBoundaryConditions();
 
     phi = ( fvc::interpolate( U ) & mesh.Sf() ) + pEqn.flux() + presSource;
 
-    p.relax();
+    if ( underrelaxation )
+      p.relax();
 
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative( phi, U );
@@ -495,15 +349,18 @@ void CoupledFluidSolver::solve()
     relativeResidual = max( residualPressure, residualVelocity );
 
     scalar initResidual = 0;
-    forAll( solverPerf.initialResidual(), i )
+    forAll( initialResidual4, i )
     {
-      initResidual += solverPerf.initialResidual()[i];
+      initResidual = max( initResidual, initialResidual4[i] );
     }
 
     relativeResidual = min( relativeResidual, initResidual );
 
     if ( oCorr == 0 )
       initialResidual = relativeResidual;
+
+    if ( relativeResidual < convergenceTolerance && oCorr > 1 && !underrelaxation )
+      break;
 
     if ( relativeResidual < convergenceTolerance && oCorr > 1 )
       break;

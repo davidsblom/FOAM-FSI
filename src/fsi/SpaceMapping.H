@@ -57,15 +57,6 @@ public:
     bool residualCriterium
     ) = 0;
 
-  virtual void performPostProcessing(
-    const fsi::vector & y,
-    const fsi::vector & x0,
-    fsi::vector & xk,
-    const matrix & B,
-    const fsi::vector & xktilde,
-    const fsi::vector & xkp
-    );
-
   shared_ptr<SurrogateModel> fineModel;
   shared_ptr<SurrogateModel> coarseModel;
 

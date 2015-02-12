@@ -1,10 +1,19 @@
 #!/bin/bash
 
-GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=0 tests > tests_0.log 2>&1 &
-GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=1 tests > tests_1.log 2>&1 &
-GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=2 tests > tests_2.log 2>&1 &
-GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=3 tests > tests_3.log 2>&1 &
-GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=4 tests > tests_4.log 2>&1 &
-GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=5 tests > tests_5.log 2>&1 &
-GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=6 tests > tests_6.log 2>&1 &
-GTEST_TOTAL_SHARDS=8 GTEST_SHARD_INDEX=7 tests > tests_7.log 2>&1 &
+rm -rf *.log
+
+NB_CORES=`grep -c ^processor /proc/cpuinfo`
+
+CORE_COUNT=`expr $NB_CORES - 1`
+
+for i in `seq 0 $CORE_COUNT`
+  do
+    GTEST_TOTAL_SHARDS=$NB_CORES GTEST_SHARD_INDEX=${i} tests > tests_${i}.log 2>&1 &
+  done
+
+wait
+
+for i in `seq 0 $CORE_COUNT`
+  do
+    tail tests_${i}.log
+  done

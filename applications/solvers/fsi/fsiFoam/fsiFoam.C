@@ -19,7 +19,6 @@
 #include "steadyCoupledFluidSolver.H"
 #include "FsiSolver.H"
 #include "AndersonPostProcessing.H"
-#include "IQNILSPostProcessing.H"
 #include "ImplicitMultiLevelFsiSolver.H"
 #include "MLIQNILSSolver.H"
 #include "ManifoldMapping.H"
@@ -28,12 +27,18 @@
 #include "MultiLevelSolver.H"
 #include "MultiLevelSpaceMappingSolver.H"
 #include "OutputSpaceMapping.H"
+#include "RBFCoarsening.H"
 #include "RBFInterpolation.H"
 #include "RelativeConvergenceMeasure.H"
 #include "SolidSolver.H"
 #include "steadySolidSolver.H"
 #include "SpaceMappingSolver.H"
-#include "ResponseParameterMapping.H"
+#include "CompressibleFluidSolver.H"
+#include "TPS.H"
+#include "WendlandC0Function.H"
+#include "WendlandC2Function.H"
+#include "WendlandC4Function.H"
+#include "WendlandC6Function.H"
 
 using std::list;
 
@@ -69,6 +74,33 @@ void setConvergenceMeasures(
   assert( convergenceMeasures->size() > 0 );
 }
 
+std::shared_ptr<rbf::RBFInterpolation> createRBFInterpolator(
+  std::string interpolationFunction,
+  double radius
+  )
+{
+  std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
+
+  if ( interpolationFunction == "thin-plate-spline" )
+    rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
+
+  if ( interpolationFunction == "wendland-c0" )
+    rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::WendlandC0Function( radius ) );
+
+  if ( interpolationFunction == "wendland-c2" )
+    rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::WendlandC2Function( radius ) );
+
+  if ( interpolationFunction == "wendland-c4" )
+    rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::WendlandC4Function( radius ) );
+
+  if ( interpolationFunction == "wendland-c6" )
+    rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::WendlandC6Function( radius ) );
+
+  assert( rbfFunction );
+
+  return std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
+}
+
 int main(
   int argc,
   char * argv[]
@@ -93,21 +125,46 @@ int main(
   string filename = static_cast<std::string>( args->rootPath() ) + "/" + static_cast<std::string>( args->globalCaseName() ) + "/constant/fsi.yaml";
 
   YAML::Node config = YAML::LoadFile( filename );
+  YAML::Node configInterpolation( config["interpolation"] );
 
   assert( config["fluid-solver"] );
+  assert( config["solid-solver"] );
 
   std::string fluidSolver = config["fluid-solver"].as<std::string>();
   std::string solidSolver = config["solid-solver"].as<std::string>();
 
-  assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "steady-state-coupled-pressure-velocity-solver" );
+  assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "steady-state-coupled-pressure-velocity-solver" || fluidSolver == "compressible-solver" );
   assert( solidSolver == "segregated-solver" || solidSolver == "steady-state-segregated-solver" );
+
+  assert( configInterpolation["coarsening"] );
+  assert( configInterpolation["coarsening"]["enabled"] );
+  assert( configInterpolation["coarsening"]["tol"] );
+  assert( configInterpolation["coarsening"]["min-points"] );
+  assert( configInterpolation["coarsening"]["max-points"] );
+  assert( configInterpolation["radial-basis-function"] );
+  assert( configInterpolation["radial-basis-function"]["function"] );
+
+  bool coarsening = configInterpolation["coarsening"]["enabled"].as<bool>();
+  double coarseningTol = configInterpolation["coarsening"]["tol"].as<double>();
+  int coarseningMinPoints = configInterpolation["coarsening"]["min-points"].as<int>();
+  int coarseningMaxPoints = configInterpolation["coarsening"]["max-points"].as<int>();
+  std::string interpolationFunction = configInterpolation["radial-basis-function"]["function"].as<std::string>();
+  double radius = 1;
+
+  assert( interpolationFunction == "thin-plate-spline" || interpolationFunction == "wendland-c0" || interpolationFunction == "wendland-c2" || interpolationFunction == "wendland-c4" || interpolationFunction == "wendland-c6" );
+
+  if ( interpolationFunction != "thin-plate-spline" )
+  {
+    assert( configInterpolation["radial-basis-function"]["radius"] );
+    radius = configInterpolation["radial-basis-function"]["radius"].as<double>();
+  }
 
   if ( config["multi-level-acceleration"] )
   {
     std::string algorithm = config["multi-level-acceleration"]["algorithm"].as<std::string>();
 
     assert( !config["coupling-scheme-implicit"] );
-    assert( algorithm == "manifold-mapping" || algorithm == "output-space-mapping" || algorithm == "ML-IQN-ILS" || algorithm == "aggressive-space-mapping" || algorithm == "ASM-ILS" || algorithm == "response-parameter-mapping" );
+    assert( algorithm == "manifold-mapping" || algorithm == "output-space-mapping" || algorithm == "ML-IQN-ILS" || algorithm == "aggressive-space-mapping" || algorithm == "ASM-ILS" );
 
     int nbLevels = config["multi-level-acceleration"]["levels"].size();
 
@@ -146,6 +203,7 @@ int main(
     assert( configPostProcessing["reuse-information-starting-from-time-index"] );
     assert( configPostProcessing["max-used-iterations"] );
     assert( configPostProcessing["beta"] );
+    assert( configPostProcessing["update-jacobian"] );
 
     int order = 0;
 
@@ -169,7 +227,8 @@ int main(
     double singularityLimit = configPostProcessing["singularity-limit"].as<double>();
     int reuseInformationStartingFromTimeIndex = configPostProcessing["reuse-information-starting-from-time-index"].as<int>();
     int maxUsedIterations = configPostProcessing["max-used-iterations"].as<int>();
-    double beta = configPostProcessing["beta"].as<int>();
+    double beta = configPostProcessing["beta"].as<double>();
+    bool updateJacobian = configPostProcessing["update-jacobian"].as<bool>();
 
     assert( extrapolation >= 0 );
     assert( extrapolation <= 2 );
@@ -189,6 +248,9 @@ int main(
     if ( fluidSolver == "steady-state-coupled-pressure-velocity-solver" )
       fluid = std::shared_ptr<foamFluidSolver> ( new steadyCoupledFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
 
+    if ( fluidSolver == "compressible-solver" )
+      fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
+
     if ( solidSolver == "segregated-solver" )
       solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid-level-" + std::to_string( level ), args, runTime ) );
 
@@ -200,12 +262,30 @@ int main(
 
     setConvergenceMeasures( configMeasures, convergenceMeasures );
 
-    multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, 0, nbLevels - 1 ) );
-    multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, 1, nbLevels - 1 ) );
+    std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
+    std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator;
+    std::shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
+    std::shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;
+
+    rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, nbLevels - 1 ) );
+
+    rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, nbLevels - 1 ) );
 
     multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
-    postProcessing = std::shared_ptr<PostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta ) );
+    postProcessing = std::shared_ptr<PostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
 
     fineModel = std::shared_ptr<ImplicitMultiLevelFsiSolver> ( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
 
@@ -224,6 +304,7 @@ int main(
       assert( configPostProcessing["reuse-information-starting-from-time-index"] );
       assert( configPostProcessing["max-used-iterations"] );
       assert( configPostProcessing["beta"] );
+      assert( configPostProcessing["update-jacobian"] );
 
       bool parallel = config["parallel-coupling"].as<bool>();
       int extrapolation = configLevel["extrapolation-order"].as<int>();
@@ -233,8 +314,9 @@ int main(
       double singularityLimit = configPostProcessing["singularity-limit"].as<double>();
       int reuseInformationStartingFromTimeIndex = configPostProcessing["reuse-information-starting-from-time-index"].as<int>();
       int maxUsedIterations = configPostProcessing["max-used-iterations"].as<int>();
-      double beta = configPostProcessing["beta"].as<int>();
+      double beta = configPostProcessing["beta"].as<double>();
       bool scaling = false;
+      bool updateJacobian = configPostProcessing["update-jacobian"].as<bool>();
 
       if ( parallel )
         scaling = true;
@@ -257,6 +339,9 @@ int main(
       if ( fluidSolver == "steady-state-coupled-pressure-velocity-solver" )
         fluid = std::shared_ptr<foamFluidSolver> ( new steadyCoupledFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
 
+      if ( fluidSolver == "compressible-solver" )
+        fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
+
       if ( solidSolver == "segregated-solver" )
         solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid-level-" + std::to_string( level ), args, runTime ) );
 
@@ -268,12 +353,30 @@ int main(
 
       setConvergenceMeasures( configMeasures, convergenceMeasures );
 
-      multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fineModel->fsi->fluid, 0, level ) );
-      multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fineModel->fsi->fluid, 1, level ) );
+      std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
+      std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator;
+      std::shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
+      std::shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;
+
+      rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+      rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+      rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+      rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+      multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fineModel->fsi->fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, level ) );
+
+      rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+      rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+      rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+      rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+      multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fineModel->fsi->fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, level ) );
 
       multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
-      postProcessing = std::shared_ptr<PostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta ) );
+      postProcessing = std::shared_ptr<PostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
 
       implicitMultiLevelFsiSolver = std::shared_ptr<ImplicitMultiLevelFsiSolver> ( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
 
@@ -287,7 +390,7 @@ int main(
       YAML::Node configLevel( config["multi-level-acceleration"]["levels"][level] );
       YAML::Node configPostProcessing( config["multi-level-acceleration"]["levels"][level]["post-processing"] );
 
-      if ( algorithm == "manifold-mapping" || algorithm == "output-space-mapping" || algorithm == "aggressive-space-mapping" || algorithm == "ASM-ILS" || algorithm == "response-parameter-mapping" )
+      if ( algorithm == "manifold-mapping" || algorithm == "output-space-mapping" || algorithm == "aggressive-space-mapping" || algorithm == "ASM-ILS" )
       {
         std::shared_ptr<SpaceMappingSolver> spaceMappingSolver;
         std::shared_ptr<SpaceMapping> spaceMapping;
@@ -303,10 +406,7 @@ int main(
             spaceMapping = std::shared_ptr<SpaceMapping>( new ASMILS( models->at( level ), models->at( 0 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
 
           if ( algorithm == "manifold-mapping" )
-            spaceMapping = std::shared_ptr<SpaceMapping>( new ManifoldMapping( models->at( level ), models->at( 0 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
-
-          if ( algorithm == "response-parameter-mapping" )
-            spaceMapping = std::shared_ptr<SpaceMapping>( new ResponseParameterMapping( models->at( level ), models->at( 0 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+            spaceMapping = std::shared_ptr<SpaceMapping>( new ManifoldMapping( models->at( level ), models->at( 0 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
 
           if ( algorithm == "output-space-mapping" )
             spaceMapping = std::shared_ptr<SpaceMapping>( new OutputSpaceMapping( models->at( level ), models->at( 0 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
@@ -327,10 +427,7 @@ int main(
             spaceMapping = std::shared_ptr<SpaceMapping>( new ASMILS( models->at( level ), solvers->at( level - 1 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
 
           if ( algorithm == "manifold-mapping" )
-            spaceMapping = std::shared_ptr<SpaceMapping>( new ManifoldMapping( models->at( level ), solvers->at( level - 2 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
-
-          if ( algorithm == "response-parameter-mapping" )
-            spaceMapping = std::shared_ptr<SpaceMapping>( new ResponseParameterMapping( models->at( level ), solvers->at( level - 2 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+            spaceMapping = std::shared_ptr<SpaceMapping>( new ManifoldMapping( models->at( level ), solvers->at( level - 2 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
 
           if ( algorithm == "output-space-mapping" )
             spaceMapping = std::shared_ptr<SpaceMapping>( new OutputSpaceMapping( models->at( level ), solvers->at( level - 2 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
@@ -344,7 +441,7 @@ int main(
 
     std::shared_ptr<Solver> solver;
 
-    if ( algorithm == "manifold-mapping" || algorithm == "output-space-mapping" || algorithm == "aggressive-space-mapping" || algorithm == "ASM-ILS" || algorithm == "response-parameter-mapping" )
+    if ( algorithm == "manifold-mapping" || algorithm == "output-space-mapping" || algorithm == "aggressive-space-mapping" || algorithm == "ASM-ILS" )
       solver = std::shared_ptr<Solver>( new MultiLevelSpaceMappingSolver( solvers, models, synchronization ) );
 
     if ( algorithm == "ML-IQN-ILS" )
@@ -378,13 +475,16 @@ int main(
     bool scaling = false;
     std::string algorithm = configPostProcessing["algorithm"].as<std::string>();
     double beta = 1;
+    bool updateJacobian = false;
 
-    assert( algorithm == "IQN-ILS" or algorithm == "QN" or algorithm == "Aitken" or algorithm == "Anderson" );
+    assert( algorithm == "QN" or algorithm == "Aitken" or algorithm == "Anderson" );
 
     if ( algorithm == "Anderson" )
     {
       assert( configPostProcessing["beta"] );
+      assert( configPostProcessing["update-jacobian"] );
       beta = configPostProcessing["beta"].as<double>();
+      updateJacobian = configPostProcessing["update-jacobian"].as<bool>();
     }
 
     if ( parallel )
@@ -419,6 +519,9 @@ int main(
     if ( fluidSolver == "steady-state-coupled-pressure-velocity-solver" )
       fluid = std::shared_ptr<foamFluidSolver> ( new steadyCoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
+    if ( fluidSolver == "compressible-solver" )
+      fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+
     if ( solidSolver == "segregated-solver" )
       solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid", args, runTime ) );
 
@@ -430,19 +533,34 @@ int main(
 
     setConvergenceMeasures( configMeasures, convergenceMeasures );
 
-    multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, 0, 0 ) );
-    multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, 1, 0 ) );
+    std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
+    std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator;
+    std::shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
+    std::shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;
+
+    rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+
+    rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, coarseningTol, coarseningMinPoints, coarseningMaxPoints ) );
+
+    multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
 
     multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
     if ( algorithm == "Aitken" )
       postProcessing = std::shared_ptr<PostProcessing> ( new AitkenPostProcessing( multiLevelFsiSolver, initialRelaxation, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex ) );
 
-    if ( algorithm == "IQN-ILS" )
-      postProcessing = std::shared_ptr<PostProcessing> ( new IQNILSPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling ) );
-
     if ( algorithm == "Anderson" )
-      postProcessing = std::shared_ptr<PostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta ) );
+      postProcessing = std::shared_ptr<PostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
 
     if ( algorithm == "QN" )
       postProcessing = std::shared_ptr<PostProcessing> ( new BroydenPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex ) );

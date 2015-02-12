@@ -1,7 +1,8 @@
-EXE_INC = -std=c++0x \
-    -I$(WM_PROJECT_USER_DIR)/src/fsi/lnInclude \
-    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/eigen \
+EXE_INC = -std=c++11 \
+    -I../../../../src/fsi/lnInclude \
+    -I../../../../src/thirdParty/eigen \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
@@ -12,26 +13,24 @@ EXE_INC = -std=c++0x \
     -I$(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/solidModels/lnInclude \
-    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/boost \
-    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/precice/src \
-    -I$(WM_PROJECT_USER_DIR)/src/thirdParty/boost \
-    -I$(WM_PROJECT_USER_DIR)/src/thirdParty \
-    -I$(WM_PROJECT_USER_DIR)/src/RBFmeshInterpolation/lnInclude/ \
+    -I../../../../src/thirdParty/boost \
+    -I../../../../src/thirdParty/precice/src \
+    -I../../../../src/thirdParty/boost \
+    -I../../../../src/thirdParty \
+    -I../../../../src/RBFMeshMotionSolver/lnInclude/ \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
-    -I$(LIB_SRC)/VectorN/lnInclude
+    -I../../../../src/thirdParty/yaml-cpp/include
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -L$(WM_PROJECT_USER_DIR)/src/thirdParty/precice/build/release \
-    -L$(HOME)/Apps/Python/ActivePython-2.7/lib \
+    -L../../../../src/thirdParty/yaml-cpp/build/ \
+    -L../../../../src/thirdParty/precice/build/release-nopetsc-nopython \
     -lfsi \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
     -lmeshTools \
-    -llapack \
-    -lblas \
     -lfiniteVolume \
     -lincompressibleTransportModels \
     -lincompressibleTurbulenceModel \
@@ -45,7 +44,9 @@ EXE_LIBS = \
     -lsampling \
     -llagrangian \
     -lprecice \
-    -lpython2.7 \
-    -lRBFmeshInterpolation \
+    -lRBFMeshMotionSolver \
     -ltetFiniteElement \
-    -lVectorN
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels \
+    -lyaml-cpp
