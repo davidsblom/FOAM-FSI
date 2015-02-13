@@ -255,6 +255,13 @@ void RBFMeshMotionSolver::solve()
     positions.setZero();
     int offset = 0;
 
+    // Create a list which indicates whether the positions is local or
+    // located on another processor.
+    // 1 = local position
+    // 0 = position lies on another processor
+    Eigen::VectorXi positionsParallelLocation( positions.rows() );
+    positionsParallelLocation.setZero();
+
     vectorField positionsField( positions.rows(), vector::zero );
 
     forAll( movingPatchIDs, i )
@@ -264,7 +271,9 @@ void RBFMeshMotionSolver::solve()
       // Set the positions for patch i
       forAll( faceCentres, j )
       {
-        positionsField[j + offset + globalMovingOffset] = faceCentres[j];
+        int index = j + offset + globalMovingOffset;
+        positionsField[index] = faceCentres[j];
+        positionsParallelLocation( index ) = 1;
       }
 
       offset += faceCentres.size();
@@ -279,7 +288,9 @@ void RBFMeshMotionSolver::solve()
       // Set the positions for patch i
       forAll( faceCentres, j )
       {
-        positionsField[j + offset + globalStaticOffset] = faceCentres[j];
+        int index = j + offset + globalStaticOffset;
+        positionsField[index] = faceCentres[j];
+        positionsParallelLocation( index ) = 1;
       }
 
       offset += faceCentres.size();
@@ -322,7 +333,7 @@ void RBFMeshMotionSolver::solve()
       }
     }
 
-    rbf->compute( positions, positionsInterpolation );
+    rbf->computeInParallel( positions, positionsInterpolation, positionsParallelLocation );
 
     rbf->setNbMovingAndStaticFaceCenters( nbMovingFaceCenters, nbStaticFaceCenters );
   }

@@ -29,6 +29,12 @@ public:
       const matrix & positionsInterpolation
       );
 
+    void computeInParallel(
+      const matrix & positions,
+      const matrix & positionsInterpolation,
+      const Eigen::VectorXi & positionsParallelLocation
+      );
+
     void interpolate(
       const matrix & values,
       matrix & valuesInterpolation
