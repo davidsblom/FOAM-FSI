@@ -1,5 +1,5 @@
 EXE_INC = -std=c++11 \
-    -Ieigen/ \
+    -I../thirdParty/eigen/ \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
