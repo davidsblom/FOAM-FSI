@@ -157,7 +157,7 @@ namespace rbf
 
     // Initialize matrices
 
-    matrix H( n_A, n_A ), Phi_AA( n_A, n_A );
+    matrix H( n_A, n_A );
     H.setZero();
     Phi.conservativeResize( n_B, n_A );
 
