@@ -13,7 +13,7 @@ FoamFile
  object controlDict;
 }
 
-application delftFsiFoam2;
+application fsiFoam;
 
 startFrom latestTime;
 
