@@ -22,7 +22,7 @@ Features
 -----------
 
 * Partitioned Fluid-Structure Interaction solvers build with standard foam-extend fluid and solid solvers.
-* Algorithms for strongly coupled FSI: IQN-ILS or Anderson acceleration, manifold mapping acceleration, and space mapping acceleration.
+* Algorithms for strongly coupled FSI: Aitken under relaxation, IQN-ILS or Anderson acceleration, manifold mapping acceleration, and space mapping acceleration.
 * Consistent first and second order time integration schemes for incompressible flow, structural dynamics and FSI.
 * Efficient implementation of mesh motion solver based on radial basis function interpolation.
 
