@@ -9,6 +9,7 @@ Features
 * Consistent first and second order time integration schemes for incompressible flow, structural dynamics and FSI.
 * Efficient implementation of mesh motion solver based on radial basis function interpolation.
 * Run fluid-structure-acoustics simulations with the coupling tool preCICE.
+* Block-coupled transient incompressible flow solver.
 
 Installation
 -----------
