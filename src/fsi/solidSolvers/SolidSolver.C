@@ -215,6 +215,11 @@ void SolidSolver::readSolidMechanicsControls()
 
   nCorr = readInt( stressControl.lookup( "nCorrectors" ) );
   convergenceTolerance = readScalar( stressControl.lookup( "U" ) );
+
+  // Ensure that the absolute tolerance of the linear solver is less
+  // than the used convergence tolerance for the non-linear system.
+  scalar linearTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
+  assert( linearTolerance < convergenceTolerance );
 }
 
 void SolidSolver::resetSolution()
