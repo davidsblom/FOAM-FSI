@@ -94,6 +94,11 @@ CoupledFluidSolver::CoupledFluidSolver(
   assert( fluidPatchID >= 0 );
 
   initialize();
+
+  // Ensure that the absolute tolerance of the linear solver is less than the
+  // used convergence tolerance for the non-linear system.
+  scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "Up" ).lookup( "tolerance" ) );
+  assert( absTolerance < convergenceTolerance );
 }
 
 CoupledFluidSolver::~CoupledFluidSolver(){}
@@ -321,8 +326,6 @@ void CoupledFluidSolver::solve()
 
     // Solve the block matrix
     vector4 initialResidual4 = UpEqn.solve().initialResidual();
-
-    // UpEqn.initialResidual();
 
     // Retrieve solution
     UpEqn.retrieveSolution( 0, U.internalField() );

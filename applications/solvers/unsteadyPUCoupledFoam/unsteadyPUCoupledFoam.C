@@ -3,6 +3,7 @@
 #include "fvBlockMatrix.H"
 #include "singlePhaseTransportModel.H"
 #include "RASModel.H"
+#include <assert.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
