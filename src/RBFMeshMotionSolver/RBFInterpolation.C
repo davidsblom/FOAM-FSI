@@ -35,7 +35,6 @@ namespace rbf
     n_A = positions.rows();
     n_B = positionsInterpolation.rows();
     Hhat.resize( n_B, n_A );
-    Hhat.setZero();
     dimGrid = positions.cols();
 
     // Radial basis function interpolation
@@ -43,12 +42,10 @@ namespace rbf
     // Initialize variables
 
     matrix Q_A( n_A, dimGrid + 1 ), Q_B( n_B, dimGrid + 1 );
-    Q_A.setZero();
-    Q_B.setZero();
 
     // Initialize sparse matrices
 
-    matrix H( n_A + dimGrid + 1, n_A + dimGrid + 1 ), Phi( n_B, n_A + dimGrid + 1 ), Phi_AA( n_A, n_A );
+    matrix H( n_A + dimGrid + 1, n_A + dimGrid + 1 ), Phi( n_B, n_A + dimGrid + 1 );
     H.setZero();
 
     // RBF function evaluation
@@ -57,10 +54,15 @@ namespace rbf
 
     for ( int i = 0; i < n_A; i++ )
     {
-      for ( int j = 0; j < n_A; j++ )
+      for ( int j = i; j < n_A; j++ )
       {
         r = ( positions.row( i ) - positions.row( j ) ).norm();
         H( j, i ) = rbfFunction->evaluate( r );
+      }
+
+      for ( int j = 0; j < i; j++ )
+      {
+        H( j, i ) = H( i, j );
       }
     }
 
@@ -167,10 +169,15 @@ namespace rbf
 
     for ( int i = 0; i < n_A; i++ )
     {
-      for ( int j = 0; j < n_A; j++ )
+      for ( int j = i; j < n_A; j++ )
       {
         r = ( positions.row( i ) - positions.row( j ) ).norm();
         H( j, i ) = rbfFunction->evaluate( r );
+      }
+
+      for ( int j = 0; j < i; j++ )
+      {
+        H( j, i ) = H( i, j );
       }
     }
 
