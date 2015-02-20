@@ -102,23 +102,6 @@ bool SolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> sol
 
   const volVectorField & fieldSource = fineModel->mesh.lookupObject<volVectorField>( "U" );
 
-  /*
-   *
-   * // Create the interpolation scheme
-   * meshToMesh meshToMeshInterp( fineModel->mesh, mesh );
-   *
-   *
-   *
-   * // Interpolate field
-   * meshToMeshInterp.interpolate
-   * (
-   * U,
-   * fieldSource,
-   * meshToMesh::INTERPOLATE
-   * );
-   *
-   */
-
   // Gather all the cell centers of the source
 
   labelList cellCentresSourceSize( Pstream::nProcs(), 0 );
