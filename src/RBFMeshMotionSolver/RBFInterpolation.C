@@ -34,7 +34,6 @@ namespace rbf
 
     n_A = positions.rows();
     n_B = positionsInterpolation.rows();
-    Hhat.resize( n_B, n_A );
     dimGrid = positions.cols();
 
     // Radial basis function interpolation
@@ -107,6 +106,7 @@ namespace rbf
     // Matrix matrix multiplication
     // Hhat = Phi * inv(H)
 
+    Hhat.resize( n_B, n_A );
     Hhat.setZero();
 
     for ( int i = 0; i < Hhat.rows(); i++ )
@@ -151,8 +151,6 @@ namespace rbf
 
     n_A = positions.rows();
     n_B = positionsInterpolation.rows();
-    Hhat.resize( n_B, n_A );
-    Hhat.setZero();
     dimGrid = positions.cols();
 
     // Radial basis function interpolation
