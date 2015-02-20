@@ -8,6 +8,7 @@ Features
 * Algorithms for strongly coupled FSI: Aitken under relaxation, IQN-ILS or Anderson acceleration, manifold mapping acceleration, and space mapping acceleration.
 * Consistent first and second order time integration schemes for incompressible flow, structural dynamics and FSI.
 * Efficient implementation of mesh motion solver based on radial basis function interpolation.
+* Run fluid-structure-acoustics simulations with the coupling tool preCICE.
 
 Installation
 -----------
