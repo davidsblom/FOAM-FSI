@@ -17,15 +17,26 @@ First, compile foam-extend-3.1, the nextRelease branch.
 
 To compile the FSI library:
 
-1. cd src/thirdParty
-2. ./Allmake
-3. cd -
-4. ./Allwmake
+``` bash
+cd src/thirdParty
+./Allmake
+cd -
+./Allwmake
+```
 
 Prerequisites
 -----------
 
 gcc 4.8 or higher due to C++11 features.
+
+Test suite
+-----------
+
+A test suite is available implementing a large number of unit and functional tests within the googletest framework. In case you run into problems with the FSI solver, preferably run the test suite and attach a log of the test results to your bug report.
+To run the test suite:
+``` bash
+tests
+```
 
 Credits
 -----------
