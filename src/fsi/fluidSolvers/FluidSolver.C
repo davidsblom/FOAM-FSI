@@ -112,13 +112,6 @@ FluidSolver::FluidSolver(
   correctPhi( false ),
   convergenceTolerance( 1.0e-5 )
 {
-  assert( fluidPatchID >= 0 );
-
-  N = getInterfaceCentersSize();
-  dim = 3;
-  data.resize( N, dim );
-  data.setZero();
-
   initialize();
 }
 
