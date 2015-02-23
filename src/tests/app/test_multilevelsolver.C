@@ -49,41 +49,41 @@ protected:
 
     rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
     rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, false, tol, coarseningMinPoints, coarseningMaxPoints ) );
 
     rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
     rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, false, tol, coarseningMinPoints, coarseningMaxPoints ) );
 
     fluidSolver = new MultiLevelSolver( fluid, fluidFine, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 );
 
     rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
     rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, false, tol, coarseningMinPoints, coarseningMaxPoints ) );
 
     rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
     rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, false, tol, coarseningMinPoints, coarseningMaxPoints ) );
 
     fluidFineSolver = new MultiLevelSolver( fluidFine, fluidFine, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 );
 
     rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
     rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, false, tol, coarseningMinPoints, coarseningMaxPoints ) );
 
     rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
     rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, false, tol, coarseningMinPoints, coarseningMaxPoints ) );
 
     solidSolver = new MultiLevelSolver( solid, solidFine, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 );
 
     rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
     rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, false, tol, coarseningMinPoints, coarseningMaxPoints ) );
 
     rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
     rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, false, tol, coarseningMinPoints, coarseningMaxPoints ) );
 
     solidFineSolver = new MultiLevelSolver( solidFine, solidFine, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 );
   }

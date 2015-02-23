@@ -58,7 +58,7 @@ protected:
     int coarseningMinPoints = std::tr1::get<2>( GetParam() );
     int coarseningMaxPoints = std::tr1::get<3>( GetParam() );
 
-    rbf = std::shared_ptr<RBFCoarsening>( new RBFCoarsening( rbfInterpolator, enabled, tol, coarseningMinPoints, coarseningMaxPoints ) );
+    rbf = std::shared_ptr<RBFCoarsening>( new RBFCoarsening( rbfInterpolator, enabled, false, tol, coarseningMinPoints, coarseningMaxPoints ) );
   }
 
   virtual void TearDown()

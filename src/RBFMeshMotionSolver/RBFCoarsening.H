@@ -19,20 +19,27 @@ public:
     RBFCoarsening(
       std::shared_ptr<RBFInterpolation> rbf,
       bool enabled,
+      bool livePointSelection,
       double tol,
       int coarseningMinPoints,
       int coarseningMaxPoints
       );
 
+    RBFCoarsening(
+      std::shared_ptr<RBFInterpolation> rbf,
+      bool enabled,
+      bool livePointSelection,
+      double tol,
+      double tolLivePointSelection,
+      int coarseningMinPoints,
+      int coarseningMaxPoints
+      );
+
+    void greedySelection( const matrix & values );
+
     void compute(
       const matrix & positions,
       const matrix & positionsInterpolation
-      );
-
-    void computeInParallel(
-      const matrix & positions,
-      const matrix & positionsInterpolation,
-      const Eigen::VectorXi & positionsParallelLocation
       );
 
     void interpolate(
@@ -46,12 +53,18 @@ public:
       );
 
     std::shared_ptr<RBFInterpolation> rbf;
+    std::shared_ptr<RBFInterpolation> rbfCoarse;
     bool enabled;
+    bool livePointSelection;
     double tol;
+    double tolLivePointSelection;
     int coarseningMinPoints;
     int coarseningMaxPoints;
     Eigen::VectorXi selectedPositions;
     int nbStaticFaceCentersRemove;
+    matrix positions;
+    matrix positionsInterpolation;
+    matrix values;
   };
 }
 

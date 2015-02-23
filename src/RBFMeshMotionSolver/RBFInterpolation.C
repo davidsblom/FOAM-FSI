@@ -181,7 +181,8 @@ namespace rbf
 
     // Calculate coefficients gamma and beta
 
-    matrix B = H.fullPivLu().solve( values );
+    lu.compute( H );
+    matrix B = lu.solve( values );
 
     // Evaluate Phi_BA which contains the evaluation of the radial basis function
     // This method is only used by the greedy algorithm, and the matrix Phi
@@ -196,5 +197,22 @@ namespace rbf
     }
 
     valuesInterpolation = Phi * B;
+
+    computed = true;
+  }
+
+  void RBFInterpolation::interpolate2(
+    const matrix & values,
+    matrix & valuesInterpolation
+    )
+  {
+    assert( computed );
+
+    matrix B = lu.solve( values );
+
+    valuesInterpolation = Phi * B;
+
+    assert( valuesInterpolation.rows() == n_B );
+    assert( values.cols() == valuesInterpolation.cols() );
   }
 }

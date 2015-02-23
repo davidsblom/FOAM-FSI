@@ -40,6 +40,11 @@ public:
       matrix & valuesInterpolation
       );
 
+    void interpolate2(
+      const matrix & values,
+      matrix & valuesInterpolation
+      );
+
     std::shared_ptr<RBFFunctionInterface> rbfFunction;
     bool computed;
     int n_A;
@@ -47,6 +52,7 @@ public:
     int dimGrid;
     matrix Hhat;
     matrix Phi;
+    Eigen::FullPivLU<matrix> lu;
   };
 }
 

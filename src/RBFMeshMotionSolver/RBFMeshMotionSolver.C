@@ -111,9 +111,11 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
   bool coarsening = readBool( subDict( "coarsening" ).lookup( "enabled" ) );
   double tol = readScalar( subDict( "coarsening" ).lookup( "tol" ) );
+  bool livePointSelection = readBool( subDict( "coarsening" ).lookup( "livePointSelection" ) );
+  double tolLivePointSelection = readScalar( subDict( "tolLivePointSelection" ).lookup( "tol" ) );
   int coarseningMinPoints = readLabel( subDict( "coarsening" ).lookup( "minPoints" ) );
   int coarseningMaxPoints = readLabel( subDict( "coarsening" ).lookup( "maxPoints" ) );
-  rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, tol, coarseningMinPoints, coarseningMaxPoints ) );
+  rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints ) );
 }
 
 RBFMeshMotionSolver::~RBFMeshMotionSolver()
@@ -255,13 +257,6 @@ void RBFMeshMotionSolver::solve()
     positions.setZero();
     int offset = 0;
 
-    // Create a list which indicates whether the positions is local or
-    // located on another processor.
-    // 1 = local position
-    // 0 = position lies on another processor
-    Eigen::VectorXi positionsParallelLocation( positions.rows() );
-    positionsParallelLocation.setZero();
-
     vectorField positionsField( positions.rows(), vector::zero );
 
     forAll( movingPatchIDs, i )
@@ -271,9 +266,7 @@ void RBFMeshMotionSolver::solve()
       // Set the positions for patch i
       forAll( faceCentres, j )
       {
-        int index = j + offset + globalMovingOffset;
-        positionsField[index] = faceCentres[j];
-        positionsParallelLocation( index ) = 1;
+        positionsField[j + offset + globalMovingOffset] = faceCentres[j];
       }
 
       offset += faceCentres.size();
@@ -288,9 +281,7 @@ void RBFMeshMotionSolver::solve()
       // Set the positions for patch i
       forAll( faceCentres, j )
       {
-        int index = j + offset + globalStaticOffset;
-        positionsField[index] = faceCentres[j];
-        positionsParallelLocation( index ) = 1;
+        positionsField[j + offset + globalStaticOffset] = faceCentres[j];
       }
 
       offset += faceCentres.size();
@@ -333,7 +324,8 @@ void RBFMeshMotionSolver::solve()
       }
     }
 
-    rbf->computeInParallel( positions, positionsInterpolation, positionsParallelLocation );
+    // rbf->compute( positions, positionsInterpolation, positionsParallelLocation );
+    rbf->compute( positions, positionsInterpolation );
 
     rbf->setNbMovingAndStaticFaceCenters( nbMovingFaceCenters, nbStaticFaceCenters );
   }
