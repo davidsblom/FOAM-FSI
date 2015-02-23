@@ -9,6 +9,60 @@
 SolidSolver::SolidSolver (
   string name,
   std::shared_ptr<argList> args,
+  std::shared_ptr<Time> runTime
+  )
+  :
+  foamSolidSolver( name, args, runTime ),
+  gradU( fvc::grad( U ) ),
+  epsilon
+  (
+  IOobject
+  (
+    "epsilonGreen",
+    runTime->timeName(),
+    mesh,
+    IOobject::READ_IF_PRESENT,
+    IOobject::AUTO_WRITE
+  ),
+  mesh,
+  dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
+  ),
+  sigma
+  (
+  IOobject
+  (
+    "sigma",
+    runTime->timeName(),
+    mesh,
+    IOobject::READ_IF_PRESENT,
+    IOobject::AUTO_WRITE
+  ),
+  mesh,
+  dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
+  ),
+  rheology( sigma, U ),
+  rho( rheology.rho() ),
+  mu( rheology.mu() ),
+  lambda( rheology.lambda() ),
+  muf( fvc::interpolate( mu, "mu" ) ),
+  lambdaf( fvc::interpolate( lambda, "lambda" ) ),
+  n( mesh.Sf() / mesh.magSf() ),
+  couplingProperties
+  (
+  IOobject
+  (
+    "couplingProperties",
+    runTime->constant(),
+    mesh,
+    IOobject::MUST_READ,
+    IOobject::NO_WRITE
+  )
+  )
+{}
+
+SolidSolver::SolidSolver (
+  string name,
+  std::shared_ptr<argList> args,
   std::shared_ptr<Time> runTime,
   std::shared_ptr<rbf::RBFCoarsening> interpolator
   )
@@ -62,6 +116,7 @@ SolidSolver::SolidSolver (
   interpolator( interpolator )
 {}
 
+
 SolidSolver::~SolidSolver()
 {}
 
@@ -113,6 +168,8 @@ bool SolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> sol
   // Reduce (gather, scatter) over procs
 
   reduce( cellCentresSourceSize, sumOp<labelList>() );
+
+  assert( interpolator );
 
   if ( !interpolator->rbf->computed )
   {

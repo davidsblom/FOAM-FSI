@@ -8,7 +8,6 @@
 
 #include "PreciceSolidSolver.H"
 #include "SolidSolver.H"
-#include "TPSFunction.H"
 
 int main(
   int argc,
@@ -29,11 +28,7 @@ int main(
       args->caseName()
     ) );
 
-  std::shared_ptr<rbf::RBFFunctionInterface>rbfFunction( new rbf::TPSFunction() );
-  std::shared_ptr<rbf::RBFInterpolation>rbfInterpolator( new rbf::RBFInterpolation( rbfFunction ) );
-  std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, false, false, 1.0e-3, 10, 20 ) );
-
-  std::shared_ptr<foamSolidSolver> solid( new SolidSolver( fvMesh::defaultRegion, args, runTime, interpolator ) );
+  std::shared_ptr<foamSolidSolver> solid( new SolidSolver( fvMesh::defaultRegion, args, runTime ) );
 
   PreciceSolidSolver solver( solid );
 

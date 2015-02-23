@@ -8,12 +8,30 @@
 
 namespace rbf
 {
+  RBFCoarsening::RBFCoarsening( std::shared_ptr<RBFInterpolation> rbf )
+    :
+    rbf( rbf ),
+    rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction ) ) ),
+    enabled( false ),
+    livePointSelection( false ),
+    tol( 0 ),
+    tolLivePointSelection( 0 ),
+    coarseningMinPoints( 0 ),
+    coarseningMaxPoints( 0 ),
+    selectedPositions(),
+    nbStaticFaceCentersRemove( 0 ),
+    positions(),
+    positionsInterpolation(),
+    values()
+  {
+    assert( rbf );
+  }
+
   RBFCoarsening::RBFCoarsening(
     std::shared_ptr<RBFInterpolation> rbf,
     bool enabled,
     bool livePointSelection,
     double tol,
-    double tolLivePointSelection,
     int coarseningMinPoints,
     int coarseningMaxPoints
     )
@@ -23,7 +41,7 @@ namespace rbf
     enabled( enabled ),
     livePointSelection( livePointSelection ),
     tol( tol ),
-    tolLivePointSelection( tolLivePointSelection ),
+    tolLivePointSelection( tol ),
     coarseningMinPoints( coarseningMinPoints ),
     coarseningMaxPoints( coarseningMaxPoints ),
     selectedPositions(),
@@ -45,6 +63,7 @@ namespace rbf
     bool enabled,
     bool livePointSelection,
     double tol,
+    double tolLivePointSelection,
     int coarseningMinPoints,
     int coarseningMaxPoints
     )
@@ -54,7 +73,7 @@ namespace rbf
     enabled( enabled ),
     livePointSelection( livePointSelection ),
     tol( tol ),
-    tolLivePointSelection( tol ),
+    tolLivePointSelection( tolLivePointSelection ),
     coarseningMinPoints( coarseningMinPoints ),
     coarseningMaxPoints( coarseningMaxPoints ),
     selectedPositions(),
@@ -279,7 +298,5 @@ namespace rbf
         if ( selectedPositions( i ) >= nbMovingFaceCenters )
           nbStaticFaceCentersRemove++;
     }
-
-    rbf->Hhat.conservativeResize( rbf->Hhat.rows(), rbf->Hhat.cols() - nbStaticFaceCentersRemove );
   }
 }
