@@ -199,12 +199,12 @@ namespace rbf
           rbf::matrix valuesInterpolationCoarse( positions.rows(), valuesInterpolation.cols() );
 
           for ( int j = 0; j < selectedPositions.rows(); j++ )
-            valuesCoarse.row( j ) = values.row( selectedPositions( j ) );
+            valuesCoarse.row( j ) = this->values.row( selectedPositions( j ) );
 
           rbfCoarse->interpolate2( valuesCoarse, valuesInterpolationCoarse );
 
           double epsilon = std::sqrt( SMALL );
-          double error = ( valuesInterpolationCoarse.array() - values.array() ).matrix().norm() / (values.norm() + epsilon);
+          double error = ( valuesInterpolationCoarse.array() - this->values.array() ).matrix().norm() / (this->values.norm() + epsilon);
           bool convergence = error < tolLivePointSelection;
 
           if ( convergence )
