@@ -112,7 +112,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
   bool coarsening = readBool( subDict( "coarsening" ).lookup( "enabled" ) );
   double tol = readScalar( subDict( "coarsening" ).lookup( "tol" ) );
   bool livePointSelection = readBool( subDict( "coarsening" ).lookup( "livePointSelection" ) );
-  double tolLivePointSelection = readScalar( subDict( "tolLivePointSelection" ).lookup( "tol" ) );
+  double tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
   int coarseningMinPoints = readLabel( subDict( "coarsening" ).lookup( "minPoints" ) );
   int coarseningMaxPoints = readLabel( subDict( "coarsening" ).lookup( "maxPoints" ) );
   rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints ) );

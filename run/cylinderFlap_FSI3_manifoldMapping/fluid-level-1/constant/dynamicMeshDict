@@ -36,6 +36,8 @@ coarsening
   tol 1.0e-6;
   minPoints 10;
   maxPoints 2000;
+  livePointSelection true;
+  tolLivePointSelection 1.0e-5;
 }
 
 interpolation
