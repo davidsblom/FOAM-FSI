@@ -26,8 +26,11 @@ namespace rbf
     tolLivePointSelection( tolLivePointSelection ),
     coarseningMinPoints( coarseningMinPoints ),
     coarseningMaxPoints( coarseningMaxPoints ),
-    selectedPositions( 1 ),
-    nbStaticFaceCentersRemove( 0 )
+    selectedPositions(),
+    nbStaticFaceCentersRemove( 0 ),
+    positions(),
+    positionsInterpolation(),
+    values()
   {
     assert( rbf );
     assert( coarseningMinPoints <= coarseningMaxPoints );
@@ -54,8 +57,11 @@ namespace rbf
     tolLivePointSelection( tol ),
     coarseningMinPoints( coarseningMinPoints ),
     coarseningMaxPoints( coarseningMaxPoints ),
-    selectedPositions( 1 ),
-    nbStaticFaceCentersRemove( 0 )
+    selectedPositions(),
+    nbStaticFaceCentersRemove( 0 ),
+    positions(),
+    positionsInterpolation(),
+    values()
   {
     assert( rbf );
     assert( coarseningMinPoints <= coarseningMaxPoints );
