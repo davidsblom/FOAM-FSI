@@ -156,8 +156,6 @@ namespace rbf
         selectedPositions( selectedPositions.rows() - 1 ) = index;
       }
 
-      std::sort( selectedPositions.data(), selectedPositions.data() + selectedPositions.size() );
-
       Info << "RBF interpolation coarsening: selected " << selectedPositions.rows() << "/" << positions.rows() << " points, error = " << error << ", tol = " << tol << endl;
 
       rbf::matrix positionsCoarse( selectedPositions.rows(), positions.cols() );
