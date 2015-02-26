@@ -248,7 +248,7 @@ void foamFluidSolver::solve(
     offset += size;
   }
 
-  assert( offset == getInterfaceSize() );
+  assert( offset == getInterfaceSizeLocal() );
 
   moveMesh( movingPatchesDispl - movingPatchesDisplOld );
 
