@@ -19,6 +19,8 @@ First, compile foam-extend-3.1, the nextRelease branch.
 To compile the FSI library:
 
 ``` bash
+git clone https://github.com/davidsblom/FOAM-FSI.git
+cd FOAM-FSI
 cd src/thirdParty
 ./Allmake
 cd -
