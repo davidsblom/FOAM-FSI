@@ -13,6 +13,8 @@ FoamFile
  object couplingProperties;
 }
 
-solidPatch inner-wall;
+movingSolidPatches (inner-wall);
 
-fluidPatch wall;
+movingFluidPatches (wall);
+
+fluidConvergenceTolerance 1.0e-6;
