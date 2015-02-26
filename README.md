@@ -23,7 +23,7 @@ git clone https://github.com/davidsblom/FOAM-FSI.git
 cd FOAM-FSI
 cd src/thirdParty
 ./Allmake
-cd -
+cd ../../
 ./Allwmake
 ```
 
