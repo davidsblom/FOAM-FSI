@@ -73,7 +73,7 @@ void PreciceSolidSolver::run()
 
       Info << endl << "Time = " << solver->runTime->timeName() << ", iteration = " << iter + 1 << endl;
 
-      matrix input( solver->getInterfaceCentersSizeLocal(), precice->getDimensions() ), output;
+      matrix input( solver->getInterfaceSizeLocal(), precice->getDimensions() ), output;
       input.setZero();
 
       readData( input );

@@ -13,7 +13,7 @@ FoamFile
  object couplingProperties;
 }
 
-solidPatch inner-wall;
+movingSolidPatches (inner-wall);
 
 movingFluidPatches (wall);
 

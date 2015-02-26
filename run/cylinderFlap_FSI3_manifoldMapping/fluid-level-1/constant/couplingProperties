@@ -13,9 +13,8 @@ FoamFile
  object couplingProperties;
 }
 
-solidPatch plate;
+movingSolidPatches (plate);
 
-fluidPatch plate;
+movingFluidPatches (plate);
 
-fluidConvergenceTolerance 1e-11;
-
+fluidConvergenceTolerance 1.0e-11;

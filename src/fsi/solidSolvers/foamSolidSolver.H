@@ -15,6 +15,7 @@
 #include "solidTractionFvPatchVectorField.H"
 #include "leastSquaresVolPointInterpolation.H"
 #include <time.h>
+#include <deque>
 
 using namespace fsi;
 using std::shared_ptr;
@@ -44,11 +45,9 @@ public:
     matrix & output
     );
 
-  int getInterfacePointsSize();
+  int getInterfaceSize();
 
-  int getInterfaceCentersSize();
-
-  int getInterfaceCentersSizeLocal();
+  int getInterfaceSizeLocal();
 
   void getDisplacementLocal( matrix & displacement );
 
@@ -77,16 +76,12 @@ protected:
   IOdictionary couplingProperties;
 
   // Solid patch data
-  word solidPatchName;
-  label solidPatchID;
+  wordList movingPatches;
+  labelList movingPatchIDs;
 
-  solidTractionFvPatchVectorField * tForce;
+  std::deque<solidTractionFvPatchVectorField *> forces;
 
-  labelList nPoints;
-  labelList nGlobalPoints;
   labelList nGlobalCenters;
-  labelList globalPointsUnique;
-  labelList globalPointsNonUnique;
 
   float totalRunTime;
   int totalNbIterations;
