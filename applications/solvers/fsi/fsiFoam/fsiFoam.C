@@ -381,58 +381,48 @@ int main(
 
     models->push_back( fineModel );
 
-    for ( int level = 1; level < nbLevels; level++ )
+    for ( int level = 0; level < nbLevels - 1; level++ )
     {
       YAML::Node configLevel( config["multi-level-acceleration"]["levels"][level] );
-      YAML::Node configPostProcessing( config["multi-level-acceleration"]["levels"][level]["post-processing"] );
+      YAML::Node configPostProcessing( configLevel["post-processing"] );
 
-      if ( algorithm == "manifold-mapping" || algorithm == "output-space-mapping" || algorithm == "aggressive-space-mapping" || algorithm == "ASM-ILS" )
-      {
-        std::shared_ptr<SpaceMappingSolver> spaceMappingSolver;
-        std::shared_ptr<SpaceMapping> spaceMapping;
+      int maxIter = configLevel["max-iterations"].as<int>();
+      int nbReuse = configPostProcessing["timesteps-reused"].as<int>();
+      double singularityLimit = configPostProcessing["singularity-limit"].as<double>();
+      int reuseInformationStartingFromTimeIndex = configPostProcessing["reuse-information-starting-from-time-index"].as<int>();
+      bool updateJacobian = configPostProcessing["update-jacobian"].as<bool>();
 
-        if ( level == 1 )
-        {
-          reuseInformationStartingFromTimeIndex = configPostProcessing["reuse-information-starting-from-time-index"].as<int>();
+      shared_ptr<ImplicitMultiLevelFsiSolver> fineModel;
+      shared_ptr<ImplicitMultiLevelFsiSolver> coarseModel;
 
-          if ( algorithm == "aggressive-space-mapping" )
-            spaceMapping = std::shared_ptr<SpaceMapping>( new AggressiveSpaceMapping( models->at( level ), models->at( 0 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+      fineModel = models->at( level + 1 );
 
-          if ( algorithm == "ASM-ILS" )
-            spaceMapping = std::shared_ptr<SpaceMapping>( new ASMILS( models->at( level ), models->at( 0 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+      if ( level == 0 )
+        coarseModel = models->at( level );
 
-          if ( algorithm == "manifold-mapping" )
-            spaceMapping = std::shared_ptr<SpaceMapping>( new ManifoldMapping( models->at( level ), models->at( 0 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+      if ( level > 0 )
+        coarseModel = solvers->at( level - 1 );
 
-          if ( algorithm == "output-space-mapping" )
-            spaceMapping = std::shared_ptr<SpaceMapping>( new OutputSpaceMapping( models->at( level ), models->at( 0 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
+      shared_ptr<SpaceMapping> spaceMapping;
 
-          spaceMappingSolver = std::shared_ptr<SpaceMappingSolver>( new SpaceMappingSolver( models->at( level ), models->at( 0 ), spaceMapping ) );
+      if ( algorithm == "manifold-mapping" )
+        spaceMapping = shared_ptr<SpaceMapping> ( new ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
 
-          solvers->push_back( spaceMappingSolver );
-        }
+      if ( algorithm == "output-space-mapping" )
+        spaceMapping = shared_ptr<SpaceMapping> ( new OutputSpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
 
-        if ( level > 1 )
-        {
-          reuseInformationStartingFromTimeIndex = configPostProcessing["reuse-information-starting-from-time-index"].as<int>();
+      if ( algorithm == "aggressive-space-mapping" )
+        spaceMapping = shared_ptr<SpaceMapping> ( new AggressiveSpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
 
-          if ( algorithm == "aggressive-space-mapping" )
-            spaceMapping = std::shared_ptr<SpaceMapping>( new AggressiveSpaceMapping( models->at( level ), solvers->at( level - 1 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+      if ( algorithm == "ASM-ILS" )
+        spaceMapping = shared_ptr<SpaceMapping> ( new ASMILS( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
 
-          if ( algorithm == "ASM-ILS" )
-            spaceMapping = std::shared_ptr<SpaceMapping>( new ASMILS( models->at( level ), solvers->at( level - 1 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+      shared_ptr<SpaceMappingSolver > spaceMappingSolver( new SpaceMappingSolver( fineModel, coarseModel, spaceMapping ) );
 
-          if ( algorithm == "manifold-mapping" )
-            spaceMapping = std::shared_ptr<SpaceMapping>( new ManifoldMapping( models->at( level ), solvers->at( level - 2 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+      solvers->push_back( spaceMappingSolver );
 
-          if ( algorithm == "output-space-mapping" )
-            spaceMapping = std::shared_ptr<SpaceMapping>( new OutputSpaceMapping( models->at( level ), solvers->at( level - 2 ), maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
-
-          spaceMappingSolver = std::shared_ptr<SpaceMappingSolver>( new SpaceMappingSolver( models->at( level ), solvers->at( level - 2 ), spaceMapping ) );
-
-          solvers->push_back( spaceMappingSolver );
-        }
-      }
+      spaceMapping.reset();
+      spaceMappingSolver.reset();
     }
 
     std::shared_ptr<Solver> solver;
