@@ -33,11 +33,11 @@ staticPatches ( cylinder outlet inlet top bottom );
 coarsening
 {
   enabled true;
-  tol 1.0e-6;
+  tol 1.0e-3;
   minPoints 10;
   maxPoints 2000;
   livePointSelection true;
-  tolLivePointSelection 1.0e-5;
+  tolLivePointSelection 1.0e-2;
 }
 
 interpolation

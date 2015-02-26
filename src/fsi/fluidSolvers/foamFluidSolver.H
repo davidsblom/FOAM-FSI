@@ -54,11 +54,9 @@ public:
     matrix & output
     );
 
-  int getInterfaceCentersSize();
+  int getInterfaceSize();
 
-  int getInterfacePointsSize();
-
-  int getInterfacePointsSizeLocal();
+  int getInterfaceSizeLocal();
 
   void setDisplacementLocal( const matrix & displacement );
 
@@ -78,16 +76,16 @@ public:
 
 protected:
 
-  virtual void moveMesh( vectorField motion );
+  virtual void moveMesh( Field<vectorField> motion );
 
   // Dictionaries
   IOdictionary couplingProperties;
 
   // FSI interface displacement
-  word fluidPatchName;
-  label fluidPatchID;
-  vectorField fluidPatchPointsDispl;
-  vectorField fluidPatchPointsDisplOld;
+  wordList movingPatches;
+  labelList movingPatchIDs;
+  Field<vectorField> movingPatchesDispl;
+  Field<vectorField> movingPatchesDisplOld;
 
   // Parallel FSI coupling variables
   labelList nPoints;

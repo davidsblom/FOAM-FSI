@@ -176,10 +176,26 @@ void CompressibleFluidSolver::getAcousticsVelocityLocal( matrix & data )
 
 void CompressibleFluidSolver::getTractionLocal( matrix & traction )
 {
-  vectorField tractionField = -thermo.mu()
-    * U.boundaryField()[fluidPatchID].snGrad()
-    + p.boundaryField()[fluidPatchID]
-    * mesh.boundary()[fluidPatchID].nf();
+  vectorField tractionField( getInterfaceSizeLocal(), Foam::vector::zero );
+
+  int offset = 0;
+
+  forAll( movingPatchIDs, patchI )
+  {
+    int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
+
+    vectorField tractionFieldPatchI = -thermo.mu()
+      * U.boundaryField()[movingPatchIDs[patchI]].snGrad()
+      + p.boundaryField()[movingPatchIDs[patchI]]
+      * mesh.boundary()[movingPatchIDs[patchI]].nf();
+
+    forAll( tractionFieldPatchI, i )
+    {
+      tractionField[i + offset] = tractionFieldPatchI[i];
+    }
+
+    offset += size;
+  }
 
   assert( tractionField.size() == nGlobalCenters[Pstream::myProcNo()] );
 

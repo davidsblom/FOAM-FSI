@@ -29,7 +29,7 @@ FluidSolver::FluidSolver(
   ),
   pimple( mesh.solutionDict().subDict( "PIMPLE" ) ),
   nu( transportProperties.lookup( "nu" ) ),
-  rhoFluid( transportProperties.lookup( "rho" ) ),
+  rho( transportProperties.lookup( "rho" ) ),
   p
   (
   IOobject
@@ -329,14 +329,30 @@ void FluidSolver::getAcousticsPressureLocal( matrix & data )
 
 void FluidSolver::getTractionLocal( matrix & traction )
 {
-  vectorField tractionField = -rhoFluid.value() * nu.value()
-    * U.boundaryField()[fluidPatchID].snGrad()
-    + rhoFluid.value() * p.boundaryField()[fluidPatchID]
-    * mesh.boundary()[fluidPatchID].nf();
+  vectorField tractionField( getInterfaceSizeLocal(), Foam::vector::zero );
+
+  int offset = 0;
+
+  forAll( movingPatchIDs, patchI )
+  {
+    int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
+
+    vectorField tractionFieldPatchI = -rho.value() * nu.value()
+      * U.boundaryField()[movingPatchIDs[patchI]].snGrad()
+      + rho.value() * p.boundaryField()[patchI]
+      * mesh.boundary()[movingPatchIDs[patchI]].nf();
+
+    forAll( tractionFieldPatchI, i )
+    {
+      tractionField[i + offset] = tractionFieldPatchI[i];
+    }
+
+    offset += size;
+  }
 
   assert( tractionField.size() == nGlobalCenters[Pstream::myProcNo()] );
 
-  traction.resize( tractionField.size(), 3 );
+  traction.resize( tractionField.size(), mesh.nGeometricD() );
 
   for ( int i = 0; i < traction.rows(); i++ )
     for ( int j = 0; j < traction.cols(); j++ )

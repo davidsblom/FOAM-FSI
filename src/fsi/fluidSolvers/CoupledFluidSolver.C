@@ -91,8 +91,6 @@ CoupledFluidSolver::CoupledFluidSolver(
   meanCoNum( 0 ),
   velMag( 0 )
 {
-  assert( fluidPatchID >= 0 );
-
   initialize();
 
   // Ensure that the absolute tolerance of the linear solver is less than the
@@ -191,10 +189,26 @@ void CoupledFluidSolver::getAcousticsPressureLocal( matrix & data )
 
 void CoupledFluidSolver::getTractionLocal( matrix & traction )
 {
-  vectorField tractionField = -rho.value() * nu.value()
-    * U.boundaryField()[fluidPatchID].snGrad()
-    + rho.value() * p.boundaryField()[fluidPatchID]
-    * mesh.boundary()[fluidPatchID].nf();
+  vectorField tractionField( getInterfaceSizeLocal(), Foam::vector::zero );
+
+  int offset = 0;
+
+  forAll( movingPatchIDs, patchI )
+  {
+    int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
+
+    vectorField tractionFieldPatchI = -rho.value() * nu.value()
+      * U.boundaryField()[movingPatchIDs[patchI]].snGrad()
+      + rho.value() * p.boundaryField()[movingPatchIDs[patchI]]
+      * mesh.boundary()[movingPatchIDs[patchI]].nf();
+
+    forAll( tractionFieldPatchI, i )
+    {
+      tractionField[i + offset] = tractionFieldPatchI[i];
+    }
+
+    offset += size;
+  }
 
   assert( tractionField.size() == nGlobalCenters[Pstream::myProcNo()] );
 

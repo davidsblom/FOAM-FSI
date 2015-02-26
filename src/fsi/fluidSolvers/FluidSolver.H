@@ -100,7 +100,7 @@ private:
 
   // Dimensioned scalars
   dimensionedScalar nu;
-  dimensionedScalar rhoFluid;
+  dimensionedScalar rho;
 
   // Fields
   volScalarField p;

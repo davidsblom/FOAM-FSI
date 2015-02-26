@@ -5,6 +5,7 @@ set -e
 NB_CORES=3
 
 cp fluid/system/decomposeParDict solid/system/
+cp fluid/constant/couplingProperties solid/constant/
 
 ./Allclean
 
