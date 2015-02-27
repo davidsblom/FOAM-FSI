@@ -2,8 +2,6 @@
 
 set -e
 
-find . -name '*~' -exec rm -rf {} \;
-
 # Define which versions of the different packages are used
 
 export BOOST_VERSION=1_53_0
@@ -20,7 +18,7 @@ rm -rf precice
 
 # Unpack third party packages
 
-tar jxf boost_${BOOST_VERSION}.tar.bz2
+tar jxfv boost_${BOOST_VERSION}.tar.bz2
 
 rm -f boost_${BOOST_VERSION}.tar.bz2
 
