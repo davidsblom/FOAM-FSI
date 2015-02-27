@@ -388,11 +388,14 @@ int main(
         YAML::Node configLevel( config["multi-level-acceleration"]["levels"][level] );
         YAML::Node configPostProcessing( configLevel["post-processing"] );
 
+        assert( config["multi-level-acceleration"]["initial-solution-coarse-model"] );
+
         int maxIter = configLevel["max-iterations"].as<int>();
         int nbReuse = configPostProcessing["timesteps-reused"].as<int>();
         double singularityLimit = configPostProcessing["singularity-limit"].as<double>();
         int reuseInformationStartingFromTimeIndex = configPostProcessing["reuse-information-starting-from-time-index"].as<int>();
         bool updateJacobian = configPostProcessing["update-jacobian"].as<bool>();
+        bool initialSolutionCoarseModel = config["multi-level-acceleration"]["initial-solution-coarse-model"].as<bool>();
 
         shared_ptr<ImplicitMultiLevelFsiSolver> fineModel;
         shared_ptr<ImplicitMultiLevelFsiSolver> coarseModel;
@@ -408,7 +411,7 @@ int main(
         shared_ptr<SpaceMapping> spaceMapping;
 
         if ( algorithm == "manifold-mapping" )
-          spaceMapping = shared_ptr<SpaceMapping> ( new ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+          spaceMapping = shared_ptr<SpaceMapping> ( new ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian, initialSolutionCoarseModel ) );
 
         if ( algorithm == "output-space-mapping" )
           spaceMapping = shared_ptr<SpaceMapping> ( new OutputSpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );

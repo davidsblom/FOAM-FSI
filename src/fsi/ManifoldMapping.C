@@ -20,6 +20,28 @@ ManifoldMapping::ManifoldMapping(
   :
   SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
   updateJacobian( updateJacobian ),
+  initialSolutionCoarseModel( false ),
+  scaling( false ),
+  iter( 0 ),
+  scalingFactors( Eigen::VectorXd::Ones( 2 ) ),
+  sizeVar0( 0 ),
+  sizeVar1( 0 )
+{}
+
+ManifoldMapping::ManifoldMapping(
+  shared_ptr<SurrogateModel> fineModel,
+  shared_ptr<SurrogateModel> coarseModel,
+  int maxIter,
+  int nbReuse,
+  int reuseInformationStartingFromTimeIndex,
+  double singularityLimit,
+  bool updateJacobian,
+  bool initialSolutionCoarseModel
+  )
+  :
+  SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
+  updateJacobian( updateJacobian ),
+  initialSolutionCoarseModel( initialSolutionCoarseModel ),
   scaling( false ),
   iter( 0 ),
   scalingFactors( Eigen::VectorXd::Ones( 2 ) ),
@@ -98,7 +120,7 @@ void ManifoldMapping::performPostProcessing(
   iter = 0;
   matrix Tk;
 
-  if ( timeIndex == 0 )
+  if ( timeIndex == 0 || initialSolutionCoarseModel )
   {
     // Determine optimum of coarse model xstar
     if ( residualCriterium )

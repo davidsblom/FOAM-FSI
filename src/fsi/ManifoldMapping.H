@@ -28,6 +28,17 @@ public:
       bool updateJacobian
       );
 
+    ManifoldMapping(
+      shared_ptr<SurrogateModel> fineModel,
+      shared_ptr<SurrogateModel> coarseModel,
+      int maxIter,
+      int nbReuse,
+      int reuseInformationStartingFromTimeIndex,
+      double singularityLimit,
+      bool updateJacobian,
+      bool initialSolutionCoarseModel
+      );
+
     virtual ~ManifoldMapping();
 
     virtual void performPostProcessing(
@@ -49,6 +60,7 @@ public:
       );
 
     bool updateJacobian;
+    bool initialSolutionCoarseModel;
     bool scaling;
     int iter;
     vector scalingFactors;
