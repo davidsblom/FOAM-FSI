@@ -20,8 +20,7 @@ To compile the FSI library:
 
 ``` bash
 git clone https://github.com/davidsblom/FOAM-FSI.git
-cd FOAM-FSI
-cd src/thirdParty
+cd FOAM-FSI/src/thirdParty
 ./Allmake
 cd ../../
 ./Allwmake
