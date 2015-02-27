@@ -16,6 +16,7 @@ cp fluid-level-1/system/controlDict solid-level-0/system/
 cp fluid-level-1/system/controlDict solid-level-1/system/
 
 cd fluid-level-0
+touch fluid-level-0.foam
 runApplication blockMesh
 runApplication renumberMesh -overwrite
 runApplication checkMesh
@@ -23,6 +24,7 @@ runApplication decomposePar
 cd -
 
 cd fluid-level-1
+touch fluid-level-1.foam
 runApplication blockMesh
 runApplication renumberMesh -overwrite
 runApplication checkMesh
@@ -30,6 +32,7 @@ runApplication decomposePar
 cd -
 
 cd solid-level-0
+touch solid-level-0.foam
 runApplication blockMesh
 runApplication renumberMesh -overwrite
 runApplication checkMesh
@@ -37,6 +40,7 @@ runApplication decomposePar
 cd -
 
 cd solid-level-1
+touch solid-level-1.foam
 runApplication blockMesh
 runApplication renumberMesh -overwrite
 runApplication checkMesh
@@ -75,4 +79,3 @@ for i in `seq 0 $CORE_COUNT`
 
 cd fluid-level-1
 runParallel fsiFoam $NB_CORES
-#fsiFoam
