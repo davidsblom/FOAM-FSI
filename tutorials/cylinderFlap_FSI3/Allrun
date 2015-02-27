@@ -12,6 +12,7 @@ cp fluid/constant/couplingProperties solid/constant/
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 cd fluid
+touch fluid.foam
 runApplication blockMesh
 runApplication renumberMesh -overwrite
 runApplication checkMesh
@@ -19,6 +20,7 @@ runApplication decomposePar
 cd -
 
 cd solid
+touch solid.foam
 runApplication blockMesh
 runApplication renumberMesh -overwrite
 runApplication checkMesh
