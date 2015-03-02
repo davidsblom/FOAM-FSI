@@ -23,7 +23,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class MultiLevelSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int, bool, int, bool> >
+class MultiLevelSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int, bool, int, bool, bool> >
 {
 protected:
 
@@ -49,6 +49,7 @@ protected:
 
     // Computational settings
     double tol = 1.0e-5;
+    double tolLiveSelection = 1.0e-4;
     int maxIter = 500;
     double initialRelaxation = 1.0e-3;
     double singularityLimit = 1.0e-12;
@@ -68,6 +69,7 @@ protected:
     bool convergenceMeasureTraction = std::tr1::get<5>( GetParam() );
     int spaceMappingAlgorithm = std::tr1::get<6>( GetParam() );
     bool coarsening = std::tr1::get<7>( GetParam() );
+    bool liveSelection = std::tr1::get<8>( GetParam() );
 
     assert( spaceMappingAlgorithm > -1 && spaceMappingAlgorithm < 3 );
 
@@ -111,21 +113,21 @@ protected:
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, false, false, tol, 1, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, liveSelection, false, tol, tolLiveSelection, coarseningMinPoints, coarseningMaxPoints ) );
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, false, false, tol, 1, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, liveSelection, false, tol, tolLiveSelection, coarseningMinPoints, coarseningMaxPoints ) );
 
     multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fineModelFluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, false, false, tol, 1, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, liveSelection, false, tol, tolLiveSelection, coarseningMinPoints, coarseningMaxPoints ) );
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, false, false, tol, 1, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, liveSelection, false, tol, tolLiveSelection, coarseningMinPoints, coarseningMaxPoints ) );
 
     multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fineModelSolid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
 
@@ -164,21 +166,21 @@ protected:
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, false, false, tol, 1, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, liveSelection, false, tol, tolLiveSelection, coarseningMinPoints, coarseningMaxPoints ) );
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, false, false, tol, 1, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, liveSelection, false, tol, tolLiveSelection, coarseningMinPoints, coarseningMaxPoints ) );
 
     multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fineModelFluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 1 ) );
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, false, false, tol, 1, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, liveSelection, false, tol, tolLiveSelection, coarseningMinPoints, coarseningMaxPoints ) );
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, false, false, tol, 1, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, liveSelection, false, tol, tolLiveSelection, coarseningMinPoints, coarseningMaxPoints ) );
 
     multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fineModelSolid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 1 ) );
 
@@ -237,21 +239,21 @@ protected:
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, false, false, tol, 1, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, liveSelection, false, tol, tolLiveSelection, coarseningMinPoints, coarseningMaxPoints ) );
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, false, false, tol, 1, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, liveSelection, false, tol, tolLiveSelection, coarseningMinPoints, coarseningMaxPoints ) );
 
     multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fineModelFluid, fineModelFluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 2 ) );
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, false, false, tol, 1, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, liveSelection, false, tol, tolLiveSelection, coarseningMinPoints, coarseningMaxPoints ) );
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, false, false, tol, 1, coarseningMinPoints, coarseningMaxPoints ) );
+    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator, coarsening, liveSelection, false, tol, tolLiveSelection, coarseningMinPoints, coarseningMaxPoints ) );
 
     multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fineModelSolid, fineModelSolid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 2 ) );
 
@@ -299,7 +301,7 @@ protected:
   shared_ptr<MultiLevelSpaceMappingSolver> solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelSpaceMappingSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 4 ), Values( 0, 2 ), Values( 3 ), Values( 20, 40 ), Bool(), Values( 0, 1, 2 ), Bool() ) );
+INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelSpaceMappingSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 4 ), Values( 0, 2 ), Values( 3 ), Values( 20, 40 ), Bool(), Values( 0, 1, 2 ), Bool(), Bool() ) );
 
 TEST_P( MultiLevelSpaceMappingSolverParametrizedTest, run )
 {
