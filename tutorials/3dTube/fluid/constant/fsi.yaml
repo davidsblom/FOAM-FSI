@@ -6,9 +6,6 @@ interpolation:
     function: thin-plate-spline
   coarsening:
     enabled: false
-    tol: 1.0e-6
-    min-points: 200
-    max-points: 2000
 coupling-scheme-implicit:
   extrapolation-order: 2
   convergence-measures:
