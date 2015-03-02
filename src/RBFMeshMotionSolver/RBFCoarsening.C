@@ -62,6 +62,8 @@ namespace rbf
     assert( coarseningMaxPoints > 0 );
     assert( tol > 0 );
     assert( tol < 1 );
+    assert( tolLivePointSelection > 0 );
+    assert( tolLivePointSelection < 1 );
   }
 
   /* Select a subset of control point with a greedy algorithm.
