@@ -67,6 +67,7 @@ public:
     matrix positions;
     matrix positionsInterpolation;
     matrix values;
+    int nbMovingFaceCenters;
   };
 }
 

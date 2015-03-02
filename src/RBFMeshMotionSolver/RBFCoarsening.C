@@ -22,7 +22,8 @@ namespace rbf
     nbStaticFaceCentersRemove( 0 ),
     positions(),
     positionsInterpolation(),
-    values()
+    values(),
+    nbMovingFaceCenters( 0 )
   {
     assert( rbf );
   }
@@ -48,7 +49,8 @@ namespace rbf
     nbStaticFaceCentersRemove( 0 ),
     positions(),
     positionsInterpolation(),
-    values()
+    values(),
+    nbMovingFaceCenters( 0 )
   {
     assert( rbf );
     assert( coarseningMinPoints <= coarseningMaxPoints );
@@ -80,7 +82,8 @@ namespace rbf
     nbStaticFaceCentersRemove( 0 ),
     positions(),
     positionsInterpolation(),
-    values()
+    values(),
+    nbMovingFaceCenters( 0 )
   {
     assert( rbf );
     assert( coarseningMinPoints <= coarseningMaxPoints );
@@ -255,7 +258,17 @@ namespace rbf
       {
         // Unit displacement of control points
         matrix unitDisplacement( positions.rows(), positions.cols() );
-        unitDisplacement.fill( 1 );
+        unitDisplacement.setZero();
+
+        assert( unitDisplacement.rows() >= nbMovingFaceCenters );
+
+        if ( nbMovingFaceCenters == 0 )
+          unitDisplacement.fill( 1 );
+        else
+          for ( int i = 0; i < nbMovingFaceCenters; i++ )
+            for ( int j = 0; j < unitDisplacement.cols(); j++ )
+              unitDisplacement( i, j ) = 1;
+
         greedySelection( unitDisplacement );
 
         rbf->Hhat.conservativeResize( rbf->Hhat.rows(), rbf->Hhat.cols() - nbStaticFaceCentersRemove );
@@ -288,6 +301,7 @@ namespace rbf
     )
   {
     nbStaticFaceCentersRemove = nbStaticFaceCenters;
+    this->nbMovingFaceCenters = nbMovingFaceCenters;
 
     if ( enabled )
     {
