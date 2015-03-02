@@ -14,6 +14,7 @@ namespace rbf
     rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction ) ) ),
     enabled( false ),
     livePointSelection( false ),
+    livePointSelectionSumValues( false ),
     tol( 0 ),
     tolLivePointSelection( 0 ),
     coarseningMinPoints( 0 ),
@@ -32,38 +33,7 @@ namespace rbf
     std::shared_ptr<RBFInterpolation> rbf,
     bool enabled,
     bool livePointSelection,
-    double tol,
-    int coarseningMinPoints,
-    int coarseningMaxPoints
-    )
-    :
-    rbf( rbf ),
-    rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction ) ) ),
-    enabled( enabled ),
-    livePointSelection( livePointSelection ),
-    tol( tol ),
-    tolLivePointSelection( tol ),
-    coarseningMinPoints( coarseningMinPoints ),
-    coarseningMaxPoints( coarseningMaxPoints ),
-    selectedPositions(),
-    nbStaticFaceCentersRemove( 0 ),
-    positions(),
-    positionsInterpolation(),
-    values(),
-    nbMovingFaceCenters( 0 )
-  {
-    assert( rbf );
-    assert( coarseningMinPoints <= coarseningMaxPoints );
-    assert( coarseningMinPoints > 0 );
-    assert( coarseningMaxPoints > 0 );
-    assert( tol > 0 );
-    assert( tol < 1 );
-  }
-
-  RBFCoarsening::RBFCoarsening(
-    std::shared_ptr<RBFInterpolation> rbf,
-    bool enabled,
-    bool livePointSelection,
+    bool livePointSelectionSumValues,
     double tol,
     double tolLivePointSelection,
     int coarseningMinPoints,
@@ -74,6 +44,7 @@ namespace rbf
     rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction ) ) ),
     enabled( enabled ),
     livePointSelection( livePointSelection ),
+    livePointSelectionSumValues( livePointSelectionSumValues ),
     tol( tol ),
     tolLivePointSelection( tolLivePointSelection ),
     coarseningMinPoints( coarseningMinPoints ),
@@ -211,10 +182,15 @@ namespace rbf
         // For RBF mesh interpolation, the values to be interpolated need to be
         // the total displacements. As input, the incremental displacements
         // are given.
-        if ( this->values.cols() != values.cols() )
-          this->values = values;
+        if ( livePointSelectionSumValues )
+        {
+          if ( this->values.cols() != values.cols() )
+            this->values = values;
+          else
+            this->values.array() += values.array();
+        }
         else
-          this->values.array() += values.array();
+          this->values = values;
 
         // Check if re-selection is necessary
         bool reselection = true;

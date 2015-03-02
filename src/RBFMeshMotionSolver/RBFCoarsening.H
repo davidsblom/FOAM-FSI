@@ -22,15 +22,7 @@ public:
       std::shared_ptr<RBFInterpolation> rbf,
       bool enabled,
       bool livePointSelection,
-      double tol,
-      int coarseningMinPoints,
-      int coarseningMaxPoints
-      );
-
-    RBFCoarsening(
-      std::shared_ptr<RBFInterpolation> rbf,
-      bool enabled,
-      bool livePointSelection,
+      bool livePointSelectionSumValues,
       double tol,
       double tolLivePointSelection,
       int coarseningMinPoints,
@@ -58,6 +50,7 @@ public:
     std::shared_ptr<RBFInterpolation> rbfCoarse;
     bool enabled;
     bool livePointSelection;
+    bool livePointSelectionSumValues;
     double tol;
     double tolLivePointSelection;
     int coarseningMinPoints;
