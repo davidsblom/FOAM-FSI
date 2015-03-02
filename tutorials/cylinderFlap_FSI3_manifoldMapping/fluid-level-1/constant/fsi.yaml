@@ -9,6 +9,7 @@ interpolation:
     max-points: 2000
 multi-level-acceleration:
   algorithm: manifold-mapping
+  initial-solution-coarse-model: true
   levels:
   - convergence-measures:
     - min-iteration-convergence-measure:
