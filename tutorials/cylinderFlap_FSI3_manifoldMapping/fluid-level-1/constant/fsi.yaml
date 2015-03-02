@@ -4,9 +4,6 @@ interpolation:
     function: thin-plate-spline
   coarsening:
     enabled: false
-    tol: 1.0e-6
-    min-points: 200
-    max-points: 2000
 multi-level-acceleration:
   algorithm: manifold-mapping
   initial-solution-coarse-model: true
