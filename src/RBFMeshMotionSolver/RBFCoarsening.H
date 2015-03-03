@@ -9,6 +9,7 @@
 
 #include "RBFInterpolation.H"
 #include "fvCFD.H"
+#include <fstream>
 
 namespace rbf
 {
@@ -26,7 +27,8 @@ public:
       double tol,
       double tolLivePointSelection,
       int coarseningMinPoints,
-      int coarseningMaxPoints
+      int coarseningMaxPoints,
+      bool exportTxt
       );
 
     void greedySelection( const matrix & values );
@@ -55,12 +57,14 @@ public:
     double tolLivePointSelection;
     int coarseningMinPoints;
     int coarseningMaxPoints;
+    bool exportTxt;
     Eigen::VectorXi selectedPositions;
     int nbStaticFaceCentersRemove;
     matrix positions;
     matrix positionsInterpolation;
     matrix values;
     int nbMovingFaceCenters;
+    int fileExportIndex;
   };
 }
 

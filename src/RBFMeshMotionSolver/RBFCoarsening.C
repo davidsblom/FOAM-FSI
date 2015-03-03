@@ -19,12 +19,14 @@ namespace rbf
     tolLivePointSelection( 0 ),
     coarseningMinPoints( 0 ),
     coarseningMaxPoints( 0 ),
+    exportTxt( false ),
     selectedPositions(),
     nbStaticFaceCentersRemove( 0 ),
     positions(),
     positionsInterpolation(),
     values(),
-    nbMovingFaceCenters( 0 )
+    nbMovingFaceCenters( 0 ),
+    fileExportIndex( 0 )
   {
     assert( rbf );
   }
@@ -37,7 +39,8 @@ namespace rbf
     double tol,
     double tolLivePointSelection,
     int coarseningMinPoints,
-    int coarseningMaxPoints
+    int coarseningMaxPoints,
+    bool exportTxt
     )
     :
     rbf( rbf ),
@@ -49,12 +52,14 @@ namespace rbf
     tolLivePointSelection( tolLivePointSelection ),
     coarseningMinPoints( coarseningMinPoints ),
     coarseningMaxPoints( coarseningMaxPoints ),
+    exportTxt( exportTxt ),
     selectedPositions(),
     nbStaticFaceCentersRemove( 0 ),
     positions(),
     positionsInterpolation(),
     values(),
-    nbMovingFaceCenters( 0 )
+    nbMovingFaceCenters( 0 ),
+    fileExportIndex( 0 )
   {
     assert( rbf );
     assert( coarseningMinPoints <= coarseningMaxPoints );
@@ -165,6 +170,16 @@ namespace rbf
         positionsCoarse.row( i ) = positions.row( selectedPositions( i ) );
 
       usedPositions = positionsCoarse;
+
+      if ( exportTxt )
+      {
+        std::string fileName = "rbf-coarsening-greedy-selection-" + std::to_string( fileExportIndex ) + ".txt";
+        std::ofstream file( fileName );
+        fileExportIndex++;
+
+        if ( file.is_open() )
+          file << usedPositions;
+      }
     }
 
     rbf->compute( usedPositions, positionsInterpolation );

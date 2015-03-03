@@ -38,6 +38,7 @@ coarsening
   maxPoints 2000;
   livePointSelection true;
   tolLivePointSelection 1.0e-5;
+  exportSelectedPoints false;
 }
 
 interpolation
