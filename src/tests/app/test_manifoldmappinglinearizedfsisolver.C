@@ -55,7 +55,7 @@ protected:
     double tol = 1.0e-5;
     int maxIter = 50;
     double initialRelaxation = 1.0e-3;
-    double singularityLimit = 1.0e-11;
+    double singularityLimit = 1.0e-12;
     int reuseInformationStartingFromTimeIndex = 0;
     bool scaling = false;
     double beta = 1;
@@ -186,7 +186,7 @@ protected:
 
     // Create manifold mapping object
 
-    shared_ptr<ManifoldMapping> manifoldMapping( new ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+    shared_ptr<ManifoldMapping> manifoldMapping( new ManifoldMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
 
     // Create manifold mapping solver
     solver = new SpaceMappingSolver( fineModel, coarseModel, manifoldMapping );

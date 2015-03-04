@@ -12,6 +12,7 @@ SpaceMapping::SpaceMapping(
   shared_ptr<SurrogateModel> fineModel,
   shared_ptr<SurrogateModel> coarseModel,
   int maxIter,
+  int maxUsedIterations,
   int nbReuse,
   int reuseInformationStartingFromTimeIndex,
   double singularityLimit
@@ -20,6 +21,7 @@ SpaceMapping::SpaceMapping(
   fineModel( fineModel ),
   coarseModel( coarseModel ),
   maxIter( maxIter ),
+  maxUsedIterations( maxUsedIterations ),
   nbReuse( nbReuse ),
   reuseInformationStartingFromTimeIndex( reuseInformationStartingFromTimeIndex ),
   singularityLimit( singularityLimit ),
@@ -27,7 +29,9 @@ SpaceMapping::SpaceMapping(
   coarseResiduals(),
   fineResiduals(),
   coarseResidualsList(),
-  fineResidualsList()
+  fineResidualsList(),
+  coarseResidualsTimeList(),
+  fineResidualsTimeList()
 {
   assert( fineModel );
   assert( coarseModel );
@@ -36,10 +40,35 @@ SpaceMapping::SpaceMapping(
   assert( reuseInformationStartingFromTimeIndex >= 0 );
   assert( singularityLimit > 0 );
   assert( singularityLimit < 1 );
+  assert( maxUsedIterations > 0 );
 };
 
 void SpaceMapping::finalizeTimeStep()
 {
+  // Save input/output information for next time step
+  if ( nbReuse > 0 && fineResidualsList.size() >= 1 && timeIndex >= reuseInformationStartingFromTimeIndex )
+  {
+    assert( fineResidualsTimeList.size() == coarseResidualsTimeList.size() );
+    fineResidualsTimeList.push_front( fineResidualsList );
+    coarseResidualsTimeList.push_front( coarseResidualsList );
+  }
+
+  // Remove the last items from the residual list and solutions list
+  // in order to ensure that at maximum nbReuse time steps
+  // are included.
+  while ( static_cast<int>( fineResidualsTimeList.size() ) > nbReuse )
+  {
+    fineResidualsTimeList.pop_back();
+    coarseResidualsTimeList.pop_back();
+  }
+
+  fineResidualsList.clear();
+  coarseResidualsList.clear();
+
+  assert( fineResidualsTimeList.size() == coarseResidualsTimeList.size() );
+  assert( coarseResiduals.size() == fineResiduals.size() );
+  assert( static_cast<int>( fineResidualsTimeList.size() ) <= nbReuse );
+
   timeIndex++;
 }
 
@@ -57,29 +86,19 @@ bool SpaceMapping::isConvergence(
 
 void SpaceMapping::iterationsConverged()
 {
-  // Save input/output information for next time step
-  if ( nbReuse > 0 && fineResiduals.cols() >= 2 && timeIndex >= reuseInformationStartingFromTimeIndex )
+  // Save input/output information for next solve
+  if ( fineResiduals.size() >= 2 )
   {
-    assert( coarseResiduals.cols() == fineResiduals.cols() );
+    assert( fineResiduals.size() == coarseResiduals.size() );
 
-    coarseResidualsList.push_front( coarseResiduals );
     fineResidualsList.push_front( fineResiduals );
+    coarseResidualsList.push_front( coarseResiduals );
   }
 
-  // Remove the last item from the residual list and solutions
-  // list in order to ensure that at maximum nbReuse time steps
-  // are included.
-  while ( static_cast<int>( fineResidualsList.size() ) > nbReuse )
-  {
-    coarseResidualsList.pop_back();
-    fineResidualsList.pop_back();
-  }
+  fineResiduals.clear();
+  coarseResiduals.clear();
 
-  coarseResiduals.resize( coarseResiduals.rows(), 0 );
-  fineResiduals.resize( fineResiduals.rows(), 0 );
-
-  assert( coarseResidualsList.size() == fineResidualsList.size() );
-  assert( static_cast<int>( coarseResidualsList.size() ) <= nbReuse );
+  assert( fineResidualsList.size() == coarseResidualsList.size() );
 }
 
 void SpaceMapping::performPostProcessing(

@@ -52,7 +52,7 @@ protected:
     int maxIter = 500;
     double initialRelaxation = 1.0e-3;
     int reuseInformationStartingFromTimeIndex = 0;
-    double singularityLimit = 1.0e-10;
+    double singularityLimit = 1.0e-13;
     bool scaling = false;
     double beta = 1;
     bool updateJacobian = false;
@@ -175,7 +175,7 @@ protected:
 
     // Create manifold mapping object
 
-    shared_ptr<OutputSpaceMapping> outputSpaceMapping( new OutputSpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
+    shared_ptr<OutputSpaceMapping> outputSpaceMapping( new OutputSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
 
     // Create manifold mapping solver
     solver = new SpaceMappingSolver( fineModel, coarseModel, outputSpaceMapping );
@@ -417,7 +417,7 @@ protected:
 
     // Create manifold mapping object
 
-    shared_ptr<OutputSpaceMapping> outputSpaceMapping( new OutputSpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
+    shared_ptr<OutputSpaceMapping> outputSpaceMapping( new OutputSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
 
     // Create manifold mapping solver
     solver = new SpaceMappingSolver( fineModel, coarseModel, outputSpaceMapping );

@@ -195,7 +195,7 @@ protected:
 
     // Create manifold mapping object
 
-    shared_ptr<OutputSpaceMapping> outputSpaceMapping( new OutputSpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
+    shared_ptr<OutputSpaceMapping> outputSpaceMapping( new OutputSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
 
     // Create manifold mapping solver
     shared_ptr<SpaceMappingSolver > outputSpaceMappingSolver( new SpaceMappingSolver( fineModel, coarseModel, outputSpaceMapping ) );
@@ -257,7 +257,7 @@ protected:
 
     // Create manifold mapping object
 
-    outputSpaceMapping = shared_ptr<OutputSpaceMapping> ( new OutputSpaceMapping( fineModel, coarseModelSolver, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
+    outputSpaceMapping = shared_ptr<OutputSpaceMapping> ( new OutputSpaceMapping( fineModel, coarseModelSolver, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
 
     // Create manifold mapping solver
     outputSpaceMappingSolver = shared_ptr<SpaceMappingSolver> ( new SpaceMappingSolver( fineModel, coarseModelSolver, outputSpaceMapping ) );

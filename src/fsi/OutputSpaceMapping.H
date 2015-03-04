@@ -26,6 +26,7 @@ public:
       shared_ptr<SurrogateModel> fineModel,
       shared_ptr<SurrogateModel> coarseModel,
       int maxIter,
+      int maxUsedIterations,
       int nbReuse,
       int reuseInformationStartingFromTimeIndex,
       double singularityLimit,
@@ -33,6 +34,8 @@ public:
       );
 
     virtual ~OutputSpaceMapping();
+
+    virtual void finalizeTimeStep();
 
     virtual void iterationsConverged();
 
@@ -51,6 +54,7 @@ public:
     shared_ptr<SurrogateModel> surrogateModel;
     deque<vector> sols;
     deque<deque<vector> > solsList;
+    deque<deque<deque<vector> > > solsTimeList;
 
     int order;
   };

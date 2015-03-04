@@ -96,9 +96,6 @@ protected:
     shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
     shared_ptr<RBFCoarsening> rbfInterpToMesh;
 
-
-
-
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
     rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
@@ -189,7 +186,12 @@ protected:
 
     // Create manifold mapping object
 
-    shared_ptr<ManifoldMapping> manifoldMapping( new ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+    maxUsedIterations = couplingGridSize;
+
+    if ( parallel )
+      maxUsedIterations *= 2;
+
+    shared_ptr<ManifoldMapping> manifoldMapping( new ManifoldMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
 
     // Create manifold mapping solver
     solver = new SpaceMappingSolver( fineModel, coarseModel, manifoldMapping );
@@ -327,9 +329,6 @@ protected:
     shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
     shared_ptr<RBFCoarsening> rbfInterpToMesh;
 
-
-
-
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
     rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
@@ -408,7 +407,7 @@ protected:
 
     // Create manifold mapping object
 
-    shared_ptr<ManifoldMapping> manifoldMapping( new ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+    shared_ptr<ManifoldMapping> manifoldMapping( new ManifoldMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
 
     // Create manifold mapping solver
     solver = new SpaceMappingSolver( fineModel, coarseModel, manifoldMapping );

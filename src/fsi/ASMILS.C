@@ -12,12 +12,13 @@ ASMILS::ASMILS(
   shared_ptr<SurrogateModel> fineModel,
   shared_ptr<SurrogateModel> coarseModel,
   int maxIter,
+  int maxUsedIterations,
   int nbReuse,
   int reuseInformationStartingFromTimeIndex,
   double singularityLimit
   )
   :
-  SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit )
+  SpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit )
 {}
 
 ASMILS::~ASMILS()
@@ -49,10 +50,8 @@ void ASMILS::performPostProcessing(
   vector yk( m ), output( m ), R( m ), zstar( m ), zk( m ), xkprev( m );
   xk = x0;
   xkprev = x0;
-  coarseResiduals.resize( m, 0 );
-  coarseResiduals.setZero();
-  fineResiduals.resize( m, 0 );
-  fineResiduals.setZero();
+  coarseResiduals.clear();
+  fineResiduals.clear();
 
   // Determine optimum of coarse model zstar
   if ( residualCriterium )
@@ -65,7 +64,7 @@ void ASMILS::performPostProcessing(
     coarseModel->optimize( y, x0, zstar );
 
   if ( !coarseModel->allConverged() )
-    Warning << "Surrogate model optimization process is not converged." << endl;
+    Warning << "ASMILS: surrogate model optimization process is not converged." << endl;
 
   if ( timeIndex == 0 )
     xk = zstar;
@@ -81,8 +80,7 @@ void ASMILS::performPostProcessing(
     return;
   }
 
-  fineResiduals.conservativeResize( fineResiduals.rows(), fineResiduals.cols() + 1 );
-  fineResiduals.col( fineResiduals.cols() - 1 ) = xk;
+  fineResiduals.push_back( xk );
 
   // Parameter extraction
 
@@ -91,8 +89,7 @@ void ASMILS::performPostProcessing(
   if ( !coarseModel->allConverged() )
     Warning << "Surrogate model optimization process is not converged." << endl;
 
-  coarseResiduals.conservativeResize( coarseResiduals.rows(), coarseResiduals.cols() + 1 );
-  coarseResiduals.col( coarseResiduals.cols() - 1 ) = zk;
+  coarseResiduals.push_back( zk );
 
   for ( int k = 0; k < maxIter - 1; k++ )
   {
@@ -100,15 +97,22 @@ void ASMILS::performPostProcessing(
 
     // Determine the number of columns used to calculate the mapping matrix J
 
-    int nbCols = fineResiduals.cols() - 1;
+    int nbCols = fineResiduals.size() - 1;
     nbCols = std::max( nbCols, 0 );
+
+    // Include information from previous optimization cycles
+
+    for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
+      nbCols += fineResidualsList.at( i ).size() - 1;
 
     // Include information from previous time steps
 
-    for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
-      nbCols += fineResidualsList.at( i ).cols() - 1;
+    for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
+      for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
+        nbCols += fineResidualsTimeList.at( i ).at( j ).size() - 1;
 
     nbCols = std::min( static_cast<int>( xk.rows() ), nbCols );
+    nbCols = std::min( nbCols, maxUsedIterations );
 
     assert( nbCols <= xk.rows() );
 
@@ -125,7 +129,7 @@ void ASMILS::performPostProcessing(
       // Construct the V and W matrices
       matrix V( xk.rows(), nbCols ), W( xk.rows(), nbCols );
 
-      int nbColsCurrentTimeStep = std::max( static_cast<int>(fineResiduals.cols() - 1), 0 );
+      int nbColsCurrentTimeStep = std::max( static_cast<int>(fineResiduals.size() - 1), 0 );
       nbColsCurrentTimeStep = std::min( nbColsCurrentTimeStep, nbCols );
 
       // Include information from previous iterations
@@ -137,26 +141,47 @@ void ASMILS::performPostProcessing(
         if ( colIndex >= V.cols() )
           continue;
 
-        V.col( i ) = coarseResiduals.col( coarseResiduals.cols() - 2 - i ) - coarseResiduals.col( coarseResiduals.cols() - 1 );
-        W.col( i ) = fineResiduals.col( fineResiduals.cols() - 2 - i ) - fineResiduals.col( fineResiduals.cols() - 1 );
+        V.col( i ) = coarseResiduals.at( coarseResiduals.size() - 2 - i ) - coarseResiduals.back();
+        W.col( i ) = fineResiduals.at( fineResiduals.size() - 2 - i ) - fineResiduals.back();
         colIndex++;
       }
 
-      // Include information from previous time steps
+      // Include information from previous optimization cycles
 
       for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
       {
-        assert( fineResidualsList.at( i ).cols() >= 2 );
-        assert( coarseResidualsList.at( i ).cols() >= 2 );
+        assert( fineResidualsList.at( i ).size() >= 2 );
+        assert( coarseResidualsList.at( i ).size() >= 2 );
 
-        for ( int j = 0; j < fineResidualsList.at( i ).cols() - 1; j++ )
+        for ( unsigned j = 0; j < fineResidualsList.at( i ).size() - 1; j++ )
         {
           if ( colIndex >= V.cols() )
             continue;
 
-          V.col( colIndex ) = coarseResidualsList.at( i ).col( coarseResidualsList.at( i ).cols() - 2 - j ) - coarseResidualsList.at( i ).col( coarseResidualsList.at( i ).cols() - 1 );
-          W.col( colIndex ) = fineResidualsList.at( i ).col( fineResidualsList.at( i ).cols() - 2 - j ) - fineResidualsList.at( i ).col( fineResidualsList.at( i ).cols() - 1 );
+          V.col( colIndex ) = coarseResidualsList.at( i ).at( coarseResidualsList.at( i ).size() - 2 - j ) - coarseResidualsList.at( i ).back();
+          W.col( colIndex ) = fineResidualsList.at( i ).at( fineResidualsList.at( i ).size() - 2 - j ) - fineResidualsList.at( i ).back();
           colIndex++;
+        }
+      }
+
+      // Include information from previous time steps
+
+      for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
+      {
+        for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
+        {
+          assert( fineResidualsTimeList.at( i ).at( j ).size() >= 2 );
+          assert( coarseResidualsTimeList.at( i ).at( j ).size() >= 2 );
+
+          for ( unsigned k = 0; k < fineResidualsTimeList.at( i ).at( j ).size() - 1; k++ )
+          {
+            if ( colIndex >= V.cols() )
+              continue;
+
+            V.col( colIndex ) = coarseResidualsTimeList.at( i ).at( j ).at( coarseResidualsTimeList.at( i ).at( j ).size() - 2 - k ) - coarseResidualsTimeList.at( i ).at( j ).back();
+            W.col( colIndex ) = fineResidualsTimeList.at( i ).at( j ).at( fineResidualsTimeList.at( i ).at( j ).size() - 2 - k ) - fineResidualsTimeList.at( i ).at( j ).back();
+            colIndex++;
+          }
         }
       }
 
@@ -210,28 +235,24 @@ void ASMILS::performPostProcessing(
 
     fineModel->evaluate( xk, output, R );
 
-    fineResiduals.conservativeResize( fineResiduals.rows(), fineResiduals.cols() + 1 );
-    fineResiduals.col( fineResiduals.cols() - 1 ) = xk;
+    // Check convergence criteria
+    if ( isConvergence( xk, xkprev, residualCriterium ) )
+    {
+      iterationsConverged();
+      break;
+    }
+
+    fineResiduals.push_back( xk );
 
     // Parameter extraction
 
     coarseModel->optimize( R, zstar, zk );
 
     if ( !coarseModel->allConverged() )
-      Warning << "Surrogate model optimization process is not converged." << endl;
+      Warning << "ASMILS: surrogate model optimization process is not converged." << endl;
 
-    coarseResiduals.conservativeResize( coarseResiduals.rows(), coarseResiduals.cols() + 1 );
-    coarseResiduals.col( coarseResiduals.cols() - 1 ) = zk;
-
-    // Check convergence criteria
-    if ( isConvergence( xk, xkprev, residualCriterium ) )
-      break;
-
-    if ( k == maxIter - 2 )
-      break;
+    coarseResiduals.push_back( zk );
   }
-
-  iterationsConverged();
 }
 
 void ASMILS::removeColumnFromMatrix(

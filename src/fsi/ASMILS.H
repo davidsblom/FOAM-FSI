@@ -21,6 +21,7 @@ public:
       shared_ptr<SurrogateModel> fineModel,
       shared_ptr<SurrogateModel> coarseModel,
       int maxIter,
+      int maxUsedIterations,
       int nbReuse,
       int reuseInformationStartingFromTimeIndex,
       double singularityLimit

@@ -5,7 +5,7 @@
  */
 
 #include "AndersonPostProcessing.H"
-#include "ASMILS.H"
+#include "MLIQNILSSolver.H"
 #include "MinIterationConvergenceMeasure.H"
 #include "MonolithicFsiSolver.H"
 #include "MultiLevelFsiSolver.H"
@@ -22,7 +22,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class MultiLevelASMILSSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int> >
+class MultiLevelMLIQNILSSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int, bool> >
 {
 protected:
 
@@ -34,7 +34,7 @@ protected:
     double u0 = 0.1;
     double p0 = 0;
     double dt = 0.1;
-    int N = 20;
+    int N = 10;
     double L = 1;
     double T = 10;
     double dx = L / N;
@@ -50,10 +50,10 @@ protected:
     double tol = 1.0e-5;
     int maxIter = 500;
     double initialRelaxation = 1.0e-3;
-    double singularityLimit = 1.0e-11;
+    double singularityLimit = 1.0e-12;
     bool scaling = false;
-    double beta = 1;
     bool updateJacobian = false;
+    double beta = 1;
 
     // Parametrized settings
     bool parallel = std::tr1::get<0>( GetParam() );
@@ -62,6 +62,7 @@ protected:
     int minIter = std::tr1::get<3>( GetParam() );
     int couplingGridSize = std::tr1::get<4>( GetParam() );
     int reuseInformationStartingFromTimeIndex = 0;
+    bool convergenceMeasureTraction = std::tr1::get<5>( GetParam() );
 
     ASSERT_NEAR( tau, 0.01, 1.0e-13 );
     ASSERT_NEAR( kappa, 10, 1.0e-13 );
@@ -77,10 +78,8 @@ protected:
     shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
     shared_ptr<MultiLevelFsiSolver> multiLevelFsiSolver;
     shared_ptr<AndersonPostProcessing> postProcessing;
-    shared_ptr< std::deque<shared_ptr<SpaceMappingSolver> > > solvers;
     shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models;
 
-    solvers = shared_ptr< std::deque<shared_ptr<SpaceMappingSolver> > > ( new std::deque<shared_ptr<SpaceMappingSolver> >() );
     models = shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > ( new std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > () );
 
     fineModelFluid = shared_ptr<TubeFlowFluidSolver> ( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, couplingGridSize, L, T, rho ) );
@@ -100,9 +99,6 @@ protected:
     shared_ptr<RBFInterpolation> rbfInterpolator;
     shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
     shared_ptr<RBFCoarsening> rbfInterpToMesh;
-
-
-
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
@@ -127,10 +123,10 @@ protected:
     // Convergence measures
     convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-    convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
+    convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, 5 ) ) );
     convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, 1.0e-3 * tol ) ) );
 
-    if ( parallel )
+    if ( parallel || convergenceMeasureTraction )
       convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, 1.0e-3 * tol ) ) );
 
     multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
@@ -183,7 +179,7 @@ protected:
     convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
     convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, 1.0e-2 * tol ) ) );
 
-    if ( parallel )
+    if ( parallel || convergenceMeasureTraction )
       convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, 1.0e-2 * tol ) ) );
 
     multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
@@ -191,18 +187,8 @@ protected:
 
     shared_ptr<ImplicitMultiLevelFsiSolver> fineModel( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
 
-    // Create manifold mapping object
-
-    shared_ptr<ASMILS> aggressiveSpaceMapping( new ASMILS( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
-
-    // Create manifold mapping solver
-    shared_ptr<SpaceMappingSolver > aggressiveSpaceMappingSolver( new SpaceMappingSolver( fineModel, coarseModel, aggressiveSpaceMapping ) );
-
-    solvers->push_back( aggressiveSpaceMappingSolver );
     models->push_back( coarseModel );
     models->push_back( fineModel );
-
-    shared_ptr<SpaceMappingSolver> coarseModelSolver = aggressiveSpaceMappingSolver;
 
     fluid.reset();
     solid.reset();
@@ -245,7 +231,7 @@ protected:
     convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, 1 ) ) );
     convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
 
-    if ( parallel )
+    if ( parallel || convergenceMeasureTraction )
       convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
 
     multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
@@ -253,19 +239,11 @@ protected:
 
     fineModel = shared_ptr<ImplicitMultiLevelFsiSolver> ( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
 
-    // Create manifold mapping object
-
-    aggressiveSpaceMapping = shared_ptr<ASMILS> ( new ASMILS( fineModel, coarseModelSolver, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
-
-    // Create manifold mapping solver
-    aggressiveSpaceMappingSolver = shared_ptr<SpaceMappingSolver> ( new SpaceMappingSolver( fineModel, coarseModelSolver, aggressiveSpaceMapping ) );
-
-    solvers->push_back( aggressiveSpaceMappingSolver );
     models->push_back( fineModel );
 
     // Create multi level manifold mapping solver
 
-    solver = new MultiLevelSpaceMappingSolver( solvers, models, true );
+    solver = new MLIQNILSSolver( models, true );
 
     // Monolithic solver
     monolithicSolver = new MonolithicFsiSolver( a0, u0, p0, dt, cmk, couplingGridSize, L, T, rho );
@@ -278,43 +256,17 @@ protected:
   }
 
   MonolithicFsiSolver * monolithicSolver;
-  MultiLevelSpaceMappingSolver * solver;
+  MLIQNILSSolver * solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelASMILSSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0 ), Values( 0 ), Values( 3 ), Values( 40, 50 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelMLIQNILSSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0 ), Values( 0 ), Values( 3 ), Values( 20, 40 ), Bool() ) );
 
-TEST_P( MultiLevelASMILSSolverParametrizedTest, object )
+TEST_P( MultiLevelMLIQNILSSolverParametrizedTest, object )
 {
   ASSERT_TRUE( true );
 }
 
-TEST_P( MultiLevelASMILSSolverParametrizedTest, monolithic )
+TEST_P( MultiLevelMLIQNILSSolverParametrizedTest, timeStep )
 {
-  for ( int i = 0; i < 100; i++ )
-  {
-    solver->solveTimeStep();
-    monolithicSolver->solveTimeStep();
-
-    double tol = 1.0e-5;
-
-    if ( i < 99 )
-      ASSERT_TRUE( solver->models->at( solver->models->size() - 1 )->fsi->fluid->isRunning() );
-    else
-      ASSERT_FALSE( solver->models->at( solver->models->size() - 1 )->fsi->fluid->isRunning() );
-
-    ASSERT_TRUE( solver->models->at( 0 )->fsi->allConverged );
-    ASSERT_TRUE( solver->models->at( 1 )->fsi->allConverged );
-    ASSERT_TRUE( solver->models->at( 2 )->fsi->allConverged );
-    ASSERT_NEAR( solver->models->at( solver->models->size() - 1 )->fsi->fluid->data.norm(), monolithicSolver->pn.norm(), tol );
-    ASSERT_NEAR( solver->models->at( solver->models->size() - 1 )->fsi->solid->data.norm(), monolithicSolver->an.norm(), tol );
-    ASSERT_TRUE( monolithicSolver->an.norm() > 0 );
-    ASSERT_TRUE( monolithicSolver->pn.norm() > 0 );
-
-    // Verify that the coarse models are synchronized with the fine model
-    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = solver->models->begin(); it != solver->models->end(); ++it )
-    {
-      shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
-      ASSERT_NEAR( model->fsi->x.norm(), solver->solvers->at( solver->solvers->size() - 1 )->fsi->x.norm(), 1.0e-13 );
-    }
-  }
+  solver->solveTimeStep();
 }

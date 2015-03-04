@@ -193,7 +193,7 @@ protected:
 
     // Create manifold mapping object
 
-    shared_ptr<AggressiveSpaceMapping> aggressiveSpaceMapping( new AggressiveSpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+    shared_ptr<AggressiveSpaceMapping> aggressiveSpaceMapping( new AggressiveSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
 
     // Create manifold mapping solver
     shared_ptr<SpaceMappingSolver > aggressiveSpaceMappingSolver( new SpaceMappingSolver( fineModel, coarseModel, aggressiveSpaceMapping ) );
@@ -255,7 +255,7 @@ protected:
 
     // Create manifold mapping object
 
-    aggressiveSpaceMapping = shared_ptr<AggressiveSpaceMapping> ( new AggressiveSpaceMapping( fineModel, coarseModelSolver, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+    aggressiveSpaceMapping = shared_ptr<AggressiveSpaceMapping> ( new AggressiveSpaceMapping( fineModel, coarseModelSolver, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
 
     // Create manifold mapping solver
     aggressiveSpaceMappingSolver = shared_ptr<SpaceMappingSolver> ( new SpaceMappingSolver( fineModel, coarseModelSolver, aggressiveSpaceMapping ) );
@@ -314,7 +314,6 @@ TEST_P( MultiLevelAggressiveSpaceMappingSolverParametrizedTest, monolithic )
     else
       ASSERT_FALSE( solver->models->at( solver->models->size() - 1 )->fsi->fluid->isRunning() );
 
-    ASSERT_TRUE( solver->models->at( 0 )->fsi->allConverged );
     ASSERT_TRUE( solver->models->at( 1 )->fsi->allConverged );
     ASSERT_TRUE( solver->models->at( 2 )->fsi->allConverged );
     ASSERT_NEAR( solver->models->at( solver->models->size() - 1 )->fsi->fluid->data.norm(), monolithicSolver->pn.norm(), tol );
@@ -354,15 +353,15 @@ TEST_P( MultiLevelAggressiveSpaceMappingSolverParametrizedTest, timeStep )
 
   if ( couplingGridSize == 50 && parallel )
   {
-    ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 506 );
-    ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 59 );
+    ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 446 );
+    ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 53 );
     ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 6 );
   }
 
   if ( couplingGridSize == 50 && !parallel )
   {
-    ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 185 );
-    ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 31 );
+    ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 142 );
+    ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 25 );
     ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 4 );
   }
 }

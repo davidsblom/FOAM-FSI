@@ -9,7 +9,6 @@
 
 #include "MultiLevelFsiSolver.H"
 
-using std::list;
 using std::deque;
 
 namespace fsi

@@ -91,9 +91,6 @@ protected:
     shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
     shared_ptr<RBFCoarsening> rbfInterpToMesh;
 
-
-
-
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
     rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
@@ -173,9 +170,14 @@ protected:
 
     shared_ptr<ImplicitMultiLevelFsiSolver> coarseModel( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
 
-    // Create manifold mapping object
+    // Create aggressive space mapping object
 
-    shared_ptr<AggressiveSpaceMapping> aggressiveSpaceMapping( new AggressiveSpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+    maxUsedIterations = couplingGridSize;
+
+    if ( parallel )
+      maxUsedIterations *= 2;
+
+    shared_ptr<AggressiveSpaceMapping> aggressiveSpaceMapping( new AggressiveSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
 
     // Create manifold mapping solver
     solver = new SpaceMappingSolver( fineModel, coarseModel, aggressiveSpaceMapping );
@@ -247,8 +249,8 @@ TEST_P( AggressiveSpaceMappingSolverParametrizedTest, reuse )
 
   if ( !parallel && couplingGridSize == 20 && nbReuse == 4 && extrapolation == 0 && minIter == 3 )
   {
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 567 );
-    ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3298 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 543 );
+    ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3101 );
   }
 }
 
@@ -400,7 +402,7 @@ protected:
 
     // Create manifold mapping object
 
-    shared_ptr<AggressiveSpaceMapping> aggressiveSpaceMapping( new AggressiveSpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+    shared_ptr<AggressiveSpaceMapping> aggressiveSpaceMapping( new AggressiveSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
 
     // Create manifold mapping solver
     solver = new SpaceMappingSolver( fineModel, coarseModel, aggressiveSpaceMapping );

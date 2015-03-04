@@ -49,7 +49,7 @@ protected:
     double tol = 1.0e-5;
     int maxIter = 500;
     double initialRelaxation = 1.0e-3;
-    double singularityLimit = 1.0e-11;
+    double singularityLimit = 1.0e-12;
     int reuseInformationStartingFromTimeIndex = 0;
     bool scaling = false;
     double beta = 1;
@@ -90,9 +90,6 @@ protected:
     shared_ptr<RBFInterpolation> rbfInterpolator;
     shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
     shared_ptr<RBFCoarsening> rbfInterpToMesh;
-
-
-
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
@@ -173,9 +170,14 @@ protected:
 
     shared_ptr<ImplicitMultiLevelFsiSolver> coarseModel( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
 
-    // Create manifold mapping object
+    // Create ASMILS object
 
-    shared_ptr<ASMILS> aggressiveSpaceMapping( new ASMILS( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+    maxUsedIterations = couplingGridSize;
+
+    if ( parallel )
+      maxUsedIterations *= 2;
+
+    shared_ptr<ASMILS> aggressiveSpaceMapping( new ASMILS( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
 
     // Create manifold mapping solver
     solver = new SpaceMappingSolver( fineModel, coarseModel, aggressiveSpaceMapping );
@@ -379,7 +381,7 @@ protected:
 
     // Create manifold mapping object
 
-    shared_ptr<ASMILS> aggressiveSpaceMapping( new ASMILS( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+    shared_ptr<ASMILS> aggressiveSpaceMapping( new ASMILS( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
 
     // Create manifold mapping solver
     solver = new SpaceMappingSolver( fineModel, coarseModel, aggressiveSpaceMapping );

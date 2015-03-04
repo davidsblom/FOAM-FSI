@@ -249,13 +249,14 @@ void BroydenPostProcessing::performPostProcessing(
 
     // Check convergence criteria
     if ( isConvergence( output, output + y - R, residualCriterium ) )
+    {
+      bool keepIterations = residualCriterium;
+      iterationsConverged( keepIterations );
       break;
+    }
 
     assert( sols.size() == residuals.size() );
     assert( sols.at( 0 ).rows() == residuals.at( 0 ).rows() );
     assert( fsi->iter <= maxIter );
   }
-
-  bool keepIterations = residualCriterium;
-  iterationsConverged( keepIterations );
 }

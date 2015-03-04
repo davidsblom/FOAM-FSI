@@ -102,9 +102,6 @@ protected:
     shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
     shared_ptr<RBFCoarsening> rbfInterpToMesh;
 
-
-
-
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
     rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
@@ -194,7 +191,7 @@ protected:
 
     // Create manifold mapping object
 
-    shared_ptr<ManifoldMapping> manifoldMapping( new ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+    shared_ptr<ManifoldMapping> manifoldMapping( new ManifoldMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
 
     // Create manifold mapping solver
     shared_ptr<SpaceMappingSolver > manifoldMappingSolver( new SpaceMappingSolver( fineModel, coarseModel, manifoldMapping ) );
@@ -256,7 +253,7 @@ protected:
 
     // Create manifold mapping object
 
-    manifoldMapping = shared_ptr<ManifoldMapping> ( new ManifoldMapping( fineModel, coarseModelSolver, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+    manifoldMapping = shared_ptr<ManifoldMapping> ( new ManifoldMapping( fineModel, coarseModelSolver, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
 
     // Create manifold mapping solver
     manifoldMappingSolver = shared_ptr<SpaceMappingSolver> ( new SpaceMappingSolver( fineModel, coarseModelSolver, manifoldMapping ) );
@@ -325,7 +322,6 @@ TEST_P( MultiLevelManifoldMappingSolverParametrizedTest, monolithic )
     else
       ASSERT_FALSE( solver->models->at( solver->models->size() - 1 )->fsi->fluid->isRunning() );
 
-    ASSERT_TRUE( solver->models->at( 0 )->fsi->allConverged );
     ASSERT_TRUE( solver->models->at( 1 )->fsi->allConverged );
     ASSERT_TRUE( solver->models->at( 2 )->fsi->allConverged );
     ASSERT_NEAR( solver->models->at( solver->models->size() - 1 )->fsi->fluid->data.norm(), monolithicSolver->pn.norm(), tol );

@@ -13,6 +13,7 @@
 #include "fvCFD.H"
 
 using namespace fsi;
+using std::deque;
 
 class SpaceMapping
 {
@@ -22,6 +23,7 @@ public:
     shared_ptr<SurrogateModel> fineModel,
     shared_ptr<SurrogateModel> coarseModel,
     int maxIter,
+    int maxUsedIterations,
     int nbReuse,
     int reuseInformationStartingFromTimeIndex,
     double singularityLimit
@@ -61,15 +63,18 @@ public:
   shared_ptr<SurrogateModel> coarseModel;
 
   int maxIter;
+  int maxUsedIterations;
   int nbReuse;
   int reuseInformationStartingFromTimeIndex;
   double singularityLimit;
   int timeIndex;
 
-  matrix coarseResiduals;
-  matrix fineResiduals;
-  std::deque<matrix> coarseResidualsList;
-  std::deque<matrix> fineResidualsList;
+  deque<fsi::vector> coarseResiduals;
+  deque<fsi::vector> fineResiduals;
+  deque<deque<fsi::vector> > coarseResidualsList;
+  deque<deque<fsi::vector> > fineResidualsList;
+  deque<deque<deque<fsi::vector> > > coarseResidualsTimeList;
+  deque<deque<deque<fsi::vector> > > fineResidualsTimeList;
 };
 
 #endif

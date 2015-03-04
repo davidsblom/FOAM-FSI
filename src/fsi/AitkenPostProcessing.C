@@ -119,11 +119,12 @@ void AitkenPostProcessing::performPostProcessing(
 
     // Check convergence criteria
     if ( isConvergence( xk, xkprev, residualCriterium ) )
+    {
+      bool keepIterations = residualCriterium;
+      iterationsConverged( keepIterations );
       break;
+    }
 
     assert( fsi->iter <= maxIter );
   }
-
-  bool keepIterations = residualCriterium;
-  iterationsConverged( keepIterations );
 }

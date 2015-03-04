@@ -12,12 +12,13 @@ AggressiveSpaceMapping::AggressiveSpaceMapping(
   shared_ptr<SurrogateModel> fineModel,
   shared_ptr<SurrogateModel> coarseModel,
   int maxIter,
+  int maxUsedIterations,
   int nbReuse,
   int reuseInformationStartingFromTimeIndex,
   double singularityLimit
   )
   :
-  SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit )
+  SpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit )
 {}
 
 AggressiveSpaceMapping::~AggressiveSpaceMapping()
@@ -38,10 +39,8 @@ void AggressiveSpaceMapping::performPostProcessing(
   vector yk( m ), output( m ), R( m ), zstar( m ), zk( m ), xkprev( m );
   xk = x0;
   xkprev = x0;
-  coarseResiduals.resize( m, 0 );
-  coarseResiduals.setZero();
-  fineResiduals.resize( m, 0 );
-  fineResiduals.setZero();
+  coarseResiduals.clear();
+  fineResiduals.clear();
 
   // Determine optimum of coarse model zstar
   if ( residualCriterium )
@@ -77,11 +76,8 @@ void AggressiveSpaceMapping::performPostProcessing(
   if ( !coarseModel->allConverged() )
     Warning << "Surrogate model optimization process is not converged." << endl;
 
-  coarseResiduals.conservativeResize( coarseResiduals.rows(), coarseResiduals.cols() + 1 );
-  coarseResiduals.col( coarseResiduals.cols() - 1 ) = zk;
-
-  fineResiduals.conservativeResize( fineResiduals.rows(), fineResiduals.cols() + 1 );
-  fineResiduals.col( fineResiduals.cols() - 1 ) = xk;
+  coarseResiduals.push_back( zk );
+  fineResiduals.push_back( xk );
 
   for ( int k = 0; k < maxIter - 1; k++ )
   {
@@ -93,10 +89,16 @@ void AggressiveSpaceMapping::performPostProcessing(
     int nbColsCurrentTimeStep = nbCols;
     int colIndex = 0;
 
-    // Include information from previous time steps
+    // Include information from previous optimization cycles
 
     for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
-      nbCols += fineResidualsList.at( i ).cols() - 1;
+      nbCols += fineResidualsList.at( i ).size() - 1;
+
+    // Include information from previous time steps
+
+    for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
+      for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
+        nbCols += fineResidualsTimeList.at( i ).at( j ).size() - 1;
 
     if ( nbCols > 0 )
     {
@@ -106,19 +108,46 @@ void AggressiveSpaceMapping::performPostProcessing(
 
       // Include information from previous time steps
 
-      for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
+      for ( unsigned i = fineResidualsTimeList.size(); i-- > 0; )
       {
-        assert( fineResidualsList.at( i ).cols() >= 2 );
-        assert( coarseResidualsList.at( i ).cols() >= 2 );
+        for ( unsigned j = fineResidualsTimeList.at( i ).size(); j-- > 0; )
+        {
+          assert( fineResidualsTimeList.at( i ).at( j ).size() >= 2 );
+          assert( coarseResidualsTimeList.at( i ).at( j ).size() >= 2 );
 
-        for ( int j = 0; j < fineResidualsList.at( i ).cols() - 1; j++ )
+          for ( unsigned k = 0; k < fineResidualsTimeList.at( i ).at( j ).size() - 1; k++ )
+          {
+            colIndex++;
+
+            vector deltax, deltaz;
+
+            deltax = fineResidualsTimeList.at( i ).at( j ).at( k + 1 ) - fineResidualsTimeList.at( i ).at( j ).at( k );
+            deltaz = coarseResidualsTimeList.at( i ).at( j ).at( k + 1 ) - coarseResidualsTimeList.at( i ).at( j ).at( k );
+
+            if ( deltax.norm() >= singularityLimit )
+            {
+              // Sherman–Morrison formula
+              J += (deltax - J * deltaz) / (deltax.transpose() * J * deltaz) * (deltax.transpose() * J);
+            }
+          }
+        }
+      }
+
+      // Include information from previous optimization cycles
+
+      for ( unsigned i = fineResidualsList.size(); i-- > 0; )
+      {
+        assert( fineResidualsList.at( i ).size() >= 2 );
+        assert( coarseResidualsList.at( i ).size() >= 2 );
+
+        for ( unsigned j = 0; j < fineResidualsList.at( i ).size() - 1; j++ )
         {
           colIndex++;
 
           vector deltax, deltaz;
 
-          deltax = fineResidualsList.at( i ).col( j + 1 ) - fineResidualsList.at( i ).col( j );
-          deltaz = coarseResidualsList.at( i ).col( j + 1 ) - coarseResidualsList.at( i ).col( j );
+          deltax = fineResidualsList.at( i ).at( j + 1 ) - fineResidualsList.at( i ).at( j );
+          deltaz = coarseResidualsList.at( i ).at( j + 1 ) - coarseResidualsList.at( i ).at( j );
 
           if ( deltax.norm() >= singularityLimit )
           {
@@ -136,8 +165,8 @@ void AggressiveSpaceMapping::performPostProcessing(
 
         vector deltax, deltaz;
 
-        deltax = fineResiduals.col( i + 1 ) - fineResiduals.col( i );
-        deltaz = coarseResiduals.col( i + 1 ) - coarseResiduals.col( i );
+        deltax = fineResiduals.at( i + 1 ) - fineResiduals.at( i );
+        deltaz = coarseResiduals.at( i + 1 ) - coarseResiduals.at( i );
 
         if ( deltax.norm() >= singularityLimit )
         {
@@ -159,7 +188,10 @@ void AggressiveSpaceMapping::performPostProcessing(
 
     // Check convergence criteria
     if ( isConvergence( xk, xkprev, residualCriterium ) )
+    {
+      iterationsConverged();
       break;
+    }
 
     // Parameter extraction
 
@@ -168,12 +200,7 @@ void AggressiveSpaceMapping::performPostProcessing(
     if ( !coarseModel->allConverged() )
       Warning << "Surrogate model optimization process is not converged." << endl;
 
-    coarseResiduals.conservativeResize( coarseResiduals.rows(), coarseResiduals.cols() + 1 );
-    coarseResiduals.col( coarseResiduals.cols() - 1 ) = zk;
-
-    fineResiduals.conservativeResize( fineResiduals.rows(), fineResiduals.cols() + 1 );
-    fineResiduals.col( fineResiduals.cols() - 1 ) = xk;
+    coarseResiduals.push_back( zk );
+    fineResiduals.push_back( xk );
   }
-
-  iterationsConverged();
 }

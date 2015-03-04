@@ -97,9 +97,6 @@ protected:
     shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
     shared_ptr<RBFCoarsening> rbfInterpToMesh;
 
-
-
-
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
     rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
@@ -225,6 +222,14 @@ TEST_P( MLIQNILSSolverParametrizedTest, object )
   ASSERT_TRUE( true );
 }
 
+TEST_P( MLIQNILSSolverParametrizedTest, solveTimeStep )
+{
+  solver->solveTimeStep();
+
+  ASSERT_TRUE( solver->fineModel->fsi->allConverged );
+  ASSERT_TRUE( solver->models->at( 0 )->fsi->allConverged );
+}
+
 TEST_P( MLIQNILSSolverParametrizedTest, run )
 {
   solver->run();
@@ -343,9 +348,6 @@ protected:
     shared_ptr<RBFInterpolation> rbfInterpolator;
     shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
     shared_ptr<RBFCoarsening> rbfInterpToMesh;
-
-
-
 
     rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
     rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );

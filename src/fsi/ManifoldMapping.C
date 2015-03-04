@@ -11,14 +11,31 @@ using namespace fsi;
 ManifoldMapping::ManifoldMapping(
   shared_ptr<SurrogateModel> fineModel,
   shared_ptr<SurrogateModel> coarseModel,
+  int maxIter
+  )
+  :
+  SpaceMapping( fineModel, coarseModel, maxIter, 500, 0, 0, 1.0e-15 ),
+  updateJacobian( false ),
+  initialSolutionCoarseModel( false ),
+  scaling( false ),
+  iter( 0 ),
+  scalingFactors( Eigen::VectorXd::Ones( 2 ) ),
+  sizeVar0( 0 ),
+  sizeVar1( 0 )
+{}
+
+ManifoldMapping::ManifoldMapping(
+  shared_ptr<SurrogateModel> fineModel,
+  shared_ptr<SurrogateModel> coarseModel,
   int maxIter,
+  int maxUsedIterations,
   int nbReuse,
   int reuseInformationStartingFromTimeIndex,
   double singularityLimit,
   bool updateJacobian
   )
   :
-  SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
+  SpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
   updateJacobian( updateJacobian ),
   initialSolutionCoarseModel( false ),
   scaling( false ),
@@ -32,6 +49,7 @@ ManifoldMapping::ManifoldMapping(
   shared_ptr<SurrogateModel> fineModel,
   shared_ptr<SurrogateModel> coarseModel,
   int maxIter,
+  int maxUsedIterations,
   int nbReuse,
   int reuseInformationStartingFromTimeIndex,
   double singularityLimit,
@@ -39,7 +57,7 @@ ManifoldMapping::ManifoldMapping(
   bool initialSolutionCoarseModel
   )
   :
-  SpaceMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
+  SpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
   updateJacobian( updateJacobian ),
   initialSolutionCoarseModel( initialSolutionCoarseModel ),
   scaling( false ),
@@ -113,10 +131,8 @@ void ManifoldMapping::performPostProcessing(
   vector xkprev = x0;
   output.setZero();
   R.setZero();
-  coarseResiduals.resize( m, 1 );
-  coarseResiduals.setZero();
-  fineResiduals.resize( m, 1 );
-  fineResiduals.setZero();
+  coarseResiduals.clear();
+  fineResiduals.clear();
   iter = 0;
   matrix Tk;
 
@@ -144,7 +160,7 @@ void ManifoldMapping::performPostProcessing(
   // Coarse model evaluation
 
   coarseModel->evaluate( xk, output, R );
-  coarseResiduals.col( 0 ) = R;
+  coarseResiduals.push_back( R );
   assert( xk.rows() == n );
   assert( output.rows() == m );
   assert( R.rows() == m );
@@ -152,7 +168,7 @@ void ManifoldMapping::performPostProcessing(
   // Fine model evaluation
 
   fineModel->evaluate( xk, output, R );
-  fineResiduals.col( 0 ) = R;
+  fineResiduals.push_back( R );
   assert( output.rows() == m );
   assert( R.rows() == m );
 
@@ -179,17 +195,25 @@ void ManifoldMapping::performPostProcessing(
     int nbCols = std::min( k, n );
     int nbColsCurrentTimeStep = nbCols;
 
-    // Include information from previous time steps
+    // Include information from previous optimization cycles
 
     for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
-      nbCols += fineResidualsList.at( i ).cols() - 1;
+      nbCols += fineResidualsList.at( i ).size() - 1;
+
+    // Include information from previous time steps
+
+    for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
+      for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
+        nbCols += fineResidualsTimeList.at( i ).at( j ).size() - 1;
 
     nbCols = std::min( nbCols, n );
+    nbCols = std::min( nbCols, maxUsedIterations );
+    nbColsCurrentTimeStep = std::min( nbCols, nbColsCurrentTimeStep );
 
     // Update the design specification yk
 
-    vector alpha = fineResiduals.col( k ) - y;
-    yk = coarseResiduals.col( k );
+    vector alpha = fineResiduals.at( k ) - y;
+    yk = coarseResiduals.at( k );
 
     // Apply scaling
     if ( scaling )
@@ -216,27 +240,49 @@ void ManifoldMapping::performPostProcessing(
 
       int colIndex = 0;
 
+      // Include information from previous iterations
+
       for ( int i = 0; i < nbColsCurrentTimeStep; i++ )
       {
-        DeltaF.col( i ) = fineResiduals.col( k ) - fineResiduals.col( k - 1 - i );
-        DeltaC.col( i ) = coarseResiduals.col( k ) - coarseResiduals.col( k - 1 - i );
+        DeltaF.col( i ) = fineResiduals.back() - fineResiduals.at( k - 1 - i );
+        DeltaC.col( i ) = coarseResiduals.back() - coarseResiduals.at( k - 1 - i );
         colIndex++;
       }
 
-      // Include information from previous time steps
+      // Include information from previous optimization cycles
 
       for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
       {
-        assert( fineResidualsList.at( i ).cols() >= 2 );
+        assert( fineResidualsList.at( i ).size() >= 2 );
 
-        for ( unsigned j = 0; j < fineResidualsList.at( i ).cols() - 1; j++ )
+        for ( unsigned j = 0; j < fineResidualsList.at( i ).size() - 1; j++ )
         {
           if ( colIndex >= DeltaF.cols() )
             continue;
 
-          DeltaF.col( colIndex ) = fineResidualsList.at( i ).col( fineResidualsList.at( i ).cols() - 1 ) - fineResidualsList.at( i ).col( fineResidualsList.at( i ).cols() - 2 - j );
-          DeltaC.col( colIndex ) = coarseResidualsList.at( i ).col( coarseResidualsList.at( i ).cols() - 1 ) - coarseResidualsList.at( i ).col( coarseResidualsList.at( i ).cols() - 2 - j );
+          DeltaF.col( colIndex ) = fineResidualsList.at( i ).back() - fineResidualsList.at( i ).at( fineResidualsList.at( i ).size() - 2 - j );
+          DeltaC.col( colIndex ) = coarseResidualsList.at( i ).back() - coarseResidualsList.at( i ).at( coarseResidualsList.at( i ).size() - 2 - j );
           colIndex++;
+        }
+      }
+
+      // Include information from previous time steps
+
+      for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
+      {
+        for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
+        {
+          assert( fineResidualsTimeList.at( i ).at( j ).size() >= 2 );
+
+          for ( unsigned k = 0; k < fineResidualsTimeList.at( i ).at( j ).size() - 1; k++ )
+          {
+            if ( colIndex >= DeltaF.cols() )
+              continue;
+
+            DeltaF.col( colIndex ) = fineResidualsTimeList.at( i ).at( j ).back() - fineResidualsTimeList.at( i ).at( j ).at( fineResidualsTimeList.at( i ).at( j ).size() - 2 - k );
+            DeltaC.col( colIndex ) = coarseResidualsTimeList.at( i ).at( j ).back() - coarseResidualsTimeList.at( i ).at( j ).at( coarseResidualsTimeList.at( i ).at( j ).size() - 2 - k );
+            colIndex++;
+          }
         }
       }
 
@@ -369,8 +415,7 @@ void ManifoldMapping::performPostProcessing(
     assert( xk.rows() == n );
     assert( output.rows() == m );
     assert( R.rows() == m );
-    coarseResiduals.conservativeResize( coarseResiduals.rows(), coarseResiduals.cols() + 1 );
-    coarseResiduals.col( coarseResiduals.cols() - 1 ) = R;
+    coarseResiduals.push_back( R );
 
     // Fine model evaluation
 
@@ -378,8 +423,7 @@ void ManifoldMapping::performPostProcessing(
     assert( xk.rows() == n );
     assert( output.rows() == m );
     assert( R.rows() == m );
-    fineResiduals.conservativeResize( fineResiduals.rows(), fineResiduals.cols() + 1 );
-    fineResiduals.col( fineResiduals.cols() - 1 ) = R;
+    fineResiduals.push_back( R );
 
     determineScalingFactors( output );
 
@@ -393,11 +437,11 @@ void ManifoldMapping::performPostProcessing(
       if ( updateJacobian && Tk.cols() > 0 && timeIndex >= reuseInformationStartingFromTimeIndex )
         Tkprev = Tk;
 
+      iterationsConverged();
+
       break;
     }
   }
-
-  iterationsConverged();
 }
 
 void ManifoldMapping::removeColumnFromMatrix(

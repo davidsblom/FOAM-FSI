@@ -368,7 +368,15 @@ namespace fsi
 
       // Check convergence criteria
       if ( isConvergence( output, output + y - R, residualCriterium ) )
+      {
+        bool keepIterations = residualCriterium || solsList.size() == 0;
+        iterationsConverged( keepIterations );
+
+        if ( updateJacobian && J.cols() > 0 && timeIndex >= reuseInformationStartingFromTimeIndex )
+          Jprev = J;
+
         break;
+      }
 
       determineScalingFactors( output );
 
@@ -383,12 +391,6 @@ namespace fsi
       assert( sols.at( 0 ).rows() == residuals.at( 0 ).rows() );
       assert( fsi->iter <= maxIter );
     }
-
-    bool keepIterations = residualCriterium || solsList.size() == 0;
-    iterationsConverged( keepIterations );
-
-    if ( updateJacobian && J.cols() > 0 && timeIndex >= reuseInformationStartingFromTimeIndex )
-      Jprev = J;
   }
 }
 

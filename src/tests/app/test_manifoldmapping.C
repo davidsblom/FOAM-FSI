@@ -426,13 +426,9 @@ TEST( ManifoldMapping, specification1 )
 
   // Settings
   int maxIter = 200;
-  double singularityLimit = 1.0e-15;
-  int nbReuse = 0;
-  int reuseInformationStartingFromTimeIndex = 0;
-  bool updateJacobian = false;
 
   // Create manifold mapping object
-  ManifoldMapping mm = ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian );
+  ManifoldMapping mm = ManifoldMapping( fineModel, coarseModel, maxIter );
 
   mm.performPostProcessing( y, x0, xk );
 
@@ -458,13 +454,9 @@ TEST( ManifoldMapping, specification2 )
 
   // Settings
   int maxIter = 500;
-  double singularityLimit = 1.0e-15;
-  int nbReuse = 0;
-  int reuseInformationStartingFromTimeIndex = 0;
-  bool updateJacobian = false;
 
   // Create manifold mapping object
-  ManifoldMapping mm = ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian );
+  ManifoldMapping mm = ManifoldMapping( fineModel, coarseModel, maxIter );
 
   mm.performPostProcessing( y, x0, xk );
 
@@ -490,13 +482,9 @@ TEST( ManifoldMapping, specification3 )
 
   // Settings
   int maxIter = 200;
-  double singularityLimit = 1.0e-15;
-  int nbReuse = 0;
-  int reuseInformationStartingFromTimeIndex = 0;
-  bool updateJacobian = false;
 
   // Create manifold mapping object
-  ManifoldMapping mm = ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian );
+  ManifoldMapping mm = ManifoldMapping( fineModel, coarseModel, maxIter );
 
   mm.performPostProcessing( y, x0, xk );
 
@@ -522,13 +510,9 @@ TEST( ManifoldMapping, specification4 )
 
   // Settings
   int maxIter = 2000;
-  double singularityLimit = 1.0e-15;
-  int nbReuse = 0;
-  int reuseInformationStartingFromTimeIndex = 0;
-  bool updateJacobian = false;
 
   // Create manifold mapping object
-  ManifoldMapping mm = ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian );
+  ManifoldMapping mm = ManifoldMapping( fineModel, coarseModel, maxIter );
 
   mm.performPostProcessing( y, x0, xk );
 
@@ -554,13 +538,9 @@ TEST( ManifoldMapping, specification5 )
 
   // Settings
   int maxIter = 200;
-  double singularityLimit = 1.0e-15;
-  int nbReuse = 0;
-  int reuseInformationStartingFromTimeIndex = 0;
-  bool updateJacobian = false;
 
   // Create manifold mapping object
-  ManifoldMapping mm = ManifoldMapping( fineModel, coarseModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian );
+  ManifoldMapping mm = ManifoldMapping( fineModel, coarseModel, maxIter );
 
   mm.performPostProcessing( y, x0, xk );
 

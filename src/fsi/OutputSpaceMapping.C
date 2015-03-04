@@ -12,13 +12,14 @@ OutputSpaceMapping::OutputSpaceMapping(
   shared_ptr<SurrogateModel> fineModel,
   shared_ptr<SurrogateModel> surrogateModel,
   int maxIter,
+  int maxUsedIterations,
   int nbReuse,
   int reuseInformationStartingFromTimeIndex,
   double singularityLimit,
   int order
   )
   :
-  SpaceMapping( fineModel, surrogateModel, maxIter, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
+  SpaceMapping( fineModel, surrogateModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
   surrogateModel( surrogateModel ),
   order( order )
 {
@@ -29,23 +30,37 @@ OutputSpaceMapping::OutputSpaceMapping(
 OutputSpaceMapping::~OutputSpaceMapping()
 {}
 
+void OutputSpaceMapping::finalizeTimeStep()
+{
+  SpaceMapping::finalizeTimeStep();
+
+  // Save input/output information for next time step
+  if ( nbReuse > 0 && solsList.size() >= 1 && timeIndex >= reuseInformationStartingFromTimeIndex )
+    solsTimeList.push_front( solsList );
+
+  // Remove the last items from the residual list and solutions list
+  // in order to ensure that at maximum nbReuse time steps
+  // are included.
+  while ( static_cast<int>( solsTimeList.size() ) > nbReuse )
+    solsTimeList.pop_back();
+
+  solsList.clear();
+
+  assert( solsTimeList.size() == coarseResidualsTimeList.size() );
+  assert( solsTimeList.size() == fineResidualsTimeList.size() );
+  assert( static_cast<int>( solsTimeList.size() ) <= nbReuse );
+}
+
 void OutputSpaceMapping::iterationsConverged()
 {
   SpaceMapping::iterationsConverged();
 
-  // Save input/output information for next time step
-  if ( nbReuse > 0 && sols.size() >= 2 && timeIndex >= reuseInformationStartingFromTimeIndex )
+  // Save input/output information for next solve
+  if ( sols.size() >= 2 )
     solsList.push_front( sols );
-
-  // Remove the last item from the sols list and solutions
-  // list in order to ensure that at maximum nbReuse time steps
-  // are included.
-  while ( static_cast<int>( solsList.size() ) > nbReuse )
-    solsList.pop_back();
 
   sols.clear();
 
-  assert( static_cast<int>( solsList.size() ) <= nbReuse );
   assert( solsList.size() == coarseResidualsList.size() );
   assert( solsList.size() == fineResidualsList.size() );
 }
@@ -68,10 +83,8 @@ void OutputSpaceMapping::performPostProcessing(
   vector xkprev = x0;
   output.setZero();
   R.setZero();
-  coarseResiduals.resize( m, 1 );
-  coarseResiduals.setZero();
-  fineResiduals.resize( m, 1 );
-  fineResiduals.setZero();
+  coarseResiduals.clear();
+  fineResiduals.clear();
 
   if ( timeIndex == 0 )
   {
@@ -86,7 +99,7 @@ void OutputSpaceMapping::performPostProcessing(
       surrogateModel->optimize( y, x0, xk );
 
     if ( !surrogateModel->allConverged() )
-      Warning << "Surrogate model optimization process is not converged." << endl;
+      Warning << "Output space mapping: surrogate model optimization process is not converged." << endl;
   }
 
   assert( xk.rows() == n );
@@ -99,7 +112,7 @@ void OutputSpaceMapping::performPostProcessing(
   // Coarse model evaluation
 
   surrogateModel->evaluate( xk, output, R );
-  coarseResiduals.col( 0 ) = R;
+  coarseResiduals.push_back( R );
   assert( xk.rows() == n );
   assert( output.rows() == m );
   assert( R.rows() == m );
@@ -107,7 +120,7 @@ void OutputSpaceMapping::performPostProcessing(
   // Fine model evaluation
 
   fineModel->evaluate( xk, output, R );
-  fineResiduals.col( 0 ) = R;
+  fineResiduals.push_back( R );
   assert( output.rows() == m );
   assert( R.rows() == m );
 
@@ -130,18 +143,23 @@ void OutputSpaceMapping::performPostProcessing(
     int nbCols = k;
     int nbColsCurrentTimeStep = nbCols;
 
-    // Include information from previous time steps
+    // Include information from previous optimization cycles
 
-    for ( unsigned i = 0; i < solsList.size(); i++ )
-      nbCols += solsList.at( i ).size() - 1;
+    for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
+      nbCols += fineResidualsList.at( i ).size() - 1;
+
+    // Include information from previous time steps
+    for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
+      for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
+        nbCols += fineResidualsTimeList.at( i ).at( j ).size() - 1;
 
     // Update the design specification yk
-    yk = coarseResiduals.col( k ) - (fineResiduals.col( k ) - y);
+    yk = coarseResiduals.at( k ) - (fineResiduals.at( k ) - y);
 
     if ( nbCols > 0 && order == 1 )
     {
-      assert( fineResiduals.cols() == coarseResiduals.cols() );
-      assert( static_cast<int>( sols.size() ) == fineResiduals.cols() );
+      assert( fineResiduals.size() == coarseResiduals.size() );
+      assert( sols.size() == fineResiduals.size() );
       assert( solsList.size() == fineResidualsList.size() );
       assert( solsList.size() == coarseResidualsList.size() );
 
@@ -150,11 +168,36 @@ void OutputSpaceMapping::performPostProcessing(
       fsi::vector d, dprev, deltad, deltax;
       int colIndex = 0;
 
-      Info << "Output space mapping with ";
+      Info << "OSM(1) with ";
       Info << nbCols;
       Info << " cols for the Jacobian" << endl;
 
       // Include information from previous time steps
+
+      for ( unsigned i = solsTimeList.size(); i-- > 0; )
+      {
+        for ( unsigned j = solsTimeList.at( i ).size(); j-- > 0; )
+        {
+          for ( unsigned k = 0; k < solsTimeList.at( i ).at( j ).size() - 1; k++ )
+          {
+            colIndex++;
+
+            d = fineResidualsTimeList.at( i ).at( j ).at( k + 1 ) - coarseResidualsTimeList.at( i ).at( j ).at( k + 1 );
+            dprev = fineResidualsTimeList.at( i ).at( j ).at( k ) - coarseResidualsTimeList.at( i ).at( j ).at( k );
+            deltad = d - dprev;
+            deltax = solsTimeList.at( i ).at( j ).at( k + 1 ) - solsTimeList.at( i ).at( j ).at( k );
+
+            // Broyden update for the Jacobian matrix
+
+            if ( deltax.norm() < singularityLimit )
+              continue;
+
+            J += (deltad - J * deltax) / deltax.squaredNorm() * deltax.transpose();
+          }
+        }
+      }
+
+      // Include information from previous optimization cycles
 
       for ( unsigned i = solsList.size(); i-- > 0; )
       {
@@ -162,8 +205,8 @@ void OutputSpaceMapping::performPostProcessing(
         {
           colIndex++;
 
-          d = fineResidualsList.at( i ).col( j + 1 ) - coarseResidualsList.at( i ).col( j + 1 );
-          dprev = fineResidualsList.at( i ).col( j ) - coarseResidualsList.at( i ).col( j );
+          d = fineResidualsList.at( i ).at( j + 1 ) - coarseResidualsList.at( i ).at( j + 1 );
+          dprev = fineResidualsList.at( i ).at( j ) - coarseResidualsList.at( i ).at( j );
           deltad = d - dprev;
           deltax = solsList.at( i ).at( j + 1 ) - solsList.at( i ).at( j );
 
@@ -180,8 +223,8 @@ void OutputSpaceMapping::performPostProcessing(
       {
         colIndex++;
 
-        d = fineResiduals.col( i + 1 ) - coarseResiduals.col( i + 1 );
-        dprev = fineResiduals.col( i ) - coarseResiduals.col( i );
+        d = fineResiduals.at( i + 1 ) - coarseResiduals.at( i + 1 );
+        dprev = fineResiduals.at( i ) - coarseResiduals.at( i );
         deltad = d - dprev;
         deltax = sols.at( i + 1 ) - sols.at( i );
 
@@ -202,6 +245,12 @@ void OutputSpaceMapping::performPostProcessing(
     if ( nbCols > 0 && order == 2 )
     {
       nbCols = std::min( nbCols, n );
+      nbCols = std::min( nbCols, maxUsedIterations );
+      nbColsCurrentTimeStep = std::min( nbCols, nbColsCurrentTimeStep );
+
+      Info << "OSM(2) with ";
+      Info << nbCols;
+      Info << " cols for the Jacobian" << endl;
 
       matrix DeltaF( m, nbCols ), DeltaX( m, nbCols );
 
@@ -214,13 +263,13 @@ void OutputSpaceMapping::performPostProcessing(
         if ( colIndex >= DeltaF.cols() )
           continue;
 
-        DeltaF.col( colIndex ) = fineResiduals.col( k ) - coarseResiduals.col( k );
-        DeltaF.col( colIndex ) -= fineResiduals.col( k - 1 - i ) - coarseResiduals.col( k - 1 - i );
-        DeltaX.col( colIndex ) = sols.at( k ) - sols.at( k - 1 - i );
+        DeltaF.col( colIndex ) = fineResiduals.back() - coarseResiduals.back();
+        DeltaF.col( colIndex ) -= fineResiduals.at( k - 1 - i ) - coarseResiduals.at( k - 1 - i );
+        DeltaX.col( colIndex ) = sols.back() - sols.at( k - 1 - i );
         colIndex++;
       }
 
-      // Include information from previous time steps
+      // Include information from previous optimization cycles
 
       for ( unsigned i = 0; i < solsList.size(); i++ )
       {
@@ -229,13 +278,41 @@ void OutputSpaceMapping::performPostProcessing(
           if ( colIndex >= DeltaF.cols() )
             continue;
 
-          DeltaF.col( colIndex ) = fineResidualsList.at( i ).col( fineResidualsList.at( i ).cols() - 1 ) - coarseResidualsList.at( i ).col( coarseResidualsList.at( i ).cols() - 1 );
+          DeltaF.col( colIndex ) = fineResidualsList.at( i ).back() - coarseResidualsList.at( i ).back();
 
-          DeltaF.col( colIndex ) -= fineResidualsList.at( i ).col( fineResidualsList.at( i ).cols() - 2 - j ) - coarseResidualsList.at( i ).col( coarseResidualsList.at( i ).cols() - 2 - j );
+          DeltaF.col( colIndex ) -= fineResidualsList.at( i ).at( fineResidualsList.at( i ).size() - 2 - j );
+          DeltaF.col( colIndex ) -= coarseResidualsList.at( i ).at( coarseResidualsList.at( i ).size() - 2 - j );
 
-          DeltaX.col( colIndex ) = solsList.at( i ).at( solsList.at( i ).size() - 1 ) - solsList.at( i ).at( solsList.at( i ).size() - 2 - j );
+          DeltaX.col( colIndex ) = solsList.at( i ).back() - solsList.at( i ).at( solsList.at( i ).size() - 2 - j );
 
           colIndex++;
+        }
+      }
+
+      // Include information from previous time steps
+      for ( unsigned i = 0; i < solsTimeList.size(); i++ )
+      {
+        for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
+        {
+          for ( unsigned k = 0; k < solsTimeList.at( i ).at( j ).size() - 1; k++ )
+          {
+            assert( fineResidualsTimeList.at( i ).at( j ).size() == solsTimeList.at( i ).at( j ).size() );
+            assert( coarseResidualsTimeList.at( i ).at( j ).size() == solsTimeList.at( i ).at( j ).size() );
+
+            if ( colIndex >= DeltaF.cols() )
+              continue;
+
+            DeltaF.col( colIndex ) = fineResidualsTimeList.at( i ).at( j ).back();
+            DeltaF.col( colIndex ) -= coarseResidualsTimeList.at( i ).at( j ).back();
+
+            DeltaF.col( colIndex ) -= fineResidualsTimeList.at( i ).at( j ).at( fineResidualsTimeList.at( i ).at( j ).size() - 2 - k );
+            DeltaF.col( colIndex ) -= coarseResidualsTimeList.at( i ).at( j ).at( coarseResidualsTimeList.at( i ).at( j ).size() - 2 - k );
+
+            DeltaX.col( colIndex ) = solsTimeList.at( i ).at( j ).back();
+            DeltaX.col( colIndex ) -= solsTimeList.at( i ).at( j ).at( solsTimeList.at( i ).at( j ).size() - 2 - k );
+
+            colIndex++;
+          }
         }
       }
 
@@ -296,7 +373,7 @@ void OutputSpaceMapping::performPostProcessing(
     assert( xk.rows() == n );
 
     if ( !surrogateModel->allConverged() )
-      Warning << "Surrogate model optimization process is not converged." << endl;
+      Warning << "Output space mapping: surrogate model optimization process is not converged." << endl;
 
     xk = output;
 
@@ -308,8 +385,7 @@ void OutputSpaceMapping::performPostProcessing(
     assert( xk.rows() == n );
     assert( output.rows() == m );
     assert( R.rows() == m );
-    coarseResiduals.conservativeResize( coarseResiduals.rows(), coarseResiduals.cols() + 1 );
-    coarseResiduals.col( coarseResiduals.cols() - 1 ) = R;
+    coarseResiduals.push_back( R );
 
     // Fine model evaluation
 
@@ -317,8 +393,7 @@ void OutputSpaceMapping::performPostProcessing(
     assert( xk.rows() == n );
     assert( output.rows() == m );
     assert( R.rows() == m );
-    fineResiduals.conservativeResize( fineResiduals.rows(), fineResiduals.cols() + 1 );
-    fineResiduals.col( fineResiduals.cols() - 1 ) = R;
+    fineResiduals.push_back( R );
 
     sols.push_back( xk );
 
@@ -326,11 +401,10 @@ void OutputSpaceMapping::performPostProcessing(
     if ( isConvergence( xk, xkprev, residualCriterium ) )
     {
       assert( fineModel->allConverged() );
+      iterationsConverged();
       break;
     }
   }
-
-  iterationsConverged();
 }
 
 void OutputSpaceMapping::removeColumnFromMatrix(

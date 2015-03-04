@@ -27,6 +27,7 @@ linux64GccDPOpt
 darwinIntel64GccDPOpt
 
 # Specific files
+*.log
 formatCode
 uncrustify.cfg
 runTests.sh
