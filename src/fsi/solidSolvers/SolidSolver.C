@@ -276,7 +276,6 @@ void SolidSolver::solve()
   scalar relativeResidual = 1;
   scalar initialResidual = 1;
   lduMatrix::solverPerformance solverPerf;
-  lduMatrix::debug = 0;
 
   gradU = fvc::grad( U );
 
@@ -334,8 +333,6 @@ void SolidSolver::solve()
     &&
     ++iCorr < nCorr
   );
-
-  lduMatrix::debug = 1;
 
   Info << "Solving for " << U.name();
   Info << ", Initial residual = " << initialResidual;
