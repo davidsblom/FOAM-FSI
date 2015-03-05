@@ -533,8 +533,6 @@ void FluidSolver::solve()
   scalar residualPressure;
   scalar residualVelocity;
 
-  lduMatrix::debug = 0;
-
   // --- PIMPLE loop
   do
   {
@@ -639,6 +637,4 @@ void FluidSolver::solve()
        << ", No outer iterations " << ocorr + 1 << endl;
 
   continuityErrs();
-
-  lduMatrix::debug = 1;
 }
