@@ -119,27 +119,27 @@ void Piston::evaluate(
 
 double Piston::solve()
 {
-  Eigen::VectorXd q( nbTimeSteps + 1 ), qdot( nbTimeSteps + 1 ), qold(2), f(2), rhs(2), result(2);
+  Eigen::VectorXd q( nbTimeSteps + 1 ), qdot( nbTimeSteps + 1 ), qold( 2 ), f( 2 ), rhs( 2 ), result( 2 );
 
-  q(0) = Ac;
-  qdot(0) = q(0);
+  q( 0 ) = Ac;
+  qdot( 0 ) = q( 0 );
 
   for ( int i = 1; i < nbTimeSteps + 1; i++ )
   {
     double t = dt * i;
 
-    qold << qdot(i-1), q(i-1);
+    qold << qdot( i - 1 ), q( i - 1 );
 
     f.setZero();
     rhs.setZero();
 
     solveTimeStep( t, dt, qold, rhs, f, result );
 
-    qdot(i) = result(0);
-    q(i) = result(1);
+    qdot( i ) = result( 0 );
+    q( i ) = result( 1 );
   }
 
-  return q( q.rows() -1  );
+  return q( q.rows() - 1 );
 }
 
 void Piston::solveTimeStep(
