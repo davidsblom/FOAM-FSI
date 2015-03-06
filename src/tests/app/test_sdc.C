@@ -39,6 +39,8 @@ public:
 
   double referenceSolution( double t );
 
+  double solve();
+
   void solveTimeStep(
     const double t,
     const double dt,
@@ -115,6 +117,31 @@ void Piston::evaluate(
   f( 1 ) = q( 0 );
 }
 
+double Piston::solve()
+{
+  Eigen::VectorXd q( nbTimeSteps + 1 ), qdot( nbTimeSteps + 1 ), qold(2), f(2), rhs(2), result(2);
+
+  q(0) = Ac;
+  qdot(0) = q(0);
+
+  for ( int i = 1; i < nbTimeSteps + 1; i++ )
+  {
+    double t = dt * i;
+
+    qold << qdot(i-1), q(i-1);
+
+    f.setZero();
+    rhs.setZero();
+
+    solveTimeStep( t, dt, qold, rhs, f, result );
+
+    qdot(i) = result(0);
+    q(i) = result(1);
+  }
+
+  return q( q.rows() -1  );
+}
+
 void Piston::solveTimeStep(
   const double t,
   const double dt,
@@ -180,4 +207,13 @@ TEST_F( PistonTest, referenceSolution )
   double result = piston->referenceSolution( 100 );
 
   ASSERT_NEAR( result, -35.5953231178, 1.0e-11 );
+}
+
+TEST_F( PistonTest, solve )
+{
+  double result = piston->solve();
+
+  double ref = piston->referenceSolution( 100 );
+
+  ASSERT_NEAR( ref, result, 1.0e-3 );
 }
