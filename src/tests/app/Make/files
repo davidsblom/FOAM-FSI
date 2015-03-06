@@ -60,5 +60,6 @@ test_manifoldmappinglinearizedfsisolver.C
 test_rbfcoarsening.C
 test_multilevelspacemapping.C
 test_multilevelmliqnilssolver.C
+test_sdc.C
 
 EXE = $(FOAM_USER_APPBIN)/tests
