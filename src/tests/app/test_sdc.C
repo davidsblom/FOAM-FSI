@@ -39,8 +39,6 @@ public:
 
   double referenceSolution( double t );
 
-  void solve();
-
   void solveTimeStep(
     const double t,
     const double dt,
