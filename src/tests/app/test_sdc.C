@@ -222,7 +222,7 @@ TEST_F( PistonTest, solve )
 
 TEST_F( PistonTest, evaluateFunction )
 {
-  Eigen::VectorXd q( 2 ), f ( 2 );
+  Eigen::VectorXd q( 2 ), f( 2 );
   double t;
 
   q << -100, -100;
@@ -230,6 +230,6 @@ TEST_F( PistonTest, evaluateFunction )
 
   piston->evaluateFunction( q, t, f );
 
-  ASSERT_NEAR( f(0),  138.17732907, 1.0e-8 );
-  ASSERT_NEAR( f(1),  -100, 1.0e-9 );
+  ASSERT_NEAR( f( 0 ), 138.17732907, 1.0e-8 );
+  ASSERT_NEAR( f( 1 ), -100, 1.0e-9 );
 }
