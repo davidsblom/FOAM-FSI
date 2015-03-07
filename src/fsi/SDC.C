@@ -8,11 +8,13 @@
 
 namespace sdc
 {
-
-  SDC::SDC( std::shared_ptr<SDCSolver> solver, int nbNodes )
-  :
-  solver( solver ),
-  nbNodes( nbNodes )
+  SDC::SDC(
+    std::shared_ptr<SDCSolver> solver,
+    int nbNodes
+    )
+    :
+    solver( solver ),
+    nbNodes( nbNodes )
   {
     assert( solver );
     assert( nbNodes > 1 );
@@ -20,8 +22,5 @@ namespace sdc
   }
 
   SDC::~SDC()
-  {
-    
-  }
-
+  {}
 }

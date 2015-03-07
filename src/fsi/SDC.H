@@ -12,20 +12,21 @@
 
 namespace sdc
 {
-
-class SDC
-{
+  class SDC
+  {
 public:
-  
-  SDC( std::shared_ptr<SDCSolver> solver, int nbNodes );
 
-  ~SDC();
+    SDC(
+      std::shared_ptr<SDCSolver> solver,
+      int nbNodes
+      );
 
-  std::shared_ptr<SDCSolver> solver;
+    ~SDC();
 
-  int nbNodes;
-};
+    std::shared_ptr<SDCSolver> solver;
 
+    int nbNodes;
+  };
 }
 
 #endif
