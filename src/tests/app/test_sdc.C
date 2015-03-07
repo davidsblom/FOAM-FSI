@@ -5,7 +5,10 @@
  */
 
 #include <Eigen/Dense>
+#include "SDC.H"
 #include "gtest/gtest.h"
+
+using namespace sdc;
 
 /*
  * Implements the piston problem for which a exact solution exists.
@@ -21,7 +24,7 @@
  * http://en.wikipedia.org/wiki/Legendre_polynomials
  */
 
-class Piston
+class Piston : public SDCSolver
 {
 public:
 
@@ -41,7 +44,7 @@ public:
 
   double solve();
 
-  void solveTimeStep(
+  virtual void implicitSolve(
     const double t,
     const double dt,
     const Eigen::VectorXd & qold,
@@ -50,7 +53,7 @@ public:
     Eigen::VectorXd & result
     );
 
-  void evaluate(
+  virtual void evaluateFunction(
     const Eigen::VectorXd & q,
     const double t,
     Eigen::VectorXd & f
@@ -77,6 +80,7 @@ Piston::Piston(
   double omega
   )
   :
+  SDCSolver(),
   nbTimeSteps( nbTimeSteps ),
   dt( dt ),
   q0( q0 ),
@@ -104,7 +108,7 @@ double Piston::referenceSolution( double t )
   return result;
 }
 
-void Piston::evaluate(
+void Piston::evaluateFunction(
   const Eigen::VectorXd & q,
   const double t,
   Eigen::VectorXd & f
@@ -133,7 +137,7 @@ double Piston::solve()
     f.setZero();
     rhs.setZero();
 
-    solveTimeStep( t, dt, qold, rhs, f, result );
+    implicitSolve( t, dt, qold, rhs, f, result );
 
     qdot( i ) = result( 0 );
     q( i ) = result( 1 );
@@ -142,7 +146,7 @@ double Piston::solve()
   return q( q.rows() - 1 );
 }
 
-void Piston::solveTimeStep(
+void Piston::implicitSolve(
   const double t,
   const double dt,
   const Eigen::VectorXd & qold,
@@ -214,4 +218,18 @@ TEST_F( PistonTest, solve )
   double result = piston->solve();
 
   ASSERT_NEAR( result, -75814.5607609, 1.0e-8 );
+}
+
+TEST_F( PistonTest, evaluateFunction )
+{
+  Eigen::VectorXd q( 2 ), f ( 2 );
+  double t;
+
+  q << -100, -100;
+  t = 1;
+
+  piston->evaluateFunction( q, t, f );
+
+  ASSERT_NEAR( f(0),  138.17732907, 1.0e-8 );
+  ASSERT_NEAR( f(1),  -100, 1.0e-9 );
 }
