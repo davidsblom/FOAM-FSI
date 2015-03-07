@@ -26,6 +26,11 @@ public:
     std::shared_ptr<SDCSolver> solver;
 
     int nbNodes;
+
+    Eigen::VectorXd nodes;
+    Eigen::MatrixXd smat;
+    Eigen::MatrixXd qmat;
+    Eigen::VectorXd dsdc;
   };
 }
 
