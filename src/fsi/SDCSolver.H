@@ -23,6 +23,8 @@ public:
       Eigen::VectorXd & f
       ) = 0;
 
+    virtual double getTimeStep() = 0;
+
     virtual void implicitSolve(
       const double t,
       const double dt,

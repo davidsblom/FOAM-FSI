@@ -23,6 +23,8 @@ public:
 
     ~SDC();
 
+    void solveTimeStep();
+
     std::shared_ptr<SDCSolver> solver;
 
     int nbNodes;

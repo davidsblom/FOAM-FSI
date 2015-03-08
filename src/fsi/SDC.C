@@ -35,4 +35,9 @@ namespace sdc
 
   SDC::~SDC()
   {}
+
+  void SDC::solveTimeStep()
+  {
+    
+  }
 }
