@@ -23,7 +23,7 @@ public:
 
     ~SDC();
 
-    void solveTimeStep();
+    void solveTimeStep( const double t0 );
 
     std::shared_ptr<SDCSolver> solver;
 
@@ -33,6 +33,8 @@ public:
     Eigen::MatrixXd smat;
     Eigen::MatrixXd qmat;
     Eigen::VectorXd dsdc;
+    double dt;
+    int N;
   };
 }
 

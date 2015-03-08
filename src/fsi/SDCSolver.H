@@ -23,13 +23,21 @@ public:
       Eigen::VectorXd & f
       ) = 0;
 
+    virtual void finalizeTimeStep() = 0;
+
+    virtual int getDOF() = 0;
+
+    virtual void getSolution( Eigen::VectorXd & solution ) = 0;
+
     virtual double getTimeStep() = 0;
+
+    virtual void initTimeStep() = 0;
 
     virtual void implicitSolve(
       const double t,
       const double dt,
       const Eigen::VectorXd & qold,
-      const Eigen::VectorXd rhs,
+      const Eigen::VectorXd & rhs,
       Eigen::VectorXd & f,
       Eigen::VectorXd & result
       ) = 0;

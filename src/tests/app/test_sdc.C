@@ -44,14 +44,22 @@ public:
 
   double solve();
 
+  virtual void finalizeTimeStep(){}
+
+  virtual void getSolution( Eigen::VectorXd & solution );
+
+  virtual void initTimeStep(){}
+
   virtual void implicitSolve(
     const double t,
     const double dt,
     const Eigen::VectorXd & qold,
-    const Eigen::VectorXd rhs,
+    const Eigen::VectorXd & rhs,
     Eigen::VectorXd & f,
     Eigen::VectorXd & result
     );
+
+  virtual int getDOF();
 
   virtual double getTimeStep();
 
@@ -70,6 +78,8 @@ public:
   double Ac;
   double omega;
   int N;
+  double q;
+  double qdot;
 };
 
 Piston::Piston(
@@ -91,7 +101,9 @@ Piston::Piston(
   As( As ),
   Ac( Ac ),
   omega( omega ),
-  N( 2 )
+  N( 2 ),
+  q( q0 ),
+  qdot( qdot0 )
 {
   assert( nbTimeSteps > 0 );
   assert( dt > 0 );
@@ -121,6 +133,18 @@ void Piston::evaluateFunction(
   f( 0 ) = As * std::sin( omega * t );
   f( 0 ) += Ac * std::cos( omega * t );
   f( 1 ) = q( 0 );
+}
+
+int Piston::getDOF()
+{
+  return 2;
+}
+
+void Piston::getSolution( Eigen::VectorXd & solution )
+{
+  assert( solution.rows() == 2 );
+  solution( 0 ) = qdot;
+  solution( 1 ) = q;
 }
 
 double Piston::getTimeStep()
@@ -157,7 +181,7 @@ void Piston::implicitSolve(
   const double t,
   const double dt,
   const Eigen::VectorXd & qold,
-  const Eigen::VectorXd rhs,
+  const Eigen::VectorXd & rhs,
   Eigen::VectorXd & f,
   Eigen::VectorXd & result
   )
@@ -176,6 +200,9 @@ void Piston::implicitSolve(
   result( 1 ) = qold( 1 ) + std::pow( dt, 2 ) * f( 0 ) + dt * qold( 0 ) + dt * rhs( 0 ) + rhs( 1 );
 
   f( 1 ) = result( 0 );
+
+  qdot = result( 0 );
+  q = result( 1 );
 }
 
 class SDCTest : public::testing::Test
@@ -245,5 +272,5 @@ TEST_F( SDCTest, evaluateFunction )
 
 TEST_F( SDCTest, solveTimeStep )
 {
-  sdc->solveTimeStep();
+  sdc->solveTimeStep( 0 );
 }
