@@ -44,7 +44,7 @@ namespace sdc
     Eigen::VectorXd dtsdc = this->dt * dsdc;
     Eigen::MatrixXd solStages( nbNodes, N ), F( nbNodes, N );
 
-    Eigen::VectorXd sol(N);
+    Eigen::VectorXd sol( N );
     solver->getSolution( sol );
     solStages.row( 0 ) = sol;
 
@@ -55,11 +55,11 @@ namespace sdc
       double dt = dtsdc( j );
       t += dt;
 
-      Eigen::VectorXd f( N ), rhs( N ), result( N ), qold(N);
+      Eigen::VectorXd f( N ), rhs( N ), result( N ), qold( N );
       f.setZero();
       rhs.setZero();
       result.setZero();
-      qold = solStages.row(j);
+      qold = solStages.row( j );
 
       solver->initTimeStep();
 
@@ -70,6 +70,5 @@ namespace sdc
       solStages.row( j + 1 ) = result;
       F.row( j + 1 ) = f;
     }
-
   }
 }
