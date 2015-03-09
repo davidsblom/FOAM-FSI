@@ -196,9 +196,6 @@ void SDCFluidSolver::initTimeStep()
 {
   assert( !init );
 
-  timeIndex++;
-  t = timeIndex * runTime->deltaT().value();
-
   readPIMPLEControls();
 
   init = true;
@@ -259,6 +256,8 @@ void SDCFluidSolver::setNumberOfStages( int k )
 
 void SDCFluidSolver::nextTimeStep()
 {
+  timeIndex++;
+
   if ( pStages.size() == static_cast<unsigned>(k) )
   {
     for ( int i = 0; i < k; i++ )
@@ -342,8 +341,8 @@ void SDCFluidSolver::implicitSolve(
   Eigen::VectorXd & result
   )
 {
-  runTime->setTime( t, 1 );
   runTime->setDeltaT( dt );
+  runTime->setTime( t, timeIndex );
 
   p = pStages.at( k + 1 );
   phi = phiStages.at( k + 1 );
