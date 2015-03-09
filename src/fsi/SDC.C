@@ -25,7 +25,7 @@ namespace sdc
   {
     assert( solver );
     assert( nbNodes > 1 );
-    assert( nbNodes < 14 );
+    assert( nbNodes < 15 );
     assert( dt > 0 );
 
     quadrature::rules( nbNodes, nodes, smat, qmat );

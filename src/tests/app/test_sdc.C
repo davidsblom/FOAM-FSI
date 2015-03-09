@@ -9,6 +9,10 @@
 #include "gtest/gtest.h"
 
 using namespace sdc;
+using::testing::TestWithParam;
+using::testing::Bool;
+using::testing::Values;
+using::testing::Combine;
 
 /*
  * Implements the piston problem for which a exact solution exists.
@@ -214,16 +218,17 @@ void Piston::implicitSolve(
   this->t = t;
 }
 
-class SDCTest : public::testing::Test
+class SDCTest : public TestWithParam< std::tr1::tuple<int, int> >
 {
 protected:
 
   virtual void SetUp()
   {
-    int nbTimeSteps;
     double dt, q0, qdot0, As, Ac, omega, endTime;
 
-    nbTimeSteps = 10;
+    int nbNodes = std::tr1::get<0>( GetParam() );
+    int nbTimeSteps = std::tr1::get<1>( GetParam() );
+
     endTime = 100;
     dt = endTime / nbTimeSteps;
     As = 100;
@@ -233,7 +238,7 @@ protected:
     qdot0 = -As;
 
     piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-    sdc = std::shared_ptr<SDC> ( new SDC( piston, 13 ) );
+    sdc = std::shared_ptr<SDC> ( new SDC( piston, nbNodes ) );
   }
 
   virtual void TearDown()
@@ -246,19 +251,21 @@ protected:
   std::shared_ptr<SDC> sdc;
 };
 
-TEST_F( SDCTest, object )
+INSTANTIATE_TEST_CASE_P( testParameters, SDCTest, ::testing::Combine( Values( 10, 11, 12, 13, 14 ), Values( 100, 200 ) ) );
+
+TEST_P( SDCTest, object )
 {
   ASSERT_TRUE( true );
 }
 
-TEST_F( SDCTest, referenceSolution )
+TEST_P( SDCTest, referenceSolution )
 {
   double result = piston->referenceSolution( 100 );
 
   ASSERT_NEAR( result, -35.5953231178, 1.0e-11 );
 }
 
-TEST_F( SDCTest, solve )
+TEST_P( SDCTest, solve )
 {
   piston->run();
 
@@ -271,7 +278,7 @@ TEST_F( SDCTest, solve )
   ASSERT_NEAR( piston->t, 100, 1.0e-10 );
 }
 
-TEST_F( SDCTest, evaluateFunction )
+TEST_P( SDCTest, evaluateFunction )
 {
   Eigen::VectorXd q( 2 ), f( 2 );
   double t;
@@ -285,12 +292,12 @@ TEST_F( SDCTest, evaluateFunction )
   ASSERT_NEAR( f( 1 ), -100, 1.0e-9 );
 }
 
-TEST_F( SDCTest, solveTimeStep )
+TEST_P( SDCTest, solveTimeStep )
 {
   sdc->solveTimeStep( 0 );
 }
 
-TEST_F( SDCTest, run )
+TEST_P( SDCTest, run )
 {
   sdc->run();
 
