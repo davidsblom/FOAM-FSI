@@ -368,7 +368,7 @@ void SDCFluidSolver::implicitSolve(
 
   // PIMPLE algorithm
 
-  for ( label oCorr = 0; oCorr < 5; oCorr++ )
+  for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
   {
     // for computing Hp
     fvVectorMatrix UEqn
