@@ -122,11 +122,11 @@ namespace sdc
         solStages.row( p + 1 ) = result;
         F.row( p + 1 ) = f;
       }
+
+      // Compute the SDC residual
+
+      Eigen::MatrixXd Qj = dt * (qmat * F);
+      Eigen::MatrixXd residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
     }
-
-    // Compute the SDC residual
-
-    Eigen::MatrixXd Qj = dt * (qmat * F);
-    Eigen::MatrixXd residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
   }
 }
