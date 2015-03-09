@@ -42,7 +42,7 @@ public:
 
   double referenceSolution( double t );
 
-  double solve();
+  void run();
 
   virtual void finalizeTimeStep(){}
 
@@ -152,7 +152,7 @@ double Piston::getTimeStep()
   return dt;
 }
 
-double Piston::solve()
+void Piston::run()
 {
   Eigen::VectorXd q( nbTimeSteps + 1 ), qdot( nbTimeSteps + 1 ), qold( 2 ), f( 2 ), rhs( 2 ), result( 2 );
 
@@ -173,8 +173,6 @@ double Piston::solve()
     qdot( i ) = result( 0 );
     q( i ) = result( 1 );
   }
-
-  return q( q.rows() - 1 );
 }
 
 void Piston::implicitSolve(
@@ -251,7 +249,12 @@ TEST_F( SDCTest, referenceSolution )
 
 TEST_F( SDCTest, solve )
 {
-  double result = piston->solve();
+  piston->run();
+
+  Eigen::VectorXd solution( 2 );
+  piston->getSolution( solution );
+
+  double result = solution( 1 );
 
   ASSERT_NEAR( result, -75814.5607609, 1.0e-8 );
 }
