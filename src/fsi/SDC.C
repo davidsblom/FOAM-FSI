@@ -11,7 +11,8 @@ namespace sdc
 {
   SDC::SDC(
     std::shared_ptr<SDCSolver> solver,
-    int nbNodes
+    int nbNodes,
+    double tol
     )
     :
     solver( solver ),
@@ -21,12 +22,15 @@ namespace sdc
     dsdc(),
     dt( solver->getTimeStep() ),
     N( solver->getDOF() ),
-    k( 0 )
+    k( 0 ),
+    tol( tol )
   {
     assert( solver );
     assert( nbNodes > 1 );
     assert( nbNodes < 15 );
     assert( dt > 0 );
+    assert( tol > 0 );
+    assert( tol < 1 );
 
     quadrature::rules( nbNodes, nodes, smat, qmat );
 
@@ -127,6 +131,17 @@ namespace sdc
 
       Eigen::MatrixXd Qj = dt * (qmat * F);
       Eigen::MatrixXd residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
+
+      double error = std::sqrt( residual.squaredNorm() / ( residual.rows() * residual.cols() ) );
+      bool convergence = error < tol;
+
+      labelList convergenceList( Pstream::nProcs(), 0 );
+      convergenceList[Pstream::myProcNo()] = convergence;
+      reduce( convergenceList, sumOp<labelList>() );
+      convergence = min( convergenceList );
+
+      if ( convergence )
+        break;
     }
   }
 }

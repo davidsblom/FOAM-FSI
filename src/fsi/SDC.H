@@ -9,6 +9,7 @@
 
 #include <memory>
 #include "SDCSolver.H"
+#include "fvCFD.H"
 
 namespace sdc
 {
@@ -18,7 +19,8 @@ public:
 
     SDC(
       std::shared_ptr<SDCSolver> solver,
-      int nbNodes
+      int nbNodes,
+      double tol
       );
 
     ~SDC();
@@ -38,6 +40,7 @@ public:
     double dt;
     int N;
     int k;
+    double tol;
   };
 }
 
