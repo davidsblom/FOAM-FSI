@@ -15,13 +15,13 @@ namespace sdc
     )
     :
     solver( solver ),
-    nbNodes( nbNodes ),
     nodes(),
     smat(),
     qmat(),
     dsdc(),
     dt( solver->getTimeStep() ),
-    N( solver->getDOF() )
+    N( solver->getDOF() ),
+    k( 0 )
   {
     assert( solver );
     assert( nbNodes > 1 );
@@ -29,6 +29,8 @@ namespace sdc
     assert( dt > 0 );
 
     quadrature::rules( nbNodes, nodes, smat, qmat );
+
+    k = nodes.rows();
 
     dsdc.resize( nodes.rows() - 1 );
 
@@ -53,7 +55,7 @@ namespace sdc
   void SDC::solveTimeStep( const double t0 )
   {
     Eigen::VectorXd dtsdc = this->dt * dsdc;
-    Eigen::MatrixXd solStages( nbNodes, N ), F( nbNodes, N );
+    Eigen::MatrixXd solStages( k, N ), F( k, N );
 
     Eigen::VectorXd sol( N );
     solver->getSolution( sol );
@@ -61,7 +63,7 @@ namespace sdc
 
     double t = t0;
 
-    for ( int j = 0; j < nbNodes - 1; j++ )
+    for ( int j = 0; j < k - 1; j++ )
     {
       double dt = dtsdc( j );
       t += dt;
@@ -82,7 +84,7 @@ namespace sdc
 
     // Compute successive corrections
 
-    for ( int j = 0; j < nbNodes; j++ )
+    for ( int j = 0; j < k; j++ )
     {
       t = t0;
       Eigen::MatrixXd Fold = F;
@@ -99,7 +101,7 @@ namespace sdc
       Eigen::MatrixXd Sj = this->dt * (smat * F);
 
       // SDC sweep
-      for ( int p = 0; p < nbNodes - 1; p++ )
+      for ( int p = 0; p < k - 1; p++ )
       {
         double dt = dtsdc( p );
         t += dt;
@@ -125,6 +127,6 @@ namespace sdc
     // Compute the SDC residual
 
     Eigen::MatrixXd Qj = dt * (qmat * F);
-    Eigen::MatrixXd residual = solStages.row( 0 ) + Qj.row( nbNodes - 2 ) - solStages.row( nbNodes - 1 );
+    Eigen::MatrixXd residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
   }
 }

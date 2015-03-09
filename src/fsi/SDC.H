@@ -37,6 +37,7 @@ public:
     Eigen::VectorXd dsdc;
     double dt;
     int N;
+    int k;
   };
 }
 

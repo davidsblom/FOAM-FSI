@@ -162,7 +162,10 @@ double Piston::getTimeStep()
 
 bool Piston::isRunning()
 {
-  return t < nbTimeSteps * dt;
+  if ( t > nbTimeSteps * dt )
+    return false;
+
+  return std::abs( t - nbTimeSteps * dt ) > 1.0e-10;
 }
 
 void Piston::run()
@@ -251,7 +254,7 @@ protected:
   std::shared_ptr<SDC> sdc;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, SDCTest, ::testing::Combine( Values( 10, 11, 12, 13, 14 ), Values( 100, 200 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, SDCTest, ::testing::Combine( Values( 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ), Values( 10, 100 ) ) );
 
 TEST_P( SDCTest, object )
 {
@@ -274,7 +277,11 @@ TEST_P( SDCTest, solve )
 
   double result = solution( 1 );
 
-  ASSERT_NEAR( result, -75814.5607609, 1.0e-8 );
+  int nbTimeSteps = std::tr1::get<1>( GetParam() );
+
+  if ( nbTimeSteps == 10 )
+    ASSERT_NEAR( result, -75814.5607609, 1.0e-8 );
+
   ASSERT_NEAR( piston->t, 100, 1.0e-10 );
 }
 
@@ -308,6 +315,11 @@ TEST_P( SDCTest, run )
   double ref = piston->referenceSolution( 100 );
   double error = std::abs( result - ref ) / std::abs( ref );
 
-  ASSERT_NEAR( error, 1.0e-7, 1.0e-6 );
+  int nbTimeSteps = std::tr1::get<1>( GetParam() );
+  int nbNodes = std::tr1::get<0>( GetParam() );
+
   ASSERT_NEAR( piston->t, 100, 1.0e-10 );
+
+  if ( nbTimeSteps == 100 && nbNodes > 4 )
+    ASSERT_NEAR( error, 1.0e-5, 1.0e-4 );
 }

@@ -1059,7 +1059,7 @@ namespace quadrature {
 
     if ( n == 12 )
     {
-      nodes.resize( 12 );
+      nodes.resize( 13 );
       smat.resize( 12, 13 );
       qmat.resize( 12, 13 );
 
@@ -1729,7 +1729,7 @@ namespace quadrature {
 
     if ( n == 14 )
     {
-      nodes.resize( 14 );
+      nodes.resize( 15 );
       smat.resize( 14, 15 );
       qmat.resize( 14, 15 );
 
