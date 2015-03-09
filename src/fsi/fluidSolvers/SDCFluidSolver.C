@@ -258,7 +258,18 @@ void SDCFluidSolver::setNumberOfStages( int k )
 }
 
 void SDCFluidSolver::nextTimeStep()
-{}
+{
+  if ( pStages.size() == static_cast<unsigned>(k) )
+  {
+    for ( int i = 0; i < k; i++ )
+    {
+      pStages.at( i ) = p;
+      phiStages.at( i ) = phi;
+      UStages.at( i ) = U;
+      UfStages.at( i ) = Uf;
+    }
+  }
+}
 
 void SDCFluidSolver::solve()
 {
