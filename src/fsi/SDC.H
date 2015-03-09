@@ -23,6 +23,8 @@ public:
 
     ~SDC();
 
+    void run();
+
     void solveTimeStep( const double t0 );
 
     std::shared_ptr<SDCSolver> solver;

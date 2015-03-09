@@ -50,6 +50,8 @@ public:
 
   virtual void initTimeStep(){}
 
+  virtual bool isRunning();
+
   virtual void implicitSolve(
     const double t,
     const double dt,
@@ -80,6 +82,7 @@ public:
   int N;
   double q;
   double qdot;
+  double t;
 };
 
 Piston::Piston(
@@ -103,7 +106,8 @@ Piston::Piston(
   omega( omega ),
   N( 2 ),
   q( q0 ),
-  qdot( qdot0 )
+  qdot( qdot0 ),
+  t( 0 )
 {
   assert( nbTimeSteps > 0 );
   assert( dt > 0 );
@@ -150,6 +154,11 @@ void Piston::getSolution( Eigen::VectorXd & solution )
 double Piston::getTimeStep()
 {
   return dt;
+}
+
+bool Piston::isRunning()
+{
+  return t < nbTimeSteps * dt;
 }
 
 void Piston::run()
@@ -201,6 +210,8 @@ void Piston::implicitSolve(
 
   qdot = result( 0 );
   q = result( 1 );
+
+  this->t = t;
 }
 
 class SDCTest : public::testing::Test
@@ -222,7 +233,7 @@ protected:
     qdot0 = -As;
 
     piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-    sdc = std::shared_ptr<SDC> ( new SDC( piston, 5 ) );
+    sdc = std::shared_ptr<SDC> ( new SDC( piston, 13 ) );
   }
 
   virtual void TearDown()
@@ -257,6 +268,7 @@ TEST_F( SDCTest, solve )
   double result = solution( 1 );
 
   ASSERT_NEAR( result, -75814.5607609, 1.0e-8 );
+  ASSERT_NEAR( piston->t, 100, 1.0e-10 );
 }
 
 TEST_F( SDCTest, evaluateFunction )
@@ -276,4 +288,19 @@ TEST_F( SDCTest, evaluateFunction )
 TEST_F( SDCTest, solveTimeStep )
 {
   sdc->solveTimeStep( 0 );
+}
+
+TEST_F( SDCTest, run )
+{
+  sdc->run();
+
+  Eigen::VectorXd solution( 2 );
+  piston->getSolution( solution );
+
+  double result = solution( 1 );
+  double ref = piston->referenceSolution( 100 );
+  double error = std::abs( result - ref ) / std::abs( ref );
+
+  ASSERT_NEAR( error, 1.0e-7, 1.0e-6 );
+  ASSERT_NEAR( piston->t, 100, 1.0e-10 );
 }

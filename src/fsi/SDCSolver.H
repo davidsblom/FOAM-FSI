@@ -33,6 +33,8 @@ public:
 
     virtual void initTimeStep() = 0;
 
+    virtual bool isRunning() = 0;
+
     virtual void implicitSolve(
       const double t,
       const double dt,
