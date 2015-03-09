@@ -57,6 +57,7 @@ public:
   virtual bool isRunning();
 
   virtual void implicitSolve(
+    const int k,
     const double t,
     const double dt,
     const Eigen::VectorXd & qold,
@@ -70,10 +71,15 @@ public:
   virtual double getTimeStep();
 
   virtual void evaluateFunction(
+    const int k,
     const Eigen::VectorXd & q,
     const double t,
     Eigen::VectorXd & f
     );
+
+  virtual void setNumberOfStages( int k ){}
+
+  virtual void nextTimeStep(){}
 
   int nbTimeSteps;
   double dt;
@@ -131,6 +137,7 @@ double Piston::referenceSolution( double t )
 }
 
 void Piston::evaluateFunction(
+  const int k,
   const Eigen::VectorXd & q,
   const double t,
   Eigen::VectorXd & f
@@ -184,7 +191,7 @@ void Piston::run()
     f.setZero();
     rhs.setZero();
 
-    implicitSolve( t, dt, qold, rhs, f, result );
+    implicitSolve( 0, t, dt, qold, rhs, f, result );
 
     qdot( i ) = result( 0 );
     q( i ) = result( 1 );
@@ -192,6 +199,7 @@ void Piston::run()
 }
 
 void Piston::implicitSolve(
+  const int k,
   const double t,
   const double dt,
   const Eigen::VectorXd & qold,
@@ -254,7 +262,7 @@ protected:
   std::shared_ptr<SDC> sdc;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, SDCTest, ::testing::Combine( Values( 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ), Values( 10, 100 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, SDCTest, ::testing::Combine( Values( 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ), Values( 10, 20, 40, 80, 100, 160 ) ) );
 
 TEST_P( SDCTest, object )
 {
@@ -293,7 +301,7 @@ TEST_P( SDCTest, evaluateFunction )
   q << -100, -100;
   t = 1;
 
-  piston->evaluateFunction( q, t, f );
+  piston->evaluateFunction( 0, q, t, f );
 
   ASSERT_NEAR( f( 0 ), 138.17732907, 1.0e-8 );
   ASSERT_NEAR( f( 1 ), -100, 1.0e-9 );
@@ -322,4 +330,19 @@ TEST_P( SDCTest, run )
 
   if ( nbTimeSteps == 100 && nbNodes > 4 )
     ASSERT_NEAR( error, 1.0e-5, 1.0e-4 );
+
+  if ( nbTimeSteps == 10 && nbNodes == 3 )
+    ASSERT_NEAR( error, 1.72134678e+03, 1.0e-5 );
+
+  if ( nbTimeSteps == 20 && nbNodes == 3 )
+    ASSERT_NEAR( error, 5.38712906e+02, 1.0e-6 );
+
+  if ( nbTimeSteps == 40 && nbNodes == 3 )
+    ASSERT_NEAR( error, 2.62943671e+01, 1.0e-7 );
+
+  if ( nbTimeSteps == 80 && nbNodes == 3 )
+    ASSERT_NEAR( error, 2.74294224e+00, 1.0e-8 );
+
+  if ( nbTimeSteps == 160 && nbNodes == 3 )
+    ASSERT_NEAR( error, 3.25178345e-01, 1.0e-9 );
 }
