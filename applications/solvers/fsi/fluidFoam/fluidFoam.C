@@ -56,8 +56,15 @@ int main(
 
   if ( fluidSolver == "sdc-pimple-solver" )
   {
+    YAML::Node sdcConfig( config["sdc"] );
+    assert( sdcConfig["convergence-tolerance"] );
+    assert( sdcConfig["number-of-points"] );
+
+    int n = sdcConfig["number-of-points"].as<int>();
+    double tol = sdcConfig["convergence-tolerance"].as<double>();
+
     std::shared_ptr<sdc::SDCSolver> solver( new SDCFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
-    sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( solver, 3, 1.0e-12 ) );
+    sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( solver, n, tol ) );
   }
 
   assert( fluid || sdc );
