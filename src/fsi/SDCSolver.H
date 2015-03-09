@@ -18,6 +18,7 @@ public:
     virtual ~SDCSolver(){}
 
     virtual void evaluateFunction(
+      const int k,
       const Eigen::VectorXd & q,
       const double t,
       Eigen::VectorXd & f
@@ -31,11 +32,16 @@ public:
 
     virtual double getTimeStep() = 0;
 
+    virtual void nextTimeStep() = 0;
+
     virtual void initTimeStep() = 0;
 
     virtual bool isRunning() = 0;
 
+    virtual void setNumberOfStages( int k ) = 0;
+
     virtual void implicitSolve(
+      const int k,
       const double t,
       const double dt,
       const Eigen::VectorXd & qold,

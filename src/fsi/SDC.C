@@ -40,6 +40,8 @@ namespace sdc
 
     for ( int i = 0; i < dsdc.rows(); i++ )
       dsdc( i ) = nodes( i + 1 ) - nodes( i );
+
+    solver->setNumberOfStages( k );
   }
 
   SDC::~SDC()
@@ -58,6 +60,8 @@ namespace sdc
 
   void SDC::solveTimeStep( const double t0 )
   {
+    solver->nextTimeStep();
+
     Eigen::VectorXd dtsdc = this->dt * dsdc;
     Eigen::MatrixXd solStages( k, N ), F( k, N );
 
@@ -78,8 +82,10 @@ namespace sdc
       result.setZero();
       qold = solStages.row( j );
 
+      Info << "\nTime = " << t << ", SDC sweep = 0, SDC stage = " << j + 1 << nl << endl;
+
       solver->initTimeStep();
-      solver->implicitSolve( t, dt, qold, rhs, f, result );
+      solver->implicitSolve( j, t, dt, qold, rhs, f, result );
       solver->finalizeTimeStep();
 
       solStages.row( j + 1 ) = result;
@@ -88,7 +94,7 @@ namespace sdc
 
     // Compute successive corrections
 
-    for ( int j = 0; j < k; j++ )
+    for ( int j = 0; j < 5 * k; j++ )
     {
       t = t0;
       Eigen::MatrixXd Fold = F;
@@ -99,7 +105,7 @@ namespace sdc
       result.setZero();
 
       q = solStages.row( 0 );
-      solver->evaluateFunction( q, t, f );
+      solver->evaluateFunction( 0, q, t, f );
       F.row( 0 ) = f;
 
       Eigen::MatrixXd Sj = this->dt * (smat * F);
@@ -112,15 +118,15 @@ namespace sdc
         f.setZero();
         result.setZero();
 
+        Info << "\nTime = " << t << ", SDC sweep = " << j + 1 << ", SDC stage = " << p + 1 << nl << endl;
+
         qold = solStages.row( p );
 
         // Form right hand side
         rhs = -dt * Fold.row( p + 1 ) + Sj.row( p );
 
-        // rhs /= dt;
-
         solver->initTimeStep();
-        solver->implicitSolve( t, dt, qold, rhs, f, result );
+        solver->implicitSolve( p, t, dt, qold, rhs, f, result );
         solver->finalizeTimeStep();
 
         solStages.row( p + 1 ) = result;
@@ -139,6 +145,15 @@ namespace sdc
       convergenceList[Pstream::myProcNo()] = convergence;
       reduce( convergenceList, sumOp<labelList>() );
       convergence = min( convergenceList );
+
+      Info << "SDC residual = " << error << ", tol = " << tol << ", convergence = ";
+
+      if ( convergence )
+        Info << "true";
+      else
+        Info << "false";
+
+      Info << endl;
 
       if ( convergence )
         break;

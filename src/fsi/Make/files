@@ -18,11 +18,13 @@ AitkenPostProcessing.C
 DataValues.C
 IDWInterpolation.C
 AndersonPostProcessing.C
+SDC.C
 
 fluidSolvers/CoupledFluidSolver.C
 fluidSolvers/FluidSolver.C
 fluidSolvers/foamFluidSolver.C
 fluidSolvers/CompressibleFluidSolver.C
+fluidSolvers/SDCFluidSolver.C
 
 solidSolvers/foamSolidSolver.C
 solidSolvers/SolidSolver.C

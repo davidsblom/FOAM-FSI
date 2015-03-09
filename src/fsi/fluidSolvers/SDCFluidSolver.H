@@ -1,18 +1,21 @@
 
 /*
  * Class
- *   FluidSolver
+ *   SDCFluidSolver
  *
  * Author
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#ifndef FluidSolver_H
-#define FluidSolver_H
+#ifndef SDCFluidSolver_H
+#define SDCFluidSolver_H
 
 #include <memory>
+#include <deque>
 
 #include "foamFluidSolver.H"
+#include "SDCSolver.H"
+
 #include "dynamicFvMesh.H"
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
@@ -28,17 +31,17 @@
 using namespace fsi;
 using std::shared_ptr;
 
-class FluidSolver : public foamFluidSolver
+class SDCFluidSolver : public foamFluidSolver, public sdc::SDCSolver
 {
 public:
 
-  FluidSolver(
+  SDCFluidSolver(
     string name,
     shared_ptr<argList> args,
     shared_ptr<Time> runTime
     );
 
-  virtual ~FluidSolver();
+  virtual ~SDCFluidSolver();
 
   virtual void getAcousticsDensityLocal( matrix & data );
 
@@ -58,39 +61,44 @@ public:
 
   virtual void solve();
 
+  virtual void evaluateFunction(
+    const int k,
+    const Eigen::VectorXd & q,
+    const double t,
+    Eigen::VectorXd & f
+    );
+
+  virtual void finalizeTimeStep();
+
+  virtual int getDOF();
+
+  virtual void getSolution( Eigen::VectorXd & solution );
+
+  virtual double getTimeStep();
+
+  virtual void implicitSolve(
+    const int k,
+    const double t,
+    const double dt,
+    const Eigen::VectorXd & qold,
+    const Eigen::VectorXd & rhs,
+    Eigen::VectorXd & f,
+    Eigen::VectorXd & result
+    );
+
+  virtual void setNumberOfStages( int k );
+
+  virtual void nextTimeStep();
+
 private:
-
-  void checkTimeDiscretisationScheme();
-
-  void checkTotalVolume();
-
-  void continuityErrs();
-
-  void correctPhiField();
-
-  void courantNo();
 
   void createFields();
 
-  void createSf();
-
-  void initContinuityErrs();
-
   void initialize();
-
-  void initTotalVolume();
-
-  void readControls();
 
   void readCouplingProperties();
 
   void readPIMPLEControls();
-
-  void readTimeControls();
-
-  void setDeltaT();
-
-  void updateSf();
 
   // Dictionaries
   IOdictionary transportProperties;
@@ -104,15 +112,16 @@ private:
   volScalarField p;
   volVectorField U;
   surfaceScalarField phi;
+  surfaceVectorField Uf;
   volScalarField AU;
   volVectorField HU;
+  volVectorField rhsU;
+  surfaceVectorField rhsUf;
 
   // PIMPLE controls
   int nOuterCorr;
   int nCorr;
   int nNonOrthCorr;
-  bool momentumPredictor;
-  bool transonic;
 
   // Continuity errors
   scalar sumLocalContErr;
@@ -121,31 +130,15 @@ private:
 
   label pRefCell;
   scalar pRefValue;
-  singlePhaseTransportModel laminarTransport;
-  autoPtr<incompressible::turbulenceModel> turbulence;
-
-  IOobject SfHeader;
-  surfaceVectorField Sf;
 
   // Controls
-  bool correctPhi;
   scalar convergenceTolerance;
 
-  // Time discretization scheme
-  word ddtScheme;
-
-  // Time controls
-  Switch adjustTimeStep;
-  scalar maxCo;
-  scalar maxDeltaT;
-
-  // Total volume
-  scalar totalVolume;
-
-  // Courant no
-  scalar CoNum;
-  scalar meanCoNum;
-  scalar velMag;
+  int k;
+  std::deque<volScalarField> pStages;
+  std::deque<surfaceScalarField> phiStages;
+  std::deque<volVectorField> UStages;
+  std::deque<surfaceVectorField> UfStages;
 };
 
 #endif

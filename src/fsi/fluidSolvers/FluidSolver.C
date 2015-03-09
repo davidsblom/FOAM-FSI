@@ -423,9 +423,6 @@ bool FluidSolver::isRunning()
   return runTime->loop();
 }
 
-void FluidSolver::postProcessing()
-{}
-
 void FluidSolver::readControls()
 {
   readPIMPLEControls();
