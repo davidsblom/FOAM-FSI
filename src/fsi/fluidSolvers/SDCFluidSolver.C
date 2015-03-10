@@ -241,6 +241,11 @@ void SDCFluidSolver::resetSolution()
   assert( false );
 }
 
+void SDCFluidSolver::setDeltaT( double dt )
+{
+  runTime->setDeltaT( dt );
+}
+
 void SDCFluidSolver::setNumberOfStages( int k )
 {
   this->k = k;
@@ -342,7 +347,6 @@ void SDCFluidSolver::implicitSolve(
   )
 {
   runTime->setDeltaT( dt );
-  runTime->setTime( t, timeIndex );
 
   p = pStages.at( k + 1 );
   phi = phiStages.at( k + 1 );

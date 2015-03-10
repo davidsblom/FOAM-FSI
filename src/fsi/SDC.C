@@ -158,5 +158,7 @@ namespace sdc
       if ( convergence )
         break;
     }
+
+    solver->setDeltaT( this->dt );
   }
 }

@@ -77,6 +77,8 @@ public:
     Eigen::VectorXd & f
     );
 
+  virtual void setDeltaT( double dt ){}
+
   virtual void setNumberOfStages( int k ){}
 
   virtual void nextTimeStep(){}

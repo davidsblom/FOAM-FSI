@@ -38,6 +38,8 @@ public:
 
     virtual bool isRunning() = 0;
 
+    virtual void setDeltaT( double dt ) = 0;
+
     virtual void setNumberOfStages( int k ) = 0;
 
     virtual void implicitSolve(
