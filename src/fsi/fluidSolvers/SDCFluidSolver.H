@@ -94,6 +94,8 @@ public:
 
 private:
 
+  void continuityErrs();
+
   void createFields();
 
   void initialize();

@@ -132,6 +132,9 @@ SDCFluidSolver::SDCFluidSolver(
   ),
   fvc::interpolate( rhsU )
   ),
+  sumLocalContErr( 0 ),
+  globalContErr( 0 ),
+  cumulativeContErr( 0 ),
   convergenceTolerance( 1.0e-5 ),
   k( 0 ),
   pStages(),
@@ -144,6 +147,24 @@ SDCFluidSolver::SDCFluidSolver(
 
 SDCFluidSolver::~SDCFluidSolver()
 {}
+
+void SDCFluidSolver::continuityErrs()
+{
+  volScalarField contErr = fvc::div( phi );
+
+  sumLocalContErr = runTime->deltaT().value() *
+    mag( contErr ) ().weightedAverage( mesh.V() ).value();
+
+  globalContErr = runTime->deltaT().value() *
+    contErr.weightedAverage( mesh.V() ).value();
+
+  cumulativeContErr += globalContErr;
+
+  Info << "time step continuity errors : sum local = " << sumLocalContErr
+       << ", global = " << globalContErr
+       << ", cumulative = " << cumulativeContErr
+       << endl;
+}
 
 void SDCFluidSolver::createFields()
 {
@@ -464,6 +485,8 @@ void SDCFluidSolver::implicitSolve(
       U.correctBoundaryConditions();
     }
   }
+
+  continuityErrs();
 
   pStages.at( k + 1 ) = p;
   phiStages.at( k + 1 ) = phi;
