@@ -23,7 +23,7 @@ EXE_INC = -std=c++11 \
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -L../../../../src/thirdParty/precice/build/release-nopetsc-nopython \
+    -L../../../../src/thirdParty/precice/build/last \
     -lfsi \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \

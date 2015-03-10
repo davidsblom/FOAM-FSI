@@ -41,8 +41,8 @@ export PRECICE_MPI_INC_PATH=${MPI_BASE}/include64
 
 cd precice
 python tools/python_scripts/insert_mpi_header.py
-scons -j 32 build=release python=off petsc=off compiler=mpicxx > >(tee make_precice.log) 2> >(tee make_precice_error.log >&2)
 scons -j 32 build=debug python=off petsc=off compiler=mpicxx > >(tee make_precice.log) 2> >(tee make_precice_error.log >&2)
+scons -j 32 build=release python=off petsc=off compiler=mpicxx > >(tee make_precice.log) 2> >(tee make_precice_error.log >&2)
 cd ..
 
 # YAML

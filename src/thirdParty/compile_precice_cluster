@@ -50,5 +50,5 @@ export PRECICE_MPI_INC_PATH=${MPI_HOME}/include
 git clone git@vmbungartz6.informatik.tu-muenchen.de:gatzhamm/precice.git
 cd precice
 git checkout develop
-scons -j 4 build=release python=off petsc=off
 scons -j 4 build=debug python=off petsc=off
+scons -j 4 build=release python=off petsc=off
