@@ -484,6 +484,36 @@ void SDCFluidSolver::implicitSolve(
 
       U.correctBoundaryConditions();
     }
+
+    // Convergence measure of outer corrections
+
+    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) - fvc::laplacian( nu, U ) + fvc::grad( p ) - rhsU / dt;
+
+    scalarField magResU = mag( residual.internalField() );
+    scalar momentumResidual = ::sqrt( sum( sqr( magResU ) ) / mesh.nCells() );
+
+    bool convergence = momentumResidual <= convergenceTolerance;
+
+    labelList convergenceList( Pstream::nProcs(), 0 );
+    convergenceList[Pstream::myProcNo()] = convergence;
+    reduce( convergenceList, sumOp<labelList>() );
+
+    int minIter = 2;
+    convergence = min( convergenceList ) && oCorr >= minIter - 1;
+
+    Info << "root mean square residual norm = " << momentumResidual << ", tolerance = " << convergenceTolerance;
+    Info << ", convergence = ";
+
+    if ( convergence )
+      Info << "true";
+    else
+      Info << "false";
+
+    Info << endl;
+
+    if ( convergence )
+      break;
+
   }
 
   continuityErrs();
