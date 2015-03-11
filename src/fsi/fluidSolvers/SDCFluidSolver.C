@@ -502,6 +502,7 @@ void SDCFluidSolver::implicitSolve(
     convergence = min( convergenceList ) && oCorr >= minIter - 1;
 
     Info << "root mean square residual norm = " << momentumResidual << ", tolerance = " << convergenceTolerance;
+    Info << ", iteration = " << oCorr + 1;
     Info << ", convergence = ";
 
     if ( convergence )

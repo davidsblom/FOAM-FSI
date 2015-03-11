@@ -82,7 +82,7 @@ namespace sdc
       result.setZero();
       qold = solStages.row( j );
 
-      Info << "\nTime = " << t << ", SDC sweep = 0, SDC stage = " << j + 1 << nl << endl;
+      Info << "\nTime = " << t << ", SDC sweep = 0, SDC substep = " << j + 1 << nl << endl;
 
       solver->initTimeStep();
       solver->implicitSolve( j, t, dt, qold, rhs, f, result );
@@ -118,7 +118,7 @@ namespace sdc
         f.setZero();
         result.setZero();
 
-        Info << "\nTime = " << t << ", SDC sweep = " << j + 1 << ", SDC stage = " << p + 1 << nl << endl;
+        Info << "\nTime = " << t << ", SDC sweep = " << j + 1 << ", SDC substep = " << p + 1 << nl << endl;
 
         qold = solStages.row( p );
 
