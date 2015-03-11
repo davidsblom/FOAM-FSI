@@ -77,6 +77,7 @@ public:
   virtual double getTimeStep();
 
   virtual void implicitSolve(
+    bool corrector,
     const int k,
     const double t,
     const double dt,

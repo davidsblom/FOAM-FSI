@@ -57,6 +57,7 @@ public:
   virtual bool isRunning();
 
   virtual void implicitSolve(
+    bool corrector,
     const int k,
     const double t,
     const double dt,
@@ -193,7 +194,7 @@ void Piston::run()
     f.setZero();
     rhs.setZero();
 
-    implicitSolve( 0, t, dt, qold, rhs, f, result );
+    implicitSolve( false, 0, t, dt, qold, rhs, f, result );
 
     qdot( i ) = result( 0 );
     q( i ) = result( 1 );
@@ -201,6 +202,7 @@ void Piston::run()
 }
 
 void Piston::implicitSolve(
+  bool corrector,
   const int k,
   const double t,
   const double dt,

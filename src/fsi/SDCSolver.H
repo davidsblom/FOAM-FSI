@@ -43,6 +43,7 @@ public:
     virtual void setNumberOfStages( int k ) = 0;
 
     virtual void implicitSolve(
+      bool corrector,
       const int k,
       const double t,
       const double dt,

@@ -358,6 +358,7 @@ void SDCFluidSolver::evaluateFunction(
 }
 
 void SDCFluidSolver::implicitSolve(
+  bool corrector,
   const int k,
   const double t,
   const double dt,
@@ -369,10 +370,21 @@ void SDCFluidSolver::implicitSolve(
 {
   runTime->setDeltaT( dt );
 
-  p = pStages.at( k + 1 );
-  phi = phiStages.at( k + 1 );
-  U = UStages.at( k + 1 );
-  Uf = UfStages.at( k + 1 );
+  if ( corrector )
+  {
+    p = pStages.at( k + 1 );
+    phi = phiStages.at( k + 1 );
+    U = UStages.at( k + 1 );
+    Uf = UfStages.at( k + 1 );
+  }
+  else
+  {
+    // predictor
+    p = pStages.at( k );
+    phi = phiStages.at( k );
+    U = UStages.at( k );
+    Uf = UfStages.at( k );
+  }
 
   for ( int i = 0; i < U.size(); i++ )
     for ( int j = 0; j < 3; j++ )
