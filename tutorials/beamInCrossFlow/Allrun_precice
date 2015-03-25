@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -e
+
+NB_FLUID_CORES=3
+NB_SOLID_CORES=3
+
+./Allclean
+
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+cp fluid/constant/preCICE.xml solid/constant/
+cp fluid/system/decomposeParDict solid/system/
+
+cd fluid
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication decomposePar
+cd -
+
+cd solid
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication decomposePar
+cd -
+
+cd solid
+binprecice server Structure_Solver constant/preCICE.xml > log.binprecice 2>&1 &
+mpirun -np $NB_SOLID_CORES fsiSolidFoam -parallel > log.fsiSolidFoam 2>&1 &
+cd -
+
+cd fluid
+binprecice server Fluid_Solver constant/preCICE.xml > log.binprecice 2>&1 &
+mpirun -np $NB_FLUID_CORES fsiFluidFoam -parallel > log.fsiFluidFoam 2>&1
+
+wait

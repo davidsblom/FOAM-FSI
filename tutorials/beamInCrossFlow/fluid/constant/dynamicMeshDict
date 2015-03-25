@@ -1,0 +1,41 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.0                                |
+|   \\  /    A nd           | Web:         http://www.extend-project.de       |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      dynamicMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dynamicFvMesh dynamicMotionSolverFvMesh;
+
+solver RBFMeshMotionSolver;
+
+movingPatches ( interface );
+
+staticPatches ( );
+
+fixedPatches ( outlet inlet top left bottom );
+
+coarsening
+{
+  enabled false;
+  tol 1.0e-6;
+  minPoints 10;
+  maxPoints 2000;
+  livePointSelection true;
+  tolLivePointSelection 1.0e-5;
+  exportSelectedPoints false;
+}
+
+interpolation
+{
+  function TPS;
+}
