@@ -39,6 +39,8 @@ private:
     labelList staticPatchIDs;
     wordList movingPatches;
     labelList movingPatchIDs;
+    wordList fixedPatches;
+    labelList fixedPatchIDs;
 
     pointField newPoints;
 
@@ -47,6 +49,7 @@ private:
     labelList nbGlobalFaceCenters;
     labelList nbGlobalMovingFaceCenters;
     labelList nbGlobalStaticFaceCenters;
+    labelList nbGlobalFixedFaceCenters;
 
     // 2d corrector
     twoDPointCorrectorRBF twoDCorrector;

@@ -28,14 +28,17 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
   staticPatchIDs( staticPatches.size() ),
   movingPatches( lookup( "movingPatches" ) ),
   movingPatchIDs( movingPatches.size() ),
+  fixedPatches( lookup( "fixedPatches" ) ),
+  fixedPatchIDs( fixedPatches.size() ),
   newPoints( mesh.points().size(), vector::zero ),
   nbGlobalFaceCenters( Pstream::nProcs(), 0 ),
   nbGlobalMovingFaceCenters( Pstream::nProcs(), 0 ),
   nbGlobalStaticFaceCenters( Pstream::nProcs(), 0 ),
+  nbGlobalFixedFaceCenters( Pstream::nProcs(), 0 ),
   twoDCorrector( mesh ),
   nbPoints( 0 )
 {
-  // Find IDs of staticPatches_
+  // Find IDs of staticPatches
   forAll( staticPatches, patchI )
   {
     label patchIndex = mesh.boundaryMesh().findPatchID( staticPatches[patchI] );
@@ -45,7 +48,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     staticPatchIDs[patchI] = patchIndex;
   }
 
-  // Find IDs of movingPatches_
+  // Find IDs of movingPatches
   forAll( movingPatches, patchI )
   {
     label patchIndex = mesh.boundaryMesh().findPatchID( movingPatches[patchI] );
@@ -53,6 +56,16 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     assert( patchIndex >= 0 );
 
     movingPatchIDs[patchI] = patchIndex;
+  }
+
+  // Find IDs of fixedPatches
+  forAll( fixedPatches, patchI )
+  {
+    label patchIndex = mesh.boundaryMesh().findPatchID( fixedPatches[patchI] );
+
+    assert( patchIndex >= 0 );
+
+    fixedPatchIDs[patchI] = patchIndex;
   }
 
   // Verify that a patch is not defined as a static and a moving patch
@@ -63,6 +76,21 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     forAll( movingPatchIDs, movingPatchI )
     {
       assert( movingPatchIDs[movingPatchI] != staticPatchIDs[staticPatchI] );
+    }
+
+    // Search the fixed patches for static patchI
+    forAll( fixedPatchIDs, fixedPatchI )
+    {
+      assert( fixedPatchIDs[fixedPatchI] != staticPatchIDs[staticPatchI] );
+    }
+  }
+
+  forAll( fixedPatchIDs, fixedPatchI )
+  {
+    // Search the moving patches for fixed patchI
+    forAll( movingPatchIDs, movingPatchI )
+    {
+      assert( movingPatchIDs[movingPatchI] != fixedPatchIDs[fixedPatchI] );
     }
   }
 
@@ -206,6 +234,7 @@ void RBFMeshMotionSolver::solve()
   int nbFaceCenters = 0;
   int nbMovingFaceCenters = 0;
   int nbStaticFaceCenters = 0;
+  int nbFixedFaceCenters = 0;
 
   if ( sum( nbGlobalFaceCenters ) == 0 )
   {
@@ -226,18 +255,26 @@ void RBFMeshMotionSolver::solve()
       nbStaticFaceCenters += mesh().boundaryMesh()[staticPatchIDs[i]].faceCentres().size();
     }
 
+    forAll( fixedPatchIDs, i )
+    {
+      nbFixedFaceCenters += mesh().boundaryMesh()[fixedPatchIDs[i]].faceCentres().size();
+    }
+
     // Calculate sum of all faces on each processor
     nbGlobalMovingFaceCenters[Pstream::myProcNo()] = nbMovingFaceCenters;
     nbGlobalStaticFaceCenters[Pstream::myProcNo()] = nbStaticFaceCenters;
-    nbGlobalFaceCenters[Pstream::myProcNo()] = nbMovingFaceCenters + nbStaticFaceCenters;
+    nbGlobalFixedFaceCenters[Pstream::myProcNo()] = nbFixedFaceCenters;
+    nbGlobalFaceCenters[Pstream::myProcNo()] = nbMovingFaceCenters + nbStaticFaceCenters + nbFixedFaceCenters;
 
     reduce( nbGlobalMovingFaceCenters, sumOp<labelList>() );
     reduce( nbGlobalStaticFaceCenters, sumOp<labelList>() );
+    reduce( nbGlobalFixedFaceCenters, sumOp<labelList>() );
     reduce( nbGlobalFaceCenters, sumOp<labelList>() );
   }
 
   nbMovingFaceCenters = sum( nbGlobalMovingFaceCenters );
   nbStaticFaceCenters = sum( nbGlobalStaticFaceCenters );
+  nbFixedFaceCenters = sum( nbGlobalFixedFaceCenters );
   nbFaceCenters = sum( nbGlobalFaceCenters );
 
   // Determine the offset taking into account multiple processors
@@ -251,6 +288,11 @@ void RBFMeshMotionSolver::solve()
 
   for ( int i = 0; i < Pstream::myProcNo(); i++ )
     globalStaticOffset += nbGlobalStaticFaceCenters[i];
+
+  int globalFixedOffset = nbMovingFaceCenters + nbStaticFaceCenters;
+
+  for ( int i = 0; i < Pstream::myProcNo(); i++ )
+    globalFixedOffset += nbGlobalFixedFaceCenters[i];
 
   if ( !rbf->rbf->computed )
   {
@@ -283,6 +325,21 @@ void RBFMeshMotionSolver::solve()
       forAll( faceCentres, j )
       {
         positionsField[j + offset + globalStaticOffset] = faceCentres[j];
+      }
+
+      offset += faceCentres.size();
+    }
+
+    offset = 0;
+
+    forAll( fixedPatchIDs, i )
+    {
+      const Foam::vectorField::subField faceCentres = mesh().boundaryMesh()[fixedPatchIDs[i]].faceCentres();
+
+      // Set the positions for patch i
+      forAll( faceCentres, j )
+      {
+        positionsField[j + offset + globalFixedOffset] = faceCentres[j];
       }
 
       offset += faceCentres.size();
@@ -328,7 +385,7 @@ void RBFMeshMotionSolver::solve()
     // rbf->compute( positions, positionsInterpolation, positionsParallelLocation );
     rbf->compute( positions, positionsInterpolation );
 
-    rbf->setNbMovingAndStaticFaceCenters( nbMovingFaceCenters, nbStaticFaceCenters );
+    rbf->setNbMovingAndStaticFaceCenters( nbMovingFaceCenters, nbStaticFaceCenters + nbFixedFaceCenters );
   }
 
   /*
@@ -392,22 +449,22 @@ void RBFMeshMotionSolver::solve()
   twoDCorrector.setShadowSide( valuesInterpolationField );
 
   /*
-   * Step 5: Correct the mesh vertices of the static patches. Set these displacements to zero.
+   * Step 5: Correct the mesh vertices of the fixed patches. Set these displacements to zero.
    */
 
-  // Loop over all the patches, and set the static patches to zero.
+  // Loop over all the patches, and set the fixed patches to zero.
   forAll( mesh().boundaryMesh(), i )
   {
     const labelList & meshPoints = mesh().boundaryMesh()[i].meshPoints();
 
-    bool isStaticPatch = false;
-    forAll( staticPatchIDs, j )
+    bool isFixedPatch = false;
+    forAll( fixedPatchIDs, j )
     {
-      if ( i == staticPatchIDs[j] )
-        isStaticPatch = true;
+      if ( i == fixedPatchIDs[j] )
+        isFixedPatch = true;
     }
 
-    if ( isStaticPatch )
+    if ( isFixedPatch )
     {
       for ( int j = 0; j < meshPoints.size(); j++ )
         valuesInterpolationField[meshPoints[j]] = Foam::vector::zero;
