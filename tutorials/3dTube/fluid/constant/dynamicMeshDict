@@ -22,7 +22,7 @@ movingPatches ( wall );
 
 staticPatches ( );
 
-fixedPatches( outlet inlet );
+fixedPatches ( outlet inlet );
 
 coarsening
 {
