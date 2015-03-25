@@ -28,7 +28,9 @@ solver RBFMeshMotionSolver;
 
 movingPatches ( plate );
 
-staticPatches ( cylinder outlet inlet top bottom );
+staticPatches ( );
+
+fixedPatches ( cylinder outlet inlet top bottom );
 
 coarsening
 {

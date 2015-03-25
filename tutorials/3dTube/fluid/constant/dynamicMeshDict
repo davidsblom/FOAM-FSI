@@ -20,7 +20,9 @@ solver RBFMeshMotionSolver;
 
 movingPatches ( wall );
 
-staticPatches ( outlet inlet );
+staticPatches ( );
+
+fixedPatches( outlet inlet );
 
 coarsening
 {
