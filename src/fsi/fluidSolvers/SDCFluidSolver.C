@@ -406,6 +406,8 @@ void SDCFluidSolver::implicitSolve(
 
   for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
   {
+    p.storePrevIter();
+
     // for computing Hp
     fvVectorMatrix UEqn
     (
@@ -421,8 +423,17 @@ void SDCFluidSolver::implicitSolve(
       - fvm::laplacian( nu, U )
     );
 
+    UEqnt.relax();
+
     // Eqn 25
     Foam::solve( UEqnt == -fvc::grad( p ) + rhsU / dt );
+
+    UEqnt = fvVectorMatrix
+      (
+      fvm::ddt( U )
+      + fvm::div( phi, U )
+      - fvm::laplacian( nu, U )
+      );
 
     // --- PISO loop
 
@@ -491,6 +502,8 @@ void SDCFluidSolver::implicitSolve(
         }
       }
 
+      p.relax();
+
       // Eqn 30
       U -= fvc::grad( p ) / AU;
 
@@ -526,7 +539,6 @@ void SDCFluidSolver::implicitSolve(
 
     if ( convergence )
       break;
-
   }
 
   continuityErrs();
