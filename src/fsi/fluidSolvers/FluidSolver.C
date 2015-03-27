@@ -541,14 +541,14 @@ void FluidSolver::solve()
 
     UEqn.relax();
 
+    Foam::solve( UEqn == -fvc::grad( p ) );
+
     UEqn = fvVectorMatrix
     (
       fvm::ddt( U )
       + fvm::div( phi, U )
       - fvc::laplacian( nu, U )
     );
-
-    Foam::solve( UEqn == -fvc::grad( p ) );
 
     // --- PISO loop
     for ( int corr = 0; corr < nCorr; corr++ )
