@@ -28,7 +28,7 @@ solvers
   {
     solver PCG;
     preconditioner DIC;
-    tolerance 1e-11;
+    tolerance 1e-13;
     relTol 0.001;
     minIter 1;
   }
@@ -36,7 +36,7 @@ solvers
   {
     solver PBiCG;
     preconditioner DILU;
-    tolerance 1e-11;
+    tolerance 1e-13;
     relTol 0.001;
     minIter 1;
   }
@@ -53,7 +53,12 @@ blockSolver
 PIMPLE
 {
   nOuterCorrectors 500;
-  nCorrectors 1;
+  nCorrectors 2;
   nNonOrthogonalCorrectors 0;
 }
 
+relaxationFactors
+{
+  p 0.9;
+  U 0.9;
+}
