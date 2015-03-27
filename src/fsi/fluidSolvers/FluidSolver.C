@@ -460,9 +460,8 @@ void FluidSolver::readPIMPLEControls()
 
   nNonOrthCorr = pimple.lookupOrDefault<int>( "nNonOrthogonalCorrectors", 0 );
 
-  momentumPredictor = pimple.lookupOrDefault<Switch>( "momentumPredictor", true );
-
-  transonic = pimple.lookupOrDefault<Switch>( "transonic", false );
+  assert( nCorr > 0 );
+  assert( nOuterCorr >= 2 );
 }
 
 void FluidSolver::readTimeControls()
@@ -476,9 +475,9 @@ void FluidSolver::readTimeControls()
 
 void FluidSolver::resetSolution()
 {
-  U == U.oldTime();
-  p == p.oldTime();
-  phi == phi.oldTime();
+  //U == U.oldTime();
+  //p == p.oldTime();
+  //phi == phi.oldTime();
 }
 
 void FluidSolver::setDeltaT()
@@ -525,32 +524,31 @@ void FluidSolver::solve()
 {
   Info << "Solve fluid domain" << endl;
 
-  int ocorr = 0;
-  scalar relativeResidual;
-  scalar residualPressure;
-  scalar residualVelocity;
-
   // --- PIMPLE loop
-  do
+  for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
   {
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative( phi, U );
 
     p.storePrevIter();
-    U.storePrevIter();
 
     fvVectorMatrix UEqn
     (
       fvm::ddt( U )
       + fvm::div( phi, U )
-      + turbulence->divDevReff( U )
+      - fvc::laplacian( nu, U )
     );
 
-    if ( ocorr != nOuterCorr - 1 )
-      UEqn.relax();
+    UEqn.relax();
 
-    if ( momentumPredictor )
-      Foam::solve( UEqn == -fvc::grad( p ) );
+    UEqn = fvVectorMatrix
+    (
+      fvm::ddt( U )
+      + fvm::div( phi, U )
+      - fvc::laplacian( nu, U )
+    );
+
+    Foam::solve( UEqn == -fvc::grad( p ) );
 
     // --- PISO loop
     for ( int corr = 0; corr < nCorr; corr++ )
@@ -596,11 +594,7 @@ void FluidSolver::solve()
         }
       }
 
-      // Explicitly relax pressure for momentum corrector
-      if ( ocorr != nOuterCorr - 1 )
-      {
-        p.relax();
-      }
+      p.relax();
 
       U -= (1.0 / AU) * fvc::grad( p );
       U.correctBoundaryConditions();
@@ -609,29 +603,37 @@ void FluidSolver::solve()
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative( phi, U );
 
-    turbulence->correct();
+    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) - fvc::laplacian( nu, U ) + fvc::grad( p );
+
+    scalarField magResU = mag( residual.internalField() );
+    scalar momentumResidual = ::sqrt( sum( sqr( magResU ) ) / mesh.nCells() );
+
+    bool convergence = momentumResidual <= convergenceTolerance;
+
+    labelList convergenceList( Pstream::nProcs(), 0 );
+    convergenceList[Pstream::myProcNo()] = convergence;
+    reduce( convergenceList, sumOp<labelList>() );
+
+    int minIter = 2;
+    convergence = min( convergenceList ) && oCorr >= minIter - 1;
+
+    Info << "root mean square residual norm = " << momentumResidual << ", tolerance = " << convergenceTolerance;
+    Info << ", iteration = " << oCorr + 1;
+    Info << ", convergence = ";
+
+    if ( convergence )
+      Info << "true";
+    else
+      Info << "false";
+
+    Info << endl;
 
     // Make the fluxes absolute to the mesh motion
     fvc::makeAbsolute( phi, U );
 
-    residualPressure = gSumMag( p.internalField() - p.prevIter().internalField() ) / (gSumMag( p.internalField() ) + SMALL);
-    residualVelocity = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
-
-    relativeResidual = max( residualPressure, residualVelocity );
+    if ( convergence )
+      break;
   }
-  while
-  (
-    relativeResidual > convergenceTolerance
-    && ++ocorr < nOuterCorr
-  );
-
-  Info << "Solving for " << U.name()
-       << ", Final residual = " << residualVelocity
-       << ", No outer iterations " << ocorr + 1 << endl;
-
-  Info << "Solving for " << p.name()
-       << ", Final residual = " << residualPressure
-       << ", No outer iterations " << ocorr + 1 << endl;
 
   continuityErrs();
 }

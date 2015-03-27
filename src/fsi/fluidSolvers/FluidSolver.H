@@ -111,8 +111,6 @@ private:
   int nOuterCorr;
   int nCorr;
   int nNonOrthCorr;
-  bool momentumPredictor;
-  bool transonic;
 
   // Continuity errors
   scalar sumLocalContErr;
