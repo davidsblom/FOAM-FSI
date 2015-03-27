@@ -296,7 +296,7 @@ namespace fsi
 
           for ( int i = 0; i < diagonals.rows(); i++ )
           {
-            if ( std::abs( diagonals[i] ) < singularityLimit )
+            if ( std::abs( diagonals[i] ) < singularityLimit && V.cols() > 5 )
             {
               // Remove the column from V and W
               removeColumnFromMatrix( V, i - nbRemoveCols );
