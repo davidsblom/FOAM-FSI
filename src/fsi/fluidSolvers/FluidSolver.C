@@ -475,9 +475,9 @@ void FluidSolver::readTimeControls()
 
 void FluidSolver::resetSolution()
 {
-  //U == U.oldTime();
-  //p == p.oldTime();
-  //phi == phi.oldTime();
+  U == U.oldTime();
+  p == p.oldTime();
+  phi == phi.oldTime();
 }
 
 void FluidSolver::setDeltaT()
