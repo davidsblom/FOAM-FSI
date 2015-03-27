@@ -524,19 +524,25 @@ void FluidSolver::solve()
 {
   Info << "Solve fluid domain" << endl;
 
+  int ocorr = 0;
+  scalar relativeResidual;
+  scalar residualPressure;
+  scalar residualVelocity;
+
   // --- PIMPLE loop
-  for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
+  do
   {
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative( phi, U );
 
     p.storePrevIter();
+    U.storePrevIter();
 
     fvVectorMatrix UEqn
     (
       fvm::ddt( U )
       + fvm::div( phi, U )
-      - fvc::laplacian( nu, U )
+      + turbulence->divDevReff( U )
     );
 
     UEqn.relax();
@@ -547,7 +553,7 @@ void FluidSolver::solve()
     (
       fvm::ddt( U )
       + fvm::div( phi, U )
-      - fvc::laplacian( nu, U )
+      + turbulence->divDevReff( U )
     );
 
     // --- PISO loop
@@ -603,37 +609,21 @@ void FluidSolver::solve()
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative( phi, U );
 
-    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) - fvc::laplacian( nu, U ) + fvc::grad( p );
+    turbulence->correct();
 
-    scalarField magResU = mag( residual.internalField() );
-    scalar momentumResidual = ::sqrt( sum( sqr( magResU ) ) / mesh.nCells() );
+    residualPressure = gSumMag( p.internalField() - p.prevIter().internalField() ) / (gSumMag( p.internalField() ) + SMALL);
+    residualVelocity = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
 
-    bool convergence = momentumResidual <= convergenceTolerance;
-
-    labelList convergenceList( Pstream::nProcs(), 0 );
-    convergenceList[Pstream::myProcNo()] = convergence;
-    reduce( convergenceList, sumOp<labelList>() );
-
-    int minIter = 2;
-    convergence = min( convergenceList ) && oCorr >= minIter - 1;
-
-    Info << "root mean square residual norm = " << momentumResidual << ", tolerance = " << convergenceTolerance;
-    Info << ", iteration = " << oCorr + 1;
-    Info << ", convergence = ";
-
-    if ( convergence )
-      Info << "true";
-    else
-      Info << "false";
-
-    Info << endl;
+    relativeResidual = max( residualPressure, residualVelocity );
 
     // Make the fluxes absolute to the mesh motion
     fvc::makeAbsolute( phi, U );
-
-    if ( convergence )
-      break;
   }
+  while
+  (
+    relativeResidual > convergenceTolerance
+    && ++ocorr < nOuterCorr
+  );
 
   continuityErrs();
 }
