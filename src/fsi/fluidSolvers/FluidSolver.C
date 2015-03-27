@@ -339,7 +339,7 @@ void FluidSolver::getTractionLocal( matrix & traction )
 
     vectorField tractionFieldPatchI = -rho.value() * nu.value()
       * U.boundaryField()[movingPatchIDs[patchI]].snGrad()
-      + rho.value() * p.boundaryField()[patchI]
+      + rho.value() * p.boundaryField()[movingPatchIDs[patchI]]
       * mesh.boundary()[movingPatchIDs[patchI]].nf();
 
     forAll( tractionFieldPatchI, i )
