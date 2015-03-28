@@ -545,11 +545,11 @@ void FluidSolver::solve()
     Foam::solve( UEqn == -fvc::grad( p ) );
 
     UEqn = fvVectorMatrix
-    (
+      (
       fvm::ddt( U )
       + fvm::div( phi, U )
       + turbulence->divDevReff( U )
-    );
+      );
 
     // --- PISO loop
     for ( int corr = 0; corr < nCorr; corr++ )
@@ -606,7 +606,7 @@ void FluidSolver::solve()
 
     turbulence->correct();
 
-    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff(U) & U) + fvc::grad(p);
+    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
 
     scalarField magResU = mag( residual.internalField() );
     scalar momentumResidual = ::sqrt( sum( sqr( magResU ) ) / mesh.nCells() );
