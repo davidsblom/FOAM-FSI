@@ -267,10 +267,6 @@ void CoupledFluidSolver::solve()
   Info << "Solve fluid domain" << endl;
 
   int oCorr;
-  scalar initialResidual = 1;
-  scalar relativeResidual = 1;
-  scalar residualPressure = 1;
-  scalar residualVelocity = 1;
   bool underrelaxation = true;
 
   // Outer correction loop to solve the non-linear system
@@ -339,7 +335,7 @@ void CoupledFluidSolver::solve()
     UpEqn.insertBlockCoupling( 3, 0, UInp, false );
 
     // Solve the block matrix
-    vector4 initialResidual4 = UpEqn.solve().initialResidual();
+    UpEqn.solve();
 
     // Retrieve solution
     UpEqn.retrieveSolution( 0, U.internalField() );
@@ -358,34 +354,31 @@ void CoupledFluidSolver::solve()
 
     turbulence->correct();
 
+    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
+
+    scalarField magResU = mag( residual.internalField() );
+    scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.nCells() );
+
+    int minIter = 2;
+    bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
+
+    Info << "root mean square residual norm = " << momentumResidual << ", tolerance = " << convergenceTolerance;
+    Info << ", iteration = " << oCorr + 1;
+    Info << ", convergence = ";
+
+    if ( convergence )
+      Info << "true";
+    else
+      Info << "false";
+
+    Info << endl;
+
     // Make the fluxes absolute
     fvc::makeAbsolute( phi, U );
 
-    residualPressure = gSumMag( p.internalField() - p.prevIter().internalField() ) / (gSumMag( p.internalField() ) + SMALL);
-    residualVelocity = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
-    relativeResidual = max( residualPressure, residualVelocity );
-
-    scalar initResidual = 0;
-    forAll( initialResidual4, i )
-    {
-      initResidual = max( initResidual, initialResidual4[i] );
-    }
-
-    relativeResidual = min( relativeResidual, initResidual );
-
-    if ( oCorr == 0 )
-      initialResidual = relativeResidual;
-
-    if ( relativeResidual < convergenceTolerance && oCorr > 1 && !underrelaxation )
-      break;
-
-    if ( relativeResidual < convergenceTolerance && oCorr > 1 )
+    if ( convergence )
       break;
   }
-
-  Info << "Solving for Up, Initial residual = " << initialResidual;
-  Info << ", Final residual = " << relativeResidual;
-  Info << ", No outer iterations = " << oCorr + 1 << endl;
 
   continuityErrs();
 }
