@@ -609,16 +609,10 @@ void FluidSolver::solve()
     volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
 
     scalarField magResU = mag( residual.internalField() );
-    scalar momentumResidual = ::sqrt( sum( sqr( magResU ) ) / mesh.nCells() );
-
-    bool convergence = momentumResidual <= convergenceTolerance;
-
-    labelList convergenceList( Pstream::nProcs(), 0 );
-    convergenceList[Pstream::myProcNo()] = convergence;
-    reduce( convergenceList, sumOp<labelList>() );
+    scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.nCells() );
 
     int minIter = 2;
-    convergence = min( convergenceList ) && oCorr >= minIter - 1;
+    bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
 
     Info << "root mean square residual norm = " << momentumResidual << ", tolerance = " << convergenceTolerance;
     Info << ", iteration = " << oCorr + 1;
