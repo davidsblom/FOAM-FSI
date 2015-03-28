@@ -524,13 +524,8 @@ void FluidSolver::solve()
 {
   Info << "Solve fluid domain" << endl;
 
-  int ocorr = 0;
-  scalar relativeResidual;
-  scalar residualPressure;
-  scalar residualVelocity;
-
   // --- PIMPLE loop
-  do
+  for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
   {
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative( phi, U );
@@ -611,19 +606,37 @@ void FluidSolver::solve()
 
     turbulence->correct();
 
-    residualPressure = gSumMag( p.internalField() - p.prevIter().internalField() ) / (gSumMag( p.internalField() ) + SMALL);
-    residualVelocity = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
+    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff(U) & U) + fvc::grad(p);
 
-    relativeResidual = max( residualPressure, residualVelocity );
+    scalarField magResU = mag( residual.internalField() );
+    scalar momentumResidual = ::sqrt( sum( sqr( magResU ) ) / mesh.nCells() );
+
+    bool convergence = momentumResidual <= convergenceTolerance;
+
+    labelList convergenceList( Pstream::nProcs(), 0 );
+    convergenceList[Pstream::myProcNo()] = convergence;
+    reduce( convergenceList, sumOp<labelList>() );
+
+    int minIter = 2;
+    convergence = min( convergenceList ) && oCorr >= minIter - 1;
+
+    Info << "root mean square residual norm = " << momentumResidual << ", tolerance = " << convergenceTolerance;
+    Info << ", iteration = " << oCorr + 1;
+    Info << ", convergence = ";
+
+    if ( convergence )
+      Info << "true";
+    else
+      Info << "false";
+
+    Info << endl;
 
     // Make the fluxes absolute to the mesh motion
     fvc::makeAbsolute( phi, U );
+
+    if ( convergence )
+      break;
   }
-  while
-  (
-    relativeResidual > convergenceTolerance
-    && ++ocorr < nOuterCorr
-  );
 
   continuityErrs();
 }
