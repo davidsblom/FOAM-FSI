@@ -4,6 +4,8 @@ rm -rf *.log
 
 NB_CORES=`grep -c ^processor /proc/cpuinfo`
 
+NB_CORES=8
+
 CORE_COUNT=`expr $NB_CORES - 1`
 
 for i in `seq 0 $CORE_COUNT`

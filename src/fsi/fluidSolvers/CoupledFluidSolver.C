@@ -357,12 +357,13 @@ void CoupledFluidSolver::solve()
     volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
 
     scalarField magResU = mag( residual.internalField() );
-    scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.nCells() );
+    scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
 
     int minIter = 2;
     bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
 
-    Info << "root mean square residual norm = " << momentumResidual << ", tolerance = " << convergenceTolerance;
+    Info << "root mean square residual norm = " << momentumResidual;
+    Info << ", tolerance = " << convergenceTolerance;
     Info << ", iteration = " << oCorr + 1;
     Info << ", convergence = ";
 
