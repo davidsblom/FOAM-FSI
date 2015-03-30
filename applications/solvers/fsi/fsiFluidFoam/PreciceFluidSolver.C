@@ -24,6 +24,7 @@ PreciceFluidSolver::PreciceFluidSolver( shared_ptr<foamFluidSolver> solver )
 
 PreciceFluidSolver::~PreciceFluidSolver()
 {
+  assert( !precice->isCouplingOngoing() );
   precice->finalize();
 }
 
