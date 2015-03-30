@@ -85,6 +85,7 @@ void OutputSpaceMapping::performPostProcessing(
   R.setZero();
   coarseResiduals.clear();
   fineResiduals.clear();
+  sols.clear();
 
   if ( timeIndex == 0 )
   {
