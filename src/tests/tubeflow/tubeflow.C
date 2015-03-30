@@ -34,16 +34,16 @@ int main(
   // List of solvers
   deque<std::string> fsiSolvers;
 
-  // fsiSolvers.push_back( "QN" );
+  fsiSolvers.push_back( "QN" );
   fsiSolvers.push_back( "Anderson" );
   fsiSolvers.push_back( "ML-IQN-ILS" );
   fsiSolvers.push_back( "MM" );
+  fsiSolvers.push_back( "OSM" );
+  fsiSolvers.push_back( "ASM" );
 
-  // fsiSolvers.push_back( "OSM" );
-  // fsiSolvers.push_back( "ASM" );
   // fsiSolvers.push_back( "ASM-ILS" );
 
-  bool parallelCoupling = true;
+  bool parallelCoupling = false;
   int nbParallel = 1;
 
   if ( parallelCoupling )
@@ -55,7 +55,7 @@ int main(
   {
     for ( int iParallel = 0; iParallel < nbParallel; iParallel++ )
     {
-      for ( int iReuse = 6; iReuse < 7; iReuse++ )
+      for ( int iReuse = 0; iReuse < 2; iReuse++ )
       {
         for ( int nbLevels = 2; nbLevels < 3; nbLevels++ )
         {
@@ -102,7 +102,7 @@ int main(
               int nbReuse = 0;
 
               if ( iReuse == 1 )
-                nbReuse = 16;
+                nbReuse = 4;
 
               if ( iReuse == 2 )
                 nbReuse = 24;
@@ -166,7 +166,7 @@ int main(
               models = shared_ptr< deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > ( new deque<shared_ptr<ImplicitMultiLevelFsiSolver> > () );
               solvers = shared_ptr< deque<shared_ptr<SpaceMappingSolver> > > ( new deque<shared_ptr<SpaceMappingSolver> >() );
 
-              if ( fsiSolver == "RPM" || fsiSolver == "MM" || fsiSolver == "OSM" || fsiSolver == "ASM" || fsiSolver == "ML-IQN-ILS" || fsiSolver == "ASM-ILS" )
+              if ( fsiSolver == "MM" || fsiSolver == "OSM" || fsiSolver == "ASM" || fsiSolver == "ML-IQN-ILS" || fsiSolver == "ASM-ILS" )
               {
                 minIter = 1;
                 tol = 1.0e-6;
@@ -315,7 +315,7 @@ int main(
 
                 assert( static_cast<int>( models->size() ) == nbLevels );
 
-                if ( fsiSolver == "RPM" || fsiSolver == "MM" || fsiSolver == "OSM" || fsiSolver == "ASM" || fsiSolver == "ASM-ILS" )
+                if ( fsiSolver == "MM" || fsiSolver == "OSM" || fsiSolver == "ASM" || fsiSolver == "ASM-ILS" )
                 {
                   for ( int level = 0; level < nbLevels - 1; level++ )
                   {
