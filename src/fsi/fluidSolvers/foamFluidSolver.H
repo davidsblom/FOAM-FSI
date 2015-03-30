@@ -66,6 +66,8 @@ public:
 
   void run();
 
+  virtual void moveMesh( Field<vectorField> motion );
+
   string name;
   shared_ptr<argList> args;
   shared_ptr<Time> runTime;
@@ -73,10 +75,6 @@ public:
   // Mesh
   autoPtr<dynamicFvMesh> meshPtr;
   dynamicFvMesh & mesh;
-
-protected:
-
-  virtual void moveMesh( Field<vectorField> motion );
 
   // Dictionaries
   IOdictionary couplingProperties;
@@ -86,6 +84,8 @@ protected:
   labelList movingPatchIDs;
   Field<vectorField> movingPatchesDispl;
   Field<vectorField> movingPatchesDisplOld;
+
+protected:
 
   // Parallel FSI coupling variables
   labelList nPoints;
