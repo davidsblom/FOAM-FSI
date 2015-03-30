@@ -31,8 +31,6 @@ int main(
   char ** argv
   )
 {
-  std::cout << "start" << std::endl;
-
   // List of solvers
   deque<std::string> fsiSolvers;
 
@@ -447,7 +445,7 @@ int main(
                 logFile << "nbTimeSteps = " << fluid->timeIndex << endl;
                 logFile << "updateJacobian = " << updateJacobian << endl;
                 logFile << "iTol = " << iTol << endl;
-                logFile << "tol coarse model = " << std::pow( 10, -iTol ) << endl;
+                logFile << "tol coarse model = " << std::pow( 10, -iTol - 1 ) << endl;
 
                 if ( fsiSolver == "QN" || fsiSolver == "Anderson" )
                   logFile << "nbIter = " << fsi->nbIter << endl;
