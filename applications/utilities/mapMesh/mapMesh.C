@@ -62,4 +62,7 @@ int main(
     fluid->setDisplacementLocal( valuesInterpolation );
     fluid->moveMesh( fluid->movingPatchesDispl - fluid->movingPatchesDisplOld );
 
+    runTime->loop();
+    runTime->write();
+
   }
