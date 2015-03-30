@@ -4,6 +4,7 @@ wclean src/fvPatchFields
 wclean src/fvSchemes
 wclean src/fsi
 wclean src/RBFMeshMotionSolver
+wclean applications/utilities/mapMesh
 wclean applications/solvers/unsteadyPUCoupledFoam
 wclean applications/solvers/fsi/fsiFoam
 wclean applications/solvers/fsi/fluidFoam
