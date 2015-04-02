@@ -1,3 +1,4 @@
+
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
@@ -38,7 +39,9 @@ int main(
     do
     {
       Info << "outer iteration: " << oCorr << endl;
-      maxResidual = 0;      // reset maxResidual for new outerloop
+
+      // reset maxResidual for new outerloop
+      maxResidual = 0;
 
       p.storePrevIter();
       U.storePrevIter();
