@@ -5,6 +5,7 @@ wclean src/fvSchemes
 wclean src/fsi
 wclean src/RBFMeshMotionSolver
 wclean applications/solvers/unsteadyPUCoupledFoam
+wclean applications/solvers/consistentPimpleFoam
 wclean applications/solvers/fsi/fsiFoam
 wclean applications/solvers/fsi/fluidFoam
 wclean applications/solvers/fsi/solidFoam
