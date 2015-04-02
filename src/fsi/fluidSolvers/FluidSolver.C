@@ -520,6 +520,11 @@ void FluidSolver::solve()
 
     scalarField magResU = mag( residual.internalField() );
     scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
+    scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
+    rmsU /= runTime->deltaT().value();
+
+    // Scale the residual by the root mean square of the velocity field
+    momentumResidual /= rmsU;
 
     int minIter = 2;
     bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;

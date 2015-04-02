@@ -31,7 +31,6 @@ int main(
     Info << "Time = " << runTime.timeName() << nl << endl;
 
     label oCorr = 1;
-    scalar relativeResidual = 1;
     bool converged = false;
     bool lastIter = false;
 
@@ -61,11 +60,15 @@ int main(
 
       turbulence->correct();
 
-      // Get residuals
-      scalar residualPressure = gSumMag( p.internalField() - p.prevIter().internalField() ) / (gSumMag( p.internalField() ) + SMALL);
-      scalar residualVelocity = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
-      relativeResidual = max( residualPressure, residualVelocity );
-      Info << "residualPressure = " << residualPressure << ", residualVelocity = " << residualVelocity << endl;
+      volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
+
+      scalarField magResU = mag( residual.internalField() );
+      scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
+      scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
+      rmsU /= runTime.deltaT().value();
+
+      // Scale the residual by the root mean square of the velocity field
+      momentumResidual /= rmsU;
 
       // Check if this was the last iter and set converged to true
       if ( lastIter )
@@ -74,7 +77,7 @@ int main(
       }
 
       // Check convergence and set lastIter to true
-      if ( relativeResidual < outerConvergence || oCorr == nOuterCorr )
+      if ( momentumResidual < outerConvergence || oCorr == nOuterCorr )
       {
         lastIter = true;
       }
