@@ -423,17 +423,33 @@ void SDCFluidSolver::implicitSolve(
       - fvm::laplacian( nu, U )
     );
 
-    UEqnt.relax();
+    {
+      // To ensure S0 and B0 are thrown out of memory
+      // Source and boundaryCoeffs need to be saved when relexation is applied
+      // to still obtain time consistent behavior.
+      // Only source is affected by relaxation, boundaryCoeffs is not relaxation
+      // dependent.
+      // BoundaryCoeffs needs to be saved to generate the correct UEqn after
+      // solving. Explicit terms (depending on U(n)) need to remain depending
+      // on U(n) and not on new solution)
+      vectorField S0 = UEqnt.source();
+      FieldField<Field, Foam::vector> B0 = UEqnt.boundaryCoeffs();
 
-    // Eqn 25
-    Foam::solve( UEqnt == -fvc::grad( p ) + rhsU / dt );
+      UEqnt.relax();
 
-    UEqnt = fvVectorMatrix
-      (
-      fvm::ddt( U )
-      + fvm::div( phi, U )
-      - fvm::laplacian( nu, U )
-      );
+      // Eqn 25
+      Foam::solve( UEqnt == -fvc::grad( p ) + rhsU / dt );
+
+      // Reset equation to ensure relaxation parameter is not causing problems for time order
+      UEqnt =
+        (
+        fvm::ddt( U )
+        + fvm::div( phi, U )
+        - fvm::laplacian( nu, U )
+        );
+      UEqnt.source() = S0;
+      UEqnt.boundaryCoeffs() = B0;
+    }
 
     // --- PISO loop
 
@@ -516,6 +532,11 @@ void SDCFluidSolver::implicitSolve(
 
     scalarField magResU = mag( residual.internalField() );
     scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
+    scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
+    rmsU /= runTime->deltaT().value();
+
+    // Scale the residual by the root mean square of the velocity field
+    momentumResidual /= rmsU;
 
     int minIter = 2;
     bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;

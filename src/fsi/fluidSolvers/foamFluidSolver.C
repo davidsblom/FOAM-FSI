@@ -209,6 +209,8 @@ void foamFluidSolver::setDisplacementLocal( const matrix & displacement )
 
     offset += size;
   }
+
+  moveMesh( movingPatchesDisplOld - movingPatchesDispl );
 }
 
 void foamFluidSolver::run()

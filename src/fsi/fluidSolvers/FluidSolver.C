@@ -109,7 +109,6 @@ FluidSolver::FluidSolver(
   mesh,
   dimensionedVector( "0", dimArea, Foam::vector::zero )
   ),
-  correctPhi( false ),
   convergenceTolerance( 1.0e-5 )
 {
   initialize();
@@ -169,81 +168,6 @@ void FluidSolver::continuityErrs()
        << ", global = " << globalContErr
        << ", cumulative = " << cumulativeContErr
        << endl;
-}
-
-void FluidSolver::correctPhiField()
-{
-  {
-    if ( mesh.changing() )
-    {
-      forAll( U.boundaryField(), patchi )
-      {
-        if ( U.boundaryField()[patchi].fixesValue() )
-        {
-          U.boundaryField()[patchi].initEvaluate();
-        }
-      }
-
-      forAll( U.boundaryField(), patchi )
-      {
-        if ( U.boundaryField()[patchi].fixesValue() )
-        {
-          U.correctBoundaryConditions();
-          U.boundaryField()[patchi].evaluate();
-
-          phi.boundaryField()[patchi] =
-            U.boundaryField()[patchi] & mesh.Sf().boundaryField()[patchi];
-        }
-      }
-    }
-
-    wordList pcorrTypes
-    (
-      p.boundaryField().size(),
-      zeroGradientFvPatchScalarField::typeName
-    );
-
-    for ( label i = 0; i < p.boundaryField().size(); i++ )
-    {
-      if ( p.boundaryField()[i].fixesValue() )
-      {
-        pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
-      }
-    }
-
-    volScalarField pcorr
-    (
-      IOobject
-      (
-        "pcorr",
-        runTime->timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-      ),
-      mesh,
-      dimensionedScalar( "pcorr", p.dimensions(), 0.0 ),
-      pcorrTypes
-    );
-
-    for ( int nonOrth = 0; nonOrth <= nNonOrthCorr; nonOrth++ )
-    {
-      fvScalarMatrix pcorrEqn
-      (
-        fvm::laplacian( 1.0 / fvc::interpolate( AU ), pcorr, "laplacian((1|A(U)),p)" ) == fvc::div( phi )
-      );
-
-      pcorrEqn.setReference( pRefCell, pRefValue );
-      pcorrEqn.solve();
-
-      if ( nonOrth == nNonOrthCorr )
-      {
-        phi -= pcorrEqn.flux();
-      }
-    }
-  }
-
-  continuityErrs();
 }
 
 void FluidSolver::courantNo()
@@ -402,7 +326,6 @@ void FluidSolver::initTimeStep()
   readControls();
   checkTotalVolume();
   courantNo();
-  setDeltaT();
 
   init = true;
 }
@@ -428,13 +351,6 @@ void FluidSolver::readControls()
   readPIMPLEControls();
 
   readTimeControls();
-
-  correctPhi = false;
-
-  if ( pimple.found( "correctPhi" ) )
-  {
-    correctPhi = Switch( pimple.lookup( "correctPhi" ) );
-  }
 }
 
 void FluidSolver::readCouplingProperties()
@@ -480,28 +396,6 @@ void FluidSolver::resetSolution()
   phi == phi.oldTime();
 }
 
-void FluidSolver::setDeltaT()
-{
-  if ( adjustTimeStep )
-  {
-    assert( false );
-
-    scalar maxDeltaTFact = maxCo / (CoNum + SMALL);
-    scalar deltaTFact = min( min( maxDeltaTFact, 1.0 + 0.1 * maxDeltaTFact ), 1.2 );
-
-    runTime->setDeltaT
-    (
-      min
-      (
-        deltaTFact * runTime->deltaT().value(),
-        maxDeltaT
-      )
-    );
-
-    Info << "deltaT = " << runTime->deltaT().value() << endl;
-  }
-}
-
 void FluidSolver::updateSf()
 {
   Sf.oldTime();
@@ -540,16 +434,32 @@ void FluidSolver::solve()
       + turbulence->divDevReff( U )
     );
 
-    UEqn.relax();
+    {
+      // To ensure S0 and B0 are thrown out of memory
+      // Source and boundaryCoeffs need to be saved when relexation is applied
+      // to still obtain time consistent behavior.
+      // Only source is affected by relaxation, boundaryCoeffs is not relaxation
+      // dependent.
+      // BoundaryCoeffs needs to be saved to generate the correct UEqn after
+      // solving. Explicit terms (depending on U(n)) need to remain depending
+      // on U(n) and not on new solution)
+      vectorField S0 = UEqn.source();
+      FieldField<Field, Foam::vector> B0 = UEqn.boundaryCoeffs();
 
-    Foam::solve( UEqn == -fvc::grad( p ) );
+      UEqn.relax();
 
-    UEqn = fvVectorMatrix
-      (
-      fvm::ddt( U )
-      + fvm::div( phi, U )
-      + turbulence->divDevReff( U )
-      );
+      Foam::solve( UEqn == -fvc::grad( p ) );
+
+      // Reset equation to ensure relaxation parameter is not causing problems for time order
+      UEqn =
+        (
+        fvm::ddt( U )
+        + fvm::div( phi, U )
+        + turbulence->divDevReff( U )
+        );
+      UEqn.source() = S0;
+      UEqn.boundaryCoeffs() = B0;
+    }
 
     // --- PISO loop
     for ( int corr = 0; corr < nCorr; corr++ )
@@ -610,6 +520,11 @@ void FluidSolver::solve()
 
     scalarField magResU = mag( residual.internalField() );
     scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
+    scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
+    rmsU /= runTime->deltaT().value();
+
+    // Scale the residual by the root mean square of the velocity field
+    momentumResidual /= rmsU;
 
     int minIter = 2;
     bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;

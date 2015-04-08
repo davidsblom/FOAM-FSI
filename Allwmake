@@ -13,6 +13,7 @@ wmake libso src/fsi
 wmake libso src/RBFMeshMotionSolver
 wmake applications/utilities/mapMesh
 wmake applications/solvers/unsteadyPUCoupledFoam
+wmake applications/solvers/consistentPimpleFoam
 wmake applications/solvers/fsi/fsiFoam
 wmake applications/solvers/fsi/solidFoam
 wmake applications/solvers/fsi/fluidFoam

@@ -66,8 +66,6 @@ private:
 
   void continuityErrs();
 
-  void correctPhiField();
-
   void courantNo();
 
   void createFields();
@@ -87,8 +85,6 @@ private:
   void readPIMPLEControls();
 
   void readTimeControls();
-
-  void setDeltaT();
 
   void updateSf();
 
@@ -126,7 +122,6 @@ private:
   surfaceVectorField Sf;
 
   // Controls
-  bool correctPhi;
   scalar convergenceTolerance;
 
   // Time discretization scheme
