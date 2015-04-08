@@ -5,6 +5,7 @@
  */
 
 #include "RBFInterpolation.H"
+#include "TPSFunction.H"
 
 namespace rbf
 {
@@ -184,8 +185,27 @@ namespace rbf
 
     // Calculate coefficients gamma and beta
 
-    lu.compute( H );
-    matrix B = lu.solve( values );
+    // If the thin plate spline radial basis function is used,
+    // use the LU decomposition to solve for the coefficients.
+    // In case a wendland function is used, use the more efficient LLT
+    // algorithm.
+    // The LLT algorithm cannot be used for the thin plate spline function,
+    // since the diagonal of matrix is zero for this function.
+    std::shared_ptr<TPSFunction> function;
+    function = std::dynamic_pointer_cast<TPSFunction>( rbfFunction );
+
+    matrix B;
+
+    if ( function )
+    {
+      lu.compute( H );
+      B = lu.solve( values );
+    }
+    else
+    {
+      llt.compute( H );
+      B = llt.solve( values );
+    }
 
     // Evaluate Phi_BA which contains the evaluation of the radial basis function
     // This method is only used by the greedy algorithm, and the matrix Phi
@@ -224,7 +244,21 @@ namespace rbf
   {
     assert( computed );
 
-    matrix B = lu.solve( values );
+    // If the thin plate spline radial basis function is used,
+    // use the LU decomposition to solve for the coefficients.
+    // In case a wendland function is used, use the more efficient LLT
+    // algorithm.
+    // The LLT algorithm cannot be used for the thin plate spline function,
+    // since the diagonal of matrix is zero for this function.
+    std::shared_ptr<TPSFunction> function;
+    function = std::dynamic_pointer_cast<TPSFunction>( rbfFunction );
+
+    matrix B;
+
+    if ( function )
+      B = lu.solve( values );
+    else
+      B = llt.solve( values );
 
     valuesInterpolation = Phi * B;
 

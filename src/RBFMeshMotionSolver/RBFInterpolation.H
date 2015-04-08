@@ -58,6 +58,7 @@ public:
     matrix Hhat;
     matrix Phi;
     Eigen::PartialPivLU<matrix> lu;
+    Eigen::LLT<matrix> llt;
 
 private:
 
