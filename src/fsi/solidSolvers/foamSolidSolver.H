@@ -71,6 +71,7 @@ protected:
 
   // Fields
   volVectorField U;
+  volVectorField Uinitial;
 
   // Dictionaries
   IOdictionary couplingProperties;

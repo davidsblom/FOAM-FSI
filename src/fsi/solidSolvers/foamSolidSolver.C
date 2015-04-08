@@ -38,6 +38,18 @@ foamSolidSolver::foamSolidSolver (
   ),
   mesh
   ),
+  Uinitial
+  (
+  IOobject
+  (
+    "U",
+    runTime->timeName(),
+    mesh,
+    IOobject::MUST_READ,
+    IOobject::NO_WRITE
+  ),
+  mesh
+  ),
   couplingProperties
   (
   IOobject
@@ -96,7 +108,7 @@ void foamSolidSolver::getDisplacementLocal( matrix & displacement )
 
     for ( int i = 0; i < size; i++ )
       for ( int j = 0; j < displacement.cols(); j++ )
-        displacement( i + offset, j ) = U.boundaryField()[movingPatchIDs[patchI]][i][j];
+        displacement( i + offset, j ) = U.boundaryField()[movingPatchIDs[patchI]][i][j] - Uinitial.boundaryField()[movingPatchIDs[patchI]][i][j];
 
     offset += size;
   }
@@ -158,7 +170,7 @@ void foamSolidSolver::getWritePositions( matrix & writePositions )
 
     forAll( faceCentres, i )
     {
-      writePositionsField[i + offset + globalOffset] = faceCentres[i];
+      writePositionsField[i + offset + globalOffset] = faceCentres[i] + Uinitial.boundaryField()[movingPatchIDs[patchI]][i];
     }
 
     offset += faceCentres.size();
@@ -185,7 +197,7 @@ void foamSolidSolver::getWritePositionsLocal( matrix & writePositions )
 
     for ( int i = 0; i < faceCentres.size(); i++ )
       for ( int j = 0; j < writePositions.cols(); j++ )
-        writePositions( i + offset, j ) = faceCentres[i][j];
+        writePositions( i + offset, j ) = faceCentres[i][j] + Uinitial.boundaryField()[movingPatchIDs[patchI]][i][j];
 
     offset += faceCentres.size();
   }
@@ -288,7 +300,7 @@ void foamSolidSolver::solve(
 
     forAll( U.boundaryField()[movingPatchIDs[patchI]], i )
     {
-      outputField[i + offset + globalOffset] = U.boundaryField()[movingPatchIDs[patchI]][i];
+      outputField[i + offset + globalOffset] = U.boundaryField()[movingPatchIDs[patchI]][i] - Uinitial.boundaryField()[movingPatchIDs[patchI]][i];
     }
 
     offset += size;
