@@ -43,6 +43,12 @@ void PreciceFluidSolver::init()
   setWritePositionsAcoustics();
 
   precice->initialize();
+
+  writeDataAcoustics();
+
+  precice->fulfilledAction( precice::constants::actionWriteInitialData() );
+
+  precice->initializeData();
 }
 
 void PreciceFluidSolver::readData( matrix & data )
