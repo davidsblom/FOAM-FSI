@@ -59,7 +59,7 @@ blockSolver
     pRefCell 0;
     pRefValue 0;
     nOuterCorrectors 500;
-    convergenceTolerance 1e-9;
+    convergenceTolerance 1e-5;
 }
 
 
