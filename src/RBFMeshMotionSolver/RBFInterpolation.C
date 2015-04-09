@@ -5,6 +5,7 @@
  */
 
 #include "RBFInterpolation.H"
+#include "TPSFunction.H"
 
 namespace rbf
 {
@@ -18,6 +19,50 @@ namespace rbf
     Hhat()
   {
     assert( rbfFunction );
+  }
+
+  void RBFInterpolation::evaluateH(
+    const matrix & positions,
+    matrix & H
+    )
+  {
+    // RBF function evaluation
+
+    double r = 0;
+
+    for ( int i = 0; i < n_A; i++ )
+    {
+      for ( int j = i; j < n_A; j++ )
+      {
+        r = ( positions.row( i ) - positions.row( j ) ).norm();
+        H( j, i ) = rbfFunction->evaluate( r );
+      }
+
+      for ( int j = 0; j < i; j++ )
+      {
+        H( j, i ) = H( i, j );
+      }
+    }
+  }
+
+  void RBFInterpolation::evaluatePhi(
+    const matrix & positions,
+    const matrix & positionsInterpolation,
+    matrix & Phi
+    )
+  {
+    // Evaluate Phi which contains the evaluation of the radial basis function
+
+    double r = 0;
+
+    for ( int i = 0; i < n_A; i++ )
+    {
+      for ( int j = 0; j < n_B; j++ )
+      {
+        r = ( positions.row( i ) - positionsInterpolation.row( j ) ).norm();
+        Phi( j, i ) = rbfFunction->evaluate( r );
+      }
+    }
   }
 
   void RBFInterpolation::compute(
@@ -47,23 +92,9 @@ namespace rbf
     matrix H( n_A + dimGrid + 1, n_A + dimGrid + 1 ), Phi( n_B, n_A + dimGrid + 1 );
     H.setZero();
 
-    // RBF function evaluation
+    // Evaluate radial basis functions for matrix H
 
-    double r;
-
-    for ( int i = 0; i < n_A; i++ )
-    {
-      for ( int j = i; j < n_A; j++ )
-      {
-        r = ( positions.row( i ) - positions.row( j ) ).norm();
-        H( j, i ) = rbfFunction->evaluate( r );
-      }
-
-      for ( int j = 0; j < i; j++ )
-      {
-        H( j, i ) = H( i, j );
-      }
-    }
+    evaluateH( positions, H );
 
     // Evaluate Q_A
     for ( int i = 0; i < n_A; i++ )
@@ -76,16 +107,9 @@ namespace rbf
     H.topRightCorner( Q_A.rows(), Q_A.cols() ) = Q_A;
     H.bottomLeftCorner( Q_A.cols(), Q_A.rows() ) = Q_A.transpose();
 
-    // Evaluate Phi_BA which contains the evaluation of the radial basis function
+    // Evaluate Phi which contains the evaluation of the radial basis function
 
-    for ( int i = 0; i < n_A; i++ )
-    {
-      for ( int j = 0; j < n_B; j++ )
-      {
-        r = ( positions.row( i ) - positionsInterpolation.row( j ) ).norm();
-        Phi( j, i ) = rbfFunction->evaluate( r );
-      }
-    }
+    evaluatePhi( positions, positionsInterpolation, Phi );
 
     // Evaluate Q_B
 
@@ -100,19 +124,13 @@ namespace rbf
 
     // Compute the LU decomposition of the matrix H
 
-    Eigen::FullPivLU<matrix> lu( H );
-    matrix Hinverse = lu.inverse();
+    Eigen::PartialPivLU<matrix> lu( H );
 
-    // Matrix matrix multiplication
-    // Hhat = Phi * inv(H)
+    // Compute interpolation matrix
 
-    Hhat.resize( n_B, n_A );
-    Hhat.setZero();
+    Hhat = Phi * lu.inverse();
 
-    for ( int i = 0; i < Hhat.rows(); i++ )
-      for ( int j = 0; j < Hhat.cols(); j++ )
-        for ( int k = 0; k < Phi.cols(); k++ )
-          Hhat( i, j ) += Phi( i, k ) * Hinverse( k, j );
+    Hhat.conservativeResize( n_B, n_A );
 
     computed = true;
   }
@@ -163,42 +181,60 @@ namespace rbf
 
     // RBF function evaluation
 
-    double r;
-
-    for ( int i = 0; i < n_A; i++ )
-    {
-      for ( int j = i; j < n_A; j++ )
-      {
-        r = ( positions.row( i ) - positions.row( j ) ).norm();
-        H( j, i ) = rbfFunction->evaluate( r );
-      }
-
-      for ( int j = 0; j < i; j++ )
-      {
-        H( j, i ) = H( i, j );
-      }
-    }
+    evaluateH( positions, H );
 
     // Calculate coefficients gamma and beta
 
-    lu.compute( H );
-    matrix B = lu.solve( values );
+    // If the thin plate spline radial basis function is used,
+    // use the LU decomposition to solve for the coefficients.
+    // In case a wendland function is used, use the more efficient LLT
+    // algorithm.
+    // The LLT algorithm cannot be used for the thin plate spline function,
+    // since the diagonal of matrix is zero for this function.
+    std::shared_ptr<TPSFunction> function;
+    function = std::dynamic_pointer_cast<TPSFunction>( rbfFunction );
+
+    matrix B;
+
+    if ( function )
+    {
+      lu.compute( H );
+      B = lu.solve( values );
+    }
+    else
+    {
+      llt.compute( H );
+      B = llt.solve( values );
+    }
 
     // Evaluate Phi_BA which contains the evaluation of the radial basis function
     // This method is only used by the greedy algorithm, and the matrix Phi
     // is therefore enlarged at every greedy step.
 
+    buildPhi( positions, positionsInterpolation );
+
+    valuesInterpolation = Phi * B;
+
+    computed = true;
+  }
+
+  void RBFInterpolation::buildPhi(
+    const matrix & positions,
+    const matrix & positionsInterpolation
+    )
+  {
+    n_A = positions.rows();
+    n_B = positionsInterpolation.rows();
+    Phi.conservativeResize( n_B, n_A );
+
     int i = Phi.cols() - 1;
+    double r = 0;
 
     for ( int j = 0; j < n_B; j++ )
     {
       r = ( positions.row( i ) - positionsInterpolation.row( j ) ).norm();
       Phi( j, i ) = rbfFunction->evaluate( r );
     }
-
-    valuesInterpolation = Phi * B;
-
-    computed = true;
   }
 
   void RBFInterpolation::interpolate2(
@@ -208,7 +244,21 @@ namespace rbf
   {
     assert( computed );
 
-    matrix B = lu.solve( values );
+    // If the thin plate spline radial basis function is used,
+    // use the LU decomposition to solve for the coefficients.
+    // In case a wendland function is used, use the more efficient LLT
+    // algorithm.
+    // The LLT algorithm cannot be used for the thin plate spline function,
+    // since the diagonal of matrix is zero for this function.
+    std::shared_ptr<TPSFunction> function;
+    function = std::dynamic_pointer_cast<TPSFunction>( rbfFunction );
+
+    matrix B;
+
+    if ( function )
+      B = lu.solve( values );
+    else
+      B = llt.solve( values );
 
     valuesInterpolation = Phi * B;
 

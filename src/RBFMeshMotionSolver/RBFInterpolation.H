@@ -45,6 +45,11 @@ public:
       matrix & valuesInterpolation
       );
 
+    void buildPhi(
+      const matrix & positions,
+      const matrix & positionsInterpolation
+      );
+
     std::shared_ptr<RBFFunctionInterface> rbfFunction;
     bool computed;
     int n_A;
@@ -52,7 +57,21 @@ public:
     int dimGrid;
     matrix Hhat;
     matrix Phi;
-    Eigen::FullPivLU<matrix> lu;
+    Eigen::PartialPivLU<matrix> lu;
+    Eigen::LLT<matrix> llt;
+
+private:
+
+    void evaluateH(
+      const matrix & positions,
+      matrix & H
+      );
+
+    void evaluatePhi(
+      const matrix & positions,
+      const matrix & positionsInterpolation,
+      matrix & Phi
+      );
   };
 }
 

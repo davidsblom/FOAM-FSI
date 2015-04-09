@@ -100,8 +100,13 @@ namespace rbf
       // Greedy algorithm
 
       rbf::vector errorList( positions.rows() );
-      selectedPositions.resize( 1 );
-      selectedPositions.setZero();
+      selectedPositions.resize( 2 );
+
+      for ( int i = 0; i < selectedPositions.rows(); i++ )
+        selectedPositions( i ) = i;
+
+      assert( positions.rows() >= selectedPositions.rows() );
+
       rbf::matrix positionsInterpolationCoarse = positions;
 
       int maxNbPoints = std::min( coarseningMaxPoints, static_cast<int>( positions.rows() ) );
@@ -109,7 +114,22 @@ namespace rbf
       double error = 0;
 
       // Create RBF interpolator
+
+      // Initialize the matrix Phi if more than 1 positions have been selected
+      // before the greedening algorithm starts
       rbfCoarse->Phi.resize( 0, 0 );
+
+      for ( int i = 1; i < selectedPositions.rows(); i++ )
+      {
+        rbf::matrix positionsCoarse( i, positions.cols() );
+
+        for ( int j = 0; j < i; j++ )
+          positionsCoarse.row( j ) = positions.row( selectedPositions( j ) );
+
+        rbfCoarse->buildPhi( positionsCoarse, positionsInterpolationCoarse );
+      }
+
+      // Run the greedy algorithm
 
       for ( int i = selectedPositions.rows(); i < maxNbPoints + 1; i++ )
       {
