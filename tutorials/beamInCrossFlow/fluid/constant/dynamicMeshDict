@@ -26,7 +26,7 @@ fixedPatches ( outlet inlet top left bottom );
 
 coarsening
 {
-  enabled false;
+  enabled true;
   tol 1.0e-6;
   minPoints 10;
   maxPoints 2000;

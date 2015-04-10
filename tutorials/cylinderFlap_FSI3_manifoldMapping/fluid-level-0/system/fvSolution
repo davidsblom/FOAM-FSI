@@ -15,50 +15,31 @@ FoamFile
 
 solvers
 {
-  Up
-  {
-    solver BiCGStab;
-    preconditioner Cholesky;
-    tolerance 1e-13;
-    relTol 1e-05;
-    minIter 5;
-    maxIter 500;
-  }
-  "(p|pFinal)"
+  p
   {
     solver PCG;
     preconditioner DIC;
     tolerance 1e-13;
     relTol 0.001;
-    minIter 1;
   }
-  "(U|UFinal)"
+  
+  U
   {
-    solver PBiCG;
+    solver BiCGStab;
     preconditioner DILU;
     tolerance 1e-13;
     relTol 0.001;
-    minIter 1;
   }
-}
-
-blockSolver
-{
-  pRefCell 0;
-  pRefValue 0;
-  nOuterCorrectors 500;
-  convergenceTolerance 1e-12;
 }
 
 PIMPLE
 {
   nOuterCorrectors 500;
-  nCorrectors 2;
+  nCorrectors 5;
   nNonOrthogonalCorrectors 0;
 }
 
 relaxationFactors
 {
-  p 0.9;
   U 0.9;
 }

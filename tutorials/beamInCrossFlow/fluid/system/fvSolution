@@ -28,29 +28,27 @@ solvers
         maxIter 500;
     }
 
-    "(p|pFinal)"
+    p
     {
       solver           PCG;
       preconditioner   DIC;
       tolerance        1e-11;
       relTol           1.0e-3;
-      minIter          1;
     }
 
-    "(U|UFinal)"
+    U
     {
-        solver          PBiCG;
+        solver          BiCGStab;
         preconditioner  DILU;
         tolerance       1e-11;
         relTol          1.0e-3;
-        minIter         1;
     }
 }
 
 PIMPLE
 {
   nOuterCorrectors 500;
-  nCorrectors 1;
+  nCorrectors 5;
   nNonOrthogonalCorrectors 0;
 }
 
