@@ -73,8 +73,8 @@ SDCFluidSolver::SDCFluidSolver(
     "Uf",
     runTime->timeName(),
     mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
+    IOobject::NO_READ,
+    IOobject::NO_WRITE
   ),
   fvc::interpolate( U )
   ),
@@ -85,7 +85,7 @@ SDCFluidSolver::SDCFluidSolver(
     "AU",
     runTime->timeName(),
     mesh,
-    IOobject::READ_IF_PRESENT,
+    IOobject::NO_READ,
     IOobject::NO_WRITE
   ),
   mesh,
@@ -99,7 +99,7 @@ SDCFluidSolver::SDCFluidSolver(
     "HU",
     runTime->timeName(),
     mesh,
-    IOobject::READ_IF_PRESENT,
+    IOobject::NO_READ,
     IOobject::NO_WRITE
   ),
   mesh,
@@ -113,8 +113,8 @@ SDCFluidSolver::SDCFluidSolver(
     "rhsU",
     runTime->timeName(),
     mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
+    IOobject::NO_READ,
+    IOobject::NO_WRITE
   ),
   mesh,
   dimensionedVector( "rhsU", dimVelocity / dimTime, Foam::vector::zero ),
@@ -127,8 +127,8 @@ SDCFluidSolver::SDCFluidSolver(
     "rhsUf",
     runTime->timeName(),
     mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
+    IOobject::NO_READ,
+    IOobject::NO_WRITE
   ),
   fvc::interpolate( rhsU )
   ),
