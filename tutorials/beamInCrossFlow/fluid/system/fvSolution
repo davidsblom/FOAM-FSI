@@ -16,18 +16,6 @@ FoamFile
 
 solvers
 {
-    Up
-    {
-        solver BiCGStab;
-        preconditioner Cholesky;
-
-        tolerance 1e-11;
-        relTol 1.0e-3;
-
-        minIter 1;
-        maxIter 500;
-    }
-
     p
     {
       solver           PCG;
@@ -50,15 +38,7 @@ PIMPLE
   nOuterCorrectors 500;
   nCorrectors 5;
   nNonOrthogonalCorrectors 0;
+  convergenceTolerance 1.0e-6;
 }
-
-blockSolver
-{
-    pRefCell 0;
-    pRefValue 0;
-    nOuterCorrectors 500;
-    convergenceTolerance 1e-9;
-}
-
 
 // ************************************************************************* //

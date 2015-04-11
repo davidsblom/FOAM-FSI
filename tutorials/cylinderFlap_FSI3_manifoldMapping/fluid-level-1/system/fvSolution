@@ -36,6 +36,7 @@ PIMPLE
   nOuterCorrectors 500;
   nCorrectors 5;
   nNonOrthogonalCorrectors 0;
+  convergenceTolerance 1.0e-11;
 }
 
 relaxationFactors

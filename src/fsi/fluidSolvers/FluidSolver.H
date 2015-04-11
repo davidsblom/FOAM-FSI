@@ -80,8 +80,6 @@ private:
 
   void readControls();
 
-  void readCouplingProperties();
-
   void readPIMPLEControls();
 
   void readTimeControls();
