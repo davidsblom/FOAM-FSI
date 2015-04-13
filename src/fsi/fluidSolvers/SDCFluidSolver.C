@@ -25,6 +25,7 @@ SDCFluidSolver::SDCFluidSolver(
     mesh,
     IOobject::MUST_READ,
     IOobject::NO_WRITE
+
   )
   ),
   pimple( mesh.solutionDict().subDict( "PIMPLE" ) ),
@@ -166,9 +167,38 @@ void SDCFluidSolver::continuityErrs()
        << endl;
 }
 
+void SDCFluidSolver::courantNo()
+{
+  scalar CoNum = 0.0;
+  scalar meanCoNum = 0.0;
+  scalar velMag = 0.0;
+
+  if ( mesh.nInternalFaces() )
+  {
+    surfaceScalarField magPhi = mag( phi );
+
+    surfaceScalarField SfUfbyDelta =
+      mesh.surfaceInterpolation::deltaCoeffs() * magPhi;
+
+    const scalar deltaT = runTime->deltaT().value();
+
+    CoNum = max( SfUfbyDelta / mesh.magSf() ).value() * deltaT;
+
+    meanCoNum = ( sum( SfUfbyDelta ) / sum( mesh.magSf() ) ).value() * deltaT;
+
+    velMag = max( magPhi / mesh.magSf() ).value();
+  }
+
+  Info << "Courant Number mean: " << meanCoNum
+       << " max: " << CoNum
+       << " velocity magnitude: " << velMag
+       << endl;
+}
+
 void SDCFluidSolver::createFields()
 {
   U.oldTime();
+  Uf.oldTime();
   phi.oldTime();
 
   // Read pressure properties and create turbulence model
@@ -402,6 +432,8 @@ void SDCFluidSolver::implicitSolve(
     for ( int j = 0; j < 3; j++ )
       rhsUf[i][j] = rhs( i * 3 + j + U.size() * 3 );
 
+  courantNo();
+
   // PIMPLE algorithm
 
   for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
@@ -572,15 +604,15 @@ void SDCFluidSolver::implicitSolve(
     for ( int j = 0; j < 3; j++ )
       result( i * 3 + j + U.size() * 3 ) = Uf[i][j];
 
-  volVectorField F = fvc::laplacian( nu, U ) - fvc::div( phi, U ) - fvc::grad( p );
   dimensionedScalar rDeltaT = 1.0 / runTime->deltaT();
-  surfaceVectorField Ff = rDeltaT * ( Uf - Uf.oldTime() ) - rhsUf / dt;
+  volVectorField UF = rDeltaT * ( U - U.oldTime() ) - rhsU / dt;
+  surfaceVectorField UfF = rDeltaT * ( Uf - Uf.oldTime() ) - rhsUf / dt;
 
-  for ( int i = 0; i < F.size(); i++ )
+  for ( int i = 0; i < UF.size(); i++ )
     for ( int j = 0; j < 3; j++ )
-      f( i * 3 + j ) = F[i][j];
+      f( i * 3 + j ) = UF[i][j];
 
-  for ( int i = 0; i < Ff.size(); i++ )
+  for ( int i = 0; i < UfF.size(); i++ )
     for ( int j = 0; j < 3; j++ )
-      f( i * 3 + j + F.size() * 3 ) = Ff[i][j];
+      f( i * 3 + j + UF.size() * 3 ) = UfF[i][j];
 }

@@ -97,6 +97,8 @@ private:
 
   void continuityErrs();
 
+  void courantNo();
+
   void createFields();
 
   void initialize();

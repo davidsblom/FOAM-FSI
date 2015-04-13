@@ -146,7 +146,10 @@ namespace sdc
       reduce( convergenceList, sumOp<labelList>() );
       convergence = min( convergenceList );
 
-      Info << "SDC residual = " << error << ", tol = " << tol << ", convergence = ";
+      Info << "SDC residual = " << error;
+      Info << ", tol = " << tol;
+      Info << ", time = " << t;
+      Info << ", convergence = ";
 
       if ( convergence )
         Info << "true";
