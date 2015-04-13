@@ -178,6 +178,8 @@ void foamFluidSolver::getWritePositionsLocal( matrix & writePositions )
 
 void foamFluidSolver::moveMesh( Field<vectorField> motion )
 {
+  std::clock_t t = std::clock();
+
   RBFMeshMotionSolver & motionSolver =
     const_cast<RBFMeshMotionSolver &>
     (
@@ -187,6 +189,10 @@ void foamFluidSolver::moveMesh( Field<vectorField> motion )
   motionSolver.setMotion( motion );
 
   mesh.update();
+
+  t = std::clock() - t;
+  double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+  Info << "timing mesh deformation = " << runTime << " s" << endl;
 }
 
 void foamFluidSolver::setDisplacementLocal( const matrix & displacement )
