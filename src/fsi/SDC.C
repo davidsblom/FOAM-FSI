@@ -94,6 +94,8 @@ namespace sdc
 
     // Compute successive corrections
 
+    bool convergence = false;
+
     for ( int j = 0; j < 5 * k; j++ )
     {
       t = t0;
@@ -138,13 +140,12 @@ namespace sdc
       Eigen::MatrixXd Qj = dt * (qmat * F);
       Eigen::MatrixXd residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
 
-      double error = std::sqrt( residual.squaredNorm() / ( residual.rows() * residual.cols() ) );
-      bool convergence = error < tol;
-
-      labelList convergenceList( Pstream::nProcs(), 0 );
-      convergenceList[Pstream::myProcNo()] = convergence;
-      reduce( convergenceList, sumOp<labelList>() );
-      convergence = min( convergenceList );
+      scalarList squaredNorm( Pstream::nProcs() );
+      squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
+      reduce( squaredNorm, sumOp<scalarList>() );
+      double error = std::sqrt( sum( squaredNorm ) / solver->getNbCells() );
+      error /= solver->getScalingFactor();
+      convergence = error < tol;
 
       Info << "SDC residual = " << error;
       Info << ", tol = " << tol;
@@ -161,6 +162,8 @@ namespace sdc
       if ( convergence )
         break;
     }
+
+    assert( convergence );
 
     solver->setDeltaT( this->dt );
   }

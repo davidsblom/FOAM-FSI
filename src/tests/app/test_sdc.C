@@ -84,6 +84,16 @@ public:
 
   virtual void nextTimeStep(){}
 
+  virtual int getNbCells()
+  {
+    return 2;
+  }
+
+  virtual double getScalingFactor()
+  {
+    return 1;
+  }
+
   int nbTimeSteps;
   double dt;
   double q0;

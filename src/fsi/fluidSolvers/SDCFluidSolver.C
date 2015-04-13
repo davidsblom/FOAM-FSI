@@ -616,3 +616,18 @@ void SDCFluidSolver::implicitSolve(
     for ( int j = 0; j < 3; j++ )
       f( i * 3 + j + UF.size() * 3 ) = UfF[i][j];
 }
+
+int SDCFluidSolver::getNbCells()
+{
+  return mesh.globalData().nTotalCells();
+}
+
+double SDCFluidSolver::getScalingFactor()
+{
+  scalar rmsU = gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells();
+  rmsU += gSumSqr( mag( Uf.internalField() ) ) / mesh.globalData().nTotalFaces();
+  rmsU = std::sqrt( rmsU );
+  rmsU /= runTime->deltaT().value();
+
+  return rmsU;
+}
