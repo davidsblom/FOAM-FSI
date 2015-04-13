@@ -96,7 +96,7 @@ namespace sdc
 
     bool convergence = false;
 
-    for ( int j = 0; j < 5 * k; j++ )
+    for ( int j = 0; j < 10 * k; j++ )
     {
       t = t0;
       Eigen::MatrixXd Fold = F;
@@ -145,6 +145,7 @@ namespace sdc
       reduce( squaredNorm, sumOp<scalarList>() );
       double error = std::sqrt( sum( squaredNorm ) / solver->getNbCells() );
       error /= solver->getScalingFactor();
+      error *= residual.rows();
       convergence = error < tol;
 
       Info << "SDC residual = " << error;
