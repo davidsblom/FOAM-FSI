@@ -107,8 +107,6 @@ private:
 
   void initialize();
 
-  void readCouplingProperties();
-
   void readPIMPLEControls();
 
   // Dictionaries

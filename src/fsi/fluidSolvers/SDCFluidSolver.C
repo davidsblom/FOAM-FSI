@@ -136,13 +136,21 @@ SDCFluidSolver::SDCFluidSolver(
   sumLocalContErr( 0 ),
   globalContErr( 0 ),
   cumulativeContErr( 0 ),
-  convergenceTolerance( 1.0e-5 ),
+  convergenceTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "convergenceTolerance" ) ) ),
   k( 0 ),
   pStages(),
   phiStages(),
   UStages(),
   UfStages()
 {
+  // Ensure that the absolute tolerance of the linear solver is less than the
+  // used convergence tolerance for the non-linear system.
+  scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
+  assert( absTolerance < convergenceTolerance );
+
+  absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
+  assert( absTolerance < convergenceTolerance );
+
   initialize();
 }
 
@@ -239,8 +247,6 @@ void SDCFluidSolver::initialize()
   readPIMPLEControls();
 
   createFields();
-
-  readCouplingProperties();
 }
 
 void SDCFluidSolver::initTimeStep()
@@ -261,22 +267,6 @@ bool SDCFluidSolver::isRunning()
        << endl << endl;
 
   return runTime->loop();
-}
-
-void SDCFluidSolver::readCouplingProperties()
-{
-  if ( couplingProperties.found( "fluidConvergenceTolerance" ) )
-    convergenceTolerance = readScalar( couplingProperties.lookup( "fluidConvergenceTolerance" ) );
-  else
-    FatalErrorIn( "readCouplingProperties" ) << "fluidConvergenceTolerance is not defined" << abort( FatalError );
-
-  // Ensure that the absolute tolerance of the linear solver is less than the
-  // used convergence tolerance for the non-linear system.
-  scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
-  assert( absTolerance < convergenceTolerance );
-
-  absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
-  assert( absTolerance < convergenceTolerance );
 }
 
 void SDCFluidSolver::readPIMPLEControls()
