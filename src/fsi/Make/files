@@ -16,7 +16,6 @@ BroydenPostProcessing.C
 ASMILS.C
 AitkenPostProcessing.C
 DataValues.C
-IDWInterpolation.C
 AndersonPostProcessing.C
 SDC.C
 

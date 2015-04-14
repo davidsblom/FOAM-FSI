@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | foam-extend: Open Source CFD                    |
-|  \\    /   O peration     | Version:     3.0                                |
+|  \\    /   O peration     | Version:     3.1                                |
 |   \\  /    A nd           | Web:         http://www.extend-project.de       |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -9,36 +9,43 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      fvSolution;
+    class       volScalarField;
+    location    "0";
+    object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solvers
-{
-    p
-    {
-      solver           PCG;
-      preconditioner   DIC;
-      tolerance        1e-11;
-      relTol           1.0e-3;
-    }
+dimensions      [0 2 -2 0 0 0 0];
 
-    U
+internalField   uniform 0;
+
+boundaryField
+{
+    outlet
     {
-        solver          BiCGStab;
-        preconditioner  DILU;
-        tolerance       1e-11;
-        relTol          1.0e-3;
+        type            fixedValue;
+        value           uniform 0;
+    }
+    inlet
+    {
+        type            timeVaryingUniformFixedValue;
+        fileName        "$FOAM_CASE/time-series";
+        outOfBounds     clamp;
+        value           uniform 1.3332;
+    }
+    wall
+    {
+        type            zeroGradient;
+    }
+    symmetry-x
+    {
+        type            symmetryPlane;
+    }
+    symmetry-y
+    {
+        type            symmetryPlane;
     }
 }
 
-PIMPLE
-{
-  nOuterCorrectors 500;
-  nCorrectors 5;
-  nNonOrthogonalCorrectors 0;
-  convergenceTolerance 1.0e-6;
-}
 
 // ************************************************************************* //

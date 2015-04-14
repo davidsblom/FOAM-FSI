@@ -22,12 +22,10 @@ AggressiveSpaceMapping.C
 ASMILS.C
 AitkenPostProcessing.C
 DataValues.C
-IDWInterpolation.C
 AndersonPostProcessing.C
 SDC.C
 
 tests.C
-test_idwinterpolation.C
 test_fluidsolver.C
 test_solidsolver.C
 test_fsisolver.C

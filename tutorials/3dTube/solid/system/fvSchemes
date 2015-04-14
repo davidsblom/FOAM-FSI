@@ -45,8 +45,6 @@ snGradSchemes
 interpolationSchemes
 {
     default linear;
-    interpolate(mu) linear;
-    interpolate(lambda) linear;
 }
 
 // ************************************************************************* //

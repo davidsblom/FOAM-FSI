@@ -109,8 +109,19 @@ FluidSolver::FluidSolver(
   mesh,
   dimensionedVector( "0", dimArea, Foam::vector::zero )
   ),
-  convergenceTolerance( 1.0e-5 )
+  convergenceTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "convergenceTolerance" ) ) )
 {
+  assert( convergenceTolerance < 1 );
+  assert( convergenceTolerance > 0 );
+
+  // Ensure that the absolute tolerance of the linear solver is less than the
+  // used convergence tolerance for the non-linear system.
+  scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
+  assert( absTolerance < convergenceTolerance );
+
+  absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
+  assert( absTolerance < convergenceTolerance );
+
   initialize();
 }
 
@@ -305,8 +316,6 @@ void FluidSolver::initialize()
 
   createFields();
 
-  readCouplingProperties();
-
   initContinuityErrs();
 
   initTotalVolume();
@@ -351,22 +360,6 @@ void FluidSolver::readControls()
   readPIMPLEControls();
 
   readTimeControls();
-}
-
-void FluidSolver::readCouplingProperties()
-{
-  if ( couplingProperties.found( "fluidConvergenceTolerance" ) )
-    convergenceTolerance = readScalar( couplingProperties.lookup( "fluidConvergenceTolerance" ) );
-  else
-    FatalErrorIn( "readCouplingProperties" ) << "fluidConvergenceTolerance is not defined" << abort( FatalError );
-
-  // Ensure that the absolute tolerance of the linear solver is less than the
-  // used convergence tolerance for the non-linear system.
-  scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
-  assert( absTolerance < convergenceTolerance );
-
-  absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
-  assert( absTolerance < convergenceTolerance );
 }
 
 void FluidSolver::readPIMPLEControls()

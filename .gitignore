@@ -35,3 +35,4 @@ src/thirdParty/boost*
 src/thirdParty/gtest*
 src/thirdParty/precice
 src/thirdParty/yaml-cpp*
+src/thirdParty/scons*

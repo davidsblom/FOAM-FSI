@@ -74,6 +74,10 @@ public:
 
   virtual void getSolution( Eigen::VectorXd & solution );
 
+  virtual int getNbCells();
+
+  virtual double getScalingFactor();
+
   virtual double getTimeStep();
 
   virtual void implicitSolve(
@@ -97,11 +101,11 @@ private:
 
   void continuityErrs();
 
+  void courantNo();
+
   void createFields();
 
   void initialize();
-
-  void readCouplingProperties();
 
   void readPIMPLEControls();
 

@@ -193,12 +193,20 @@ namespace rbf
 
       if ( exportTxt )
       {
-        std::string fileName = "rbf-coarsening-greedy-selection-" + std::to_string( fileExportIndex ) + ".txt";
-        std::ofstream file( fileName );
-        fileExportIndex++;
+        std::string fileNameTXT = "rbf-coarsening-greedy-selection-" + std::to_string( fileExportIndex ) + ".txt";
+        std::ofstream fileTXT( fileNameTXT );
 
-        if ( file.is_open() )
-          file << usedPositions;
+        if ( fileTXT.is_open() )
+          fileTXT << usedPositions;
+
+        std::string fileNameCSV = "rbf-coarsening-greedy-selection-" + std::to_string( fileExportIndex ) + ".csv";
+        std::ofstream fileCSV( fileNameCSV );
+        Eigen::IOFormat CSVFmt( Eigen::FullPrecision, Eigen::DontAlignCols, "," );
+
+        if ( fileCSV.is_open() )
+          fileCSV << usedPositions.format( CSVFmt );
+
+        fileExportIndex++;
       }
     }
 

@@ -1,4 +1,4 @@
-fluid-solver: coupled-pressure-velocity-solver
+fluid-solver: pimple-solver
 interpolation:
   radial-basis-function:
     function: thin-plate-spline

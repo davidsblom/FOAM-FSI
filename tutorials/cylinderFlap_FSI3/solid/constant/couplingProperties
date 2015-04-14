@@ -16,5 +16,3 @@ FoamFile
 movingSolidPatches (plate);
 
 movingFluidPatches (plate);
-
-fluidConvergenceTolerance 1.0e-5;

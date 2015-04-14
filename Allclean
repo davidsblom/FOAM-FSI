@@ -1,10 +1,10 @@
 #! /bin/bash
 
-wclean src/fvPatchFields
-wclean src/fvSchemes
-wclean src/fsi
-wclean src/RBFMeshMotionSolver
-wclean applications/utilities/mapMesh
+wclean libso src/fvPatchFields
+wclean libso src/fvSchemes
+wclean libso src/fsi
+wclean libso src/RBFMeshMotionSolver
+wclean libso applications/utilities/mapMesh
 wclean applications/solvers/unsteadyPUCoupledFoam
 wclean applications/solvers/consistentPimpleFoam
 wclean applications/solvers/fsi/fsiFoam

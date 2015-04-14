@@ -16,5 +16,3 @@ FoamFile
 movingSolidPatches (inner-wall);
 
 movingFluidPatches (wall);
-
-fluidConvergenceTolerance 1.0e-6;

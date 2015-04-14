@@ -32,30 +32,15 @@ solvers
     solver           PCG;
     preconditioner   DIC;
     tolerance        1e-09;
-    relTol           0;
+    relTol           1.0e-3;
   }
-  pFinal
-  {
-    solver           PCG;
-    preconditioner   DIC;
-    tolerance        1e-09;
-    relTol           0;
-  }
+
   U
   {
-    solver PBiCG;
+    solver BiCGStab;
     preconditioner DILU;
     tolerance 1e-10;
-    relTol 0;
-    minIter 0;
-  }
-  UFinal
-  {
-    solver PBiCG;
-    preconditioner DILU;
-    tolerance 1e-10;
-    relTol 0;
-    minIter 0;
+    relTol 1.0e-3;
   }
 }
 
@@ -64,19 +49,19 @@ blockSolver
     pRefCell 0;
     pRefValue 0;
     nOuterCorrectors 500;
-    convergenceTolerance 1e-9;
+    convergenceTolerance 1e-5;
 }
 
 
 PIMPLE
 {
   nOuterCorrectors 100;
-  nCorrectors 10;
+  nCorrectors 5;
   nNonOrthogonalCorrectors 0;
+  convergenceTolerance 1e-5;
 }
 
 relaxationFactors
 {
-  p 0.7;
-  U 0.7;
+  U 0.9;
 }

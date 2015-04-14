@@ -1,4 +1,4 @@
-fluid-solver: coupled-pressure-velocity-solver
+fluid-solver: pimple-solver
 solid-solver: segregated-solver
 parallel-coupling: false
 interpolation:

@@ -25,6 +25,7 @@ SDCFluidSolver::SDCFluidSolver(
     mesh,
     IOobject::MUST_READ,
     IOobject::NO_WRITE
+
   )
   ),
   pimple( mesh.solutionDict().subDict( "PIMPLE" ) ),
@@ -76,7 +77,7 @@ SDCFluidSolver::SDCFluidSolver(
     IOobject::READ_IF_PRESENT,
     IOobject::AUTO_WRITE
   ),
-  fvc::interpolate( U )
+  linearInterpolate( U )
   ),
   AU
   (
@@ -85,7 +86,7 @@ SDCFluidSolver::SDCFluidSolver(
     "AU",
     runTime->timeName(),
     mesh,
-    IOobject::READ_IF_PRESENT,
+    IOobject::NO_READ,
     IOobject::NO_WRITE
   ),
   mesh,
@@ -99,7 +100,7 @@ SDCFluidSolver::SDCFluidSolver(
     "HU",
     runTime->timeName(),
     mesh,
-    IOobject::READ_IF_PRESENT,
+    IOobject::NO_READ,
     IOobject::NO_WRITE
   ),
   mesh,
@@ -113,8 +114,8 @@ SDCFluidSolver::SDCFluidSolver(
     "rhsU",
     runTime->timeName(),
     mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
+    IOobject::NO_READ,
+    IOobject::NO_WRITE
   ),
   mesh,
   dimensionedVector( "rhsU", dimVelocity / dimTime, Foam::vector::zero ),
@@ -127,21 +128,29 @@ SDCFluidSolver::SDCFluidSolver(
     "rhsUf",
     runTime->timeName(),
     mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
+    IOobject::NO_READ,
+    IOobject::NO_WRITE
   ),
   fvc::interpolate( rhsU )
   ),
   sumLocalContErr( 0 ),
   globalContErr( 0 ),
   cumulativeContErr( 0 ),
-  convergenceTolerance( 1.0e-5 ),
+  convergenceTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "convergenceTolerance" ) ) ),
   k( 0 ),
   pStages(),
   phiStages(),
   UStages(),
   UfStages()
 {
+  // Ensure that the absolute tolerance of the linear solver is less than the
+  // used convergence tolerance for the non-linear system.
+  scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
+  assert( absTolerance < convergenceTolerance );
+
+  absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
+  assert( absTolerance < convergenceTolerance );
+
   initialize();
 }
 
@@ -166,9 +175,38 @@ void SDCFluidSolver::continuityErrs()
        << endl;
 }
 
+void SDCFluidSolver::courantNo()
+{
+  scalar CoNum = 0.0;
+  scalar meanCoNum = 0.0;
+  scalar velMag = 0.0;
+
+  if ( mesh.nInternalFaces() )
+  {
+    surfaceScalarField magPhi = mag( phi );
+
+    surfaceScalarField SfUfbyDelta =
+      mesh.surfaceInterpolation::deltaCoeffs() * magPhi;
+
+    const scalar deltaT = runTime->deltaT().value();
+
+    CoNum = max( SfUfbyDelta / mesh.magSf() ).value() * deltaT;
+
+    meanCoNum = ( sum( SfUfbyDelta ) / sum( mesh.magSf() ) ).value() * deltaT;
+
+    velMag = max( magPhi / mesh.magSf() ).value();
+  }
+
+  Info << "Courant Number mean: " << meanCoNum
+       << " max: " << CoNum
+       << " velocity magnitude: " << velMag
+       << endl;
+}
+
 void SDCFluidSolver::createFields()
 {
   U.oldTime();
+  Uf.oldTime();
   phi.oldTime();
 
   // Read pressure properties and create turbulence model
@@ -209,8 +247,6 @@ void SDCFluidSolver::initialize()
   readPIMPLEControls();
 
   createFields();
-
-  readCouplingProperties();
 }
 
 void SDCFluidSolver::initTimeStep()
@@ -231,22 +267,6 @@ bool SDCFluidSolver::isRunning()
        << endl << endl;
 
   return runTime->loop();
-}
-
-void SDCFluidSolver::readCouplingProperties()
-{
-  if ( couplingProperties.found( "fluidConvergenceTolerance" ) )
-    convergenceTolerance = readScalar( couplingProperties.lookup( "fluidConvergenceTolerance" ) );
-  else
-    FatalErrorIn( "readCouplingProperties" ) << "fluidConvergenceTolerance is not defined" << abort( FatalError );
-
-  // Ensure that the absolute tolerance of the linear solver is less than the
-  // used convergence tolerance for the non-linear system.
-  scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
-  assert( absTolerance < convergenceTolerance );
-
-  absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
-  assert( absTolerance < convergenceTolerance );
 }
 
 void SDCFluidSolver::readPIMPLEControls()
@@ -401,6 +421,8 @@ void SDCFluidSolver::implicitSolve(
   for ( int i = 0; i < Uf.size(); i++ )
     for ( int j = 0; j < 3; j++ )
       rhsUf[i][j] = rhs( i * 3 + j + U.size() * 3 );
+
+  courantNo();
 
   // PIMPLE algorithm
 
@@ -572,15 +594,30 @@ void SDCFluidSolver::implicitSolve(
     for ( int j = 0; j < 3; j++ )
       result( i * 3 + j + U.size() * 3 ) = Uf[i][j];
 
-  volVectorField F = fvc::laplacian( nu, U ) - fvc::div( phi, U ) - fvc::grad( p );
   dimensionedScalar rDeltaT = 1.0 / runTime->deltaT();
-  surfaceVectorField Ff = rDeltaT * ( Uf - Uf.oldTime() ) - rhsUf / dt;
+  volVectorField UF = rDeltaT * ( U - U.oldTime() ) - rhsU / dt;
+  surfaceVectorField UfF = rDeltaT * ( Uf - Uf.oldTime() ) - rhsUf / dt;
 
-  for ( int i = 0; i < F.size(); i++ )
+  for ( int i = 0; i < UF.size(); i++ )
     for ( int j = 0; j < 3; j++ )
-      f( i * 3 + j ) = F[i][j];
+      f( i * 3 + j ) = UF[i][j];
 
-  for ( int i = 0; i < Ff.size(); i++ )
+  for ( int i = 0; i < UfF.size(); i++ )
     for ( int j = 0; j < 3; j++ )
-      f( i * 3 + j + F.size() * 3 ) = Ff[i][j];
+      f( i * 3 + j + UF.size() * 3 ) = UfF[i][j];
+}
+
+int SDCFluidSolver::getNbCells()
+{
+  return mesh.globalData().nTotalCells();
+}
+
+double SDCFluidSolver::getScalingFactor()
+{
+  scalar rmsU = gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells();
+  rmsU += gSumSqr( mag( Uf.internalField() ) ) / mesh.globalData().nTotalFaces();
+  rmsU = std::sqrt( rmsU );
+  rmsU /= runTime->deltaT().value();
+
+  return rmsU;
 }
