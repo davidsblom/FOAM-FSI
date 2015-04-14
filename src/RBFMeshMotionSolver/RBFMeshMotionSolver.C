@@ -138,12 +138,25 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
   std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( rbfFunction ) );
 
   bool coarsening = readBool( subDict( "coarsening" ).lookup( "enabled" ) );
-  double tol = readScalar( subDict( "coarsening" ).lookup( "tol" ) );
-  bool livePointSelection = readBool( subDict( "coarsening" ).lookup( "livePointSelection" ) );
-  double tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
-  int coarseningMinPoints = readLabel( subDict( "coarsening" ).lookup( "minPoints" ) );
-  int coarseningMaxPoints = readLabel( subDict( "coarsening" ).lookup( "maxPoints" ) );
-  bool exportSelectedPoints = readBool( subDict( "coarsening" ).lookup( "exportSelectedPoints" ) );
+  double tol = 0.1;
+  double tolLivePointSelection = 0.1;
+  bool livePointSelection = false;
+  bool exportSelectedPoints = false;
+  int coarseningMinPoints = 1;
+  int coarseningMaxPoints = 2;
+
+  if ( coarsening )
+  {
+    tol = readScalar( subDict( "coarsening" ).lookup( "tol" ) );
+    coarseningMinPoints = readLabel( subDict( "coarsening" ).lookup( "minPoints" ) );
+    coarseningMaxPoints = readLabel( subDict( "coarsening" ).lookup( "maxPoints" ) );
+    livePointSelection = readBool( subDict( "coarsening" ).lookup( "livePointSelection" ) );
+    exportSelectedPoints = readBool( subDict( "coarsening" ).lookup( "exportSelectedPoints" ) );
+  }
+
+  if ( livePointSelection )
+    tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
+
   rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, exportSelectedPoints ) );
 }
 
