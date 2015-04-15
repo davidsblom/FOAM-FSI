@@ -428,8 +428,6 @@ void SDCFluidSolver::implicitSolve(
 
   for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
   {
-    p.storePrevIter();
-
     // for computing Hp
     fvVectorMatrix UEqn
     (
@@ -477,6 +475,8 @@ void SDCFluidSolver::implicitSolve(
 
     for ( label corr = 0; corr < nCorr; corr++ )
     {
+      p.storePrevIter();
+
       volVectorField HU = UEqn.H();       // Eqn 6
       volScalarField AU = UEqnt.A();       // Eqn 14
 

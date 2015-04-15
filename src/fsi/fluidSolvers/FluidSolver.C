@@ -417,7 +417,6 @@ void FluidSolver::solve()
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative( phi, U );
 
-    p.storePrevIter();
     U.storePrevIter();
 
     fvVectorMatrix UEqn
@@ -457,6 +456,8 @@ void FluidSolver::solve()
     // --- PISO loop
     for ( int corr = 0; corr < nCorr; corr++ )
     {
+      p.storePrevIter();
+
       HU = UEqn.H();
       AU = UEqn.A();
       U = HU / AU;
