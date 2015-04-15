@@ -473,6 +473,16 @@ void SDCFluidSolver::implicitSolve(
 
     // --- PISO loop
 
+    // Relative convergence measure for the PISO loop:
+    // Perform at maximum nCorr PISO corrections.
+    // If the relative residual with respect to the initial
+    // residual is decreased by factor tol: assume convergence.
+
+    double initResidual = 1;
+    double currResidual = 1;
+    double pressureResidual = 1;
+    double tol = 1.0e-2;
+
     for ( label corr = 0; corr < nCorr; corr++ )
     {
       p.storePrevIter();
@@ -528,7 +538,12 @@ void SDCFluidSolver::implicitSolve(
         );
 
         pEqn.setReference( pRefCell, pRefValue );
-        pEqn.solve();
+        pressureResidual = pEqn.solve().initialResidual();
+
+        if ( corr == 0 && nonOrth == 0 )
+          initResidual = pressureResidual;
+        else if ( nonOrth == 0 )
+          currResidual = pressureResidual;
 
         if ( nonOrth == nNonOrthCorr )
         {
@@ -546,6 +561,9 @@ void SDCFluidSolver::implicitSolve(
       U -= fvc::grad( p ) / AU;
 
       U.correctBoundaryConditions();
+
+      if ( currResidual < tol * initResidual )
+        break;
     }
 
     // Convergence measure of outer corrections
