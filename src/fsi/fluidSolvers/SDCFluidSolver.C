@@ -215,6 +215,21 @@ void SDCFluidSolver::createFields()
   setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
 }
 
+double SDCFluidSolver::evaluateMomentumResidual( double dt )
+{
+  volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) - fvc::laplacian( nu, U ) + fvc::grad( p ) - rhsU / dt;
+
+  scalarField magResU = mag( residual.internalField() );
+  scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
+  scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
+  rmsU /= runTime->deltaT().value();
+
+  // Scale the residual by the root mean square of the velocity field
+  momentumResidual /= rmsU;
+
+  return momentumResidual;
+}
+
 void SDCFluidSolver::getAcousticsDensityLocal( matrix & data )
 {
   assert( false );
@@ -424,6 +439,13 @@ void SDCFluidSolver::implicitSolve(
 
   courantNo();
 
+  double initMomentumResidual = evaluateMomentumResidual( dt );
+  convergenceTolerance = 1.0e-2 * initMomentumResidual;
+
+  Info << "root mean square residual norm = " << initMomentumResidual;
+  Info << ", tolerance = " << convergenceTolerance;
+  Info << ", iteration = 0, convergence = false" << endl;
+
   // PIMPLE algorithm
 
   for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
@@ -542,7 +564,8 @@ void SDCFluidSolver::implicitSolve(
 
         if ( corr == 0 && nonOrth == 0 )
           initResidual = pressureResidual;
-        else if ( nonOrth == 0 )
+        else
+        if ( nonOrth == 0 )
           currResidual = pressureResidual;
 
         if ( nonOrth == nNonOrthCorr )
@@ -566,20 +589,9 @@ void SDCFluidSolver::implicitSolve(
         break;
     }
 
-    // Convergence measure of outer corrections
+    scalar momentumResidual = evaluateMomentumResidual( dt );
 
-    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) - fvc::laplacian( nu, U ) + fvc::grad( p ) - rhsU / dt;
-
-    scalarField magResU = mag( residual.internalField() );
-    scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
-    scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
-    rmsU /= runTime->deltaT().value();
-
-    // Scale the residual by the root mean square of the velocity field
-    momentumResidual /= rmsU;
-
-    int minIter = 2;
-    bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
+    bool convergence = momentumResidual <= convergenceTolerance;
 
     Info << "root mean square residual norm = " << momentumResidual;
     Info << ", tolerance = " << convergenceTolerance;

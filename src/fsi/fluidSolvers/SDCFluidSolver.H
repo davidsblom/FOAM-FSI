@@ -105,6 +105,8 @@ private:
 
   void createFields();
 
+  double evaluateMomentumResidual( double dt );
+
   void initialize();
 
   void readPIMPLEControls();
