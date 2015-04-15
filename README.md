@@ -1,4 +1,4 @@
-aFOAM-FSI
+FOAM-FSI
 ========
 
 Features
