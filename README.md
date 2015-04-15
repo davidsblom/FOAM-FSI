@@ -54,5 +54,5 @@ Credits
 The FOAM-FSI project has been started by David Blom. Many other people have also contributed. Here is an alphabetical list:
 
 Philip Cardiff  
-Thijs Gillebaart 
+Thijs Gillebaart  
 Vahid Kazemi-Kamyab
