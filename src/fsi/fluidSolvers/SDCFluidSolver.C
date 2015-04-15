@@ -442,7 +442,7 @@ void SDCFluidSolver::implicitSolve(
   if ( runTime->timeIndex() > 1 )
   {
     double initMomentumResidual = evaluateMomentumResidual( dt );
-    convergenceTolerance = 1.0e-2 * initMomentumResidual;
+    convergenceTolerance = std::max( 1.0e-2 * initMomentumResidual, 1.0e-15 );
 
     Info << "root mean square residual norm = " << initMomentumResidual;
     Info << ", tolerance = " << convergenceTolerance;
@@ -588,7 +588,7 @@ void SDCFluidSolver::implicitSolve(
 
       U.correctBoundaryConditions();
 
-      if ( currResidual < tol * initResidual )
+      if ( currResidual < std::max( tol * initResidual, 1.0e-15 ) )
         break;
     }
 
