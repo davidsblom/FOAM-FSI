@@ -12,9 +12,9 @@ int main(
 {
   argList::validArgs.append( "randomPercentage" );
 
-  #   include "setRootCase.H"
-  #   include "createTime.H"
-  #   include "createMesh.H"
+  #include "setRootCase.H"
+  #include "createTime.H"
+  #include "createMesh.H"
 
   scalar randomPercentage( readScalar( IStringStream( args.additionalArgs()[0] ) () ) );
 
