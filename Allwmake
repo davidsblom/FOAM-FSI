@@ -11,6 +11,7 @@ wmake libso src/fvPatchFields
 wmake libso src/fvSchemes
 wmake libso src/fsi
 wmake libso src/RBFMeshMotionSolver
+wmake applications/utilities/addInitialRandomVelocity
 wmake applications/solvers/unsteadyPUCoupledFoam
 wmake applications/solvers/consistentPimpleFoam
 wmake applications/solvers/fsi/fsiFoam

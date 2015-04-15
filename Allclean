@@ -4,6 +4,7 @@ wclean libso src/fvPatchFields
 wclean libso src/fvSchemes
 wclean libso src/fsi
 wclean libso src/RBFMeshMotionSolver
+wclean applications/utilities/addInitialRandomVelocity
 wclean applications/solvers/unsteadyPUCoupledFoam
 wclean applications/solvers/consistentPimpleFoam
 wclean applications/solvers/fsi/fsiFoam
