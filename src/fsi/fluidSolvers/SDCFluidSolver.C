@@ -439,7 +439,7 @@ void SDCFluidSolver::implicitSolve(
 
   courantNo();
 
-  if ( runTime->timeIndex() > 1 )
+  if ( runTime->timeIndex() > 1 || k > 0 || corrector )
   {
     double initMomentumResidual = evaluateMomentumResidual( dt );
     convergenceTolerance = std::max( 1.0e-2 * initMomentumResidual, 1.0e-15 );
