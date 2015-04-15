@@ -23,14 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fv::bdf2DdtScheme
+    Foam::fv::backwardDdtScheme
 
 Description
     Second-order backward-differencing ddt using the current and
-    two previous time-step values. Now time consistent ddtPhiCorr for both
-    moving and non-moving meshes.
-    Requires Uf to be created in solver for moving meshes.
-    By Thijs Gillebaart, thijsgillebaart@gmail.com
+    two previous time-step values.
 
 SourceFiles
     bdf2DdtScheme.C

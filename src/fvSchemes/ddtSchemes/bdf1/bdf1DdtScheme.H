@@ -26,11 +26,8 @@ Class
     Foam::fv::bdf1DdtScheme
 
 Description
-    First-order backward-differencing ddt using the current and
-    two previous time-step values. Now time consistent ddtPhiCorr for both
-    moving and non-moving meshes.
-    Requires Uf to be created in solver for moving meshes.
-    By Thijs Gillebaart, thijsgillebaart@gmail.com
+    Basic first-order Euler implicit/explicit ddt using only the current and
+    previous time-step values.
 
 SourceFiles
     bdf1DdtScheme.C
@@ -41,6 +38,8 @@ SourceFiles
 #define bdf1DdtScheme_H
 
 #include "ddtScheme.H"
+#include "volFields.H"
+#include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

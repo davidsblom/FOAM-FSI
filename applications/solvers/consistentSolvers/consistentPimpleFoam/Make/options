@@ -13,4 +13,5 @@ EXE_LIBS = \
     -lincompressibleLESModels \
     -lfiniteVolume \
     -lmeshTools \
-    -llduSolvers
+    -llduSolvers \
+    -lmySchemes

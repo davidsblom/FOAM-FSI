@@ -23,15 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fv::bdf3DdtScheme
+    Foam::fv::backwardDdtScheme
 
 Description
-    Third-order backward-differencing ddt using the current and
-    two previous time-step values. Time consistent ddtPhiCorr for both
-    moving and non-moving meshes.
-    Requires Uf to be created in solver for moving meshes. Also V000 is needed
-    for moving meshes and needs to be available (created in solver).
-    By Thijs Gillebaart, thijsgillebaart@gmail.com
+    Second-order backward-differencing ddt using the current and
+    two previous time-step values.
 
 SourceFiles
     bdf3DdtScheme.C

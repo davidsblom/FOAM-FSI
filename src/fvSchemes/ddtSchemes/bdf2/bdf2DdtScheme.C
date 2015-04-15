@@ -28,6 +28,9 @@ License
 #include "surfaceInterpolate.H"
 #include "fvcDiv.H"
 #include "fvMatrices.H"
+#include "slipFvPatchFields.H"
+#include "symmetryFvPatchFields.H"
+#include "basicSymmetryFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -640,8 +643,9 @@ tmp<surfaceScalarField> bdf2DdtScheme<vector>::fvcDdtPhiCorr
         if
         (
             U.boundaryField()[patchI].fixesValue()
-         //|| isA<symmetryFvPatchVectorField>(U.boundaryField()[patchI])
-         //|| isA<slipFvPatchVectorField>(U.boundaryField()[patchI])
+            /*|| isA<symmetryFvPatchVectorField>(U.boundaryField()[patchI])
+            || isA<basicSymmetryFvPatchVectorField>(U.boundaryField()[patchI])
+            || isA<slipFvPatchVectorField>(U.boundaryField()[patchI])*/
         )
         {
             ddtPhiCoeff.boundaryField()[patchI] = 0.0;
@@ -716,7 +720,7 @@ tmp<surfaceScalarField> bdf2DdtScheme<vector>::fvcDdtPhiCorr
                     )/fvc::interpolate(1.0/rA)
                 )
             );
-
+            
             return ddtPhiCorr;
         }
         else
