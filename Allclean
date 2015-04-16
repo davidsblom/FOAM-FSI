@@ -1,6 +1,6 @@
 #! /bin/bash
 
-wclean libso src/fvPatchFields
+wclean libso src/boundaryConditions
 wclean libso src/fvSchemes
 wclean libso src/fsi
 wclean libso src/RBFMeshMotionSolver
