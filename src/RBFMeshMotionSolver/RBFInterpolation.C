@@ -37,11 +37,6 @@ namespace rbf
                 r = ( positions.row( i ) - positions.row( j ) ).norm();
                 H( j, i ) = rbfFunction->evaluate( r );
             }
-
-            for ( int j = 0; j < i; j++ )
-            {
-                H( j, i ) = H( i, j );
-            }
         }
     }
 
@@ -90,7 +85,6 @@ namespace rbf
         // Initialize sparse matrices
 
         matrix H( n_A + dimGrid + 1, n_A + dimGrid + 1 ), Phi( n_B, n_A + dimGrid + 1 );
-        H.setZero();
 
         // Evaluate radial basis functions for matrix H
 
@@ -104,8 +98,11 @@ namespace rbf
 
         // Build the matrix H
 
-        H.topRightCorner( Q_A.rows(), Q_A.cols() ) = Q_A;
         H.bottomLeftCorner( Q_A.cols(), Q_A.rows() ) = Q_A.transpose();
+
+        for ( int i = 0; i < Q_A.cols(); i++ )
+            for ( int j = 0; j < Q_A.cols(); j++ )
+                H( H.rows() - Q_A.cols() + i, H.rows() - Q_A.cols() + j ) = 0;
 
         // Evaluate Phi which contains the evaluation of the radial basis function
 
@@ -124,7 +121,7 @@ namespace rbf
 
         // Compute the LU decomposition of the matrix H
 
-        Eigen::PartialPivLU<matrix> lu( H );
+        Eigen::PartialPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
 
         // Compute interpolation matrix
 
@@ -176,7 +173,6 @@ namespace rbf
         // Initialize matrices
 
         matrix H( n_A, n_A );
-        H.setZero();
         Phi.conservativeResize( n_B, n_A );
 
         // RBF function evaluation
@@ -198,12 +194,12 @@ namespace rbf
 
         if ( function )
         {
-            lu.compute( H );
+            lu.compute( H.selfadjointView<Eigen::Lower>() );
             B = lu.solve( values );
         }
         else
         {
-            llt.compute( H );
+            llt.compute( H.selfadjointView<Eigen::Lower>() );
             B = llt.solve( values );
         }
 
