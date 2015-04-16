@@ -2,12 +2,12 @@
 
 set -e
 
-wmakeLnInclude src/fvPatchFields
+wmakeLnInclude src/boundaryConditions
 wmakeLnInclude src/fvSchemes
 wmakeLnInclude src/fsi
 wmakeLnInclude src/RBFMeshMotionSolver
 
-wmake libso src/fvPatchFields
+wmake libso src/boundaryConditions
 wmake libso src/fvSchemes
 wmake libso src/fsi
 wmake libso src/RBFMeshMotionSolver

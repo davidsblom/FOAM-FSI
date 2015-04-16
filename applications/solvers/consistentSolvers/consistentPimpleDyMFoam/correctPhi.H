@@ -1,23 +1,24 @@
+
 {
-    if (mesh.changing())
+    if ( mesh.changing() )
     {
-        forAll(U.boundaryField(), patchi)
+        forAll( U.boundaryField(), patchi )
         {
-            if (U.boundaryField()[patchi].fixesValue())
+            if ( U.boundaryField()[patchi].fixesValue() )
             {
                 U.boundaryField()[patchi].initEvaluate();
             }
         }
-	
-        forAll(U.boundaryField(), patchi)
+
+        forAll( U.boundaryField(), patchi )
         {
-            if (U.boundaryField()[patchi].fixesValue())
+            if ( U.boundaryField()[patchi].fixesValue() )
             {
                 U.correctBoundaryConditions();
                 U.boundaryField()[patchi].evaluate();
 
                 phi.boundaryField()[patchi] =
-                U.boundaryField()[patchi] & mesh.Sf().boundaryField()[patchi];
+                    U.boundaryField()[patchi] & mesh.Sf().boundaryField()[patchi];
             }
         }
     }
@@ -28,9 +29,9 @@
         zeroGradientFvPatchScalarField::typeName
     );
 
-    for (label i=0; i<p.boundaryField().size(); i++)
+    for ( label i = 0; i < p.boundaryField().size(); i++ )
     {
-        if(p.boundaryField()[i].fixesValue())
+        if ( p.boundaryField()[i].fixesValue() )
         {
             pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
         }
@@ -47,21 +48,21 @@
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedScalar("pcorr", p.dimensions(), 0.0),
+        dimensionedScalar( "pcorr", p.dimensions(), 0.0 ),
         pcorrTypes
     );
 
-    for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for ( int nonOrth = 0; nonOrth <= nNonOrthCorr; nonOrth++ )
     {
         fvScalarMatrix pcorrEqn
         (
-            fvm::laplacian(1.0/fvc::interpolate(AU), pcorr,"laplacian((1|A(U)),p)") == fvc::div(phi)
+            fvm::laplacian( 1.0 / fvc::interpolate( AU ), pcorr, "laplacian((1|A(U)),p)" ) == fvc::div( phi )
         );
 
-        pcorrEqn.setReference(pRefCell, pRefValue);
+        pcorrEqn.setReference( pRefCell, pRefValue );
         pcorrEqn.solve();
 
-        if (nonOrth == nNonOrthCorr)
+        if ( nonOrth == nNonOrthCorr )
         {
             phi -= pcorrEqn.flux();
         }

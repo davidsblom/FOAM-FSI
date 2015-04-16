@@ -1,8 +1,9 @@
+
 // check convergence
 
-if (maxResidual < convergenceCriterion)
+if ( maxResidual < convergenceCriterion )
 {
-    Info<< "reached convergence criterion: " << convergenceCriterion << endl;
+    Info << "reached convergence criterion: " << convergenceCriterion << endl;
     runTime.writeAndEnd();
-    Info<< "latestTime = " << runTime.timeName() << endl;
+    Info << "latestTime = " << runTime.timeName() << endl;
 }

@@ -11,41 +11,41 @@
 
 namespace fsi
 {
-  class AitkenPostProcessing : public PostProcessing
-  {
+    class AitkenPostProcessing : public PostProcessing
+    {
 public:
 
-    AitkenPostProcessing(
-      shared_ptr<MultiLevelFsiSolver> fsi,
-      double initialRelaxation,
-      int maxIter,
-      int maxUsedIterations,
-      int nbReuse,
-      int reuseInformationStartingFromTimeIndex
-      );
+        AitkenPostProcessing(
+            shared_ptr<MultiLevelFsiSolver> fsi,
+            double initialRelaxation,
+            int maxIter,
+            int maxUsedIterations,
+            int nbReuse,
+            int reuseInformationStartingFromTimeIndex
+            );
 
-    virtual ~AitkenPostProcessing();
+        virtual ~AitkenPostProcessing();
 
-    void performPostProcessing(
-      const vector & x0,
-      vector & xk
-      );
+        void performPostProcessing(
+            const vector & x0,
+            vector & xk
+            );
 
-    void performPostProcessing(
-      const vector & y,
-      const vector & x0,
-      vector & xk
-      );
+        void performPostProcessing(
+            const vector & y,
+            const vector & x0,
+            vector & xk
+            );
 
-    void performPostProcessing(
-      const vector & y,
-      const vector & x0,
-      vector & xk,
-      bool residualCriterium
-      );
+        void performPostProcessing(
+            const vector & y,
+            const vector & x0,
+            vector & xk,
+            bool residualCriterium
+            );
 
-    double aitkenFactor;
-  };
+        double aitkenFactor;
+    };
 }
 
 #endif

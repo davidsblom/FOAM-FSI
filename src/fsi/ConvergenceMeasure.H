@@ -12,45 +12,45 @@
 
 namespace fsi
 {
-  class ConvergenceMeasure
-  {
+    class ConvergenceMeasure
+    {
 public:
 
-    ConvergenceMeasure(
-      int dataId,
-      int minIter
-      )
-      :
-      dataId( dataId ),
-      isConvergence_( false )
-    {}
+        ConvergenceMeasure(
+            int dataId,
+            int minIter
+            )
+            :
+            dataId( dataId ),
+            isConvergence_( false )
+        {}
 
-    ConvergenceMeasure(
-      int dataId,
-      double convergenceLimit
-      )
-      :
-      dataId( dataId ),
-      isConvergence_( false )
-    {}
+        ConvergenceMeasure(
+            int dataId,
+            double convergenceLimit
+            )
+            :
+            dataId( dataId ),
+            isConvergence_( false )
+        {}
 
-    virtual ~ConvergenceMeasure(){}
+        virtual ~ConvergenceMeasure(){}
 
-    virtual void measure(
-      vector & oldValues,
-      vector & newValues
-      ) = 0;
+        virtual void measure(
+            vector & oldValues,
+            vector & newValues
+            ) = 0;
 
-    virtual void newMeasurementSeries() = 0;
+        virtual void newMeasurementSeries() = 0;
 
-    virtual bool isConvergence() = 0;
+        virtual bool isConvergence() = 0;
 
-    virtual void printState() = 0;
+        virtual void printState() = 0;
 
-    int dataId;
+        int dataId;
 
-    bool isConvergence_;
-  };
+        bool isConvergence_;
+    };
 }
 
 #endif

@@ -1,55 +1,56 @@
-    Info<< "Reading transportProperties\n" << endl;
 
-    IOdictionary transportProperties
+Info << "Reading transportProperties\n" << endl;
+
+IOdictionary transportProperties
+(
+    IOobject
     (
-        IOobject
-        (
-            "transportProperties",
-            runTime.constant(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    );
+        "transportProperties",
+        runTime.constant(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    )
+);
 
-    dimensionedScalar nu
+dimensionedScalar nu
+(
+    transportProperties.lookup( "nu" )
+);
+
+Info << "Reading field p\n" << endl;
+volScalarField p
+(
+    IOobject
     (
-        transportProperties.lookup("nu")
-    );
+        "p",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh
+);
 
-    Info<< "Reading field p\n" << endl;
-    volScalarField p
+
+Info << "Reading field U\n" << endl;
+volVectorField U
+(
+    IOobject
     (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
+        "U",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh
+);
+U.oldTime();
 
+#include "createPhi.H"
+phi.oldTime();
 
-    Info<< "Reading field U\n" << endl;
-    volVectorField U
-    (
-        IOobject
-        (
-            "U",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-    U.oldTime();
-
-#   include "createPhi.H"
-    phi.oldTime();
-
-    label pRefCell = 0;
-    scalar pRefValue = 0.0;
-    setRefCell(p, mesh.solutionDict().subDict("PISO"), pRefCell, pRefValue);
+label pRefCell = 0;
+scalar pRefValue = 0.0;
+setRefCell( p, mesh.solutionDict().subDict( "PISO" ), pRefCell, pRefValue );

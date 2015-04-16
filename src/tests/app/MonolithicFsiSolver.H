@@ -15,79 +15,79 @@ using namespace fsi;
 
 namespace tubeflow
 {
-  class MonolithicFsiSolver
-  {
+    class MonolithicFsiSolver
+    {
 public:
 
-    MonolithicFsiSolver(
-      double a0,
-      double u0,
-      double p0,
-      double dt,
-      double cmk,
-      int N,
-      double L,
-      double T,
-      double rho
-      );
+        MonolithicFsiSolver(
+            double a0,
+            double u0,
+            double p0,
+            double dt,
+            double cmk,
+            int N,
+            double L,
+            double T,
+            double rho
+            );
 
-    double evaluateInletVelocityBoundaryCondition();
+        double evaluateInletVelocityBoundaryCondition();
 
-    double evaluateOutputPressureBoundaryCondition(
-      double pout_n,
-      double uout_n,
-      double uout
-      );
+        double evaluateOutputPressureBoundaryCondition(
+            double pout_n,
+            double uout_n,
+            double uout
+            );
 
-    void evaluateResidual(
-      fsi::vector & x,
-      fsi::vector & un,
-      fsi::vector & pn,
-      fsi::vector & an,
-      fsi::vector & R
-      );
+        void evaluateResidual(
+            fsi::vector & x,
+            fsi::vector & un,
+            fsi::vector & pn,
+            fsi::vector & an,
+            fsi::vector & R
+            );
 
-    void finalizeTimeStep();
+        void finalizeTimeStep();
 
-    void initTimeStep();
+        void initTimeStep();
 
-    bool isRunning();
+        bool isRunning();
 
-    void run();
+        void run();
 
-    void solve();
+        void solve();
 
-    void solveTimeStep();
+        void solveTimeStep();
 
-    double a0;
-    double u0;
-    double p0;
-    double dt;
-    double cmk;
-    int N;
-    double L;
-    double T;
-    double rho;
+        double a0;
+        double u0;
+        double p0;
+        double dt;
+        double cmk;
+        int N;
+        double L;
+        double T;
+        double rho;
 
-    fsi::vector un;
-    fsi::vector pn;
-    fsi::vector an;
-    fsi::vector u;
-    fsi::vector p;
-    fsi::vector a;
+        fsi::vector un;
+        fsi::vector pn;
+        fsi::vector an;
+        fsi::vector u;
+        fsi::vector p;
+        fsi::vector a;
 
-    bool init;
+        bool init;
 
-    double dx;
-    double alpha;
-    double tau;
+        double dx;
+        double alpha;
+        double tau;
 
-    int timeIndex;
-    double t;
+        int timeIndex;
+        double t;
 
-    double p_outn;
-    double p_out;
-  };
+        double p_outn;
+        double p_out;
+    };
 }
 
 #endif

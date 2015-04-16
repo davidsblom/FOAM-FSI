@@ -1,4 +1,5 @@
-Info<< "Reading field p\n" << endl;
+
+Info << "Reading field p\n" << endl;
 volScalarField p
 (
     IOobject
@@ -12,7 +13,7 @@ volScalarField p
     mesh
 );
 
-Info<< "Reading field U\n" << endl;
+Info << "Reading field U\n" << endl;
 volVectorField U
 (
     IOobject
@@ -32,12 +33,12 @@ phi.oldTime();
 
 label pRefCell = 0;
 scalar pRefValue = 0.0;
-setRefCell(p, mesh.solutionDict().subDict("PIMPLE"), pRefCell, pRefValue);
+setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
 
 
-singlePhaseTransportModel laminarTransport(U, phi);
+singlePhaseTransportModel laminarTransport( U, phi );
 
 autoPtr<incompressible::turbulenceModel> turbulence
 (
-    incompressible::turbulenceModel::New(U, phi, laminarTransport)
+    incompressible::turbulenceModel::New( U, phi, laminarTransport )
 );

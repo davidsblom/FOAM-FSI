@@ -12,31 +12,31 @@
 
 namespace fsi
 {
-  class RelativeConvergenceMeasure : public ConvergenceMeasure
-  {
+    class RelativeConvergenceMeasure : public ConvergenceMeasure
+    {
 public:
 
-    RelativeConvergenceMeasure(
-      int dataId,
-      double convergenceLimit
-      );
+        RelativeConvergenceMeasure(
+            int dataId,
+            double convergenceLimit
+            );
 
-    virtual void measure(
-      vector & oldValues,
-      vector & newValues
-      );
+        virtual void measure(
+            vector & oldValues,
+            vector & newValues
+            );
 
-    virtual void newMeasurementSeries();
+        virtual void newMeasurementSeries();
 
-    virtual bool isConvergence();
+        virtual bool isConvergence();
 
-    virtual void printState();
+        virtual void printState();
 
-    double normDiff;
-    double norm;
-    double convergenceLimit;
-    double epsilon;
-  };
+        double normDiff;
+        double norm;
+        double convergenceLimit;
+        double epsilon;
+    };
 }
 
 #endif

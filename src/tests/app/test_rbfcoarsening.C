@@ -23,67 +23,67 @@ class RBFCoarseningParametrizedTest : public TestWithParam < std::tr1::tuple<boo
 {
 protected:
 
-  virtual void SetUp()
-  {
-    int rbfFunctionId = std::tr1::get<1>( GetParam() );
+    virtual void SetUp()
+    {
+        int rbfFunctionId = std::tr1::get<1>( GetParam() );
 
-    std::shared_ptr<RBFFunctionInterface> rbfFunction;
+        std::shared_ptr<RBFFunctionInterface> rbfFunction;
 
-    if ( rbfFunctionId == 0 )
-      rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC0Function( 5 ) );
+        if ( rbfFunctionId == 0 )
+            rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC0Function( 5 ) );
 
-    else
-    if ( rbfFunctionId == 1 )
-      rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC2Function( 5 ) );
+        else
+        if ( rbfFunctionId == 1 )
+            rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC2Function( 5 ) );
 
-    else
-    if ( rbfFunctionId == 2 )
-      rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC4Function( 5 ) );
+        else
+        if ( rbfFunctionId == 2 )
+            rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC4Function( 5 ) );
 
-    else
-    if ( rbfFunctionId == 3 )
-      rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC6Function( 5 ) );
+        else
+        if ( rbfFunctionId == 3 )
+            rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC6Function( 5 ) );
 
-    else
-    if ( rbfFunctionId == 4 )
-      rbfFunction = std::shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+        else
+        if ( rbfFunctionId == 4 )
+            rbfFunction = std::shared_ptr<RBFFunctionInterface>( new TPSFunction() );
 
-    else
-      assert( false );
+        else
+            assert( false );
 
-    std::shared_ptr<RBFInterpolation> rbfInterpolator( new RBFInterpolation( rbfFunction ) );
+        std::shared_ptr<RBFInterpolation> rbfInterpolator( new RBFInterpolation( rbfFunction ) );
 
-    bool enabled = std::tr1::get<0>( GetParam() );
-    double tol = 1.0e-6;
-    int coarseningMinPoints = std::tr1::get<2>( GetParam() );
-    int coarseningMaxPoints = std::tr1::get<3>( GetParam() );
+        bool enabled = std::tr1::get<0>( GetParam() );
+        double tol = 1.0e-6;
+        int coarseningMinPoints = std::tr1::get<2>( GetParam() );
+        int coarseningMaxPoints = std::tr1::get<3>( GetParam() );
 
-    rbf = std::shared_ptr<RBFCoarsening>( new RBFCoarsening( rbfInterpolator, enabled, false, false, tol, 0.1, coarseningMinPoints, coarseningMaxPoints, false ) );
-  }
+        rbf = std::shared_ptr<RBFCoarsening>( new RBFCoarsening( rbfInterpolator, enabled, false, false, tol, 0.1, coarseningMinPoints, coarseningMaxPoints, false ) );
+    }
 
-  virtual void TearDown()
-  {
-    rbf.reset();
-  }
+    virtual void TearDown()
+    {
+        rbf.reset();
+    }
 
-  std::shared_ptr<RBFCoarsening> rbf;
+    std::shared_ptr<RBFCoarsening> rbf;
 };
 
 INSTANTIATE_TEST_CASE_P( RBFTest, RBFCoarseningParametrizedTest, ::testing::Combine( Bool(), Values( 0, 1, 2, 3, 4 ), Values( 10, 25 ), Values( 25, 100 ) ) );
 
 TEST_P( RBFCoarseningParametrizedTest, rbf1d_regularity )
 {
-  // Check that the RBF function approximates a smooth function well
-  // away from the nodes
+    // Check that the RBF function approximates a smooth function well
+    // away from the nodes
 
-  matrix x( 30, 1 ), y( 30, 1 ), xnew( 100, 1 ), ynew;
-  x.col( 0 ).setLinSpaced( 30, 0, 10 );
-  y.col( 0 ) = x.array().sin();
-  xnew.col( 0 ).setLinSpaced( 100, 0, 10 );
+    matrix x( 30, 1 ), y( 30, 1 ), xnew( 100, 1 ), ynew;
+    x.col( 0 ).setLinSpaced( 30, 0, 10 );
+    y.col( 0 ) = x.array().sin();
+    xnew.col( 0 ).setLinSpaced( 100, 0, 10 );
 
-  rbf->compute( x, xnew );
-  rbf->interpolate( y, ynew );
+    rbf->compute( x, xnew );
+    rbf->interpolate( y, ynew );
 
-  for ( int i = 0; i < ynew.rows(); i++ )
-    ASSERT_NEAR( ynew( i, 0 ), std::sin( xnew( i, 0 ) ), 1.0e-1 );
+    for ( int i = 0; i < ynew.rows(); i++ )
+        ASSERT_NEAR( ynew( i, 0 ), std::sin( xnew( i, 0 ) ), 1.0e-1 );
 }

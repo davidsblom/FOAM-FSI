@@ -13,35 +13,35 @@
 
 namespace sdc
 {
-  class SDC
-  {
+    class SDC
+    {
 public:
 
-    SDC(
-      std::shared_ptr<SDCSolver> solver,
-      int nbNodes,
-      double tol
-      );
+        SDC(
+            std::shared_ptr<SDCSolver> solver,
+            int nbNodes,
+            double tol
+            );
 
-    ~SDC();
+        ~SDC();
 
-    void run();
+        void run();
 
-    void solveTimeStep( const double t0 );
+        void solveTimeStep( const double t0 );
 
-    std::shared_ptr<SDCSolver> solver;
+        std::shared_ptr<SDCSolver> solver;
 
-    int nbNodes;
+        int nbNodes;
 
-    Eigen::VectorXd nodes;
-    Eigen::MatrixXd smat;
-    Eigen::MatrixXd qmat;
-    Eigen::VectorXd dsdc;
-    double dt;
-    int N;
-    int k;
-    double tol;
-  };
+        Eigen::VectorXd nodes;
+        Eigen::MatrixXd smat;
+        Eigen::MatrixXd qmat;
+        Eigen::VectorXd dsdc;
+        double dt;
+        int N;
+        int k;
+        double tol;
+    };
 }
 
 #endif

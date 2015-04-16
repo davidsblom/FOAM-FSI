@@ -13,57 +13,57 @@
 #include "CompressibleFluidSolver.H"
 
 int main(
-  int argc,
-  char * argv[]
-  )
+    int argc,
+    char * argv[]
+    )
 {
-  std::shared_ptr<argList> args( new argList( argc, argv ) );
+    std::shared_ptr<argList> args( new argList( argc, argv ) );
 
-  if ( !args->checkRootCase() )
-  {
-    FatalError.exit();
-  }
+    if ( !args->checkRootCase() )
+    {
+        FatalError.exit();
+    }
 
-  std::shared_ptr<Time> runTime( new Time
-    (
-      Time::controlDictName,
-      args->rootPath(),
-      args->caseName()
-    ) );
+    std::shared_ptr<Time> runTime( new Time
+        (
+            Time::controlDictName,
+            args->rootPath(),
+            args->caseName()
+        ) );
 
-  string filename = static_cast<std::string>( args->rootPath() ) + "/" + static_cast<std::string>( args->globalCaseName() ) + "/constant/fsi.yaml";
+    string filename = static_cast<std::string>( args->rootPath() ) + "/" + static_cast<std::string>( args->globalCaseName() ) + "/constant/fsi.yaml";
 
-  YAML::Node config = YAML::LoadFile( filename );
+    YAML::Node config = YAML::LoadFile( filename );
 
-  assert( config["fluid-solver"] );
+    assert( config["fluid-solver"] );
 
-  std::string fluidSolver = config["fluid-solver"].as<std::string>();
+    std::string fluidSolver = config["fluid-solver"].as<std::string>();
 
-  assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" );
+    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" );
 
-  std::shared_ptr<foamFluidSolver> fluid;
+    std::shared_ptr<foamFluidSolver> fluid;
 
-  if ( fluidSolver == "coupled-pressure-velocity-solver" )
-    fluid = std::shared_ptr<foamFluidSolver> ( new CoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+    if ( fluidSolver == "coupled-pressure-velocity-solver" )
+        fluid = std::shared_ptr<foamFluidSolver> ( new CoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
-  if ( fluidSolver == "pimple-solver" )
-    fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+    if ( fluidSolver == "pimple-solver" )
+        fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
-  if ( fluidSolver == "compressible-solver" )
-    fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+    if ( fluidSolver == "compressible-solver" )
+        fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
-  assert( fluid );
+    assert( fluid );
 
-  PreciceFluidSolver solver( fluid );
+    PreciceFluidSolver solver( fluid );
 
-  solver.run();
+    solver.run();
 
-  Info << "End\n" << endl;
+    Info << "End\n" << endl;
 
-  label tmp = Pstream::myProcNo();
-  reduce( tmp, sumOp<label>() );
+    label tmp = Pstream::myProcNo();
+    reduce( tmp, sumOp<label>() );
 
-  return (0);
+    return (0);
 }
 
 // ************************************************************************* //

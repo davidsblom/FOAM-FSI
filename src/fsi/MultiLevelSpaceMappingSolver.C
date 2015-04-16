@@ -9,154 +9,154 @@
 using namespace fsi;
 
 MultiLevelSpaceMappingSolver::MultiLevelSpaceMappingSolver(
-  shared_ptr< std::deque<shared_ptr<SpaceMappingSolver> > > solvers,
-  shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
-  bool synchronization
-  )
-  :
-  solvers( solvers ),
-  models( models ),
-  fineModel( models->back() ),
-  init( false ),
-  synchronization( synchronization )
+    shared_ptr< std::deque<shared_ptr<SpaceMappingSolver> > > solvers,
+    shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
+    bool synchronization
+    )
+    :
+    solvers( solvers ),
+    models( models ),
+    fineModel( models->back() ),
+    init( false ),
+    synchronization( synchronization )
 {
-  assert( solvers->size() > 0 );
-  assert( models->size() == solvers->size() + 1 );
+    assert( solvers->size() > 0 );
+    assert( models->size() == solvers->size() + 1 );
 
-  int level = 0;
+    int level = 0;
 
-  for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
-  {
-    shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
+    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
+    {
+        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
 
-    assert( model->fsi->fluidSolver->level == model->fsi->solidSolver->level );
-    assert( model->fsi->fluidSolver->level == level );
+        assert( model->fsi->fluidSolver->level == model->fsi->solidSolver->level );
+        assert( model->fsi->fluidSolver->level == level );
 
-    level++;
-  }
+        level++;
+    }
 
-  level = 0;
+    level = 0;
 
-  for ( std::deque<shared_ptr<SpaceMappingSolver> >::iterator it = solvers->begin(); it != solvers->end(); ++it )
-  {
-    shared_ptr<SpaceMappingSolver> solver = *it;
+    for ( std::deque<shared_ptr<SpaceMappingSolver> >::iterator it = solvers->begin(); it != solvers->end(); ++it )
+    {
+        shared_ptr<SpaceMappingSolver> solver = *it;
 
-    assert( solver->fineModel->fsi->fluidSolver->level == level + 1 );
-    assert( solver->coarseModel->fsi->fluidSolver->level == level );
+        assert( solver->fineModel->fsi->fluidSolver->level == level + 1 );
+        assert( solver->coarseModel->fsi->fluidSolver->level == level );
 
-    level++;
-  }
+        level++;
+    }
 }
 
 void MultiLevelSpaceMappingSolver::initTimeStep()
 {
-  assert( !init );
+    assert( !init );
 
-  for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
-  {
-    shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
-    model->initTimeStep();
-  }
+    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
+    {
+        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
+        model->initTimeStep();
+    }
 
-  for ( std::deque<shared_ptr<SpaceMappingSolver> >::iterator it = solvers->begin(); it != solvers->end(); ++it )
-  {
-    shared_ptr<SpaceMappingSolver> solver = *it;
-    solver->init = true;
-  }
+    for ( std::deque<shared_ptr<SpaceMappingSolver> >::iterator it = solvers->begin(); it != solvers->end(); ++it )
+    {
+        shared_ptr<SpaceMappingSolver> solver = *it;
+        solver->init = true;
+    }
 
-  init = true;
+    init = true;
 }
 
 void MultiLevelSpaceMappingSolver::finalizeTimeStep()
 {
-  assert( init );
+    assert( init );
 
-  Info << endl << "Synchronize solvers" << endl;
+    Info << endl << "Synchronize solvers" << endl;
 
-  int level = 1;
+    int level = 1;
 
-  for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
-  {
-    shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
-
-    if ( level < static_cast<int>( models->size() ) )
+    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
     {
-      assert( model->fsi->x.rows() == fineModel->fsi->x.rows() );
+        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
 
-      if ( synchronization )
-      {
-        matrix input = Eigen::Map<const matrix> ( fineModel->fsi->x.head( model->fsi->solidSolver->couplingGridSize * model->fsi->solid->dim ).data(), model->fsi->solidSolver->couplingGridSize, model->fsi->solid->dim );
+        if ( level < static_cast<int>( models->size() ) )
+        {
+            assert( model->fsi->x.rows() == fineModel->fsi->x.rows() );
 
-        matrix output( fineModel->fsi->solid->data.rows(), fineModel->fsi->solid->data.cols() );
+            if ( synchronization )
+            {
+                matrix input = Eigen::Map<const matrix> ( fineModel->fsi->x.head( model->fsi->solidSolver->couplingGridSize * model->fsi->solid->dim ).data(), model->fsi->solidSolver->couplingGridSize, model->fsi->solid->dim );
 
-        if ( std::abs( model->fsi->x.norm() - fineModel->fsi->x.norm() ) > 1.0e-14 )
-          model->fsi->fluidSolver->solve( input, output );
+                matrix output( fineModel->fsi->solid->data.rows(), fineModel->fsi->solid->data.cols() );
 
-        if ( model->fsi->parallel )
-          input = Eigen::Map<const matrix> ( fineModel->fsi->x.tail( model->fsi->fluidSolver->couplingGridSize * model->fsi->fluid->dim ).data(), model->fsi->fluidSolver->couplingGridSize, model->fsi->fluid->dim );
+                if ( std::abs( model->fsi->x.norm() - fineModel->fsi->x.norm() ) > 1.0e-14 )
+                    model->fsi->fluidSolver->solve( input, output );
 
-        if ( !model->fsi->parallel )
-          input = fineModel->fsi->fluid->data;
+                if ( model->fsi->parallel )
+                    input = Eigen::Map<const matrix> ( fineModel->fsi->x.tail( model->fsi->fluidSolver->couplingGridSize * model->fsi->fluid->dim ).data(), model->fsi->fluidSolver->couplingGridSize, model->fsi->fluid->dim );
 
-        output.resize( fineModel->fsi->fluid->data.rows(), fineModel->fsi->fluid->data.cols() );
+                if ( !model->fsi->parallel )
+                    input = fineModel->fsi->fluid->data;
 
-        bool interpolated = model->fsi->solid->interpolateVolField( fineModel->fsi->solid );
+                output.resize( fineModel->fsi->fluid->data.rows(), fineModel->fsi->fluid->data.cols() );
 
-        if ( !interpolated )
-          if ( std::abs( model->fsi->x.norm() - fineModel->fsi->x.norm() ) > 1.0e-14 || !model->fsi->parallel )
-            model->fsi->solidSolver->solve( input, output );
+                bool interpolated = model->fsi->solid->interpolateVolField( fineModel->fsi->solid );
 
-        model->fsi->x = fineModel->fsi->x;
-      }
+                if ( !interpolated )
+                    if ( std::abs( model->fsi->x.norm() - fineModel->fsi->x.norm() ) > 1.0e-14 || !model->fsi->parallel )
+                        model->fsi->solidSolver->solve( input, output );
 
-      if ( !synchronization )
-      {
-        model->solve();
-      }
+                model->fsi->x = fineModel->fsi->x;
+            }
+
+            if ( !synchronization )
+            {
+                model->solve();
+            }
+        }
+
+        model->finalizeTimeStep();
+
+        level++;
     }
 
-    model->finalizeTimeStep();
+    for ( std::deque<shared_ptr<SpaceMappingSolver> >::iterator it = solvers->begin(); it != solvers->end(); ++it )
+    {
+        shared_ptr<SpaceMappingSolver> solver = *it;
 
-    level++;
-  }
+        solver->spaceMapping->finalizeTimeStep();
+    }
 
-  for ( std::deque<shared_ptr<SpaceMappingSolver> >::iterator it = solvers->begin(); it != solvers->end(); ++it )
-  {
-    shared_ptr<SpaceMappingSolver> solver = *it;
-
-    solver->spaceMapping->finalizeTimeStep();
-  }
-
-  init = false;
+    init = false;
 }
 
 bool MultiLevelSpaceMappingSolver::isRunning()
 {
-  return models->back()->fsi->fluid->isRunning();
+    return models->back()->fsi->fluid->isRunning();
 }
 
 void MultiLevelSpaceMappingSolver::run()
 {
-  assert( !init );
+    assert( !init );
 
-  time = std::clock();
+    time = std::clock();
 
-  while ( isRunning() )
-    solveTimeStep();
+    while ( isRunning() )
+        solveTimeStep();
 }
 
 void MultiLevelSpaceMappingSolver::solve()
 {
-  assert( init );
+    assert( init );
 
-  solvers->back()->solve();
+    solvers->back()->solve();
 }
 
 void MultiLevelSpaceMappingSolver::solveTimeStep()
 {
-  assert( !init );
+    assert( !init );
 
-  initTimeStep();
-  solve();
-  finalizeTimeStep();
+    initTimeStep();
+    solve();
+    finalizeTimeStep();
 }

@@ -11,18 +11,18 @@
 
 namespace rbf
 {
-  class WendlandC0Function : public RBFFunctionInterface
-  {
+    class WendlandC0Function : public RBFFunctionInterface
+    {
 public:
 
-    WendlandC0Function( double radius );
+        WendlandC0Function( double radius );
 
-    virtual ~WendlandC0Function();
+        virtual ~WendlandC0Function();
 
-    virtual double evaluate( double value );
+        virtual double evaluate( double value );
 
-    double radius;
-  };
+        double radius;
+    };
 }
 
 #endif

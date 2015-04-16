@@ -1,59 +1,60 @@
-    p.boundaryField().updateCoeffs();
 
-    volVectorField HU = UEqn().H();
-    volScalarField AU = UEqn().A();
-    U = HU/AU;
+p.boundaryField().updateCoeffs();
 
-    phi = (fvc::interpolate(HU)/fvc::interpolate(AU)) & mesh.Sf();
+volVectorField HU = UEqn().H();
+volScalarField AU = UEqn().A();
+U = HU / AU;
 
-    forAll(phi.boundaryField(), patchI)
+phi = ( fvc::interpolate( HU ) / fvc::interpolate( AU ) ) & mesh.Sf();
+
+forAll( phi.boundaryField(), patchI )
+{
+    if ( !phi.boundaryField()[patchI].coupled() )
     {
-        if (!phi.boundaryField()[patchI].coupled())
-        {
-            phi.boundaryField()[patchI] =
+        phi.boundaryField()[patchI] =
             (
-                U.boundaryField()[patchI]
-              & mesh.Sf().boundaryField()[patchI]
+            U.boundaryField()[patchI]
+            & mesh.Sf().boundaryField()[patchI]
             );
-        }
     }
+}
 
-    UEqn.clear();
+UEqn.clear();
 
-    adjustPhi(phi, U, p);
+adjustPhi( phi, U, p );
 
-    // Non-orthogonal pressure corrector loop
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+// Non-orthogonal pressure corrector loop
+for ( int nonOrth = 0; nonOrth <= nNonOrthCorr; nonOrth++ )
+{
+    fvScalarMatrix pEqn
+    (
+        fvm::laplacian( 1.0 / fvc::interpolate( AU ), p, "laplacian((1|A(U)),p)" ) == fvc::div( phi )
+    );
+
+    pEqn.setReference( pRefCell, pRefValue );
+
+    // Retain the residual from the first iteration
+    if ( nonOrth == 0 )
     {
-        fvScalarMatrix pEqn
-        (
-            fvm::laplacian(1.0/fvc::interpolate(AU), p,"laplacian((1|A(U)),p)") == fvc::div(phi)
-        );
-
-        pEqn.setReference(pRefCell, pRefValue);
-
-        // Retain the residual from the first iteration
-        if (nonOrth == 0)
-        {
-            eqnResidual = pEqn.solve().initialResidual();
-            maxResidual = max(eqnResidual, maxResidual);
-        }
-        else
-        {
-            pEqn.solve();
-        }
-
-        if (nonOrth == nNonOrthCorr)
-        {
-            phi -= pEqn.flux();
-        }
+        eqnResidual = pEqn.solve().initialResidual();
+        maxResidual = max( eqnResidual, maxResidual );
+    }
+    else
+    {
+        pEqn.solve();
     }
 
-#   include "continuityErrs.H"
+    if ( nonOrth == nNonOrthCorr )
+    {
+        phi -= pEqn.flux();
+    }
+}
 
-    // Explicitly relax pressure for momentum corrector
-    p.relax();
+#include "continuityErrs.H"
 
-    // Momentum corrector
-    U -= fvc::grad(p)/AU;
-    U.correctBoundaryConditions();
+// Explicitly relax pressure for momentum corrector
+p.relax();
+
+// Momentum corrector
+U -= fvc::grad( p ) / AU;
+U.correctBoundaryConditions();

@@ -8,17 +8,17 @@
 
 namespace rbf
 {
-  TPSFunction::TPSFunction()
-  {}
+    TPSFunction::TPSFunction()
+    {}
 
-  TPSFunction::~TPSFunction()
-  {}
+    TPSFunction::~TPSFunction()
+    {}
 
-  double TPSFunction::evaluate( double value )
-  {
-    if ( value > 0 )
-      return std::log10( value ) * value * value;
+    double TPSFunction::evaluate( double value )
+    {
+        if ( value > 0 )
+            return std::log10( value ) * value * value;
 
-    return 0;
-  }
+        return 0;
+    }
 }

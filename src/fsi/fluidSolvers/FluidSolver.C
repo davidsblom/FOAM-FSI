@@ -10,150 +10,150 @@
 #include "FluidSolver.H"
 
 FluidSolver::FluidSolver(
-  string name,
-  std::shared_ptr<argList> args,
-  std::shared_ptr<Time> runTime
-  )
-  :
-  foamFluidSolver( name, args, runTime ),
-  transportProperties
-  (
-  IOobject
-  (
-    "transportProperties",
-    runTime->constant(),
-    mesh,
-    IOobject::MUST_READ,
-    IOobject::NO_WRITE
-  )
-  ),
-  nu( transportProperties.lookup( "nu" ) ),
-  rho( transportProperties.lookup( "rho" ) ),
-  p
-  (
-  IOobject
-  (
-    "p",
-    runTime->timeName(),
-    mesh,
-    IOobject::MUST_READ,
-    IOobject::AUTO_WRITE
-  ),
-  mesh
-  ),
-  U
-  (
-  IOobject
-  (
-    "U",
-    runTime->timeName(),
-    mesh,
-    IOobject::MUST_READ,
-    IOobject::AUTO_WRITE
-  ),
-  mesh
-  ),
-  phi
-  (
-  IOobject
-  (
-    "phi",
-    runTime->timeName(),
-    mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
-  ),
-  linearInterpolate( U ) & mesh.Sf()
-  ),
-  UfHeader
-  (
-  "Uf",
-  runTime->timeName(),
-  mesh,
-  IOobject::READ_IF_PRESENT,
-  IOobject::AUTO_WRITE
-  ),
-  Uf
-  (
-  UfHeader,
-  mesh,
-  dimensionedVector( "0", U.dimensions(), Foam::vector::zero )
-  ),
-  AU
-  (
-  IOobject
-  (
-    "AU",
+    string name,
+    std::shared_ptr<argList> args,
+    std::shared_ptr<Time> runTime
+    )
+    :
+    foamFluidSolver( name, args, runTime ),
+    transportProperties
+    (
+    IOobject
+    (
+        "transportProperties",
+        runTime->constant(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    )
+    ),
+    nu( transportProperties.lookup( "nu" ) ),
+    rho( transportProperties.lookup( "rho" ) ),
+    p
+    (
+    IOobject
+    (
+        "p",
+        runTime->timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh
+    ),
+    U
+    (
+    IOobject
+    (
+        "U",
+        runTime->timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh
+    ),
+    phi
+    (
+    IOobject
+    (
+        "phi",
+        runTime->timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    linearInterpolate( U ) & mesh.Sf()
+    ),
+    UfHeader
+    (
+    "Uf",
     runTime->timeName(),
     mesh,
     IOobject::READ_IF_PRESENT,
-    IOobject::NO_WRITE
-  ),
-  mesh,
-  1.0 / runTime->deltaT(),
-  zeroGradientFvPatchScalarField::typeName
-  ),
-  HU
-  (
-  IOobject
-  (
-    "HU",
-    runTime->timeName(),
+    IOobject::AUTO_WRITE
+    ),
+    Uf
+    (
+    UfHeader,
     mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::NO_WRITE
-  ),
-  mesh,
-  U.dimensions() / runTime->deltaT().dimensions(),
-  zeroGradientFvPatchVectorField::typeName
-  ),
-  nOuterCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nOuterCorrectors" ) ) ),
-  nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
-  nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
-  convergenceTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "convergenceTolerance" ) ) ),
-  sumLocalContErr( 0 ),
-  globalContErr( 0 ),
-  cumulativeContErr( 0 ),
-  laminarTransport( U, phi ),
-  turbulence( autoPtr<incompressible::turbulenceModel>
-  (
-    incompressible::turbulenceModel::New( U, phi, laminarTransport )
-  ) )
+    dimensionedVector( "0", U.dimensions(), Foam::vector::zero )
+    ),
+    AU
+    (
+    IOobject
+    (
+        "AU",
+        runTime->timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    1.0 / runTime->deltaT(),
+    zeroGradientFvPatchScalarField::typeName
+    ),
+    HU
+    (
+    IOobject
+    (
+        "HU",
+        runTime->timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    U.dimensions() / runTime->deltaT().dimensions(),
+    zeroGradientFvPatchVectorField::typeName
+    ),
+    nOuterCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nOuterCorrectors" ) ) ),
+    nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
+    nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
+    convergenceTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "convergenceTolerance" ) ) ),
+    sumLocalContErr( 0 ),
+    globalContErr( 0 ),
+    cumulativeContErr( 0 ),
+    laminarTransport( U, phi ),
+    turbulence( autoPtr<incompressible::turbulenceModel>
+    (
+        incompressible::turbulenceModel::New( U, phi, laminarTransport )
+    ) )
 {
-  assert( convergenceTolerance < 1 );
-  assert( convergenceTolerance > 0 );
-  assert( nCorr > 0 );
-  assert( nOuterCorr >= 2 );
-  assert( nNonOrthCorr >= 0 );
+    assert( convergenceTolerance < 1 );
+    assert( convergenceTolerance > 0 );
+    assert( nCorr > 0 );
+    assert( nOuterCorr >= 2 );
+    assert( nNonOrthCorr >= 0 );
 
-  // Ensure that the absolute tolerance of the linear solver is less than the
-  // used convergence tolerance for the non-linear system.
-  scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
-  assert( absTolerance < convergenceTolerance );
+    // Ensure that the absolute tolerance of the linear solver is less than the
+    // used convergence tolerance for the non-linear system.
+    scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
+    assert( absTolerance < convergenceTolerance );
 
-  absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
-  assert( absTolerance < convergenceTolerance );
+    absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
+    assert( absTolerance < convergenceTolerance );
 
-  checkTimeDiscretisationScheme();
+    checkTimeDiscretisationScheme();
 
-  U.oldTime();
-  Uf.oldTime();
-  phi.oldTime();
-
-  if ( !UfHeader.headerOk() )
-  {
+    U.oldTime();
     Uf.oldTime();
+    phi.oldTime();
 
-    surfaceVectorField nf = mesh.Sf() / mesh.magSf();
-    surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
-    surfaceVectorField Unor = phi / mesh.magSf() * nf;
+    if ( !UfHeader.headerOk() )
+    {
+        Uf.oldTime();
 
-    Uf = Utang + Unor;
-  }
+        surfaceVectorField nf = mesh.Sf() / mesh.magSf();
+        surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
+        surfaceVectorField Unor = phi / mesh.magSf() * nf;
 
-  pRefCell = 0;
-  pRefValue = 0.0;
-  setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
+        Uf = Utang + Unor;
+    }
+
+    pRefCell = 0;
+    pRefValue = 0.0;
+    setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
 }
 
 FluidSolver::~FluidSolver()
@@ -161,299 +161,299 @@ FluidSolver::~FluidSolver()
 
 void FluidSolver::checkTimeDiscretisationScheme()
 {
-  const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>( "fvSchemes" );
-  const dictionary & ddtSchemes = fvSchemes.subDict( "ddtSchemes" );
-  word ddtScheme;
+    const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>( "fvSchemes" );
+    const dictionary & ddtSchemes = fvSchemes.subDict( "ddtSchemes" );
+    word ddtScheme;
 
-  if ( ddtSchemes.found( "ddt(U)" ) )
-    ddtScheme = word( ddtSchemes.lookup( "ddt(U)" ) );
-  else
-    ddtScheme = word( ddtSchemes.lookup( "default" ) );
+    if ( ddtSchemes.found( "ddt(U)" ) )
+        ddtScheme = word( ddtSchemes.lookup( "ddt(U)" ) );
+    else
+        ddtScheme = word( ddtSchemes.lookup( "default" ) );
 
-  if ( ddtScheme != word( "bdf1" ) && ddtScheme != word( "bdf2" ) && ddtScheme != word( "bdf3" ) )
-  {
-    FatalErrorIn( "checkTimeDiscretisationScheme: " )
-    << " ddt(U) scheme is currently set to " << ddtScheme
-    << ". This solver only works with ddt(U) scheme = bdf1, bdf2 or bdf3."
-    << abort( FatalError );
-  }
+    if ( ddtScheme != word( "bdf1" ) && ddtScheme != word( "bdf2" ) && ddtScheme != word( "bdf3" ) )
+    {
+        FatalErrorIn( "checkTimeDiscretisationScheme: " )
+        << " ddt(U) scheme is currently set to " << ddtScheme
+        << ". This solver only works with ddt(U) scheme = bdf1, bdf2 or bdf3."
+        << abort( FatalError );
+    }
 }
 
 void FluidSolver::continuityErrs()
 {
-  volScalarField contErr = fvc::div( phi );
+    volScalarField contErr = fvc::div( phi );
 
-  sumLocalContErr = runTime->deltaT().value() *
-    mag( contErr ) ().weightedAverage( mesh.V() ).value();
+    sumLocalContErr = runTime->deltaT().value() *
+        mag( contErr ) ().weightedAverage( mesh.V() ).value();
 
-  globalContErr = runTime->deltaT().value() *
-    contErr.weightedAverage( mesh.V() ).value();
+    globalContErr = runTime->deltaT().value() *
+        contErr.weightedAverage( mesh.V() ).value();
 
-  cumulativeContErr += globalContErr;
+    cumulativeContErr += globalContErr;
 
-  Info << "time step continuity errors : sum local = " << sumLocalContErr
-       << ", global = " << globalContErr
-       << ", cumulative = " << cumulativeContErr
-       << endl;
+    Info << "time step continuity errors : sum local = " << sumLocalContErr
+         << ", global = " << globalContErr
+         << ", cumulative = " << cumulativeContErr
+         << endl;
 }
 
 void FluidSolver::courantNo()
 {
-  CoNum = 0.0;
-  meanCoNum = 0.0;
-  velMag = 0.0;
+    CoNum = 0.0;
+    meanCoNum = 0.0;
+    velMag = 0.0;
 
-  if ( mesh.nInternalFaces() )
-  {
-    surfaceScalarField magPhi = mag( phi );
+    if ( mesh.nInternalFaces() )
+    {
+        surfaceScalarField magPhi = mag( phi );
 
-    surfaceScalarField SfUfbyDelta =
-      mesh.surfaceInterpolation::deltaCoeffs() * magPhi;
+        surfaceScalarField SfUfbyDelta =
+            mesh.surfaceInterpolation::deltaCoeffs() * magPhi;
 
-    CoNum = max( SfUfbyDelta / mesh.magSf() )
-      .value() * runTime->deltaT().value();
+        CoNum = max( SfUfbyDelta / mesh.magSf() )
+            .value() * runTime->deltaT().value();
 
-    meanCoNum = ( sum( SfUfbyDelta ) / sum( mesh.magSf() ) )
-      .value() * runTime->deltaT().value();
+        meanCoNum = ( sum( SfUfbyDelta ) / sum( mesh.magSf() ) )
+            .value() * runTime->deltaT().value();
 
-    velMag = max( magPhi / mesh.magSf() ).value();
-  }
+        velMag = max( magPhi / mesh.magSf() ).value();
+    }
 
-  Info << "Courant Number mean: " << meanCoNum
-       << " max: " << CoNum
-       << " velocity magnitude: " << velMag
-       << endl;
+    Info << "Courant Number mean: " << meanCoNum
+         << " max: " << CoNum
+         << " velocity magnitude: " << velMag
+         << endl;
 }
 
 void FluidSolver::getAcousticsDensityLocal( matrix & data )
 {
-  assert( false );
+    assert( false );
 }
 
 void FluidSolver::getAcousticsVelocityLocal( matrix & data )
 {
-  assert( false );
+    assert( false );
 }
 
 void FluidSolver::getAcousticsPressureLocal( matrix & data )
 {
-  assert( false );
+    assert( false );
 }
 
 void FluidSolver::getTractionLocal( matrix & traction )
 {
-  vectorField tractionField( getInterfaceSizeLocal(), Foam::vector::zero );
+    vectorField tractionField( getInterfaceSizeLocal(), Foam::vector::zero );
 
-  int offset = 0;
+    int offset = 0;
 
-  forAll( movingPatchIDs, patchI )
-  {
-    int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
-
-    vectorField tractionFieldPatchI = -rho.value() * nu.value()
-      * U.boundaryField()[movingPatchIDs[patchI]].snGrad()
-      + rho.value() * p.boundaryField()[movingPatchIDs[patchI]]
-      * mesh.boundary()[movingPatchIDs[patchI]].nf();
-
-    forAll( tractionFieldPatchI, i )
+    forAll( movingPatchIDs, patchI )
     {
-      tractionField[i + offset] = tractionFieldPatchI[i];
+        int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
+
+        vectorField tractionFieldPatchI = -rho.value() * nu.value()
+            * U.boundaryField()[movingPatchIDs[patchI]].snGrad()
+            + rho.value() * p.boundaryField()[movingPatchIDs[patchI]]
+            * mesh.boundary()[movingPatchIDs[patchI]].nf();
+
+        forAll( tractionFieldPatchI, i )
+        {
+            tractionField[i + offset] = tractionFieldPatchI[i];
+        }
+
+        offset += size;
     }
 
-    offset += size;
-  }
+    assert( tractionField.size() == nGlobalCenters[Pstream::myProcNo()] );
 
-  assert( tractionField.size() == nGlobalCenters[Pstream::myProcNo()] );
+    traction.resize( tractionField.size(), mesh.nGeometricD() );
 
-  traction.resize( tractionField.size(), mesh.nGeometricD() );
-
-  for ( int i = 0; i < traction.rows(); i++ )
-    for ( int j = 0; j < traction.cols(); j++ )
-      traction( i, j ) = tractionField[i][j];
+    for ( int i = 0; i < traction.rows(); i++ )
+        for ( int j = 0; j < traction.cols(); j++ )
+            traction( i, j ) = tractionField[i][j];
 }
 
 void FluidSolver::getWritePositionsLocalAcoustics( matrix & writePositions )
 {
-  assert( false );
+    assert( false );
 }
 
 void FluidSolver::initTimeStep()
 {
-  assert( !init );
+    assert( !init );
 
-  timeIndex++;
-  t = timeIndex * runTime->deltaT().value();
+    timeIndex++;
+    t = timeIndex * runTime->deltaT().value();
 
-  Info << "\nTime = " << runTime->deltaT().value() << endl;
+    Info << "\nTime = " << runTime->deltaT().value() << endl;
 
-  courantNo();
+    courantNo();
 
-  init = true;
+    init = true;
 }
 
 bool FluidSolver::isRunning()
 {
-  runTime->write();
+    runTime->write();
 
-  Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
-       << "  ClockTime = " << runTime->elapsedClockTime() << " s"
-       << endl << endl;
+    Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
+         << "  ClockTime = " << runTime->elapsedClockTime() << " s"
+         << endl << endl;
 
-  return runTime->loop();
+    return runTime->loop();
 }
 
 void FluidSolver::resetSolution()
 {
-  U == U.oldTime();
-  p == p.oldTime();
-  phi == phi.oldTime();
+    U == U.oldTime();
+    p == p.oldTime();
+    phi == phi.oldTime();
 }
 
 void FluidSolver::solve()
 {
-  Info << "Solve fluid domain" << endl;
+    Info << "Solve fluid domain" << endl;
 
-  // --- PIMPLE loop
-  for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
-  {
-    // Make the fluxes relative to the mesh motion
-    fvc::makeRelative( phi, U );
-
-    U.storePrevIter();
-
-    fvVectorMatrix UEqn
-    (
-      fvm::ddt( U )
-      + fvm::div( phi, U )
-      + turbulence->divDevReff( U )
-    );
-
+    // --- PIMPLE loop
+    for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
     {
-      // To ensure S0 and B0 are thrown out of memory
-      // Source and boundaryCoeffs need to be saved when relexation is applied
-      // to still obtain time consistent behavior.
-      // Only source is affected by relaxation, boundaryCoeffs is not relaxation
-      // dependent.
-      // BoundaryCoeffs needs to be saved to generate the correct UEqn after
-      // solving. Explicit terms (depending on U(n)) need to remain depending
-      // on U(n) and not on new solution)
-      vectorField S0 = UEqn.source();
-      FieldField<Field, Foam::vector> B0 = UEqn.boundaryCoeffs();
+        // Make the fluxes relative to the mesh motion
+        fvc::makeRelative( phi, U );
 
-      UEqn.relax();
+        U.storePrevIter();
 
-      Foam::solve( UEqn == -fvc::grad( p ) );
-
-      // Reset equation to ensure relaxation parameter is not causing problems for time order
-      UEqn =
+        fvVectorMatrix UEqn
         (
-        fvm::ddt( U )
-        + fvm::div( phi, U )
-        + turbulence->divDevReff( U )
-        );
-      UEqn.source() = S0;
-      UEqn.boundaryCoeffs() = B0;
-    }
-
-    // --- PISO loop
-    for ( int corr = 0; corr < nCorr; corr++ )
-    {
-      p.storePrevIter();
-
-      HU = UEqn.H();
-      AU = UEqn.A();
-      U = HU / AU;
-
-      {
-        phi = ( fvc::interpolate( HU ) / fvc::interpolate( AU ) ) & mesh.Sf();
-
-        forAll( phi.boundaryField(), patchI )
-        {
-          if ( !phi.boundaryField()[patchI].coupled() )
-          {
-            phi.boundaryField()[patchI] =
-              (
-              U.boundaryField()[patchI]
-              & mesh.Sf().boundaryField()[patchI]
-              );
-          }
-        }
-
-        phi += fvc::ddtPhiCorr( 1.0 / AU, U, phi );
-      }
-
-      for ( int nonOrth = 0; nonOrth <= nNonOrthCorr; nonOrth++ )
-      {
-        fvScalarMatrix pEqn
-        (
-          fvm::laplacian( 1.0 / fvc::interpolate( AU ), p, "laplacian((1|A(U)),p)" ) == fvc::div( phi )
+            fvm::ddt( U )
+            + fvm::div( phi, U )
+            + turbulence->divDevReff( U )
         );
 
-        pEqn.setReference( pRefCell, pRefValue );
-
-        pEqn.solve();
-
-        if ( nonOrth == nNonOrthCorr )
         {
-          phi -= pEqn.flux();
+            // To ensure S0 and B0 are thrown out of memory
+            // Source and boundaryCoeffs need to be saved when relexation is applied
+            // to still obtain time consistent behavior.
+            // Only source is affected by relaxation, boundaryCoeffs is not relaxation
+            // dependent.
+            // BoundaryCoeffs needs to be saved to generate the correct UEqn after
+            // solving. Explicit terms (depending on U(n)) need to remain depending
+            // on U(n) and not on new solution)
+            vectorField S0 = UEqn.source();
+            FieldField<Field, Foam::vector> B0 = UEqn.boundaryCoeffs();
+
+            UEqn.relax();
+
+            Foam::solve( UEqn == -fvc::grad( p ) );
+
+            // Reset equation to ensure relaxation parameter is not causing problems for time order
+            UEqn =
+                (
+                fvm::ddt( U )
+                + fvm::div( phi, U )
+                + turbulence->divDevReff( U )
+                );
+            UEqn.source() = S0;
+            UEqn.boundaryCoeffs() = B0;
         }
-      }
 
-      p.relax();
+        // --- PISO loop
+        for ( int corr = 0; corr < nCorr; corr++ )
+        {
+            p.storePrevIter();
 
-      // Make the fluxes relative to the mesh motion
-      fvc::makeRelative( phi, U );
+            HU = UEqn.H();
+            AU = UEqn.A();
+            U = HU / AU;
 
-      U -= (1.0 / AU) * fvc::grad( p );
-      U.correctBoundaryConditions();
+            {
+                phi = ( fvc::interpolate( HU ) / fvc::interpolate( AU ) ) & mesh.Sf();
+
+                forAll( phi.boundaryField(), patchI )
+                {
+                    if ( !phi.boundaryField()[patchI].coupled() )
+                    {
+                        phi.boundaryField()[patchI] =
+                            (
+                            U.boundaryField()[patchI]
+                            & mesh.Sf().boundaryField()[patchI]
+                            );
+                    }
+                }
+
+                phi += fvc::ddtPhiCorr( 1.0 / AU, U, phi );
+            }
+
+            for ( int nonOrth = 0; nonOrth <= nNonOrthCorr; nonOrth++ )
+            {
+                fvScalarMatrix pEqn
+                (
+                    fvm::laplacian( 1.0 / fvc::interpolate( AU ), p, "laplacian((1|A(U)),p)" ) == fvc::div( phi )
+                );
+
+                pEqn.setReference( pRefCell, pRefValue );
+
+                pEqn.solve();
+
+                if ( nonOrth == nNonOrthCorr )
+                {
+                    phi -= pEqn.flux();
+                }
+            }
+
+            p.relax();
+
+            // Make the fluxes relative to the mesh motion
+            fvc::makeRelative( phi, U );
+
+            U -= (1.0 / AU) * fvc::grad( p );
+            U.correctBoundaryConditions();
+        }
+
+        turbulence->correct();
+
+        // Update the face velocities
+        fvc::makeAbsolute( phi, U );
+        {
+            Uf.oldTime();
+
+            surfaceVectorField nf = mesh.Sf() / mesh.magSf();
+            surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
+            surfaceVectorField Unor = phi / mesh.magSf() * nf;
+
+            Uf = Utang + Unor;
+        }
+        fvc::makeRelative( phi, U );
+
+        volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
+
+        scalarField magResU = mag( residual.internalField() );
+        scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
+        scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
+        rmsU /= runTime->deltaT().value();
+
+        // Scale the residual by the root mean square of the velocity field
+        momentumResidual /= rmsU;
+
+        int minIter = 2;
+        bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
+
+        Info << "root mean square residual norm = " << momentumResidual;
+        Info << ", tolerance = " << convergenceTolerance;
+        Info << ", iteration = " << oCorr + 1;
+        Info << ", convergence = ";
+
+        if ( convergence )
+            Info << "true";
+        else
+            Info << "false";
+
+        Info << endl;
+
+        // Make the fluxes absolute to the mesh motion
+        fvc::makeAbsolute( phi, U );
+
+        if ( convergence )
+            break;
     }
 
-    turbulence->correct();
-
-    // Update the face velocities
-    fvc::makeAbsolute( phi, U );
-    {
-      Uf.oldTime();
-
-      surfaceVectorField nf = mesh.Sf() / mesh.magSf();
-      surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
-      surfaceVectorField Unor = phi / mesh.magSf() * nf;
-
-      Uf = Utang + Unor;
-    }
-    fvc::makeRelative( phi, U );
-
-    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
-
-    scalarField magResU = mag( residual.internalField() );
-    scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
-    scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
-    rmsU /= runTime->deltaT().value();
-
-    // Scale the residual by the root mean square of the velocity field
-    momentumResidual /= rmsU;
-
-    int minIter = 2;
-    bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
-
-    Info << "root mean square residual norm = " << momentumResidual;
-    Info << ", tolerance = " << convergenceTolerance;
-    Info << ", iteration = " << oCorr + 1;
-    Info << ", convergence = ";
-
-    if ( convergence )
-      Info << "true";
-    else
-      Info << "false";
-
-    Info << endl;
-
-    // Make the fluxes absolute to the mesh motion
-    fvc::makeAbsolute( phi, U );
-
-    if ( convergence )
-      break;
-  }
-
-  continuityErrs();
+    continuityErrs();
 }
