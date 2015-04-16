@@ -22,7 +22,7 @@ FoamFile
 
 ddtSchemes
 {
-    default backwardRC;
+    default bdf2;
 }
 
 gradSchemes
