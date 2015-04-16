@@ -18,13 +18,6 @@
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
 
-#include "faceTetPolyPatch.H"
-#include "fixedValuePointPatchFields.H"
-#include "fixedValueTetPolyPatchFields.H"
-#include "tetFemMatrices.H"
-#include "tetPointFields.H"
-#include "tetPolyPatchInterpolation.H"
-
 using namespace fsi;
 using std::shared_ptr;
 
@@ -62,33 +55,12 @@ private:
 
   void checkTimeDiscretisationScheme();
 
-  void checkTotalVolume();
-
   void continuityErrs();
 
   void courantNo();
 
-  void createFields();
-
-  void createSf();
-
-  void initContinuityErrs();
-
-  void initialize();
-
-  void initTotalVolume();
-
-  void readControls();
-
-  void readPIMPLEControls();
-
-  void readTimeControls();
-
-  void updateSf();
-
   // Dictionaries
   IOdictionary transportProperties;
-  dictionary pimple;
 
   // Dimensioned scalars
   dimensionedScalar nu;
@@ -98,6 +70,8 @@ private:
   volScalarField p;
   volVectorField U;
   surfaceScalarField phi;
+  IOobject UfHeader;
+  surfaceVectorField Uf;
   volScalarField AU;
   volVectorField HU;
 
@@ -105,6 +79,7 @@ private:
   int nOuterCorr;
   int nCorr;
   int nNonOrthCorr;
+  scalar convergenceTolerance;
 
   // Continuity errors
   scalar sumLocalContErr;
@@ -115,23 +90,6 @@ private:
   scalar pRefValue;
   singlePhaseTransportModel laminarTransport;
   autoPtr<incompressible::turbulenceModel> turbulence;
-
-  IOobject SfHeader;
-  surfaceVectorField Sf;
-
-  // Controls
-  scalar convergenceTolerance;
-
-  // Time discretization scheme
-  word ddtScheme;
-
-  // Time controls
-  Switch adjustTimeStep;
-  scalar maxCo;
-  scalar maxDeltaT;
-
-  // Total volume
-  scalar totalVolume;
 
   // Courant no
   scalar CoNum;

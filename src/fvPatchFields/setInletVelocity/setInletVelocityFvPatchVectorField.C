@@ -73,7 +73,7 @@ namespace Foam
       return;
     }
 
-    scalar Umax = 0.2; // 0.3;
+    scalar Umax = 0;
 
     scalar t = this->db().time().value();
 
@@ -81,7 +81,7 @@ namespace Foam
 
     if ( t < T )
     {
-      Umax = Umax * ( 1.0 - cos( M_PI * t / T ) ) / 2.0;
+      Umax = maxValue_ * ( 1.0 - cos( M_PI * t / T ) ) / 2.0;
     }
 
     const vectorField & Cf = patch().Cf();
