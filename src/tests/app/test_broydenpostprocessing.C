@@ -217,25 +217,25 @@ TEST_P( BroydenPostProcessingParametrizedTest, reuse )
         ASSERT_EQ( solver->fsi->nbIter, 1072 );
 
     if ( !parallel && nbReuse == 1 )
-        ASSERT_EQ( solver->fsi->nbIter, 690 );
+        ASSERT_EQ( solver->fsi->nbIter, 703 );
 
     if ( !parallel && nbReuse == 4 )
-        ASSERT_EQ( solver->fsi->nbIter, 573 );
+        ASSERT_EQ( solver->fsi->nbIter, 574 );
 
     if ( !parallel && nbReuse == 8 )
-        ASSERT_EQ( solver->fsi->nbIter, 514 );
+        ASSERT_EQ( solver->fsi->nbIter, 522 );
 
     if ( parallel && nbReuse == 0 )
         ASSERT_EQ( solver->fsi->nbIter, 1841 );
 
     if ( parallel && nbReuse == 1 )
-        ASSERT_EQ( solver->fsi->nbIter, 1233 );
+        ASSERT_EQ( solver->fsi->nbIter, 1267 );
 
     if ( parallel && nbReuse == 4 )
-        ASSERT_EQ( solver->fsi->nbIter, 954 );
+        ASSERT_EQ( solver->fsi->nbIter, 944 );
 
     if ( parallel && nbReuse == 8 )
-        ASSERT_EQ( solver->fsi->nbIter, 829 );
+        ASSERT_EQ( solver->fsi->nbIter, 816 );
 }
 
 TEST_P( BroydenPostProcessingParametrizedTest, numberOfColumnsVIQN )

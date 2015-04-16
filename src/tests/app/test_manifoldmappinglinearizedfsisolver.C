@@ -25,7 +25,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class ManifoldMappingLinearizedFsiSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int> >
+class ManifoldMappingLinearizedFsiSolverParametrizedTest : public TestWithParam< std::tr1::tuple<int, int> >
 {
 protected:
 
@@ -62,11 +62,11 @@ protected:
         int minIter = 1;
         int extrapolation = 2;
         bool updateJacobian = false;
+        bool parallel = false;
 
         // Parametrized settings
-        bool parallel = std::tr1::get<0>( GetParam() );
-        int nbReuse = std::tr1::get<1>( GetParam() );
-        int couplingGridSize = std::tr1::get<2>( GetParam() );
+        int nbReuse = std::tr1::get<0>( GetParam() );
+        int couplingGridSize = std::tr1::get<1>( GetParam() );
 
         ASSERT_NEAR( tau, 0.01, 1.0e-13 );
         ASSERT_NEAR( kappa, 10, 1.0e-13 );
@@ -98,9 +98,6 @@ protected:
         shared_ptr<RBFInterpolation> rbfInterpolator;
         shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
         shared_ptr<RBFCoarsening> rbfInterpToMesh;
-
-
-
 
         rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
         rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
@@ -213,7 +210,7 @@ protected:
     SpaceMappingSolver * solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, ManifoldMappingLinearizedFsiSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 1, 4 ), Values( 10, 20 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, ManifoldMappingLinearizedFsiSolverParametrizedTest, ::testing::Combine( Values( 0, 1, 4 ), Values( 10, 20 ) ) );
 
 TEST_P( ManifoldMappingLinearizedFsiSolverParametrizedTest, object )
 {
