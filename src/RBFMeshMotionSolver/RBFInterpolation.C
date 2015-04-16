@@ -6,6 +6,7 @@
 
 #include "RBFInterpolation.H"
 #include "TPSFunction.H"
+#include <iostream>
 
 namespace rbf
 {
@@ -77,12 +78,7 @@ namespace rbf
         dimGrid = positions.cols();
 
         // Radial basis function interpolation
-
-        // Initialize variables
-
-        matrix Q_A( n_A, dimGrid + 1 ), Q_B( n_B, dimGrid + 1 );
-
-        // Initialize sparse matrices
+        // Initialize matrices H and Phi
 
         matrix H( n_A + dimGrid + 1, n_A + dimGrid + 1 ), Phi( n_B, n_A + dimGrid + 1 );
 
@@ -90,34 +86,27 @@ namespace rbf
 
         evaluateH( positions, H );
 
-        // Evaluate Q_A
+        // Include polynomial contributions
+
         for ( int i = 0; i < n_A; i++ )
-            Q_A( i, 0 ) = 1;
+            H( n_A, i ) = 1;
 
-        Q_A.block( 0, 1, n_A, dimGrid ) = positions.block( 0, 0, n_A, dimGrid );
+        H.bottomLeftCorner( dimGrid, n_A ) = positions.block( 0, 0, n_A, dimGrid ).transpose();
 
-        // Build the matrix H
-
-        H.bottomLeftCorner( Q_A.cols(), Q_A.rows() ) = Q_A.transpose();
-
-        for ( int i = 0; i < Q_A.cols(); i++ )
-            for ( int j = 0; j < Q_A.cols(); j++ )
-                H( H.rows() - Q_A.cols() + i, H.rows() - Q_A.cols() + j ) = 0;
+        for ( int i = 0; i < dimGrid + 1; i++ )
+            for ( int j = 0; j < dimGrid + 1; j++ )
+                H( H.rows() - dimGrid - 1 + i, H.rows() - dimGrid - 1 + j ) = 0;
 
         // Evaluate Phi which contains the evaluation of the radial basis function
 
         evaluatePhi( positions, positionsInterpolation, Phi );
 
-        // Evaluate Q_B
+        // Include polynomial contributions in matrix Phi
 
-        for ( int i = 0; i < n_B; i++ )
-            Q_B( i, 0 ) = 1;
+        for ( int i = 0; i < Phi.rows(); i++ )
+            Phi( i, n_A ) = 1;
 
-        Q_B.block( 0, 1, n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
-
-        // Determine the matrix Phi
-
-        Phi.topRightCorner( Q_B.rows(), Q_B.cols() ) = Q_B;
+        Phi.topRightCorner( n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
 
         // Compute the LU decomposition of the matrix H
 
