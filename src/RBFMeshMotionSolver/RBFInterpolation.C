@@ -128,7 +128,7 @@ namespace rbf
 
         // Compute interpolation matrix
 
-        Hhat = Phi * lu.inverse();
+        Hhat.noalias() = Phi * lu.inverse();
 
         Hhat.conservativeResize( n_B, n_A );
 
@@ -142,7 +142,7 @@ namespace rbf
     {
         assert( computed );
 
-        valuesInterpolation = Hhat * values;
+        valuesInterpolation.noalias() = Hhat * values;
 
         assert( valuesInterpolation.rows() == n_B );
         assert( values.cols() == valuesInterpolation.cols() );
@@ -213,7 +213,7 @@ namespace rbf
 
         buildPhi( positions, positionsInterpolation );
 
-        valuesInterpolation = Phi * B;
+        valuesInterpolation.noalias() = Phi * B;
 
         computed = true;
     }
@@ -260,7 +260,7 @@ namespace rbf
         else
             B = llt.solve( values );
 
-        valuesInterpolation = Phi * B;
+        valuesInterpolation.noalias() = Phi * B;
 
         assert( valuesInterpolation.rows() == n_B );
         assert( values.cols() == valuesInterpolation.cols() );
