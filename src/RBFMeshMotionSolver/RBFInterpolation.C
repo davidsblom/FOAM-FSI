@@ -6,7 +6,6 @@
 
 #include "RBFInterpolation.H"
 #include "TPSFunction.H"
-#include <iostream>
 
 namespace rbf
 {
