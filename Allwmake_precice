@@ -2,17 +2,22 @@
 
 set -e
 
-wmakeLnInclude src/fvPatchFields
+export FOAM_USER_SRC=`pwd`/src
+
+wmakeLnInclude src/boundaryConditions
 wmakeLnInclude src/fvSchemes
 wmakeLnInclude src/fsi
 wmakeLnInclude src/RBFMeshMotionSolver
+wmakeLnInclude src/SRFModelAbs
 
-wmake libso src/fvPatchFields
+wmake libso src/boundaryConditions
 wmake libso src/fvSchemes
 wmake libso src/fsi
 wmake libso src/RBFMeshMotionSolver
+wmake libso src/SRFModelAbs
+wmake applications/utilities/addInitialRandomVelocity
+wmake all applications/solvers/consistentSolvers
 wmake applications/solvers/unsteadyPUCoupledFoam
-wmake applications/solvers/consistentPimpleFoam
 wmake applications/solvers/fsi/fsiFoam
 wmake applications/solvers/fsi/solidFoam
 wmake applications/solvers/fsi/fluidFoam
