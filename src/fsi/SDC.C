@@ -145,7 +145,6 @@ namespace sdc
             reduce( squaredNorm, sumOp<scalarList>() );
             double error = std::sqrt( sum( squaredNorm ) / solver->getNbCells() );
             error /= solver->getScalingFactor();
-            error *= residual.rows();
             convergence = error < tol && j >= k - 1;
 
             Info << "SDC residual = " << error;
