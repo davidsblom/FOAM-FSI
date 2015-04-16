@@ -355,6 +355,16 @@ void FluidSolver::solve()
             UEqn.boundaryCoeffs() = B0;
         }
 
+        // Relative convergence measure for the PISO loop:
+        // Perform at maximum nCorr PISO corrections.
+        // If the relative residual with respect to the initial
+        // residual is decreased by factor tol: assume convergence.
+
+        double initResidual = 1;
+        double currResidual = 1;
+        double pressureResidual = 1;
+        double tol = 1.0e-2;
+
         // --- PISO loop
         for ( int corr = 0; corr < nCorr; corr++ )
         {
@@ -391,7 +401,13 @@ void FluidSolver::solve()
 
                 pEqn.setReference( pRefCell, pRefValue );
 
-                pEqn.solve();
+                pressureResidual = pEqn.solve().initialResidual();
+
+                if ( corr == 0 && nonOrth == 0 )
+                    initResidual = pressureResidual;
+                else
+                if ( nonOrth == 0 )
+                    currResidual = pressureResidual;
 
                 if ( nonOrth == nNonOrthCorr )
                 {
@@ -406,6 +422,9 @@ void FluidSolver::solve()
 
             U -= (1.0 / AU) * fvc::grad( p );
             U.correctBoundaryConditions();
+
+            if ( currResidual < std::max( tol * initResidual, 1.0e-15 ) )
+                break;
         }
 
         turbulence->correct();
