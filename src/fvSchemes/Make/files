@@ -1,4 +1,8 @@
 ddtSchemes = ddtSchemes
+$(ddtSchemes)/bdf1/bdf1DdtSchemes.C
+$(ddtSchemes)/bdf2/bdf2DdtSchemes.C
+$(ddtSchemes)/bdf3/bdf3DdtSchemes.C
+$(ddtSchemes)/backwardPhiCc/backwardPhiCcDdtSchemes.C
 $(ddtSchemes)/backwardRC/backwardRCDdtSchemes.C
 $(ddtSchemes)/EulerRC/EulerRCDdtSchemes.C
 

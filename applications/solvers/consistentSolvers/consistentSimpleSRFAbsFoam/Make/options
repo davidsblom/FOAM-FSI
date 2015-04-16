@@ -1,0 +1,14 @@
+EXE_INC = \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/turbulenceModels \
+    -I$(LIB_SRC)/transportModels \
+    -I$(WM_PROJECT_USER_DIR)/src/SRFModelAbs/lnInclude
+
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -lincompressibleRASModels \
+    -lincompressibleTransportModels \
+    -lfiniteVolume \
+    -lmeshTools \
+    -llduSolvers \
+    -lSRFModelAbs
