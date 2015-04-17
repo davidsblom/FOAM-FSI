@@ -10,7 +10,7 @@ Features
 * Efficient implementation of mesh motion solver based on radial basis function interpolation.
 * Run fluid-structure-acoustics simulations with the coupling tool preCICE.
 * Block-coupled transient incompressible flow solver.
-* Arbitrary high order time discretization for incompressible flow solver based on the PISO algorithm.
+* Arbitrary high order time discretization for incompressible flow solver based on the PIMPLE algorithm.
 
 Installation
 -----------
