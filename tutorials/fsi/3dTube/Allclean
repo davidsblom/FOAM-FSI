@@ -13,6 +13,7 @@ cleanCase
 cd -
 
 rm -rf fluid/*.foam solid/*.foam fluid/*.txt fluid/*.csv
+rm -rf fluid/gmon.out
 rm -rf fluid/0/solid
 rm -rf fluid/system/solid
 rm -rf fluid/constant/solid
