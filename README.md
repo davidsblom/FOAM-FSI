@@ -31,7 +31,7 @@ git clone https://github.com/davidsblom/FOAM-FSI.git
 cd FOAM-FSI/src/thirdParty
 ./Allmake
 cd ../../
-./Allwmake_firstInstall
+./Allwmake.firstInstall
 ```
 
 The first time the library is compiled, use the `Allwmake_firstInstall` script which installs the necessary settings in `foam-extend-3.1/etc/prefs.sh`. Thereafter, you can use the `Allwmake` script.
