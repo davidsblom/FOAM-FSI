@@ -110,8 +110,6 @@ void foamSolidSolver::getDisplacementLocal( matrix & displacement )
             for ( int j = 0; j < displacement.cols(); j++ )
                 displacement( i + offset, j ) = U.boundaryField()[movingPatchIDs[patchI]][i][j] - Uinitial.boundaryField()[movingPatchIDs[patchI]][i][j];
 
-        ;
-
         offset += size;
     }
 }
