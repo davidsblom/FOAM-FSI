@@ -4,6 +4,8 @@ wclean libso src/boundaryConditions
 wclean libso src/fvSchemes
 wclean libso src/fsi
 wclean libso src/RBFMeshMotionSolver
+wclean libso src/SRFModelAbs
+wclean libso src/extraSolidBodyMotion
 wclean applications/utilities/addInitialRandomVelocity
 wclean all applications/solvers/consistentSolvers
 wclean applications/solvers/unsteadyPUCoupledFoam

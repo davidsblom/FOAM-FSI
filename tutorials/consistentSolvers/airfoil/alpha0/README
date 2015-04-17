@@ -1,0 +1,7 @@
+========================================
+README - airfoil on low angle of attack
+========================================
+
+1. potentialFoam
+2. consistentSimpleFoam (simpleFoam): will convergence, so there is no direct need for an unsteady solver.
+3. consistentPimpleFoam: starts from the steadystate solution from 2 (consistentSimpleFoam). Almost nothing will change, due to the steadyness of the flow.

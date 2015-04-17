@@ -9,6 +9,7 @@ EXE_INC = \
     -I$(FOAM_USER_SRC)/include
 
 EXE_LIBS = \
+	-L$(FOAM_USER_LIBBIN) \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
@@ -18,4 +19,5 @@ EXE_LIBS = \
     -lincompressibleRASModels \
     -lincompressibleLESModels \
     -lfiniteVolume \
-    -llduSolvers
+    -llduSolvers \
+	-lfvSchemes
