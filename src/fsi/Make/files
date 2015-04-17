@@ -24,6 +24,7 @@ fluidSolvers/FluidSolver.C
 fluidSolvers/foamFluidSolver.C
 fluidSolvers/CompressibleFluidSolver.C
 fluidSolvers/SDCFluidSolver.C
+fluidSolvers/SDCLaplacianSolver.C
 
 solidSolvers/foamSolidSolver.C
 solidSolvers/SolidSolver.C

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+#load clean function
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+runApplication potentialFoam -writep

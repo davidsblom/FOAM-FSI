@@ -2,7 +2,7 @@
 
 set -e
 
-export FOAM_USER_SRC=`pwd`/src
+# export FOAM_USER_SRC=`pwd`/src
 
 wmakeLnInclude src/boundaryConditions
 wmakeLnInclude src/fvSchemes
@@ -16,6 +16,7 @@ wmake libso src/fsi
 wmake libso src/RBFMeshMotionSolver
 wmake applications/utilities/mapMesh
 wmake libso src/SRFModelAbs
+wmake libso src/extraSolidBodyMotion
 wmake applications/utilities/addInitialRandomVelocity
 wmake all applications/solvers/consistentSolvers
 wmake applications/solvers/unsteadyPUCoupledFoam

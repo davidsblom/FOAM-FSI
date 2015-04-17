@@ -77,7 +77,7 @@ namespace Foam
 
         scalar t = this->db().time().value();
 
-        scalar T = 1; // 0.2;
+        scalar T = 2; // 0.2;
 
         if ( t < T )
         {

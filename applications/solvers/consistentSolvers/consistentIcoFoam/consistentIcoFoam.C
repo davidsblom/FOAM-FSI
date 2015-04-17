@@ -46,12 +46,10 @@ int main(
             }
             while ( innerResidual > innerTolerance && corr < nCorr );
 
-            for ( int corr = 0; corr < nCorr; corr++ )
-
             // Check convergence
             #include "checkPISOResidualConvergence.H"
 
-                oCorr++;
+            oCorr++;
         }
         while ( !outerLoopConverged );
 

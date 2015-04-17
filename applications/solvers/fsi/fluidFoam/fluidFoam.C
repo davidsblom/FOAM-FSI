@@ -12,6 +12,7 @@
 #include "CompressibleFluidSolver.H"
 #include "SDCFluidSolver.H"
 #include "SDC.H"
+#include "SDCLaplacianSolver.H"
 
 int main(
     int argc,
@@ -40,7 +41,7 @@ int main(
 
     std::string fluidSolver = config["fluid-solver"].as<std::string>();
 
-    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "sdc-pimple-solver" );
+    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" );
 
     std::shared_ptr<foamFluidSolver> fluid;
     std::shared_ptr<sdc::SDC> sdc;
@@ -54,7 +55,7 @@ int main(
     if ( fluidSolver == "compressible-solver" )
         fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
-    if ( fluidSolver == "sdc-pimple-solver" )
+    if ( fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" )
     {
         YAML::Node sdcConfig( config["sdc"] );
         assert( sdcConfig["convergence-tolerance"] );
@@ -63,7 +64,14 @@ int main(
         int n = sdcConfig["number-of-points"].as<int>();
         double tol = sdcConfig["convergence-tolerance"].as<double>();
 
-        std::shared_ptr<sdc::SDCSolver> solver( new SDCFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+        std::shared_ptr<sdc::SDCSolver> solver;
+
+        if ( fluidSolver == "sdc-pimple-solver" )
+            solver = std::shared_ptr<sdc::SDCSolver>( new SDCFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+
+        if ( fluidSolver == "sdc-laplacian-solver" )
+            solver = std::shared_ptr<sdc::SDCSolver>( new SDCLaplacianSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+
         sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( solver, n, tol ) );
     }
 
