@@ -171,7 +171,6 @@ void foamSolidSolver::getWritePositions( matrix & writePositions )
         forAll( faceCentres, i )
         {
             writePositionsField[i + offset + globalOffset] = faceCentres[i] + Uinitial.boundaryField()[movingPatchIDs[patchI]][i];
-            ;
         }
 
         offset += faceCentres.size();
