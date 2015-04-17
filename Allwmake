@@ -15,6 +15,7 @@ wmake libso src/fvSchemes
 wmake libso src/fsi
 wmake libso src/RBFMeshMotionSolver
 wmake libso src/SRFModelAbs
+wmake libso src/extraSolidBodyMotion
 wmake applications/utilities/addInitialRandomVelocity
 wmake all applications/solvers/consistentSolvers
 wmake applications/solvers/unsteadyPUCoupledFoam

@@ -1,0 +1,9 @@
+========================================
+README - airfoil on high angle of attack
+========================================
+
+1. potentialFoam
+2. consistentSimpleFoam (simpleFoam): will not convergence, because flow is inherently unsteady and cannot be solved with steadystate solver. Also, final solution is not a good starting solution for unsteady solver.
+3. consistentPimpleFoam_initRun: unsteady solver on large time step with low accuracy to purely generate a good starting condition for the actual (accurate) unsteady run. Maps from potentialFoam for a slightly better initial solution
+4. consistentPimpleFoam_pimpleStart: starts from solution from 3. Most flow is developed and thus the solver will be doing a better job from the beginning.
+5. consistentPimpleFoam: starts from the (steadystate) potentialFoam, which works fines in terms of convergence. However. needs time to develop shedding (which is not needed on high accuracy for final result) and thus will take longer to reach periodic solution compared to 4 (with 3 as initializer).
