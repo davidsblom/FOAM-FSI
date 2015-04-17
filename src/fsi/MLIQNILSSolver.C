@@ -9,165 +9,165 @@
 using namespace fsi;
 
 MLIQNILSSolver::MLIQNILSSolver(
-  shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
-  bool synchronization
-  )
-  :
-  models( models ),
-  fineModel( models->back() ),
-  init( false ),
-  synchronization( synchronization )
+    shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
+    bool synchronization
+    )
+    :
+    models( models ),
+    fineModel( models->back() ),
+    init( false ),
+    synchronization( synchronization )
 {
-  assert( models );
-  assert( models->size() >= 2 );
+    assert( models );
+    assert( models->size() >= 2 );
 
-  int level = 0;
+    int level = 0;
 
-  for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
-  {
-    shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
+    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
+    {
+        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
 
-    assert( model->fsi->fluidSolver->level == model->fsi->solidSolver->level );
-    assert( model->fsi->fluidSolver->level == level );
+        assert( model->fsi->fluidSolver->level == model->fsi->solidSolver->level );
+        assert( model->fsi->fluidSolver->level == level );
 
-    level++;
-  }
+        level++;
+    }
 }
 
 void MLIQNILSSolver::finalizeTimeStep()
 {
-  assert( init );
+    assert( init );
 
-  Info << endl << "Synchronize solvers" << endl;
+    Info << endl << "Synchronize solvers" << endl;
 
-  int level = 1;
+    int level = 1;
 
-  for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
-  {
-    shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
-
-    if ( synchronization )
+    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
     {
-      if ( level < static_cast<int>( models->size() ) )
-      {
-        assert( model->fsi->x.rows() == fineModel->fsi->x.rows() );
+        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
 
-        matrix input = Eigen::Map<const matrix> ( fineModel->fsi->x.head( model->fsi->solidSolver->couplingGridSize * model->fsi->solid->dim ).data(), model->fsi->solidSolver->couplingGridSize, model->fsi->solid->dim );
+        if ( synchronization )
+        {
+            if ( level < static_cast<int>( models->size() ) )
+            {
+                assert( model->fsi->x.rows() == fineModel->fsi->x.rows() );
 
-        matrix output( fineModel->fsi->solid->data.rows(), fineModel->fsi->solid->data.cols() );
-        model->fsi->fluidSolver->solve( input, output );
+                matrix input = Eigen::Map<const matrix> ( fineModel->fsi->x.head( model->fsi->solidSolver->couplingGridSize * model->fsi->solid->dim ).data(), model->fsi->solidSolver->couplingGridSize, model->fsi->solid->dim );
 
-        if ( model->fsi->parallel )
-          input = Eigen::Map<const matrix> ( fineModel->fsi->x.tail( model->fsi->fluidSolver->couplingGridSize * model->fsi->fluid->dim ).data(), model->fsi->fluidSolver->couplingGridSize, model->fsi->fluid->dim );
+                matrix output( fineModel->fsi->solid->data.rows(), fineModel->fsi->solid->data.cols() );
+                model->fsi->fluidSolver->solve( input, output );
 
-        if ( !model->fsi->parallel )
-          input = fineModel->fsi->fluid->data;
+                if ( model->fsi->parallel )
+                    input = Eigen::Map<const matrix> ( fineModel->fsi->x.tail( model->fsi->fluidSolver->couplingGridSize * model->fsi->fluid->dim ).data(), model->fsi->fluidSolver->couplingGridSize, model->fsi->fluid->dim );
 
-        output.resize( fineModel->fsi->fluid->data.rows(), fineModel->fsi->fluid->data.cols() );
+                if ( !model->fsi->parallel )
+                    input = fineModel->fsi->fluid->data;
 
-        bool interpolated = model->fsi->solid->interpolateVolField( fineModel->fsi->solid );
+                output.resize( fineModel->fsi->fluid->data.rows(), fineModel->fsi->fluid->data.cols() );
 
-        if ( !interpolated )
-          model->fsi->solidSolver->solve( input, output );
+                bool interpolated = model->fsi->solid->interpolateVolField( fineModel->fsi->solid );
 
-        model->fsi->x = fineModel->fsi->x;
-      }
+                if ( !interpolated )
+                    model->fsi->solidSolver->solve( input, output );
+
+                model->fsi->x = fineModel->fsi->x;
+            }
+        }
+
+        if ( !synchronization )
+        {
+            model->solve();
+        }
+
+        model->finalizeTimeStep();
+
+        level++;
     }
 
-    if ( !synchronization )
-    {
-      model->solve();
-    }
-
-    model->finalizeTimeStep();
-
-    level++;
-  }
-
-  init = false;
+    init = false;
 }
 
 void MLIQNILSSolver::initTimeStep()
 {
-  assert( !init );
+    assert( !init );
 
-  for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
-  {
-    shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
+    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
+    {
+        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
 
-    model->initTimeStep();
-  }
+        model->initTimeStep();
+    }
 
-  init = true;
+    init = true;
 }
 
 bool MLIQNILSSolver::isRunning()
 {
-  return fineModel->fsi->isRunning();
+    return fineModel->fsi->isRunning();
 }
 
 void MLIQNILSSolver::run()
 {
-  assert( !init );
+    assert( !init );
 
-  time = std::clock();
+    time = std::clock();
 
-  while ( isRunning() )
-    solveTimeStep();
+    while ( isRunning() )
+        solveTimeStep();
 }
 
 void MLIQNILSSolver::solve()
 {
-  assert( init );
+    assert( init );
 
-  // Initialize variables
-
-  fsi::vector x0 = fineModel->fsi->x;
-  fsi::vector xk = x0;
-  int level = 1;
-
-  for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
-  {
     // Initialize variables
 
-    shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
+    fsi::vector x0 = fineModel->fsi->x;
+    fsi::vector xk = x0;
+    int level = 1;
 
-    x0 = xk;
-
-    // Optimize the model
-
-    model->optimize( x0, xk );
-
-    model->fsi->x = xk;
-
-    // Copy Jacobian information from the current level to the next level
-
-    if ( level < static_cast<int>( models->size() ) )
+    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
     {
-      // Copy residuals of current time step
+        // Initialize variables
 
-      for ( deque<deque<fsi::vector> >::iterator it = model->postProcessing->residualsList.begin(); it != model->postProcessing->residualsList.end(); ++it )
-      {
-        deque<fsi::vector> residuals = *it;
-        models->at( level )->postProcessing->residualsList.push_back( residuals );
-      }
+        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
 
-      for ( deque<deque<fsi::vector> >::iterator it = model->postProcessing->solsList.begin(); it != model->postProcessing->solsList.end(); ++it )
-      {
-        deque<fsi::vector> sols = *it;
-        models->at( level )->postProcessing->solsList.push_back( sols );
-      }
+        x0 = xk;
+
+        // Optimize the model
+
+        model->optimize( x0, xk );
+
+        model->fsi->x = xk;
+
+        // Copy Jacobian information from the current level to the next level
+
+        if ( level < static_cast<int>( models->size() ) )
+        {
+            // Copy residuals of current time step
+
+            for ( deque<deque<fsi::vector> >::iterator it = model->postProcessing->residualsList.begin(); it != model->postProcessing->residualsList.end(); ++it )
+            {
+                deque<fsi::vector> residuals = *it;
+                models->at( level )->postProcessing->residualsList.push_back( residuals );
+            }
+
+            for ( deque<deque<fsi::vector> >::iterator it = model->postProcessing->solsList.begin(); it != model->postProcessing->solsList.end(); ++it )
+            {
+                deque<fsi::vector> sols = *it;
+                models->at( level )->postProcessing->solsList.push_back( sols );
+            }
+        }
+
+        level++;
     }
-
-    level++;
-  }
 }
 
 void MLIQNILSSolver::solveTimeStep()
 {
-  assert( !init );
+    assert( !init );
 
-  initTimeStep();
-  solve();
-  finalizeTimeStep();
+    initTimeStep();
+    solve();
+    finalizeTimeStep();
 }

@@ -15,67 +15,67 @@
 
 namespace fsi
 {
-  class AndersonPostProcessing : public PostProcessing
-  {
+    class AndersonPostProcessing : public PostProcessing
+    {
 public:
 
-    AndersonPostProcessing(
-      shared_ptr<MultiLevelFsiSolver> fsi,
-      int maxIter,
-      double initialRelaxation,
-      int maxUsedIterations,
-      int nbReuse,
-      double singularityLimit,
-      int reuseInformationStartingFromTimeIndex,
-      bool scaling,
-      double beta,
-      bool updateJacobian
-      );
+        AndersonPostProcessing(
+            shared_ptr<MultiLevelFsiSolver> fsi,
+            int maxIter,
+            double initialRelaxation,
+            int maxUsedIterations,
+            int nbReuse,
+            double singularityLimit,
+            int reuseInformationStartingFromTimeIndex,
+            bool scaling,
+            double beta,
+            bool updateJacobian
+            );
 
-    void fixedUnderRelaxation(
-      vector & xk,
-      vector & R,
-      vector & yk
-      );
+        void fixedUnderRelaxation(
+            vector & xk,
+            vector & R,
+            vector & yk
+            );
 
-    virtual void performPostProcessing(
-      const vector & x0,
-      vector & xk
-      );
+        virtual void performPostProcessing(
+            const vector & x0,
+            vector & xk
+            );
 
-    virtual void performPostProcessing(
-      const vector & y,
-      const vector & x0,
-      vector & xk
-      );
+        virtual void performPostProcessing(
+            const vector & y,
+            const vector & x0,
+            vector & xk
+            );
 
-    virtual void performPostProcessing(
-      const vector & y,
-      const vector & x0,
-      vector & xk,
-      bool residualCriterium
-      );
+        virtual void performPostProcessing(
+            const vector & y,
+            const vector & x0,
+            vector & xk,
+            bool residualCriterium
+            );
 
-    void applyScaling( vector & vec );
+        void applyScaling( vector & vec );
 
-    void applyScaling( matrix & mat );
+        void applyScaling( matrix & mat );
 
-    void removeColumnFromMatrix(
-      matrix & A,
-      int col
-      );
+        void removeColumnFromMatrix(
+            matrix & A,
+            int col
+            );
 
-    void determineScalingFactors( const vector & output );
+        void determineScalingFactors( const vector & output );
 
-    bool scaling;
-    double beta;
-    double singularityLimit;
-    bool updateJacobian;
-    vector scalingFactors;
-    matrix Jprev;
-    int sizeVar0;
-    int sizeVar1;
-  };
+        bool scaling;
+        double beta;
+        double singularityLimit;
+        bool updateJacobian;
+        vector scalingFactors;
+        matrix Jprev;
+        int sizeVar0;
+        int sizeVar1;
+    };
 }
 
 #endif

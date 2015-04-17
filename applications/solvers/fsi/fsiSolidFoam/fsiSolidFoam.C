@@ -10,36 +10,36 @@
 #include "SolidSolver.H"
 
 int main(
-  int argc,
-  char * argv[]
-  )
+    int argc,
+    char * argv[]
+    )
 {
-  std::shared_ptr<argList> args( new argList( argc, argv ) );
+    std::shared_ptr<argList> args( new argList( argc, argv ) );
 
-  if ( !args->checkRootCase() )
-  {
-    FatalError.exit();
-  }
+    if ( !args->checkRootCase() )
+    {
+        FatalError.exit();
+    }
 
-  std::shared_ptr<Time> runTime( new Time
-    (
-      Time::controlDictName,
-      args->rootPath(),
-      args->caseName()
-    ) );
+    std::shared_ptr<Time> runTime( new Time
+        (
+            Time::controlDictName,
+            args->rootPath(),
+            args->caseName()
+        ) );
 
-  std::shared_ptr<foamSolidSolver> solid( new SolidSolver( fvMesh::defaultRegion, args, runTime ) );
+    std::shared_ptr<foamSolidSolver> solid( new SolidSolver( fvMesh::defaultRegion, args, runTime ) );
 
-  PreciceSolidSolver solver( solid );
+    PreciceSolidSolver solver( solid );
 
-  solver.run();
+    solver.run();
 
-  Info << "End\n" << endl;
+    Info << "End\n" << endl;
 
-  label tmp = Pstream::myProcNo();
-  reduce( tmp, sumOp<label>() );
+    label tmp = Pstream::myProcNo();
+    reduce( tmp, sumOp<label>() );
 
-  return (0);
+    return (0);
 }
 
 // ************************************************************************* //

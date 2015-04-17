@@ -17,27 +17,27 @@ class MLIQNILSSolver : public Solver
 {
 public:
 
-  MLIQNILSSolver(
-    shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
-    bool synchronization
-    );
+    MLIQNILSSolver(
+        shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
+        bool synchronization
+        );
 
-  virtual void run();
+    virtual void run();
 
-  void finalizeTimeStep();
+    void finalizeTimeStep();
 
-  void initTimeStep();
+    void initTimeStep();
 
-  bool isRunning();
+    bool isRunning();
 
-  void solve();
+    void solve();
 
-  void solveTimeStep();
+    void solveTimeStep();
 
-  shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models;
-  shared_ptr<ImplicitMultiLevelFsiSolver> fineModel;
-  bool init;
-  bool synchronization;
+    shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models;
+    shared_ptr<ImplicitMultiLevelFsiSolver> fineModel;
+    bool init;
+    bool synchronization;
 };
 
 #endif

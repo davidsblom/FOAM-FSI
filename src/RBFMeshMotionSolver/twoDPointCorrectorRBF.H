@@ -11,61 +11,61 @@
 
 namespace Foam
 {
-  // Forward class declarations
-  class polyMesh;
+    // Forward class declarations
+    class polyMesh;
 
-  /*---------------------------------------------------------------------------*\
-  *                       Class twoDPointCorrectorRBF Declaration
-  \*---------------------------------------------------------------------------*/
+    /*---------------------------------------------------------------------------*\
+    *                       Class twoDPointCorrectorRBF Declaration
+    \*---------------------------------------------------------------------------*/
 
-  class twoDPointCorrectorRBF
-    :
-    public twoDPointCorrector
-  {
-    // Private data
+    class twoDPointCorrectorRBF
+        :
+        public twoDPointCorrector
+    {
+        // Private data
 
-    // - Reference to moving mesh
-    const polyMesh & mesh_;
+        // - Reference to moving mesh
+        const polyMesh & mesh_;
 
-    // - Holder for marker value: -1 if on "back" side and 0 otherwise
-    labelList pointMarker_;
+        // - Holder for marker value: -1 if on "back" side and 0 otherwise
+        labelList pointMarker_;
 
-    // - Point IDs marked with 0
-    labelList useablePointIDs_;
+        // - Point IDs marked with 0
+        labelList useablePointIDs_;
 
-    // - Point IDs marked with -1
-    labelList shadowPointIDs_;
+        // - Point IDs marked with -1
+        labelList shadowPointIDs_;
 
 
-    // Private Member Functions
+        // Private Member Functions
 
-    // - Disallow default bitwise copy construct
-    twoDPointCorrectorRBF( const twoDPointCorrectorRBF & );
+        // - Disallow default bitwise copy construct
+        twoDPointCorrectorRBF( const twoDPointCorrectorRBF & );
 
-    // - Disallow default bitwise assignment
-    void operator=( const twoDPointCorrectorRBF & );
+        // - Disallow default bitwise assignment
+        void operator=( const twoDPointCorrectorRBF & );
 
-    void setMarker();
+        void setMarker();
 
 public:
 
-    // Constructors
+        // Constructors
 
-    // - Construct from components
-    twoDPointCorrectorRBF( const polyMesh & mesh );
-
-
-    // Destructor
-
-    ~twoDPointCorrectorRBF();
+        // - Construct from components
+        twoDPointCorrectorRBF( const polyMesh & mesh );
 
 
-    // Member Functions
+        // Destructor
 
-    const labelList & marker() const;
+        ~twoDPointCorrectorRBF();
 
-    void setShadowSide( vectorField & newpoints ) const;
-  };
+
+        // Member Functions
+
+        const labelList & marker() const;
+
+        void setShadowSide( vectorField & newpoints ) const;
+    };
 } // End namespace Foam
 
 

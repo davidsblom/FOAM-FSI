@@ -13,17 +13,17 @@ class Solver
 {
 public:
 
-  virtual ~Solver(){}
+    virtual ~Solver(){}
 
-  virtual void run() = 0;
+    virtual void run() = 0;
 
-  virtual double timeElapsed()
-  {
-    time = std::clock() - time;
-    return static_cast<double>(time) / CLOCKS_PER_SEC;
-  }
+    virtual double timeElapsed()
+    {
+        time = std::clock() - time;
+        return static_cast<double>(time) / CLOCKS_PER_SEC;
+    }
 
-  std::clock_t time;
+    std::clock_t time;
 };
 
 #endif

@@ -7,83 +7,83 @@
 #include "foamSolidSolver.H"
 
 foamSolidSolver::foamSolidSolver (
-  string name,
-  std::shared_ptr<argList> args,
-  std::shared_ptr<Time> runTime
-  )
-  :
-  BaseMultiLevelSolver( 5, 3, 0 ),
-  name( name ),
-  args( args ),
-  runTime( runTime ),
-  mesh
-  (
-  Foam::IOobject
-  (
-    name,
-    runTime->timeName(),
-    *runTime,
-    Foam::IOobject::MUST_READ
-  )
-  ),
-  U
-  (
-  IOobject
-  (
-    "U",
-    runTime->timeName(),
-    mesh,
-    IOobject::MUST_READ,
-    IOobject::AUTO_WRITE
-  ),
-  mesh
-  ),
-  Uinitial
-  (
-  IOobject
-  (
-    "U",
-    runTime->timeName(),
-    mesh,
-    IOobject::MUST_READ,
-    IOobject::NO_WRITE
-  ),
-  mesh
-  ),
-  couplingProperties
-  (
-  IOobject
-  (
-    "couplingProperties",
-    runTime->constant(),
-    mesh,
-    IOobject::MUST_READ,
-    IOobject::NO_WRITE
-  )
-  ),
-  movingPatches( couplingProperties.lookup( "movingSolidPatches" ) ),
-  movingPatchIDs( movingPatches.size() ),
-  forces(),
-  nGlobalCenters( Pstream::nProcs(), 0 ),
-  totalRunTime( 0 ),
-  totalNbIterations( 0 )
+    string name,
+    std::shared_ptr<argList> args,
+    std::shared_ptr<Time> runTime
+    )
+    :
+    BaseMultiLevelSolver( 5, 3, 0 ),
+    name( name ),
+    args( args ),
+    runTime( runTime ),
+    mesh
+    (
+    Foam::IOobject
+    (
+        name,
+        runTime->timeName(),
+        *runTime,
+        Foam::IOobject::MUST_READ
+    )
+    ),
+    U
+    (
+    IOobject
+    (
+        "U",
+        runTime->timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh
+    ),
+    Uinitial
+    (
+    IOobject
+    (
+        "U",
+        runTime->timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh
+    ),
+    couplingProperties
+    (
+    IOobject
+    (
+        "couplingProperties",
+        runTime->constant(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    )
+    ),
+    movingPatches( couplingProperties.lookup( "movingSolidPatches" ) ),
+    movingPatchIDs( movingPatches.size() ),
+    forces(),
+    nGlobalCenters( Pstream::nProcs(), 0 ),
+    totalRunTime( 0 ),
+    totalNbIterations( 0 )
 {
-  // Find IDs of staticPatches_
-  forAll( movingPatches, patchI )
-  {
-    label patchIndex = mesh.boundaryMesh().findPatchID( movingPatches[patchI] );
+    // Find IDs of staticPatches_
+    forAll( movingPatches, patchI )
+    {
+        label patchIndex = mesh.boundaryMesh().findPatchID( movingPatches[patchI] );
 
-    assert( patchIndex >= 0 );
+        assert( patchIndex >= 0 );
 
-    movingPatchIDs[patchI] = patchIndex;
-  }
+        movingPatchIDs[patchI] = patchIndex;
+    }
 
-  N = getInterfaceSize();
-  dim = mesh.nGeometricD();
-  data.resize( N, dim );
-  data.setZero();
+    N = getInterfaceSize();
+    dim = mesh.nGeometricD();
+    data.resize( N, dim );
+    data.setZero();
 
-  readCouplingProperties();
+    readCouplingProperties();
 }
 
 foamSolidSolver::~foamSolidSolver()
@@ -91,239 +91,242 @@ foamSolidSolver::~foamSolidSolver()
 
 void foamSolidSolver::finalizeTimeStep()
 {
-  assert( init );
+    assert( init );
 
-  init = false;
+    init = false;
 }
 
 void foamSolidSolver::getDisplacementLocal( matrix & displacement )
 {
-  displacement.resize( getInterfaceSizeLocal(), mesh.nGeometricD() );
+    displacement.resize( getInterfaceSizeLocal(), mesh.nGeometricD() );
 
-  int offset = 0;
+    int offset = 0;
 
-  forAll( movingPatchIDs, patchI )
-  {
-    int size = U.boundaryField()[movingPatchIDs[patchI]].size();
+    forAll( movingPatchIDs, patchI )
+    {
+        int size = U.boundaryField()[movingPatchIDs[patchI]].size();
 
-    for ( int i = 0; i < size; i++ )
-      for ( int j = 0; j < displacement.cols(); j++ )
-        displacement( i + offset, j ) = U.boundaryField()[movingPatchIDs[patchI]][i][j] - Uinitial.boundaryField()[movingPatchIDs[patchI]][i][j];
+        for ( int i = 0; i < size; i++ )
+            for ( int j = 0; j < displacement.cols(); j++ )
+                displacement( i + offset, j ) = U.boundaryField()[movingPatchIDs[patchI]][i][j] - Uinitial.boundaryField()[movingPatchIDs[patchI]][i][j];
 
-    offset += size;
-  }
+        ;
+
+        offset += size;
+    }
 }
 
 int foamSolidSolver::getInterfaceSize()
 {
-  if ( sum( nGlobalCenters ) > 0 )
+    if ( sum( nGlobalCenters ) > 0 )
+        return sum( nGlobalCenters );
+
+    nGlobalCenters = 0;
+
+    forAll( movingPatchIDs, patchI )
+    {
+        nGlobalCenters[Pstream::myProcNo()] += mesh.boundaryMesh()[movingPatchIDs[patchI]].size();
+    }
+
+    reduce( nGlobalCenters, sumOp<labelList>() );
+
     return sum( nGlobalCenters );
-
-  nGlobalCenters = 0;
-
-  forAll( movingPatchIDs, patchI )
-  {
-    nGlobalCenters[Pstream::myProcNo()] += mesh.boundaryMesh()[movingPatchIDs[patchI]].size();
-  }
-
-  reduce( nGlobalCenters, sumOp<labelList>() );
-
-  return sum( nGlobalCenters );
 }
 
 int foamSolidSolver::getInterfaceSizeLocal()
 {
-  int size = 0;
+    int size = 0;
 
-  forAll( movingPatchIDs, patchI )
-  {
-    size += mesh.boundaryMesh()[movingPatchIDs[patchI]].size();
-  }
+    forAll( movingPatchIDs, patchI )
+    {
+        size += mesh.boundaryMesh()[movingPatchIDs[patchI]].size();
+    }
 
-  return size;
+    return size;
 }
 
 void foamSolidSolver::getReadPositions( matrix & readPositions )
 {
-  getWritePositions( readPositions );
+    getWritePositions( readPositions );
 }
 
 void foamSolidSolver::getReadPositionsLocal( matrix & readPositions )
 {
-  getWritePositionsLocal( readPositions );
+    getWritePositionsLocal( readPositions );
 }
 
 void foamSolidSolver::getWritePositions( matrix & writePositions )
 {
-  vectorField writePositionsField( getInterfaceSize(), Foam::vector::zero );
+    vectorField writePositionsField( getInterfaceSize(), Foam::vector::zero );
 
-  int globalOffset = 0;
+    int globalOffset = 0;
 
-  for ( int i = 0; i < Pstream::myProcNo(); i++ )
-    globalOffset += nGlobalCenters[i];
+    for ( int i = 0; i < Pstream::myProcNo(); i++ )
+        globalOffset += nGlobalCenters[i];
 
-  int offset = 0;
+    int offset = 0;
 
-  forAll( movingPatchIDs, patchI )
-  {
-    const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
-
-    forAll( faceCentres, i )
+    forAll( movingPatchIDs, patchI )
     {
-      writePositionsField[i + offset + globalOffset] = faceCentres[i] + Uinitial.boundaryField()[movingPatchIDs[patchI]][i];
+        const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
+
+        forAll( faceCentres, i )
+        {
+            writePositionsField[i + offset + globalOffset] = faceCentres[i] + Uinitial.boundaryField()[movingPatchIDs[patchI]][i];
+            ;
+        }
+
+        offset += faceCentres.size();
     }
 
-    offset += faceCentres.size();
-  }
+    reduce( writePositionsField, sumOp<vectorField>() );
 
-  reduce( writePositionsField, sumOp<vectorField>() );
+    writePositions.resize( writePositionsField.size(), mesh.nGeometricD() );
 
-  writePositions.resize( writePositionsField.size(), mesh.nGeometricD() );
-
-  for ( int i = 0; i < writePositions.rows(); i++ )
-    for ( int j = 0; j < writePositions.cols(); j++ )
-      writePositions( i, j ) = writePositionsField[i][j];
+    for ( int i = 0; i < writePositions.rows(); i++ )
+        for ( int j = 0; j < writePositions.cols(); j++ )
+            writePositions( i, j ) = writePositionsField[i][j];
 }
 
 void foamSolidSolver::getWritePositionsLocal( matrix & writePositions )
 {
-  writePositions.resize( getInterfaceSizeLocal(), mesh.nGeometricD() );
+    writePositions.resize( getInterfaceSizeLocal(), mesh.nGeometricD() );
 
-  int offset = 0;
+    int offset = 0;
 
-  forAll( movingPatchIDs, patchI )
-  {
-    const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
+    forAll( movingPatchIDs, patchI )
+    {
+        const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
 
-    for ( int i = 0; i < faceCentres.size(); i++ )
-      for ( int j = 0; j < writePositions.cols(); j++ )
-        writePositions( i + offset, j ) = faceCentres[i][j] + Uinitial.boundaryField()[movingPatchIDs[patchI]][i][j];
+        for ( int i = 0; i < faceCentres.size(); i++ )
+            for ( int j = 0; j < writePositions.cols(); j++ )
+                writePositions( i + offset, j ) = faceCentres[i][j] + Uinitial.boundaryField()[movingPatchIDs[patchI]][i][j];
 
-    offset += faceCentres.size();
-  }
+        offset += faceCentres.size();
+    }
 }
 
 void foamSolidSolver::readCouplingProperties()
 {
-  // Grab solid patch field
+    // Grab solid patch field
 
-  forAll( movingPatchIDs, patchI )
-  {
-    assert( U.boundaryField()[movingPatchIDs[patchI]].type() == solidTractionFvPatchVectorField::typeName );
+    forAll( movingPatchIDs, patchI )
+    {
+        assert( U.boundaryField()[movingPatchIDs[patchI]].type() == solidTractionFvPatchVectorField::typeName );
 
-    solidTractionFvPatchVectorField & tForce =
-      refCast<solidTractionFvPatchVectorField>
-      (
-      U.boundaryField()[movingPatchIDs[patchI]]
-      );
+        solidTractionFvPatchVectorField & tForce =
+            refCast<solidTractionFvPatchVectorField>
+            (
+            U.boundaryField()[movingPatchIDs[patchI]]
+            );
 
-    forces.push_back( &tForce );
-  }
+        forces.push_back( &tForce );
+    }
 }
 
 void foamSolidSolver::setTractionLocal( const matrix & traction )
 {
-  assert( traction.rows() == getInterfaceSizeLocal() );
-  assert( traction.cols() == mesh.nGeometricD() );
+    assert( traction.rows() == getInterfaceSizeLocal() );
+    assert( traction.cols() == mesh.nGeometricD() );
 
-  int offset = 0;
+    int offset = 0;
 
-  forAll( movingPatchIDs, patchI )
-  {
-    int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
+    forAll( movingPatchIDs, patchI )
+    {
+        int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
 
-    vectorField tractionSolid( size, Foam::vector::zero );
+        vectorField tractionSolid( size, Foam::vector::zero );
 
-    for ( int i = 0; i < size; i++ )
-      for ( int j = 0; j < traction.cols(); j++ )
-        tractionSolid[i][j] = traction( i + offset, j );
+        for ( int i = 0; i < size; i++ )
+            for ( int j = 0; j < traction.cols(); j++ )
+                tractionSolid[i][j] = traction( i + offset, j );
 
-    forces.at( patchI )->traction() = tractionSolid;
+        forces.at( patchI )->traction() = tractionSolid;
 
-    offset += size;
-  }
+        offset += size;
+    }
 }
 
 void foamSolidSolver::run()
 {
-  while ( isRunning() )
-  {
-    initTimeStep();
-    solve();
-    finalizeTimeStep();
-  }
+    while ( isRunning() )
+    {
+        initTimeStep();
+        solve();
+        finalizeTimeStep();
+    }
 }
 
 void foamSolidSolver::solve(
-  const matrix & input,
-  matrix & output
-  )
+    const matrix & input,
+    matrix & output
+    )
 {
-  assert( input.rows() == sum( nGlobalCenters ) );
-  assert( input.cols() == mesh.nGeometricD() );
+    assert( input.rows() == sum( nGlobalCenters ) );
+    assert( input.cols() == mesh.nGeometricD() );
 
-  std::clock_t t = std::clock();
+    std::clock_t t = std::clock();
 
-  vectorField readPositionsField( getInterfaceSize(), Foam::vector::zero );
+    vectorField readPositionsField( getInterfaceSize(), Foam::vector::zero );
 
-  int globalOffset = 0;
+    int globalOffset = 0;
 
-  for ( int i = 0; i < Pstream::myProcNo(); i++ )
-    globalOffset += nGlobalCenters[i];
+    for ( int i = 0; i < Pstream::myProcNo(); i++ )
+        globalOffset += nGlobalCenters[i];
 
-  int offset = 0;
+    int offset = 0;
 
-  forAll( movingPatchIDs, patchI )
-  {
-    int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
-
-    vectorField tractionSolid( size, Foam::vector::zero );
-
-    for ( int i = 0; i < size; i++ )
-      for ( int j = 0; j < input.cols(); j++ )
-        tractionSolid[i][j] = input( i + offset + globalOffset, j );
-
-    forces.at( patchI )->traction() = tractionSolid;
-
-    offset += size;
-  }
-
-  solve();
-
-  vectorField outputField( getInterfaceSize(), Foam::vector::zero );
-
-  offset = 0;
-
-  forAll( movingPatchIDs, patchI )
-  {
-    int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
-
-    forAll( U.boundaryField()[movingPatchIDs[patchI]], i )
+    forAll( movingPatchIDs, patchI )
     {
-      outputField[i + offset + globalOffset] = U.boundaryField()[movingPatchIDs[patchI]][i] - Uinitial.boundaryField()[movingPatchIDs[patchI]][i];
+        int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
+
+        vectorField tractionSolid( size, Foam::vector::zero );
+
+        for ( int i = 0; i < size; i++ )
+            for ( int j = 0; j < input.cols(); j++ )
+                tractionSolid[i][j] = input( i + offset + globalOffset, j );
+
+        forces.at( patchI )->traction() = tractionSolid;
+
+        offset += size;
     }
 
-    offset += size;
-  }
+    solve();
 
-  reduce( outputField, sumOp<vectorField>() );
+    vectorField outputField( getInterfaceSize(), Foam::vector::zero );
 
-  output.resize( outputField.size(), mesh.nGeometricD() );
+    offset = 0;
 
-  for ( int i = 0; i < output.rows(); i++ )
-    for ( int j = 0; j < output.cols(); j++ )
-      output( i, j ) = outputField[i][j];
+    forAll( movingPatchIDs, patchI )
+    {
+        int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
 
-  assert( output.rows() == data.rows() );
-  assert( output.cols() == data.cols() );
+        forAll( U.boundaryField()[movingPatchIDs[patchI]], i )
+        {
+            outputField[i + offset + globalOffset] = U.boundaryField()[movingPatchIDs[patchI]][i] - Uinitial.boundaryField()[movingPatchIDs[patchI]][i];
+        }
 
-  data = output;
+        offset += size;
+    }
 
-  t = std::clock() - t;
-  double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
-  totalRunTime += runTime;
-  totalNbIterations++;
-  Info << "runtime = " << runTime << " s" << endl;
-  Info << "average runtime = " << totalRunTime / totalNbIterations << " s" << endl;
-  Info << "total runtime = " << totalRunTime << " s" << endl;
+    reduce( outputField, sumOp<vectorField>() );
+
+    output.resize( outputField.size(), mesh.nGeometricD() );
+
+    for ( int i = 0; i < output.rows(); i++ )
+        for ( int j = 0; j < output.cols(); j++ )
+            output( i, j ) = outputField[i][j];
+
+    assert( output.rows() == data.rows() );
+    assert( output.cols() == data.cols() );
+
+    data = output;
+
+    t = std::clock() - t;
+    double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+    totalRunTime += runTime;
+    totalNbIterations++;
+    Info << "runtime = " << runTime << " s" << endl;
+    Info << "average runtime = " << totalRunTime / totalNbIterations << " s" << endl;
+    Info << "total runtime = " << totalRunTime << " s" << endl;
 }

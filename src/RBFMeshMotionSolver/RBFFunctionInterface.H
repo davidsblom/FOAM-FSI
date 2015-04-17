@@ -14,14 +14,14 @@
 
 namespace rbf
 {
-  class RBFFunctionInterface
-  {
+    class RBFFunctionInterface
+    {
 public:
 
-    virtual ~RBFFunctionInterface(){}
+        virtual ~RBFFunctionInterface(){}
 
-    virtual double evaluate( double value ) = 0;
-  };
+        virtual double evaluate( double value ) = 0;
+    };
 }
 
 #endif

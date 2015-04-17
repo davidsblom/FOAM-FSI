@@ -8,75 +8,75 @@
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(
-  int argc,
-  char * argv[]
-  )
+    int argc,
+    char * argv[]
+    )
 {
-  #include "setRootCase.H"
-  #include "createTime.H"
-  #include "createMesh.H"
-  #include "createFields.H"
-  #include "initContinuityErrs.H"
-  #include "readBlockSolverControls.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
+    #include "readBlockSolverControls.H"
 
-  Info << "\nStarting time loop\n" << endl;
+    Info << "\nStarting time loop\n" << endl;
 
-  while ( runTime.loop() )
-  {
-    Info << "Time = " << runTime.timeName() << nl << endl;
-
-    for ( int oCorr = 0; oCorr < nOuterCorr; oCorr++ )
+    while ( runTime.loop() )
     {
-      p.storePrevIter();
+        Info << "Time = " << runTime.timeName() << nl << endl;
 
-      // Initialize the Up block system (matrix, source and reference to Up)
-      fvBlockMatrix<vector4> UpEqn( Up );
+        for ( int oCorr = 0; oCorr < nOuterCorr; oCorr++ )
+        {
+            p.storePrevIter();
 
-      // Assemble and insert momentum equation
-      #include "UEqn.H"
+            // Initialize the Up block system (matrix, source and reference to Up)
+            fvBlockMatrix<vector4> UpEqn( Up );
 
-      // Assemble and insert pressure equation
-      #include "pEqn.H"
+            // Assemble and insert momentum equation
+            #include "UEqn.H"
 
-      // Assemble and insert coupling terms
-      #include "couplingTerms.H"
+            // Assemble and insert pressure equation
+            #include "pEqn.H"
 
-      // Solve the block matrix
-      vector4 initialResidual4 = UpEqn.solve().initialResidual();
+            // Assemble and insert coupling terms
+            #include "couplingTerms.H"
 
-      // Retrieve solution
-      UpEqn.retrieveSolution( 0, U.internalField() );
-      UpEqn.retrieveSolution( 3, p.internalField() );
+            // Solve the block matrix
+            vector4 initialResidual4 = UpEqn.solve().initialResidual();
 
-      U.correctBoundaryConditions();
-      p.correctBoundaryConditions();
+            // Retrieve solution
+            UpEqn.retrieveSolution( 0, U.internalField() );
+            UpEqn.retrieveSolution( 3, p.internalField() );
 
-      phi = ( fvc::interpolate( U ) & mesh.Sf() ) + pEqn.flux() + presSource;
+            U.correctBoundaryConditions();
+            p.correctBoundaryConditions();
 
-      #include "continuityErrs.H"
+            phi = ( fvc::interpolate( U ) & mesh.Sf() ) + pEqn.flux() + presSource;
 
-      p.relax();
+            #include "continuityErrs.H"
 
-      turbulence->correct();
+            p.relax();
 
-      scalar residual = 0;
-      forAll( initialResidual4, i )
-      {
-        residual = max( residual, initialResidual4[i] );
-      }
+            turbulence->correct();
 
-      if ( residual < convergenceTolerance )
-        break;
+            scalar residual = 0;
+            forAll( initialResidual4, i )
+            {
+                residual = max( residual, initialResidual4[i] );
+            }
+
+            if ( residual < convergenceTolerance )
+                break;
+        }
+
+        runTime.write();
+
+        Info << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+             << nl << endl;
     }
 
-    runTime.write();
+    Info << "End\n" << endl;
 
-    Info << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-         << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-         << nl << endl;
-  }
-
-  Info << "End\n" << endl;
-
-  return 0;
+    return 0;
 }

@@ -16,48 +16,48 @@ using std::deque;
 
 namespace fsi
 {
-  class OutputSpaceMapping : public SpaceMapping
-  {
+    class OutputSpaceMapping : public SpaceMapping
+    {
 public:
 
-    using SpaceMapping::performPostProcessing;
+        using SpaceMapping::performPostProcessing;
 
-    OutputSpaceMapping(
-      shared_ptr<SurrogateModel> fineModel,
-      shared_ptr<SurrogateModel> coarseModel,
-      int maxIter,
-      int maxUsedIterations,
-      int nbReuse,
-      int reuseInformationStartingFromTimeIndex,
-      double singularityLimit,
-      int order
-      );
+        OutputSpaceMapping(
+            shared_ptr<SurrogateModel> fineModel,
+            shared_ptr<SurrogateModel> coarseModel,
+            int maxIter,
+            int maxUsedIterations,
+            int nbReuse,
+            int reuseInformationStartingFromTimeIndex,
+            double singularityLimit,
+            int order
+            );
 
-    virtual ~OutputSpaceMapping();
+        virtual ~OutputSpaceMapping();
 
-    virtual void finalizeTimeStep();
+        virtual void finalizeTimeStep();
 
-    virtual void iterationsConverged();
+        virtual void iterationsConverged();
 
-    virtual void performPostProcessing(
-      const vector & y,
-      const vector & x0,
-      vector & xk,
-      bool residualCriterium
-      );
+        virtual void performPostProcessing(
+            const vector & y,
+            const vector & x0,
+            vector & xk,
+            bool residualCriterium
+            );
 
-    void removeColumnFromMatrix(
-      matrix & A,
-      int col
-      );
+        void removeColumnFromMatrix(
+            matrix & A,
+            int col
+            );
 
-    shared_ptr<SurrogateModel> surrogateModel;
-    deque<vector> sols;
-    deque<deque<vector> > solsList;
-    deque<deque<deque<vector> > > solsTimeList;
+        shared_ptr<SurrogateModel> surrogateModel;
+        deque<vector> sols;
+        deque<deque<vector> > solsList;
+        deque<deque<deque<vector> > > solsTimeList;
 
-    int order;
-  };
+        int order;
+    };
 }
 
 #endif

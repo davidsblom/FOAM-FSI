@@ -11,16 +11,16 @@
 
 namespace rbf
 {
-  class TPSFunction : public RBFFunctionInterface
-  {
+    class TPSFunction : public RBFFunctionInterface
+    {
 public:
 
-    TPSFunction();
+        TPSFunction();
 
-    virtual ~TPSFunction();
+        virtual ~TPSFunction();
 
-    virtual double evaluate( double value );
-  };
+        virtual double evaluate( double value );
+    };
 }
 
 #endif

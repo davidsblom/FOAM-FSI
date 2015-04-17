@@ -1,9 +1,10 @@
 ddtSchemes = ddtSchemes
-$(ddtSchemes)/backwardRC/backwardRCDdtSchemes.C
-$(ddtSchemes)/EulerRC/EulerRCDdtSchemes.C
+$(ddtSchemes)/bdf1/bdf1DdtSchemes.C
+$(ddtSchemes)/bdf2/bdf2DdtSchemes.C
+$(ddtSchemes)/bdf3/bdf3DdtSchemes.C
 
 d2dt2Schemes = d2dt2Schemes
 $(d2dt2Schemes)/backward2D2dt2/backward2D2dt2Schemes.C
 $(d2dt2Schemes)/Euler1D2dt2/Euler1D2dt2Schemes.C
 
-LIB = $(FOAM_USER_LIBBIN)/libmySchemes
+LIB = $(FOAM_USER_LIBBIN)/libfvSchemes

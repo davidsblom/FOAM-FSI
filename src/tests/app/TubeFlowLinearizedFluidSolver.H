@@ -13,79 +13,79 @@ using namespace fsi;
 
 namespace tubeflow
 {
-  class TubeFlowLinearizedFluidSolver : public BaseMultiLevelSolver
-  {
+    class TubeFlowLinearizedFluidSolver : public BaseMultiLevelSolver
+    {
 public:
 
-    TubeFlowLinearizedFluidSolver(
-      int N,
-      double p0,
-      double r0,
-      double u0,
-      double rho,
-      double E,
-      double h,
-      double T,
-      double dt,
-      double L
-      );
+        TubeFlowLinearizedFluidSolver(
+            int N,
+            double p0,
+            double r0,
+            double u0,
+            double rho,
+            double E,
+            double h,
+            double T,
+            double dt,
+            double L
+            );
 
-    virtual ~TubeFlowLinearizedFluidSolver();
+        virtual ~TubeFlowLinearizedFluidSolver();
 
-    virtual void finalizeTimeStep();
+        virtual void finalizeTimeStep();
 
-    virtual void getReadPositions( matrix & readPositions );
+        virtual void getReadPositions( matrix & readPositions );
 
-    virtual void getWritePositions( matrix & writePositions );
+        virtual void getWritePositions( matrix & writePositions );
 
-    virtual void initTimeStep();
+        virtual void initTimeStep();
 
-    virtual bool isRunning();
+        virtual bool isRunning();
 
-    virtual void resetSolution();
+        virtual void resetSolution();
 
-    virtual void solve(
-      const matrix & input,
-      matrix & output
-      );
+        virtual void solve(
+            const matrix & input,
+            matrix & output
+            );
 
-    void factorizeMatrix();
+        void factorizeMatrix();
 
-    void solve(
-      const fsi::vector & a,
-      fsi::vector & p
-      );
+        void solve(
+            const fsi::vector & a,
+            fsi::vector & p
+            );
 
-    void calcGrid();
+        void calcGrid();
 
-    // Constants
+        // Constants
 
-    double p0;
-    double r0;
-    double u0;
-    double a0;
-    double rho;
-    double h;
-    double T;
-    double dt;
-    double dx;
-    double tau;
-    double cmk;
-    double alpha;
+        double p0;
+        double r0;
+        double u0;
+        double a0;
+        double rho;
+        double h;
+        double T;
+        double dt;
+        double dx;
+        double tau;
+        double cmk;
+        double alpha;
 
-    matrix grid;
+        matrix grid;
 
-    // Fields
+        // Fields
 
-    fsi::vector un;
-    fsi::vector an;
-    fsi::vector pn;
-    fsi::vector u;
-    fsi::vector a;
-    fsi::vector p;
+        fsi::vector un;
+        fsi::vector an;
+        fsi::vector pn;
+        fsi::vector u;
+        fsi::vector a;
+        fsi::vector p;
 
-    Eigen::FullPivLU<matrix> lu;
-  };
+        Eigen::FullPivLU<matrix> lu;
+    };
 }
 
 #endif

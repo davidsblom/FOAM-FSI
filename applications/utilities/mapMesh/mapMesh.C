@@ -1,7 +1,7 @@
 
 #include <iostream>
-#include "fvCFD.H"
 #include <memory>
+#include "fvCFD.H"
 #include "SolidSolver.H"
 #include "CoupledFluidSolver.H"
 #include "RBFInterpolation.H"
@@ -11,121 +11,121 @@ class MapMeshSolidSolver : public SolidSolver
 {
 public:
 
-  MapMeshSolidSolver(
-    string name,
-    std::shared_ptr<argList> args,
-    std::shared_ptr<Time> runTime
-    )
-    :
-    SolidSolver( name, args, runTime )
-  {}
+    MapMeshSolidSolver(
+        string name,
+        std::shared_ptr<argList> args,
+        std::shared_ptr<Time> runTime
+        )
+        :
+        SolidSolver( name, args, runTime )
+    {}
 
-  void getDisplacementLocal( matrix & displacement )
-  {
-    displacement.resize( getInterfaceSizeLocal(), mesh.nGeometricD() );
-
-    int offset = 0;
-
-    forAll( movingPatchIDs, patchI )
+    void getDisplacementLocal( matrix & displacement )
     {
-      int size = U.boundaryField()[movingPatchIDs[patchI]].size();
+        displacement.resize( getInterfaceSizeLocal(), mesh.nGeometricD() );
 
-      for ( int i = 0; i < size; i++ )
-        for ( int j = 0; j < displacement.cols(); j++ )
-          displacement( i + offset, j ) = U.boundaryField()[movingPatchIDs[patchI]][i][j];
+        int offset = 0;
 
-      offset += size;
-    }
-  }
+        forAll( movingPatchIDs, patchI )
+        {
+            int size = U.boundaryField()[movingPatchIDs[patchI]].size();
 
-  virtual void getWritePositions( matrix & writePositions )
-  {
-    vectorField writePositionsField( getInterfaceSize(), Foam::vector::zero );
+            for ( int i = 0; i < size; i++ )
+                for ( int j = 0; j < displacement.cols(); j++ )
+                    displacement( i + offset, j ) = U.boundaryField()[movingPatchIDs[patchI]][i][j];
 
-    int globalOffset = 0;
-
-    for ( int i = 0; i < Pstream::myProcNo(); i++ )
-      globalOffset += nGlobalCenters[i];
-
-    int offset = 0;
-
-    forAll( movingPatchIDs, patchI )
-    {
-      const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
-
-      forAll( faceCentres, i )
-      {
-        writePositionsField[i + offset + globalOffset] = faceCentres[i];
-      }
-
-      offset += faceCentres.size();
+            offset += size;
+        }
     }
 
-    reduce( writePositionsField, sumOp<vectorField>() );
+    virtual void getWritePositions( matrix & writePositions )
+    {
+        vectorField writePositionsField( getInterfaceSize(), Foam::vector::zero );
 
-    writePositions.resize( writePositionsField.size(), mesh.nGeometricD() );
+        int globalOffset = 0;
 
-    for ( int i = 0; i < writePositions.rows(); i++ )
-      for ( int j = 0; j < writePositions.cols(); j++ )
-        writePositions( i, j ) = writePositionsField[i][j];
-  }
+        for ( int i = 0; i < Pstream::myProcNo(); i++ )
+            globalOffset += nGlobalCenters[i];
+
+        int offset = 0;
+
+        forAll( movingPatchIDs, patchI )
+        {
+            const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
+
+            forAll( faceCentres, i )
+            {
+                writePositionsField[i + offset + globalOffset] = faceCentres[i];
+            }
+
+            offset += faceCentres.size();
+        }
+
+        reduce( writePositionsField, sumOp<vectorField>() );
+
+        writePositions.resize( writePositionsField.size(), mesh.nGeometricD() );
+
+        for ( int i = 0; i < writePositions.rows(); i++ )
+            for ( int j = 0; j < writePositions.cols(); j++ )
+                writePositions( i, j ) = writePositionsField[i][j];
+    }
 };
 
 int main(
-  int argc,
-  char * argv[]
-  )
+    int argc,
+    char * argv[]
+    )
 {
-  std::shared_ptr<argList> args( new argList( argc, argv ) );
+    std::shared_ptr<argList> args( new argList( argc, argv ) );
 
-  if ( !args->checkRootCase() )
-  {
-    FatalError.exit();
-  }
+    if ( !args->checkRootCase() )
+    {
+        FatalError.exit();
+    }
 
-  std::shared_ptr<Time> runTime( new Time
-    (
-      Time::controlDictName,
-      args->rootPath(),
-      args->caseName()
-    ) );
+    std::shared_ptr<Time> runTime( new Time
+        (
+            Time::controlDictName,
+            args->rootPath(),
+            args->caseName()
+        ) );
 
-  assert( Pstream::nProcs() == 1 );
+    assert( Pstream::nProcs() == 1 );
 
-  std::shared_ptr<MapMeshSolidSolver> solid( new MapMeshSolidSolver( "solid", args, runTime ) );
+    std::shared_ptr<MapMeshSolidSolver> solid( new MapMeshSolidSolver( "solid", args, runTime ) );
 
-  std::shared_ptr<foamFluidSolver> fluid( new CoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+    std::shared_ptr<foamFluidSolver> fluid( new CoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
-  /*
-   * 1. Interpolate displacement from solid interface to fluid interface
-   * 2. Mesh deformation fluid mesh
-   */
+    /*
+     * 1. Interpolate displacement from solid interface to fluid interface
+     * 2. Mesh deformation fluid mesh
+     */
 
-  // Step 1: Interpolate displacement from solid interface to fluid interface
+    // Step 1: Interpolate displacement from solid interface to fluid interface
 
-  std::shared_ptr<TPSFunction> tpsFunction( new TPSFunction() );
-  rbf::RBFInterpolation rbfSolidToFluidInterface( tpsFunction );
+    std::shared_ptr<TPSFunction> tpsFunction( new TPSFunction() );
+    rbf::RBFInterpolation rbfSolidToFluidInterface( tpsFunction );
 
-  Eigen::MatrixXd positions, positionsInterpolation, values, valuesInterpolation;
+    Eigen::MatrixXd positions, positionsInterpolation, values, valuesInterpolation;
 
-  solid->getWritePositions( positions );
-  fluid->getReadPositions( positionsInterpolation );
+    solid->getWritePositions( positions );
+    fluid->getReadPositions( positionsInterpolation );
 
-  rbfSolidToFluidInterface.compute( positions, positionsInterpolation );
+    rbfSolidToFluidInterface.compute( positions, positionsInterpolation );
 
-  // valuesInterpolation = displacement of fluid interface
-  // values = displacement of solid interface
+    // valuesInterpolation = displacement of fluid interface
+    // values = displacement of solid interface
 
-  solid->getDisplacementLocal( values );
+    solid->getDisplacementLocal( values );
 
-  rbfSolidToFluidInterface.interpolate( values, valuesInterpolation );
+    rbfSolidToFluidInterface.interpolate( values, valuesInterpolation );
 
-  // Step 2
-  // Fluid mesh deformation
+    // Step 2
+    // Fluid mesh deformation
 
-  fluid->setDisplacementLocal( valuesInterpolation );
-  fluid->moveMesh( fluid->movingPatchesDispl - fluid->movingPatchesDisplOld );
+    fluid->setDisplacementLocal( valuesInterpolation );
+    fluid->moveMesh( fluid->movingPatchesDispl - fluid->movingPatchesDisplOld );
 
-  runTime->loop();
-  runTime->write();
+    runTime->loop();
+    runTime->write();
 }

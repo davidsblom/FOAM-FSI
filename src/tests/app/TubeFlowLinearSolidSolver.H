@@ -13,33 +13,33 @@ using namespace fsi;
 
 namespace tubeflow
 {
-  class TubeFlowLinearSolidSolver : public TubeFlowLinearizedSolidSolver
-  {
+    class TubeFlowLinearSolidSolver : public TubeFlowLinearizedSolidSolver
+    {
 public:
 
-    TubeFlowLinearSolidSolver(
-      int N,
-      double nu,
-      double rho,
-      double h,
-      double L,
-      double dt,
-      double G,
-      double E0,
-      double r0
-      );
+        TubeFlowLinearSolidSolver(
+            int N,
+            double nu,
+            double rho,
+            double h,
+            double L,
+            double dt,
+            double G,
+            double E0,
+            double r0
+            );
 
-    virtual ~TubeFlowLinearSolidSolver();
+        virtual ~TubeFlowLinearSolidSolver();
 
-    virtual void solve(
-      const fsi::vector & p,
-      fsi::vector & a
-      );
+        virtual void solve(
+            const fsi::vector & p,
+            fsi::vector & a
+            );
 
-    double h;
-    double E0;
-    double nu;
-  };
+        double h;
+        double E0;
+        double nu;
+    };
 }
 
 #endif

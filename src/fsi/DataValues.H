@@ -11,26 +11,26 @@
 
 namespace fsi
 {
-  typedef Eigen::MatrixXd matrix;
-  typedef Eigen::VectorXd vector;
+    typedef Eigen::MatrixXd matrix;
+    typedef Eigen::VectorXd vector;
 
-  class DataValues
-  {
+    class DataValues
+    {
 public:
 
-    DataValues();
-    ~DataValues();
+        DataValues();
+        ~DataValues();
 
-    void setData( matrix & data );
+        void setData( matrix & data );
 
-    void setDataOld( matrix & data );
+        void setDataOld( matrix & data );
 
-    void finalizeTimeStep();
+        void finalizeTimeStep();
 
-    matrix data;
-    matrix dataprev;
-    matrix dataPreviousTimeStep;
-  };
+        matrix data;
+        matrix dataprev;
+        matrix dataPreviousTimeStep;
+    };
 }
 
 #endif

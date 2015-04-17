@@ -21,61 +21,61 @@ class SolidSolver : public foamSolidSolver
 {
 public:
 
-  SolidSolver(
-    string name,
-    std::shared_ptr<argList> args,
-    std::shared_ptr<Time> runTime
-    );
+    SolidSolver(
+        string name,
+        std::shared_ptr<argList> args,
+        std::shared_ptr<Time> runTime
+        );
 
-  SolidSolver(
-    string name,
-    std::shared_ptr<argList> args,
-    std::shared_ptr<Time> runTime,
-    std::shared_ptr<rbf::RBFCoarsening> interpolator
-    );
+    SolidSolver(
+        string name,
+        std::shared_ptr<argList> args,
+        std::shared_ptr<Time> runTime,
+        std::shared_ptr<rbf::RBFCoarsening> interpolator
+        );
 
-  virtual ~SolidSolver();
+    virtual ~SolidSolver();
 
-  virtual void initTimeStep();
+    virtual void initTimeStep();
 
-  virtual bool isRunning();
+    virtual bool isRunning();
 
-  virtual void resetSolution();
+    virtual void resetSolution();
 
-  virtual void solve();
+    virtual void solve();
 
-  virtual bool interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> fineModel );
+    virtual bool interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> fineModel );
 
 protected:
 
-  void calculateEpsilonSigma();
+    void calculateEpsilonSigma();
 
-  void initialize();
+    void initialize();
 
-  void readSolidMechanicsControls();
+    void readSolidMechanicsControls();
 
-  // Fields
-  volTensorField gradU;
-  volSymmTensorField epsilon;
-  volSymmTensorField sigma;
+    // Fields
+    volTensorField gradU;
+    volSymmTensorField epsilon;
+    volSymmTensorField sigma;
 
-  // Constitutive model
-  constitutiveModel rheology;
-  volScalarField rho;
-  volScalarField mu;
-  volScalarField lambda;
-  surfaceScalarField muf;
-  surfaceScalarField lambdaf;
-  surfaceVectorField n;
+    // Constitutive model
+    constitutiveModel rheology;
+    volScalarField rho;
+    volScalarField mu;
+    volScalarField lambda;
+    surfaceScalarField muf;
+    surfaceScalarField lambdaf;
+    surfaceVectorField n;
 
-  // Solid mechanics controls
-  int nCorr;
-  scalar convergenceTolerance;
+    // Solid mechanics controls
+    int nCorr;
+    scalar convergenceTolerance;
 
-  // Dictionaries
-  IOdictionary couplingProperties;
+    // Dictionaries
+    IOdictionary couplingProperties;
 
-  std::shared_ptr<rbf::RBFCoarsening> interpolator;
+    std::shared_ptr<rbf::RBFCoarsening> interpolator;
 };
 
 #endif

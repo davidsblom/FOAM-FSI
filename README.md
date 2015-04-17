@@ -10,12 +10,19 @@ Features
 * Efficient implementation of mesh motion solver based on radial basis function interpolation.
 * Run fluid-structure-acoustics simulations with the coupling tool preCICE.
 * Block-coupled transient incompressible flow solver.
-* Arbitrary high order time discretization for incompressible flow solver based on the PISO algorithm.
+* Arbitrary high order time discretization for incompressible flow solver based on the PIMPLE algorithm.
 
 Installation
 -----------
 
-First, compile foam-extend-3.1, the nextRelease branch.
+First, compile `foam-extend-3.1`, the `nextRelease` branch. A detailed description for the compilation of `foam-extend-3.1` can be found here: https://openfoamwiki.net/index.php/Installation/Linux/foam-extend-3.1. Note that FOAM-FSI uses the `nextRelease` branch as shown below:
+
+``` bash
+git clone git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1
+cd foam-extend-3.1
+git checkout nextRelease
+./Allwmake.firstInstall
+```
 
 To compile the FSI library:
 
@@ -47,4 +54,5 @@ Credits
 The FOAM-FSI project has been started by David Blom. Many other people have also contributed. Here is an alphabetical list:
 
 Philip Cardiff  
-Thijs Gillebaart
+Thijs Gillebaart  
+Vahid Kazemi-Kamyab

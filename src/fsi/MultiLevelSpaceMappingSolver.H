@@ -17,29 +17,29 @@ class MultiLevelSpaceMappingSolver : public Solver
 {
 public:
 
-  MultiLevelSpaceMappingSolver(
-    shared_ptr< std::deque<shared_ptr<SpaceMappingSolver> > > solvers,
-    shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
-    bool synchronization
-    );
+    MultiLevelSpaceMappingSolver(
+        shared_ptr< std::deque<shared_ptr<SpaceMappingSolver> > > solvers,
+        shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
+        bool synchronization
+        );
 
-  virtual void run();
+    virtual void run();
 
-  void initTimeStep();
+    void initTimeStep();
 
-  void finalizeTimeStep();
+    void finalizeTimeStep();
 
-  bool isRunning();
+    bool isRunning();
 
-  void solve();
+    void solve();
 
-  void solveTimeStep();
+    void solveTimeStep();
 
-  shared_ptr< std::deque<shared_ptr<SpaceMappingSolver> > > solvers;
-  shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models;
-  shared_ptr<ImplicitMultiLevelFsiSolver> fineModel;
-  bool init;
-  bool synchronization;
+    shared_ptr< std::deque<shared_ptr<SpaceMappingSolver> > > solvers;
+    shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models;
+    shared_ptr<ImplicitMultiLevelFsiSolver> fineModel;
+    bool init;
+    bool synchronization;
 };
 
 #endif

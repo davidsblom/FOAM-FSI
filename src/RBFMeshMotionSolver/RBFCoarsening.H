@@ -13,59 +13,59 @@
 
 namespace rbf
 {
-  class RBFCoarsening
-  {
+    class RBFCoarsening
+    {
 public:
 
-    RBFCoarsening( std::shared_ptr<RBFInterpolation> rbf );
+        RBFCoarsening( std::shared_ptr<RBFInterpolation> rbf );
 
-    RBFCoarsening(
-      std::shared_ptr<RBFInterpolation> rbf,
-      bool enabled,
-      bool livePointSelection,
-      bool livePointSelectionSumValues,
-      double tol,
-      double tolLivePointSelection,
-      int coarseningMinPoints,
-      int coarseningMaxPoints,
-      bool exportTxt
-      );
+        RBFCoarsening(
+            std::shared_ptr<RBFInterpolation> rbf,
+            bool enabled,
+            bool livePointSelection,
+            bool livePointSelectionSumValues,
+            double tol,
+            double tolLivePointSelection,
+            int coarseningMinPoints,
+            int coarseningMaxPoints,
+            bool exportTxt
+            );
 
-    void greedySelection( const matrix & values );
+        void greedySelection( const matrix & values );
 
-    void compute(
-      const matrix & positions,
-      const matrix & positionsInterpolation
-      );
+        void compute(
+            const matrix & positions,
+            const matrix & positionsInterpolation
+            );
 
-    void interpolate(
-      const matrix & values,
-      matrix & valuesInterpolation
-      );
+        void interpolate(
+            const matrix & values,
+            matrix & valuesInterpolation
+            );
 
-    void setNbMovingAndStaticFaceCenters(
-      int nbMovingFaceCenters,
-      int nbStaticFaceCenters
-      );
+        void setNbMovingAndStaticFaceCenters(
+            int nbMovingFaceCenters,
+            int nbStaticFaceCenters
+            );
 
-    std::shared_ptr<RBFInterpolation> rbf;
-    std::shared_ptr<RBFInterpolation> rbfCoarse;
-    bool enabled;
-    bool livePointSelection;
-    bool livePointSelectionSumValues;
-    double tol;
-    double tolLivePointSelection;
-    int coarseningMinPoints;
-    int coarseningMaxPoints;
-    bool exportTxt;
-    Eigen::VectorXi selectedPositions;
-    int nbStaticFaceCentersRemove;
-    matrix positions;
-    matrix positionsInterpolation;
-    matrix values;
-    int nbMovingFaceCenters;
-    int fileExportIndex;
-  };
+        std::shared_ptr<RBFInterpolation> rbf;
+        std::shared_ptr<RBFInterpolation> rbfCoarse;
+        bool enabled;
+        bool livePointSelection;
+        bool livePointSelectionSumValues;
+        double tol;
+        double tolLivePointSelection;
+        int coarseningMinPoints;
+        int coarseningMaxPoints;
+        bool exportTxt;
+        Eigen::VectorXi selectedPositions;
+        int nbStaticFaceCentersRemove;
+        matrix positions;
+        matrix positionsInterpolation;
+        matrix values;
+        int nbMovingFaceCenters;
+        int fileExportIndex;
+    };
 }
 
 #endif

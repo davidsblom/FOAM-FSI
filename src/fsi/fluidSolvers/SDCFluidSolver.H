@@ -35,119 +35,121 @@ class SDCFluidSolver : public foamFluidSolver, public sdc::SDCSolver
 {
 public:
 
-  SDCFluidSolver(
-    string name,
-    shared_ptr<argList> args,
-    shared_ptr<Time> runTime
-    );
+    SDCFluidSolver(
+        string name,
+        shared_ptr<argList> args,
+        shared_ptr<Time> runTime
+        );
 
-  virtual ~SDCFluidSolver();
+    virtual ~SDCFluidSolver();
 
-  virtual void getAcousticsDensityLocal( matrix & data );
+    virtual void getAcousticsDensityLocal( matrix & data );
 
-  virtual void getAcousticsVelocityLocal( matrix & data );
+    virtual void getAcousticsVelocityLocal( matrix & data );
 
-  virtual void getAcousticsPressureLocal( matrix & data );
+    virtual void getAcousticsPressureLocal( matrix & data );
 
-  virtual void getTractionLocal( matrix & traction );
+    virtual void getTractionLocal( matrix & traction );
 
-  virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
+    virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
 
-  virtual void initTimeStep();
+    virtual void initTimeStep();
 
-  virtual bool isRunning();
+    virtual bool isRunning();
 
-  virtual void resetSolution();
+    virtual void resetSolution();
 
-  virtual void solve();
+    virtual void solve();
 
-  virtual void evaluateFunction(
-    const int k,
-    const Eigen::VectorXd & q,
-    const double t,
-    Eigen::VectorXd & f
-    );
+    virtual void evaluateFunction(
+        const int k,
+        const Eigen::VectorXd & q,
+        const double t,
+        Eigen::VectorXd & f
+        );
 
-  virtual void finalizeTimeStep();
+    virtual void finalizeTimeStep();
 
-  virtual int getDOF();
+    virtual int getDOF();
 
-  virtual void getSolution( Eigen::VectorXd & solution );
+    virtual void getSolution( Eigen::VectorXd & solution );
 
-  virtual int getNbCells();
+    virtual int getNbCells();
 
-  virtual double getScalingFactor();
+    virtual double getScalingFactor();
 
-  virtual double getTimeStep();
+    virtual double getTimeStep();
 
-  virtual void implicitSolve(
-    bool corrector,
-    const int k,
-    const double t,
-    const double dt,
-    const Eigen::VectorXd & qold,
-    const Eigen::VectorXd & rhs,
-    Eigen::VectorXd & f,
-    Eigen::VectorXd & result
-    );
+    virtual void implicitSolve(
+        bool corrector,
+        const int k,
+        const double t,
+        const double dt,
+        const Eigen::VectorXd & qold,
+        const Eigen::VectorXd & rhs,
+        Eigen::VectorXd & f,
+        Eigen::VectorXd & result
+        );
 
-  virtual void setDeltaT( double dt );
+    virtual void setDeltaT( double dt );
 
-  virtual void setNumberOfStages( int k );
+    virtual void setNumberOfStages( int k );
 
-  virtual void nextTimeStep();
+    virtual void nextTimeStep();
 
 private:
 
-  void continuityErrs();
+    void continuityErrs();
 
-  void courantNo();
+    void courantNo();
 
-  void createFields();
+    void createFields();
 
-  void initialize();
+    double evaluateMomentumResidual( double dt );
 
-  void readPIMPLEControls();
+    void initialize();
 
-  // Dictionaries
-  IOdictionary transportProperties;
-  dictionary pimple;
+    void readPIMPLEControls();
 
-  // Dimensioned scalars
-  dimensionedScalar nu;
-  dimensionedScalar rho;
+    // Dictionaries
+    IOdictionary transportProperties;
+    dictionary pimple;
 
-  // Fields
-  volScalarField p;
-  volVectorField U;
-  surfaceScalarField phi;
-  surfaceVectorField Uf;
-  volScalarField AU;
-  volVectorField HU;
-  volVectorField rhsU;
-  surfaceVectorField rhsUf;
+    // Dimensioned scalars
+    dimensionedScalar nu;
+    dimensionedScalar rho;
 
-  // PIMPLE controls
-  int nOuterCorr;
-  int nCorr;
-  int nNonOrthCorr;
+    // Fields
+    volScalarField p;
+    volVectorField U;
+    surfaceScalarField phi;
+    surfaceVectorField Uf;
+    volScalarField AU;
+    volVectorField HU;
+    volVectorField rhsU;
+    surfaceVectorField rhsUf;
 
-  // Continuity errors
-  scalar sumLocalContErr;
-  scalar globalContErr;
-  scalar cumulativeContErr;
+    // PIMPLE controls
+    int nOuterCorr;
+    int nCorr;
+    int nNonOrthCorr;
 
-  label pRefCell;
-  scalar pRefValue;
+    // Continuity errors
+    scalar sumLocalContErr;
+    scalar globalContErr;
+    scalar cumulativeContErr;
 
-  // Controls
-  scalar convergenceTolerance;
+    label pRefCell;
+    scalar pRefValue;
 
-  int k;
-  std::deque<volScalarField> pStages;
-  std::deque<surfaceScalarField> phiStages;
-  std::deque<volVectorField> UStages;
-  std::deque<surfaceVectorField> UfStages;
+    // Controls
+    scalar convergenceTolerance;
+
+    int k;
+    std::deque<volScalarField> pStages;
+    std::deque<surfaceScalarField> phiStages;
+    std::deque<volVectorField> UStages;
+    std::deque<surfaceVectorField> UfStages;
 };
 
 #endif

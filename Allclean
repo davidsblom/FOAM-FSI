@@ -1,12 +1,13 @@
 #! /bin/bash
 
-wclean libso src/fvPatchFields
+wclean libso src/boundaryConditions
 wclean libso src/fvSchemes
 wclean libso src/fsi
 wclean libso src/RBFMeshMotionSolver
 wclean libso applications/utilities/mapMesh
+wclean applications/utilities/addInitialRandomVelocity
+wclean all applications/solvers/consistentSolvers
 wclean applications/solvers/unsteadyPUCoupledFoam
-wclean applications/solvers/consistentPimpleFoam
 wclean applications/solvers/fsi/fsiFoam
 wclean applications/solvers/fsi/fluidFoam
 wclean applications/solvers/fsi/solidFoam

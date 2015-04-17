@@ -24,47 +24,47 @@ class CoupledSolidSolver : public foamSolidSolver
 {
 public:
 
-  CoupledSolidSolver(
-    string name,
-    std::shared_ptr<argList> args,
-    std::shared_ptr<Time> runTime
-    );
+    CoupledSolidSolver(
+        string name,
+        std::shared_ptr<argList> args,
+        std::shared_ptr<Time> runTime
+        );
 
-  virtual ~CoupledSolidSolver();
+    virtual ~CoupledSolidSolver();
 
-  virtual void initTimeStep();
+    virtual void initTimeStep();
 
-  virtual bool isRunning();
+    virtual bool isRunning();
 
-  virtual void solve();
+    virtual void solve();
 
 private:
 
-  void createNonLinearGeometry();
+    void createNonLinearGeometry();
 
-  // Mesh
-  solidPolyMesh solidMesh;
-  pointMesh pMesh;
-  leastSquaresVolPointInterpolation volToPointInterp;
+    // Mesh
+    solidPolyMesh solidMesh;
+    pointMesh pMesh;
+    leastSquaresVolPointInterpolation volToPointInterp;
 
-  // Fields
-  volTensorField gradU;
-  surfaceTensorField gradUf;
-  volSymmTensorField epsilon;
-  volSymmTensorField sigma;
-  surfaceVectorField n;
+    // Fields
+    volTensorField gradU;
+    surfaceTensorField gradUf;
+    volSymmTensorField epsilon;
+    volSymmTensorField sigma;
+    surfaceVectorField n;
 
-  // Constitutive model
-  constitutiveModel rheology;
-  const volScalarField rho;
-  const volScalarField mu;
-  const volScalarField lambda;
-  surfaceScalarField muf;
-  surfaceScalarField lambdaf;
+    // Constitutive model
+    constitutiveModel rheology;
+    const volScalarField rho;
+    const volScalarField mu;
+    const volScalarField lambda;
+    surfaceScalarField muf;
+    surfaceScalarField lambdaf;
 
-  // Solid mechanics controls
-  const dictionary & stressControl;
-  int nCorr;
+    // Solid mechanics controls
+    const dictionary & stressControl;
+    int nCorr;
 };
 
 #endif

@@ -12,70 +12,70 @@
 
 namespace fsi
 {
-  class ManifoldMapping : public SpaceMapping
-  {
+    class ManifoldMapping : public SpaceMapping
+    {
 public:
 
-    using SpaceMapping::performPostProcessing;
+        using SpaceMapping::performPostProcessing;
 
-    ManifoldMapping(
-      shared_ptr<SurrogateModel> fineModel,
-      shared_ptr<SurrogateModel> coarseModel,
-      int maxIter
-      );
+        ManifoldMapping(
+            shared_ptr<SurrogateModel> fineModel,
+            shared_ptr<SurrogateModel> coarseModel,
+            int maxIter
+            );
 
-    ManifoldMapping(
-      shared_ptr<SurrogateModel> fineModel,
-      shared_ptr<SurrogateModel> coarseModel,
-      int maxIter,
-      int maxUsedIterations,
-      int nbReuse,
-      int reuseInformationStartingFromTimeIndex,
-      double singularityLimit,
-      bool updateJacobian
-      );
+        ManifoldMapping(
+            shared_ptr<SurrogateModel> fineModel,
+            shared_ptr<SurrogateModel> coarseModel,
+            int maxIter,
+            int maxUsedIterations,
+            int nbReuse,
+            int reuseInformationStartingFromTimeIndex,
+            double singularityLimit,
+            bool updateJacobian
+            );
 
-    ManifoldMapping(
-      shared_ptr<SurrogateModel> fineModel,
-      shared_ptr<SurrogateModel> coarseModel,
-      int maxIter,
-      int maxUsedIterations,
-      int nbReuse,
-      int reuseInformationStartingFromTimeIndex,
-      double singularityLimit,
-      bool updateJacobian,
-      bool initialSolutionCoarseModel
-      );
+        ManifoldMapping(
+            shared_ptr<SurrogateModel> fineModel,
+            shared_ptr<SurrogateModel> coarseModel,
+            int maxIter,
+            int maxUsedIterations,
+            int nbReuse,
+            int reuseInformationStartingFromTimeIndex,
+            double singularityLimit,
+            bool updateJacobian,
+            bool initialSolutionCoarseModel
+            );
 
-    virtual ~ManifoldMapping();
+        virtual ~ManifoldMapping();
 
-    virtual void performPostProcessing(
-      const vector & y,
-      const vector & x0,
-      vector & xk,
-      bool residualCriterium
-      );
+        virtual void performPostProcessing(
+            const vector & y,
+            const vector & x0,
+            vector & xk,
+            bool residualCriterium
+            );
 
-    void applyScaling( vector & vec );
+        void applyScaling( vector & vec );
 
-    void applyScaling( matrix & mat );
+        void applyScaling( matrix & mat );
 
-    void determineScalingFactors( const vector & output );
+        void determineScalingFactors( const vector & output );
 
-    void removeColumnFromMatrix(
-      matrix & A,
-      int col
-      );
+        void removeColumnFromMatrix(
+            matrix & A,
+            int col
+            );
 
-    bool updateJacobian;
-    bool initialSolutionCoarseModel;
-    bool scaling;
-    int iter;
-    vector scalingFactors;
-    matrix Tkprev;
-    int sizeVar0;
-    int sizeVar1;
-  };
+        bool updateJacobian;
+        bool initialSolutionCoarseModel;
+        bool scaling;
+        int iter;
+        vector scalingFactors;
+        matrix Tkprev;
+        int sizeVar0;
+        int sizeVar1;
+    };
 }
 
 #endif
