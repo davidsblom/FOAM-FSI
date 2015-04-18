@@ -126,6 +126,7 @@ FluidSolver::FluidSolver(
     assert( nCorr > 0 );
     assert( nOuterCorr >= 2 );
     assert( nNonOrthCorr >= 0 );
+    assert( relativeTolerance < 1 );
 
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
