@@ -330,17 +330,6 @@ void FluidSolver::solve()
     Info << "Solve fluid domain" << endl;
 
     scalar convergenceTolerance = absoluteTolerance;
-    if ( relativeTolerance > 0 && timeIndex > 1 )
-    {
-        fvc::makeRelative( phi, U );
-        double initMomentumResidual = evaluateMomentumResidual();
-        fvc::makeAbsolute( phi, U );
-        convergenceTolerance = std::max( relativeTolerance * initMomentumResidual, absoluteTolerance );
-
-        Info << "root mean square residual norm = " << initMomentumResidual;
-        Info << ", tolerance = " << convergenceTolerance;
-        Info << ", iteration = 0, convergence = false" << endl;
-    }
 
     // --- PIMPLE loop
     for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
@@ -472,6 +461,9 @@ void FluidSolver::solve()
         fvc::makeRelative( phi, U );
 
         scalar momentumResidual = evaluateMomentumResidual();
+
+        if ( oCorr == 0 )
+            convergenceTolerance = std::max( relativeTolerance * momentumResidual, absoluteTolerance );
 
         int minIter = 2;
         bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
