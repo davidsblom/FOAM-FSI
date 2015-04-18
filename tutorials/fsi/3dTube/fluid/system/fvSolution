@@ -29,7 +29,6 @@ solvers
         solver          BiCGStab;
         preconditioner  DILU;
         tolerance       1e-11;
-        relTol          1.0e-3;
     }
 }
 

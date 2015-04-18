@@ -28,7 +28,6 @@ solvers
     solver BiCGStab;
     preconditioner DILU;
     tolerance 1e-13;
-    relTol 0.001;
   }
 }
 
@@ -37,7 +36,8 @@ PIMPLE
   nOuterCorrectors 500;
   nCorrectors 5;
   nNonOrthogonalCorrectors 0;
-  convergenceTolerance 1.0e-12;
+  tolerance 1.0e-6;
+  relTol 0;
 }
 
 relaxationFactors
