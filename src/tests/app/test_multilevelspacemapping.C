@@ -23,7 +23,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class MultiLevelSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int, bool, int> >
+class MultiLevelSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<int, int, int, int, bool, int, int> >
 {
 protected:
 
@@ -58,16 +58,17 @@ protected:
         double beta = 1;
         int coarseningMinPoints = 5;
         int coarseningMaxPoints = 2000;
+        int order = 2;
+        bool parallel = false;
 
         // Parametrized settings
-        bool parallel = std::tr1::get<0>( GetParam() );
-        int nbReuse = std::tr1::get<1>( GetParam() );
-        int extrapolation = std::tr1::get<2>( GetParam() );
-        int minIter = std::tr1::get<3>( GetParam() );
-        int couplingGridSize = std::tr1::get<4>( GetParam() );
-        int reuseInformationStartingFromTimeIndex = 0;
-        bool convergenceMeasureTraction = std::tr1::get<5>( GetParam() );
-        int spaceMappingAlgorithm = std::tr1::get<6>( GetParam() );
+        int nbReuse = std::tr1::get<0>( GetParam() );
+        int extrapolation = std::tr1::get<1>( GetParam() );
+        int minIter = std::tr1::get<2>( GetParam() );
+        int couplingGridSize = std::tr1::get<3>( GetParam() );
+        bool convergenceMeasureTraction = std::tr1::get<4>( GetParam() );
+        int spaceMappingAlgorithm = std::tr1::get<5>( GetParam() );
+        int reuseInformationStartingFromTimeIndex = std::tr1::get<6>( GetParam() );
         bool coarsening = false;
         bool liveSelection = false;
 
@@ -206,7 +207,7 @@ protected:
             spaceMapping = shared_ptr<SpaceMapping>( new ManifoldMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
 
         if ( spaceMappingAlgorithm == 1 )
-            spaceMapping = shared_ptr<SpaceMapping>( new OutputSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+            spaceMapping = shared_ptr<SpaceMapping>( new OutputSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
 
         if ( spaceMappingAlgorithm == 2 )
             spaceMapping = shared_ptr<SpaceMapping>( new AggressiveSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
@@ -301,14 +302,15 @@ protected:
     shared_ptr<MultiLevelSpaceMappingSolver> solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelSpaceMappingSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 4 ), Values( 0, 2 ), Values( 3 ), Values( 20, 40 ), Bool(), Values( 0, 1, 2 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelSpaceMappingSolverParametrizedTest, ::testing::Combine( Values( 0, 2 ), Values( 0, 2 ), Values( 3 ), Values( 20, 40 ), Bool(), Values( 0, 1, 2 ), Values( 0, 5 ) ) );
 
 TEST_P( MultiLevelSpaceMappingSolverParametrizedTest, run )
 {
-    solver->solveTimeStep();
+    for ( int i = 0; i < 9; i++ )
+        solver->solveTimeStep();
 
     ASSERT_TRUE( solver->models->at( solver->models->size() - 1 )->fsi->allConverged );
     ASSERT_TRUE( solver->models->at( solver->models->size() - 1 )->fsi->fluid->isRunning() );
-    ASSERT_EQ( solver->solvers->at( 0 )->spaceMapping->timeIndex, 1 );
-    ASSERT_EQ( solver->solvers->at( 1 )->spaceMapping->timeIndex, 1 );
+    ASSERT_EQ( solver->solvers->at( 0 )->spaceMapping->timeIndex, 9 );
+    ASSERT_EQ( solver->solvers->at( 1 )->spaceMapping->timeIndex, 9 );
 }

@@ -16,6 +16,10 @@ if [ -z "$FOAM_USER_SRC" ]; then
     echo "========================================================"
 fi
 
+cd src/thirdParty
+./Allmake
+cd ../../
+
 set -e
 
 wmakeLnInclude src/boundaryConditions

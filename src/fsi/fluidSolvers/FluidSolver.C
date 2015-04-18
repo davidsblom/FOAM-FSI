@@ -284,7 +284,7 @@ void FluidSolver::initTimeStep()
     timeIndex++;
     t = timeIndex * runTime->deltaT().value();
 
-    Info << "\nTime = " << runTime->deltaT().value() << endl;
+    Info << "\nTime = " << t << endl;
 
     courantNo();
 
