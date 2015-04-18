@@ -59,6 +59,8 @@ private:
 
     void courantNo();
 
+    double evaluateMomentumResidual();
+
     // Dictionaries
     IOdictionary transportProperties;
 
@@ -79,7 +81,8 @@ private:
     int nOuterCorr;
     int nCorr;
     int nNonOrthCorr;
-    scalar convergenceTolerance;
+    scalar absoluteTolerance;
+    scalar relativeTolerance;
 
     // Continuity errors
     scalar sumLocalContErr;

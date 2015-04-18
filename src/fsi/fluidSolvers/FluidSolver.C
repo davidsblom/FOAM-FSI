@@ -110,7 +110,8 @@ FluidSolver::FluidSolver(
     nOuterCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nOuterCorrectors" ) ) ),
     nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
     nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
-    convergenceTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "convergenceTolerance" ) ) ),
+    absoluteTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "tolerance" ) ) ),
+    relativeTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "relTol" ) ) ),
     sumLocalContErr( 0 ),
     globalContErr( 0 ),
     cumulativeContErr( 0 ),
@@ -120,8 +121,8 @@ FluidSolver::FluidSolver(
         incompressible::turbulenceModel::New( U, phi, laminarTransport )
     ) )
 {
-    assert( convergenceTolerance < 1 );
-    assert( convergenceTolerance > 0 );
+    assert( absoluteTolerance < 1 );
+    assert( absoluteTolerance > 0 );
     assert( nCorr > 0 );
     assert( nOuterCorr >= 2 );
     assert( nNonOrthCorr >= 0 );
@@ -129,10 +130,10 @@ FluidSolver::FluidSolver(
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
     scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
-    assert( absTolerance < convergenceTolerance );
+    assert( absTolerance < absoluteTolerance );
 
     absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
-    assert( absTolerance < convergenceTolerance );
+    assert( absTolerance < absoluteTolerance );
 
     checkTimeDiscretisationScheme();
 
@@ -225,6 +226,21 @@ void FluidSolver::courantNo()
          << endl;
 }
 
+double FluidSolver::evaluateMomentumResidual()
+{
+    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
+
+    scalarField magResU = mag( residual.internalField() );
+    scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
+    scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
+    rmsU /= runTime->deltaT().value();
+
+    // Scale the residual by the root mean square of the velocity field
+    momentumResidual /= rmsU;
+
+    return momentumResidual;
+}
+
 void FluidSolver::getAcousticsDensityLocal( matrix & data )
 {
     assert( false );
@@ -312,6 +328,17 @@ void FluidSolver::resetSolution()
 void FluidSolver::solve()
 {
     Info << "Solve fluid domain" << endl;
+
+    scalar convergenceTolerance = absoluteTolerance;
+    if ( relativeTolerance > 0 && timeIndex > 1 )
+    {
+        double initMomentumResidual = evaluateMomentumResidual();
+        convergenceTolerance = std::max( relativeTolerance * initMomentumResidual, absoluteTolerance );
+
+        Info << "root mean square residual norm = " << initMomentumResidual;
+        Info << ", tolerance = " << convergenceTolerance;
+        Info << ", iteration = 0, convergence = false" << endl;
+    }
 
     // --- PIMPLE loop
     for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
