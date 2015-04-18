@@ -34,9 +34,13 @@ void OutputSpaceMapping::finalizeTimeStep()
 {
     SpaceMapping::finalizeTimeStep();
 
+    timeIndex--;
+
     // Save input/output information for next time step
     if ( nbReuse > 0 && solsList.size() >= 1 && timeIndex >= reuseInformationStartingFromTimeIndex )
         solsTimeList.push_front( solsList );
+
+    timeIndex++;
 
     // Remove the last items from the residual list and solutions list
     // in order to ensure that at maximum nbReuse time steps
