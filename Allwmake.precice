@@ -18,10 +18,6 @@ wmake libso src/SRFModelAbs
 wmake applications/utilities/addInitialRandomVelocity
 wmake all applications/solvers/consistentSolvers
 wmake applications/solvers/unsteadyPUCoupledFoam
-wmake applications/solvers/fsi/fsiFoam
-wmake applications/solvers/fsi/solidFoam
-wmake applications/solvers/fsi/fluidFoam
+wmake all applications/solvers/fsi
 wmake src/tests/app
 wmake src/tests/tubeflow
-wmake applications/solvers/fsi/fsiFluidFoam
-wmake applications/solvers/fsi/fsiSolidFoam
