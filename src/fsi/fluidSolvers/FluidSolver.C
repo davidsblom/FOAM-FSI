@@ -471,7 +471,7 @@ void FluidSolver::solve()
         }
         fvc::makeRelative( phi, U );
 
-        scalar initMomentumResidual = evaluateMomentumResidual();
+        scalar momentumResidual = evaluateMomentumResidual();
 
         int minIter = 2;
         bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
