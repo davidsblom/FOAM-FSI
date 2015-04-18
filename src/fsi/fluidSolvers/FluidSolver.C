@@ -332,7 +332,9 @@ void FluidSolver::solve()
     scalar convergenceTolerance = absoluteTolerance;
     if ( relativeTolerance > 0 && timeIndex > 1 )
     {
+        fvc::makeRelative( phi, U );
         double initMomentumResidual = evaluateMomentumResidual();
+        fvc::makeAbsolute( phi, U );
         convergenceTolerance = std::max( relativeTolerance * initMomentumResidual, absoluteTolerance );
 
         Info << "root mean square residual norm = " << initMomentumResidual;
@@ -469,15 +471,7 @@ void FluidSolver::solve()
         }
         fvc::makeRelative( phi, U );
 
-        volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
-
-        scalarField magResU = mag( residual.internalField() );
-        scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
-        scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
-        rmsU /= runTime->deltaT().value();
-
-        // Scale the residual by the root mean square of the velocity field
-        momentumResidual /= rmsU;
+        scalar initMomentumResidual = evaluateMomentumResidual();
 
         int minIter = 2;
         bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
