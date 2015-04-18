@@ -28,6 +28,7 @@ To compile the FSI library:
 
 ``` bash
 git clone https://github.com/davidsblom/FOAM-FSI.git
+cd FOAM-FSI
 ./Allwmake.firstInstall
 ```
 
