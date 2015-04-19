@@ -31,7 +31,7 @@ boundaryField
     }
     wall
     {
-        type            movingWallVelocity;
+        type            myMovingWallVelocity;
         value           uniform (0 0 0);
     }
     symmetry-x
