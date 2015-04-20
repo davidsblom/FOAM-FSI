@@ -69,8 +69,10 @@ protected:
     surfaceVectorField n;
 
     // Solid mechanics controls
-    int nCorr;
-    scalar convergenceTolerance;
+    int minIter;
+    int maxIter;
+    scalar absoluteTolerance;
+    scalar relativeTolerance;
 
     // Dictionaries
     IOdictionary couplingProperties;

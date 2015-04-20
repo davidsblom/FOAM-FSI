@@ -23,16 +23,17 @@ solvers
 
 solidMechanics
 {
-  nCorrectors 1000;
-  U 1e-11;
-  divSigmaExp standard;
-  divSigmaLargeStrainExp standard;
-  moveMeshMethod leastSquares;
-  gravity gravity       [ 0 1 -2 0 0 0 0 ]       (0 0 0) ;
+    tolerance 1e-11;
+    relTol 1.0e-5;
+    minIter 5;
+    maxIter 500;
+    divSigmaExp standard;
+    divSigmaLargeStrainExp standard;
+    moveMeshMethod leastSquares;
+    gravity gravity       [ 0 1 -2 0 0 0 0 ]       (0 0 0) ;
 }
 
 relaxationFactors
 {
   U 0.9;
 }
-
