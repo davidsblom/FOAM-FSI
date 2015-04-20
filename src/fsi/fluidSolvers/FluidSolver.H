@@ -78,9 +78,10 @@ private:
     volVectorField HU;
 
     // PIMPLE controls
-    int nOuterCorr;
     int nCorr;
     int nNonOrthCorr;
+    int minIter;
+    int maxIter;
     scalar absoluteTolerance;
     scalar relativeTolerance;
 

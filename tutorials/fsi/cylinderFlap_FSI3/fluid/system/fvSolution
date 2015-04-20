@@ -20,7 +20,7 @@ solvers
   {
     solver           PCG;
     preconditioner   DIC;
-    tolerance        1e-09;
+    tolerance        1e-11;
     relTol           1.0e-3;
   }
 
@@ -28,18 +28,19 @@ solvers
   {
     solver BiCGStab;
     preconditioner DILU;
-    tolerance 1e-10;
+    tolerance 1e-11;
   }
 }
 
 
 PIMPLE
 {
-  nOuterCorrectors 100;
-  nCorrectors 5;
-  nNonOrthogonalCorrectors 0;
-  tolerance 1.0e-6;
-  relTol 1.0e-2;
+    nCorrectors 5;
+    nNonOrthogonalCorrectors 0;
+    tolerance 1.0e-10;
+    relTol 1.0e-2;
+    maxIter 500;
+    minIter 1;
 }
 
 relaxationFactors

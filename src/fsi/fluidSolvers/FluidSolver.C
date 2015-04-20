@@ -107,9 +107,10 @@ FluidSolver::FluidSolver(
     U.dimensions() / runTime->deltaT().dimensions(),
     zeroGradientFvPatchVectorField::typeName
     ),
-    nOuterCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nOuterCorrectors" ) ) ),
     nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
     nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
+    minIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "minIter" ) ) ),
+    maxIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "maxIter" ) ) ),
     absoluteTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "tolerance" ) ) ),
     relativeTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "relTol" ) ) ),
     sumLocalContErr( 0 ),
@@ -124,9 +125,11 @@ FluidSolver::FluidSolver(
     assert( absoluteTolerance < 1 );
     assert( absoluteTolerance > 0 );
     assert( nCorr > 0 );
-    assert( nOuterCorr >= 2 );
+    assert( maxIter >= 1 );
     assert( nNonOrthCorr >= 0 );
     assert( relativeTolerance < 1 );
+    assert( minIter <= maxIter );
+    assert( minIter >= 0 );
 
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
@@ -333,7 +336,7 @@ void FluidSolver::solve()
     scalar convergenceTolerance = absoluteTolerance;
 
     // --- PIMPLE loop
-    for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
+    for ( label oCorr = 0; oCorr < maxIter; oCorr++ )
     {
         // Make the fluxes relative to the mesh motion
         fvc::makeRelative( phi, U );
@@ -466,7 +469,6 @@ void FluidSolver::solve()
         if ( oCorr == 0 )
             convergenceTolerance = std::max( relativeTolerance * momentumResidual, absoluteTolerance );
 
-        int minIter = 2;
         bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
 
         Info << "root mean square residual norm = " << momentumResidual;
