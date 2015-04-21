@@ -21,14 +21,13 @@ ddtSchemes
 
 gradSchemes
 {
-    default Gauss;
+    default Gauss linear;
 }
 
 divSchemes
 {
     default Gauss linear;
-    div(phi,U)   Gauss skewCorrected linear;
-//    div(phi,U) Gauss linearUpwind cellLimited leastSquares 1;
+    div(phi,U) Gauss linearUpwind Gauss linear;
 }
 
 laplacianSchemes
@@ -48,7 +47,7 @@ snGradSchemes
 
 fluxRequired
 {
-    default         no;
+    default no;
     p;
 }
 

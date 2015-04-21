@@ -34,8 +34,10 @@ solvers
 
 PIMPLE
 {
-  nOuterCorrectors 500;
   nCorrectors 5;
   nNonOrthogonalCorrectors 0;
-  convergenceTolerance 1.0e-6;
+  tolerance 1.0e-10;
+  relTol 1.0e-2;
+  maxIter 500;
+  minIter 1;
 }

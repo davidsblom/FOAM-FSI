@@ -253,13 +253,21 @@ void SolidSolver::readSolidMechanicsControls()
     const dictionary & stressControl =
         mesh.solutionDict().subDict( "solidMechanics" );
 
-    nCorr = readInt( stressControl.lookup( "nCorrectors" ) );
-    convergenceTolerance = readScalar( stressControl.lookup( "U" ) );
+    minIter = readInt( stressControl.lookup( "minIter" ) );
+    maxIter = readInt( stressControl.lookup( "maxIter" ) );
+    absoluteTolerance = readScalar( stressControl.lookup( "tolerance" ) );
+    relativeTolerance = readScalar( stressControl.lookup( "relTol") );
 
     // Ensure that the absolute tolerance of the linear solver is less
     // than the used convergence tolerance for the non-linear system.
     scalar linearTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
-    assert( linearTolerance < convergenceTolerance );
+    assert( linearTolerance < absoluteTolerance );
+    assert( relativeTolerance < 1 );
+    assert( absoluteTolerance > 0 );
+    assert( absoluteTolerance < 1 );
+    assert( minIter < maxIter );
+    assert( maxIter > 0 );
+    assert( minIter >= 0 );
 }
 
 void SolidSolver::resetSolution()
@@ -272,11 +280,12 @@ void SolidSolver::solve()
 {
     Info << "Solve solid domain" << endl;
 
-    int iCorr = 0;
-    scalar relativeResidual = 1;
+    scalar iCorr = 0;
+    scalar displacementResidual = 1;
     scalar initialResidual = 1;
     lduMatrix::solverPerformance solverPerf;
     lduMatrix::debug = 0;
+    scalar convergenceTolerance = absoluteTolerance;
 
     gradU = fvc::grad( U );
 
@@ -284,7 +293,7 @@ void SolidSolver::solve()
 
     dimensionedVector gravity( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "gravity" ) );
 
-    do
+    for ( iCorr = 0; iCorr < maxIter; iCorr++ )
     {
         U.storePrevIter();
 
@@ -322,23 +331,26 @@ void SolidSolver::solve()
 
         calculateEpsilonSigma();
 
-        relativeResidual = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
-        relativeResidual = max( relativeResidual, solverPerf.initialResidual() );
+        displacementResidual = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
+        displacementResidual = max( displacementResidual, solverPerf.initialResidual() );
 
         if ( iCorr == 0 )
-            initialResidual = relativeResidual;
+        {
+            initialResidual = displacementResidual;
+            convergenceTolerance = std::max( relativeTolerance * displacementResidual, absoluteTolerance );
+            convergenceTolerance = std::min( relativeTolerance, convergenceTolerance );
+        }
+
+        bool convergence = displacementResidual <= convergenceTolerance && iCorr >= minIter - 1;
+
+        if ( convergence )
+            break;
     }
-    while
-    (
-        relativeResidual > convergenceTolerance
-        &&
-        ++iCorr < nCorr
-    );
 
     lduMatrix::debug = 1;
 
     Info << "Solving for " << U.name();
     Info << ", Initial residual = " << initialResidual;
-    Info << ", Final residual = " << relativeResidual;
+    Info << ", Final residual = " << displacementResidual;
     Info << ", No outer iterations " << iCorr << endl;
 }

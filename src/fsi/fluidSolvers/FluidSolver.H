@@ -59,6 +59,8 @@ private:
 
     void courantNo();
 
+    double evaluateMomentumResidual();
+
     // Dictionaries
     IOdictionary transportProperties;
 
@@ -76,10 +78,12 @@ private:
     volVectorField HU;
 
     // PIMPLE controls
-    int nOuterCorr;
     int nCorr;
     int nNonOrthCorr;
-    scalar convergenceTolerance;
+    int minIter;
+    int maxIter;
+    scalar absoluteTolerance;
+    scalar relativeTolerance;
 
     // Continuity errors
     scalar sumLocalContErr;

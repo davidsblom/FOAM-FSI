@@ -107,10 +107,12 @@ FluidSolver::FluidSolver(
     U.dimensions() / runTime->deltaT().dimensions(),
     zeroGradientFvPatchVectorField::typeName
     ),
-    nOuterCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nOuterCorrectors" ) ) ),
     nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
     nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
-    convergenceTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "convergenceTolerance" ) ) ),
+    minIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "minIter" ) ) ),
+    maxIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "maxIter" ) ) ),
+    absoluteTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "tolerance" ) ) ),
+    relativeTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "relTol" ) ) ),
     sumLocalContErr( 0 ),
     globalContErr( 0 ),
     cumulativeContErr( 0 ),
@@ -120,19 +122,22 @@ FluidSolver::FluidSolver(
         incompressible::turbulenceModel::New( U, phi, laminarTransport )
     ) )
 {
-    assert( convergenceTolerance < 1 );
-    assert( convergenceTolerance > 0 );
+    assert( absoluteTolerance < 1 );
+    assert( absoluteTolerance > 0 );
     assert( nCorr > 0 );
-    assert( nOuterCorr >= 2 );
+    assert( maxIter >= 1 );
     assert( nNonOrthCorr >= 0 );
+    assert( relativeTolerance < 1 );
+    assert( minIter <= maxIter );
+    assert( minIter >= 0 );
 
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
     scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
-    assert( absTolerance < convergenceTolerance );
+    assert( absTolerance < absoluteTolerance );
 
     absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
-    assert( absTolerance < convergenceTolerance );
+    assert( absTolerance < absoluteTolerance );
 
     checkTimeDiscretisationScheme();
 
@@ -225,6 +230,21 @@ void FluidSolver::courantNo()
          << endl;
 }
 
+double FluidSolver::evaluateMomentumResidual()
+{
+    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
+
+    scalarField magResU = mag( residual.internalField() );
+    scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
+    scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
+    rmsU /= runTime->deltaT().value();
+
+    // Scale the residual by the root mean square of the velocity field
+    momentumResidual /= rmsU;
+
+    return momentumResidual;
+}
+
 void FluidSolver::getAcousticsDensityLocal( matrix & data )
 {
     assert( false );
@@ -284,7 +304,7 @@ void FluidSolver::initTimeStep()
     timeIndex++;
     t = timeIndex * runTime->deltaT().value();
 
-    Info << "\nTime = " << t << endl;
+    Info << "\nTime = " << runTime->value() << endl;
 
     courantNo();
 
@@ -313,8 +333,10 @@ void FluidSolver::solve()
 {
     Info << "Solve fluid domain" << endl;
 
+    scalar convergenceTolerance = absoluteTolerance;
+
     // --- PIMPLE loop
-    for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
+    for ( label oCorr = 0; oCorr < maxIter; oCorr++ )
     {
         // Make the fluxes relative to the mesh motion
         fvc::makeRelative( phi, U );
@@ -442,17 +464,11 @@ void FluidSolver::solve()
         }
         fvc::makeRelative( phi, U );
 
-        volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
+        scalar momentumResidual = evaluateMomentumResidual();
 
-        scalarField magResU = mag( residual.internalField() );
-        scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
-        scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
-        rmsU /= runTime->deltaT().value();
+        if ( oCorr == 0 )
+            convergenceTolerance = std::max( relativeTolerance * momentumResidual, absoluteTolerance );
 
-        // Scale the residual by the root mean square of the velocity field
-        momentumResidual /= rmsU;
-
-        int minIter = 2;
         bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
 
         Info << "root mean square residual norm = " << momentumResidual;
