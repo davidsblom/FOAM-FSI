@@ -5,12 +5,13 @@
  */
 
 #include "SDC.H"
-#include "gauss_radau.H"
+#include "QuadratureRules.H"
 
 namespace sdc
 {
     SDC::SDC(
         std::shared_ptr<SDCSolver> solver,
+        std::string rule,
         int nbNodes,
         double tol
         )
@@ -31,8 +32,9 @@ namespace sdc
         assert( dt > 0 );
         assert( tol > 0 );
         assert( tol < 1 );
+        assert( rule == "gauss-radau" || rule == "gauss-lobatto" );
 
-        quadrature::rules( nbNodes, nodes, smat, qmat );
+        quadrature::rules( rule, nbNodes, nodes, smat, qmat );
 
         k = nodes.rows();
 

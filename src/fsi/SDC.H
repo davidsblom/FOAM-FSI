@@ -19,6 +19,7 @@ public:
 
         SDC(
             std::shared_ptr<SDCSolver> solver,
+            std::string rule,
             int nbNodes,
             double tol
             );

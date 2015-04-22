@@ -263,7 +263,7 @@ protected:
         qdot0 = -As;
 
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc = std::shared_ptr<SDC> ( new SDC( piston, nbNodes, 1.0e-11 ) );
+        sdc = std::shared_ptr<SDC> ( new SDC( piston, "gauss-radau", nbNodes, 1.0e-11 ) );
     }
 
     virtual void TearDown()
