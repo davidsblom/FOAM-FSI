@@ -67,18 +67,21 @@ namespace sdc
         Eigen::VectorXd dtsdc = this->dt * dsdc;
         Eigen::MatrixXd solStages( k, N ), F( k, N );
 
-        Eigen::VectorXd sol( N );
+        Eigen::VectorXd sol( N ), f( N );
         solver->getSolution( sol );
         solStages.row( 0 ) = sol;
 
         double t = t0;
+
+        solver->evaluateFunction( 0, sol, t, f );
+        F.row( 0 ) = f;
 
         for ( int j = 0; j < k - 1; j++ )
         {
             double dt = dtsdc( j );
             t += dt;
 
-            Eigen::VectorXd f( N ), rhs( N ), result( N ), qold( N );
+            Eigen::VectorXd rhs( N ), result( N ), qold( N );
             f.setZero();
             rhs.setZero();
             result.setZero();
@@ -103,14 +106,10 @@ namespace sdc
             t = t0;
             Eigen::MatrixXd Fold = F;
 
-            Eigen::VectorXd f( N ), rhs( N ), result( N ), qold( N ), q( N );
+            Eigen::VectorXd rhs( N ), result( N ), qold( N );
             f.setZero();
             rhs.setZero();
             result.setZero();
-
-            q = solStages.row( 0 );
-            solver->evaluateFunction( 0, q, t, f );
-            F.row( 0 ) = f;
 
             Eigen::MatrixXd Sj = this->dt * (smat * F);
 

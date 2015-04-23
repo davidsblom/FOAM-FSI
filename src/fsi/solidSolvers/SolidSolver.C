@@ -256,7 +256,7 @@ void SolidSolver::readSolidMechanicsControls()
     minIter = readInt( stressControl.lookup( "minIter" ) );
     maxIter = readInt( stressControl.lookup( "maxIter" ) );
     absoluteTolerance = readScalar( stressControl.lookup( "tolerance" ) );
-    relativeTolerance = readScalar( stressControl.lookup( "relTol") );
+    relativeTolerance = readScalar( stressControl.lookup( "relTol" ) );
 
     // Ensure that the absolute tolerance of the linear solver is less
     // than the used convergence tolerance for the non-linear system.
