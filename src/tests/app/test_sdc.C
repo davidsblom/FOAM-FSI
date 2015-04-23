@@ -363,14 +363,17 @@ TEST_P( SDCTest, run )
         ASSERT_NEAR( error, 3.25178345e-01, 1.0e-9 );
 
     if ( nbTimeSteps == 10 && nbNodes == 3 && rule == "gauss-lobatto" )
-        ASSERT_NEAR( error, 1372.1182688807226, 1.0e-5 );
+        ASSERT_NEAR( error, 1.37211827e+03, 1.0e-5 );
 
     if ( nbTimeSteps == 20 && nbNodes == 3 && rule == "gauss-lobatto" )
-        ASSERT_NEAR( error, 179.89046496228198, 1.0e-5 );
+        ASSERT_NEAR( error, 1.79890465e+02, 1.0e-5 );
 
     if ( nbTimeSteps == 40 && nbNodes == 3 && rule == "gauss-lobatto" )
-        ASSERT_NEAR( error, 4.5545567112114851, 1.0e-5 );
+        ASSERT_NEAR( error, 4.55455671e+00, 1.0e-5 );
 
     if ( nbTimeSteps == 80 && nbNodes == 3 && rule == "gauss-lobatto" )
-        ASSERT_NEAR( error, 0.2447204738937219, 1.0e-5 );
+        ASSERT_NEAR( error, 2.44720474e-01, 1.0e-5 );
+
+    if ( nbTimeSteps == 160 && nbNodes == 3 && rule == "gauss-lobatto" )
+        ASSERT_NEAR( error, 1.47661061e-02, 1.0e-5 );
 }
