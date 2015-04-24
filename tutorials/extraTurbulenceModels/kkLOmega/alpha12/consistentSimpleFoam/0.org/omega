@@ -25,8 +25,7 @@ boundaryField
 {
     "(top|bottom)"
     {
-        type            omegaWallFunction;
-	    value		    uniform 1e8;
+        type            zeroGradient;
     }
 
     farfield
