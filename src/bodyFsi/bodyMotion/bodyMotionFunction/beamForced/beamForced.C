@@ -11,21 +11,45 @@ addToRunTimeSelectionTable(bodyMotionFunction, beamForced, dictionary);
 
 
 // * * * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
+void beamForced::writeState(const scalar time)
+{
+	scalar tipDisp = getTipDisplacement(time);
+	ofBody_ << time << "\t" <<  tipDisp << endl;
+}
+
+scalar beamForced::getTipDisplacement(const scalar time)
+{
+	const scalar& pi = mathematicalConstant::pi;
+
+	scalar currentscale = 0.0;
+	scalar dT_=1.0/frequency_;
+	if(time>T0_)
+	{
+		currentscale = sin(2*pi*frequency_*(time-T0_));
+		if(time<T0_+dT_){
+			scalar smoothFactor=0.5*(1-cos(pi/dT_*(time-T0_)));
+			currentscale *= smoothFactor;
+		}
+	}
+
+	//Adding something weird with dt dependency for testing
+	//currentscale *= (1+10*sqr(mesh_.time().deltaT().value()));
+
+	//Info << "currentScale = " << currentscale << endl;
+	return currentscale*amplitude_;
+}
+
+
 tmp<Field<vectorField> > beamForced::calculatePosition(const scalar time)
 {
 	tmp<Field<vectorField> > tPosition(new Field<vectorField>(patchIDs_.size()));
     Field<vectorField>& position = tPosition();
 
-	const scalar& pi = mathematicalConstant::pi;
-
-	scalar currentscale = sin(2*pi*frequency_*time);
-	/*if(time<0.5){
-		currentscale *= 0.5*(1-cos(2*pi*time));
-	}*/
+	scalar tipDisp = getTipDisplacement(time);
 
 	forAll(patchIDs_,ipatch){
 		vectorField deltaPoints(initialPoints_.size(),vector::zero);
-		deltaPoints = transDir_ * currentscale*amplitude_*Foam::sqr(((initialPoints_[ipatch] - origin_) & normalDir_)/beamLength_);
+		deltaPoints = transDir_ * tipDisp*Foam::sqr(((initialPoints_[ipatch] - origin_) & normalDir_)/beamLength_);
 
 		position[ipatch] = initialPoints_[ipatch] + deltaPoints;
 
@@ -119,10 +143,14 @@ origin_(dict.lookup("origin")),
 normalDir_(dict.lookup("normalDirection")),
 transDir_(dict.lookup("translationDirection")),
 beamLength_(1.0),
+T0_(mesh.time().startTime().value()),
 currentPosition_(patchIDs_.size()),
 prevPosition_(patchIDs_.size()),
-initialPoints_(patchIDs_.size())
+initialPoints_(patchIDs_.size()),
+ofBody_("body-"+name+"-state.dat")
 {
+	T0_ = dict.lookupOrDefault("startTime",T0_);
+	Info << "Start time of structure = " << T0_ << endl;
 	//Set patchIDs_ according to patchNames_
 	setPatchIDs();
 
@@ -166,4 +194,12 @@ void beamForced::update()
 
 	//Since this is a forced motion the position can be calculated here
 	currentPosition_ = calculatePosition(mesh_.time().value());
+}
+
+void beamForced::write()
+{
+	if(writeToFile())
+	{
+		writeState(mesh_.time().value());
+	}
 }

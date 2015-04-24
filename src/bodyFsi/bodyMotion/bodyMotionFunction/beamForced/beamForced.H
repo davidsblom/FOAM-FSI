@@ -76,18 +76,28 @@ class beamForced
     vector normalDir_;
     vector transDir_;;
     scalar beamLength_;
+    scalar T0_;
 
     //Positions
     Field<vectorField> currentPosition_;
     Field<vectorField> prevPosition_;
     Field<vectorField> initialPoints_;
 
+    //Writing properties
+    OFstream ofBody_;
+
         // Private Member Functions
 
     	//- Disallow default bitwise copy construct
         beamForced(const beamForced&);
 
-        //Private functions
+        //- Writing state out into file
+        void writeState(const scalar time);
+
+        //- Get the tip displacement
+        scalar getTipDisplacement(const scalar time);
+
+        //Calculate beam deflection
         tmp<Field<vectorField> > calculatePosition(const scalar time);
 
         void setPatchIDs();
@@ -130,6 +140,9 @@ class beamForced
 		virtual const Field<vectorField>& getPosition() const;
 
         virtual void update();
+
+        //- Write out body properties if requested
+        virtual void write();
     };
 }
 
