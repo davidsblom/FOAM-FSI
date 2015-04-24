@@ -14,16 +14,11 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-RASModel            kOmegaSSTsust;
+RASModel            kkLOmega;
 
 turbulence          on;
 
 printCoeffs         on;
 
-kOmegaSSTsustCoeffs
-{
-	kAmb 		kAmb [0 2 -2 0 0 0 0] 0.00025;
-	omegaAmb 	omegaAmbt [0 0 -1 0 0 0 0] 322.5;
-}
 
 // ************************************************************************* //

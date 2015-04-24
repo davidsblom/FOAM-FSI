@@ -26,7 +26,7 @@ solvers
         maxIter		    500;
     }
 
-    "(U|k|omega)"
+    "(U|kl|kt|omega)"
     {
         solver          smoothSolver;
         smoother        GaussSeidel;
@@ -48,7 +48,8 @@ relaxationFactors
 {
     p               	0.7;
     U               	0.7;
-    k         		0.7;
+   	kt         		0.7;
+	kl				0.7;
     omega      		0.7;
 }
 

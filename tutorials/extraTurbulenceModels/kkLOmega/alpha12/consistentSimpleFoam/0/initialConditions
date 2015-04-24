@@ -16,7 +16,8 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 velocity            (12.6181 2.6821 0);
 pressure            0;
-k                	0.00025;
+kl                	0;
+kt                	0.00025;
 omega				322.5;
 nut                 7.7e-7;
 #inputMode			merge

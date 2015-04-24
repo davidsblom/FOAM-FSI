@@ -11,7 +11,7 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      k;
+    object      kl;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -19,20 +19,20 @@ FoamFile
 
 dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform $k;
+internalField   uniform $kl;
 
 boundaryField
 {
 	"(top|bottom)"
     {
-        type            kqRWallFunction;
+        type            fixedValue;
         value           uniform 0;
     }
 
     farfield
     {
         type           inletOutlet;
-        inletValue     uniform $k;
+        inletValue     uniform $kl;
     }
 
     frontback
