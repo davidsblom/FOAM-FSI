@@ -1,0 +1,6 @@
+========================================
+README - airfoil on low angle of attack
+========================================
+
+1. potentialFoam: initial condition for simpleFoam
+2. consistentSimpleFoam (simpleFoam): a simple case for the new turbulence model for comparison
