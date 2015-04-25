@@ -132,19 +132,12 @@ void foamFluidSolver::getWritePositions( matrix & writePositions )
     for ( int i = 0; i < Pstream::myProcNo(); i++ )
         globalOffset += nGlobalCenters[i];
 
-    int offset = 0;
+    matrix writePositionsLocal;
+    getWritePositionsLocal ( writePositionsLocal );
 
-    forAll( movingPatchIDs, patchI )
-    {
-        const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
-
-        forAll( faceCentres, i )
-        {
-            writePositionsField[i + offset + globalOffset] = faceCentres[i];
-        }
-
-        offset += faceCentres.size();
-    }
+    for ( int i = 0; i < writePositionsLocal.rows(); i++ )
+        for ( int j = 0; j < writePositionsLocal.cols(); j++ )
+            writePositionsField[i + globalOffset][j] = writePositionsLocal( i, j );
 
     reduce( writePositionsField, sumOp<vectorField>() );
 
