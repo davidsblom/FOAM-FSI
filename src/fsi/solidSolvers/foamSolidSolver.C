@@ -268,19 +268,12 @@ void foamSolidSolver::solve(
 
     vectorField outputField( getInterfaceSize(), Foam::vector::zero );
 
-    offset = 0;
+    matrix displacementLocal;
+    getDisplacementLocal( displacementLocal );
 
-    forAll( movingPatchIDs, patchI )
-    {
-        int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
-
-        forAll( U.boundaryField()[movingPatchIDs[patchI]], i )
-        {
-            outputField[i + offset + globalOffset] = U.boundaryField()[movingPatchIDs[patchI]][i];
-        }
-
-        offset += size;
-    }
+    for ( int i = 0; i < displacementLocal.rows(); i++ )
+        for ( int j = 0; j < displacementLocal.cols(); j++ )
+            outputField[i + globalOffset][j] = displacementLocal( i, j );
 
     reduce( outputField, sumOp<vectorField>() );
 
