@@ -47,6 +47,8 @@ public:
 
     virtual void getWritePositions( matrix & writePositions );
 
+    virtual void moveMesh();
+
     virtual void solve() = 0;
 
     virtual void solve(
@@ -75,8 +77,6 @@ public:
     dynamicFvMesh & mesh;
 
 protected:
-
-    virtual void moveMesh( Field<vectorField> motion );
 
     // Dictionaries
     IOdictionary couplingProperties;

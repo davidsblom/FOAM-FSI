@@ -166,7 +166,7 @@ void foamFluidSolver::getWritePositionsLocal( matrix & writePositions )
     }
 }
 
-void foamFluidSolver::moveMesh( Field<vectorField> motion )
+void foamFluidSolver::moveMesh()
 {
     std::clock_t t = std::clock();
 
@@ -176,7 +176,7 @@ void foamFluidSolver::moveMesh( Field<vectorField> motion )
         mesh.lookupObject<RBFMeshMotionSolver>( "dynamicMeshDict" )
         );
 
-    motionSolver.setMotion( motion );
+    motionSolver.setMotion( movingPatchesDispl - movingPatchesDisplOld );
 
     mesh.update();
 
@@ -201,8 +201,6 @@ void foamFluidSolver::setDisplacementLocal( const matrix & displacement )
 
         offset += size;
     }
-
-    moveMesh( movingPatchesDisplOld - movingPatchesDispl );
 }
 
 void foamFluidSolver::run()
@@ -244,7 +242,7 @@ void foamFluidSolver::solve(
 
     assert( offset == getInterfaceSizeLocal() );
 
-    moveMesh( movingPatchesDispl - movingPatchesDisplOld );
+    moveMesh();
 
     solve();
 

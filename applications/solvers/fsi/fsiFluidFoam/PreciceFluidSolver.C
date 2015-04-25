@@ -91,6 +91,7 @@ void PreciceFluidSolver::run()
                 precice->fulfilledAction( precice::constants::actionReadIterationCheckpoint() );
 
             solver->setDisplacementLocal( input );
+            solver->moveMesh();
             solver->solve();
             solver->getTractionLocal( output );
 
