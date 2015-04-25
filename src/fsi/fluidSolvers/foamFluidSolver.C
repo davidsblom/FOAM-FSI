@@ -94,10 +94,7 @@ int foamFluidSolver::getInterfaceSize()
 
     nGlobalCenters = 0;
 
-    forAll( movingPatchIDs, patchI )
-    {
-        nGlobalCenters[Pstream::myProcNo()] += mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
-    }
+    nGlobalCenters[Pstream::myProcNo()] = getInterfaceSizeLocal();
 
     reduce( nGlobalCenters, sumOp<labelList>() );
 
