@@ -195,13 +195,9 @@ void foamFluidSolver::setDisplacementLocal( const matrix & displacement )
     {
         int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
 
-        vectorField displacementField( size, Foam::vector::zero );
-
         for ( int i = 0; i < size; i++ )
             for ( int j = 0; j < displacement.cols(); j++ )
-                displacementField[i][j] = displacement( i + offset, j );
-
-        movingPatchesDispl[movingPatchIDs[patchI]] = displacementField;
+                movingPatchesDispl[movingPatchIDs[patchI]][i][j] = displacement( i + offset, j );
 
         offset += size;
     }
