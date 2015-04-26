@@ -133,7 +133,7 @@ void foamFluidSolver::getWritePositions( matrix & writePositions )
         globalOffset += nGlobalCenters[i];
 
     matrix writePositionsLocal;
-    getWritePositionsLocal ( writePositionsLocal );
+    getWritePositionsLocal( writePositionsLocal );
 
     for ( int i = 0; i < writePositionsLocal.rows(); i++ )
         for ( int j = 0; j < writePositionsLocal.cols(); j++ )
