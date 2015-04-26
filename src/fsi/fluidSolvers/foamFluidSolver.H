@@ -47,6 +47,8 @@ public:
 
     virtual void getWritePositions( matrix & writePositions );
 
+    virtual void moveMesh();
+
     virtual void solve() = 0;
 
     virtual void solve(
@@ -76,6 +78,8 @@ public:
     autoPtr<dynamicFvMesh> meshPtr;
     dynamicFvMesh & mesh;
 
+protected:
+
     // Dictionaries
     IOdictionary couplingProperties;
 
@@ -84,8 +88,6 @@ public:
     labelList movingPatchIDs;
     Field<vectorField> movingPatchesDispl;
     Field<vectorField> movingPatchesDisplOld;
-
-protected:
 
     // Parallel FSI coupling variables
     labelList nPoints;

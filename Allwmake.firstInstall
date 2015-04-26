@@ -9,12 +9,9 @@ if [ -z "$FOAM_USER_SRC" ]; then
     echo "Creating FOAM_USER_SRC before compiling in $prefLocation"
     echo "# Setting up environment variable for FOAM-FSI" >> $prefLocation
     echo "export FOAM_USER_SRC=$pwdstring/src" >> $prefLocation
-
-    echo ""
-    echo "========================================================"
-    echo "PLEASE RELOAD foam-extend-3.1 to ensure correct settings"
-    echo "========================================================"
 fi
+
+source $FOAM_SRC/../etc/bashrc
 
 cd src/thirdParty
 ./Allmake

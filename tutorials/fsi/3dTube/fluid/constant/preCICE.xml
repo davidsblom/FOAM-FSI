@@ -35,7 +35,7 @@
             <read-data mesh="Fluid_Nodes" name="Displacements" />
             <mapping:rbf-thin-plate-splines direction="write" from="Fluid_CellCenters" to="Structure_CellCenters" constraint="consistent" timing="initial"/>
             <mapping:rbf-thin-plate-splines direction="read" from="Structure_Nodes" to="Fluid_Nodes" constraint="consistent" timing="initial"/>
-            <server:sockets port="500100" exchange-directory="./" />
+            <server:sockets exchange-directory="./" />
         </participant>
 
         <participant name="Structure_Solver">
@@ -43,10 +43,10 @@
             <use-mesh name="Structure_CellCenters" provide="yes"/>
             <write-data mesh="Structure_Nodes" name="Displacements" />
             <read-data mesh="Structure_CellCenters" name="Stresses" />
-            <server:sockets port="500101" exchange-directory="./" />
+            <server:sockets exchange-directory="./" />
         </participant>
 
-        <communication:sockets port="500103" exchange-directory="../" from="Fluid_Solver" to="Structure_Solver" />
+        <m2n:sockets exchange-directory="../" from="Fluid_Solver" to="Structure_Solver" />
 
         <coupling-scheme:serial-implicit>
             <timestep-length value="1.0e-4" />

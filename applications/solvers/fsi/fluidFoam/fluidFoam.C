@@ -60,9 +60,11 @@ int main(
         YAML::Node sdcConfig( config["sdc"] );
         assert( sdcConfig["convergence-tolerance"] );
         assert( sdcConfig["number-of-points"] );
+        assert( sdcConfig["quadrature-rule"] );
 
         int n = sdcConfig["number-of-points"].as<int>();
         double tol = sdcConfig["convergence-tolerance"].as<double>();
+        std::string quadratureRule = sdcConfig["quadrature-rule"].as<std::string>();
 
         std::shared_ptr<sdc::SDCSolver> solver;
 
@@ -72,7 +74,7 @@ int main(
         if ( fluidSolver == "sdc-laplacian-solver" )
             solver = std::shared_ptr<sdc::SDCSolver>( new SDCLaplacianSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
-        sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( solver, n, tol ) );
+        sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( solver, quadratureRule, n, tol ) );
     }
 
     assert( fluid || sdc );

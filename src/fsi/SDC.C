@@ -5,12 +5,13 @@
  */
 
 #include "SDC.H"
-#include "gauss_radau.H"
+#include "QuadratureRules.H"
 
 namespace sdc
 {
     SDC::SDC(
         std::shared_ptr<SDCSolver> solver,
+        std::string rule,
         int nbNodes,
         double tol
         )
@@ -31,8 +32,9 @@ namespace sdc
         assert( dt > 0 );
         assert( tol > 0 );
         assert( tol < 1 );
+        assert( rule == "gauss-radau" || rule == "gauss-lobatto" );
 
-        quadrature::rules( nbNodes, nodes, smat, qmat );
+        quadrature::rules( rule, nbNodes, nodes, smat, qmat );
 
         k = nodes.rows();
 
@@ -65,18 +67,21 @@ namespace sdc
         Eigen::VectorXd dtsdc = this->dt * dsdc;
         Eigen::MatrixXd solStages( k, N ), F( k, N );
 
-        Eigen::VectorXd sol( N );
+        Eigen::VectorXd sol( N ), f( N );
         solver->getSolution( sol );
         solStages.row( 0 ) = sol;
 
         double t = t0;
+
+        solver->evaluateFunction( 0, sol, t, f );
+        F.row( 0 ) = f;
 
         for ( int j = 0; j < k - 1; j++ )
         {
             double dt = dtsdc( j );
             t += dt;
 
-            Eigen::VectorXd f( N ), rhs( N ), result( N ), qold( N );
+            Eigen::VectorXd rhs( N ), result( N ), qold( N );
             f.setZero();
             rhs.setZero();
             result.setZero();
@@ -101,14 +106,10 @@ namespace sdc
             t = t0;
             Eigen::MatrixXd Fold = F;
 
-            Eigen::VectorXd f( N ), rhs( N ), result( N ), qold( N ), q( N );
+            Eigen::VectorXd rhs( N ), result( N ), qold( N );
             f.setZero();
             rhs.setZero();
             result.setZero();
-
-            q = solStages.row( 0 );
-            solver->evaluateFunction( 0, q, t, f );
-            F.row( 0 ) = f;
 
             Eigen::MatrixXd Sj = this->dt * (smat * F);
 

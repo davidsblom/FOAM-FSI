@@ -94,10 +94,7 @@ int foamFluidSolver::getInterfaceSize()
 
     nGlobalCenters = 0;
 
-    forAll( movingPatchIDs, patchI )
-    {
-        nGlobalCenters[Pstream::myProcNo()] += mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
-    }
+    nGlobalCenters[Pstream::myProcNo()] = getInterfaceSizeLocal();
 
     reduce( nGlobalCenters, sumOp<labelList>() );
 
@@ -135,19 +132,12 @@ void foamFluidSolver::getWritePositions( matrix & writePositions )
     for ( int i = 0; i < Pstream::myProcNo(); i++ )
         globalOffset += nGlobalCenters[i];
 
-    int offset = 0;
+    matrix writePositionsLocal;
+    getWritePositionsLocal( writePositionsLocal );
 
-    forAll( movingPatchIDs, patchI )
-    {
-        const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
-
-        forAll( faceCentres, i )
-        {
-            writePositionsField[i + offset + globalOffset] = faceCentres[i];
-        }
-
-        offset += faceCentres.size();
-    }
+    for ( int i = 0; i < writePositionsLocal.rows(); i++ )
+        for ( int j = 0; j < writePositionsLocal.cols(); j++ )
+            writePositionsField[i + globalOffset][j] = writePositionsLocal( i, j );
 
     reduce( writePositionsField, sumOp<vectorField>() );
 
@@ -176,7 +166,7 @@ void foamFluidSolver::getWritePositionsLocal( matrix & writePositions )
     }
 }
 
-void foamFluidSolver::moveMesh( Field<vectorField> motion )
+void foamFluidSolver::moveMesh()
 {
     std::clock_t t = std::clock();
 
@@ -186,7 +176,7 @@ void foamFluidSolver::moveMesh( Field<vectorField> motion )
         mesh.lookupObject<RBFMeshMotionSolver>( "dynamicMeshDict" )
         );
 
-    motionSolver.setMotion( motion );
+    motionSolver.setMotion( movingPatchesDispl - movingPatchesDisplOld );
 
     mesh.update();
 
@@ -205,18 +195,12 @@ void foamFluidSolver::setDisplacementLocal( const matrix & displacement )
     {
         int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
 
-        vectorField displacementField( size, Foam::vector::zero );
-
         for ( int i = 0; i < size; i++ )
             for ( int j = 0; j < displacement.cols(); j++ )
-                displacementField[i][j] = displacement( i + offset, j );
-
-        movingPatchesDispl[movingPatchIDs[patchI]] = displacementField;
+                movingPatchesDispl[movingPatchIDs[patchI]][i][j] = displacement( i + offset, j );
 
         offset += size;
     }
-
-    moveMesh( movingPatchesDisplOld - movingPatchesDispl );
 }
 
 void foamFluidSolver::run()
@@ -258,7 +242,7 @@ void foamFluidSolver::solve(
 
     assert( offset == getInterfaceSizeLocal() );
 
-    moveMesh( movingPatchesDispl - movingPatchesDisplOld );
+    moveMesh();
 
     solve();
 

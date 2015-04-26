@@ -121,10 +121,7 @@ int foamSolidSolver::getInterfaceSize()
 
     nGlobalCenters = 0;
 
-    forAll( movingPatchIDs, patchI )
-    {
-        nGlobalCenters[Pstream::myProcNo()] += mesh.boundaryMesh()[movingPatchIDs[patchI]].size();
-    }
+    nGlobalCenters[Pstream::myProcNo()] = getInterfaceSizeLocal();
 
     reduce( nGlobalCenters, sumOp<labelList>() );
 
@@ -137,7 +134,7 @@ int foamSolidSolver::getInterfaceSizeLocal()
 
     forAll( movingPatchIDs, patchI )
     {
-        size += mesh.boundaryMesh()[movingPatchIDs[patchI]].size();
+        size += mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
     }
 
     return size;
@@ -162,19 +159,12 @@ void foamSolidSolver::getWritePositions( matrix & writePositions )
     for ( int i = 0; i < Pstream::myProcNo(); i++ )
         globalOffset += nGlobalCenters[i];
 
-    int offset = 0;
+    matrix writePositionsLocal;
+    getWritePositionsLocal( writePositionsLocal );
 
-    forAll( movingPatchIDs, patchI )
-    {
-        const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
-
-        forAll( faceCentres, i )
-        {
-            writePositionsField[i + offset + globalOffset] = faceCentres[i] + Uinitial.boundaryField()[movingPatchIDs[patchI]][i];
-        }
-
-        offset += faceCentres.size();
-    }
+    for ( int i = 0; i < writePositionsLocal.rows(); i++ )
+        for ( int j = 0; j < writePositionsLocal.cols(); j++ )
+            writePositionsField[i + globalOffset][j] = writePositionsLocal( i, j );
 
     reduce( writePositionsField, sumOp<vectorField>() );
 
@@ -264,8 +254,6 @@ void foamSolidSolver::solve(
 
     std::clock_t t = std::clock();
 
-    vectorField readPositionsField( getInterfaceSize(), Foam::vector::zero );
-
     int globalOffset = 0;
 
     for ( int i = 0; i < Pstream::myProcNo(); i++ )
@@ -292,19 +280,12 @@ void foamSolidSolver::solve(
 
     vectorField outputField( getInterfaceSize(), Foam::vector::zero );
 
-    offset = 0;
+    matrix displacementLocal;
+    getDisplacementLocal( displacementLocal );
 
-    forAll( movingPatchIDs, patchI )
-    {
-        int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
-
-        forAll( U.boundaryField()[movingPatchIDs[patchI]], i )
-        {
-            outputField[i + offset + globalOffset] = U.boundaryField()[movingPatchIDs[patchI]][i] - Uinitial.boundaryField()[movingPatchIDs[patchI]][i];
-        }
-
-        offset += size;
-    }
+    for ( int i = 0; i < displacementLocal.rows(); i++ )
+        for ( int j = 0; j < displacementLocal.cols(); j++ )
+            outputField[i + globalOffset][j] = displacementLocal( i, j );
 
     reduce( outputField, sumOp<vectorField>() );
 

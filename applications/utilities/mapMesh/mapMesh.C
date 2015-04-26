@@ -124,7 +124,7 @@ int main(
     // Fluid mesh deformation
 
     fluid->setDisplacementLocal( valuesInterpolation );
-    fluid->moveMesh( fluid->movingPatchesDispl - fluid->movingPatchesDisplOld );
+    fluid->moveMesh();
 
     runTime->loop();
     runTime->write();
