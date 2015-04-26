@@ -68,8 +68,6 @@ public:
 
     void run();
 
-    virtual void moveMesh( Field<vectorField> motion );
-
     string name;
     shared_ptr<argList> args;
     shared_ptr<Time> runTime;
