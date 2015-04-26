@@ -38,14 +38,9 @@ public:
         }
     }
 
-    virtual void getWritePositions( matrix & writePositions )
+    void getWritePositionsLocal( matrix & writePositions )
     {
-        vectorField writePositionsField( getInterfaceSize(), Foam::vector::zero );
-
-        int globalOffset = 0;
-
-        for ( int i = 0; i < Pstream::myProcNo(); i++ )
-            globalOffset += nGlobalCenters[i];
+        writePositions.resize( getInterfaceSizeLocal(), mesh.nGeometricD() );
 
         int offset = 0;
 
@@ -53,21 +48,12 @@ public:
         {
             const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
 
-            forAll( faceCentres, i )
-            {
-                writePositionsField[i + offset + globalOffset] = faceCentres[i];
-            }
+            for ( int i = 0; i < faceCentres.size(); i++ )
+                for ( int j = 0; j < writePositions.cols(); j++ )
+                    writePositions( i + offset, j ) = faceCentres[i][j];
 
             offset += faceCentres.size();
         }
-
-        reduce( writePositionsField, sumOp<vectorField>() );
-
-        writePositions.resize( writePositionsField.size(), mesh.nGeometricD() );
-
-        for ( int i = 0; i < writePositions.rows(); i++ )
-            for ( int j = 0; j < writePositions.cols(); j++ )
-                writePositions( i, j ) = writePositionsField[i][j];
     }
 };
 
@@ -108,7 +94,7 @@ int main(
 
     Eigen::MatrixXd positions, positionsInterpolation, values, valuesInterpolation;
 
-    solid->getWritePositions( positions );
+    solid->getWritePositionsLocal( positions );
     fluid->getReadPositions( positionsInterpolation );
 
     rbfSolidToFluidInterface.compute( positions, positionsInterpolation );
