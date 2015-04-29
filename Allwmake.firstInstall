@@ -19,24 +19,4 @@ cd ../../
 
 set -e
 
-wmakeLnInclude src/boundaryConditions
-wmakeLnInclude src/fvSchemes
-wmakeLnInclude src/fsi
-wmakeLnInclude src/RBFMeshMotionSolver
-wmakeLnInclude src/SRFModelAbs
-
-wmake libso src/boundaryConditions
-wmake libso src/fvSchemes
-wmake libso src/fsi
-wmake libso src/RBFMeshMotionSolver
-wmake libso src/SRFModelAbs
-wmake libso src/extraSolidBodyMotion
-wmake applications/utilities/mapMesh
-wmake applications/utilities/addInitialRandomVelocity
-wmake all applications/solvers/consistentSolvers
-wmake applications/solvers/unsteadyPUCoupledFoam
-wmake applications/solvers/fsi/fsiFoam
-wmake applications/solvers/fsi/solidFoam
-wmake applications/solvers/fsi/fluidFoam
-wmake src/tests/app
-wmake src/tests/tubeflow
+./Allwmake

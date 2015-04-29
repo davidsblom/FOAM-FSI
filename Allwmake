@@ -2,8 +2,6 @@
 
 set -e
 
-export FOAM_USER_SRC=`pwd`/src
-
 wmakeLnInclude src/boundaryConditions
 wmakeLnInclude src/fvSchemes
 wmakeLnInclude src/fsi
