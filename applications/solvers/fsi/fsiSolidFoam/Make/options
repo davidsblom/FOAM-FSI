@@ -36,8 +36,8 @@ EXE_LIBS = \
     -lincompressibleLESModels \
     -llduSolvers \
     -lsolidModels \
-    -lmySchemes \
-    -lmyBoundaries \
+    -lfvSchemes \
+    -lboundaryConditions \
     -lsolidModels \
     -lsampling \
     -llagrangian \
