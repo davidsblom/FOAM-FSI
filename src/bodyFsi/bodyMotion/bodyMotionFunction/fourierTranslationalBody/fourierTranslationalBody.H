@@ -104,6 +104,8 @@ class fourierTranslationalBody
         //Read in file
         scalarField readFile(string fileName) const;
 
+        void createFourierCoeffs();
+
     protected:
 
         virtual tmp<Field<vectorField> > getChildMotion();
