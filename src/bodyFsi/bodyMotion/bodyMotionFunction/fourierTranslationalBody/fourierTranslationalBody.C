@@ -205,7 +205,7 @@ ofBody_("body-"+name+"-state.dat")
 
 	if(writeToFile())
 	{
-		ofBody_ << "time [s]\ttheta [deg]\tx [m]\ty [m]" << endl;
+		ofBody_ << "time [s]\ttranslation [m]" << endl;
 	}
 	else
 	{
