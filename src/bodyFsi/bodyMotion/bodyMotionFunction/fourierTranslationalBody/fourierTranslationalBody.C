@@ -137,7 +137,24 @@ scalarField fourierTranslationalBody::readFile(string fileName) const{
 
 void fourierTranslationalBody::createFourierCoeffs()
 {
+	const scalar& pi = mathematicalConstant::pi;
+	scalar T=1.0/frequency_;
+	scalar w=2.0*pi/T;
+	scalar dt=T/(amplitudes_.size()-1);
+	scalar a0=2.0/T*(sum(amplitudes_*dt));
 
+	scalarField times(amplitudes_.size(),0);
+	forAll(times,itime){
+		times[itime] = itime*dt;
+	}
+
+	scalar N=5;
+	scalarField an(N,0);
+	scalarField bn(N,0);
+	forAll(an,i){
+	    an[i]=2.0/T*(sum( (amplitudes_*cos((i+1)*w*times)) * dt));
+	    bn[i]=2.0/T*(sum( (amplitudes_*sin((i+1)*w*times)) * dt));
+	}
 }
 
 
@@ -162,7 +179,7 @@ initialPoints_(patchIDs_.size()),
 ofBody_("body-"+name+"-state.dat")
 {
 	amplitudes_ = readFile(fileName_);
-	Info << amplitudes_ << endl;
+	createFourierCoeffs();
 
 	translationDirection_ /= mag(translationDirection_) + SMALL;
 	if(dict.found("smoothStart"))
