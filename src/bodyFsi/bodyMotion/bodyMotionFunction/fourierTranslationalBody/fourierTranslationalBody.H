@@ -75,6 +75,10 @@ class fourierTranslationalBody
 	scalar frequency_;
 	vector translationDirection_;
     scalarField amplitudes_;
+    label N_;
+    scalar fourierA0_;
+    scalarField fourierAn_;
+    scalarField fourierBn_;
     bool smoothStart_;
 
     //Positions
@@ -91,7 +95,7 @@ class fourierTranslationalBody
         void writeState(const scalar& time);
 
         //- Get state back for time given (x,y,angle)
-        vector getState(const scalar& time);
+        scalar getState(const scalar& time);
 
     	//- Disallow default bitwise copy construct
         fourierTranslationalBody(const fourierTranslationalBody&);

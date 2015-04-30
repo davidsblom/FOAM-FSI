@@ -63,6 +63,8 @@ int main(int argc, char *argv[])
         ms.setMotion(bodyCol.getPatchMotion());
         mesh.update();
 
+
+		bodyCol.write();
         runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
