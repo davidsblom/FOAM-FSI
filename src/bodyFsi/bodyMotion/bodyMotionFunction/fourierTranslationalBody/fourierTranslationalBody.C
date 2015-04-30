@@ -15,16 +15,15 @@ addToRunTimeSelectionTable(bodyMotionFunction, fourierTranslationalBody, diction
 // * * * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
 void fourierTranslationalBody::writeState(const scalar& time)
 {
-	vector state = getState(time);
-	ofBody_ << time << "\t" << state.z()*180.0/mathematicalConstant::pi << "\t" << state.x() << "\t" << state.y()<< endl;
+	scalar state = getState(time);
+	ofBody_ << time << "\t" << state << endl;
 }
 
-vector fourierTranslationalBody::getState(const scalar& time)
+scalar fourierTranslationalBody::getState(const scalar& time)
 {
 	const scalar& pi = mathematicalConstant::pi;
 
-	scalar smoothingScalarTrans = 1;
-	scalar smoothingScalarRot = 1;
+	/*scalar smoothingScalarTrans = 1;
 	if(smoothStart_)
 	{
 		if(time < 1.0/frequency_){
@@ -33,12 +32,15 @@ vector fourierTranslationalBody::getState(const scalar& time)
 		}
 	}
 
-	vector translationVector =
-		smoothingScalarTrans*scaleFactor_*sin(2*pi*frequency_*time)*translationDirection_;
+	vector translationVector = smoothingScalarTrans*scaleFactor_*sin(2*pi*frequency_*time)*translationDirection_;*/
 
-	vector state(translationVector.x(),translationVector.y(),0);
+	scalar translation = fourierA0_/2;
+	forAll(fourierAn_,iFourier){
+		translation += 	fourierAn_[iFourier]*cos((iFourier+1)*2.0*pi*frequency_*time) +
+						fourierBn_[iFourier]*sin((iFourier+1)*2.0*pi*frequency_*time);
+	}
 
-	return state;
+	return translation;
 }
 
 tmp<Field<vectorField> > fourierTranslationalBody::calculatePosition(const scalar time)
@@ -46,11 +48,12 @@ tmp<Field<vectorField> > fourierTranslationalBody::calculatePosition(const scala
 	tmp<Field<vectorField> > tPosition(new Field<vectorField>(patchIDs_.size()));
     Field<vectorField>& position = tPosition();
 
-	vector state = getState(time);
-	vector translationVector(state.x(),state.y(),0.0);
+	scalar state = getState(time);
+	vector translationVector = state*translationDirection_;
 
 	forAll(patchIDs_,ipatch){
-		position[ipatch] = translationVector;
+		position[ipatch] = initialPoints_[ipatch];
+		position[ipatch] += translationVector;
 	}
 
 	return tPosition;
@@ -141,19 +144,16 @@ void fourierTranslationalBody::createFourierCoeffs()
 	scalar T=1.0/frequency_;
 	scalar w=2.0*pi/T;
 	scalar dt=T/(amplitudes_.size()-1);
-	scalar a0=2.0/T*(sum(amplitudes_*dt));
+	fourierA0_=2.0/T*(sum(amplitudes_*dt));
 
 	scalarField times(amplitudes_.size(),0);
 	forAll(times,itime){
 		times[itime] = itime*dt;
 	}
 
-	scalar N=5;
-	scalarField an(N,0);
-	scalarField bn(N,0);
-	forAll(an,i){
-	    an[i]=2.0/T*(sum( (amplitudes_*cos((i+1)*w*times)) * dt));
-	    bn[i]=2.0/T*(sum( (amplitudes_*sin((i+1)*w*times)) * dt));
+	forAll(fourierAn_,iFourier){
+		fourierAn_[iFourier]=2.0/T*(sum( (amplitudes_*cos((iFourier+1)*w*times)) * dt));
+		fourierBn_[iFourier]=2.0/T*(sum( (amplitudes_*sin((iFourier+1)*w*times)) * dt));
 	}
 }
 
@@ -172,6 +172,10 @@ scaleFactor_(readScalar(dict.lookup("scaleFactor"))),
 frequency_(readScalar(dict.lookup("frequency"))),
 translationDirection_(dict.lookup("translationDirection")),
 amplitudes_(0),
+N_(readLabel(dict.lookup("fourierModes"))),
+fourierA0_(0),
+fourierAn_(N_,0),
+fourierBn_(N_,0),
 smoothStart_(false),
 currentPosition_(patchIDs_.size()),
 prevPosition_(patchIDs_.size()),
