@@ -150,6 +150,8 @@ private:
     std::deque<surfaceScalarField> phiStages;
     std::deque<volVectorField> UStages;
     std::deque<surfaceVectorField> UfStages;
+    volVectorField UF;
+    surfaceVectorField UfF;
 };
 
 #endif

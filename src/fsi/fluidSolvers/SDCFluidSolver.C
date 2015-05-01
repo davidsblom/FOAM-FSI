@@ -141,7 +141,33 @@ SDCFluidSolver::SDCFluidSolver(
     pStages(),
     phiStages(),
     UStages(),
-    UfStages()
+    UfStages(),
+    UF
+    (
+    IOobject
+    (
+        "UF",
+        runTime->timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedVector( "UF", dimVelocity / dimTime, Foam::vector::zero )
+    ),
+    UfF
+    (
+    IOobject
+    (
+        "UfF",
+        runTime->timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedVector( "UfF", dimVelocity / dimTime, Foam::vector::zero )
+    )
 {
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
@@ -369,27 +395,13 @@ void SDCFluidSolver::evaluateFunction(
     Eigen::VectorXd & f
     )
 {
-    p = pStages.at( k );
-    phi = phiStages.at( k );
-
-    for ( int i = 0; i < U.size(); i++ )
+    for ( int i = 0; i < UF.size(); i++ )
         for ( int j = 0; j < 3; j++ )
-            U[i][j] = q( i * 3 + j );
+            f( i * 3 + j ) = UF[i][j];
 
-    for ( int i = 0; i < Uf.size(); i++ )
+    for ( int i = 0; i < UfF.size(); i++ )
         for ( int j = 0; j < 3; j++ )
-            Uf[i][j] = q( i * 3 + j + U.size() * 3 );
-
-    volVectorField F = fvc::laplacian( nu, U ) - fvc::div( phi, U ) - fvc::grad( p );
-    surfaceVectorField Ff = fvc::interpolate( F );
-
-    for ( int i = 0; i < F.size(); i++ )
-        for ( int j = 0; j < 3; j++ )
-            f( i * 3 + j ) = F[i][j];
-
-    for ( int i = 0; i < Ff.size(); i++ )
-        for ( int j = 0; j < 3; j++ )
-            f( i * 3 + j + F.size() * 3 ) = Ff[i][j];
+            f( i * 3 + j + UF.size() * 3 ) = UfF[i][j];
 }
 
 void SDCFluidSolver::implicitSolve(
@@ -628,8 +640,8 @@ void SDCFluidSolver::implicitSolve(
             result( i * 3 + j + U.size() * 3 ) = Uf[i][j];
 
     dimensionedScalar rDeltaT = 1.0 / runTime->deltaT();
-    volVectorField UF = rDeltaT * ( U - U.oldTime() ) - rhsU / dt;
-    surfaceVectorField UfF = rDeltaT * ( Uf - Uf.oldTime() ) - rhsUf / dt;
+    UF = rDeltaT * ( U - U.oldTime() ) - rhsU / dt;
+    UfF = rDeltaT * ( Uf - Uf.oldTime() ) - rhsUf / dt;
 
     for ( int i = 0; i < UF.size(); i++ )
         for ( int j = 0; j < 3; j++ )
