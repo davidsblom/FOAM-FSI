@@ -1,16 +1,17 @@
-dictionary piso = mesh.solutionDict().subDict("PISO");
 
-int nOuterCorr(readInt(piso.lookup("nOuterCorrectors")));//Max outer correctors
-int nCorr(readInt(piso.lookup("nCorrectors")));//Max inner correctors
-int nNonOrthCorr = piso.lookupOrDefault<int>("nNonOrthogonalCorrectors", 0);//# non-Orthogonal correctors
+dictionary piso = mesh.solutionDict().subDict( "PISO" );
 
-scalar momentumTolerance = readScalar(piso.lookup("momentumTolerance"));//Read in momentumTolerance
-scalar pressureTolerance = momentumTolerance;//Default is pressureTolerance equal to momentumTolerance
-piso.readIfPresent("pressureTolerance", pressureTolerance);//Read if present
+int nOuterCorr( readInt( piso.lookup( "nOuterCorrectors" ) ) ); // Max outer correctors
+int nCorr( readInt( piso.lookup( "nCorrectors" ) ) ); // Max inner correctors
+int nNonOrthCorr = piso.lookupOrDefault<int>( "nNonOrthogonalCorrectors", 0 ); // # non-Orthogonal correctors
 
-scalar innerTolerance = 0;//Inner tolerance for inner correctors
-piso.readIfPresent("innerTolerance", innerTolerance);
+scalar momentumTolerance = readScalar( piso.lookup( "momentumTolerance" ) ); // Read in momentumTolerance
+scalar pressureTolerance = momentumTolerance; // Default is pressureTolerance equal to momentumTolerance
+piso.readIfPresent( "pressureTolerance", pressureTolerance ); // Read if present
 
-bool outerLoopConverged=false;//create converged variable for outerloop
-scalar innerResidual = 1;//residual initialization for inner correctors
-scalar residualPressure = 1;//residual initialization for pressure outer correctors
+scalar innerTolerance = 0; // Inner tolerance for inner correctors
+piso.readIfPresent( "innerTolerance", innerTolerance );
+
+bool outerLoopConverged = false; // create converged variable for outerloop
+scalar innerResidual = 1; // residual initialization for inner correctors
+scalar residualPressure = 1; // residual initialization for pressure outer correctors

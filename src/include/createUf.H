@@ -1,3 +1,4 @@
+
 IOobject UfHeader
 (
     "Uf",
@@ -11,16 +12,16 @@ surfaceVectorField Uf
 (
     UfHeader,
     mesh,
-    dimensionedVector("0", U.dimensions(), vector::zero)
+    dimensionedVector( "0", U.dimensions(), vector::zero )
 );
 
-if(!UfHeader.headerOk())
+if ( !UfHeader.headerOk() )
 {
     Uf.oldTime();
 
-    surfaceVectorField nf = mesh.Sf()/mesh.magSf();
-    surfaceVectorField Utang = fvc::interpolate(U) - nf*(fvc::interpolate(U) & nf);
-    surfaceVectorField Unor = phi/mesh.magSf() * nf;
+    surfaceVectorField nf = mesh.Sf() / mesh.magSf();
+    surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
+    surfaceVectorField Unor = phi / mesh.magSf() * nf;
 
     Uf = Utang + Unor;
 }
