@@ -8,5 +8,7 @@ cd src/thirdParty/
 ./compile_precice
 cd ../../
 
+wclean applications/solvers/fsi/fsiFluidFoam
+wclean applications/solvers/fsi/fsiSolidFoam
 wmake applications/solvers/fsi/fsiFluidFoam
 wmake applications/solvers/fsi/fsiSolidFoam
