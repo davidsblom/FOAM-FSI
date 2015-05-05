@@ -584,13 +584,7 @@ void SDCFluidSolver::implicitSolve(
                     currResidual = pressureResidual;
 
                 if ( nonOrth == nNonOrthCorr )
-                {
-                    // Eqn 28
-                    Uf -= pEqn.flux() * mesh.Sf() / ( mesh.magSf() * mesh.magSf() );
-
-                    // Eqn 29
-                    phi = Uf & mesh.Sf();
-                }
+                    phi -= pEqn.flux();
             }
 
             p.relax();
@@ -603,6 +597,12 @@ void SDCFluidSolver::implicitSolve(
             if ( currResidual < std::max( tol * initResidual, 1.0e-15 ) )
                 break;
         }
+
+        surfaceVectorField nf = mesh.Sf() / mesh.magSf();
+        surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
+        surfaceVectorField Unor = phi / mesh.magSf() * nf;
+
+        Uf = Utang + Unor;
 
         scalar momentumResidual = evaluateMomentumResidual( dt );
 
