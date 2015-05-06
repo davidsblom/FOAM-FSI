@@ -151,6 +151,7 @@ namespace sdc
             Info << "SDC residual = " << error;
             Info << ", tol = " << tol;
             Info << ", time = " << t;
+            Info << ", sweep = " << j + 1;
             Info << ", convergence = ";
 
             if ( convergence )

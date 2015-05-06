@@ -130,9 +130,12 @@ private:
     surfaceVectorField rhsUf;
 
     // PIMPLE controls
-    int nOuterCorr;
     int nCorr;
     int nNonOrthCorr;
+    int minIter;
+    int maxIter;
+    scalar absoluteTolerance;
+    scalar relativeTolerance;
 
     // Continuity errors
     scalar sumLocalContErr;
@@ -141,9 +144,6 @@ private:
 
     label pRefCell;
     scalar pRefValue;
-
-    // Controls
-    scalar convergenceTolerance;
 
     int k;
     std::deque<volScalarField> pStages;

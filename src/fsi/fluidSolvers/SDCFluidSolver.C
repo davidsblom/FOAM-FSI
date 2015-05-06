@@ -133,10 +133,15 @@ SDCFluidSolver::SDCFluidSolver(
     ),
     fvc::interpolate( rhsU )
     ),
+    nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
+    nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
+    minIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "minIter" ) ) ),
+    maxIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "maxIter" ) ) ),
+    absoluteTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "tolerance" ) ) ),
+    relativeTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "relTol" ) ) ),
     sumLocalContErr( 0 ),
     globalContErr( 0 ),
     cumulativeContErr( 0 ),
-    convergenceTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "convergenceTolerance" ) ) ),
     k( 0 ),
     pStages(),
     phiStages(),
@@ -172,10 +177,10 @@ SDCFluidSolver::SDCFluidSolver(
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
     scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
-    assert( absTolerance < convergenceTolerance );
+    assert( absTolerance < absoluteTolerance );
 
     absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
-    assert( absTolerance < convergenceTolerance );
+    assert( absTolerance < absoluteTolerance );
 
     initialize();
 }
@@ -285,16 +290,12 @@ void SDCFluidSolver::initialize()
 {
     assert( !init );
 
-    readPIMPLEControls();
-
     createFields();
 }
 
 void SDCFluidSolver::initTimeStep()
 {
     assert( !init );
-
-    readPIMPLEControls();
 
     init = true;
 }
@@ -308,14 +309,6 @@ bool SDCFluidSolver::isRunning()
          << endl << endl;
 
     return runTime->loop();
-}
-
-void SDCFluidSolver::readPIMPLEControls()
-{
-    nOuterCorr = readInt( pimple.lookup( "nOuterCorrectors" ) );
-    nCorr = readInt( pimple.lookup( "nCorrectors" ) );
-
-    nNonOrthCorr = pimple.lookupOrDefault<int>( "nNonOrthogonalCorrectors", 0 );
 }
 
 void SDCFluidSolver::resetSolution()
@@ -449,21 +442,13 @@ void SDCFluidSolver::implicitSolve(
         for ( int j = 0; j < 3; j++ )
             rhsUf[i][j] = rhs( i * 3 + j + U.size() * 3 );
 
+    scalar convergenceTolerance = absoluteTolerance;
+
     courantNo();
-
-    if ( runTime->timeIndex() > 1 || k > 0 || corrector )
-    {
-        double initMomentumResidual = evaluateMomentumResidual( dt );
-        convergenceTolerance = std::max( 1.0e-2 * initMomentumResidual, 1.0e-15 );
-
-        Info << "root mean square residual norm = " << initMomentumResidual;
-        Info << ", tolerance = " << convergenceTolerance;
-        Info << ", iteration = 0, convergence = false" << endl;
-    }
 
     // PIMPLE algorithm
 
-    for ( label oCorr = 0; oCorr < nOuterCorr; oCorr++ )
+    for ( label oCorr = 0; oCorr < maxIter; oCorr++ )
     {
         // for computing Hp
         fvVectorMatrix UEqn
@@ -606,7 +591,10 @@ void SDCFluidSolver::implicitSolve(
 
         scalar momentumResidual = evaluateMomentumResidual( dt );
 
-        bool convergence = momentumResidual <= convergenceTolerance;
+        if ( oCorr == 0 )
+            convergenceTolerance = std::max( relativeTolerance * momentumResidual, absoluteTolerance );
+
+        bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
 
         Info << "root mean square residual norm = " << momentumResidual;
         Info << ", tolerance = " << convergenceTolerance;
