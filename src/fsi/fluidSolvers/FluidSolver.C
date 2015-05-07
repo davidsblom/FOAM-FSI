@@ -176,6 +176,24 @@ FluidSolver::FluidSolver(
 
         if ( word( dict.lookup( "simulationType" ) ) == "laminar" )
             turbulenceSwitch = false;
+
+        if ( word( dict.lookup( "simulationType" ) ) == "RASModel" )
+        {
+            IOdictionary dict
+            (
+                IOobject
+                (
+                    "RASProperties",
+                    runTime->constant(),
+                    *runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+
+            if ( word( dict.lookup( "RASModel" ) ) == "laminar" )
+                turbulenceSwitch = false;
+        }
     }
 
     Info << "Turbulence ";
