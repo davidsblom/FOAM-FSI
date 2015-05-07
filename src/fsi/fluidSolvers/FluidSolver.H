@@ -99,6 +99,8 @@ private:
     scalar CoNum;
     scalar meanCoNum;
     scalar velMag;
+
+    bool turbulenceSwitch;
 };
 
 #endif

@@ -144,6 +144,8 @@ private:
 
     label pRefCell;
     scalar pRefValue;
+    singlePhaseTransportModel laminarTransport;
+    autoPtr<incompressible::turbulenceModel> turbulence;
 
     int k;
     std::deque<volScalarField> pStages;
@@ -152,6 +154,8 @@ private:
     std::deque<surfaceVectorField> UfStages;
     volVectorField UF;
     surfaceVectorField UfF;
+
+    bool turbulenceSwitch;
 };
 
 #endif

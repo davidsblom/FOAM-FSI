@@ -142,6 +142,11 @@ SDCFluidSolver::SDCFluidSolver(
     sumLocalContErr( 0 ),
     globalContErr( 0 ),
     cumulativeContErr( 0 ),
+    laminarTransport( U, phi ),
+    turbulence( autoPtr<incompressible::turbulenceModel>
+    (
+        incompressible::turbulenceModel::New( U, phi, laminarTransport )
+    ) ),
     k( 0 ),
     pStages(),
     phiStages(),
@@ -172,7 +177,8 @@ SDCFluidSolver::SDCFluidSolver(
     ),
     mesh,
     dimensionedVector( "UfF", dimVelocity / dimTime, Foam::vector::zero )
-    )
+    ),
+    turbulenceSwitch( true )
 {
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
@@ -181,6 +187,32 @@ SDCFluidSolver::SDCFluidSolver(
 
     absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
     assert( absTolerance < absoluteTolerance );
+
+    {
+        IOdictionary dict
+        (
+            IOobject
+            (
+                "turbulenceProperties",
+                runTime->constant(),
+                *runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+        if ( word( dict.lookup( "simulationType" ) ) == "laminar" )
+            turbulenceSwitch = false;
+    }
+
+    Info << "Turbulence ";
+
+    if ( turbulenceSwitch )
+        Info << "enabled";
+    else
+        Info << "disabled";
+
+    Info << endl;
 
     initialize();
 }
@@ -248,7 +280,12 @@ void SDCFluidSolver::createFields()
 
 double SDCFluidSolver::evaluateMomentumResidual( double dt )
 {
-    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) - fvc::laplacian( nu, U ) + fvc::grad( p ) - rhsU / dt;
+    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p ) - rhsU / dt;
+
+    if ( turbulenceSwitch )
+        residual += turbulence->divDevReff( U ) & U;
+    else
+        residual += -fvc::laplacian( nu, U );
 
     scalarField magResU = mag( residual.internalField() );
     scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
@@ -454,7 +491,6 @@ void SDCFluidSolver::implicitSolve(
         fvVectorMatrix UEqn
         (
             fvm::div( phi, U )
-            - fvm::laplacian( nu, U )
         );
 
         // for computing \tilde{a}_{P}
@@ -462,8 +498,18 @@ void SDCFluidSolver::implicitSolve(
         (
             fvm::ddt( U )
             + fvm::div( phi, U )
-            - fvm::laplacian( nu, U )
         );
+
+        if ( turbulenceSwitch )
+        {
+            UEqn += turbulence->divDevReff( U );
+            UEqnt += turbulence->divDevReff( U );
+        }
+        else
+        {
+            UEqn += -fvm::laplacian( nu, U );
+            UEqnt += -fvm::laplacian( nu, U );
+        }
 
         {
             // To ensure S0 and B0 are thrown out of memory
@@ -487,8 +533,13 @@ void SDCFluidSolver::implicitSolve(
                 (
                 fvm::ddt( U )
                 + fvm::div( phi, U )
-                - fvm::laplacian( nu, U )
                 );
+
+            if ( turbulenceSwitch )
+                UEqnt += turbulence->divDevReff( U );
+            else
+                UEqnt += -fvm::laplacian( nu, U );
+
             UEqnt.source() = S0;
             UEqnt.boundaryCoeffs() = B0;
         }
@@ -551,12 +602,7 @@ void SDCFluidSolver::implicitSolve(
             {
                 fvScalarMatrix pEqn
                 (
-                    fvm::laplacian
-                    (
-                        1.0 / fvc::interpolate( AU ), p,
-                        "laplacian((1|A(U)),p)"
-                    )
-                    == fvc::div( phi )
+                    fvm::laplacian( 1.0 / fvc::interpolate( AU ), p, "laplacian((1|A(U)),p)" ) == fvc::div( phi )
                 );
 
                 pEqn.setReference( pRefCell, pRefValue );
@@ -575,13 +621,15 @@ void SDCFluidSolver::implicitSolve(
             p.relax();
 
             // Eqn 30
-            U -= fvc::grad( p ) / AU;
-
+            U -= (1.0 / AU) * fvc::grad( p );
             U.correctBoundaryConditions();
 
             if ( currResidual < std::max( tol * initResidual, 1.0e-15 ) )
                 break;
         }
+
+        if ( turbulenceSwitch )
+            turbulence->correct();
 
         surfaceVectorField nf = mesh.Sf() / mesh.magSf();
         surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);

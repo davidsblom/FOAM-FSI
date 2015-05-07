@@ -120,7 +120,8 @@ FluidSolver::FluidSolver(
     turbulence( autoPtr<incompressible::turbulenceModel>
     (
         incompressible::turbulenceModel::New( U, phi, laminarTransport )
-    ) )
+    ) ),
+    turbulenceSwitch( true )
 {
     assert( absoluteTolerance < 1 );
     assert( absoluteTolerance > 0 );
@@ -159,6 +160,32 @@ FluidSolver::FluidSolver(
     pRefCell = 0;
     pRefValue = 0.0;
     setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
+
+    {
+        IOdictionary dict
+        (
+            IOobject
+            (
+                "turbulenceProperties",
+                runTime->constant(),
+                *runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+        if ( word( dict.lookup( "simulationType" ) ) == "laminar" )
+            turbulenceSwitch = false;
+    }
+
+    Info << "Turbulence ";
+
+    if ( turbulenceSwitch )
+        Info << "enabled";
+    else
+        Info << "disabled";
+
+    Info << endl;
 }
 
 FluidSolver::~FluidSolver()
@@ -232,7 +259,12 @@ void FluidSolver::courantNo()
 
 double FluidSolver::evaluateMomentumResidual()
 {
-    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
+    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p );
+
+    if ( turbulenceSwitch )
+        residual += turbulence->divDevReff( U ) & U;
+    else
+        residual += -fvc::laplacian( nu, U );
 
     scalarField magResU = mag( residual.internalField() );
     scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
@@ -347,8 +379,12 @@ void FluidSolver::solve()
         (
             fvm::ddt( U )
             + fvm::div( phi, U )
-            + turbulence->divDevReff( U )
         );
+
+        if ( turbulenceSwitch )
+            UEqn += turbulence->divDevReff( U );
+        else
+            UEqn += -fvm::laplacian( nu, U );
 
         {
             // To ensure S0 and B0 are thrown out of memory
@@ -371,8 +407,13 @@ void FluidSolver::solve()
                 (
                 fvm::ddt( U )
                 + fvm::div( phi, U )
-                + turbulence->divDevReff( U )
                 );
+
+            if ( turbulenceSwitch )
+                UEqn += turbulence->divDevReff( U );
+            else
+                UEqn += -fvm::laplacian( nu, U );
+
             UEqn.source() = S0;
             UEqn.boundaryCoeffs() = B0;
         }
@@ -449,7 +490,8 @@ void FluidSolver::solve()
                 break;
         }
 
-        turbulence->correct();
+        if ( turbulenceSwitch )
+            turbulence->correct();
 
         // Update the face velocities
         fvc::makeAbsolute( phi, U );
