@@ -51,7 +51,7 @@ Description
 
 int main(int argc, char *argv[])
 {
-    /*int N=100;
+	/*int N=1000;
     rbf::matrix C(N,N);
     for(int i=0;i<N;i++){
         for(int j=0;j<N;j++){
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
     // == options == //
     int coarsening=1;
-    int Nx=33;
+    int Nx=129;
     int Ny=257;
     double R=0.5;
     int nTimes=50;
@@ -112,8 +112,8 @@ int main(int argc, char *argv[])
 
     Info<< nl << "==== Timings - Building ==== " << endl;
     clock_t t_start = std::clock();
-    rbf::matrix Crbf(N,N);
-    invLib.getControlMatrix(points,Crbf);
+    rbf::matrix Crbf(Nc,Nc);
+    invLib.getControlMatrix(controlPoints,Crbf);
     clock_t t_end = std::clock();
     double tcb = 1.0*(t_end-t_start)/CLOCKS_PER_SEC;
     Info << "Building C [" << Nc << "," << Nc << "]: " << tcb << " s" << endl;
