@@ -126,7 +126,7 @@ namespace rbf
                 for ( int j = 0; j < i; j++ )
                     positionsCoarse.row( j ) = positions.row( selectedPositions( j ) );
 
-                rbfCoarse->buildPhi( positionsCoarse, positionsInterpolationCoarse );
+                rbfCoarse->buildPhi( livePointSelection, positionsCoarse, positionsInterpolationCoarse );
             }
 
             // Run the greedy algorithm
@@ -145,7 +145,7 @@ namespace rbf
                 }
 
                 // Perform the RBF interpolation.
-                rbfCoarse->interpolate( positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
+                rbfCoarse->interpolate( livePointSelection, positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
 
                 // Evaluate the error
                 for ( int j = 0; j < valuesInterpolationCoarse.rows(); j++ )

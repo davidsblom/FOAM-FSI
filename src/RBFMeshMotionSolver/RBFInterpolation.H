@@ -37,6 +37,7 @@ public:
             );
 
         void interpolate(
+            bool polynomialTerm,
             const matrix & positions,
             const matrix & positionsInterpolation,
             const matrix & values,
@@ -49,6 +50,7 @@ public:
             );
 
         void buildPhi(
+            bool polynomialTerm,
             const matrix & positions,
             const matrix & positionsInterpolation
             );
@@ -61,6 +63,7 @@ public:
         matrix Hhat;
         matrix Phi;
         Eigen::PartialPivLU<matrix> lu;
+        Eigen::FullPivLU<matrix> fullPivLu;
         Eigen::LLT<matrix> llt;
 
 private:
