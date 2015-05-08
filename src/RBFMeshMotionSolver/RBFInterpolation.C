@@ -5,7 +5,6 @@
  */
 
 #include "RBFInterpolation.H"
-#include "TPSFunction.H"
 
 namespace rbf
 {
@@ -65,6 +64,16 @@ namespace rbf
         const matrix & positionsInterpolation
         )
     {
+        std::clock_t t = std::clock();
+
+        int debugLevel = Foam::debug::debugSwitch( "RBFInterpolation", 0 );
+
+        if ( debugLevel > 0 )
+        {
+            Info << "RBFInterpolation::debug positions = " << positions.rows() << " x " << positions.cols() << endl;
+            Info << "RBFInterpolation::debug positionsInterpolation = " << positionsInterpolation.rows() << " x " << positionsInterpolation.cols() << endl;
+        }
+
         // Verify input
 
         assert( positions.cols() == positionsInterpolation.cols() );
@@ -96,6 +105,14 @@ namespace rbf
             for ( int j = 0; j < dimGrid + 1; j++ )
                 H( H.rows() - dimGrid - 1 + i, H.rows() - dimGrid - 1 + j ) = 0;
 
+        if ( debugLevel > 0 )
+        {
+            t = std::clock() - t;
+            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+            Info << "RBFInterpolation::debug 1. evaluate H = " << runTime << " s" << endl;
+            t = std::clock();
+        }
+
         // Evaluate Phi which contains the evaluation of the radial basis function
 
         evaluatePhi( positions, positionsInterpolation, Phi );
@@ -107,15 +124,42 @@ namespace rbf
 
         Phi.topRightCorner( n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
 
+        if ( debugLevel > 0 )
+        {
+            t = std::clock() - t;
+            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+            Info << "RBFInterpolation::debug 2. evaluate Phi = " << runTime << " s" << endl;
+            t = std::clock();
+        }
+
         // Compute the LU decomposition of the matrix H
 
         Eigen::PartialPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
+        matrix Hinverse = lu.inverse();
+
+        if ( debugLevel > 0 )
+        {
+            t = std::clock() - t;
+            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+            Info << "RBFInterpolation::debug 3. inversion H = " << runTime << " s" << endl;
+            t = std::clock();
+
+            Info << "RBFInterpolation::debug Phi = " << Phi.rows() << " x " << Phi.cols() << endl;
+            Info << "RBFInterpolation::debug Hinverse = " << Hinverse.rows() << " x " << Hinverse.cols() << endl;
+        }
 
         // Compute interpolation matrix
 
-        Hhat.noalias() = Phi * lu.inverse();
+        Hhat.noalias() = Phi * Hinverse;
 
         Hhat.conservativeResize( n_B, n_A );
+
+        if ( debugLevel > 0 )
+        {
+            t = std::clock() - t;
+            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+            Info << "RBFInterpolation::debug 4. compute Hhat = " << runTime << " s" << endl;
+        }
 
         computed = true;
     }
@@ -127,7 +171,16 @@ namespace rbf
     {
         assert( computed );
 
+        std::clock_t t = std::clock();
+
         valuesInterpolation.noalias() = Hhat * values;
+
+        if ( Foam::debug::debugSwitch( "RBFInterpolation", 0 ) > 0 )
+        {
+            t = std::clock() - t;
+            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+            Info << "RBFInterpolation::debug 5. interpolation = " << runTime << " s" << endl;
+        }
 
         assert( valuesInterpolation.rows() == n_B );
         assert( values.cols() == valuesInterpolation.cols() );
