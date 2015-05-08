@@ -378,6 +378,31 @@ namespace rbf
         valuesInterpolation = Phi * B;
     }*/
 
+    void inverseMatrixLibrary::getEvaluationMatrix(
+        const matrix & positions,
+        const matrix & controlPoints,
+        matrix & B
+    )
+    {
+        assert( positions.rows() > 0 );
+        assert( positions.cols() > 0 );
+        assert( controlPoints.rows() > 0 );
+        assert( controlPoints.cols() > 0 );
+        assert( B.cols() == controlPoints.rows() );
+        assert( B.rows() == positions.rows());
+
+        // RBF function evaluation
+        double r;
+        for ( int i = 0; i < B.rows(); i++ )
+        {
+            for ( int j = 0; j < B.cols(); j++ )
+            {
+                r = ( positions.row(i) - controlPoints.row(j)).norm();
+                B(i,j) = rbfFunction->evaluate(r);
+            }
+        }
+    }
+
     void inverseMatrixLibrary::getControlMatrix(
         const matrix & positions,
         matrix & Crbf
