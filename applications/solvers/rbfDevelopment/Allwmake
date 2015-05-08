@@ -1,0 +1,6 @@
+#!/bin/bash
+
+wmake inverseMatrixTesting
+wmake matrixMatrixTesting
+wmake moveBodyFoamDavid
+

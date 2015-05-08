@@ -1,3 +1,0 @@
-writeSets.C
-
-EXE = $(FOAM_USER_APPBIN)/writeSets

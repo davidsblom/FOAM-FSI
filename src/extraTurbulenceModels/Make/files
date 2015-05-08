@@ -1,9 +1,0 @@
-incompressibleRAS=incompressible/RAS
-$(incompressibleRAS)/kOmegaSSTsust/kOmegaSSTsust.C
-$(incompressibleRAS)/kkLOmega/kkLOmega.C
-$(incompressibleRAS)/kkLOmega2008/kkLOmega2008.C
-
-$(incompressibleRAS)/derivedFvPatchFields/wallFunctions/kLowReWallFunction/kLowReWallFunctionFvPatchScalarField.C
-$(incompressibleRAS)/derivedFvPatchFields/wallFunctions/nutLowReWallFunction/nutLowReWallFunctionFvPatchScalarField.C
-
-LIB = $(FOAM_USER_LIBBIN)/libextraTurbulenceModels

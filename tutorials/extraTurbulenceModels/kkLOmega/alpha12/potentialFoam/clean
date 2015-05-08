@@ -1,9 +1,0 @@
-#!/bin/sh
-
-#load clean function
-. $WM_PROJECT_DIR/bin/tools/CleanFunctions
-
-cleanTimeDirectories
-
-rm -rf 0
-cp -r 0.org 0
