@@ -1,0 +1,8 @@
+bodyCollector/bodyCollector.C
+
+bodyMotionFunction/bodyMotionFunction/bodyMotionFunction.C
+bodyMotionFunction/bodyMotionFunction/newbodyMotionFunction.C
+bodyMotionFunction/twodRigidBody/twodRigidBody.C
+bodyMotionFunction/twodTwoHingeFlap/twodTwoHingeFlap.C
+
+LIB = $(FOAM_USER_LIBBIN)/libbodyMotions
