@@ -65,6 +65,12 @@ namespace rbf
             matrix & valuesInterpolation
         );*/
 
+        void getEvaluationMatrix(
+            const matrix & positions,
+            const matrix & controlPoints,
+            matrix & B
+        );
+
         void getControlMatrix(
             const matrix & positions,
             matrix & Crbf

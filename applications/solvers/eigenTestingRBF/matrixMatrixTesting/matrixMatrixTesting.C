@@ -68,14 +68,14 @@ int main(int argc, char *argv[])
 
     // == options == //
     int coarsening=1;
-    int Nx=129;
-    int Ny=257;
-    double R=0.5;
+    int Nx=257;
+    int Ny=513;
+    double R=1;
     int nTimes=50;
 
     // == create "mesh" == //
-    //std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-    std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::WendlandC2Function(R) );
+    std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
+    //std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::WendlandC2Function(R) );
     rbf::inverseMatrixLibrary invLib(rbfFunction);
     int N=Nx*Ny;
 
@@ -124,6 +124,72 @@ int main(int argc, char *argv[])
     t_end = std::clock();
     double ti = 1.0*(t_end-t_start)/CLOCKS_PER_SEC;
     Info << "Inverting C [" << Nc << "," << Nc << "]: " << ti << " s" << endl;
+
+    t_start = std::clock();
+    rbf::matrix H(N,Nc);
+    invLib.getEvaluationMatrix(points,controlPoints,H);
+    t_end = std::clock();
+    double tbb = 1.0*(t_end-t_start)/CLOCKS_PER_SEC;
+    Info << "Building B [" << N << "," << Nc << "]: " << tbb << " s" << endl;
+
+    t_start = std::clock();
+    H*=Cinv;
+    t_end = std::clock();
+    double tch = 1.0*(t_end-t_start)/CLOCKS_PER_SEC;
+    Info << "Calculating H [" << N << "," << Nc << "]: " << tch << " s" << endl;
+    Info << "Size of H [" << N << "," << Nc << "]: " << N*Nc*8/1000/1000 << " MB" << endl;
+
+
+    Info<< nl << "==== Timings - Solving ==== " << endl;
+    t_start = std::clock();
+    for(int i=0;i<nTimes;i++)
+    {
+        rbf::vector dx=H*displacement.col(0);
+        rbf::vector dy=H*displacement.col(1);
+    }
+    t_end = std::clock();
+    double tMEM = 1.0*(t_end-t_start)/CLOCKS_PER_SEC;
+    Info << "Calculating dx,dy [" << N << "," << "2] "<< nTimes << " times using memory: " << tMEM << " s" << endl;
+
+    double tas=0;double trbfs=0;double tes=0;
+    for(int k=0;k<nTimes;k++)
+    {
+        t_start = std::clock();
+        rbf::vector alphax=Cinv*displacement.col(0);
+        rbf::vector alphay=Cinv*displacement.col(1);
+        t_end = std::clock();
+        double ta=1.0*(t_end-t_start)/CLOCKS_PER_SEC;
+
+        rbf::vector dx(N);
+        rbf::vector dy(N);
+        for(int i=0;i<N;i++)
+        {
+            t_start = std::clock();
+            rbf::vector rbfvalue(Nc);
+            for(int j=0;j<Nc;j++)
+            {
+                double r = std::sqrt(std::pow(points(i,0)-controlPoints(j,0),2) + std::pow(points(i,1)-controlPoints(j,1),2))/R;
+                rbfvalue(j) = rbfFunction->evaluate(r);
+            }
+            t_end = std::clock();
+            double trbf=1.0*(t_end-t_start)/CLOCKS_PER_SEC;
+
+            t_start = std::clock();
+            dx(i)=rbfvalue.transpose()*alphax;
+            dy(i)=rbfvalue.transpose()*alphay;
+            t_end = std::clock();
+            double te=1.0*(t_end-t_start)/CLOCKS_PER_SEC;
+
+            trbfs+=trbf;
+            tes+=te;
+        }
+        tas+=ta;
+    }
+    double tCPU=trbfs+tes;
+    Info << "Calculating dx,dy [" << N << "," << "2] "<< nTimes << " times using CPU: " << tCPU << "[" << tas << " , " << trbfs << " , " << tes << "]" << endl;
+
+    Info << "Ratio tMEM/tCPU = " << tCPU/tMEM << endl;
+
 
     // ========= Testing matrix calculations ==========//
     /*double totalMatrixVector = 0;
