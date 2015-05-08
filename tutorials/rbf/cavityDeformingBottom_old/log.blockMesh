@@ -1,0 +1,72 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     3.1                                |
+|   \\  /    A nd           | Web:         http://www.extend-project.de       |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build    : 3.1-be934ff67481
+Exec     : blockMesh
+Date     : May 08 2015
+Time     : 15:58:26
+Host     : tud276718
+PID      : 14436
+CtrlDict : /home/thijsgillebaart/foam/foam-extend-3.1/etc/controlDict
+Case     : /home/thijsgillebaart/repositories/foam/tutorials/rbf/cavityDeformingBottom_old
+nProcs   : 1
+SigFpe   : Enabling floating point exception trapping (FOAM_SIGFPE).
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+
+Creating block mesh from
+    "/home/thijsgillebaart/repositories/foam/tutorials/rbf/cavityDeformingBottom_old/constant/polyMesh/blockMeshDict"
+
+Creating curved edges
+Creating topology blocks
+Creating topology patches
+
+Creating block mesh topology
+
+Check topology
+
+	Basic statistics
+		Number of internal faces : 0
+		Number of boundary faces : 6
+		Number of defined boundary faces : 6
+		Number of undefined boundary faces : 0
+	Checking patch -> block consistency
+
+Creating block offsets
+Creating merge list .
+
+Creating polyMesh from blockMesh
+Creating patches
+Creating cells
+Creating points with scale 1
+    Block 0 cell size :
+        i : 0.03125 .. 0.03125
+        j : 0.03125 .. 0.03125
+        k : 0.0625 .. 0.0625
+
+
+Writing polyMesh
+----------------
+Mesh Information
+----------------
+  boundingBox: (0 0 0) (1 1 1)
+  nPoints: 18513
+  nCells: 16384
+  nFaces: 51200
+  nInternalFaces: 47104
+----------------
+Patches
+----------------
+  patch 0 (start: 47104 size: 1024) name: top
+  patch 1 (start: 48128 size: 1024) name: frontBack
+  patch 2 (start: 49152 size: 1024) name: leftRight
+  patch 3 (start: 50176 size: 1024) name: bottom
+
+End
+
