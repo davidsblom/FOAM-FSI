@@ -6,6 +6,6 @@ runApplication blockMesh
 
 #decomposePar
 echo "Start running moveBodyFoamDavid on 1 processor"
-runApplication moveBodyFoamDavid
-
+#runApplication moveBodyFoamDavid
+moveBodyFoamDavid
 

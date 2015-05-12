@@ -20,26 +20,26 @@ FoamFile
     top
     {
         type            patch;
-        nFaces          1024;
-        startFace       47104;
+        nFaces          1600;
+        startFace       73920;
     }
     frontBack
     {
         type            patch;
-        nFaces          1024;
-        startFace       48128;
+        nFaces          1280;
+        startFace       75520;
     }
     leftRight
     {
         type            patch;
-        nFaces          1024;
-        startFace       49152;
+        nFaces          1280;
+        startFace       76800;
     }
     bottom
     {
         type            patch;
-        nFaces          1024;
-        startFace       50176;
+        nFaces          1600;
+        startFace       78080;
     }
 )
 

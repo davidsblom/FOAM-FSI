@@ -39,5 +39,5 @@ coarsening
 interpolation
 {
   function WendlandC2;//TPS;
-  radius 1;
+  radius 5;
 }
