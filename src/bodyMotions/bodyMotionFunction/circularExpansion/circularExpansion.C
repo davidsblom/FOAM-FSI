@@ -1,4 +1,4 @@
-#include "sphericalExpansion.H"
+#include "circularExpansion.H"
 #include "mathematicalConstants.H"
 #include "tensor.H"
 #include "addToRunTimeSelectionTable.H"
@@ -6,18 +6,18 @@
 
 using namespace Foam;
 
-defineTypeNameAndDebug(sphericalExpansion, 0);
-addToRunTimeSelectionTable(bodyMotionFunction, sphericalExpansion, dictionary);
+defineTypeNameAndDebug(circularExpansion, 0);
+addToRunTimeSelectionTable(bodyMotionFunction, circularExpansion, dictionary);
 
 
 // * * * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
-void sphericalExpansion::writeState(const scalar& time)
+void circularExpansion::writeState(const scalar& time)
 {
     scalar state = getState(time);
     ofBody_ << time << "\t" << state << endl;
 }
 
-scalar sphericalExpansion::getState(const scalar& time)
+scalar circularExpansion::getState(const scalar& time)
 {
     const scalar& pi = mathematicalConstant::pi;
 
@@ -26,7 +26,7 @@ scalar sphericalExpansion::getState(const scalar& time)
     return radius;
 }
 
-tmp<Field<vectorField> > sphericalExpansion::calculatePosition(const scalar time)
+tmp<Field<vectorField> > circularExpansion::calculatePosition(const scalar time)
 {
 
     tmp<Field<vectorField> > tPosition(new Field<vectorField>(patchIDs_.size()));
@@ -36,14 +36,13 @@ tmp<Field<vectorField> > sphericalExpansion::calculatePosition(const scalar time
 
     forAll(patchIDs_,ipatch){
         position[ipatch] = initialPoints_[ipatch];
-        vectorField r = initialPoints_[ipatch] - origin_;
-
+        vectorField r = (initialPoints_[ipatch] - axis_*(axis_ & initialPoints_[ipatch]));
+        r -= origin_;
         forAll(r,ipoint)
         {
-            scalar radius=mag(r[ipoint]);
+            scalar radius = mag(r[ipoint]);
             if(radius<state){
                 position[ipatch][ipoint] += (state-radius)*(r[ipoint]/radius);
-                Info << ipoint << ": " << (state-radius)*(r[ipoint]/radius) << endl;
             }
         }
     }
@@ -52,11 +51,11 @@ tmp<Field<vectorField> > sphericalExpansion::calculatePosition(const scalar time
     return tPosition;
 }
 
-void sphericalExpansion::setPatchIDs(){
+void circularExpansion::setPatchIDs(){
     forAll(patchNames_,ipatch){
         label patchID(mesh_.boundaryMesh().findPatchID(patchNames_[ipatch]));
         if(patchID < 0){
-            FatalErrorIn("void sphericalExpansion::setPatchIDs()")
+            FatalErrorIn("void circularExpansion::setPatchIDs()")
             << "patchName " << patchNames_[ipatch] << " does not exist."
             << abort(FatalError);
         }else{
@@ -66,12 +65,12 @@ void sphericalExpansion::setPatchIDs(){
 }
 
 // * * * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * * //
-tmp<Field<vectorField> > sphericalExpansion::getChildMotion()
+tmp<Field<vectorField> > circularExpansion::getChildMotion()
 {
     //If the localTimeIndex is not equal to mesh time index, update has not been called
     if(mesh_.time().timeIndex() != localTimeIndex())
     {
-        WarningIn("sphericalExpansion::getChildMotion()")
+        WarningIn("circularExpansion::getChildMotion()")
             << "Local time index is not equal to global time index. Update functions needs to be called" << endl;
         update();
     }
@@ -89,23 +88,23 @@ tmp<Field<vectorField> > sphericalExpansion::getChildMotion()
     return tMotion;
 }
 
-void sphericalExpansion::setInitialPoints(){
+void circularExpansion::setInitialPoints(){
     forAll(patchIDs_,ipatch){
         initialPoints_[ipatch] = mesh_.Cf().boundaryField()[patchIDs_[ipatch]];
     }
 }
 
-const labelList sphericalExpansion::getChildMotionPatchIDs() const{
+const labelList circularExpansion::getChildMotionPatchIDs() const{
     return patchIDs_;
 }
 
-const wordList sphericalExpansion::getChildMotionPatchNames() const{
+const wordList circularExpansion::getChildMotionPatchNames() const{
     return patchNames_;
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-sphericalExpansion::sphericalExpansion(const dictionary& dict,const fvMesh& mesh, const word name):
+circularExpansion::circularExpansion(const dictionary& dict,const fvMesh& mesh, const word name):
 bodyMotionFunction(dict,mesh,name),
 dict_(dict),
 mesh_(mesh),
@@ -116,12 +115,25 @@ radius0_(readScalar(dict.lookup("initialRadius"))),
 amplitude_(readScalar(dict.lookup("amplitude"))),
 frequency_(readScalar(dict.lookup("frequency"))),
 origin_(dict.lookup("origin")),
+axis_(dict.lookup("axis")),
 currentPosition_(patchIDs_.size()),
 prevPosition_(patchIDs_.size()),
 initialPoints_(patchIDs_.size()),
 ofBody_("body-"+name+"-state.dat")
 {
     Info << "A = " << amplitude_ << ", origin = " << origin_ << endl;
+
+    if(mag(axis_)>SMALL)
+    {
+        axis_/=mag(axis_);
+    }
+    else
+    {
+        FatalErrorIn("void circularExpansion::Constructor()")
+        << "mag(axis) == 0. Give axis with magnitude. Obviously ;)"
+        << abort(FatalError);
+    }
+
     //Set patchIDs_ according to patchNames_
     setPatchIDs();
 
@@ -147,19 +159,19 @@ ofBody_("body-"+name+"-state.dat")
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-sphericalExpansion::~sphericalExpansion()
+circularExpansion::~circularExpansion()
 {
 
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Field<vectorField>& sphericalExpansion::getPosition() const
+const Field<vectorField>& circularExpansion::getPosition() const
 {
     return currentPosition_;
 }
 
-void sphericalExpansion::update()
+void circularExpansion::update()
 {
     if(localTimeIndex() < mesh_.time().timeIndex()){
         forAll(prevPosition_,ipatch){
@@ -172,7 +184,7 @@ void sphericalExpansion::update()
     currentPosition_ = calculatePosition(mesh_.time().value());
 }
 
-void sphericalExpansion::write()
+void circularExpansion::write()
 {
     if(writeToFile())
     {

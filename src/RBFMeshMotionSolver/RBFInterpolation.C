@@ -133,8 +133,8 @@ namespace rbf
         }
 
         // Compute the LU decomposition of the matrix H
-
-        Eigen::PartialPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
+        //Eigen::PartialPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
+        Eigen::FullPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
 
         // Compute interpolation matrix
 
@@ -334,6 +334,8 @@ namespace rbf
         valuesLU.setZero();
         valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
 
+        Info << "valuesLU.rows()|cols() = " << valuesLU.rows() << "|" << valuesLU.cols() << endl;
+        Info << "fullPivLu.rows()|cols() = " << fullPivLu.rows() << "|" << fullPivLu.cols() << endl;
         matrix B = fullPivLu.solve( valuesLU );
 
         valuesInterpolation.noalias() = Phi * B;

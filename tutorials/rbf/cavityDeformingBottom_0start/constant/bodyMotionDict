@@ -10,33 +10,22 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      motionProperties;
+    object      bodyMotionDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh   dynamicMotionSolverFvMesh;
+bodyMotions ( bottom );
 
-solver          RBFMeshMotionSolver;
-
-movingPatches   ( flaptop flapbottom flapback );
-
-staticPatches   ( wingtop wingbottom );
-
-fixedPatches 	( farfield );
-
-coarsening
+bottomDict
 {
-  enabled true;
-  tol 1.0e-3;
-  minPoints 10;
-  maxPoints 300;
-  
-  livePointSelection true;
-  tolLivePointSelection 1e-2;
-  exportSelectedPoints true;
-}
+    type sphericalExpansion;
+    patches (bottom);
 
-interpolation
-{
-  function TPS;
+    initialRadius 0.2;
+    amplitude 0.2;
+    frequency 2;
+    origin (0.5 0.5 -0.2);
+
+    write true;
 }
+// ************************************************************************* //

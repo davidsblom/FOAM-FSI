@@ -20,24 +20,24 @@ solver          RBFMeshMotionSolver;
 
 movingPatches   ( bottom );
 
-staticPatches   ( top );
+staticPatches   ( top frontBack leftRight );
 
 fixedPatches 	( );
 
 coarsening
 {
-  enabled false;
+  enabled true;
   tol 1.0e-3;
   minPoints 10;
-  maxPoints 300;
+  maxPoints 800;
 
-  livePointSelection false;
-  tolLivePointSelection 1e-4;
+  livePointSelection true;
+  tolLivePointSelection 1e-2;
   exportSelectedPoints true;
 }
 
 interpolation
 {
-  function WendlandC2;//TPS;
+  function WendlandC2;
   radius 5;
 }

@@ -24,7 +24,7 @@ bottomDict
     initialRadius 0.2;
     amplitude 0.2;
     frequency 2;
-    origin (0.5 0.5 -0.2);
+    origin (0.5 0.5 -0.19);
 
     write true;
 }

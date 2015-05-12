@@ -18,19 +18,19 @@ dynamicFvMesh   dynamicMotionSolverFvMesh;
 
 solver          RBFMeshMotionSolver;
 
-movingPatches   ( flaptop flapbottom flapback );
+movingPatches   ( bottom );
 
-staticPatches   ( wingtop wingbottom );
+staticPatches   ( top leftRight );
 
-fixedPatches 	( farfield );
+fixedPatches 	( );
 
 coarsening
 {
   enabled true;
   tol 1.0e-3;
   minPoints 10;
-  maxPoints 300;
-  
+  maxPoints 800;
+
   livePointSelection true;
   tolLivePointSelection 1e-2;
   exportSelectedPoints true;
@@ -38,5 +38,6 @@ coarsening
 
 interpolation
 {
-  function TPS;
+  function TPS;//WendlandC2;
+  radius 5;
 }

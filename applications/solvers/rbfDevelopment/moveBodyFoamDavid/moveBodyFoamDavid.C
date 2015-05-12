@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
         bool meshChanged = mesh.update();
 
         runTime.write();
+		bodyCol.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

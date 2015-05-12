@@ -93,6 +93,8 @@ namespace rbf
         assert( positionsInterpolation.rows() > 0 );
         assert( positions.rows() == values.rows() );
 
+        int debugLevel = Foam::debug::debugSwitch( "RBFInterpolation", 0 );
+
         matrix usedPositions = positions;
 
         if ( enabled )
@@ -130,11 +132,18 @@ namespace rbf
             }
 
             // Run the greedy algorithm
-
-            for ( int i = selectedPositions.rows(); i < maxNbPoints + 1; i++ )
+            double runTimeInterpolate = 0.0;
+            double runTimeError = 0.0;
+            double runTimeConvergence = 0.0;
+            bool addedSecondPoint = false;
+            int counter = selectedPositions.rows();
+//            for ( int i = selectedPositions.rows(); i < maxNbPoints + 1; i++ )
+            while(true)
             {
+                std::clock_t t = std::clock();
+
                 // Build the matrices used for the RBF interpolation
-                rbf::matrix positionsCoarse( i, positions.cols() );
+                rbf::matrix positionsCoarse( counter, positions.cols() );
                 rbf::matrix valuesCoarse( positionsCoarse.rows(), positionsCoarse.cols() );
                 rbf::matrix valuesInterpolationCoarse( positionsInterpolationCoarse.rows(), positionsInterpolationCoarse.cols() );
 
@@ -147,39 +156,104 @@ namespace rbf
                 // Perform the RBF interpolation.
                 rbfCoarse->interpolate( livePointSelection, positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
 
+                if ( debugLevel > 0 )
+                {
+                    t = std::clock() - t;
+                    runTimeInterpolate += static_cast<float>(t) / CLOCKS_PER_SEC;
+                    t = std::clock();
+                }
+
                 // Evaluate the error
                 for ( int j = 0; j < valuesInterpolationCoarse.rows(); j++ )
                     errorList( j ) = ( valuesInterpolationCoarse.row( j ).array() - values.row( j ).array() ).matrix().norm();
 
                 // Select the point with the largest error which is not already selected.
-
                 int index = -1;
                 double largestError = -1;
-
                 for ( int j = 0; j < errorList.rows(); j++ )
                 {
-                    bool notSelected = true;
+                    // Check if points are selected or not. Is quiet costly (Ns x Nc) and
+                    // should not be needed since error on selected points should be zero (and thus not maximum)
+                    // However, for the case where there is zero displacement all errors are zero.
+                    // Additional function to check whether the largestError = 0 (<SMALL) and do select next consecutive point
+
+                    /*bool notSelected = true;
 
                     for ( int k = 0; k < selectedPositions.rows(); k++ )
                         if ( selectedPositions( k ) == j )
                             notSelected = false;
 
-                    if ( errorList( j ) > largestError && notSelected )
+                    if ( errorList( j ) > largestError && notSelected )*/
+                    if ( errorList( j ) > largestError )
                     {
                         index = j;
                         largestError = errorList( j );
                     }
                 }
 
+                // Additional function to check whether the largestError = 0 (<SMALL) and do select next consecutive point
+                if(largestError<SMALL)
+                {
+                    index = selectedPositions.rows();
+                }
+
+                bool twoPointSelection = false;
+                int index2 = -1;
+                double largestError2 = -1;
+                //selected point with largest error in opposite direction (more than 90 degrees differenc in direction)
+                if(twoPointSelection)
+                {
+                    vector largestErrorVector = valuesInterpolationCoarse.row( index ) - values.row( index );
+                    for ( int j = 0; j < errorList.rows(); j ++ )
+                    {
+                        vector errorVector = valuesInterpolationCoarse.row( j ) - values.row( j );
+                        if(largestErrorVector.dot(errorVector)<0 && largestError2 < errorList(j) )
+                        {
+                            index2 = j;
+                            largestError2 = errorList( j );
+                        }
+                    }
+                }
+
+                if ( debugLevel > 0 )
+                {
+                    t = std::clock() - t;
+                    runTimeError += static_cast<float>(t) / CLOCKS_PER_SEC;
+                    t = std::clock();
+                }
+
                 double epsilon = std::sqrt( SMALL );
-                error = ( valuesInterpolationCoarse.array() - values.array() ).matrix().norm() / (values.norm() + epsilon);
-                bool convergence = (error < tol && i >= minPoints) || i >= maxNbPoints;
+                error = ( errorList ).matrix().norm() / (values.norm() + epsilon);
+                bool convergence = (error < tol && counter >= minPoints) || counter >= maxNbPoints;
 
                 if ( convergence )
                     break;
 
                 selectedPositions.conservativeResize( selectedPositions.rows() + 1 );
                 selectedPositions( selectedPositions.rows() - 1 ) = index;
+                counter ++;
+
+                //Add second point if possible
+                if(twoPointSelection && index2 >= 0 && index != index2 )
+                {
+                    addedSecondPoint = true;
+                    selectedPositions.conservativeResize( selectedPositions.rows() + 1 );
+                    selectedPositions( selectedPositions.rows() - 1 ) = index2;
+                    counter ++;
+                }
+
+                if ( debugLevel > 0 )
+                {
+                    t = std::clock() - t;
+                    runTimeConvergence += static_cast<float>(t) / CLOCKS_PER_SEC;
+                    t = std::clock();
+                }
+            }
+            if ( debugLevel > 0 )
+            {
+                Info << "RBFCoarsening::debug 1. interpolate to surface = " << runTimeInterpolate << " s" << endl;
+                Info << "RBFCoarsening::debug 2. find largest error = " << runTimeError << " s" <<". Added second point = " << addedSecondPoint <<  endl;
+                Info << "RBFCoarsening::debug 3. convergence check = " << runTimeConvergence << " s" << endl;
             }
 
             Info << "RBF interpolation coarsening: selected " << selectedPositions.rows() << "/" << positions.rows() << " points, error = " << error << ", tol = " << tol << endl;
@@ -218,6 +292,7 @@ namespace rbf
         matrix & valuesInterpolation
         )
     {
+        Info << "RBFCoarsening::interpolate(values, valuesInterpolation)" << endl;
         matrix usedValues = values;
 
         if ( enabled )

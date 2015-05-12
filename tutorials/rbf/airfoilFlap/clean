@@ -7,7 +7,7 @@
 
 cleanTimeDirectories
 rm -rf force*
-
+rm -rf *.txt *.csv
 
 
 
