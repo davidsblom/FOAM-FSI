@@ -289,7 +289,8 @@ namespace rbf
     {
         n_A = positions.rows();
         n_B = positionsInterpolation.rows();
-
+        int phiColsOld = Phi.cols() - n_A;
+        Info << "phiColsOld = " << phiColsOld << endl;
         if ( polynomialTerm )
             Phi.conservativeResize(n_B, n_A + dimGrid + 1 );
         else

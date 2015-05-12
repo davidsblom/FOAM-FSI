@@ -197,7 +197,7 @@ namespace rbf
                     index = selectedPositions.rows();
                 }
 
-                bool twoPointSelection = false;
+                bool twoPointSelection = true;
                 int index2 = -1;
                 double largestError2 = -1;
                 //selected point with largest error in opposite direction (more than 90 degrees differenc in direction)
