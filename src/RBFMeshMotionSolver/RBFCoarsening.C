@@ -121,15 +121,20 @@ namespace rbf
             // before the greedening algorithm starts
             rbfCoarse->Phi.resize( 0, 0 );
 
+            /*Info << "0: selectedPositions.rows() = " << selectedPositions.rows() << endl;
             for ( int i = 1; i < selectedPositions.rows(); i++ )
             {
                 rbf::matrix positionsCoarse( i, positions.cols() );
-
+                Info << "0: i = " << i << endl;
                 for ( int j = 0; j < i; j++ )
+                {
+                    Info << "0: j = " << i << endl;
                     positionsCoarse.row( j ) = positions.row( selectedPositions( j ) );
+                }
 
                 rbfCoarse->buildPhi( livePointSelection, positionsCoarse, positionsInterpolationCoarse );
-            }
+            }*/
+
 
             // Run the greedy algorithm
             double runTimeInterpolate = 0.0;
@@ -197,7 +202,7 @@ namespace rbf
                     index = selectedPositions.rows();
                 }
 
-                bool twoPointSelection = true;
+                bool twoPointSelection = false;
                 int index2 = -1;
                 double largestError2 = -1;
                 //selected point with largest error in opposite direction (more than 90 degrees differenc in direction)
@@ -292,7 +297,6 @@ namespace rbf
         matrix & valuesInterpolation
         )
     {
-        Info << "RBFCoarsening::interpolate(values, valuesInterpolation)" << endl;
         matrix usedValues = values;
 
         if ( enabled )

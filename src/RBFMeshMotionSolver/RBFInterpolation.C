@@ -203,7 +203,6 @@ namespace rbf
         // Initialize matrices
 
         matrix H( n_A, n_A );
-        Phi.conservativeResize( n_B, n_A );
 
         if ( polynomialTerm )
             H.resize( n_A + dimGrid + 1, n_A + dimGrid + 1 );
@@ -216,6 +215,12 @@ namespace rbf
 
         if ( polynomialTerm )
         {
+            //THIJS: initialize Phi if empty
+            if(Phi.cols() == 0)
+            {
+                Phi.conservativeResize( n_B, dimGrid + 1);
+            }
+
             for ( int i = 0; i < n_A; i++ )
                 H( n_A, i ) = 1;
 
@@ -289,23 +294,28 @@ namespace rbf
     {
         n_A = positions.rows();
         n_B = positionsInterpolation.rows();
-        int phiColsOld = Phi.cols() - n_A;
-        Info << "phiColsOld = " << phiColsOld << endl;
+        int phiColsOld = Phi.cols();
+
         if ( polynomialTerm )
             Phi.conservativeResize(n_B, n_A + dimGrid + 1 );
         else
             Phi.conservativeResize( n_B, n_A );
 
-        int i = Phi.cols() - 1;
-        if ( polynomialTerm )
-            i = Phi.cols() - 2 - dimGrid;
+        int nNewPoints = Phi.cols() - phiColsOld;
 
         double r = 0;
-
-        for ( int j = 0; j < n_B; j++ )
+        for (int i = 0; i < nNewPoints; i++)
         {
-            r = ( positions.row( i ) - positionsInterpolation.row( j ) ).norm();
-            Phi( j, i ) = rbfFunction->evaluate( r );
+            int index = Phi.cols() - (i+1);
+            if ( polynomialTerm )
+                index = Phi.cols() - 1 - dimGrid - (i+1);
+
+            for ( int j = 0; j < n_B; j++ )
+            {
+
+                r = ( positions.row( index ) - positionsInterpolation.row( j ) ).norm();
+                Phi( j, index ) = rbfFunction->evaluate( r );
+            }
         }
     }
 
@@ -335,8 +345,6 @@ namespace rbf
         valuesLU.setZero();
         valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
 
-        Info << "valuesLU.rows()|cols() = " << valuesLU.rows() << "|" << valuesLU.cols() << endl;
-        Info << "fullPivLu.rows()|cols() = " << fullPivLu.rows() << "|" << fullPivLu.cols() << endl;
         matrix B = fullPivLu.solve( valuesLU );
 
         valuesInterpolation.noalias() = Phi * B;
