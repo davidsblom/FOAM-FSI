@@ -37,10 +37,12 @@ boundaryField
     symmetry-x
     {
         type            symmetryPlane;
+        value           uniform (0 0 0);
     }
     symmetry-y
     {
         type            symmetryPlane;
+        value           uniform (0 0 0);
     }
 }
 
