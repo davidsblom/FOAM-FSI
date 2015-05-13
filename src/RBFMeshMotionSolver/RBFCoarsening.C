@@ -19,6 +19,7 @@ namespace rbf
         tolLivePointSelection( 0 ),
         coarseningMinPoints( 0 ),
         coarseningMaxPoints( 0 ),
+        twoPointSelection ( false ),
         exportTxt( false ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -40,6 +41,7 @@ namespace rbf
         double tolLivePointSelection,
         int coarseningMinPoints,
         int coarseningMaxPoints,
+        bool twoPointSelection,
         bool exportTxt
         )
         :
@@ -52,6 +54,7 @@ namespace rbf
         tolLivePointSelection( tolLivePointSelection ),
         coarseningMinPoints( coarseningMinPoints ),
         coarseningMaxPoints( coarseningMaxPoints ),
+        twoPointSelection ( twoPointSelection ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -202,7 +205,6 @@ namespace rbf
                     index = selectedPositions.rows();
                 }
 
-                bool twoPointSelection = false;
                 int index2 = -1;
                 double largestError2 = -1;
                 //selected point with largest error in opposite direction (more than 90 degrees differenc in direction)

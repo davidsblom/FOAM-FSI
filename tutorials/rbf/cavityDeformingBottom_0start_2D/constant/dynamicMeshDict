@@ -33,6 +33,8 @@ coarsening
 
   livePointSelection true;
   tolLivePointSelection 1e-2;
+  twoPointSelection false;
+
   exportSelectedPoints true;
 }
 

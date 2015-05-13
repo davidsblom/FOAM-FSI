@@ -28,6 +28,7 @@ public:
             double tolLivePointSelection,
             int coarseningMinPoints,
             int coarseningMaxPoints,
+            bool twoPointSelection,
             bool exportTxt
             );
 
@@ -57,6 +58,7 @@ public:
         double tolLivePointSelection;
         int coarseningMinPoints;
         int coarseningMaxPoints;
+        bool twoPointSelection;
         bool exportTxt;
         Eigen::VectorXi selectedPositions;
         int nbStaticFaceCentersRemove;
