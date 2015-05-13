@@ -311,7 +311,7 @@ TEST( RBFInterpolationTest, rbf2d_directly_interpolate )
 
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
-            ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-11 );
+            ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-10 );
 }
 
 TEST( RBFInterpolationTest, rbf3d )
