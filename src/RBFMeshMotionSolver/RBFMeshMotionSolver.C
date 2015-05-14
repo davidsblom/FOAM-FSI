@@ -153,7 +153,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         coarseningMaxPoints = readLabel( subDict( "coarsening" ).lookup( "maxPoints" ) );
         livePointSelection = readBool( subDict( "coarsening" ).lookup( "livePointSelection" ) );
         exportSelectedPoints = readBool( subDict( "coarsening" ).lookup( "exportSelectedPoints" ) );
-        twoPointSelection = readBool( subDict( "coarsening" ).lookup( "twoPointSelection" ) );
+        twoPointSelection = subDict( "coarsening" ).lookupOrDefault( "twoPointSelection", false );
     }
 
     if ( livePointSelection )

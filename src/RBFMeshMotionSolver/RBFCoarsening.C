@@ -145,7 +145,8 @@ namespace rbf
             double runTimeConvergence = 0.0;
             bool addedSecondPoint = false;
             int counter = selectedPositions.rows();
-//            for ( int i = selectedPositions.rows(); i < maxNbPoints + 1; i++ )
+
+            Info << "twoPointSelection = " << twoPointSelection << endl;
             while(true)
             {
                 std::clock_t t = std::clock();
@@ -171,9 +172,12 @@ namespace rbf
                     t = std::clock();
                 }
 
+
                 // Evaluate the error
                 for ( int j = 0; j < valuesInterpolationCoarse.rows(); j++ )
                     errorList( j ) = ( valuesInterpolationCoarse.row( j ).array() - values.row( j ).array() ).matrix().norm();
+
+
 
                 // Select the point with the largest error which is not already selected.
                 int index = -1;
@@ -199,6 +203,7 @@ namespace rbf
                     }
                 }
 
+
                 // Additional function to check whether the largestError = 0 (<SMALL) and do select next consecutive point
                 if(largestError<SMALL)
                 {
@@ -214,7 +219,7 @@ namespace rbf
                     for ( int j = 0; j < errorList.rows(); j ++ )
                     {
                         vector errorVector = valuesInterpolationCoarse.row( j ) - values.row( j );
-                        if(largestErrorVector.dot(errorVector)<0 && largestError2 < errorList(j) )
+                        if(largestErrorVector.dot(errorVector)<-SMALL && largestError2 < errorList(j) )
                         {
                             index2 = j;
                             largestError2 = errorList( j );
@@ -227,6 +232,7 @@ namespace rbf
                     t = std::clock() - t;
                     runTimeError += static_cast<float>(t) / CLOCKS_PER_SEC;
                     t = std::clock();
+                    //Info << index << ": largestError = " << largestError << ", " << index2 << ": largestError2 = " << largestError2 << endl;
                 }
 
                 double epsilon = std::sqrt( SMALL );
@@ -234,11 +240,19 @@ namespace rbf
                 bool convergence = (error < tol && counter >= minPoints) || counter >= maxNbPoints;
 
                 if ( convergence )
+                {
                     break;
+                }
 
                 selectedPositions.conservativeResize( selectedPositions.rows() + 1 );
                 selectedPositions( selectedPositions.rows() - 1 ) = index;
                 counter ++;
+
+                //Break if maximum point are reached
+                if ( counter >= maxNbPoints )
+                {
+                    break;
+                }
 
                 //Add second point if possible
                 if(twoPointSelection && index2 >= 0 && index != index2 )
