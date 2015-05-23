@@ -20,7 +20,7 @@ rm -rf precice
 
 # Unpack third party packages
 
-tar jxf boost_${BOOST_VERSION}.tar.bz2
+tar jxfv boost_${BOOST_VERSION}.tar.bz2
 
 rm -f boost_${BOOST_VERSION}.tar.bz2
 
@@ -28,14 +28,11 @@ rm -f boost_${BOOST_VERSION}.tar.bz2
 
 export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
 export PRECICE_BOOST_ROOT=${BOOST_ROOT}
-export PRECICE_MPI_LIB=mpi
-export PRECICE_MPI_LIB_PATH=/opt/local/lib/openmpi-mp
-export PRECICE_MPI_INC_PATH=/opt/local/include/openmpi-mp
 
 # Build preCICE
 
 git clone git@vmbungartz6.informatik.tu-muenchen.de:gatzhamm/precice.git
 cd precice
 git checkout develop
-scons -j 4 build=debug python=off petsc=off
-scons -j 4 build=release python=off petsc=off
+scons -j 4 build=debug python=off petsc=off mpi=off
+scons -j 4 build=release python=off petsc=off mpi=off
