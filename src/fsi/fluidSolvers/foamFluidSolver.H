@@ -76,6 +76,8 @@ public:
     autoPtr<dynamicFvMesh> meshPtr;
     dynamicFvMesh & mesh;
 
+    static Foam::debug::debugSwitch debug;
+
 protected:
 
     // Dictionaries
