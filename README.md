@@ -27,7 +27,7 @@ git checkout nextRelease
 To compile the FSI library:
 
 ``` bash
-git clone https://github.com/davidsblom/FOAM-FSI.git
+git clone --recursive https://github.com/davidsblom/FOAM-FSI.git
 cd FOAM-FSI
 ./Allwmake.firstInstall
 ```

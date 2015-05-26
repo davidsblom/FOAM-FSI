@@ -14,6 +14,7 @@
 #include "RBFFunctionInterface.H"
 #include "TPSFunction.H"
 #include "fvCFD.H"
+#include "debugSwitch.H"
 
 namespace rbf
 {
@@ -65,6 +66,8 @@ public:
         Eigen::PartialPivLU<matrix> lu;
         Eigen::FullPivLU<matrix> fullPivLu;
         Eigen::LLT<matrix> llt;
+
+        static debug::debugSwitch debug;
 
 private:
 

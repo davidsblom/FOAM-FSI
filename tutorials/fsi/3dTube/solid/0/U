@@ -15,23 +15,36 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+dimensions      [0 1 0 0 0 0 0];
 
 internalField   uniform (0 0 0);
 
 boundaryField
 {
-    outlet
-    {
-        type            zeroGradient;
-    }
     inlet
     {
-        type            zeroGradient;
+        type            fixedDisplacement;
+        value           uniform (0 0 0);
     }
-    wall
+    outlet
     {
-        type            myMovingWallVelocity;
+        type            fixedDisplacement;
+        value           uniform (0 0 0);
+    }
+    inner-wall
+    {
+        type            solidTraction;
+        nonLinear       totalLagrangian;
+        traction        uniform ( 0 0 0 );
+        pressure        uniform 0;
+        value           uniform (0 0 0);
+    }
+    outer-wall
+    {
+        type            solidTraction;
+        nonLinear       totalLagrangian;
+        traction        uniform ( 0 0 0 );
+        pressure        uniform 0;
         value           uniform (0 0 0);
     }
     symmetry-x

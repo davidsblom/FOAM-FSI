@@ -65,6 +65,8 @@ public:
 
     Foam::fvMesh mesh;
 
+    static Foam::debug::debugSwitch debug;
+
 protected:
 
     void readCouplingProperties();

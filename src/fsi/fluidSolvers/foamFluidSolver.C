@@ -6,6 +6,8 @@
 
 #include "foamFluidSolver.H"
 
+Foam::debug::debugSwitch foamFluidSolver::debug( "FsiSolver", 0 );
+
 foamFluidSolver::foamFluidSolver(
     string name,
     shared_ptr<argList> args,
@@ -180,9 +182,12 @@ void foamFluidSolver::moveMesh()
 
     mesh.update();
 
-    t = std::clock() - t;
-    double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
-    Info << "timing mesh deformation = " << runTime << " s" << endl;
+    if ( debug > 0 )
+    {
+        t = std::clock() - t;
+        double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+        Info << "timing mesh deformation = " << runTime << " s" << endl;
+    }
 }
 
 void foamFluidSolver::setDisplacementLocal( const matrix & displacement )
@@ -273,11 +278,14 @@ void foamFluidSolver::solve(
 
     data = output;
 
-    t = std::clock() - t;
-    double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
-    totalRunTime += runTime;
-    totalNbIterations++;
-    Info << "runtime = " << runTime << " s" << endl;
-    Info << "average runtime = " << totalRunTime / totalNbIterations << " s" << endl;
-    Info << "total runtime = " << totalRunTime << " s" << endl;
+    if ( debug > 0 )
+    {
+        t = std::clock() - t;
+        double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+        totalRunTime += runTime;
+        totalNbIterations++;
+        Info << "runtime = " << runTime << " s" << endl;
+        Info << "average runtime = " << totalRunTime / totalNbIterations << " s" << endl;
+        Info << "total runtime = " << totalRunTime << " s" << endl;
+    }
 }
