@@ -8,6 +8,8 @@
 
 namespace rbf
 {
+    Foam::debug::debugSwitch RBFCoarsening::debug( "RBFInterpolation", 0 );
+
     RBFCoarsening::RBFCoarsening( std::shared_ptr<RBFInterpolation> rbf )
         :
         rbf( rbf ),
@@ -96,8 +98,6 @@ namespace rbf
         assert( positionsInterpolation.rows() > 0 );
         assert( positions.rows() == values.rows() );
 
-        int debugLevel = Foam::debug::debugSwitch( "RBFInterpolation", 0 );
-
         matrix usedPositions = positions;
 
         if ( enabled )
@@ -165,7 +165,7 @@ namespace rbf
                 // Perform the RBF interpolation.
                 rbfCoarse->interpolate( livePointSelection, positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
 
-                if ( debugLevel > 0 )
+                if ( debug > 0 )
                 {
                     t = std::clock() - t;
                     runTimeInterpolate += static_cast<float>(t) / CLOCKS_PER_SEC;
@@ -227,7 +227,7 @@ namespace rbf
                     }
                 }
 
-                if ( debugLevel > 0 )
+                if ( debug > 0 )
                 {
                     t = std::clock() - t;
                     runTimeError += static_cast<float>(t) / CLOCKS_PER_SEC;
@@ -263,14 +263,14 @@ namespace rbf
                     counter ++;
                 }
 
-                if ( debugLevel > 0 )
+                if ( debug > 0 )
                 {
                     t = std::clock() - t;
                     runTimeConvergence += static_cast<float>(t) / CLOCKS_PER_SEC;
                     t = std::clock();
                 }
             }
-            if ( debugLevel > 0 )
+            if ( debug > 0 )
             {
                 Info << "RBFCoarsening::debug 1. interpolate to surface = " << runTimeInterpolate << " s" << endl;
                 Info << "RBFCoarsening::debug 2. find largest error = " << runTimeError << " s" <<". Added second point = " << addedSecondPoint <<  endl;

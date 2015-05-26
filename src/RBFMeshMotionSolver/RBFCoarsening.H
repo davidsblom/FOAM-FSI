@@ -67,6 +67,8 @@ public:
         matrix values;
         int nbMovingFaceCenters;
         int fileExportIndex;
+
+        static debug::debugSwitch debug;
     };
 }
 
