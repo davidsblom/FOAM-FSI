@@ -31,8 +31,8 @@ export PRECICE_BOOST_ROOT=${BOOST_ROOT}
 
 # Build preCICE
 
-git clone git@vmbungartz6.informatik.tu-muenchen.de:gatzhamm/precice.git
+git clone https://github.com/precice/precice.git
 cd precice
 git checkout develop
-scons -j 4 build=debug python=off petsc=off mpi=off
-scons -j 4 build=release python=off petsc=off mpi=off
+scons -j 4 build=debug python=off petsc=off mpi=off compiler=g++-mp-4.9
+scons -j 4 build=release python=off petsc=off mpi=off compiler=g++-mp-4.9
