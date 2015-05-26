@@ -16,7 +16,7 @@ wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/
 # Remove old build files
 
 rm -rf boost_${BOOST_VERSION}
-rm -rf precice
+rm -rf precice/build
 
 # Unpack third party packages
 
@@ -31,8 +31,5 @@ export PRECICE_BOOST_ROOT=${BOOST_ROOT}
 
 # Build preCICE
 
-git clone https://github.com/precice/precice.git
 cd precice
-git checkout develop
-scons -j 4 build=debug python=off petsc=off mpi=off compiler=g++-mp-4.9
 scons -j 4 build=release python=off petsc=off mpi=off compiler=g++-mp-4.9
