@@ -8,6 +8,8 @@
 
 namespace rbf
 {
+    Foam::debug::debugSwitch RBFInterpolation::debug( "RBFInterpolation", 0 );
+
     RBFInterpolation::RBFInterpolation( std::shared_ptr<RBFFunctionInterface> rbfFunction )
         :
         rbfFunction( rbfFunction ),
@@ -66,9 +68,7 @@ namespace rbf
     {
         std::clock_t t = std::clock();
 
-        int debugLevel = Foam::debug::debugSwitch( "RBFInterpolation", 0 );
-
-        if ( debugLevel > 0 )
+        if ( debug > 0 )
         {
             Info << "RBFInterpolation::debug positions = " << positions.rows() << " x " << positions.cols() << endl;
             Info << "RBFInterpolation::debug positionsInterpolation = " << positionsInterpolation.rows() << " x " << positionsInterpolation.cols() << endl;
@@ -105,7 +105,7 @@ namespace rbf
             for ( int j = 0; j < dimGrid + 1; j++ )
                 H( H.rows() - dimGrid - 1 + i, H.rows() - dimGrid - 1 + j ) = 0;
 
-        if ( debugLevel > 0 )
+        if ( debug > 0 )
         {
             t = std::clock() - t;
             double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
@@ -124,7 +124,7 @@ namespace rbf
 
         Phi.topRightCorner( n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
 
-        if ( debugLevel > 0 )
+        if ( debug > 0 )
         {
             t = std::clock() - t;
             double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
@@ -142,7 +142,7 @@ namespace rbf
 
         Hhat.conservativeResize( n_B, n_A );
 
-        if ( debugLevel > 0 )
+        if ( debug > 0 )
         {
             t = std::clock() - t;
             double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
@@ -244,7 +244,7 @@ namespace rbf
 
         matrix B;
 
-        matrix valuesLU ( H.rows(), values.cols() );
+        matrix valuesLU( H.rows(), values.cols() );
         valuesLU.setZero();
         valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
 
@@ -297,7 +297,7 @@ namespace rbf
         int phiColsOld = Phi.cols();
 
         if ( polynomialTerm )
-            Phi.conservativeResize(n_B, n_A + dimGrid + 1 );
+            Phi.conservativeResize( n_B, n_A + dimGrid + 1 );
         else
             Phi.conservativeResize( n_B, n_A );
 
@@ -320,11 +320,11 @@ namespace rbf
     }
 
     /*
-    * This function is only called by the RBFCoarsening class.
-    * It is assumed that the polynomial term is included in the
-    * interpolation, and that the fullPivLu decomposition is
-    * used to solve for the coefficients B.
-    */
+     * This function is only called by the RBFCoarsening class.
+     * It is assumed that the polynomial term is included in the
+     * interpolation, and that the fullPivLu decomposition is
+     * used to solve for the coefficients B.
+     */
     void RBFInterpolation::interpolate2(
         const matrix & values,
         matrix & valuesInterpolation
@@ -341,7 +341,7 @@ namespace rbf
         std::shared_ptr<TPSFunction> function;
         function = std::dynamic_pointer_cast<TPSFunction>( rbfFunction );
 
-        matrix valuesLU ( values.rows() + values.cols() + 1, values.cols() );
+        matrix valuesLU( values.rows() + values.cols() + 1, values.cols() );
         valuesLU.setZero();
         valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
 

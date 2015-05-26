@@ -1,5 +1,12 @@
 #!/bin/bash
 
 set -e
-./compile_gtest
-./compile_yaml
+if [ "$(uname)" == "Darwin" ]; then
+    ./compile_gtest_osx
+    ./compile_yaml_osx
+    ./compile_precice_osx
+else
+    ./compile_gtest
+    ./compile_yaml
+    ./compile_precice
+fi

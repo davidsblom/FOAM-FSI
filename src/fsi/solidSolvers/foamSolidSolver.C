@@ -6,6 +6,8 @@
 
 #include "foamSolidSolver.H"
 
+Foam::debug::debugSwitch foamSolidSolver::debug( "FsiSolver", 0 );
+
 foamSolidSolver::foamSolidSolver (
     string name,
     std::shared_ptr<argList> args,
@@ -300,11 +302,14 @@ void foamSolidSolver::solve(
 
     data = output;
 
-    t = std::clock() - t;
-    double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
-    totalRunTime += runTime;
-    totalNbIterations++;
-    Info << "runtime = " << runTime << " s" << endl;
-    Info << "average runtime = " << totalRunTime / totalNbIterations << " s" << endl;
-    Info << "total runtime = " << totalRunTime << " s" << endl;
+    if ( debug > 0 )
+    {
+        t = std::clock() - t;
+        double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+        totalRunTime += runTime;
+        totalNbIterations++;
+        Info << "runtime = " << runTime << " s" << endl;
+        Info << "average runtime = " << totalRunTime / totalNbIterations << " s" << endl;
+        Info << "total runtime = " << totalRunTime << " s" << endl;
+    }
 }
