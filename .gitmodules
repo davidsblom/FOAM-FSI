@@ -1,3 +1,4 @@
 [submodule "src/thirdParty/precice"]
 	path = src/thirdParty/precice
 	url = https://github.com/precice/precice.git
+	branch = develop
