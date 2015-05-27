@@ -70,7 +70,7 @@ Foam::vectorField Foam::movingWallPressureGradientFvPatchScalarField::ddtU(const
 
     const scalar& patchID = this->patch().index();
 
-    vectorField ddtU = coefft * U.boundaryField()[patchID] - coefft0 * U.oldTime().boundaryField()[patchID] + coefft00 * U.oldTime().oldTime().boundaryField()[patchID];
+    vectorField ddtU = (coefft * U.boundaryField()[patchID] - coefft0 * U.oldTime().boundaryField()[patchID] + coefft00 * U.oldTime().oldTime().boundaryField()[patchID])/deltaT;
     return ddtU;
 }
 
@@ -175,7 +175,6 @@ void Foam::movingWallPressureGradientFvPatchScalarField::updateCoeffs()
 
 
     gradient() = -(ddtU(U) & patch().Sf())/patch().magSf();
-    //gradient() = (phip - (patch().Sf() & Up))/patch().magSf()/rAp;
 
     fixedGradientFvPatchScalarField::updateCoeffs();
 }
