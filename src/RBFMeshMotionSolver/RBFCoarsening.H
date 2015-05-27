@@ -59,6 +59,7 @@ public:
         int coarseningMinPoints;
         int coarseningMaxPoints;
         bool twoPointSelection;
+        bool polynomialTerm;
         bool exportTxt;
         Eigen::VectorXi selectedPositions;
         int nbStaticFaceCentersRemove;

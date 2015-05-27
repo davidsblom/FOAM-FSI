@@ -46,6 +46,7 @@ public:
             );
 
         void interpolate2(
+            bool polynomialTerm,
             const matrix & values,
             matrix & valuesInterpolation
             );

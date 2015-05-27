@@ -326,11 +326,14 @@ namespace rbf
      * used to solve for the coefficients B.
      */
     void RBFInterpolation::interpolate2(
+        bool polynomialTerm,
         const matrix & values,
         matrix & valuesInterpolation
         )
     {
         assert( computed );
+
+        Info << "void RBFInterpolation::interpolate2" << endl;
 
         // If the thin plate spline radial basis function is used,
         // use the LU decomposition to solve for the coefficients.
@@ -341,12 +344,41 @@ namespace rbf
         std::shared_ptr<TPSFunction> function;
         function = std::dynamic_pointer_cast<TPSFunction>( rbfFunction );
 
-        matrix valuesLU( values.rows() + values.cols() + 1, values.cols() );
-        valuesLU.setZero();
-        valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
+        matrix valuesLU( values.rows(), values.cols() );
 
-        matrix B = fullPivLu.solve( valuesLU );
+        //resize valuesLU if polynomial is used
+        if ( polynomialTerm )
+        {
+            valuesLU.conservativeResize( values.rows() + values.cols() + 1, values.cols() );
+        }
+        valuesLU.setZero();//initialize all values zero
 
+        //Set correct part of valuesLU equal to values
+        if ( polynomialTerm )
+        {
+            valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
+        }
+        else
+        {
+            valuesLU = values;
+        }
+
+        matrix B; 
+        if ( polynomialTerm )
+        {
+            B = fullPivLu.solve( valuesLU );
+        }
+        else
+        if ( function )
+        { 
+            B = lu.solve( valuesLU );
+        }
+        else
+        { 
+            B = llt.solve( valuesLU );
+        }
+
+        //matrix B = fullPivLu.solve( valuesLU );
         valuesInterpolation.noalias() = Phi * B;
 
         assert( valuesInterpolation.rows() == n_B );

@@ -22,6 +22,7 @@ namespace rbf
         coarseningMinPoints( 0 ),
         coarseningMaxPoints( 0 ),
         twoPointSelection ( false ),
+		polynomialTerm( true ),
         exportTxt( false ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -57,6 +58,7 @@ namespace rbf
         coarseningMinPoints( coarseningMinPoints ),
         coarseningMaxPoints( coarseningMaxPoints ),
         twoPointSelection ( twoPointSelection ),
+        polynomialTerm ( true ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -74,6 +76,13 @@ namespace rbf
         assert( tol < 1 );
         assert( tolLivePointSelection > 0 );
         assert( tolLivePointSelection < 1 );
+
+        //If unit displacement
+        /*if(enabled && !livePointSelection){
+            polynomialTerm = false;
+            if(debug > 0)
+                Info << "RBFCoarsening::debug: For unit displacement selection no polynomial is used" << endl;
+        }*/
     }
 
     /* Select a subset of control point with a greedy algorithm.
@@ -146,7 +155,6 @@ namespace rbf
             bool addedSecondPoint = false;
             int counter = selectedPositions.rows();
 
-            Info << "twoPointSelection = " << twoPointSelection << endl;
             while(true)
             {
                 std::clock_t t = std::clock();
@@ -163,7 +171,7 @@ namespace rbf
                 }
 
                 // Perform the RBF interpolation.
-                rbfCoarse->interpolate( livePointSelection, positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
+                rbfCoarse->interpolate( polynomialTerm, positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
 
                 if ( debug > 0 )
                 {
@@ -343,7 +351,8 @@ namespace rbf
                     for ( int j = 0; j < selectedPositions.rows(); j++ )
                         valuesCoarse.row( j ) = this->values.row( selectedPositions( j ) );
 
-                    rbfCoarse->interpolate2( valuesCoarse, valuesInterpolationCoarse );
+                    Info << "bla" << endl;
+                    rbfCoarse->interpolate2( polynomialTerm, valuesCoarse, valuesInterpolationCoarse );
 
                     double epsilon = std::sqrt( SMALL );
                     double error = ( valuesInterpolationCoarse.array() - this->values.array() ).matrix().norm() / (this->values.norm() + epsilon);
