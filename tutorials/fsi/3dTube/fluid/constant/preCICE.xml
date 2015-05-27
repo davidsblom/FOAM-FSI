@@ -47,6 +47,7 @@
         </participant>
 
         <m2n:sockets exchange-directory="../" from="Fluid_Solver" to="Structure_Solver" />
+        <!-- OSX: <m2n:sockets network="lo0" exchange-directory="../" from="Fluid_Solver" to="Structure_Solver" />-->
 
         <coupling-scheme:serial-implicit>
             <timestep-length value="1.0e-4" />
