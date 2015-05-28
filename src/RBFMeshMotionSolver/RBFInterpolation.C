@@ -13,6 +13,20 @@ namespace rbf
     RBFInterpolation::RBFInterpolation( std::shared_ptr<RBFFunctionInterface> rbfFunction )
         :
         rbfFunction( rbfFunction ),
+        polynomialTerm( true ),
+        computed( false ),
+        n_A( 0 ),
+        n_B( 0 ),
+        dimGrid( 0 ),
+        Hhat()
+    {
+        assert( rbfFunction );
+    }
+
+    RBFInterpolation::RBFInterpolation( std::shared_ptr<RBFFunctionInterface> rbfFunction, bool polynomialTerm )
+        :
+        rbfFunction( rbfFunction ),
+        polynomialTerm( polynomialTerm ),
         computed( false ),
         n_A( 0 ),
         n_B( 0 ),
@@ -87,23 +101,29 @@ namespace rbf
 
         // Radial basis function interpolation
         // Initialize matrices H and Phi
-
-        matrix H( n_A + dimGrid + 1, n_A + dimGrid + 1 ), Phi( n_B, n_A + dimGrid + 1 );
+        matrix H( n_A, n_A ), Phi( n_B, n_A );
+        if ( polynomialTerm )
+        {
+            H.resize( n_A + dimGrid + 1, n_A + dimGrid + 1 );
+            Phi.resize( n_B, n_A + dimGrid + 1 );
+        }
 
         // Evaluate radial basis functions for matrix H
 
         evaluateH( positions, H );
 
         // Include polynomial contributions
+        if ( polynomialTerm )
+        {
+            for ( int i = 0; i < n_A; i++ )
+                H( n_A, i ) = 1;
 
-        for ( int i = 0; i < n_A; i++ )
-            H( n_A, i ) = 1;
+            H.bottomLeftCorner( dimGrid, n_A ) = positions.block( 0, 0, n_A, dimGrid ).transpose();
 
-        H.bottomLeftCorner( dimGrid, n_A ) = positions.block( 0, 0, n_A, dimGrid ).transpose();
-
-        for ( int i = 0; i < dimGrid + 1; i++ )
-            for ( int j = 0; j < dimGrid + 1; j++ )
-                H( H.rows() - dimGrid - 1 + i, H.rows() - dimGrid - 1 + j ) = 0;
+            for ( int i = 0; i < dimGrid + 1; i++ )
+                for ( int j = 0; j < dimGrid + 1; j++ )
+                    H( H.rows() - dimGrid - 1 + i, H.rows() - dimGrid - 1 + j ) = 0;
+        }
 
         if ( debug > 0 )
         {
@@ -118,11 +138,13 @@ namespace rbf
         evaluatePhi( positions, positionsInterpolation, Phi );
 
         // Include polynomial contributions in matrix Phi
+        if ( polynomialTerm )
+        {
+            for ( int i = 0; i < Phi.rows(); i++ )
+                Phi( i, n_A ) = 1;
 
-        for ( int i = 0; i < Phi.rows(); i++ )
-            Phi( i, n_A ) = 1;
-
-        Phi.topRightCorner( n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
+            Phi.topRightCorner( n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
+        }
 
         if ( debug > 0 )
         {
@@ -333,8 +355,6 @@ namespace rbf
     {
         assert( computed );
 
-        Info << "void RBFInterpolation::interpolate2" << endl;
-
         // If the thin plate spline radial basis function is used,
         // use the LU decomposition to solve for the coefficients.
         // In case a wendland function is used, use the more efficient LLT
@@ -363,18 +383,18 @@ namespace rbf
             valuesLU = values;
         }
 
-        matrix B; 
+        matrix B;
         if ( polynomialTerm )
         {
             B = fullPivLu.solve( valuesLU );
         }
         else
         if ( function )
-        { 
+        {
             B = lu.solve( valuesLU );
         }
         else
-        { 
+        {
             B = llt.solve( valuesLU );
         }
 

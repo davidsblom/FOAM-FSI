@@ -27,6 +27,8 @@ public:
 
         RBFInterpolation( std::shared_ptr<RBFFunctionInterface> rbfFunction );
 
+        RBFInterpolation( std::shared_ptr<RBFFunctionInterface> rbfFunction, bool polynomialTerm );
+
         void compute(
             const matrix & positions,
             const matrix & positionsInterpolation
@@ -58,6 +60,7 @@ public:
             );
 
         std::shared_ptr<RBFFunctionInterface> rbfFunction;
+        bool polynomialTerm;
         bool computed;
         int n_A;
         int n_B;

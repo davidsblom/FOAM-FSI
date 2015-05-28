@@ -135,7 +135,8 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
     assert( rbfFunction );
 
-    std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( rbfFunction ) );
+    bool polynomialTerm = lookupOrDefault( "polynomial", false );
+    std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( rbfFunction, polynomialTerm ) );
 
     bool coarsening = readBool( subDict( "coarsening" ).lookup( "enabled" ) );
     double tol = 0.1;
@@ -159,7 +160,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     if ( livePointSelection )
         tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
 
-    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, exportSelectedPoints ) );
+    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, polynomialTerm, exportSelectedPoints ) );
 }
 
 RBFMeshMotionSolver::~RBFMeshMotionSolver()

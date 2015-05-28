@@ -29,6 +29,7 @@ public:
             int coarseningMinPoints,
             int coarseningMaxPoints,
             bool twoPointSelection,
+            bool polynomialTerm,
             bool exportTxt
             );
 

@@ -45,6 +45,7 @@ namespace rbf
         int coarseningMinPoints,
         int coarseningMaxPoints,
         bool twoPointSelection,
+        bool polynomialTerm,
         bool exportTxt
         )
         :
@@ -58,7 +59,7 @@ namespace rbf
         coarseningMinPoints( coarseningMinPoints ),
         coarseningMaxPoints( coarseningMaxPoints ),
         twoPointSelection ( twoPointSelection ),
-        polynomialTerm ( true ),
+        polynomialTerm ( polynomialTerm ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -77,12 +78,14 @@ namespace rbf
         assert( tolLivePointSelection > 0 );
         assert( tolLivePointSelection < 1 );
 
-        //If unit displacement
-        /*if(enabled && !livePointSelection){
-            polynomialTerm = false;
+        //If unit displacement do not use polynomial for selection
+        if(enabled && !livePointSelection && this->polynomialTerm){
+            WarningIn("RBFCoarsening::RBFCoarsening")
+            << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
+            /*this->polynomialTerm = false;
             if(debug > 0)
-                Info << "RBFCoarsening::debug: For unit displacement selection no polynomial is used" << endl;
-        }*/
+                Info << "RBFCoarsening::debug: For unit displacement selection no polynomial is used-> polynomial = " << this->polynomialTerm << endl;*/
+        }
     }
 
     /* Select a subset of control point with a greedy algorithm.
@@ -180,7 +183,6 @@ namespace rbf
                     t = std::clock();
                 }
 
-
                 // Evaluate the error
                 for ( int j = 0; j < valuesInterpolationCoarse.rows(); j++ )
                     errorList( j ) = ( valuesInterpolationCoarse.row( j ).array() - values.row( j ).array() ).matrix().norm();
@@ -210,7 +212,6 @@ namespace rbf
                         largestError = errorList( j );
                     }
                 }
-
 
                 // Additional function to check whether the largestError = 0 (<SMALL) and do select next consecutive point
                 if(largestError<SMALL)
@@ -351,7 +352,6 @@ namespace rbf
                     for ( int j = 0; j < selectedPositions.rows(); j++ )
                         valuesCoarse.row( j ) = this->values.row( selectedPositions( j ) );
 
-                    Info << "bla" << endl;
                     rbfCoarse->interpolate2( polynomialTerm, valuesCoarse, valuesInterpolationCoarse );
 
                     double epsilon = std::sqrt( SMALL );
