@@ -42,6 +42,10 @@ mkdir build
 
 cd build
 
-cmake ..
+if [ "$(uname)" == "Darwin" ]; then
+    CC=gcc-mp-4.9 CXX=g++-mp-4.9 cmake ..
+else
+    cmake ..
+fi
 
 make -j 8
