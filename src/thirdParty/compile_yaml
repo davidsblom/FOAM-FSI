@@ -2,24 +2,13 @@
 
 set -e
 
+# Assume that preCICE has been built before, and boost is already downloaded.
+
 VERSION=0.5.1
 
 # Define which versions of the different packages are used
 
 export BOOST_VERSION=1_53_0
-export BOOST_VERSION_DOT=1.53.0
-
-# Download Boost
-
-wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
-
-# Remove old build files
-
-rm -rf boost_${BOOST_VERSION}
-
-tar jxfv boost_${BOOST_VERSION}.tar.bz2
-
-rm -f boost_${BOOST_VERSION}.tar.bz2
 
 rm -rf yaml-cpp
 

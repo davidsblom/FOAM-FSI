@@ -3,5 +3,5 @@
 set -e
 
 ./compile_gtest
-./compile_yaml
 ./compile_precice
+./compile_yaml
