@@ -48,39 +48,74 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+typedef Eigen::MatrixXd ematrix;
+typedef Eigen::VectorXd evector;
+
 int main(int argc, char *argv[])
 {
     // == create "rbfs" == //
-    int N=1e6;
-    double R=1.0;
-    rbf::vector radius(N);
-    double dN=1.0/N;
-    for(int i=1;i<N;i++)
+    for (int k = 1; k<8; k++)
     {
-        radius(i)=i*dN;
+        Info << nl << " ============================== " << endl;
+
+        int N=1*pow(10,k);
+        Info << "N = " << N << endl;
+
+        double R=1.0;
+        evector radius(N);
+        evector yrbf(N);
+        evector dy(N);
+        evector dx(N);
+
+        double dN=1.0/N;
+        for(int i=1;i<N;i++)
+        {
+            radius(i)=i*dN;
+            dy(i)=std::sin(radius(i));
+        }
+
+        std::shared_ptr<rbf::RBFFunctionInterface> rbfFunctionTPS = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
+        std::shared_ptr<rbf::RBFFunctionInterface> rbfFunctionC2 = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::WendlandC2Function(R) );
+
+        int t_start = std::clock();
+        for ( int i=1; i<N; i++ )
+        {
+            yrbf(i)=rbfFunctionTPS->evaluate(radius(i));
+        }
+        int t_end = std::clock();
+        double tTPS = 1.0*(t_end-t_start)/CLOCKS_PER_SEC;
+        Info << "Time to calculate " << N << " TPS function evaluations: " << tTPS << " s" << endl;
+
+        t_start = std::clock();
+        for ( int i=1; i<N; i++ )
+        {
+            yrbf(i)=rbfFunctionC2->evaluate(radius(i));
+        }
+        t_end = std::clock();
+        double tC2 = 1.0*(t_end-t_start)/CLOCKS_PER_SEC;
+        Info << "Time to calculate " << N << " WendlandC2 function evaluations: " << tC2  << " s"<< endl;
+
+        t_start = std::clock();
+        for ( int i=1; i<N; i++ )
+        {
+            dx(i)=yrbf(i)*dy(i);
+        }
+        t_end = std::clock();
+        double tFLOP = 1.0*(t_end-t_start)/CLOCKS_PER_SEC;
+        Info << "Time to calculate " << N << " FLOPS: " << tFLOP << " s"<< endl;
+
+        t_start = std::clock();
+        dx=yrbf.array()*dy.array();
+        t_end = std::clock();
+        double tVV = 1.0*(t_end-t_start)/CLOCKS_PER_SEC;
+        Info << "Time to calculate vector vector product of size " << N << ": " << tVV << " s"<< endl;
+
+        Info << "tTPS/tFLOPS = " << tTPS/tFLOP << endl;
+        Info << "tC2/tFLOPS = " << tC2/tFLOP << endl;
+        Info << "tTPS/tVV = " << tTPS/tVV << endl;
+        Info << "tC2/tVV = " << tC2/tVV << endl;
     }
-
-    std::shared_ptr<rbf::RBFFunctionInterface> rbfFunctionTPS = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-    std::shared_ptr<rbf::RBFFunctionInterface> rbfFunctionC2 = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::WendlandC2Function(R) );
-
-    int t_start = std::clock();
-    for ( int i=1; i<N; i++ )
-    {
-        rbfFunctionTPS->evaluate(radius(i));
-    }
-    int t_end = std::clock();
-    double tTPS = 1.0*(t_end-t_start)/CLOCKS_PER_SEC;
-    Info << "Time to calculate " << N << " TPS function evaluations: " << tTPS << endl;
-
-    t_start = std::clock();
-    for ( int i=1; i<N; i++ )
-    {
-        rbfFunctionC2->evaluate(radius(i));
-    }
-    t_end = std::clock();
-    double tC2 = 1.0*(t_end-t_start)/CLOCKS_PER_SEC;
-    Info << "Time to calculate " << N << " WendlandC2 function evaluations: " << tC2 << endl;
-
+    Info << " ============================== " << endl;
     return 0;
 }
 
