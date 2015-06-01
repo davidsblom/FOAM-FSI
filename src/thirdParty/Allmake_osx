@@ -1,5 +1,0 @@
-#!/bin/bash
-
-./compile_gtest_osx
-./compile_precice_osx
-./compile_yaml_osx
