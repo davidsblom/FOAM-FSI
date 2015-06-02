@@ -464,6 +464,9 @@ void SDCFluidSolver::implicitSolve(
     )
 {
     runTime->setDeltaT( dt );
+    
+    double told = runTime->value();
+    runTime->setTime( t, runTime->timeIndex() );
 
     if ( corrector )
     {
@@ -704,6 +707,8 @@ void SDCFluidSolver::implicitSolve(
     for ( int i = 0; i < UfF.size(); i++ )
         for ( int j = 0; j < 3; j++ )
             f( i * 3 + j + UF.size() * 3 ) = UfF[i][j];
+    
+    runTime->setTime( told, runTime->timeIndex() );
 }
 
 int SDCFluidSolver::getNbCells()
