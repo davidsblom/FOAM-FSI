@@ -13,7 +13,7 @@ namespace rbf
     RBFCoarsening::RBFCoarsening( std::shared_ptr<RBFInterpolation> rbf )
         :
         rbf( rbf ),
-        rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction ) ) ),
+        rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction, rbf->polynomialTerm ) ) ),
         enabled( false ),
         livePointSelection( false ),
         livePointSelectionSumValues( false ),
@@ -21,8 +21,7 @@ namespace rbf
         tolLivePointSelection( 0 ),
         coarseningMinPoints( 0 ),
         coarseningMaxPoints( 0 ),
-        twoPointSelection ( false ),
-		polynomialTerm( true ),
+        twoPointSelection( false ),
         exportTxt( false ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -45,12 +44,11 @@ namespace rbf
         int coarseningMinPoints,
         int coarseningMaxPoints,
         bool twoPointSelection,
-        bool polynomialTerm,
         bool exportTxt
         )
         :
         rbf( rbf ),
-        rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction ) ) ),
+        rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction, rbf->polynomialTerm ) ) ),
         enabled( enabled ),
         livePointSelection( livePointSelection ),
         livePointSelectionSumValues( livePointSelectionSumValues ),
@@ -58,8 +56,7 @@ namespace rbf
         tolLivePointSelection( tolLivePointSelection ),
         coarseningMinPoints( coarseningMinPoints ),
         coarseningMaxPoints( coarseningMaxPoints ),
-        twoPointSelection ( twoPointSelection ),
-        polynomialTerm ( polynomialTerm ),
+        twoPointSelection( twoPointSelection ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -78,13 +75,11 @@ namespace rbf
         assert( tolLivePointSelection > 0 );
         assert( tolLivePointSelection < 1 );
 
-        //If unit displacement do not use polynomial for selection
-        if(enabled && !livePointSelection && this->polynomialTerm){
-            WarningIn("RBFCoarsening::RBFCoarsening")
+        // If unit displacement do not use polynomial for selection
+        if ( enabled && !livePointSelection && rbf->polynomialTerm )
+        {
+            WarningIn( "RBFCoarsening::RBFCoarsening" )
             << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
-            /*this->polynomialTerm = false;
-            if(debug > 0)
-                Info << "RBFCoarsening::debug: For unit displacement selection no polynomial is used-> polynomial = " << this->polynomialTerm << endl;*/
         }
     }
 
@@ -136,21 +131,6 @@ namespace rbf
             // before the greedening algorithm starts
             rbfCoarse->Phi.resize( 0, 0 );
 
-            /*Info << "0: selectedPositions.rows() = " << selectedPositions.rows() << endl;
-            for ( int i = 1; i < selectedPositions.rows(); i++ )
-            {
-                rbf::matrix positionsCoarse( i, positions.cols() );
-                Info << "0: i = " << i << endl;
-                for ( int j = 0; j < i; j++ )
-                {
-                    Info << "0: j = " << i << endl;
-                    positionsCoarse.row( j ) = positions.row( selectedPositions( j ) );
-                }
-
-                rbfCoarse->buildPhi( livePointSelection, positionsCoarse, positionsInterpolationCoarse );
-            }*/
-
-
             // Run the greedy algorithm
             double runTimeInterpolate = 0.0;
             double runTimeError = 0.0;
@@ -158,7 +138,7 @@ namespace rbf
             bool addedSecondPoint = false;
             int counter = selectedPositions.rows();
 
-            while(true)
+            while ( true )
             {
                 std::clock_t t = std::clock();
 
@@ -174,7 +154,7 @@ namespace rbf
                 }
 
                 // Perform the RBF interpolation.
-                rbfCoarse->interpolate( polynomialTerm, positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
+                rbfCoarse->interpolate( positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
 
                 if ( debug > 0 )
                 {
@@ -187,11 +167,10 @@ namespace rbf
                 for ( int j = 0; j < valuesInterpolationCoarse.rows(); j++ )
                     errorList( j ) = ( valuesInterpolationCoarse.row( j ).array() - values.row( j ).array() ).matrix().norm();
 
-
-
                 // Select the point with the largest error which is not already selected.
                 int index = -1;
                 double largestError = -1;
+
                 for ( int j = 0; j < errorList.rows(); j++ )
                 {
                     // Check if points are selected or not. Is quiet costly (Ns x Nc) and
@@ -199,13 +178,6 @@ namespace rbf
                     // However, for the case where there is zero displacement all errors are zero.
                     // Additional function to check whether the largestError = 0 (<SMALL) and do select next consecutive point
 
-                    /*bool notSelected = true;
-
-                    for ( int k = 0; k < selectedPositions.rows(); k++ )
-                        if ( selectedPositions( k ) == j )
-                            notSelected = false;
-
-                    if ( errorList( j ) > largestError && notSelected )*/
                     if ( errorList( j ) > largestError )
                     {
                         index = j;
@@ -214,21 +186,24 @@ namespace rbf
                 }
 
                 // Additional function to check whether the largestError = 0 (<SMALL) and do select next consecutive point
-                if(largestError<SMALL)
+                if ( largestError < SMALL )
                 {
                     index = selectedPositions.rows();
                 }
 
                 int index2 = -1;
                 double largestError2 = -1;
-                //selected point with largest error in opposite direction (more than 90 degrees differenc in direction)
-                if(twoPointSelection)
+
+                // selected point with largest error in opposite direction (more than 90 degrees differenc in direction)
+                if ( twoPointSelection )
                 {
                     vector largestErrorVector = valuesInterpolationCoarse.row( index ) - values.row( index );
-                    for ( int j = 0; j < errorList.rows(); j ++ )
+
+                    for ( int j = 0; j < errorList.rows(); j++ )
                     {
                         vector errorVector = valuesInterpolationCoarse.row( j ) - values.row( j );
-                        if(largestErrorVector.dot(errorVector)<-SMALL && largestError2 < errorList(j) )
+
+                        if ( largestErrorVector.dot( errorVector ) < -SMALL && largestError2 < errorList( j ) )
                         {
                             index2 = j;
                             largestError2 = errorList( j );
@@ -241,11 +216,10 @@ namespace rbf
                     t = std::clock() - t;
                     runTimeError += static_cast<float>(t) / CLOCKS_PER_SEC;
                     t = std::clock();
-                    //Info << index << ": largestError = " << largestError << ", " << index2 << ": largestError2 = " << largestError2 << endl;
                 }
 
                 double epsilon = std::sqrt( SMALL );
-                error = ( errorList ).matrix().norm() / (values.norm() + epsilon);
+                error = (errorList).matrix().norm() / (values.norm() + epsilon);
                 bool convergence = (error < tol && counter >= minPoints) || counter >= maxNbPoints;
 
                 if ( convergence )
@@ -255,21 +229,21 @@ namespace rbf
 
                 selectedPositions.conservativeResize( selectedPositions.rows() + 1 );
                 selectedPositions( selectedPositions.rows() - 1 ) = index;
-                counter ++;
+                counter++;
 
-                //Break if maximum point are reached
+                // Break if maximum point are reached
                 if ( counter >= maxNbPoints )
                 {
                     break;
                 }
 
-                //Add second point if possible
-                if(twoPointSelection && index2 >= 0 && index != index2 )
+                // Add second point if possible
+                if ( twoPointSelection && index2 >= 0 && index != index2 )
                 {
                     addedSecondPoint = true;
                     selectedPositions.conservativeResize( selectedPositions.rows() + 1 );
                     selectedPositions( selectedPositions.rows() - 1 ) = index2;
-                    counter ++;
+                    counter++;
                 }
 
                 if ( debug > 0 )
@@ -279,10 +253,11 @@ namespace rbf
                     t = std::clock();
                 }
             }
+
             if ( debug > 0 )
             {
                 Info << "RBFCoarsening::debug 1. interpolate to surface = " << runTimeInterpolate << " s" << endl;
-                Info << "RBFCoarsening::debug 2. find largest error = " << runTimeError << " s" <<". Added second point = " << addedSecondPoint <<  endl;
+                Info << "RBFCoarsening::debug 2. find largest error = " << runTimeError << " s" << ". Added second point = " << addedSecondPoint << endl;
                 Info << "RBFCoarsening::debug 3. convergence check = " << runTimeConvergence << " s" << endl;
             }
 
@@ -352,7 +327,7 @@ namespace rbf
                     for ( int j = 0; j < selectedPositions.rows(); j++ )
                         valuesCoarse.row( j ) = this->values.row( selectedPositions( j ) );
 
-                    rbfCoarse->interpolate2( polynomialTerm, valuesCoarse, valuesInterpolationCoarse );
+                    rbfCoarse->interpolate2( valuesCoarse, valuesInterpolationCoarse );
 
                     double epsilon = std::sqrt( SMALL );
                     double error = ( valuesInterpolationCoarse.array() - this->values.array() ).matrix().norm() / (this->values.norm() + epsilon);

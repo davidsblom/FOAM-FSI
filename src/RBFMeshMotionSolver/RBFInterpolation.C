@@ -23,7 +23,10 @@ namespace rbf
         assert( rbfFunction );
     }
 
-    RBFInterpolation::RBFInterpolation( std::shared_ptr<RBFFunctionInterface> rbfFunction, bool polynomialTerm )
+    RBFInterpolation::RBFInterpolation(
+        std::shared_ptr<RBFFunctionInterface> rbfFunction,
+        bool polynomialTerm
+        )
         :
         rbfFunction( rbfFunction ),
         polynomialTerm( polynomialTerm ),
@@ -82,7 +85,7 @@ namespace rbf
     {
         std::clock_t t = std::clock();
 
-        if ( debug > 0 )
+        if ( debug )
         {
             Info << "RBFInterpolation::debug positions = " << positions.rows() << " x " << positions.cols() << endl;
             Info << "RBFInterpolation::debug positionsInterpolation = " << positionsInterpolation.rows() << " x " << positionsInterpolation.cols() << endl;
@@ -102,6 +105,7 @@ namespace rbf
         // Radial basis function interpolation
         // Initialize matrices H and Phi
         matrix H( n_A, n_A ), Phi( n_B, n_A );
+
         if ( polynomialTerm )
         {
             H.resize( n_A + dimGrid + 1, n_A + dimGrid + 1 );
@@ -125,7 +129,7 @@ namespace rbf
                     H( H.rows() - dimGrid - 1 + i, H.rows() - dimGrid - 1 + j ) = 0;
         }
 
-        if ( debug > 0 )
+        if ( debug )
         {
             t = std::clock() - t;
             double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
@@ -146,7 +150,7 @@ namespace rbf
             Phi.topRightCorner( n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
         }
 
-        if ( debug > 0 )
+        if ( debug )
         {
             t = std::clock() - t;
             double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
@@ -155,7 +159,7 @@ namespace rbf
         }
 
         // Compute the LU decomposition of the matrix H
-        //Eigen::PartialPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
+        // Eigen::PartialPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
         Eigen::FullPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
 
         // Compute interpolation matrix
@@ -164,7 +168,7 @@ namespace rbf
 
         Hhat.conservativeResize( n_B, n_A );
 
-        if ( debug > 0 )
+        if ( debug )
         {
             t = std::clock() - t;
             double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
@@ -185,7 +189,7 @@ namespace rbf
 
         valuesInterpolation.noalias() = Hhat * values;
 
-        if ( Foam::debug::debugSwitch( "RBFInterpolation", 0 ) > 0 )
+        if ( debug )
         {
             t = std::clock() - t;
             double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
@@ -202,7 +206,6 @@ namespace rbf
      * uses the coefficients to interpolate the data to the new positions.
      */
     void RBFInterpolation::interpolate(
-        bool polynomialTerm,
         const matrix & positions,
         const matrix & positionsInterpolation,
         const matrix & values,
@@ -237,10 +240,10 @@ namespace rbf
 
         if ( polynomialTerm )
         {
-            //THIJS: initialize Phi if empty
-            if(Phi.cols() == 0)
+            // THIJS: initialize Phi if empty
+            if ( Phi.cols() == 0 )
             {
-                Phi.conservativeResize( n_B, dimGrid + 1);
+                Phi.conservativeResize( n_B, dimGrid + 1 );
             }
 
             for ( int i = 0; i < n_A; i++ )
@@ -291,7 +294,7 @@ namespace rbf
         // This method is only used by the greedy algorithm, and the matrix Phi
         // is therefore enlarged at every greedy step.
 
-        buildPhi( polynomialTerm, positions, positionsInterpolation );
+        buildPhi( positions, positionsInterpolation );
 
         if ( polynomialTerm )
         {
@@ -309,7 +312,6 @@ namespace rbf
     }
 
     void RBFInterpolation::buildPhi(
-        bool polynomialTerm,
         const matrix & positions,
         const matrix & positionsInterpolation
         )
@@ -326,15 +328,16 @@ namespace rbf
         int nNewPoints = Phi.cols() - phiColsOld;
 
         double r = 0;
-        for (int i = 0; i < nNewPoints; i++)
+
+        for ( int i = 0; i < nNewPoints; i++ )
         {
-            int index = Phi.cols() - (i+1);
+            int index = Phi.cols() - (i + 1);
+
             if ( polynomialTerm )
-                index = Phi.cols() - 1 - dimGrid - (i+1);
+                index = Phi.cols() - 1 - dimGrid - (i + 1);
 
             for ( int j = 0; j < n_B; j++ )
             {
-
                 r = ( positions.row( index ) - positionsInterpolation.row( j ) ).norm();
                 Phi( j, index ) = rbfFunction->evaluate( r );
             }
@@ -348,7 +351,6 @@ namespace rbf
      * used to solve for the coefficients B.
      */
     void RBFInterpolation::interpolate2(
-        bool polynomialTerm,
         const matrix & values,
         matrix & valuesInterpolation
         )
@@ -366,14 +368,15 @@ namespace rbf
 
         matrix valuesLU( values.rows(), values.cols() );
 
-        //resize valuesLU if polynomial is used
+        // resize valuesLU if polynomial is used
         if ( polynomialTerm )
         {
             valuesLU.conservativeResize( values.rows() + values.cols() + 1, values.cols() );
         }
-        valuesLU.setZero();//initialize all values zero
 
-        //Set correct part of valuesLU equal to values
+        valuesLU.setZero(); // initialize all values zero
+
+        // Set correct part of valuesLU equal to values
         if ( polynomialTerm )
         {
             valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
@@ -384,6 +387,7 @@ namespace rbf
         }
 
         matrix B;
+
         if ( polynomialTerm )
         {
             B = fullPivLu.solve( valuesLU );
@@ -398,7 +402,6 @@ namespace rbf
             B = llt.solve( valuesLU );
         }
 
-        //matrix B = fullPivLu.solve( valuesLU );
         valuesInterpolation.noalias() = Phi * B;
 
         assert( valuesInterpolation.rows() == n_B );
