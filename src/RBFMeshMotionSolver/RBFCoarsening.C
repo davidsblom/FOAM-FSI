@@ -129,6 +129,7 @@ namespace rbf
             int maxNbPoints = std::min( coarseningMaxPoints, static_cast<int>( positions.rows() ) );
             int minPoints = std::min( coarseningMinPoints, static_cast<int>( positions.rows() ) );
             double error = 0;
+            double errorMax = 0;
 
             // Create RBF interpolator
 
@@ -241,12 +242,13 @@ namespace rbf
                     t = std::clock() - t;
                     runTimeError += static_cast<float>(t) / CLOCKS_PER_SEC;
                     t = std::clock();
-                    //Info << index << ": largestError = " << largestError << ", " << index2 << ": largestError2 = " << largestError2 << endl;
                 }
 
                 double epsilon = std::sqrt( SMALL );
                 error = ( errorList ).matrix().norm() / (values.norm() + epsilon);
-                bool convergence = (error < tol && counter >= minPoints) || counter >= maxNbPoints;
+                errorMax = largestError/ (values.colwise().norm()).maxCoeff();
+                //bool convergence = (error < tol && counter >= minPoints) || counter >= maxNbPoints;
+                bool convergence = (error < tol && errorMax < tol && counter >= minPoints) || counter >= maxNbPoints;
 
                 if ( convergence )
                 {
@@ -286,7 +288,8 @@ namespace rbf
                 Info << "RBFCoarsening::debug 3. convergence check = " << runTimeConvergence << " s" << endl;
             }
 
-            Info << "RBF interpolation coarsening: selected " << selectedPositions.rows() << "/" << positions.rows() << " points, error = " << error << ", tol = " << tol << endl;
+            Info    << "RBF interpolation coarsening: selected " << selectedPositions.rows() << "/" << positions.rows() << " points, 2-norm(error) = "
+                    << error << ", max(error) = " << errorMax << ", tol = " << tol << endl;
 
             rbf::matrix positionsCoarse( selectedPositions.rows(), positions.cols() );
 
@@ -356,12 +359,20 @@ namespace rbf
 
                     double epsilon = std::sqrt( SMALL );
                     double error = ( valuesInterpolationCoarse.array() - this->values.array() ).matrix().norm() / (this->values.norm() + epsilon);
-                    bool convergence = error < tolLivePointSelection;
+
+                    rbf::vector errorList(valuesInterpolationCoarse.rows());
+                    for ( int j = 0; j < valuesInterpolationCoarse.rows(); j++ )
+                        errorList( j ) = ( valuesInterpolationCoarse.row( j ).array() - this->values.row( j ).array() ).matrix().norm();
+
+                    double errorMax = errorList.maxCoeff()/(this->values.colwise().norm()).maxCoeff();
+
+                    //bool convergence = error < tolLivePointSelection;
+                    bool convergence = (error < tolLivePointSelection && errorMax < tolLivePointSelection);
 
                     if ( convergence )
                         reselection = false;
 
-                    Info << "RBF interpolation coarsening: error = " << error << ", tol = " << tolLivePointSelection << ", reselection = ";
+                    Info << "RBF interpolation coarsening: 2-norm(error) = " << error << ", max(error) = " << errorMax << ", tol = " << tolLivePointSelection << ", reselection = ";
 
                     if ( reselection )
                         Info << "true";
@@ -416,8 +427,15 @@ namespace rbf
         }
 
         usedValues.conservativeResize( usedValues.rows() - nbStaticFaceCentersRemove, usedValues.cols() );
-
         rbf->interpolate( usedValues, valuesInterpolation );
+
+        //Start testing correction
+        /*rbf::vector newErrors(values.rows());
+        for(int i=0;i<values.rows();i++)
+        {
+            newErrors( i ) = ( valuesInterpolation.row( i ).array() - values.row( i ).array() ).matrix().norm();
+        }
+        Info << "2-norm of new error = " << newErrors.norm() << endl;*/
     }
 
     void RBFCoarsening::setNbMovingAndStaticFaceCenters(
