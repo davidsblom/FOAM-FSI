@@ -12,7 +12,11 @@ unzip gtest-${VERSION}
 
 cd gtest-${VERSION}
 
-cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CC_COMPILER=gcc
+if [ "$(uname)" == "Darwin" ]; then
+    CC=gcc-mp-4.9 CXX=g++-mp-4.9 cmake -DCMAKE_CXX_COMPILER=g++-mp-4.9
+else
+    cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CC_COMPILER=gcc
+fi
 
 make
 

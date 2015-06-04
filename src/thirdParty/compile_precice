@@ -33,4 +33,8 @@ export PRECICE_MPI_INC_PATH=${MPI_HOME}/include
 # Build preCICE
 
 cd precice
-scons -j 4 build=release python=off petsc=off
+if [ "$(uname)" == "Darwin" ]; then
+    scons -j 4 build=release python=off petsc=off mpi=off compiler=g++-mp-4.9
+else
+    scons -j 4 build=release python=off petsc=off
+fi

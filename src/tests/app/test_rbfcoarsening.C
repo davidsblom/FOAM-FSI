@@ -51,16 +51,16 @@ protected:
         else
             assert( false );
 
-        std::shared_ptr<RBFInterpolation> rbfInterpolator( new RBFInterpolation( rbfFunction ) );
+        bool polynomialTerm = false;
+        std::shared_ptr<RBFInterpolation> rbfInterpolator( new RBFInterpolation( rbfFunction, polynomialTerm ) );
 
         bool enabled = std::tr1::get<0>( GetParam() );
         double tol = 1.0e-6;
         int coarseningMinPoints = std::tr1::get<2>( GetParam() );
         int coarseningMaxPoints = std::tr1::get<3>( GetParam() );
         bool twoPointSelection = std::tr1::get<4>( GetParam() );
-        bool polynomialTerm = false;
 
-        rbf = std::shared_ptr<RBFCoarsening>( new RBFCoarsening( rbfInterpolator, enabled, false, false, tol, 0.1, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, polynomialTerm, false ) );
+        rbf = std::shared_ptr<RBFCoarsening>( new RBFCoarsening( rbfInterpolator, enabled, false, false, tol, 0.1, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, false ) );
     }
 
     virtual void TearDown()
@@ -103,19 +103,19 @@ protected:
         else
             assert( false );
 
-        std::shared_ptr<RBFInterpolation> rbfInterpolator( new RBFInterpolation( rbfFunction ) );
+        bool polynomialTerm = std::tr1::get<5>( GetParam() );
+        std::shared_ptr<RBFInterpolation> rbfInterpolator( new RBFInterpolation( rbfFunction, polynomialTerm ) );
 
         bool enabled = std::tr1::get<0>( GetParam() );
         double tol = 1.0e-5;
         int coarseningMinPoints = std::tr1::get<2>( GetParam() );
         int coarseningMaxPoints = std::tr1::get<3>( GetParam() );
         bool twoPointSelection = std::tr1::get<4>( GetParam() );
-        bool polynomialTerm = std::tr1::get<5>( GetParam() );
 
         bool livePointSelection = true;
         double liveTol = 1e-2;
 
-        rbf = std::shared_ptr<RBFCoarsening>( new RBFCoarsening( rbfInterpolator, enabled, livePointSelection, false, tol, liveTol, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, polynomialTerm, false ) );
+        rbf = std::shared_ptr<RBFCoarsening>( new RBFCoarsening( rbfInterpolator, enabled, livePointSelection, false, tol, liveTol, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, false ) );
     }
 
     virtual void TearDown()
@@ -166,22 +166,22 @@ TEST_P( RBFCoarseningLiveParametrizedTest, rbf1d_regularity )
 
 
 /*TEST( RBFCoarseningTest, rbf2d_coarsening )
-{
-    // Check that the RBF function interpolates through the nodes (2D)
-    std::shared_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-    RBFInterpolation rbfInterpolator( rbfFunction );
-
-    std::shared_ptr<RBFCoarsening> rbf = std::shared_ptr<RBFCoarsening>( new RBFCoarsening( rbfInterpolator, true, false, false, 1e-6, 0.1, 2, 30, true, false ) );
-
-    matrix x, y, ynew;
-
-    x = Eigen::MatrixXd::Random( 50, 2 ).array() * 4 - 2;
-    y = Eigen::MatrixXd::Random( 50, 2 ).array() * 4 - 2;
-
-    rbf.compute( x, x );
-    rbf.interpolate( y, ynew );
-
-    for ( int i = 0; i < y.rows(); i++ )
-        for ( int j = 0; j < y.cols(); j++ )
-            ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-10 );
-}*/
+ * {
+ *  // Check that the RBF function interpolates through the nodes (2D)
+ *  std::shared_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
+ *  RBFInterpolation rbfInterpolator( rbfFunction );
+ *
+ *  std::shared_ptr<RBFCoarsening> rbf = std::shared_ptr<RBFCoarsening>( new RBFCoarsening( rbfInterpolator, true, false, false, 1e-6, 0.1, 2, 30, true, false ) );
+ *
+ *  matrix x, y, ynew;
+ *
+ *  x = Eigen::MatrixXd::Random( 50, 2 ).array() * 4 - 2;
+ *  y = Eigen::MatrixXd::Random( 50, 2 ).array() * 4 - 2;
+ *
+ *  rbf.compute( x, x );
+ *  rbf.interpolate( y, ynew );
+ *
+ *  for ( int i = 0; i < y.rows(); i++ )
+ *      for ( int j = 0; j < y.cols(); j++ )
+ *          ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-10 );
+ * }*/
