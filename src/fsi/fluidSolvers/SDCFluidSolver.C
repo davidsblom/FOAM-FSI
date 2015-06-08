@@ -841,11 +841,6 @@ void SDCFluidSolver::implicitSolve(
     runTime->setTime( told, runTime->timeIndex() );
 }
 
-int SDCFluidSolver::getNbCells()
-{
-    return mesh.globalData().nTotalCells() * 3 + mesh.globalData().nTotalFaces();
-}
-
 double SDCFluidSolver::getScalingFactor()
 {
     return 1;

@@ -74,8 +74,6 @@ public:
 
     virtual void getSolution( Eigen::VectorXd & solution );
 
-    virtual int getNbCells();
-
     virtual double getScalingFactor();
 
     virtual double getTimeStep();
