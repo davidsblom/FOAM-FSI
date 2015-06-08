@@ -122,8 +122,8 @@ private:
     // Fields
     volScalarField p;
     volVectorField U;
-    surfaceScalarField phi;
     surfaceVectorField Uf;
+    surfaceScalarField phi;
     volScalarField AU;
     volVectorField HU;
     volVectorField rhsU;

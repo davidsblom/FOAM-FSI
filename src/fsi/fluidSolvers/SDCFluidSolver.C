@@ -55,18 +55,6 @@ SDCFluidSolver::SDCFluidSolver(
     ),
     mesh
     ),
-    phi
-    (
-    IOobject
-    (
-        "phi",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    linearInterpolate( U ) & mesh.Sf()
-    ),
     Uf
     (
     IOobject
@@ -78,6 +66,18 @@ SDCFluidSolver::SDCFluidSolver(
         IOobject::AUTO_WRITE
     ),
     linearInterpolate( U )
+    ),
+    phi
+    (
+    IOobject
+    (
+        "phi",
+        runTime->timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    Uf & mesh.Sf()
     ),
     AU
     (
