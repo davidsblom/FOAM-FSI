@@ -821,8 +821,6 @@ void SDCFluidSolver::implicitSolve(
             break;
     }
 
-    assert( convergence );
-
     continuityErrs();
 
     // -------------------------------------------------------------------------
