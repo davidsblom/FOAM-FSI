@@ -105,7 +105,7 @@ private:
 
     void createFields();
 
-    double evaluateMomentumResidual( double dt );
+    double evaluateMomentumResidual();
 
     void initialize();
 
@@ -127,7 +127,7 @@ private:
     volScalarField AU;
     volVectorField HU;
     volVectorField rhsU;
-    surfaceVectorField rhsUf;
+    surfaceScalarField rhsPhi;
 
     // PIMPLE controls
     int nCorr;
@@ -153,7 +153,7 @@ private:
     std::deque<volVectorField> UStages;
     std::deque<surfaceVectorField> UfStages;
     volVectorField UF;
-    surfaceVectorField UfF;
+    surfaceScalarField phiF;
 
     bool turbulenceSwitch;
 };

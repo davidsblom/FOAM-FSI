@@ -144,7 +144,7 @@ namespace sdc
             scalarList squaredNorm( Pstream::nProcs() );
             squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
             reduce( squaredNorm, sumOp<scalarList>() );
-            double error = std::sqrt( sum( squaredNorm ) / solver->getNbCells() );
+            double error = std::sqrt( sum( squaredNorm ) / N );
             error /= solver->getScalingFactor();
             convergence = error < tol && j >= k - 1;
 
@@ -164,6 +164,8 @@ namespace sdc
             if ( convergence )
                 break;
         }
+
+        assert( convergence );
 
         solver->setDeltaT( this->dt );
     }
