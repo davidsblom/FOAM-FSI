@@ -165,8 +165,6 @@ namespace sdc
                 break;
         }
 
-        assert( convergence );
-
         solver->setDeltaT( this->dt );
     }
 }
