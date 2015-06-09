@@ -422,7 +422,7 @@ void SDCFluidSolver::finalizeTimeStep()
 
 int SDCFluidSolver::getDOF()
 {
-    int index  = 0;
+    int index = 0;
     forAll( U.internalField(), i )
     {
         for ( int j = 0; j < 3; j++ )
@@ -435,7 +435,7 @@ int SDCFluidSolver::getDOF()
     {
         forAll( U.boundaryField()[patchI], i )
         {
-            for( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < 3; j++ )
             {
                 index++;
             }
@@ -475,7 +475,7 @@ void SDCFluidSolver::getSolution( Eigen::VectorXd & solution )
     {
         forAll( U.boundaryField()[patchI], i )
         {
-            for( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < 3; j++ )
             {
                 solution( index ) = U.boundaryField()[patchI][i][j];
                 index++;
@@ -513,6 +513,12 @@ void SDCFluidSolver::evaluateFunction(
     Eigen::VectorXd & f
     )
 {
+    if ( timeIndex == 1 && k == 0 )
+    {
+        UF = -fvc::div( phi, U ) - fvc::grad( p ) + fvc::laplacian( nu, U );
+        phiF = fvc::interpolate( UF ) & mesh.Sf();
+    }
+
     int index = 0;
 
     forAll( UF.internalField(), i )
@@ -528,7 +534,7 @@ void SDCFluidSolver::evaluateFunction(
     {
         forAll( UF.boundaryField()[patchI], i )
         {
-            for( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < 3; j++ )
             {
                 f( index ) = UF.boundaryField()[patchI][i][j];
                 index++;
@@ -602,7 +608,7 @@ void SDCFluidSolver::implicitSolve(
     {
         forAll( U.boundaryField()[patchI], i )
         {
-            for( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < 3; j++ )
             {
                 U.oldTime().boundaryField()[patchI][i][j] = qold( index );
                 index++;
@@ -640,7 +646,7 @@ void SDCFluidSolver::implicitSolve(
     {
         forAll( rhsU.boundaryField()[patchI], i )
         {
-            for( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < 3; j++ )
             {
                 rhsU.boundaryField()[patchI][i][j] = rhs( index );
                 index++;
@@ -682,8 +688,6 @@ void SDCFluidSolver::implicitSolve(
         );
 
         Foam::solve( UEqn == -fvc::grad( p ) + rDeltaT * rhsU );
-
-        // Foam::solve( UEqn == -fvc::grad( p ) );
 
         // Relative convergence measure for the PISO loop:
         // Perform at maximum nCorr PISO corrections.
@@ -826,7 +830,7 @@ void SDCFluidSolver::implicitSolve(
     phiF = rDeltaT * (phi - phi.oldTime() - rhsPhi);
 
     getSolution( result );
-    evaluateFunction( k, qold, t, f );
+    evaluateFunction( k + 1, qold, t, f );
 
     runTime->setTime( told, runTime->timeIndex() );
 }

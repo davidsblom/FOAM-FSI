@@ -102,7 +102,7 @@ int main(
 
     std::shared_ptr<TPSFunction> tpsFunction( new TPSFunction() );
     std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( tpsFunction ) );
-    std::shared_ptr<rbf::RBFCoarsening> rbfSolidToFluidInterface ( new rbf::RBFCoarsening( rbfInterpolator, enabled,  livePointSelection, livePointSelectionSumValues, tol, tolLivePointSelection, coarseningMinPoints,  coarseningMaxPoints, exportTxt ) );
+    std::shared_ptr<rbf::RBFCoarsening> rbfSolidToFluidInterface( new rbf::RBFCoarsening( rbfInterpolator, enabled, livePointSelection, livePointSelectionSumValues, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, exportTxt ) );
 
     Eigen::MatrixXd positions, positionsInterpolation, values, valuesInterpolation;
 
