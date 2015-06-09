@@ -1,0 +1,45 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM Extend Project: Open Source CFD        |
+|  \\    /   O peration     | Version:  1.6-ext                               |
+|   \\  /    A nd           | Web:      www.extend-project.de                 |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      motionProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dynamicFvMesh   dynamicMotionSolverFvMesh;
+
+solver          RBFMeshMotionSolver;
+
+movingPatches   ( bottom );
+
+staticPatches ( );
+
+fixedPatches 	( );
+
+coarsening
+{
+  enabled true;
+  tol 1e-1;
+  minPoints 2;
+  maxPoints 800;
+
+  livePointSelection true;
+  tolLivePointSelection 1e-1;
+  twoPointSelection false; //default: false
+
+  exportSelectedPoints true;
+}
+
+interpolation
+{
+  function TPS;//WendlandC2;
+  radius 5;
+}

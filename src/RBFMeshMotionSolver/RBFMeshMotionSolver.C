@@ -146,6 +146,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     int coarseningMinPoints = 1;
     int coarseningMaxPoints = 2;
     bool twoPointSelection = false;
+    bool surfaceCorrection = false;
 
     if ( coarsening )
     {
@@ -158,9 +159,12 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     }
 
     if ( livePointSelection )
+    {
         tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
+        surfaceCorrection = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrection", false );
+    }
 
-    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, exportSelectedPoints ) );
+    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, exportSelectedPoints ) );
 }
 
 RBFMeshMotionSolver::~RBFMeshMotionSolver()
