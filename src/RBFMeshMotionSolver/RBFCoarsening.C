@@ -528,8 +528,9 @@ namespace rbf
             t = std::clock() - t;
             runTimeCorr += static_cast<float>(t) / CLOCKS_PER_SEC;
             t = std::clock();
+            Info << "RBFCoarsening::correctSurface::debug 2. correction evaluation = " << runTimeCorr << " s" << endl;
         }
-        Info << "RBFCoarsening::correctSurface::debug 2. correction evaluation = " << runTimeCorr << " s" << endl;
+
     }
 
     void RBFCoarsening::setNbMovingAndStaticFaceCenters(
