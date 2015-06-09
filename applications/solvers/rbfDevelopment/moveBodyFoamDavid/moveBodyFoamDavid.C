@@ -54,8 +54,6 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-#       include "readControls.H"
-
         runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;

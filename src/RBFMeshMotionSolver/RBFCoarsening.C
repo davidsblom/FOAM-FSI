@@ -24,6 +24,7 @@ namespace rbf
         coarseningMaxPoints( 0 ),
         twoPointSelection( false ),
         surfaceCorrection( false ),
+        ratioRadiusError( 10 ),
         exportTxt( false ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -63,6 +64,7 @@ namespace rbf
         coarseningMaxPoints( coarseningMaxPoints ),
         twoPointSelection( twoPointSelection ),
         surfaceCorrection( false ),
+        ratioRadiusError( 10 ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -103,6 +105,7 @@ namespace rbf
         int coarseningMaxPoints,
         bool twoPointSelection,
         bool surfaceCorrection,
+        int ratioRadiusError,
         bool exportTxt
         )
         :
@@ -117,6 +120,7 @@ namespace rbf
         coarseningMaxPoints( coarseningMaxPoints ),
         twoPointSelection( twoPointSelection ),
         surfaceCorrection( surfaceCorrection ),
+        ratioRadiusError( ratioRadiusError ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -471,7 +475,12 @@ namespace rbf
             valuesCorrection.conservativeResize(valuesInterpolation.rows(),valuesInterpolation.cols());
             valuesCorrection.setZero();
         }
-        double R = 10* (errorInterpolationCoarse.rowwise().norm()).maxCoeff();
+        double R = ratioRadiusError * ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff();
+
+        if(debug > 0)
+        {
+            Info << nl << "RBFCoarsening::correctSurface::debug 0: ratioRadiusError = " << ratioRadiusError << ", R = " << R << endl;
+        }
 
         //Find nearest boundary point for each internal point. Do this only the first time
         vector closestBoundaryRadius(positionsInterpolation.rows());
