@@ -552,14 +552,6 @@ void SDCFluidSolver::evaluateFunction(
     }
 
     assert( index == f.rows() );
-
-    /*for ( int i = 0; i < UF.size(); i++ )
-        for ( int j = 0; j < 3; j++ )
-            f( i * 3 + j ) = UF[i][j];
-
-    for( int i = 0; i < phiF.size(); i++ )
-        for ( int i = 0; i < phiF.size(); i++ )
-            f( UF.size() * 3 + i ) = phiF[i];*/
 }
 
 void SDCFluidSolver::implicitSolve(
