@@ -5,6 +5,7 @@
 #include "SolidSolver.H"
 #include "CoupledFluidSolver.H"
 #include "RBFInterpolation.H"
+#include "RBFCoarsening.H"
 #include "TPSFunction.H"
 
 class MapMeshSolidSolver : public SolidSolver
@@ -89,22 +90,33 @@ int main(
 
     // Step 1: Interpolate displacement from solid interface to fluid interface
 
+    // Settings coarsening;
+    bool enabled = true;
+    bool livePointSelection = false;
+    bool livePointSelectionSumValues = false;
+    double tol = 1.0e-4;
+    double tolLivePointSelection = 1.0e-4;
+    int coarseningMinPoints = 5;
+    int coarseningMaxPoints = 500;
+    bool exportTxt = false;
+
     std::shared_ptr<TPSFunction> tpsFunction( new TPSFunction() );
-    rbf::RBFInterpolation rbfSolidToFluidInterface( tpsFunction );
+    std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( tpsFunction ) );
+    std::shared_ptr<rbf::RBFCoarsening> rbfSolidToFluidInterface ( new rbf::RBFCoarsening( rbfInterpolator, enabled,  livePointSelection, livePointSelectionSumValues, tol, tolLivePointSelection, coarseningMinPoints,  coarseningMaxPoints, exportTxt ) );
 
     Eigen::MatrixXd positions, positionsInterpolation, values, valuesInterpolation;
 
     solid->getWritePositionsLocal( positions );
     fluid->getReadPositions( positionsInterpolation );
 
-    rbfSolidToFluidInterface.compute( positions, positionsInterpolation );
+    rbfSolidToFluidInterface->compute( positions, positionsInterpolation );
 
     // valuesInterpolation = displacement of fluid interface
     // values = displacement of solid interface
 
     solid->getDisplacementLocal( values );
 
-    rbfSolidToFluidInterface.interpolate( values, valuesInterpolation );
+    rbfSolidToFluidInterface->interpolate( values, valuesInterpolation );
 
     // Step 2
     // Fluid mesh deformation
