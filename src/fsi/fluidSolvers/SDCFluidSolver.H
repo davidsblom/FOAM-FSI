@@ -83,6 +83,7 @@ public:
         const int k,
         const double t,
         const double dt,
+        const double Akk,
         const Eigen::VectorXd & qold,
         const Eigen::VectorXd & rhs,
         Eigen::VectorXd & f,

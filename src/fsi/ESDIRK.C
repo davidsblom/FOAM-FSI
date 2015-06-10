@@ -142,6 +142,8 @@ namespace sdc
 
         for ( int i = 0; i < nbStages; i++ )
             B( i ) = A( nbStages - 1, i );
+
+        solver->setNumberOfStages( nbStages );
     }
 
     ESDIRK::~ESDIRK()
@@ -191,7 +193,7 @@ namespace sdc
             double dt = C( j ) * this->dt;
             t = t0 + dt;
 
-            Info << "ESDIRK: t = " << t << ", stage = " << j << endl;
+            Info << "\nTime = " << t << ", ESDIRK stage = " << j + 1 << "/" << nbStages << nl << endl;
 
             Eigen::VectorXd rhs( N ), result( N );
             f.setZero();
@@ -211,5 +213,7 @@ namespace sdc
             solStages.row( j ) = result;
             F.row( j ) = f;
         }
+
+        solver->setDeltaT( this->dt );
     }
 }
