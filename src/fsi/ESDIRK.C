@@ -21,7 +21,7 @@ namespace sdc
         C(),
         N( solver->getDOF() )
     {
-        assert( method == "SDIRK2" || method == "SDIRK3" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK5" );
+        assert( method == "SDIRK2" || method == "SDIRK3" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK4" || method == "SDIRK4" );
         assert( solver );
         assert( dt > 0 );
 
@@ -45,6 +45,28 @@ namespace sdc
             A( 2, 0 ) = 1.2084966;
             A( 2, 1 ) = -0.64436317;
             A( 2, 2 ) = 0.43586652;
+        }
+
+        // source: Cash-5-3-4 http://runge.math.smu.edu/arkode_dev/doc/guide/build/html/Butcher.html
+        if ( method == "SDIRK4" )
+        {
+            A.resize( 5, 5 );
+            A.setZero();
+            A( 0, 0 ) = 0.435866521508;
+            A( 1, 0 ) = -1.13586652150;
+            A( 1, 1 ) = 0.435866521508;
+            A( 2, 0 ) = 1.08543330679;
+            A( 2, 1 ) = -0.721299828287;
+            A( 2, 2 ) = 0.435866521508;
+            A( 3, 0 ) = 0.416349501547;
+            A( 3, 1 ) = 0.190984004184;
+            A( 3, 2 ) = -0.118643265417;
+            A( 3, 3 ) = 0.435866521508;
+            A( 4, 0 ) = 0.896869652944;
+            A( 4, 1 ) = 0.0182725272734;
+            A( 4, 2 ) = -0.0845900310706;
+            A( 4, 3 ) = -0.266418670647;
+            A( 4, 4 ) = 0.435866521508;
         }
 
         if ( method == "ESDIRK3" )
