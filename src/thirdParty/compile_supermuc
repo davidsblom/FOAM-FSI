@@ -35,6 +35,7 @@ export PRECICE_BOOST_ROOT=${BOOST_ROOT}
 export PRECICE_MPI_LIB=mpi
 export PRECICE_MPI_LIB_PATH=${MPI_BASE}/lib64
 export PRECICE_MPI_INC_PATH=${MPI_BASE}/include64
+export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
 cd precice
 python tools/python_scripts/insert_mpi_header.py
