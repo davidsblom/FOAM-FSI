@@ -113,19 +113,19 @@ TEST_P( ESDIRKTest, run )
     // ---------------------------------------------
 
     if ( nbTimeSteps == 100 && method == "SDIRK3" )
-        ASSERT_NEAR( error, 2.44907705e+00, 1.0e-8 );
+        ASSERT_NEAR( error, 2.4490859141990304, 1.0e-8 );
 
     if ( nbTimeSteps == 200 && method == "SDIRK3" )
-        ASSERT_NEAR( error, 2.89782371e-01, 1.0e-7 );
+        ASSERT_NEAR( error, 0.2897941698557594, 1.0e-7 );
 
     if ( nbTimeSteps == 400 && method == "SDIRK3" )
-        ASSERT_NEAR( error, 3.54034132e-02, 1.0e-7 );
+        ASSERT_NEAR( error, 0.035416525581987941, 1.0e-7 );
 
     if ( nbTimeSteps == 800 && method == "SDIRK3" )
-        ASSERT_NEAR( error, 4.36890963e-03, 1.0e-7 );
+        ASSERT_NEAR( error, 0.004382608722869219, 1.0e-7 );
 
     if ( nbTimeSteps == 1600 && method == "SDIRK3" )
-        ASSERT_NEAR( error, 5.31256827e-04, 1.0e-7 );
+        ASSERT_NEAR( error, 0.00054522799915263077, 1.0e-7 );
 
     // ---------------------------------------------
 

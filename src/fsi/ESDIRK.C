@@ -21,10 +21,11 @@ namespace sdc
         C(),
         N( solver->getDOF() )
     {
-        assert( method == "SDIRK2" || method == "SDIRK3" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK4" || method == "SDIRK4" );
+        assert( method == "SDIRK2" || method == "SDIRK3" || method == "SDIRK4" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK5" );
         assert( solver );
         assert( dt > 0 );
 
+        // source: Ellsiepen. Habilitation thesis Philipp Birken
         if ( method == "SDIRK2" )
         {
             double alpha = 1.0 - 0.5 * std::sqrt( 2 );
@@ -35,16 +36,21 @@ namespace sdc
             A( 1, 1 ) = alpha;
         }
 
+        // source: Cash. Habilitation thesis Philipp Birken
         if ( method == "SDIRK3" )
         {
             A.resize( 3, 3 );
             A.setZero();
-            A( 0, 0 ) = 0.43586652;
-            A( 1, 0 ) = 0.28206673;
-            A( 1, 1 ) = 0.43586652;
-            A( 2, 0 ) = 1.2084966;
-            A( 2, 1 ) = -0.64436317;
-            A( 2, 2 ) = 0.43586652;
+            double alpha = 1.2084966491760101;
+            double beta = -0.6443631706844691;
+            double gamma = 0.4358665215084580;
+            double delta = 0.7179332607542295;
+            A( 0, 0 ) = gamma;
+            A( 1, 0 ) = delta - gamma;
+            A( 1, 1 ) = gamma;
+            A( 2, 0 ) = alpha;
+            A( 2, 1 ) = beta;
+            A( 2, 2 ) = gamma;
         }
 
         // source: Cash-5-3-4 http://runge.math.smu.edu/arkode_dev/doc/guide/build/html/Butcher.html
