@@ -235,7 +235,7 @@ namespace sdc
             rhs.array() *= this->dt;
 
             solver->initTimeStep();
-            solver->implicitSolve( false, j, t, this->dt, A( j, j ), qold, rhs, f, result );
+            solver->implicitSolve( false, j, t, A( j, j ) * this->dt, qold, rhs, f, result );
             solver->finalizeTimeStep();
 
             solStages.row( j ) = result;

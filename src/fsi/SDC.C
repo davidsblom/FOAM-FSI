@@ -90,7 +90,7 @@ namespace sdc
             Info << "\nTime = " << t << ", SDC sweep = 0, SDC substep = " << j + 1 << nl << endl;
 
             solver->initTimeStep();
-            solver->implicitSolve( false, j, t, dt, 1, qold, rhs, f, result );
+            solver->implicitSolve( false, j, t, dt, qold, rhs, f, result );
             solver->finalizeTimeStep();
 
             solStages.row( j + 1 ) = result;
@@ -129,7 +129,7 @@ namespace sdc
                 rhs = -dt * Fold.row( p + 1 ) + Sj.row( p );
 
                 solver->initTimeStep();
-                solver->implicitSolve( true, p, t, dt, 1, qold, rhs, f, result );
+                solver->implicitSolve( true, p, t, dt, qold, rhs, f, result );
                 solver->finalizeTimeStep();
 
                 solStages.row( p + 1 ) = result;

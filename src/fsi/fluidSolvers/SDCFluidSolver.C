@@ -565,7 +565,6 @@ void SDCFluidSolver::implicitSolve(
     const int k,
     const double t,
     const double dt,
-    const double Akk,
     const Eigen::VectorXd & qold,
     const Eigen::VectorXd & rhs,
     Eigen::VectorXd & f,
@@ -573,7 +572,7 @@ void SDCFluidSolver::implicitSolve(
     )
 {
     bool convergence = false;
-    runTime->setDeltaT( dt * Akk );
+    runTime->setDeltaT( dt );
 
     double told = runTime->value();
     runTime->setTime( t, runTime->timeIndex() );
@@ -848,7 +847,7 @@ void SDCFluidSolver::implicitSolve(
 
     // -------------------------------------------------------------------------
 
-    if ( pStages.size() >= k + 2 )
+    if ( static_cast<int>( pStages.size() ) >= k + 2 )
     {
         pStages.at( k + 1 ) = p;
         phiStages.at( k + 1 ) = phi;

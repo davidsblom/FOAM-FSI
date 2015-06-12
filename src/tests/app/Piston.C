@@ -105,7 +105,7 @@ void Piston::run()
         f.setZero();
         rhs.setZero();
 
-        implicitSolve( false, 0, t, dt, 1, qold, rhs, f, result );
+        implicitSolve( false, 0, t, dt, qold, rhs, f, result );
 
         qdot( i ) = result( 0 );
         q( i ) = result( 1 );
@@ -117,7 +117,6 @@ void Piston::implicitSolve(
     const int k,
     const double t,
     const double dt,
-    const double Akk,
     const Eigen::VectorXd & qold,
     const Eigen::VectorXd & rhs,
     Eigen::VectorXd & f,
@@ -128,16 +127,14 @@ void Piston::implicitSolve(
     assert( rhs.rows() == 2 );
     assert( result.rows() == 2 );
 
-    double deltaT = dt * Akk;
-
     f( 0 ) = As * std::sin( omega * t );
     f( 0 ) += Ac * std::cos( omega * t );
 
     // qdot
-    result( 0 ) = qold( 0 ) + deltaT * f( 0 ) + rhs( 0 );
+    result( 0 ) = qold( 0 ) + dt * f( 0 ) + rhs( 0 );
 
     // q
-    result( 1 ) = qold( 1 ) + std::pow( deltaT, 2 ) * f( 0 ) + deltaT * qold( 0 ) + deltaT * rhs( 0 ) + rhs( 1 );
+    result( 1 ) = qold( 1 ) + std::pow( dt, 2 ) * f( 0 ) + dt * qold( 0 ) + dt * rhs( 0 ) + rhs( 1 );
 
     f( 1 ) = result( 0 );
 
