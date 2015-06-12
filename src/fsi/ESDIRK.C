@@ -218,8 +218,7 @@ namespace sdc
             if ( !isStageImplicit( A( j, j ) ) )
                 continue;
 
-            double dt = C( j ) * this->dt;
-            t = t0 + dt;
+            t = t0 + C( j ) * dt;
 
             Info << "\nTime = " << t << ", ESDIRK stage = " << j + 1 << "/" << nbStages << nl << endl;
 
@@ -232,16 +231,16 @@ namespace sdc
             for ( int iStage = 0; iStage < j; iStage++ )
                 rhs += A( j, iStage ) * F.row( iStage ).transpose();
 
-            rhs.array() *= this->dt;
+            rhs.array() *= dt;
 
             solver->initTimeStep();
-            solver->implicitSolve( false, j, t, A( j, j ) * this->dt, qold, rhs, f, result );
+            solver->implicitSolve( false, j, t, A( j, j ) * dt, qold, rhs, f, result );
             solver->finalizeTimeStep();
 
             solStages.row( j ) = result;
             F.row( j ) = f;
         }
 
-        solver->setDeltaT( this->dt );
+        solver->setDeltaT( dt );
     }
 }
