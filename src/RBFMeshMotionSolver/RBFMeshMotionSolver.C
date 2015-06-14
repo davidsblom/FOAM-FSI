@@ -249,6 +249,8 @@ void RBFMeshMotionSolver::solve()
     int nbStaticFaceCenters = 0;
     int nbFixedFaceCenters = 0;
 
+    std::vector<int> staticControlPointLabels;
+
     if ( sum( nbGlobalFaceCenters ) == 0 )
     {
         // Determine the number of face centers
@@ -265,8 +267,25 @@ void RBFMeshMotionSolver::solve()
 
         forAll( staticPatchIDs, i )
         {
-            nbStaticFaceCenters += mesh().boundaryMesh()[staticPatchIDs[i]].meshPoints().size();
+            // nbStaticFaceCenters += mesh().boundaryMesh()[staticPatchIDs[i]].meshPoints().size();
+
+            const labelList & meshPoints = mesh().boundaryMesh()[staticPatchIDs[i]].meshPoints();
+
+            forAll( meshPoints, j )
+            {
+                // Only add the static vertex point if it's not already added to the list
+                std::vector<int>::iterator it;
+
+                it = std::find( staticControlPointLabels.begin(), staticControlPointLabels.end(), meshPoints[j] );
+
+                if ( it == staticControlPointLabels.end() || staticControlPointLabels.size() == 0 )
+                {
+                    staticControlPointLabels.push_back( meshPoints[j] );
+                }
+            }
         }
+
+        nbStaticFaceCenters = staticControlPointLabels.size();
 
         forAll( fixedPatchIDs, i )
         {
@@ -332,17 +351,9 @@ void RBFMeshMotionSolver::solve()
 
         const Foam::pointField & points = mesh().points();
 
-        forAll( staticPatchIDs, i )
+        for ( unsigned i = 0; i < staticControlPointLabels.size(); i++ )
         {
-            const labelList & meshPoints = mesh().boundaryMesh()[staticPatchIDs[i]].meshPoints();
-
-            // Set the positions for patch i
-            forAll( meshPoints, j )
-            {
-                positionsField[j + offset + globalStaticOffset] = points[meshPoints[j]];
-            }
-
-            offset += meshPoints.size();
+            positionsField[i + globalStaticOffset] = points[staticControlPointLabels[i]];
         }
 
         offset = 0;
