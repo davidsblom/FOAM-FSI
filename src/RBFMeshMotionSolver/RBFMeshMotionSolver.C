@@ -265,12 +265,12 @@ void RBFMeshMotionSolver::solve()
 
         forAll( staticPatchIDs, i )
         {
-            nbStaticFaceCenters += mesh().boundaryMesh()[staticPatchIDs[i]].faceCentres().size();
+            nbStaticFaceCenters += mesh().boundaryMesh()[staticPatchIDs[i]].meshPoints().size();
         }
 
         forAll( fixedPatchIDs, i )
         {
-            nbFixedFaceCenters += mesh().boundaryMesh()[fixedPatchIDs[i]].faceCentres().size();
+            nbFixedFaceCenters += mesh().boundaryMesh()[fixedPatchIDs[i]].meshPoints().size();
         }
 
         // Calculate sum of all faces on each processor
@@ -330,32 +330,34 @@ void RBFMeshMotionSolver::solve()
 
         offset = 0;
 
+        const Foam::pointField & points = mesh().points();
+
         forAll( staticPatchIDs, i )
         {
-            const Foam::vectorField::subField faceCentres = mesh().boundaryMesh()[staticPatchIDs[i]].faceCentres();
+            const labelList & meshPoints = mesh().boundaryMesh()[staticPatchIDs[i]].meshPoints();
 
             // Set the positions for patch i
-            forAll( faceCentres, j )
+            forAll( meshPoints, j )
             {
-                positionsField[j + offset + globalStaticOffset] = faceCentres[j];
+                positionsField[j + offset + globalStaticOffset] = points[meshPoints[j]];
             }
 
-            offset += faceCentres.size();
+            offset += meshPoints.size();
         }
 
         offset = 0;
 
         forAll( fixedPatchIDs, i )
         {
-            const Foam::vectorField::subField faceCentres = mesh().boundaryMesh()[fixedPatchIDs[i]].faceCentres();
+            const labelList & meshPoints = mesh().boundaryMesh()[fixedPatchIDs[i]].meshPoints();
 
             // Set the positions for patch i
-            forAll( faceCentres, j )
+            forAll( meshPoints, j )
             {
-                positionsField[j + offset + globalFixedOffset] = faceCentres[j];
+                positionsField[j + offset + globalFixedOffset] = points[meshPoints[j]];
             }
 
-            offset += faceCentres.size();
+            offset += meshPoints.size();
         }
 
         reduce( positionsField, sumOp<vectorField>() );
@@ -370,8 +372,6 @@ void RBFMeshMotionSolver::solve()
          * This is only local information and does not need to be communicated to other
          * processors.
          */
-
-        const Foam::pointField & points = mesh().points();
 
         // Determine the number of points by using the 2d corrector
         nbPoints = 0;
