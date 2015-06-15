@@ -43,7 +43,7 @@ public:
             int coarseningMaxPoints,
             bool twoPointSelection,
             bool surfaceCorrection,
-            int ratioRadiusError,
+            double ratioRadiusError,
             bool exportTxt
             );
 
@@ -78,7 +78,7 @@ public:
         bool twoPointSelection;
         bool polynomialTerm;
         bool surfaceCorrection;
-        int ratioRadiusError;
+        double ratioRadiusError;
         bool exportTxt;
         Eigen::VectorXi selectedPositions;
         int nbStaticFaceCentersRemove;

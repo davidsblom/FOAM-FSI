@@ -35,6 +35,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     nbGlobalMovingFaceCenters( Pstream::nProcs(), 0 ),
     nbGlobalStaticFaceCenters( Pstream::nProcs(), 0 ),
     nbGlobalFixedFaceCenters( Pstream::nProcs(), 0 ),
+    interpolateFromPoints( false ),
     twoDCorrector( mesh ),
     nbPoints( 0 )
 {
@@ -94,6 +95,22 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         }
     }
 
+    interpolateFromPoints = lookupOrDefault( "interpolateFromPoints", false );
+    if(interpolateFromPoints)
+        Info << "Interpolating from points instead of faceCentres. Only applicable for 2D case with 1 independent moving and 1 independent static patch!!" << endl;
+    if(interpolateFromPoints && movingPatches.size()>1)
+    {
+        Info << "Things are going wrong now! Doing interpolation from points only supported for single moving patch" << endl;
+    }
+    if(interpolateFromPoints && staticPatches.size()>1)
+    {
+        Info << "Things are going wrong now! Doing interpolation from points only supported for single static patch" << endl;
+    }
+    if(interpolateFromPoints && fixedPatches.size()>0)
+    {
+        Info << "Things are going wrong now! Doing interpolation from points only supported for static patch, not fixed" << endl;
+    }
+
     // Initialize RBF interpolator
 
     dictionary & dict = subDict( "interpolation" );
@@ -147,7 +164,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     int coarseningMaxPoints = 2;
     bool twoPointSelection = false;
     bool surfaceCorrection = false;
-    int ratioRadiusError = 10;
+    double ratioRadiusError = 10.0;
 
     if ( coarsening )
     {
@@ -165,7 +182,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         surfaceCorrection = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrection", false );
         if( surfaceCorrection )
         {
-            ratioRadiusError = subDict( "coarsening" ).lookupOrDefault( "ratioRadiusError", 10 );
+            ratioRadiusError = subDict( "coarsening" ).lookupOrDefault( "ratioRadiusError", 10.0 );
         }
     }
 
@@ -197,7 +214,6 @@ tmp<pointField> RBFMeshMotionSolver::curPoints() const
 void RBFMeshMotionSolver::setMotion( const Field<vectorField> & motion )
 {
     // Input checking
-
     assert( motion.size() == mesh().boundaryMesh().size() );
 
     forAll( motion, ipatch )
@@ -224,13 +240,254 @@ void RBFMeshMotionSolver::setMotion( const Field<vectorField> & motion )
     motionCenters = motion;
 }
 
+// As a first step, the motion is defined in the
+void RBFMeshMotionSolver::setMotionPoints( const Field<vectorField> & motion )
+{
+    Info << "void RBFMeshMotionSolver::setMotionPoints( const Field<vectorField> & motion )" << endl;
+    // Input checking
+    assert( motion.size() == mesh().boundaryMesh().size() );
+
+    forAll( motion, ipatch )
+    {
+        const vectorField & mpatch = motion[ipatch];
+
+        // Check whether the size of patch motion is equal to number of face centers in patch
+        if ( mpatch.size() > 0 )
+            assert( mpatch.size() == mesh().boundaryMesh()[ipatch].meshPoints().size() );
+
+        // Check whether the size of a moving patch is equal to the number of face centers in the patch
+        // First check if patchid is a moving patch
+        bool movingPatch = false;
+        forAll( movingPatchIDs, movingPatchI )
+        {
+            if ( movingPatchIDs[movingPatchI] == ipatch )
+                movingPatch = true;
+        }
+
+        if ( movingPatch )
+            assert( mpatch.size() == mesh().boundaryMesh()[ipatch].localPoints().size() );
+    }
+
+    motionCenters = motion;
+}
+
 void RBFMeshMotionSolver::updateMesh( const mapPolyMesh & )
 {
     assert( false );
 }
 
+void RBFMeshMotionSolver::solvePoints()
+{
+    Info << "void RBFMeshMotionSolver::solvePoints()" << endl;
+    assert( motionCenters.size() == mesh().boundaryMesh().size() );
+
+    /*
+     * RBF interpolator from face centers to local complete mesh vertices
+     * The interpolation consists of the following steps:
+     * 1. Build a matrix with the face center positions of the static patches and the moving patches
+     * 2. Build a matrix with the positions of every vertex in the local mesh
+     * 3. Build a matrix with the displacement/motion of the face center positions of the static patches and the moving patches
+     * 4. Perform the interpolation from the face centers to the complete mesh
+     * 5. Correct the mesh vertices of the static patches. Set these displacement to zero.
+     * 6. Set the motion of the mesh vertices
+     */
+
+    /*
+     * Step 1: Build a matrix with the face center positions of the static patches and the moving patches
+     * The order of the matrix is defined as first a list of the moving patch face centers,
+     * thereafter the static patch face centers. These are the control points used by the
+     * radial basis function interpolation.
+     * The control points should be exactly the same at each processor, and are therefore communicated
+     * to each process. As only an absolute RBF interpolation is implemented, this communication step is only
+     * performed once per simulation.
+     * The global ordering of the data is first the information of the moving patches,
+     * thereafter the static patches.
+     */
+
+    int nbMovingFaceCenters = 0;
+    int nbStaticFaceCenters = 0;
+    if ( sum( nbGlobalFaceCenters ) == 0 )
+    {
+        // First add the moving patches, and thereafter the static patches
+        forAll( movingPatchIDs, i )
+        {
+            nbMovingFaceCenters += mesh().boundaryMesh()[movingPatchIDs[i]].localPoints().size()/2;
+        }
+
+        forAll( staticPatchIDs, i )
+        {
+            nbStaticFaceCenters += mesh().boundaryMesh()[staticPatchIDs[i]].localPoints().size()/2;
+        }
+
+        nbGlobalFaceCenters[0] = nbMovingFaceCenters + nbStaticFaceCenters;
+    }
+    int nbFaceCenters = nbGlobalFaceCenters[0];
+
+    if ( !rbf->rbf->computed )
+    {
+        rbf::matrix positions( nbFaceCenters, mesh().nGeometricD() );
+        positions.setZero();
+        int offset = 0;
+
+        vectorField positionsField( positions.rows(), vector::zero );
+
+        forAll( movingPatchIDs, i )
+        {
+            const Foam::labelList meshPoints = mesh().boundaryMesh()[movingPatchIDs[i]].meshPoints();
+
+            // Set the positions for patch i
+            int counter=0;
+            forAll( meshPoints, j )
+            {
+                if ( twoDCorrector.marker()[meshPoints[j]] == 0 )
+                {
+                    positionsField[counter + offset] = mesh().points()[meshPoints[j]];
+                    counter++;
+                }
+            }
+
+            offset += meshPoints.size()/2;
+        }
+
+        forAll( staticPatchIDs, i )
+        {
+            const Foam::labelList meshPoints = mesh().boundaryMesh()[staticPatchIDs[i]].meshPoints();
+
+            // Set the positions for patch i
+            int counter=0;
+            forAll( meshPoints, j )
+            {
+                if ( twoDCorrector.marker()[meshPoints[j]] == 0 )
+                {
+                    positionsField[counter + offset] = mesh().points()[meshPoints[j]];
+                    counter++;
+                }
+            }
+
+            offset += meshPoints.size();
+        }
+
+        // Copy the FOAM vector field to an Eigen matrix
+        for ( int i = 0; i < positions.rows(); i++ )
+            for ( int j = 0; j < positions.cols(); j++ )
+                positions( i, j ) = positionsField[i][j];
+
+        /*
+         * Step 2: Build a matrix with the positions of every vertex in the local mesh.
+         * This is only local information and does not need to be communicated to other
+         * processors.
+         */
+
+        const Foam::pointField & points = mesh().points();
+
+        // Determine the number of points by using the 2d corrector
+        nbPoints = 0;
+        forAll( points, i )
+        {
+            if ( twoDCorrector.marker()[i] == 0 )
+                nbPoints++;
+        }
+
+        rbf::matrix positionsInterpolation( nbPoints, positions.cols() );
+
+        int index = 0;
+        forAll( points, i )
+        {
+            if ( twoDCorrector.marker()[i] == 0 )
+            {
+                for ( int j = 0; j < positionsInterpolation.cols(); j++ )
+                    positionsInterpolation( index, j ) = points[i][j];
+
+                index++;
+            }
+        }
+
+        // rbf->compute( positions, positionsInterpolation, positionsParallelLocation );
+        rbf->compute( positions, positionsInterpolation );
+
+        rbf->setNbMovingAndStaticFaceCenters( nbMovingFaceCenters, nbStaticFaceCenters );
+    }
+
+    /*
+     * Step 3: Build a matrix with the displacement/motion of the face center
+     * positions of the static patches and the moving patches.
+     * The motion needs to be communicated to every process at every mesh deformation.
+     * This is considered to be the most expensive step with regards to parallel
+     * scalability of the overall algorithm.
+     */
+
+    rbf::matrix values( nbFaceCenters, mesh().nGeometricD() );
+    values.setZero();
+
+    vectorField valuesField( values.rows(), vector::zero );
+
+    int offset = 0;
+
+    forAll( movingPatchIDs, i )
+    {
+        const Foam::labelList meshPoints = mesh().boundaryMesh()[movingPatchIDs[i]].meshPoints();
+
+        int counter=0;
+        forAll( motionCenters[movingPatchIDs[i]], j )
+        {
+            if( twoDCorrector.marker()[meshPoints[j]] == 0 )
+            {
+                valuesField[counter + offset] = motionCenters[movingPatchIDs[i]][j];
+                counter++;
+            }
+        }
+
+        offset += meshPoints.size();
+    }
+
+    // Copy the FOAM vector field to an Eigen matrix
+    for ( int i = 0; i < values.rows(); i++ )
+        for ( int j = 0; j < values.cols(); j++ )
+            values( i, j ) = valuesField[i][j];
+
+    /*
+     * Step 4: Perform the interpolation from the face centers to the complete mesh
+     */
+
+    rbf::matrix valuesInterpolation( nbPoints, values.cols() );
+    valuesInterpolation.setZero();
+
+    rbf->interpolate( values, valuesInterpolation );
+
+    // Apply the 2d correction
+
+    vectorField valuesInterpolationField( mesh().points().size(), Foam::vector::zero );
+    int index = 0;
+    forAll( valuesInterpolationField, i )
+    {
+        if ( twoDCorrector.marker()[i] == 0 )
+        {
+            for ( int j = 0; j < valuesInterpolation.cols(); j++ )
+                valuesInterpolationField[i][j] = valuesInterpolation( index, j );
+
+            index++;
+        }
+    }
+
+    twoDCorrector.setShadowSide( valuesInterpolationField );
+
+    /*
+     * Step 6: Set the motion of the mesh vertices
+     */
+
+    assert( newPoints.size() == valuesInterpolationField.size() );
+
+    newPoints = valuesInterpolationField;
+}
+
 void RBFMeshMotionSolver::solve()
 {
+    if(interpolateFromPoints)
+    {
+        solvePoints();
+    }
+    else
+    {
     assert( motionCenters.size() == mesh().boundaryMesh().size() );
 
     /*
@@ -505,4 +762,5 @@ void RBFMeshMotionSolver::solve()
     assert( newPoints.size() == valuesInterpolationField.size() );
 
     newPoints = valuesInterpolationField;
+    }
 }

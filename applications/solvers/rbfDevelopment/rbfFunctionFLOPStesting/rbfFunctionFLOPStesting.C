@@ -54,7 +54,7 @@ typedef Eigen::VectorXd evector;
 int main(int argc, char *argv[])
 {
     // == create "rbfs" == //
-    for (int k = 1; k<8; k++)
+    for (int k = 1; k<9; k++)
     {
         Info << nl << " ============================== " << endl;
 

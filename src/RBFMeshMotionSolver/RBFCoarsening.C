@@ -64,7 +64,7 @@ namespace rbf
         coarseningMaxPoints( coarseningMaxPoints ),
         twoPointSelection( twoPointSelection ),
         surfaceCorrection( false ),
-        ratioRadiusError( 10 ),
+        ratioRadiusError( 10.0 ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -105,7 +105,7 @@ namespace rbf
         int coarseningMaxPoints,
         bool twoPointSelection,
         bool surfaceCorrection,
-        int ratioRadiusError,
+        double ratioRadiusError,
         bool exportTxt
         )
         :
