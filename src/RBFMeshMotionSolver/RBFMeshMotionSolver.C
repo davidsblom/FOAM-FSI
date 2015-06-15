@@ -332,7 +332,8 @@ void RBFMeshMotionSolver::solve()
             IOobject addrHeader
             (
                 "pointProcAddressing",
-                mesh().facesInstance() / mesh().meshSubDir,
+                mesh().facesInstance(),
+                mesh().meshSubDir,
                 mesh(),
                 IOobject::MUST_READ
             );
@@ -340,6 +341,8 @@ void RBFMeshMotionSolver::solve()
             assert( addrHeader.headerOk() );
 
             labelIOList pointProcAddressing( addrHeader );
+
+            assert( pointProcAddressing.size() == mesh().points().size() );
 
             // Count the number of global static points including double points
             nbGlobalStaticFaceCenters[Pstream::myProcNo()] = nbStaticFaceCenters;

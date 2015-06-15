@@ -134,7 +134,7 @@ namespace rbf
 
         // Compute the LU decomposition of the matrix H
 
-        Eigen::PartialPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
+        Eigen::FullPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
 
         // Compute interpolation matrix
 
