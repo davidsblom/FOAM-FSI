@@ -7,5 +7,6 @@ bodyMotionFunction/sphericalExpansion/sphericalExpansion.C
 bodyMotionFunction/circularExpansion/circularExpansion.C
 bodyMotionFunction/twodTwoHingeFlap/twodTwoHingeFlap.C
 bodyMotionFunction/oscillatingHill/oscillatingHill.C
+bodyMotionFunction/beamForced/beamForced.C
 
 LIB = $(FOAM_USER_LIBBIN)/libbodyMotions
