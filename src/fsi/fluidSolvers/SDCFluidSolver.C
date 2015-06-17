@@ -390,7 +390,6 @@ void SDCFluidSolver::setNumberOfStages( int k )
         pStages.push_back( volScalarField( p ) );
         phiStages.push_back( surfaceScalarField( phi ) );
         UStages.push_back( volVectorField( U ) );
-        UfStages.push_back( surfaceVectorField( Uf ) );
     }
 }
 
@@ -405,7 +404,6 @@ void SDCFluidSolver::nextTimeStep()
             pStages.at( i ) = p;
             phiStages.at( i ) = phi;
             UStages.at( i ) = U;
-            UfStages.at( i ) = Uf;
         }
     }
 }
@@ -582,15 +580,6 @@ void SDCFluidSolver::implicitSolve(
         p = pStages.at( k + 1 );
         phi = phiStages.at( k + 1 );
         U = UStages.at( k + 1 );
-        Uf = UfStages.at( k + 1 );
-    }
-    else
-    {
-        // predictor
-        p = pStages.at( k );
-        phi = phiStages.at( k );
-        U = UStages.at( k );
-        Uf = UfStages.at( k );
     }
 
     int index = 0;
@@ -809,17 +798,6 @@ void SDCFluidSolver::implicitSolve(
                 break;
         }
 
-        // Update the face velocities
-        {
-            Uf.oldTime();
-
-            surfaceVectorField nf = mesh.Sf() / mesh.magSf();
-            surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
-            surfaceVectorField Unor = phi / mesh.magSf() * nf;
-
-            Uf = Utang + Unor;
-        }
-
         scalar momentumResidual = evaluateMomentumResidual();
 
         if ( oCorr == 0 )
@@ -852,7 +830,6 @@ void SDCFluidSolver::implicitSolve(
         pStages.at( k + 1 ) = p;
         phiStages.at( k + 1 ) = phi;
         UStages.at( k + 1 ) = U;
-        UfStages.at( k + 1 ) = Uf;
     }
 
     UF = rDeltaT * (U - U.oldTime() - rhsU);
