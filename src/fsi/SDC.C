@@ -76,15 +76,14 @@ namespace sdc
         solver->evaluateFunction( 0, sol, t, f );
         F.row( 0 ) = f;
 
+        Eigen::VectorXd rhs( N ), result( N ), qold( N );
+        rhs.setZero();
+
         for ( int j = 0; j < k - 1; j++ )
         {
             double dt = dtsdc( j );
             t += dt;
 
-            Eigen::VectorXd rhs( N ), result( N ), qold( N );
-            f.setZero();
-            rhs.setZero();
-            result.setZero();
             qold = solStages.row( j );
 
             Info << "\nTime = " << t << ", SDC sweep = 0, SDC substep = " << j + 1 << nl << endl;
@@ -104,12 +103,6 @@ namespace sdc
         for ( int j = 0; j < 10 * k; j++ )
         {
             t = t0;
-            Eigen::MatrixXd Fold = F;
-
-            Eigen::VectorXd rhs( N ), result( N ), qold( N );
-            f.setZero();
-            rhs.setZero();
-            result.setZero();
 
             Eigen::MatrixXd Sj = this->dt * (smat * F);
 
@@ -118,15 +111,13 @@ namespace sdc
             {
                 double dt = dtsdc( p );
                 t += dt;
-                f.setZero();
-                result.setZero();
 
                 Info << "\nTime = " << t << ", SDC sweep = " << j + 1 << ", SDC substep = " << p + 1 << nl << endl;
 
                 qold = solStages.row( p );
 
                 // Form right hand side
-                rhs = -dt * Fold.row( p + 1 ) + Sj.row( p );
+                rhs = -dt * F.row( p + 1 ) + Sj.row( p );
 
                 solver->initTimeStep();
                 solver->implicitSolve( true, p, t, dt, qold, rhs, f, result );
