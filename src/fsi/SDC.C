@@ -146,7 +146,7 @@ namespace sdc
 
             Eigen::MatrixXd residual = solStages.row( 0 ) + qj.row( 0 ) - solStages.row( k - 1 );
 
-            scalarList squaredNorm( Pstream::nProcs() );
+            scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
             squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
             reduce( squaredNorm, sumOp<scalarList>() );
             double error = std::sqrt( sum( squaredNorm ) / N );
