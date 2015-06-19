@@ -133,14 +133,17 @@ namespace sdc
             // Eigen::MatrixXd residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
 
             // Only compute row k-2 of matrix Qj for efficiency
-            Eigen::MatrixXd qj ( 1, solStages.cols() );
+            Eigen::MatrixXd qj( 1, solStages.cols() );
 
             int ii = k - 2, jj, kk;
-            for( jj = 0; jj < F.cols(); ++jj )
+
+            for ( jj = 0; jj < F.cols(); ++jj )
             {
                 qj( 0, jj ) = 0;
-                for( kk = 0; kk < F.rows(); ++kk )
+
+                for ( kk = 0; kk < F.rows(); ++kk )
                     qj( 0, jj ) += qmat( ii, kk ) * F( kk, jj );
+
                 qj( 0, jj ) *= dt;
             }
 
