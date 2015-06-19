@@ -54,6 +54,7 @@ private:
         // 2d corrector
         twoDPointCorrectorRBF twoDCorrector;
         int nbPoints;
+        bool faceCellCenters;
 
 public:
 
