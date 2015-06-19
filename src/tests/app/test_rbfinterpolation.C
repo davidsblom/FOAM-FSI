@@ -110,7 +110,7 @@ TEST_P( RBFInterpolationParametrizedTest, rbf1d_regularity )
 
     for ( int i = 0; i < ynew.rows(); i++ )
         ASSERT_NEAR( ynew( i, 0 ), std::sin( xnew( i, 0 ) ), 1.0e-1 );
-    
+
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
             ASSERT_NEAR( ynew( i, j ), ynew2( i, j ), 1.0e-11 );
