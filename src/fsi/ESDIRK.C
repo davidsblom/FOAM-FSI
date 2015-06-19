@@ -200,7 +200,7 @@ namespace sdc
         Eigen::MatrixXd solStages( nbStages, N ), F( nbStages, N );
         F.setZero();
 
-        Eigen::VectorXd sol( N ), f( N ), qold( N );
+        Eigen::VectorXd sol( N ), f( N ), qold( N ), result( N ), rhs( N );
         solver->getSolution( sol );
         solStages.row( 0 ) = sol;
 
@@ -222,10 +222,7 @@ namespace sdc
 
             Info << "\nTime = " << t << ", ESDIRK stage = " << j + 1 << "/" << nbStages << nl << endl;
 
-            Eigen::VectorXd rhs( N ), result( N );
-            f.setZero();
             rhs.setZero();
-            result.setZero();
 
             // Calculate sum of the stage residuals
             for ( int iStage = 0; iStage < j; iStage++ )
