@@ -32,7 +32,7 @@ namespace sdc
         assert( dt > 0 );
         assert( tol > 0 );
         assert( tol < 1 );
-        assert( rule == "gauss-radau" || rule == "gauss-lobatto" );
+        assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" );
 
         quadrature::rules( rule, nbNodes, nodes, smat, qmat );
 
