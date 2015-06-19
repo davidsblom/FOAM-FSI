@@ -135,8 +135,8 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
     assert( rbfFunction );
 
-    bool polynomialTerm = lookupOrDefault( "polynomial", false );
-    bool cpu = lookupOrDefault( "cpu", false );
+    bool polynomialTerm = dict.lookupOrDefault( "polynomial", false );
+    bool cpu = dict.lookupOrDefault( "cpu", false );
     std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
 
     bool coarsening = readBool( subDict( "coarsening" ).lookup( "enabled" ) );
@@ -172,6 +172,15 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     }
 
     rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, ratioRadiusError, exportSelectedPoints ) );
+
+    Info << "RBF mesh deformation settings:" << endl;
+    Info << "    interpolation function = " << function << endl;
+    Info << "    interpolation polynomial term = " << polynomialTerm << endl;
+    Info << "    interpolation cpu formulation = " << cpu << endl;
+    Info << "    coarsening = " << coarsening << endl;
+    Info << "        coarsening tolerance = " << tol << endl;
+    Info << "        coarsening reselection tolerance = " << tolLivePointSelection << endl;
+    Info << "        coarsening two-point selection = " << twoPointSelection << endl;
 }
 
 RBFMeshMotionSolver::~RBFMeshMotionSolver()

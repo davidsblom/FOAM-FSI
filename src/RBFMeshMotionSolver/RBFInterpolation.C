@@ -232,12 +232,13 @@ namespace rbf
             std::shared_ptr<TPSFunction> function;
             function = std::dynamic_pointer_cast<TPSFunction>( rbfFunction );
 
-            matrix B;
-
-            matrix valuesLU( n_A, values.cols() );
+            matrix B, valuesLU( n_A, values.cols() ), Phi( n_B, n_A );
 
             if ( polynomialTerm )
+            {
+                Phi.resize( n_B, n_A + dimGrid + 1 );
                 valuesLU.resize( n_A + dimGrid + 1, values.cols() );
+            }
 
             valuesLU.setZero();
             valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
@@ -250,11 +251,7 @@ namespace rbf
             else
                 B = llt.solve( valuesLU );
 
-            // Evaluate Phi_BA which contains the evaluation of the radial basis function
-            // This method is only used by the greedy algorithm, and the matrix Phi
-            // is therefore enlarged at every greedy step.
-
-            buildPhi( positions, positionsInterpolation );
+            evaluatePhi( positions, positionsInterpolation, Phi );
 
             if ( polynomialTerm )
             {

@@ -248,10 +248,6 @@ namespace rbf
 
             // Create RBF interpolator
 
-            // Initialize the matrix Phi if more than 1 positions have been selected
-            // before the greedening algorithm starts
-            rbfCoarse->Phi.resize( 0, 0 );
-
             // Run the greedy algorithm
             double runTimeInterpolate = 0.0;
             double runTimeError = 0.0;
