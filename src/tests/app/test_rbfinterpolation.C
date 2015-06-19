@@ -13,14 +13,18 @@
 #include "gtest/gtest.h"
 
 using namespace rbf;
+using::testing::TestWithParam;
+using::testing::Bool;
+using::testing::Values;
+using::testing::Combine;
 
-class RBFInterpolationParametrizedTest : public::testing::TestWithParam<int>
+class RBFInterpolationParametrizedTest : public TestWithParam < std::tr1::tuple<int, bool, bool> >
 {
 protected:
 
     virtual void SetUp()
     {
-        int rbfFunctionId = GetParam();
+        int rbfFunctionId = std::tr1::get<0>( GetParam() );
 
         std::shared_ptr<RBFFunctionInterface> rbfFunction;
 
@@ -46,7 +50,9 @@ protected:
         else
             assert( false );
 
-        rbf = std::shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+        bool polynomialTerm = std::tr1::get<1>( GetParam() );
+        bool cpu = std::tr1::get<2>( GetParam() );
+        rbf = std::shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
     }
 
     virtual void TearDown()
@@ -57,7 +63,7 @@ protected:
     std::shared_ptr<RBFInterpolation> rbf;
 };
 
-INSTANTIATE_TEST_CASE_P( RBFTest, RBFInterpolationParametrizedTest, ::testing::Values( 0, 1, 2, 3, 4 ) );
+INSTANTIATE_TEST_CASE_P( RBFTest, RBFInterpolationParametrizedTest, ::testing::Combine( Values( 0, 1, 2, 3, 4 ), Bool(), Bool() ) );
 
 TEST_P( RBFInterpolationParametrizedTest, rbf3d_directly_interpolate )
 {

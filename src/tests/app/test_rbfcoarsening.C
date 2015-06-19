@@ -51,7 +51,9 @@ protected:
         else
             assert( false );
 
-        std::shared_ptr<RBFInterpolation> rbfInterpolator( new RBFInterpolation( rbfFunction ) );
+        bool polynomialTerm = false;
+        bool cpu = false;
+        std::shared_ptr<RBFInterpolation> rbfInterpolator( new RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
 
         bool enabled = std::tr1::get<0>( GetParam() );
         double tol = 1.0e-6;

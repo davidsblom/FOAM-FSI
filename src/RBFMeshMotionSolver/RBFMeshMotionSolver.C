@@ -135,7 +135,9 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
     assert( rbfFunction );
 
-    std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( rbfFunction ) );
+    bool polynomialTerm = lookupOrDefault( "polynomial", false );
+    bool cpu = lookupOrDefault( "cpu", false );
+    std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
 
     bool coarsening = readBool( subDict( "coarsening" ).lookup( "enabled" ) );
     double tol = 0.1;
@@ -144,6 +146,9 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     bool exportSelectedPoints = false;
     int coarseningMinPoints = 1;
     int coarseningMaxPoints = 2;
+    bool twoPointSelection = false;
+    bool surfaceCorrection = false;
+    double ratioRadiusError = 10.0;
 
     if ( coarsening )
     {
@@ -152,12 +157,21 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         coarseningMaxPoints = readLabel( subDict( "coarsening" ).lookup( "maxPoints" ) );
         livePointSelection = readBool( subDict( "coarsening" ).lookup( "livePointSelection" ) );
         exportSelectedPoints = readBool( subDict( "coarsening" ).lookup( "exportSelectedPoints" ) );
+        twoPointSelection = subDict( "coarsening" ).lookupOrDefault( "twoPointSelection", false );
     }
 
     if ( livePointSelection )
+    {
         tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
+        surfaceCorrection = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrection", false );
 
-    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, exportSelectedPoints ) );
+        if ( surfaceCorrection )
+        {
+            ratioRadiusError = subDict( "coarsening" ).lookupOrDefault( "ratioRadiusError", 10.0 );
+        }
+    }
+
+    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, ratioRadiusError, exportSelectedPoints ) );
 }
 
 RBFMeshMotionSolver::~RBFMeshMotionSolver()
