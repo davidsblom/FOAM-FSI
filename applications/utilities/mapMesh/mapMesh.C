@@ -92,16 +92,18 @@ int main(
 
     // Settings coarsening;
     bool enabled = true;
-    bool livePointSelection = false;
+    bool livePointSelection = true;
     bool livePointSelectionSumValues = false;
     double tol = 1.0e-4;
     double tolLivePointSelection = 1.0e-4;
     int coarseningMinPoints = 5;
     int coarseningMaxPoints = 500;
     bool exportTxt = false;
+    bool polynomialTerm = false;
+    bool cpu = true;
 
     std::shared_ptr<TPSFunction> tpsFunction( new TPSFunction() );
-    std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( tpsFunction ) );
+    std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( tpsFunction, polynomialTerm, cpu ) );
     std::shared_ptr<rbf::RBFCoarsening> rbfSolidToFluidInterface( new rbf::RBFCoarsening( rbfInterpolator, enabled, livePointSelection, livePointSelectionSumValues, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, exportTxt ) );
 
     Eigen::MatrixXd positions, positionsInterpolation, values, valuesInterpolation;
