@@ -21,6 +21,7 @@
 #include <memory>
 #include <assert.h>
 
+
 namespace Foam
 {
     class RBFMeshMotionSolver : public motionSolver
@@ -50,6 +51,8 @@ private:
         labelList nbGlobalMovingFaceCenters;
         labelList nbGlobalStaticFaceCenters;
         labelList nbGlobalFixedFaceCenters;
+
+        List<labelList> globalMovingPointsLabelList;
 
         // 2d corrector
         twoDPointCorrectorRBF twoDCorrector;
