@@ -151,33 +151,39 @@ SDCFluidSolver::SDCFluidSolver(
     phiStages(),
     UStages(),
     UfStages(),
+    UFHeader
+    (
+    "UF",
+    runTime->timeName(),
+    mesh,
+    IOobject::READ_IF_PRESENT,
+    IOobject::AUTO_WRITE
+    ),
+    phiFHeader
+    (
+    "phiF",
+    runTime->timeName(),
+    mesh,
+    IOobject::READ_IF_PRESENT,
+    IOobject::AUTO_WRITE
+    ),
     UF
     (
-    IOobject
-    (
-        "UF",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    ),
+    UFHeader,
     mesh,
     dimensionedVector( "UF", dimVelocity / dimTime, Foam::vector::zero )
     ),
     phiF
     (
-    IOobject
-    (
-        "phiF",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    ),
+    phiFHeader,
     fvc::interpolate( UF ) & mesh.Sf()
     ),
-    turbulenceSwitch( true )
+    turbulenceSwitch( true ),
+    explicitFirstStage( false )
 {
+    if ( UFHeader.headerOk() && phiFHeader.headerOk() )
+        explicitFirstStage = true;
+
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
     scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
@@ -511,10 +517,11 @@ void SDCFluidSolver::evaluateFunction(
     Eigen::VectorXd & f
     )
 {
-    if ( timeIndex == 1 && k == 0 )
+    if ( explicitFirstStage )
     {
         UF = -fvc::div( phi, U ) - fvc::grad( p ) + fvc::laplacian( nu, U );
         phiF = fvc::interpolate( UF ) & mesh.Sf();
+        explicitFirstStage = false;
     }
 
     int index = 0;
