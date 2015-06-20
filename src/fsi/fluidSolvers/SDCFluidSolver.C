@@ -179,10 +179,10 @@ SDCFluidSolver::SDCFluidSolver(
     fvc::interpolate( UF ) & mesh.Sf()
     ),
     turbulenceSwitch( true ),
-    explicitFirstStage( false )
+    explicitFirstStage( true )
 {
     if ( UFHeader.headerOk() && phiFHeader.headerOk() )
-        explicitFirstStage = true;
+        explicitFirstStage = false;
 
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
