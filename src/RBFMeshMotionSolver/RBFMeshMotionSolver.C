@@ -370,10 +370,10 @@ void RBFMeshMotionSolver::solve()
 
         if ( not faceCellCenters )
         {
-            forAll( movingPatchIDs, i )
+            forAll( movingPatchIDs, patchI )
             {
-                const labelList & meshPoints = mesh().boundaryMesh()[movingPatchIDs[i]].meshPoints();
-                globalMovingPointsLabelList[movingPatchIDs[i]] = labelList( meshPoints.size(), 0 );
+                const labelList & meshPoints = mesh().boundaryMesh()[movingPatchIDs[patchI]].meshPoints();
+                globalMovingPointsLabelList[movingPatchIDs[patchI]] = labelList( meshPoints.size(), 0 );
 
                 forAll( meshPoints, j )
                 {
@@ -397,9 +397,9 @@ void RBFMeshMotionSolver::solve()
                             if ( it == movingControlPointLabels.end() || movingControlPointLabels.size() == 0 )
                             {
                                 movingControlPointLabels.push_back( meshPoints[j] );
-                                movingControlPointPatchIds.push_back( i );
+                                movingControlPointPatchIds.push_back( movingPatchIDs[patchI] );
                                 movingControlPointIndices.push_back( j );
-                                globalMovingPointsLabelList[movingPatchIDs[i]][j] = 1;
+                                globalMovingPointsLabelList[movingPatchIDs[patchI]][j] = 1;
                             }
                         }
                     }
@@ -431,7 +431,6 @@ void RBFMeshMotionSolver::solve()
             );
 
             assert( addrHeader.headerOk() );
-
             labelIOList pointProcAddressing( addrHeader );
 
             assert( pointProcAddressing.size() == mesh().points().size() );
@@ -504,7 +503,6 @@ void RBFMeshMotionSolver::solve()
             globalFixedPointsListEnabled = 0;
             globalMovingPointsListEnabled.resize( nbMovingFaceCenters );
             globalMovingPointsListEnabled = 0;
-
             forAll( globalStaticPointsList, i )
             {
                 // Only add the static vertex point if it's not already added to the list
@@ -540,6 +538,12 @@ void RBFMeshMotionSolver::solve()
 
             if ( not faceCellCenters )
             {
+                forAll( movingPatchIDs, patchI )
+                {
+                    const labelList & meshPoints = mesh().boundaryMesh()[movingPatchIDs[patchI]].meshPoints();
+                    globalMovingPointsLabelList[movingPatchIDs[patchI]] = labelList( meshPoints.size(), 0 );
+                }
+
                 forAll( globalMovingPointsList, i )
                 {
                     // Only add the static vertex point if it's not already added to the list
@@ -561,7 +565,7 @@ void RBFMeshMotionSolver::solve()
                                 globalMovingPointsListEnabled[i] = 1;
 
                                 if ( i < movingControlPointLabels.size() + globalMovingOffsetNonUnique
-                                && i >= globalMovingOffsetNonUnique )
+                                    && i >= globalMovingOffsetNonUnique )
                                 {
                                     label patchId = globalMovingPointsPatchIds[i];
                                     label index = globalMovingPointsIndices[i];
