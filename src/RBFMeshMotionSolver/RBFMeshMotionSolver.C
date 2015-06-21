@@ -287,6 +287,8 @@ void RBFMeshMotionSolver::solve()
     std::vector<int> fixedControlPointLabels;
     std::vector<int> fixedControlGlobalPointLabels;
     std::vector<int> movingControlPointLabels;
+    std::vector<int> movingControlPointPatchIds;
+    std::vector<int> movingControlPointIndices;
     std::vector<int> movingControlGlobalPointLabels;
 
     labelList globalStaticPointsListEnabled( nbStaticFaceCenters, 0 );
@@ -395,6 +397,8 @@ void RBFMeshMotionSolver::solve()
                             if ( it == movingControlPointLabels.end() || movingControlPointLabels.size() == 0 )
                             {
                                 movingControlPointLabels.push_back( meshPoints[j] );
+                                movingControlPointPatchIds.push_back( i );
+                                movingControlPointIndices.push_back( j );
                                 globalMovingPointsLabelList[movingPatchIDs[i]][j] = 1;
                             }
                         }
@@ -450,6 +454,8 @@ void RBFMeshMotionSolver::solve()
             labelList globalStaticPointsList( nbStaticFaceCenters, 0 );
             labelList globalFixedPointsList( nbFixedFaceCenters, 0 );
             labelList globalMovingPointsList( nbMovingFaceCenters, 0 );
+            labelList globalMovingPointsPatchIds( nbMovingFaceCenters, 0 );
+            labelList globalMovingPointsIndices( nbMovingFaceCenters, 0 );
 
             globalStaticOffsetNonUnique = 0;
 
@@ -479,11 +485,15 @@ void RBFMeshMotionSolver::solve()
             for ( unsigned int i = 0; i < movingControlPointLabels.size(); i++ )
             {
                 globalMovingPointsList[i + globalMovingOffsetNonUnique] = pointProcAddressing[movingControlPointLabels[i]];
+                globalMovingPointsPatchIds[i + globalMovingOffsetNonUnique] = movingControlPointPatchIds[i];
+                globalMovingPointsIndices[i + globalMovingOffsetNonUnique] = movingControlPointIndices[i];
             }
 
             reduce( globalStaticPointsList, sumOp<labelList>() );
             reduce( globalFixedPointsList, sumOp<labelList>() );
             reduce( globalMovingPointsList, sumOp<labelList>() );
+            reduce( globalMovingPointsPatchIds, sumOp<labelList>() );
+            reduce( globalMovingPointsIndices, sumOp<labelList>() );
 
             // Construct a list of static control points which indicate whether
             // should be included or not.
@@ -530,36 +540,32 @@ void RBFMeshMotionSolver::solve()
 
             if ( not faceCellCenters )
             {
-                forAll( movingPatchIDs, patchI )
+                forAll( globalMovingPointsList, i )
                 {
-                    const labelList & meshPoints = mesh().boundaryMesh()[movingPatchIDs[patchI]].meshPoints();
-                    globalMovingPointsLabelList[movingPatchIDs[patchI]] = labelList( meshPoints.size(), 0 );
+                    // Only add the static vertex point if it's not already added to the list
+                    std::vector<int>::iterator it;
 
-                    forAll( meshPoints, j )
+                    it = std::find( staticControlGlobalPointLabels.begin(), staticControlGlobalPointLabels.end(), globalMovingPointsList[i] );
+
+                    if ( it == staticControlGlobalPointLabels.end() || staticControlGlobalPointLabels.size() == 0 )
                     {
-                        if ( twoDCorrector.marker()[meshPoints[j]] != 0 )
-                            continue;
+                        it = std::find( fixedControlGlobalPointLabels.begin(), fixedControlGlobalPointLabels.end(), globalMovingPointsList[i] );
 
-                        label globalPoint = pointProcAddressing[meshPoints[j]];
-
-                        // Only add the static vertex point if it's not already added to the list
-                        std::vector<int>::iterator it;
-
-                        it = std::find( staticControlGlobalPointLabels.begin(), staticControlGlobalPointLabels.end(), globalPoint );
-
-                        if ( it == staticControlGlobalPointLabels.end() || staticControlGlobalPointLabels.size() == 0 )
+                        if ( it == fixedControlGlobalPointLabels.end() || fixedControlGlobalPointLabels.size() == 0 )
                         {
-                            it = std::find( fixedControlGlobalPointLabels.begin(), fixedControlGlobalPointLabels.end(), globalPoint );
+                            it = std::find( movingControlGlobalPointLabels.begin(), movingControlGlobalPointLabels.end(), globalMovingPointsList[i] );
 
-                            if ( it == fixedControlGlobalPointLabels.end() || fixedControlGlobalPointLabels.size() == 0 )
+                            if ( it == movingControlGlobalPointLabels.end() || movingControlGlobalPointLabels.size() == 0 )
                             {
-                                it = std::find( movingControlGlobalPointLabels.begin(), movingControlGlobalPointLabels.end(), globalPoint );
+                                movingControlGlobalPointLabels.push_back( globalMovingPointsList[i] );
+                                globalMovingPointsListEnabled[i] = 1;
 
-                                if ( it == movingControlGlobalPointLabels.end() || movingControlGlobalPointLabels.size() == 0 )
+                                if ( i < movingControlPointLabels.size() + globalMovingOffsetNonUnique
+                                && i >= globalMovingOffsetNonUnique )
                                 {
-                                    movingControlGlobalPointLabels.push_back( globalPoint );
-                                    globalMovingPointsListEnabled[meshPoints[j]] = 1;
-                                    globalMovingPointsLabelList[movingPatchIDs[patchI]][j] = 1;
+                                    label patchId = globalMovingPointsPatchIds[i];
+                                    label index = globalMovingPointsIndices[i];
+                                    globalMovingPointsLabelList[patchId][index] = 1;
                                 }
                             }
                         }
