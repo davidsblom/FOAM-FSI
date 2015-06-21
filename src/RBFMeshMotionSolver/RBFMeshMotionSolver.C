@@ -35,7 +35,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     nbGlobalMovingFaceCenters( Pstream::nProcs(), 0 ),
     nbGlobalStaticFaceCenters( Pstream::nProcs(), 0 ),
     nbGlobalFixedFaceCenters( Pstream::nProcs(), 0 ),
-    globalMovingPointsLabelList( movingPatches.size(), labelList( 0 ) ),
+    globalMovingPointsLabelList( mesh.boundaryMesh().size(), labelList( 0 ) ),
     twoDCorrector( mesh ),
     nbPoints( 0 ),
     faceCellCenters( false )
@@ -312,6 +312,9 @@ void RBFMeshMotionSolver::solve()
 
             forAll( meshPoints, j )
             {
+                if ( twoDCorrector.marker()[meshPoints[j]] != 0 )
+                    continue;
+
                 // Only add the static vertex point if it's not already added to the list
                 std::vector<int>::iterator it;
 
@@ -332,6 +335,9 @@ void RBFMeshMotionSolver::solve()
 
             forAll( meshPoints, j )
             {
+                if ( twoDCorrector.marker()[meshPoints[j]] != 0 )
+                    continue;
+
                 // Only add the static vertex point if it's not already added to the list
                 // and if it's not a static point
                 std::vector<int>::iterator it;
@@ -369,6 +375,9 @@ void RBFMeshMotionSolver::solve()
 
                 forAll( meshPoints, j )
                 {
+                    if ( twoDCorrector.marker()[meshPoints[j]] != 0 )
+                        continue;
+
                     // Only add the static vertex point if it's not already added to the list
                     // and if it's not a static point
                     std::vector<int>::iterator it;
@@ -528,6 +537,9 @@ void RBFMeshMotionSolver::solve()
 
                     forAll( meshPoints, j )
                     {
+                        if ( twoDCorrector.marker()[meshPoints[j]] != 0 )
+                            continue;
+
                         label globalPoint = pointProcAddressing[meshPoints[j]];
 
                         // Only add the static vertex point if it's not already added to the list
