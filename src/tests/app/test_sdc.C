@@ -49,7 +49,7 @@ protected:
     std::shared_ptr<SDC> sdc;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, SDCTest, ::testing::Combine( Values( 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ), Values( 10, 20, 40, 80, 100, 160 ), Values( "gauss-radau", "gauss-lobatto" ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, SDCTest, ::testing::Combine( Values( 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ), Values( 10, 20, 40, 80, 100, 160 ), Values( "gauss-radau", "gauss-lobatto", "clenshaw-curtis", "uniform" ) ) );
 
 TEST_P( SDCTest, object )
 {
