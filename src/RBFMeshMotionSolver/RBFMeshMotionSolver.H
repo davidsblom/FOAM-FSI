@@ -57,6 +57,8 @@ private:
         twoDPointCorrectorRBF twoDCorrector;
         int nbPoints;
 
+        scalar getMaxWallDistance();
+
 public:
 
         // Runtime type information

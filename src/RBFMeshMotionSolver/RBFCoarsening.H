@@ -44,6 +44,7 @@ public:
             bool twoPointSelection,
             bool surfaceCorrection,
             double ratioRadiusError,
+            double maxWallDistance,
             bool exportTxt
             );
 
@@ -79,6 +80,7 @@ public:
         bool polynomialTerm;
         bool surfaceCorrection;
         double ratioRadiusError;
+        double maxWallDistance;
         bool exportTxt;
         Eigen::VectorXi selectedPositions;
         int nbStaticFaceCentersRemove;
