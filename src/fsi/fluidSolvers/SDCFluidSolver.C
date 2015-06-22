@@ -360,20 +360,10 @@ void SDCFluidSolver::initialize()
 }
 
 void SDCFluidSolver::initTimeStep()
-{
-    assert( !init );
-
-    init = true;
-}
+{}
 
 bool SDCFluidSolver::isRunning()
 {
-    runTime->write();
-
-    Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
-         << "  ClockTime = " << runTime->elapsedClockTime() << " s"
-         << endl << endl;
-
     return runTime->run();
 }
 
@@ -401,8 +391,8 @@ void SDCFluidSolver::setNumberOfStages( int k )
 
 void SDCFluidSolver::nextTimeStep()
 {
-    (*runTime)++;
     timeIndex++;
+    (*runTime)++;
 
     if ( pStages.size() == static_cast<unsigned>(k) )
     {
@@ -422,7 +412,7 @@ void SDCFluidSolver::solve()
 
 void SDCFluidSolver::finalizeTimeStep()
 {
-    foamFluidSolver::finalizeTimeStep();
+    runTime->writeNow();
 }
 
 int SDCFluidSolver::getDOF()
@@ -626,9 +616,8 @@ void SDCFluidSolver::implicitSolve(
     )
 {
     bool convergence = false;
-    runTime->setDeltaT( dt );
-
     double told = runTime->value();
+    runTime->setDeltaT( dt );
     runTime->setTime( t, runTime->timeIndex() );
 
     if ( corrector )
@@ -893,8 +882,6 @@ void SDCFluidSolver::implicitSolve(
 
     getSolution( result );
     evaluateFunction( k + 1, qold, t, f );
-
-    runTime->setTime( told, runTime->timeIndex() );
 }
 
 double SDCFluidSolver::getScalingFactor()

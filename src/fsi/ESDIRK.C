@@ -215,7 +215,7 @@ namespace sdc
 
     void ESDIRK::solveTimeStep( const double t0 )
     {
-        if ( adaptiveTimeStepper->isAccepted() )
+        if ( adaptiveTimeStepper->isPreviousStepAccepted() )
             solver->nextTimeStep();
 
         Eigen::MatrixXd solStages( nbStages, N ), F( nbStages, N );
@@ -234,6 +234,8 @@ namespace sdc
 
         // Loop over the stages
 
+        solver->initTimeStep();
+
         for ( int j = 0; j < nbStages; j++ )
         {
             if ( !isStageImplicit( A( j, j ) ) )
@@ -251,15 +253,11 @@ namespace sdc
 
             rhs.array() *= dt;
 
-            solver->initTimeStep();
             solver->implicitSolve( false, j, t, A( j, j ) * dt, qold, rhs, f, result );
-            solver->finalizeTimeStep();
 
             solStages.row( j ) = result;
             F.row( j ) = f;
         }
-
-        solver->setDeltaT( dt );
 
         if ( adaptiveTimeStepper->isEnabled() )
         {
@@ -297,5 +295,8 @@ namespace sdc
             if ( not accepted )
                 solver->setSolution( solStages.row( 0 ) );
         }
+
+        if ( adaptiveTimeStepper->isAccepted() )
+            solver->finalizeTimeStep();
     }
 }

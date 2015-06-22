@@ -130,6 +130,11 @@ bool AdaptiveTimeStepper::isEnabled()
     return enabled;
 }
 
+bool AdaptiveTimeStepper::isPreviousStepAccepted()
+{
+    return not previousTimeStepRejected;
+}
+
 double AdaptiveTimeStepper::limit( const double u )
 {
     double kappa = 1;

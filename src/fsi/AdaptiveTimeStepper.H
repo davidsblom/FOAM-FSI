@@ -54,6 +54,8 @@ public:
 
         bool isEnabled();
 
+        bool isPreviousStepAccepted();
+
         double limit( const double u );
 
         double pi42(
