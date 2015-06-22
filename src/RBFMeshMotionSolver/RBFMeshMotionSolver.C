@@ -143,6 +143,9 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     this->cpu = dict.lookupOrDefault( "fullCPU", false );
     std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
 
+    if ( this->cpu == true )
+        assert( cpu == true );
+
     bool coarsening = readBool( subDict( "coarsening" ).lookup( "enabled" ) );
     double tol = 0.1;
     double tolLivePointSelection = 0.1;
