@@ -25,6 +25,7 @@ EXE_INC = -std=c++11 \
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    -L../../../src/thirdParty/yaml-cpp/build/ \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
@@ -45,4 +46,5 @@ EXE_LIBS = \
     -ltetFiniteElement \
     -lbasicThermophysicalModels \
     -lspecie \
-    -lcompressibleRASModels
+    -lcompressibleRASModels \
+    -lyaml-cpp

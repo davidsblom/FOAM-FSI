@@ -32,7 +32,7 @@
 #include "SolidSolver.H"
 #include "SpaceMappingSolver.H"
 #include "CompressibleFluidSolver.H"
-#include "TPS.H"
+#include "TPSFunction.H"
 #include "WendlandC0Function.H"
 #include "WendlandC2Function.H"
 #include "WendlandC4Function.H"
