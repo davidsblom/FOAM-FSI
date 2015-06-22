@@ -21,7 +21,6 @@
 #include <memory>
 #include <assert.h>
 
-
 namespace Foam
 {
     class RBFMeshMotionSolver : public motionSolver
@@ -58,6 +57,7 @@ private:
         twoDPointCorrectorRBF twoDCorrector;
         int nbPoints;
         bool faceCellCenters;
+        bool cpu;
 
 public:
 

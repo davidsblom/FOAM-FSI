@@ -217,6 +217,9 @@ namespace rbf
         matrix & valuesInterpolation
         )
     {
+        if ( cpu && not computed )
+            compute( positions, positionsInterpolation );
+
         assert( computed );
 
         std::clock_t t = std::clock();

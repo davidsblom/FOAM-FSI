@@ -175,6 +175,7 @@ int main(
 
     if ( fluidSolver == "pimple-solver" )
         fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+
     /*
      * 1. Interpolate displacement from solid interface to fluid interface
      * 2. Mesh deformation fluid mesh
