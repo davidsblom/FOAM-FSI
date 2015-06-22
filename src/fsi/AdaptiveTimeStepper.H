@@ -14,6 +14,7 @@
 #include <memory>
 #include <assert.h>
 #include <math.h>
+#include "fvCFD.H"
 
 namespace sdc
 {
@@ -22,6 +23,7 @@ namespace sdc
 public:
 
         AdaptiveTimeStepper(
+            bool enabled,
             std::string filter,
             double tol,
             int k
@@ -55,12 +57,14 @@ public:
             const double rho
             );
 
+        bool enabled;
         std::string filter;
         double tol;
         int k;
         double cerrold;
         double rhoold;
         int timeStepIndex;
+        bool accepted;
     };
 }
 

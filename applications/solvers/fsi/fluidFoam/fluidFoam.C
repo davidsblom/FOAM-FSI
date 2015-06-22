@@ -14,6 +14,7 @@
 #include "SDC.H"
 #include "SDCLaplacianSolver.H"
 #include "ESDIRK.H"
+#include "AdaptiveTimeStepper.H"
 
 int main(
     int argc,
@@ -87,9 +88,13 @@ int main(
         std::string method = esdirkConfig["method"].as<std::string>();
 
         std::shared_ptr<sdc::SDCSolver> solver;
+        std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
+
         solver = std::shared_ptr<sdc::SDCSolver>( new SDCFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
-        esdirk = std::shared_ptr<sdc::ESDIRK>( new sdc::ESDIRK( solver, method ) );
+        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false, "h211b", 1.0e-3, 5 ) );
+
+        esdirk = std::shared_ptr<sdc::ESDIRK>( new sdc::ESDIRK( solver, method, adaptiveTimeStepper ) );
     }
 
     assert( fluid || sdc || esdirk );

@@ -489,7 +489,7 @@ void SDCFluidSolver::getSolution( Eigen::VectorXd & solution )
 
     forAll( phi.internalField(), i )
     {
-        solution( index ) = phi[i];
+        solution( index ) = phi.internalField()[i];
         index++;
     }
 
@@ -503,6 +503,54 @@ void SDCFluidSolver::getSolution( Eigen::VectorXd & solution )
     }
 
     assert( index == solution.rows() );
+}
+
+void SDCFluidSolver::setSolution( const Eigen::VectorXd & solution )
+{
+    int index = 0;
+
+    forAll( U.internalField(), i )
+    {
+        for ( int j = 0; j < 3; j++ )
+        {
+            U.internalField()[i][j] = solution( index );
+            index++;
+        }
+    }
+
+    forAll( U.boundaryField(), patchI )
+    {
+        forAll( U.boundaryField()[patchI], i )
+        {
+            for ( int j = 0; j < 3; j++ )
+            {
+                U.boundaryField()[patchI][i][j] = solution( index );
+                index++;
+            }
+        }
+    }
+
+    forAll( phi.internalField(), i )
+    {
+        phi.internalField()[i] = solution( index );
+        index++;
+    }
+
+    forAll( phi.boundaryField(), patchI )
+    {
+        forAll( phi.boundaryField()[patchI], i )
+        {
+            phi.boundaryField()[patchI][i] = solution( index );
+            index++;
+        }
+    }
+
+    assert( index == solution.rows() );
+}
+
+double SDCFluidSolver::getEndTime()
+{
+    return runTime->endTime().value() - runTime->startTime().value();
 }
 
 double SDCFluidSolver::getTimeStep()

@@ -10,30 +10,39 @@ namespace sdc
 {
     ESDIRK::ESDIRK(
         std::shared_ptr<SDCSolver> solver,
-        std::string method
+        std::string method,
+        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper
         )
         :
         solver( solver ),
+        adaptiveTimeStepper( adaptiveTimeStepper ),
         dt( solver->getTimeStep() ),
         nbStages( 0 ),
         A(),
         B(),
         C(),
+        Bhat(),
         N( solver->getDOF() )
     {
         assert( method == "SDIRK2" || method == "SDIRK3" || method == "SDIRK4" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK5" );
         assert( solver );
+        assert( adaptiveTimeStepper );
         assert( dt > 0 );
 
         // source: Ellsiepen. Habilitation thesis Philipp Birken
         if ( method == "SDIRK2" )
         {
             double alpha = 1.0 - 0.5 * std::sqrt( 2 );
+            double alphahat = 2.0 - 5.0 / 4.0 * std::sqrt( 2 );
             A.resize( 2, 2 );
             A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
             A( 0, 0 ) = alpha;
             A( 1, 0 ) = 1.0 - alpha;
             A( 1, 1 ) = alpha;
+            Bhat( 0 ) = 1 - alphahat;
+            Bhat( 1 ) = alphahat;
         }
 
         // source: Cash. Habilitation thesis Philipp Birken
@@ -41,16 +50,23 @@ namespace sdc
         {
             A.resize( 3, 3 );
             A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
             double alpha = 1.2084966491760101;
             double beta = -0.6443631706844691;
             double gamma = 0.4358665215084580;
             double delta = 0.7179332607542295;
+            double alphahat = 0.7726301276675511;
+            double betahat = 0.2273698723324489;
             A( 0, 0 ) = gamma;
             A( 1, 0 ) = delta - gamma;
             A( 1, 1 ) = gamma;
             A( 2, 0 ) = alpha;
             A( 2, 1 ) = beta;
             A( 2, 2 ) = gamma;
+            Bhat( 0 ) = alphahat;
+            Bhat( 1 ) = betahat;
+            Bhat( 2 ) = 0;
         }
 
         // source: Cash-5-3-4 http://runge.math.smu.edu/arkode_dev/doc/guide/build/html/Butcher.html
@@ -184,18 +200,23 @@ namespace sdc
 
     void ESDIRK::run()
     {
-        int i = 0;
+        double t = 0;
 
         while ( solver->isRunning() )
         {
-            solveTimeStep( dt * i );
-            i++;
+            double computedTimeStep = dt;
+
+            solveTimeStep( t );
+
+            if ( adaptiveTimeStepper->accepted )
+                t += computedTimeStep;
         }
     }
 
     void ESDIRK::solveTimeStep( const double t0 )
     {
-        solver->nextTimeStep();
+        if ( adaptiveTimeStepper->accepted )
+            solver->nextTimeStep();
 
         Eigen::MatrixXd solStages( nbStages, N ), F( nbStages, N );
         F.setZero();
@@ -239,5 +260,41 @@ namespace sdc
         }
 
         solver->setDeltaT( dt );
+
+        if ( adaptiveTimeStepper->enabled )
+        {
+            double newTimeStep = 0;
+            Eigen::VectorXd errorEstimate( N );
+
+            for ( int iStage = 0; iStage < nbStages; iStage++ )
+                errorEstimate += ( B( iStage ) - Bhat( iStage ) ) * F.row( iStage );
+
+            errorEstimate *= dt;
+
+            scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
+            squaredNorm[Pstream::myProcNo()] = errorEstimate.squaredNorm();
+            reduce( squaredNorm, sumOp<scalarList>() );
+            double error = std::sqrt( sum( squaredNorm ) );
+
+            squaredNorm = 0;
+            squaredNorm[Pstream::myProcNo()] = result.squaredNorm();
+            reduce( squaredNorm, sumOp<scalarList>() );
+            error /= std::sqrt( sum( squaredNorm ) );
+
+            bool accepted = adaptiveTimeStepper->determineNewTimeStep( error, dt, newTimeStep );
+
+            if ( accepted )
+            {
+                double t = t0 + dt + newTimeStep;
+
+                if ( t > solver->getEndTime() )
+                    newTimeStep = solver->getEndTime() - t0 - dt;
+            }
+
+            dt = newTimeStep;
+
+            if ( not accepted )
+                solver->setSolution( solStages.row( 0 ) );
+        }
     }
 }

@@ -74,6 +74,10 @@ public:
 
     virtual void getSolution( Eigen::VectorXd & solution );
 
+    virtual void setSolution( const Eigen::VectorXd & solution );
+
+    virtual double getEndTime();
+
     virtual double getScalingFactor();
 
     virtual double getTimeStep();

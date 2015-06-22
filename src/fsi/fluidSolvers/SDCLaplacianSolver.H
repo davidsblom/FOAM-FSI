@@ -46,6 +46,10 @@ public:
 
     virtual void getSolution( Eigen::VectorXd & solution );
 
+    virtual void setSolution( const Eigen::VectorXd & solution );
+
+    virtual double getEndTime();
+
     virtual double getTimeStep();
 
     virtual void nextTimeStep();

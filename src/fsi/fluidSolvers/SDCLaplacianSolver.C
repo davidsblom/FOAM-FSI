@@ -122,6 +122,17 @@ void SDCLaplacianSolver::getSolution( Eigen::VectorXd & solution )
         solution( i ) = T[i];
 }
 
+void SDCLaplacianSolver::setSolution( const Eigen::VectorXd & solution )
+{
+    for ( int i = 0; i < T.size(); i++ )
+        T[i] = solution( i );
+}
+
+double SDCLaplacianSolver::getEndTime()
+{
+    return runTime->endTime().value() - runTime->startTime().value();
+}
+
 double SDCLaplacianSolver::getTimeStep()
 {
     return runTime->deltaT().value();
