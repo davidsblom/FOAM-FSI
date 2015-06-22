@@ -1,9 +1,11 @@
 
 #include <iostream>
 #include <memory>
+#include <yaml-cpp/yaml.h>
 #include "fvCFD.H"
 #include "SolidSolver.H"
 #include "CoupledFluidSolver.H"
+#include "FluidSolver.H"
 #include "RBFInterpolation.H"
 #include "RBFCoarsening.H"
 #include "TPSFunction.H"
@@ -81,8 +83,20 @@ int main(
 
     std::shared_ptr<MapMeshSolidSolver> solid( new MapMeshSolidSolver( "solid", args, runTime ) );
 
-    std::shared_ptr<foamFluidSolver> fluid( new CoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+    //std::shared_ptr<foamFluidSolver> fluid( new CoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+// Capability to use different fluid solvers (copuled-pressure-velocity-solver or pimple-solver)
+    std::shared_ptr<foamFluidSolver> fluid;
+    string filename = static_cast<std::string>( args->rootPath() ) + "/" + static_cast<std::string>( args->globalCaseName() ) + "/constant/fsi.yaml";
+    YAML::Node config = YAML::LoadFile( filename );
+    std::string fluidSolver = config["fluid-solver"].as<std::string>();
+    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" );
 
+
+    if ( fluidSolver == "coupled-pressure-velocity-solver" )
+        fluid = std::shared_ptr<foamFluidSolver> ( new CoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+
+    if ( fluidSolver == "pimple-solver" )
+        fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
     /*
      * 1. Interpolate displacement from solid interface to fluid interface
      * 2. Mesh deformation fluid mesh
