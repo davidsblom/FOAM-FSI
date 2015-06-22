@@ -38,7 +38,8 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     globalMovingPointsLabelList( mesh.boundaryMesh().size(), labelList( 0 ) ),
     twoDCorrector( mesh ),
     nbPoints( 0 ),
-    faceCellCenters( false )
+    faceCellCenters( false ),
+    cpu( false )
 {
     // Find IDs of staticPatches
     forAll( staticPatches, patchI )
@@ -139,7 +140,11 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
     bool polynomialTerm = dict.lookupOrDefault( "polynomial", false );
     bool cpu = dict.lookupOrDefault( "cpu", false );
+    this->cpu = dict.lookupOrDefault( "fullCPU", false );
     std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
+
+    if ( this->cpu == true )
+        assert( cpu == true );
 
     bool coarsening = readBool( subDict( "coarsening" ).lookup( "enabled" ) );
     double tol = 0.1;
@@ -813,6 +818,9 @@ void RBFMeshMotionSolver::solve()
 
     rbf::matrix valuesInterpolation( nbPoints, values.cols() );
     valuesInterpolation.setZero();
+
+    if ( cpu )
+        rbf->rbf->computed = false;
 
     rbf->interpolate( values, valuesInterpolation );
 
