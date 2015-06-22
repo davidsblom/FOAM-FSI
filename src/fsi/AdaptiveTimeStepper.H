@@ -26,6 +26,7 @@ public:
             bool enabled,
             std::string filter,
             double tol,
+            double safetyFactor,
             int k
             );
 
@@ -60,11 +61,13 @@ public:
         bool enabled;
         std::string filter;
         double tol;
+        double safetyFactor;
         int k;
         double cerrold;
         double rhoold;
         int timeStepIndex;
         bool accepted;
+        bool previousTimeStepRejected;
     };
 }
 

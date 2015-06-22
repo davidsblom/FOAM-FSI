@@ -12,17 +12,20 @@ AdaptiveTimeStepper::AdaptiveTimeStepper(
     bool enabled,
     std::string filter,
     double tol,
+    double safetyFactor,
     int k
     )
     :
     enabled( enabled ),
     filter( filter ),
     tol( tol ),
+    safetyFactor( safetyFactor ),
     k( k ),
     cerrold( 0 ),
     rhoold( 0 ),
     timeStepIndex( 0 ),
-    accepted( true )
+    accepted( true ),
+    previousTimeStepRejected( false )
 {
     assert( filter == "h211b" || filter == "elementary" || filter == "pi42" );
     assert( tol > 0 );
@@ -45,17 +48,16 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
         return true;
     }
 
-    double cerr = tol / errorEstimate;
+    double cerr = safetyFactor * tol / errorEstimate;
     accepted = false;
     double rho = 0;
 
-    if ( cerr > 1 )
+    if ( tol / errorEstimate > 1 )
         accepted = true;
 
-    if ( timeStepIndex == 0 )
+    if ( timeStepIndex == 0 || previousTimeStepRejected )
         rho = elementary( cerr, cerrold, rhoold );
-
-    if ( timeStepIndex > 0 )
+    else
     {
         if ( filter == "h211b" )
             rho = h211b( cerr, cerrold, rhoold );
@@ -72,7 +74,12 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
     rhoold = rho;
 
     if ( accepted )
+    {
+        previousTimeStepRejected = false;
         timeStepIndex++;
+    }
+    else
+        previousTimeStepRejected = true;
 
     Info << "Adaptive time: error = " << errorEstimate;
     Info << ", tol = " << tol;
