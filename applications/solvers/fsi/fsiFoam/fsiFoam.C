@@ -32,7 +32,7 @@
 #include "SolidSolver.H"
 #include "SpaceMappingSolver.H"
 #include "CompressibleFluidSolver.H"
-#include "TPS.H"
+#include "TPSFunction.H"
 #include "WendlandC0Function.H"
 #include "WendlandC2Function.H"
 #include "WendlandC4Function.H"
@@ -74,7 +74,8 @@ void setConvergenceMeasures(
 
 std::shared_ptr<rbf::RBFInterpolation> createRBFInterpolator(
     std::string interpolationFunction,
-    double radius
+    double radius,
+    bool cpu
     )
 {
     std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
@@ -96,7 +97,8 @@ std::shared_ptr<rbf::RBFInterpolation> createRBFInterpolator(
 
     assert( rbfFunction );
 
-    return std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
+    bool polynomialTerm = true;
+    return std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
 }
 
 int main(
@@ -146,8 +148,14 @@ int main(
     double radius = 1;
     bool livePointSelection = false;
     double tolLivePointSelection = 1.0e-5;
+    bool cpu = false;
 
     assert( interpolationFunction == "thin-plate-spline" || interpolationFunction == "wendland-c0" || interpolationFunction == "wendland-c2" || interpolationFunction == "wendland-c4" || interpolationFunction == "wendland-c6" );
+
+    if ( configInterpolation["radial-basis-function"]["cpu"] )
+    {
+        cpu = configInterpolation["radial-basis-function"]["cpu"].as<bool>();
+    }
 
     if ( interpolationFunction != "thin-plate-spline" )
     {
@@ -265,7 +273,7 @@ int main(
 
         if ( solidSolver == "segregated-solver" )
         {
-            std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+            std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
 
             std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
@@ -281,18 +289,18 @@ int main(
         std::shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
         std::shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;
 
-        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
-        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
         multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, nbLevels - 1 ) );
 
-        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
-        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
         multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, nbLevels - 1 ) );
@@ -355,7 +363,7 @@ int main(
 
             if ( solidSolver == "segregated-solver" )
             {
-                std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+                std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
 
                 std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
@@ -371,18 +379,18 @@ int main(
             std::shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
             std::shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;
 
-            rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+            rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
             rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
-            rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+            rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
             rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
             multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fineModel->fsi->fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, level ) );
 
-            rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+            rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
             rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
-            rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+            rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
             rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
             multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fineModel->fsi->fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, level ) );
@@ -530,7 +538,7 @@ int main(
 
         if ( solidSolver == "segregated-solver" )
         {
-            std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+            std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
 
             std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
@@ -546,18 +554,18 @@ int main(
         std::shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
         std::shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;
 
-        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
-        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
         multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
 
-        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
-        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius );
+        rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
         multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );

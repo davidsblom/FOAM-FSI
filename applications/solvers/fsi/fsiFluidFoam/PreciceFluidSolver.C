@@ -69,6 +69,11 @@ void PreciceFluidSolver::readData( matrix & data )
 
 void PreciceFluidSolver::run()
 {
+    matrix inputOld( solver->getInterfaceSizeLocal(), precice->getDimensions() );
+    matrix input( solver->getInterfaceSizeLocal(), precice->getDimensions() );
+    matrix output;
+    inputOld.setZero();
+
     while ( solver->isRunning() )
     {
         solver->initTimeStep();
@@ -81,16 +86,12 @@ void PreciceFluidSolver::run()
 
             Info << endl << "Time = " << solver->runTime->timeName() << ", iteration = " << iter + 1 << endl;
 
-            matrix input( solver->getInterfaceSizeLocal(), precice->getDimensions() ), output;
-
-            input.setZero();
-
             readData( input );
 
             if ( precice->isActionRequired( precice::constants::actionReadIterationCheckpoint() ) )
                 precice->fulfilledAction( precice::constants::actionReadIterationCheckpoint() );
 
-            solver->setDisplacementLocal( input );
+            solver->setDisplacementLocal( input + inputOld );
             solver->moveMesh();
             solver->solve();
             solver->getTractionLocal( output );
@@ -118,6 +119,8 @@ void PreciceFluidSolver::run()
         }
 
         solver->finalizeTimeStep();
+
+        inputOld += input;
     }
 }
 

@@ -28,6 +28,18 @@ public:
             double tolLivePointSelection,
             int coarseningMinPoints,
             int coarseningMaxPoints,
+            bool exportTxt
+            );
+
+        RBFCoarsening(
+            std::shared_ptr<RBFInterpolation> rbf,
+            bool enabled,
+            bool livePointSelection,
+            bool livePointSelectionSumValues,
+            double tol,
+            double tolLivePointSelection,
+            int coarseningMinPoints,
+            int coarseningMaxPoints,
             bool twoPointSelection,
             bool exportTxt
             );
@@ -65,7 +77,7 @@ public:
             int nbStaticFaceCenters
             );
 
-        void correctSurface( matrix& valuesInterpolation );
+        void correctSurface( matrix & valuesInterpolation );
 
         std::shared_ptr<RBFInterpolation> rbf;
         std::shared_ptr<RBFInterpolation> rbfCoarse;

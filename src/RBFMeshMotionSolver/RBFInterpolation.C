@@ -14,27 +14,34 @@ namespace rbf
         :
         rbfFunction( rbfFunction ),
         polynomialTerm( true ),
+        cpu( false ),
         computed( false ),
         n_A( 0 ),
         n_B( 0 ),
         dimGrid( 0 ),
-        Hhat()
+        Hhat(),
+        positions(),
+        positionsInterpolation()
     {
         assert( rbfFunction );
     }
 
     RBFInterpolation::RBFInterpolation(
         std::shared_ptr<RBFFunctionInterface> rbfFunction,
-        bool polynomialTerm
+        bool polynomialTerm,
+        bool cpu
         )
         :
         rbfFunction( rbfFunction ),
         polynomialTerm( polynomialTerm ),
+        cpu( cpu ),
         computed( false ),
         n_A( 0 ),
         n_B( 0 ),
         dimGrid( 0 ),
-        Hhat()
+        Hhat(),
+        positions(),
+        positionsInterpolation()
     {
         assert( rbfFunction );
     }
@@ -109,7 +116,6 @@ namespace rbf
         if ( polynomialTerm )
         {
             H.resize( n_A + dimGrid + 1, n_A + dimGrid + 1 );
-            Phi.resize( n_B, n_A + dimGrid + 1 );
         }
 
         // Evaluate radial basis functions for matrix H
@@ -137,42 +143,70 @@ namespace rbf
             t = std::clock();
         }
 
-        // Evaluate Phi which contains the evaluation of the radial basis function
-
-        evaluatePhi( positions, positionsInterpolation, Phi );
-
-        // Include polynomial contributions in matrix Phi
-        if ( polynomialTerm )
+        if ( cpu )
         {
-            for ( int i = 0; i < Phi.rows(); i++ )
-                Phi( i, n_A ) = 1;
+            this->positions = positions;
+            this->positionsInterpolation = positionsInterpolation;
 
-            Phi.topRightCorner( n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
+            // If the thin plate spline radial basis function is used,
+            // use the LU decomposition to solve for the coefficients.
+            // In case a wendland function is used, use the more efficient LLT
+            // algorithm.
+            // The LLT algorithm cannot be used for the thin plate spline function,
+            // since the diagonal of matrix is zero for this function.
+            std::shared_ptr<TPSFunction> function;
+            function = std::dynamic_pointer_cast<TPSFunction>( rbfFunction );
+
+            if ( polynomialTerm )
+                fullPivLu.compute( H.selfadjointView<Eigen::Lower>() );
+            else
+            if ( function )
+                lu.compute( H.selfadjointView<Eigen::Lower>() );
+            else
+                llt.compute( H.selfadjointView<Eigen::Lower>() );
         }
 
-        if ( debug )
+        if ( not cpu )
         {
-            t = std::clock() - t;
-            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
-            Info << "RBFInterpolation::debug 2. evaluate Phi = " << runTime << " s" << endl;
-            t = std::clock();
-        }
+            // Evaluate Phi which contains the evaluation of the radial basis function
 
-        // Compute the LU decomposition of the matrix H
-        // Eigen::PartialPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
-        Eigen::FullPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
+            if ( polynomialTerm )
+                Phi.resize( n_B, n_A + dimGrid + 1 );
 
-        // Compute interpolation matrix
+            evaluatePhi( positions, positionsInterpolation, Phi );
 
-        Hhat.noalias() = Phi * lu.inverse();
+            // Include polynomial contributions in matrix Phi
+            if ( polynomialTerm )
+            {
+                for ( int i = 0; i < Phi.rows(); i++ )
+                    Phi( i, n_A ) = 1;
 
-        Hhat.conservativeResize( n_B, n_A );
+                Phi.topRightCorner( n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
+            }
 
-        if ( debug )
-        {
-            t = std::clock() - t;
-            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
-            Info << "RBFInterpolation::debug 3. compute Hhat = " << runTime << " s" << endl;
+            if ( debug )
+            {
+                t = std::clock() - t;
+                double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+                Info << "RBFInterpolation::debug 2. evaluate Phi = " << runTime << " s" << endl;
+                t = std::clock();
+            }
+
+            // Compute the LU decomposition of the matrix H
+            Eigen::FullPivLU<matrix> lu( H.selfadjointView<Eigen::Lower>() );
+
+            // Compute interpolation matrix
+
+            Hhat.noalias() = Phi * lu.inverse();
+
+            Hhat.conservativeResize( n_B, n_A );
+
+            if ( debug )
+            {
+                t = std::clock() - t;
+                double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+                Info << "RBFInterpolation::debug 3. compute Hhat = " << runTime << " s" << endl;
+            }
         }
 
         computed = true;
@@ -183,11 +217,62 @@ namespace rbf
         matrix & valuesInterpolation
         )
     {
+        if ( cpu && not computed )
+            compute( positions, positionsInterpolation );
+
         assert( computed );
 
         std::clock_t t = std::clock();
 
-        valuesInterpolation.noalias() = Hhat * values;
+        if ( cpu )
+        {
+            // If the thin plate spline radial basis function is used,
+            // use the LU decomposition to solve for the coefficients.
+            // In case a wendland function is used, use the more efficient LLT
+            // algorithm.
+            // The LLT algorithm cannot be used for the thin plate spline function,
+            // since the diagonal of matrix is zero for this function.
+            std::shared_ptr<TPSFunction> function;
+            function = std::dynamic_pointer_cast<TPSFunction>( rbfFunction );
+
+            matrix B, valuesLU( n_A, values.cols() ), Phi( n_B, n_A );
+
+            if ( polynomialTerm )
+            {
+                Phi.resize( n_B, n_A + dimGrid + 1 );
+                valuesLU.resize( n_A + dimGrid + 1, values.cols() );
+            }
+
+            valuesLU.setZero();
+            valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
+
+            if ( polynomialTerm )
+                B = fullPivLu.solve( valuesLU );
+            else
+            if ( function )
+                B = lu.solve( valuesLU );
+            else
+                B = llt.solve( valuesLU );
+
+            evaluatePhi( positions, positionsInterpolation, Phi );
+
+            if ( polynomialTerm )
+            {
+                // Include polynomial contributions in matrix Phi
+
+                for ( int i = 0; i < Phi.rows(); i++ )
+                    Phi( i, n_A ) = 1;
+
+                Phi.topRightCorner( n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
+            }
+
+            valuesInterpolation.noalias() = Phi * B;
+        }
+
+        if ( not cpu )
+        {
+            valuesInterpolation.noalias() = Hhat * values;
+        }
 
         if ( debug )
         {
@@ -326,6 +411,9 @@ namespace rbf
             Phi.conservativeResize( n_B, n_A );
 
         int nNewPoints = Phi.cols() - phiColsOld;
+
+        if ( nNewPoints == Phi.cols() )
+            nNewPoints = n_A;
 
         double r = 0;
 

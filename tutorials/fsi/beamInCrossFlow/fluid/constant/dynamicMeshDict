@@ -27,11 +27,11 @@ fixedPatches ( outlet inlet top left bottom );
 coarsening
 {
   enabled true;
-  tol 1.0e-6;
+  tol 1.0e-3;
   minPoints 10;
-  maxPoints 2000;
+  maxPoints 500;
   livePointSelection true;
-  tolLivePointSelection 1.0e-5;
+  tolLivePointSelection 1.0e-2;
   exportSelectedPoints false;
 }
 

@@ -13,6 +13,7 @@
 #include "SDCFluidSolver.H"
 #include "SDC.H"
 #include "SDCLaplacianSolver.H"
+#include "ESDIRK.H"
 
 int main(
     int argc,
@@ -41,10 +42,11 @@ int main(
 
     std::string fluidSolver = config["fluid-solver"].as<std::string>();
 
-    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" );
+    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" || fluidSolver == "esdirk-pimple-solver" );
 
     std::shared_ptr<foamFluidSolver> fluid;
     std::shared_ptr<sdc::SDC> sdc;
+    std::shared_ptr<sdc::ESDIRK> esdirk;
 
     if ( fluidSolver == "coupled-pressure-velocity-solver" )
         fluid = std::shared_ptr<foamFluidSolver> ( new CoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
@@ -77,13 +79,29 @@ int main(
         sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( solver, quadratureRule, n, tol ) );
     }
 
-    assert( fluid || sdc );
+    if ( fluidSolver == "esdirk-pimple-solver" )
+    {
+        YAML::Node esdirkConfig( config["esdirk"] );
+        assert( esdirkConfig["method"] );
+
+        std::string method = esdirkConfig["method"].as<std::string>();
+
+        std::shared_ptr<sdc::SDCSolver> solver;
+        solver = std::shared_ptr<sdc::SDCSolver>( new SDCFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+
+        esdirk = std::shared_ptr<sdc::ESDIRK>( new sdc::ESDIRK( solver, method ) );
+    }
+
+    assert( fluid || sdc || esdirk );
 
     if ( fluid )
         fluid->run();
 
     if ( sdc )
         sdc->run();
+
+    if ( esdirk )
+        esdirk->run();
 
     Info << "End\n" << endl;
 

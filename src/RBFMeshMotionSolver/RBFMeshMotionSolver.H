@@ -51,11 +51,13 @@ private:
         labelList nbGlobalStaticFaceCenters;
         labelList nbGlobalFixedFaceCenters;
 
-        bool interpolateFromPoints;
+        List<labelList> globalMovingPointsLabelList;
 
         // 2d corrector
         twoDPointCorrectorRBF twoDCorrector;
         int nbPoints;
+        bool faceCellCenters;
+        bool cpu;
 
         scalar getMaxWallDistance();
 
@@ -79,12 +81,8 @@ public:
         // The motion is defined at the face centers of the boundary patch.
         void setMotion( const Field<vectorField> & motion );
 
-        void setMotionPoints( const Field<vectorField> & motion );
-
         // Return point location obtained from the current motion field
         virtual tmp<pointField> curPoints() const;
-
-        void solvePoints();
 
         // Solve for motion
         virtual void solve();

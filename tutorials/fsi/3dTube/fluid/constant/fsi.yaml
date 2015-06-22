@@ -4,6 +4,7 @@ parallel-coupling: false
 interpolation:
   radial-basis-function:
     function: thin-plate-spline
+    cpu: true
   coarsening:
     enabled: false
 coupling-scheme-implicit:
