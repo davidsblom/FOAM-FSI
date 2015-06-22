@@ -60,7 +60,8 @@ int main(int argc, char *argv[])
 
         //Get motion of bodies and update mesh accordingly
         bodyCol.update();
-        ms.setMotionPoints(bodyCol.getPatchMotion());
+        //ms.setMotionPoints(bodyCol.getPatchMotion());
+		ms.setMotion(bodyCol.getPatchMotion());
         bool meshChanged = mesh.update();
 
         runTime.write();

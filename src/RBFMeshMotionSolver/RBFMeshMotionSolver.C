@@ -66,7 +66,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     globalMovingPointsLabelList( mesh.boundaryMesh().size(), labelList( 0 ) ),
     twoDCorrector( mesh ),
     nbPoints( 0 ),
-    faceCellCenters( false ),
+    faceCellCenters( true ),
     cpu( false )
 {
     // Find IDs of staticPatches
@@ -220,6 +220,11 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     Info << "        coarsening tolerance = " << tol << endl;
     Info << "        coarsening reselection tolerance = " << tolLivePointSelection << endl;
     Info << "        coarsening two-point selection = " << twoPointSelection << endl;
+    Info << "        coarsening surface correction = " << surfaceCorrection << endl;
+    if( debug > 1 )
+    {
+        Info << "    interpolation from face cell centers = " << faceCellCenters << endl;
+    }
 }
 
 RBFMeshMotionSolver::~RBFMeshMotionSolver()
