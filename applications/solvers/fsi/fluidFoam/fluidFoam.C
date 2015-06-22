@@ -83,16 +83,36 @@ int main(
     if ( fluidSolver == "esdirk-pimple-solver" )
     {
         YAML::Node esdirkConfig( config["esdirk"] );
+        YAML::Node adaptiveTimeConfig( config["adaptive-time-stepping"] );
+
         assert( esdirkConfig["method"] );
+        assert( adaptiveTimeConfig["enabled"] );
 
         std::string method = esdirkConfig["method"].as<std::string>();
+        bool adaptiveTimeStepping = adaptiveTimeConfig["enabled"].as<bool>();
+        std::string filter = "elementary";
+        double adaptiveTolerance = 1.0e-3;
+        double safetyFactor = 0.5;
+        int k = 1;
+
+        if ( adaptiveTimeStepping )
+        {
+            assert( adaptiveTimeConfig["filter"] );
+            assert( adaptiveTimeConfig["tolerance"] );
+            assert( adaptiveTimeConfig["safety-factor"] );
+            assert( adaptiveTimeConfig["k"] );
+            filter = adaptiveTimeConfig["filter"].as<std::string>();
+            adaptiveTolerance = adaptiveTimeConfig["tolerance"].as<double>();
+            safetyFactor = adaptiveTimeConfig["safety-factor"].as<double>();
+            k = adaptiveTimeConfig["k"].as<double>();
+        }
 
         std::shared_ptr<sdc::SDCSolver> solver;
         std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
 
         solver = std::shared_ptr<sdc::SDCSolver>( new SDCFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
-        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false, "h211b", 1.0e-3, 0.8, 5 ) );
+        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( adaptiveTimeStepping, filter, adaptiveTolerance, safetyFactor, k ) );
 
         esdirk = std::shared_ptr<sdc::ESDIRK>( new sdc::ESDIRK( solver, method, adaptiveTimeStepper ) );
     }

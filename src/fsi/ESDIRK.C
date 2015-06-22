@@ -265,6 +265,7 @@ namespace sdc
         {
             double newTimeStep = 0;
             Eigen::VectorXd errorEstimate( N );
+            errorEstimate.setZero();
 
             for ( int iStage = 0; iStage < nbStages; iStage++ )
                 errorEstimate += ( B( iStage ) - Bhat( iStage ) ) * F.row( iStage );
