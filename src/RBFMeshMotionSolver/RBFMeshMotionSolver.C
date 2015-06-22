@@ -564,7 +564,7 @@ void RBFMeshMotionSolver::solve()
                                 movingControlGlobalPointLabels.push_back( globalMovingPointsList[i] );
                                 globalMovingPointsListEnabled[i] = 1;
 
-                                if ( i < movingControlPointLabels.size() + globalMovingOffsetNonUnique
+                                if ( i < static_cast<int>( movingControlPointLabels.size() ) + globalMovingOffsetNonUnique
                                     && i >= globalMovingOffsetNonUnique )
                                 {
                                     label patchId = globalMovingPointsPatchIds[i];
