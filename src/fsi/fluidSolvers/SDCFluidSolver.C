@@ -374,7 +374,7 @@ bool SDCFluidSolver::isRunning()
          << "  ClockTime = " << runTime->elapsedClockTime() << " s"
          << endl << endl;
 
-    return runTime->loop();
+    return runTime->run();
 }
 
 void SDCFluidSolver::resetSolution()
@@ -401,6 +401,7 @@ void SDCFluidSolver::setNumberOfStages( int k )
 
 void SDCFluidSolver::nextTimeStep()
 {
+    (*runTime)++;
     timeIndex++;
 
     if ( pStages.size() == static_cast<unsigned>(k) )

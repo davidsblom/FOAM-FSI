@@ -50,6 +50,10 @@ public:
             const double rho
             );
 
+        bool isAccepted();
+
+        bool isEnabled();
+
         double limit( const double u );
 
         double pi42(
@@ -57,6 +61,8 @@ public:
             const double c0,
             const double rho
             );
+
+private:
 
         bool enabled;
         std::string filter;

@@ -202,20 +202,20 @@ namespace sdc
     {
         double t = 0;
 
-        while ( solver->isRunning() )
+        while ( t < solver->getEndTime() )
         {
             double computedTimeStep = dt;
 
             solveTimeStep( t );
 
-            if ( adaptiveTimeStepper->accepted )
+            if ( adaptiveTimeStepper->isAccepted() )
                 t += computedTimeStep;
         }
     }
 
     void ESDIRK::solveTimeStep( const double t0 )
     {
-        if ( adaptiveTimeStepper->accepted )
+        if ( adaptiveTimeStepper->isAccepted() )
             solver->nextTimeStep();
 
         Eigen::MatrixXd solStages( nbStages, N ), F( nbStages, N );
@@ -261,7 +261,7 @@ namespace sdc
 
         solver->setDeltaT( dt );
 
-        if ( adaptiveTimeStepper->enabled )
+        if ( adaptiveTimeStepper->isEnabled() )
         {
             double newTimeStep = 0;
             Eigen::VectorXd errorEstimate( N );
@@ -289,7 +289,7 @@ namespace sdc
                 double t = t0 + dt + newTimeStep;
 
                 if ( t > solver->getEndTime() )
-                    newTimeStep = solver->getEndTime() - t0 - dt;
+                    newTimeStep = std::abs( solver->getEndTime() - t0 - dt );
             }
 
             dt = newTimeStep;

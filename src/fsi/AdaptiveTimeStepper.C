@@ -24,7 +24,7 @@ AdaptiveTimeStepper::AdaptiveTimeStepper(
     cerrold( 0 ),
     rhoold( 0 ),
     timeStepIndex( 0 ),
-    accepted( true ),
+    accepted( false ),
     previousTimeStepRejected( false )
 {
     assert( filter == "h211b" || filter == "elementary" || filter == "pi42" );
@@ -81,8 +81,7 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
     else
         previousTimeStepRejected = true;
 
-    Info << "Adaptive time: error = " << errorEstimate;
-    Info << ", tol = " << tol;
+    Info << "adaptive time: error = " << errorEstimate;
     Info << ", accepted = ";
 
     if ( accepted )
@@ -116,6 +115,19 @@ double AdaptiveTimeStepper::h211b(
     double b = 4;
 
     return std::pow( c1, 1.0 / b / k ) * std::pow( c0, 1.0 / b / k ) * std::pow( rho, -1.0 / b );
+}
+
+bool AdaptiveTimeStepper::isAccepted()
+{
+    if ( not enabled )
+        return true;
+
+    return accepted;
+}
+
+bool AdaptiveTimeStepper::isEnabled()
+{
+    return enabled;
 }
 
 double AdaptiveTimeStepper::limit( const double u )
