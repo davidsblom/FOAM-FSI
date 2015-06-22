@@ -24,6 +24,8 @@ AitkenPostProcessing.C
 DataValues.C
 AndersonPostProcessing.C
 SDC.C
+ESDIRK.C
+Piston.C
 
 tests.C
 test_fluidsolver.C
@@ -60,5 +62,6 @@ test_rbfcoarsening.C
 test_multilevelspacemapping.C
 test_multilevelmliqnilssolver.C
 test_sdc.C
+test_esdirk.C
 
 EXE = $(FOAM_USER_APPBIN)/tests

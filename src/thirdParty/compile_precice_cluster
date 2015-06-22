@@ -44,6 +44,7 @@ export PRECICE_BOOST_ROOT=${BOOST_ROOT}
 export PRECICE_MPI_LIB=mpi
 export PRECICE_MPI_LIB_PATH=${MPI_HOME}/lib
 export PRECICE_MPI_INC_PATH=${MPI_HOME}/include
+export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
 # Build preCICE
 

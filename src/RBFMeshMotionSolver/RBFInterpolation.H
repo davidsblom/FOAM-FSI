@@ -29,7 +29,8 @@ public:
 
         RBFInterpolation(
             std::shared_ptr<RBFFunctionInterface> rbfFunction,
-            bool polynomialTerm
+            bool polynomialTerm,
+            bool cpu
             );
 
         void compute(
@@ -61,6 +62,7 @@ public:
 
         std::shared_ptr<RBFFunctionInterface> rbfFunction;
         bool polynomialTerm;
+        bool cpu;
         bool computed;
         int n_A;
         int n_B;
@@ -70,6 +72,8 @@ public:
         Eigen::PartialPivLU<matrix> lu;
         Eigen::FullPivLU<matrix> fullPivLu;
         Eigen::LLT<matrix> llt;
+        matrix positions;
+        matrix positionsInterpolation;
 
         static debug::debugSwitch debug;
 

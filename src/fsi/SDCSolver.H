@@ -28,8 +28,6 @@ public:
 
         virtual int getDOF() = 0;
 
-        virtual int getNbCells() = 0;
-
         virtual double getScalingFactor() = 0;
 
         virtual void getSolution( Eigen::VectorXd & solution ) = 0;
