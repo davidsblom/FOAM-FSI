@@ -413,6 +413,10 @@ void SDCFluidSolver::solve()
 void SDCFluidSolver::finalizeTimeStep()
 {
     runTime->writeNow();
+
+    Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
+         << "  ClockTime = " << runTime->elapsedClockTime() << " s"
+         << endl << endl;
 }
 
 int SDCFluidSolver::getDOF()
