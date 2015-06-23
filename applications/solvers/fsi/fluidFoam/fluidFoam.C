@@ -93,18 +93,15 @@ int main(
         std::string filter = "elementary";
         double adaptiveTolerance = 1.0e-3;
         double safetyFactor = 0.5;
-        int k = 1;
 
         if ( adaptiveTimeStepping )
         {
             assert( adaptiveTimeConfig["filter"] );
             assert( adaptiveTimeConfig["tolerance"] );
             assert( adaptiveTimeConfig["safety-factor"] );
-            assert( adaptiveTimeConfig["k"] );
             filter = adaptiveTimeConfig["filter"].as<std::string>();
             adaptiveTolerance = adaptiveTimeConfig["tolerance"].as<double>();
             safetyFactor = adaptiveTimeConfig["safety-factor"].as<double>();
-            k = adaptiveTimeConfig["k"].as<double>();
         }
 
         std::shared_ptr<sdc::SDCSolver> solver;
@@ -112,7 +109,7 @@ int main(
 
         solver = std::shared_ptr<sdc::SDCSolver>( new SDCFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
-        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( adaptiveTimeStepping, filter, adaptiveTolerance, safetyFactor, k ) );
+        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( adaptiveTimeStepping, filter, adaptiveTolerance, safetyFactor ) );
 
         esdirk = std::shared_ptr<sdc::ESDIRK>( new sdc::ESDIRK( solver, method, adaptiveTimeStepper ) );
     }

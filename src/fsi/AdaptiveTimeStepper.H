@@ -27,8 +27,7 @@ public:
             bool enabled,
             std::string filter,
             double tol,
-            double safetyFactor,
-            int k
+            double safetyFactor
             );
 
         ~AdaptiveTimeStepper();
@@ -73,6 +72,8 @@ public:
             );
 
         void setEndTime( double endTime );
+
+        void setOrderEmbeddedMethod( int order );
 
 private:
 

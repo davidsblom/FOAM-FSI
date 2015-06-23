@@ -12,15 +12,14 @@ AdaptiveTimeStepper::AdaptiveTimeStepper(
     bool enabled,
     std::string filter,
     double tol,
-    double safetyFactor,
-    int k
+    double safetyFactor
     )
     :
     enabled( enabled ),
     filter( filter ),
     tol( tol ),
     safetyFactor( safetyFactor ),
-    k( k ),
+    k( 0 ),
     cerrold( 0 ),
     rhoold( 0 ),
     timeStepIndex( 0 ),
@@ -32,7 +31,8 @@ AdaptiveTimeStepper::AdaptiveTimeStepper(
     assert( filter == "h211b" || filter == "elementary" || filter == "pi42" );
     assert( tol > 0 );
     assert( tol < 1 );
-    assert( k > 0 );
+    assert( safetyFactor > 0 );
+    assert( safetyFactor <= 1 );
 }
 
 AdaptiveTimeStepper::~AdaptiveTimeStepper()
@@ -67,6 +67,7 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
     )
 {
     assert( endTime > 0 );
+    assert( k > 0 );
 
     if ( not enabled )
     {
@@ -186,4 +187,9 @@ void AdaptiveTimeStepper::setEndTime( double endTime )
 {
     assert( endTime > 0 );
     this->endTime = endTime;
+}
+
+void AdaptiveTimeStepper::setOrderEmbeddedMethod( int order )
+{
+    k = order + 1;
 }

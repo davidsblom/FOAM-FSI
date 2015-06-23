@@ -32,6 +32,7 @@ namespace sdc
         // source: Ellsiepen. Habilitation thesis Philipp Birken
         if ( method == "SDIRK2" )
         {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 1 );
             double alpha = 1.0 - 0.5 * std::sqrt( 2 );
             double alphahat = 2.0 - 5.0 / 4.0 * std::sqrt( 2 );
             A.resize( 2, 2 );
@@ -48,6 +49,7 @@ namespace sdc
         // source: Cash. Habilitation thesis Philipp Birken
         if ( method == "SDIRK3" )
         {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 2 );
             A.resize( 3, 3 );
             A.setZero();
             Bhat.resize( A.cols() );
@@ -72,6 +74,7 @@ namespace sdc
         // source: Cash-5-3-4 http://runge.math.smu.edu/arkode_dev/doc/guide/build/html/Butcher.html
         if ( method == "SDIRK4" )
         {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 3 );
             A.resize( 5, 5 );
             A.setZero();
             Bhat.resize( A.cols() );
@@ -100,6 +103,7 @@ namespace sdc
 
         if ( method == "ESDIRK3" )
         {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 2 );
             A.resize( 4, 4 );
             A.setZero();
             Bhat.resize( A.cols() );
@@ -122,6 +126,7 @@ namespace sdc
 
         if ( method == "ESDIRK4" )
         {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 3 );
             A.resize( 6, 6 );
             A.setZero();
             Bhat.resize( A.cols() );
@@ -156,6 +161,7 @@ namespace sdc
 
         if ( method == "ESDIRK5" )
         {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 4 );
             A.resize( 8, 8 );
             A.setZero();
             Bhat.resize( A.cols() );
