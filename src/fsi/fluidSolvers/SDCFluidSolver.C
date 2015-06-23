@@ -500,7 +500,7 @@ void SDCFluidSolver::getSolution( Eigen::VectorXd & solution )
     assert( index == solution.rows() );
 }
 
-void SDCFluidSolver::setSolution( const Eigen::VectorXd & solution )
+void SDCFluidSolver::setSolution( const Eigen::VectorXd & solution, const Eigen::VectorXd & f )
 {
     int index = 0;
 
@@ -541,6 +541,46 @@ void SDCFluidSolver::setSolution( const Eigen::VectorXd & solution )
     }
 
     assert( index == solution.rows() );
+
+    index = 0;
+
+    forAll( UF.internalField(), i )
+    {
+        for ( int j = 0; j < 3; j++ )
+        {
+            UF.internalField()[i][j] = f( index );
+            index++;
+        }
+    }
+
+    forAll( UF.boundaryField(), patchI )
+    {
+        forAll( UF.boundaryField()[patchI], i )
+        {
+            for ( int j = 0; j < 3; j++ )
+            {
+                UF.boundaryField()[patchI][i][j] = f( index );
+                index++;
+            }
+        }
+    }
+
+    forAll( phiF.internalField(), i )
+    {
+        phiF.internalField()[i] = f( index );
+        index++;
+    }
+
+    forAll( phiF.boundaryField(), patchI )
+    {
+        forAll( phiF.boundaryField()[patchI], i )
+        {
+            phiF.boundaryField()[patchI][i] = f( index );
+            index++;
+        }
+    }
+
+    assert( index == f.rows() );
 }
 
 double SDCFluidSolver::getEndTime()
@@ -592,7 +632,7 @@ void SDCFluidSolver::evaluateFunction(
 
     forAll( phiF.internalField(), i )
     {
-        f( index ) = phiF[i];
+        f( index ) = phiF.internalField()[i];
         index++;
     }
 

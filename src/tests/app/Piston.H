@@ -49,7 +49,7 @@ public:
 
     virtual void getSolution( Eigen::VectorXd & solution );
 
-    virtual void setSolution( const Eigen::VectorXd & solution );
+    virtual void setSolution( const Eigen::VectorXd & solution , const Eigen::VectorXd & f );
 
     virtual double getEndTime();
 

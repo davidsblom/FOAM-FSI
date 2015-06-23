@@ -32,7 +32,7 @@ public:
 
         virtual void getSolution( Eigen::VectorXd & solution ) = 0;
 
-        virtual void setSolution( const Eigen::VectorXd & solution ) = 0;
+        virtual void setSolution( const Eigen::VectorXd & solution, const Eigen::VectorXd & f ) = 0;
 
         virtual double getEndTime() = 0;
 
