@@ -51,7 +51,7 @@ protected:
 
         std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
 
-        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false, "h211b", 1.0e-3, 0.8 ) );
+        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
 
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
         esdirk = std::shared_ptr<ESDIRK> ( new ESDIRK( piston, method, adaptiveTimeStepper ) );

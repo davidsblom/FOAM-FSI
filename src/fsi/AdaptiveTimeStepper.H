@@ -23,6 +23,8 @@ namespace sdc
     {
 public:
 
+        AdaptiveTimeStepper( bool enabled );
+
         AdaptiveTimeStepper(
             bool enabled,
             std::string filter,

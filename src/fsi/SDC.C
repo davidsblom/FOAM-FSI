@@ -11,12 +11,14 @@ namespace sdc
 {
     SDC::SDC(
         std::shared_ptr<SDCSolver> solver,
+        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
         std::string rule,
         int nbNodes,
         double tol
         )
         :
         solver( solver ),
+        adaptiveTimeStepper( adaptiveTimeStepper ),
         nodes(),
         smat(),
         qmat(),
@@ -26,6 +28,7 @@ namespace sdc
         k( 0 ),
         tol( tol )
     {
+        assert( adaptiveTimeStepper );
         assert( solver );
         assert( nbNodes > 1 );
         assert( nbNodes < 15 );
@@ -34,7 +37,8 @@ namespace sdc
         assert( tol < 1 );
         assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" );
 
-        quadrature::rules( rule, nbNodes, nodes, smat, qmat );
+        int refine = 1;
+        quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
 
         k = nodes.rows();
 
@@ -44,6 +48,29 @@ namespace sdc
             dsdc( i ) = nodes( i + 1 ) - nodes( i );
 
         solver->setNumberOfStages( k );
+
+        if ( adaptiveTimeStepper->isEnabled() )
+        {
+            refine = 2;
+            quadrature::rules( rule, nbNodes, refine, nodesEmbedded, smatEmbedded, qmatEmbedded );
+
+            int orderEmbedded = 0;
+
+            if ( rule == "gauss-radau" )
+                orderEmbedded = (nodesEmbedded.rows() - 1) * 2 - 1;
+
+            if ( rule == "gauss-lobatto" )
+                orderEmbedded = nodesEmbedded.rows() * 2 - 3;
+
+            if ( rule == "clenshaw-curtis" )
+                orderEmbedded = nodesEmbedded.rows() - 1;
+
+            if ( rule == "uniform" )
+                orderEmbedded = nodesEmbedded.rows();
+
+            adaptiveTimeStepper->setOrderEmbeddedMethod( orderEmbedded );
+            adaptiveTimeStepper->setEndTime( solver->getEndTime() );
+        }
     }
 
     SDC::~SDC()
@@ -51,18 +78,23 @@ namespace sdc
 
     void SDC::run()
     {
-        int i = 0;
+        double t = 0;
 
-        while ( solver->isRunning() )
+        while ( t < solver->getEndTime() )
         {
-            solveTimeStep( dt * i );
-            i++;
+            double computedTimeStep = dt;
+
+            solveTimeStep( t );
+
+            if ( adaptiveTimeStepper->isAccepted() )
+                t += computedTimeStep;
         }
     }
 
     void SDC::solveTimeStep( const double t0 )
     {
-        solver->nextTimeStep();
+        if ( adaptiveTimeStepper->isPreviousStepAccepted() )
+            solver->nextTimeStep();
 
         Eigen::VectorXd dtsdc = this->dt * dsdc;
         Eigen::MatrixXd solStages( k, N ), F( k, N );
@@ -171,6 +203,30 @@ namespace sdc
                 break;
         }
 
-        solver->finalizeTimeStep();
+        if ( adaptiveTimeStepper->isEnabled() )
+        {
+            double newTimeStep = 0;
+            Eigen::VectorXd errorEstimate( N );
+
+            Eigen::MatrixXd Fembedded( nodesEmbedded.rows(), N );
+
+            for ( int i = 0; i < Fembedded.rows(); i++ )
+                Fembedded.row( i ) = F.row( i * 2 );
+
+            Eigen::MatrixXd Qj = dt * (qmat * F);
+            Eigen::MatrixXd QjEmbedded = dt * (qmatEmbedded * Fembedded);
+
+            errorEstimate = Qj.row( k - 2 ) - QjEmbedded.row( nodesEmbedded.rows() - 2 );
+
+            bool accepted = adaptiveTimeStepper->determineNewTimeStep( errorEstimate, result, dt, newTimeStep );
+
+            dt = newTimeStep;
+
+            if ( not accepted )
+                solver->setSolution( solStages.row( 0 ) );
+        }
+
+        if ( adaptiveTimeStepper->isAccepted() )
+            solver->finalizeTimeStep();
     }
 }

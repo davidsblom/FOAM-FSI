@@ -8,6 +8,22 @@
 
 using namespace sdc;
 
+AdaptiveTimeStepper::AdaptiveTimeStepper( bool enabled )
+    :
+    enabled( enabled ),
+    filter( "h211b" ),
+    tol( 1.0e-4 ),
+    safetyFactor( 0.8 ),
+    k( 0 ),
+    cerrold( 0 ),
+    rhoold( 0 ),
+    timeStepIndex( 0 ),
+    accepted( false ),
+    previousTimeStepRejected( false ),
+    endTime( 0 ),
+    t( 0 )
+{}
+
 AdaptiveTimeStepper::AdaptiveTimeStepper(
     bool enabled,
     std::string filter,

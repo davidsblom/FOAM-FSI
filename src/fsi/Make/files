@@ -20,6 +20,7 @@ AndersonPostProcessing.C
 SDC.C
 ESDIRK.C
 AdaptiveTimeStepper.C
+QuadratureRules.C
 
 fluidSolvers/CoupledFluidSolver.C
 fluidSolvers/FluidSolver.C

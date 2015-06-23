@@ -27,6 +27,7 @@ SDC.C
 ESDIRK.C
 Piston.C
 AdaptiveTimeStepper.C
+QuadratureRules.C
 
 tests.C
 test_fluidsolver.C
