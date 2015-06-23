@@ -219,6 +219,8 @@ namespace sdc
             B( i ) = A( nbStages - 1, i );
 
         solver->setNumberOfStages( nbStages );
+
+        adaptiveTimeStepper->setEndTime( solver->getEndTime() );
     }
 
     ESDIRK::~ESDIRK()
@@ -301,25 +303,7 @@ namespace sdc
 
             errorEstimate *= dt;
 
-            scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
-            squaredNorm[Pstream::myProcNo()] = errorEstimate.squaredNorm();
-            reduce( squaredNorm, sumOp<scalarList>() );
-            double error = std::sqrt( sum( squaredNorm ) );
-
-            squaredNorm = 0;
-            squaredNorm[Pstream::myProcNo()] = result.squaredNorm();
-            reduce( squaredNorm, sumOp<scalarList>() );
-            error /= std::sqrt( sum( squaredNorm ) );
-
-            bool accepted = adaptiveTimeStepper->determineNewTimeStep( error, dt, newTimeStep );
-
-            if ( accepted )
-            {
-                double t = t0 + dt + newTimeStep;
-
-                if ( t > solver->getEndTime() )
-                    newTimeStep = std::abs( solver->getEndTime() - t0 - dt );
-            }
+            bool accepted = adaptiveTimeStepper->determineNewTimeStep( errorEstimate, result, dt, newTimeStep );
 
             dt = newTimeStep;
 

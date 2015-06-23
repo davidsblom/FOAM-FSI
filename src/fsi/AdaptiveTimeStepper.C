@@ -25,7 +25,9 @@ AdaptiveTimeStepper::AdaptiveTimeStepper(
     rhoold( 0 ),
     timeStepIndex( 0 ),
     accepted( false ),
-    previousTimeStepRejected( false )
+    previousTimeStepRejected( false ),
+    endTime( 0 ),
+    t( 0 )
 {
     assert( filter == "h211b" || filter == "elementary" || filter == "pi42" );
     assert( tol > 0 );
@@ -37,11 +39,35 @@ AdaptiveTimeStepper::~AdaptiveTimeStepper()
 {}
 
 bool AdaptiveTimeStepper::determineNewTimeStep(
+    const Eigen::VectorXd & errorEstimate,
+    const Eigen::VectorXd & solution,
+    const double computedTimeStep,
+    double & newTimeStep
+    )
+{
+    assert( endTime > 0 );
+
+    scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
+    squaredNorm[Pstream::myProcNo()] = errorEstimate.squaredNorm();
+    reduce( squaredNorm, sumOp<scalarList>() );
+    double error = std::sqrt( sum( squaredNorm ) );
+
+    squaredNorm = 0;
+    squaredNorm[Pstream::myProcNo()] = solution.squaredNorm();
+    reduce( squaredNorm, sumOp<scalarList>() );
+    error /= std::sqrt( sum( squaredNorm ) );
+
+    return determineNewTimeStep( error, computedTimeStep, newTimeStep );
+}
+
+bool AdaptiveTimeStepper::determineNewTimeStep(
     const double errorEstimate,
     const double computedTimeStep,
     double & newTimeStep
     )
 {
+    assert( endTime > 0 );
+
     if ( not enabled )
     {
         newTimeStep = computedTimeStep;
@@ -77,6 +103,10 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
     {
         previousTimeStepRejected = false;
         timeStepIndex++;
+        t += computedTimeStep;
+
+        if ( t + newTimeStep > endTime )
+            newTimeStep = endTime - t;
     }
     else
         previousTimeStepRejected = true;
@@ -150,4 +180,10 @@ double AdaptiveTimeStepper::pi42(
 {
     // PI.4.2 controller
     return std::pow( c1, 3.0 / 5.0 / k ) * std::pow( c0, -1.0 / 5.0 / k );
+}
+
+void AdaptiveTimeStepper::setEndTime( double endTime )
+{
+    assert( endTime > 0 );
+    this->endTime = endTime;
 }

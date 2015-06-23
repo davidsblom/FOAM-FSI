@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <math.h>
 #include "fvCFD.H"
+#include <Eigen/Dense>
 
 namespace sdc
 {
@@ -31,6 +32,13 @@ public:
             );
 
         ~AdaptiveTimeStepper();
+
+        bool determineNewTimeStep(
+            const Eigen::VectorXd & errorEstimate,
+            const Eigen::VectorXd & solution,
+            const double computedTimeStep,
+            double & newTimeStep
+            );
 
         bool determineNewTimeStep(
             const double errorEstimate,
@@ -64,6 +72,8 @@ public:
             const double rho
             );
 
+        void setEndTime( double endTime );
+
 private:
 
         bool enabled;
@@ -76,6 +86,8 @@ private:
         int timeStepIndex;
         bool accepted;
         bool previousTimeStepRejected;
+        double endTime;
+        double t;
     };
 }
 
