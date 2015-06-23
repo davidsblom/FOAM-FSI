@@ -38,7 +38,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     globalMovingPointsLabelList( mesh.boundaryMesh().size(), labelList( 0 ) ),
     twoDCorrector( mesh ),
     nbPoints( 0 ),
-    faceCellCenters( false ),
+    faceCellCenters( true ),
     cpu( false )
 {
     // Find IDs of staticPatches
