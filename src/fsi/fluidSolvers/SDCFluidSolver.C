@@ -505,6 +505,8 @@ void SDCFluidSolver::setSolution(
     const Eigen::VectorXd & f
     )
 {
+    p = pStages.at( 0 );
+
     int index = 0;
 
     forAll( U.internalField(), i )
