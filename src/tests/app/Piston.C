@@ -86,7 +86,10 @@ void Piston::getSolution( Eigen::VectorXd & solution )
     solution( 1 ) = q;
 }
 
-void Piston::setSolution( const Eigen::VectorXd & solution, const Eigen::VectorXd & f )
+void Piston::setSolution(
+    const Eigen::VectorXd & solution,
+    const Eigen::VectorXd & f
+    )
 {
     assert( solution.rows() == 2 );
     qdot = solution( 0 );

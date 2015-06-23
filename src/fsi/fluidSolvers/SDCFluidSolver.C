@@ -500,7 +500,10 @@ void SDCFluidSolver::getSolution( Eigen::VectorXd & solution )
     assert( index == solution.rows() );
 }
 
-void SDCFluidSolver::setSolution( const Eigen::VectorXd & solution, const Eigen::VectorXd & f )
+void SDCFluidSolver::setSolution(
+    const Eigen::VectorXd & solution,
+    const Eigen::VectorXd & f
+    )
 {
     int index = 0;
 
