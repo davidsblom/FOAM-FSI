@@ -620,7 +620,6 @@ void SDCFluidSolver::implicitSolve(
     )
 {
     bool convergence = false;
-    double told = runTime->value();
     runTime->setDeltaT( dt );
     runTime->setTime( t, runTime->timeIndex() );
 
