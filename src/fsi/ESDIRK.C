@@ -271,6 +271,11 @@ namespace sdc
         solver->evaluateFunction( 0, sol, t, f );
         F.row( 0 ) = f;
 
+        // Keep the solution of the first stage and function evaluate
+        // in memory in case the time step is rejected
+        Eigen::VectorXd solOld = sol;
+        Eigen::VectorXd fOld = f;
+
         // Loop over the stages
 
         solver->initTimeStep();
@@ -314,7 +319,7 @@ namespace sdc
             dt = newTimeStep;
 
             if ( not accepted )
-                solver->setSolution( solStages.row( 0 ), F.row( 0 ) );
+                solver->setSolution( solOld, fOld );
         }
 
         if ( adaptiveTimeStepper->isAccepted() )
