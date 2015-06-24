@@ -25,6 +25,7 @@ namespace rbf
         twoPointSelection( false ),
         surfaceCorrection( false ),
         ratioRadiusError( 10 ),
+        maxWallDistance( 1.0 ),
         exportTxt( false ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -118,6 +119,7 @@ namespace rbf
         twoPointSelection( twoPointSelection ),
         surfaceCorrection( false ),
         ratioRadiusError( 10.0 ),
+        maxWallDistance( 1.0 ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -159,6 +161,7 @@ namespace rbf
         bool twoPointSelection,
         bool surfaceCorrection,
         double ratioRadiusError,
+        double maxWallDistance,
         bool exportTxt
         )
         :
@@ -174,6 +177,7 @@ namespace rbf
         twoPointSelection( twoPointSelection ),
         surfaceCorrection( surfaceCorrection ),
         ratioRadiusError( ratioRadiusError ),
+        maxWallDistance( maxWallDistance ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -525,8 +529,11 @@ namespace rbf
             valuesCorrection.conservativeResize( valuesInterpolation.rows(), valuesInterpolation.cols() );
             valuesCorrection.setZero();
         }
-
-        double R = ratioRadiusError * ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff();
+        double Rerror = ratioRadiusError * ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff();
+        double Rwall = ratioRadiusError * maxWallDistance;
+        //double R = Rwall;
+        //double R = ratioRadiusError;
+        double R = max(Rerror,Rwall);
 
         if ( debug > 0 )
         {

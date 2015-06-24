@@ -17,6 +17,34 @@ addToRunTimeSelectionTable
     dictionary
 );
 
+scalar RBFMeshMotionSolver::getMaxWallDistance()
+{
+    scalarField globalMaxWallDistance(Pstream::nProcs(),0.0);
+
+    scalarField maxWallDistances(movingPatchIDs.size(),0.0);
+    forAll(movingPatchIDs,patchI)
+    {
+        const polyPatch& currPatch = mesh().boundaryMesh()[patchI];
+        const vectorField& currPatchCf = currPatch.faceCentres();
+        const labelList& currPatchCellID = currPatch.faceCells();
+        const vectorField& currPatchSf = currPatch.faceAreas();
+
+        scalarField maxDistance(currPatch.size(),0.0);
+        forAll(maxDistance,iface)
+        {
+            const vector& cellC = mesh().cellCentres()[currPatch.faceCells()[iface]];
+            maxDistance[iface] = 2*((currPatchCf[iface]-cellC) & currPatchSf[iface])/mag(currPatchSf[iface]);
+        }
+        maxWallDistances[patchI] = max(maxDistance);
+    }
+    globalMaxWallDistance[Pstream::myProcNo()] = max(maxWallDistances);
+
+    reduce( globalMaxWallDistance, sumOp<scalarField>() );
+    scalar maxWallDistance = max(globalMaxWallDistance);
+
+    return maxWallDistance;
+}
+
 RBFMeshMotionSolver::RBFMeshMotionSolver(
     const polyMesh & mesh,
     Istream & msData
@@ -167,6 +195,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         twoPointSelection = subDict( "coarsening" ).lookupOrDefault( "twoPointSelection", false );
     }
 
+    double maxWallDistance = 0.0;
     if ( livePointSelection )
     {
         tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
@@ -175,10 +204,11 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         if ( surfaceCorrection )
         {
             ratioRadiusError = subDict( "coarsening" ).lookupOrDefault( "ratioRadiusError", 10.0 );
+            maxWallDistance = getMaxWallDistance();
         }
     }
 
-    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, ratioRadiusError, exportSelectedPoints ) );
+    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, ratioRadiusError, maxWallDistance, exportSelectedPoints ) );
 
     faceCellCenters = lookupOrDefault( "faceCellCenters", true );
 
@@ -190,6 +220,11 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     Info << "        coarsening tolerance = " << tol << endl;
     Info << "        coarsening reselection tolerance = " << tolLivePointSelection << endl;
     Info << "        coarsening two-point selection = " << twoPointSelection << endl;
+    Info << "        coarsening surface correction = " << surfaceCorrection << endl;
+    if( debug > 1 )
+    {
+        Info << "    interpolation from face cell centers = " << faceCellCenters << endl;
+    }
 }
 
 RBFMeshMotionSolver::~RBFMeshMotionSolver()

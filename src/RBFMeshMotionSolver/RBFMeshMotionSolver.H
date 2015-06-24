@@ -59,6 +59,8 @@ private:
         bool faceCellCenters;
         bool cpu;
 
+        scalar getMaxWallDistance();
+
 public:
 
         // Runtime type information
