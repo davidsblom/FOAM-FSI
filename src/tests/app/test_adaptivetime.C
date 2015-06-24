@@ -84,6 +84,17 @@ TEST_P( AdaptiveTimeSteppingESDIRKTest, solveTimeStep )
 TEST_P( AdaptiveTimeSteppingESDIRKTest, run )
 {
     esdirk->run();
+
+    Eigen::VectorXd solution( 2 );
+    piston->getSolution( solution );
+
+    double result = solution( 1 );
+    double ref = piston->referenceSolution( 100 );
+    double error = std::abs( result - ref ) / std::abs( ref );
+
+    double tol = std::tr1::get<2>( GetParam() );
+
+    ASSERT_LT( error, 100*tol );
 }
 
 class AdaptiveTimeSteppingSDCTest : public TestWithParam< std::tr1::tuple<double, int> >

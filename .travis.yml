@@ -25,5 +25,5 @@ before_script:
     - source etc/bashrc
     - export WM_NCOMPPROCS=1
     - ln -fs /usr/bin/make bin/gmake
-    - ./Allwmake.firstInstall > log.Allwmake 2> log.Allwmake_error
+    - ./Allwmake.firstInstall
     - ./Allwmake
