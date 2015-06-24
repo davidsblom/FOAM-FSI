@@ -19,7 +19,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class RBFCoarseningParametrizedTest : public TestWithParam < std::tr1::tuple<bool, int, int, int> >
+class RBFCoarseningParametrizedTest : public TestWithParam < std::tr1::tuple<bool, int, int, int, double, bool> >
 {
 protected:
 
@@ -52,13 +52,13 @@ protected:
             assert( false );
 
         bool polynomialTerm = false;
-        bool cpu = false;
+        bool cpu = std::tr1::get<5>( GetParam() );
         std::shared_ptr<RBFInterpolation> rbfInterpolator( new RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
 
         bool enabled = std::tr1::get<0>( GetParam() );
-        double tol = 1.0e-6;
         int coarseningMinPoints = std::tr1::get<2>( GetParam() );
         int coarseningMaxPoints = std::tr1::get<3>( GetParam() );
+        double tol = std::tr1::get<4>( GetParam() );
 
         rbf = std::shared_ptr<RBFCoarsening>( new RBFCoarsening( rbfInterpolator, enabled, false, false, tol, 0.1, coarseningMinPoints, coarseningMaxPoints, false ) );
     }
@@ -71,7 +71,7 @@ protected:
     std::shared_ptr<RBFCoarsening> rbf;
 };
 
-INSTANTIATE_TEST_CASE_P( RBFTest, RBFCoarseningParametrizedTest, ::testing::Combine( Bool(), Values( 0, 1, 2, 3, 4 ), Values( 10, 25 ), Values( 25, 100 ) ) );
+INSTANTIATE_TEST_CASE_P( RBFTest, RBFCoarseningParametrizedTest, ::testing::Combine( Bool(), Values( 0, 1, 2, 3, 4 ), Values( 10, 25 ), Values( 25, 100 ), Values( 1.0e-6, 1.0e-30 ), Bool() ) );
 
 TEST_P( RBFCoarseningParametrizedTest, rbf1d_regularity )
 {

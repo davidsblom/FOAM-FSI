@@ -10,54 +10,75 @@ namespace sdc
 {
     ESDIRK::ESDIRK(
         std::shared_ptr<SDCSolver> solver,
-        std::string method
+        std::string method,
+        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper
         )
         :
         solver( solver ),
+        adaptiveTimeStepper( adaptiveTimeStepper ),
         dt( solver->getTimeStep() ),
         nbStages( 0 ),
         A(),
         B(),
         C(),
+        Bhat(),
         N( solver->getDOF() )
     {
         assert( method == "SDIRK2" || method == "SDIRK3" || method == "SDIRK4" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK5" );
         assert( solver );
+        assert( adaptiveTimeStepper );
         assert( dt > 0 );
 
         // source: Ellsiepen. Habilitation thesis Philipp Birken
         if ( method == "SDIRK2" )
         {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 1 );
             double alpha = 1.0 - 0.5 * std::sqrt( 2 );
+            double alphahat = 2.0 - 5.0 / 4.0 * std::sqrt( 2 );
             A.resize( 2, 2 );
             A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
             A( 0, 0 ) = alpha;
             A( 1, 0 ) = 1.0 - alpha;
             A( 1, 1 ) = alpha;
+            Bhat( 0 ) = 1 - alphahat;
+            Bhat( 1 ) = alphahat;
         }
 
         // source: Cash. Habilitation thesis Philipp Birken
         if ( method == "SDIRK3" )
         {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 2 );
             A.resize( 3, 3 );
             A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
             double alpha = 1.2084966491760101;
             double beta = -0.6443631706844691;
             double gamma = 0.4358665215084580;
             double delta = 0.7179332607542295;
+            double alphahat = 0.7726301276675511;
+            double betahat = 0.2273698723324489;
             A( 0, 0 ) = gamma;
             A( 1, 0 ) = delta - gamma;
             A( 1, 1 ) = gamma;
             A( 2, 0 ) = alpha;
             A( 2, 1 ) = beta;
             A( 2, 2 ) = gamma;
+            Bhat( 0 ) = alphahat;
+            Bhat( 1 ) = betahat;
+            Bhat( 2 ) = 0;
         }
 
         // source: Cash-5-3-4 http://runge.math.smu.edu/arkode_dev/doc/guide/build/html/Butcher.html
         if ( method == "SDIRK4" )
         {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 3 );
             A.resize( 5, 5 );
             A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
             A( 0, 0 ) = 0.435866521508;
             A( 1, 0 ) = -1.13586652150;
             A( 1, 1 ) = 0.435866521508;
@@ -73,12 +94,20 @@ namespace sdc
             A( 4, 2 ) = -0.0845900310706;
             A( 4, 3 ) = -0.266418670647;
             A( 4, 4 ) = 0.435866521508;
+            Bhat( 0 ) = 0.776691932910;
+            Bhat( 1 ) = 0.0297472791484;
+            Bhat( 2 ) = -0.0267440239074;
+            Bhat( 3 ) = 0.220304811849;
+            Bhat( 4 ) = 0;
         }
 
         if ( method == "ESDIRK3" )
         {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 2 );
             A.resize( 4, 4 );
             A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
             A( 0, 0 ) = 0.0;
             A( 1, 0 ) = 1767732205903.0 / 4055673282236.0;
             A( 1, 1 ) = 1767732205903.0 / 4055673282236.0;
@@ -89,12 +118,19 @@ namespace sdc
             A( 3, 1 ) = -4482444167858.0 / 7529755066697.0;
             A( 3, 2 ) = 11266239266428.0 / 11593286722821.0;
             A( 3, 3 ) = 1767732205903.0 / 4055673282236.0;
+            Bhat( 0 ) = 2756255671327.e0 / 12835298489170.e0;
+            Bhat( 1 ) = -10771552573575.e0 / 22201958757719.e0;
+            Bhat( 2 ) = 9247589265047.e0 / 10645013368117.e0;
+            Bhat( 3 ) = 2193209047091.e0 / 5459859503100.e0;
         }
 
         if ( method == "ESDIRK4" )
         {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 3 );
             A.resize( 6, 6 );
             A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
             A( 1, 0 ) = 1.e0 / 4.e0;
             A( 1, 1 ) = 1.e0 / 4.e0;
             A( 2, 0 ) = 8611.e0 / 62500.e0;
@@ -115,12 +151,21 @@ namespace sdc
             A( 5, 3 ) = 69875.e0 / 102672.e0;
             A( 5, 4 ) = -2260.e0 / 8211.e0;
             A( 5, 5 ) = 1.e0 / 4.e0;
+            Bhat( 0 ) = 4586570599.e0 / 29645900160.e0;
+            Bhat( 1 ) = 0.e0;
+            Bhat( 2 ) = 178811875.e0 / 945068544.e0;
+            Bhat( 3 ) = 814220225.e0 / 1159782912.e0;
+            Bhat( 4 ) = -3700637.e0 / 11593932.e0;
+            Bhat( 5 ) = 61727.e0 / 225920.e0;
         }
 
         if ( method == "ESDIRK5" )
         {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 4 );
             A.resize( 8, 8 );
             A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
             A( 0, 0 ) = 0.e0;
             A( 1, 0 ) = 41.e0 / 200.e0;
             A( 1, 1 ) = 41.e0 / 200.e0;
@@ -157,6 +202,14 @@ namespace sdc
             A( 7, 5 ) = -39379526789629.e0 / 19018526304540.e0;
             A( 7, 6 ) = 32727382324388.e0 / 42900044865799.e0;
             A( 7, 7 ) = 41.e0 / 200.e0;
+            Bhat( 0 ) = -975461918565.e0 / 9796059967033.e0;
+            Bhat( 1 ) = 0.e0;
+            Bhat( 2 ) = 0.e0;
+            Bhat( 3 ) = 78070527104295.e0 / 32432590147079.e0;
+            Bhat( 4 ) = -548382580838.e0 / 3424219808633.e0;
+            Bhat( 5 ) = -33438840321285.e0 / 15594753105479.e0;
+            Bhat( 6 ) = 3629800801594.e0 / 4656183773603.e0;
+            Bhat( 7 ) = 4035322873751.e0 / 18575991585200.e0;
         }
 
         nbStages = A.cols();
@@ -172,6 +225,8 @@ namespace sdc
             B( i ) = A( nbStages - 1, i );
 
         solver->setNumberOfStages( nbStages );
+
+        adaptiveTimeStepper->setEndTime( solver->getEndTime() );
     }
 
     ESDIRK::~ESDIRK()
@@ -184,18 +239,23 @@ namespace sdc
 
     void ESDIRK::run()
     {
-        int i = 0;
+        double t = 0;
 
-        while ( solver->isRunning() )
+        while ( t < solver->getEndTime() )
         {
-            solveTimeStep( dt * i );
-            i++;
+            double computedTimeStep = dt;
+
+            solveTimeStep( t );
+
+            if ( adaptiveTimeStepper->isAccepted() )
+                t += computedTimeStep;
         }
     }
 
     void ESDIRK::solveTimeStep( const double t0 )
     {
-        solver->nextTimeStep();
+        if ( adaptiveTimeStepper->isPreviousStepAccepted() )
+            solver->nextTimeStep();
 
         Eigen::MatrixXd solStages( nbStages, N ), F( nbStages, N );
         F.setZero();
@@ -212,6 +272,8 @@ namespace sdc
         F.row( 0 ) = f;
 
         // Loop over the stages
+
+        solver->initTimeStep();
 
         for ( int j = 0; j < nbStages; j++ )
         {
@@ -230,14 +292,32 @@ namespace sdc
 
             rhs.array() *= dt;
 
-            solver->initTimeStep();
             solver->implicitSolve( false, j, t, A( j, j ) * dt, qold, rhs, f, result );
-            solver->finalizeTimeStep();
 
             solStages.row( j ) = result;
             F.row( j ) = f;
         }
 
-        solver->setDeltaT( dt );
+        if ( adaptiveTimeStepper->isEnabled() )
+        {
+            double newTimeStep = 0;
+            Eigen::VectorXd errorEstimate( N );
+            errorEstimate.setZero();
+
+            for ( int iStage = 0; iStage < nbStages; iStage++ )
+                errorEstimate += ( B( iStage ) - Bhat( iStage ) ) * F.row( iStage );
+
+            errorEstimate *= dt;
+
+            bool accepted = adaptiveTimeStepper->determineNewTimeStep( errorEstimate, result, dt, newTimeStep );
+
+            dt = newTimeStep;
+
+            if ( not accepted )
+                solver->setSolution( solStages.row( 0 ), F.row( 0 ) );
+        }
+
+        if ( adaptiveTimeStepper->isAccepted() )
+            solver->finalizeTimeStep();
     }
 }

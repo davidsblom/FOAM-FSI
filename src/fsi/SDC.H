@@ -10,6 +10,7 @@
 #include <memory>
 #include "SDCSolver.H"
 #include "fvCFD.H"
+#include "AdaptiveTimeStepper.H"
 
 namespace sdc
 {
@@ -19,6 +20,7 @@ public:
 
         SDC(
             std::shared_ptr<SDCSolver> solver,
+            std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
             std::string rule,
             int nbNodes,
             double tol
@@ -31,12 +33,16 @@ public:
         void solveTimeStep( const double t0 );
 
         std::shared_ptr<SDCSolver> solver;
+        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
 
         int nbNodes;
 
         Eigen::VectorXd nodes;
         Eigen::MatrixXd smat;
         Eigen::MatrixXd qmat;
+        Eigen::VectorXd nodesEmbedded;
+        Eigen::MatrixXd smatEmbedded;
+        Eigen::MatrixXd qmatEmbedded;
         Eigen::VectorXd dsdc;
         double dt;
         int N;

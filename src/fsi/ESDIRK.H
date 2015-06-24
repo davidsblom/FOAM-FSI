@@ -9,6 +9,7 @@
 
 #include <memory>
 #include "SDCSolver.H"
+#include "AdaptiveTimeStepper.H"
 #include "fvCFD.H"
 
 namespace sdc
@@ -19,7 +20,8 @@ public:
 
         ESDIRK(
             std::shared_ptr<SDCSolver> solver,
-            std::string method
+            std::string method,
+            std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper
             );
 
         ~ESDIRK();
@@ -28,17 +30,18 @@ public:
 
         void solveTimeStep( const double t0 );
 
-        std::shared_ptr<SDCSolver> solver;
-
 private:
 
         bool isStageImplicit( double Akk );
 
+        std::shared_ptr<SDCSolver> solver;
+        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
         double dt;
         int nbStages;
         Eigen::MatrixXd A;
         Eigen::VectorXd B;
         Eigen::VectorXd C;
+        Eigen::VectorXd Bhat;
         int N;
     };
 }

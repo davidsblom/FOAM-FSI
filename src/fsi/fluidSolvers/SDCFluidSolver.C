@@ -360,21 +360,11 @@ void SDCFluidSolver::initialize()
 }
 
 void SDCFluidSolver::initTimeStep()
-{
-    assert( !init );
-
-    init = true;
-}
+{}
 
 bool SDCFluidSolver::isRunning()
 {
-    runTime->write();
-
-    Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
-         << "  ClockTime = " << runTime->elapsedClockTime() << " s"
-         << endl << endl;
-
-    return runTime->loop();
+    return runTime->run();
 }
 
 void SDCFluidSolver::resetSolution()
@@ -402,6 +392,7 @@ void SDCFluidSolver::setNumberOfStages( int k )
 void SDCFluidSolver::nextTimeStep()
 {
     timeIndex++;
+    (*runTime)++;
 
     if ( pStages.size() == static_cast<unsigned>(k) )
     {
@@ -421,7 +412,11 @@ void SDCFluidSolver::solve()
 
 void SDCFluidSolver::finalizeTimeStep()
 {
-    foamFluidSolver::finalizeTimeStep();
+    runTime->writeNow();
+
+    Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
+         << "  ClockTime = " << runTime->elapsedClockTime() << " s"
+         << endl << endl;
 }
 
 int SDCFluidSolver::getDOF()
@@ -489,7 +484,7 @@ void SDCFluidSolver::getSolution( Eigen::VectorXd & solution )
 
     forAll( phi.internalField(), i )
     {
-        solution( index ) = phi[i];
+        solution( index ) = phi.internalField()[i];
         index++;
     }
 
@@ -503,6 +498,99 @@ void SDCFluidSolver::getSolution( Eigen::VectorXd & solution )
     }
 
     assert( index == solution.rows() );
+}
+
+void SDCFluidSolver::setSolution(
+    const Eigen::VectorXd & solution,
+    const Eigen::VectorXd & f
+    )
+{
+    p = pStages.at( 0 );
+
+    int index = 0;
+
+    forAll( U.internalField(), i )
+    {
+        for ( int j = 0; j < 3; j++ )
+        {
+            U.internalField()[i][j] = solution( index );
+            index++;
+        }
+    }
+
+    forAll( U.boundaryField(), patchI )
+    {
+        forAll( U.boundaryField()[patchI], i )
+        {
+            for ( int j = 0; j < 3; j++ )
+            {
+                U.boundaryField()[patchI][i][j] = solution( index );
+                index++;
+            }
+        }
+    }
+
+    forAll( phi.internalField(), i )
+    {
+        phi.internalField()[i] = solution( index );
+        index++;
+    }
+
+    forAll( phi.boundaryField(), patchI )
+    {
+        forAll( phi.boundaryField()[patchI], i )
+        {
+            phi.boundaryField()[patchI][i] = solution( index );
+            index++;
+        }
+    }
+
+    assert( index == solution.rows() );
+
+    index = 0;
+
+    forAll( UF.internalField(), i )
+    {
+        for ( int j = 0; j < 3; j++ )
+        {
+            UF.internalField()[i][j] = f( index );
+            index++;
+        }
+    }
+
+    forAll( UF.boundaryField(), patchI )
+    {
+        forAll( UF.boundaryField()[patchI], i )
+        {
+            for ( int j = 0; j < 3; j++ )
+            {
+                UF.boundaryField()[patchI][i][j] = f( index );
+                index++;
+            }
+        }
+    }
+
+    forAll( phiF.internalField(), i )
+    {
+        phiF.internalField()[i] = f( index );
+        index++;
+    }
+
+    forAll( phiF.boundaryField(), patchI )
+    {
+        forAll( phiF.boundaryField()[patchI], i )
+        {
+            phiF.boundaryField()[patchI][i] = f( index );
+            index++;
+        }
+    }
+
+    assert( index == f.rows() );
+}
+
+double SDCFluidSolver::getEndTime()
+{
+    return runTime->endTime().value() - runTime->startTime().value();
 }
 
 double SDCFluidSolver::getTimeStep()
@@ -549,7 +637,7 @@ void SDCFluidSolver::evaluateFunction(
 
     forAll( phiF.internalField(), i )
     {
-        f( index ) = phiF[i];
+        f( index ) = phiF.internalField()[i];
         index++;
     }
 
@@ -578,8 +666,6 @@ void SDCFluidSolver::implicitSolve(
 {
     bool convergence = false;
     runTime->setDeltaT( dt );
-
-    double told = runTime->value();
     runTime->setTime( t, runTime->timeIndex() );
 
     if ( corrector )
@@ -844,8 +930,6 @@ void SDCFluidSolver::implicitSolve(
 
     getSolution( result );
     evaluateFunction( k + 1, qold, t, f );
-
-    runTime->setTime( told, runTime->timeIndex() );
 }
 
 double SDCFluidSolver::getScalingFactor()
