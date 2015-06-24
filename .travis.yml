@@ -8,3 +8,17 @@ before_install:
     - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq gcc-4.8; fi
     - sudo apt-get install -qq libboost-system-dev cmake git git-core flex bison libboost-filesystem-dev
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+before_script:
+    - git clone --branch nextRelease git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1
+    - export FOAM_INST_DIR=`pwd`
+    - export VERSION=3.1
+    - export WM_THIRD_PARTY_DIR=$FOAM_INST_DIR/foam-extend-${VERSION}/ThirdParty
+    - export PARAVIEW_SYSTEM=1
+    - export CUDA_IGNORE=1
+    - export SWAK4FOAM_SYSTEM=1
+    - cd $FOAM_INST_DIR/foam-extend-${VERSION}
+    - source etc/bashrc
+    - ln -fs /usr/bin/make bin/gmake
+    - ./Allwmake.firstInstall
+    - ./Allwmake
+    
