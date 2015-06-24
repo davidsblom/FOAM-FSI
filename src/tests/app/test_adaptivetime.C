@@ -31,7 +31,7 @@ using::testing::Combine;
  * http://en.wikipedia.org/wiki/Legendre_polynomials
  */
 
-class AdaptiveTimeSteppingESDIRKTest : public TestWithParam< std::tr1::tuple<int, std::string> >
+class AdaptiveTimeSteppingESDIRKTest : public TestWithParam< std::tr1::tuple<int, std::string, double> >
 {
 protected:
 
@@ -41,6 +41,7 @@ protected:
 
         int nbTimeSteps = std::tr1::get<0>( GetParam() );
         std::string method = std::tr1::get<1>( GetParam() );
+        double tol = std::tr1::get<2>( GetParam() );
 
         endTime = 100;
         dt = endTime / nbTimeSteps;
@@ -50,7 +51,7 @@ protected:
         q0 = -As;
         qdot0 = -As;
 
-        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( true, "h211b", 1.0e-3, 0.5 ) );
+        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( true, "h211b", tol, 0.5 ) );
 
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
         esdirk = std::shared_ptr<ESDIRK> ( new ESDIRK( piston, method, adaptiveTimeStepper ) );
@@ -68,7 +69,7 @@ protected:
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, AdaptiveTimeSteppingESDIRKTest, ::testing::Combine( Values( 2, 100, 200, 400, 800, 1600, 3200 ), Values( "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5" ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, AdaptiveTimeSteppingESDIRKTest, ::testing::Combine( Values( 2, 100, 200, 400, 800, 1600, 3200 ), Values( "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5" ), Values( 1.0e-2, 1.0e-4, 1.0e-6, 1.0e-8 ) ) );
 
 TEST_P( AdaptiveTimeSteppingESDIRKTest, object )
 {
@@ -83,8 +84,6 @@ TEST_P( AdaptiveTimeSteppingESDIRKTest, solveTimeStep )
 TEST_P( AdaptiveTimeSteppingESDIRKTest, run )
 {
     esdirk->run();
-
-    ASSERT_NEAR( piston->t, 100, 1.0e-5 );
 }
 
 class AdaptiveTimeSteppingSDCTest : public TestWithParam< std::tr1::tuple<double, int> >
@@ -96,9 +95,10 @@ protected:
         double dt, q0, qdot0, As, Ac, omega, endTime;
 
         int nbTimeSteps = 2;
-        int nbNodes = std::tr1::get<1>( GetParam() );
         std::string rule = "clenshaw-curtis";
+
         double tol = std::tr1::get<0>( GetParam() );
+        int nbNodes = std::tr1::get<1>( GetParam() );
 
         endTime = 100;
         dt = endTime / nbTimeSteps;
@@ -143,4 +143,15 @@ TEST_P( AdaptiveTimeSteppingSDCTest, run )
     sdc->run();
 
     ASSERT_NEAR( piston->t, 100, 1.0e-5 );
+
+    Eigen::VectorXd solution( 2 );
+    piston->getSolution( solution );
+
+    double result = solution( 1 );
+    double ref = piston->referenceSolution( 100 );
+    double error = std::abs( result - ref ) / std::abs( ref );
+
+    double tol = std::tr1::get<0>( GetParam() );
+
+    ASSERT_LT( error, tol );
 }
