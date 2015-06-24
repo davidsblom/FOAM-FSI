@@ -223,7 +223,7 @@ namespace sdc
             dt = newTimeStep;
 
             if ( not accepted )
-                solver->setSolution( solStages.row( 0 ) );
+                solver->setSolution( solStages.row( 0 ), F.row( 0 ) );
         }
 
         if ( adaptiveTimeStepper->isAccepted() )

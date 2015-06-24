@@ -122,7 +122,10 @@ void SDCLaplacianSolver::getSolution( Eigen::VectorXd & solution )
         solution( i ) = T[i];
 }
 
-void SDCLaplacianSolver::setSolution( const Eigen::VectorXd & solution )
+void SDCLaplacianSolver::setSolution(
+    const Eigen::VectorXd & solution,
+    const Eigen::VectorXd & f
+    )
 {
     for ( int i = 0; i < T.size(); i++ )
         T[i] = solution( i );
