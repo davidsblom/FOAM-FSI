@@ -21,6 +21,7 @@ before_script:
     - export CXX="g++-4.8"
     - export CC="gcc-4.8"
     - export WM_NCOMPPROCS=1
+    - export FOAM_VERBOSE=0
     - cd $FOAM_INST_DIR/foam-extend-${VERSION}
     - source etc/bashrc
     - export WM_NCOMPPROCS=1
