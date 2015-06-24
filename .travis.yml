@@ -15,6 +15,8 @@ before_script:
     - export SWAK4FOAM_SYSTEM=1
     - export WM_CC='gcc-4.8'
     - export WM_CXX='g++-4.8'
+    - export CXX="g++-4.8"
+    - export CC="gcc-4.8"
     - cd $FOAM_INST_DIR/foam-extend-${VERSION}
     - source etc/bashrc
     - ln -fs /usr/bin/make bin/gmake
