@@ -6,7 +6,7 @@ before_install:
     - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
     - sudo apt-get update -qq
     - sudo apt-get install -qq gcc-4.8 g++-4.8
-    - sudo apt-get install -qq rpm libboost-system-dev cmake git git-core flex bison libboost-filesystem-dev
+    - sudo apt-get install -qq rpm libboost-system-dev cmake git git-core flex bison libboost-filesystem-dev cmake
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 before_script:
     - git clone --branch nextRelease git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1
@@ -22,6 +22,7 @@ before_script:
     - export CC="gcc-4.8"
     - export WM_NCOMPPROCS=1
     - export FOAM_VERBOSE=0
+    - export CMAKE_SYSTEM=1
     - cd $FOAM_INST_DIR/foam-extend-${VERSION}
     - source etc/bashrc
     - export WM_NCOMPPROCS=1
