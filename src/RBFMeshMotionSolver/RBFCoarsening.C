@@ -336,10 +336,6 @@ namespace rbf
                     break;
                 }
 
-                selectedPositions.conservativeResize( selectedPositions.rows() + 1 );
-                selectedPositions( selectedPositions.rows() - 1 ) = index;
-                counter++;
-
                 // Break if maximum point are reached
                 if ( counter >= maxNbPoints )
                 {
@@ -348,6 +344,10 @@ namespace rbf
 
                     break;
                 }
+
+                selectedPositions.conservativeResize( selectedPositions.rows() + 1 );
+                selectedPositions( selectedPositions.rows() - 1 ) = index;
+                counter++;
 
                 // Add second point if possible
                 if ( twoPointSelection && index2 >= 0 && index != index2 )
