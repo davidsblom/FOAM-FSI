@@ -23,6 +23,8 @@ before_script:
     - export WM_NCOMPPROCS=1
     - export FOAM_VERBOSE=0
     - export CMAKE_SYSTEM=1
+    - export CMAKE_DIR=/usr
+    - export CMAKE_BIN_DIR=/usr/bin
     - cd $FOAM_INST_DIR/foam-extend-${VERSION}
     - source etc/bashrc
     - export WM_NCOMPPROCS=1
