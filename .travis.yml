@@ -31,7 +31,7 @@ before_script:
     - export CMAKE_SYSTEM=1
     - export CMAKE_DIR=/usr
     - export CMAKE_BIN_DIR=/usr/bin
-    - export WM_THIRD_PARTY_USE_CMAKE_322=0
+    - unset WM_THIRD_PARTY_USE_CMAKE_322
     - ln -fs /usr/bin/make bin/gmake
     - ./Allwmake.firstInstall
     - ./Allwmake
