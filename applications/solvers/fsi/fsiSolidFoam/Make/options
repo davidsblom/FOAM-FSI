@@ -46,4 +46,5 @@ EXE_LIBS = \
     -ltetFiniteElement \
     -lbasicThermophysicalModels \
     -lspecie \
-    -lcompressibleRASModels
+    -lcompressibleRASModels \
+    -lmpi_cxx -lmpi

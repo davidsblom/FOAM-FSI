@@ -49,6 +49,13 @@ public:
 
     virtual void getSolution( Eigen::VectorXd & solution );
 
+    virtual void setSolution(
+        const Eigen::VectorXd & solution,
+        const Eigen::VectorXd & f
+        );
+
+    virtual double getEndTime();
+
     virtual void initTimeStep(){}
 
     virtual bool isRunning();
@@ -75,7 +82,10 @@ public:
         Eigen::VectorXd & f
         );
 
-    virtual void setDeltaT( double dt ){}
+    virtual void setDeltaT( double dt )
+    {
+        this->dt = dt;
+    }
 
     virtual void setNumberOfStages( int k ){}
 
@@ -104,6 +114,7 @@ public:
     double qdot;
     double t;
     double timeIndex;
+    double endTime;
 };
 
 #endif

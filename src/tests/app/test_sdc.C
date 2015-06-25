@@ -35,8 +35,12 @@ protected:
         q0 = -As;
         qdot0 = -As;
 
+        std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
+
+        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
+
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc = std::shared_ptr<SDC> ( new SDC( piston, rule, nbNodes, 1.0e-10 ) );
+        sdc = std::shared_ptr<SDC> ( new SDC( piston, adaptiveTimeStepper, rule, nbNodes, 1.0e-10 ) );
     }
 
     virtual void TearDown()

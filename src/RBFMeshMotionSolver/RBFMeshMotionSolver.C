@@ -484,7 +484,9 @@ void RBFMeshMotionSolver::solve()
             reduce( nbGlobalMovingFaceCenters, sumOp<labelList>() );
             nbStaticFaceCenters = sum( nbGlobalStaticFaceCenters );
             nbFixedFaceCenters = sum( nbGlobalFixedFaceCenters );
-            nbMovingFaceCenters = sum( nbGlobalMovingFaceCenters );
+
+            if ( not faceCellCenters )
+                nbMovingFaceCenters = sum( nbGlobalMovingFaceCenters );
 
             // Construct a list with all the global point labels, thus including
             // also double points. Thereafter, construct a list of static control
@@ -530,9 +532,13 @@ void RBFMeshMotionSolver::solve()
 
             reduce( globalStaticPointsList, sumOp<labelList>() );
             reduce( globalFixedPointsList, sumOp<labelList>() );
-            reduce( globalMovingPointsList, sumOp<labelList>() );
-            reduce( globalMovingPointsPatchIds, sumOp<labelList>() );
-            reduce( globalMovingPointsIndices, sumOp<labelList>() );
+
+            if ( not faceCellCenters )
+            {
+                reduce( globalMovingPointsList, sumOp<labelList>() );
+                reduce( globalMovingPointsPatchIds, sumOp<labelList>() );
+                reduce( globalMovingPointsIndices, sumOp<labelList>() );
+            }
 
             // Construct a list of static control points which indicate whether
             // should be included or not.

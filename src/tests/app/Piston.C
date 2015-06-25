@@ -29,7 +29,8 @@ Piston::Piston(
     q( q0 ),
     qdot( qdot0 ),
     t( 0 ),
-    timeIndex( 0 )
+    timeIndex( 0 ),
+    endTime( nbTimeSteps * dt )
 {
     assert( nbTimeSteps > 0 );
     assert( dt > 0 );
@@ -64,12 +65,18 @@ void Piston::evaluateFunction(
 
 void Piston::nextTimeStep()
 {
+    t += dt;
     timeIndex++;
 }
 
 int Piston::getDOF()
 {
     return 2;
+}
+
+double Piston::getEndTime()
+{
+    return endTime;
 }
 
 void Piston::getSolution( Eigen::VectorXd & solution )
@@ -79,6 +86,16 @@ void Piston::getSolution( Eigen::VectorXd & solution )
     solution( 1 ) = q;
 }
 
+void Piston::setSolution(
+    const Eigen::VectorXd & solution,
+    const Eigen::VectorXd & f
+    )
+{
+    assert( solution.rows() == 2 );
+    qdot = solution( 0 );
+    q = solution( 1 );
+}
+
 double Piston::getTimeStep()
 {
     return dt;
@@ -86,7 +103,10 @@ double Piston::getTimeStep()
 
 bool Piston::isRunning()
 {
-    return timeIndex < nbTimeSteps;
+    if ( std::abs( t - endTime ) < 1.0e-13 )
+        return false;
+
+    return t <= endTime;
 }
 
 void Piston::run()

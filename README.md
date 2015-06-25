@@ -18,9 +18,8 @@ Installation
 First, compile `foam-extend-3.1`, the `nextRelease` branch. A detailed description for the compilation of `foam-extend-3.1` can be found here: https://openfoamwiki.net/index.php/Installation/Linux/foam-extend-3.1. Note that FOAM-FSI uses the `nextRelease` branch as shown below:
 
 ``` bash
-git clone git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1
+git clone --branch nextRelease git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1
 cd foam-extend-3.1
-git checkout nextRelease
 ./Allwmake.firstInstall
 ```
 
@@ -55,4 +54,5 @@ The FOAM-FSI project has been started by David Blom. Many other people have also
 
 Philip Cardiff  
 Thijs Gillebaart  
+Eline ter Hofstede  
 Vahid Kazemi-Kamyab
