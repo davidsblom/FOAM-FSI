@@ -71,5 +71,14 @@ before_script:
     - export OPENMPI_DIR=/usr
     - export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
     - ln -fs /usr/bin/make bin/gmake
-    - ./Allwmake.firstInstall
-    - ./Allwmake
+    - ( cd wmake/src && make )
+    - ( cd $WM_THIRD_PARTY_DIR && ./AllMake.pre )
+    - . $WM_PROJECT_DIR/etc/settings.sh
+    - cd src        
+    - wmakePrintBuild -check || /bin/rm -f foam/Make/$WM_OPTIONS/global.? 2>/dev/null
+    - wmakeLnInclude foam
+    - wmakeLnInclude meshTools
+    - wmakeLnInclude OSspecific/$WM_OSTYPE
+    - Pstream/Allwmake
+    - wmake libo  OSspecific/$WM_OSTYPE
+    - wmake libso foam
