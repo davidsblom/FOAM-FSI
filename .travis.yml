@@ -1,22 +1,53 @@
 language: cpp
+
 cache:
     directories:
         - $HOME/foam-extend-3.1
+
 compiler:
     - g++
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+      - g++-4.8
+      - rpm
+      - libboost-system-dev
+      - cmake
+      - git
+      - git-core
+      - flex
+      - bison
+      - libboost-filesystem-dev
+      - libopenmpi-dev
+      - openmpi-bin
+      - openmpi-common
+      - openmpi-checkpoint
+      - metis-edf
+      - libmetis-edf-dev
+      - libparmetis-dev
+      - scotch
+      - libscotch-dev
+      - hwloc
+      - libhwloc-dev
+      - build-essential
+      - binutils-dev
+      - zlib1g-dev
+      - qt4-dev-tools
+      - libqt4-dev
+      - libncurses5-dev
+      - libxt-dev
+      - mercurial
+      - graphviz
+
 before_install:
-    - sudo apt-get update -qq
-    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-    - sudo apt-get update -qq
-    - sudo apt-get install -qq gcc-4.8 g++-4.8 rpm libboost-system-dev cmake git git-core flex bison libboost-filesystem-dev cmake libopenmpi-dev openmpi-bin openmpi-common openmpi-checkpoint
-    - sudo apt-get install -qq metis-edf libmetis-edf-dev
-    - sudo apt-get install -qq libparmetis-dev
-    - sudo apt-get install -qq scotch libscotch-dev
-    - sudo apt-get install -qq hwloc libhwloc-dev
-    - sudo apt-get install -qq build-essential binutils-dev zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libxt-dev mercurial graphviz
     - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
     - gcc --version
+
 before_script:
     - if [ ! -d "foam-extend-3.1" ]; then git clone --branch nextRelease git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1; fi
     - export FOAM_INST_DIR=`pwd`
@@ -25,8 +56,8 @@ before_script:
     - export PARAVIEW_SYSTEM=1
     - export CUDA_IGNORE=1
     - export SWAK4FOAM_SYSTEM=1
-    - export WM_CC='gcc-4.8'
-    - export WM_CXX='g++-4.8'
+    - export WM_CC="gcc-4.8"
+    - export WM_CXX="g++-4.8"
     - export CXX="g++-4.8"
     - export CC="gcc-4.8"
     - export WM_NCOMPPROCS=2
