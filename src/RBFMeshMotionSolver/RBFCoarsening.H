@@ -60,6 +60,23 @@ public:
             bool exportTxt
             );
 
+        RBFCoarsening(
+            std::shared_ptr<RBFInterpolation> rbf,
+            bool enabled,
+            bool livePointSelection,
+            bool livePointSelectionSumValues,
+            double tol,
+            double tolLivePointSelection,
+            int coarseningMinPoints,
+            int coarseningMaxPoints,
+            bool twoPointSelection,
+            bool surfaceCorrection,
+            double ratioRadiusError,
+            double maxWallDistance,
+            double surfaceCorrectionRadius,
+            bool exportTxt
+            );
+
         void greedySelection( const matrix & values );
 
         void compute(
@@ -93,6 +110,7 @@ public:
         bool surfaceCorrection;
         double ratioRadiusError;
         double maxWallDistance;
+        double surfaceCorrectionRadius;
         bool exportTxt;
         Eigen::VectorXi selectedPositions;
         int nbStaticFaceCentersRemove;

@@ -183,7 +183,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     int coarseningMaxPoints = 2;
     bool twoPointSelection = false;
     bool surfaceCorrection = false;
-    double ratioRadiusError = 10.0;
+
 
     if ( coarsening )
     {
@@ -195,7 +195,9 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         twoPointSelection = subDict( "coarsening" ).lookupOrDefault( "twoPointSelection", false );
     }
 
-    double maxWallDistance = 0.0;
+    double ratioRadiusError = 10.0;
+    double maxWallDistance = -1.0;
+    double surfaceCorrectionRadius = -1.0;
     if ( livePointSelection )
     {
         tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
@@ -204,11 +206,16 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         if ( surfaceCorrection )
         {
             ratioRadiusError = subDict( "coarsening" ).lookupOrDefault( "ratioRadiusError", 10.0 );
-            maxWallDistance = getMaxWallDistance();
+            maxWallDistance = subDict( "coarsening" ).lookupOrDefault( "firstCellHeight", -1.0 );
+            if ( maxWallDistance < SMALL )
+            {
+                maxWallDistance = getMaxWallDistance();
+            }
+            surfaceCorrectionRadius = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionRadius", -1.0 );
         }
     }
 
-    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, ratioRadiusError, maxWallDistance, exportSelectedPoints ) );
+    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, ratioRadiusError, maxWallDistance, surfaceCorrectionRadius, exportSelectedPoints ) );
 
     faceCellCenters = lookupOrDefault( "faceCellCenters", true );
 
@@ -216,14 +223,26 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     Info << "    interpolation function = " << function << endl;
     Info << "    interpolation polynomial term = " << polynomialTerm << endl;
     Info << "    interpolation cpu formulation = " << cpu << endl;
+    if( debug > 0 )
+    {
+        Info << "    interpolation from face cell centers = " << faceCellCenters << endl;
+    }
     Info << "    coarsening = " << coarsening << endl;
     Info << "        coarsening tolerance = " << tol << endl;
     Info << "        coarsening reselection tolerance = " << tolLivePointSelection << endl;
     Info << "        coarsening two-point selection = " << twoPointSelection << endl;
     Info << "        coarsening surface correction = " << surfaceCorrection << endl;
-    if( debug > 1 )
+    if (debug > 0 && surfaceCorrection )
     {
-        Info << "    interpolation from face cell centers = " << faceCellCenters << endl;
+        if( surfaceCorrectionRadius > 0 )
+        {
+            Info << "           surface correction surfaceCorrectionRadius = " << surfaceCorrectionRadius << endl;
+        }
+        else
+        {
+            Info << "           surface correction ratioRadiusError = " << ratioRadiusError << endl;
+            Info << "           surface correction firstCellHeight = " << maxWallDistance << endl;
+        }
     }
 }
 

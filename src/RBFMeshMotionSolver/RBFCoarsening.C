@@ -26,6 +26,7 @@ namespace rbf
         surfaceCorrection( false ),
         ratioRadiusError( 10 ),
         maxWallDistance( 1.0 ),
+        surfaceCorrectionRadius( -1.0 ),
         exportTxt( false ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -65,6 +66,7 @@ namespace rbf
         twoPointSelection( false ),
         surfaceCorrection( false ),
         ratioRadiusError( 10.0 ),
+        surfaceCorrectionRadius( -1.0 ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -120,6 +122,7 @@ namespace rbf
         surfaceCorrection( false ),
         ratioRadiusError( 10.0 ),
         maxWallDistance( 1.0 ),
+        surfaceCorrectionRadius( -1.0 ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -178,6 +181,7 @@ namespace rbf
         surfaceCorrection( surfaceCorrection ),
         ratioRadiusError( ratioRadiusError ),
         maxWallDistance( maxWallDistance ),
+        surfaceCorrectionRadius( -1.0 ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -204,6 +208,72 @@ namespace rbf
         {
             WarningIn( "RBFCoarsening::RBFCoarsening" )
             << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
+        }
+    }
+
+    RBFCoarsening::RBFCoarsening(
+        std::shared_ptr<RBFInterpolation> rbf,
+        bool enabled,
+        bool livePointSelection,
+        bool livePointSelectionSumValues,
+        double tol,
+        double tolLivePointSelection,
+        int coarseningMinPoints,
+        int coarseningMaxPoints,
+        bool twoPointSelection,
+        bool surfaceCorrection,
+        double ratioRadiusError,
+        double maxWallDistance,
+        double surfaceCorrectionRadius,
+        bool exportTxt
+        )
+        :
+        rbf( rbf ),
+        rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction, rbf->polynomialTerm, rbf->cpu ) ) ),
+        enabled( enabled ),
+        livePointSelection( livePointSelection ),
+        livePointSelectionSumValues( livePointSelectionSumValues ),
+        tol( tol ),
+        tolLivePointSelection( tolLivePointSelection ),
+        coarseningMinPoints( coarseningMinPoints ),
+        coarseningMaxPoints( coarseningMaxPoints ),
+        twoPointSelection( twoPointSelection ),
+        surfaceCorrection( surfaceCorrection ),
+        ratioRadiusError( ratioRadiusError ),
+        maxWallDistance( maxWallDistance ),
+        surfaceCorrectionRadius( surfaceCorrectionRadius ),
+        exportTxt( exportTxt ),
+        selectedPositions(),
+        nbStaticFaceCentersRemove( 0 ),
+        positions(),
+        positionsInterpolation(),
+        values(),
+        errorInterpolationCoarse(),
+        closestBoundaryIndexCorrection(),
+        valuesCorrection(),
+        nbMovingFaceCenters( 0 ),
+        fileExportIndex( 0 )
+    {
+        assert( rbf );
+        assert( coarseningMinPoints <= coarseningMaxPoints );
+        assert( coarseningMinPoints > 0 );
+        assert( coarseningMaxPoints > 0 );
+        assert( tol > 0 );
+        assert( tol < 1 );
+        assert( tolLivePointSelection > 0 );
+        assert( tolLivePointSelection < 1 );
+
+        // If unit displacement do not use polynomial for selection
+        if ( enabled && !livePointSelection && rbf->polynomialTerm )
+        {
+            WarningIn( "RBFCoarsening::RBFCoarsening" )
+            << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
+        }
+
+        if ( surfaceCorrection && surfaceCorrectionRadius > 0 )
+        {
+            WarningIn( "RBFCoarsening::RBFCoarsening" )
+            << "Using surfaceCorrection and radius is manually set by surfaceCorrectionRadius: " <<surfaceCorrectionRadius <<". This could lead to bad/invalid meshes." << endl;
         }
     }
 
@@ -529,15 +599,29 @@ namespace rbf
             valuesCorrection.conservativeResize( valuesInterpolation.rows(), valuesInterpolation.cols() );
             valuesCorrection.setZero();
         }
-        double Rerror = ratioRadiusError * ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff();
-        double Rwall = ratioRadiusError * maxWallDistance;
-        //double R = Rwall;
-        //double R = ratioRadiusError;
-        double R = max(Rerror,Rwall);
+
+        double R = 1.0;
+        if ( surfaceCorrectionRadius > 0 )
+        {
+            R = surfaceCorrectionRadius;
+        }
+        else
+        {
+            double Rerror = ratioRadiusError * ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff();
+            double Rwall = ratioRadiusError * maxWallDistance;
+            R = max(Rerror,Rwall);
+        }
 
         if ( debug > 0 )
         {
-            Info << nl << "RBFCoarsening::correctSurface::debug 0: ratioRadiusError = " << ratioRadiusError << ", R = " << R << endl;
+            if ( surfaceCorrectionRadius > 0 )
+            {
+                Info << nl << "RBFCoarsening::correctSurface::debug 0: R = " << R << endl;
+            }
+            else
+            {
+                Info << nl << "RBFCoarsening::correctSurface::debug 0: ratioRadiusError = " << ratioRadiusError << ", R = " << R << endl;
+            }
         }
 
         // Find nearest boundary point for each internal point. Do this only the first time

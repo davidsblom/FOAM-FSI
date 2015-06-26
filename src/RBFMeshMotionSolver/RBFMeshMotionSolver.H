@@ -7,6 +7,7 @@
 #ifndef RBFMeshMotionSolver_H
 #define RBFMeshMotionSolver_H
 
+#include "debugSwitch.H"
 #include "motionSolver.H"
 #include "polyMesh.H"
 #include "addToRunTimeSelectionTable.H"
