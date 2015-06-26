@@ -19,14 +19,14 @@ namespace sdc
         :
         solver( solver ),
         adaptiveTimeStepper( adaptiveTimeStepper ),
+        N( solver->getDOF() ),
+        k( 0 ),
+        dt( solver->getTimeStep() ),
+        tol( tol ),
         nodes(),
         smat(),
         qmat(),
-        dsdc(),
-        dt( solver->getTimeStep() ),
-        N( solver->getDOF() ),
-        k( 0 ),
-        tol( tol )
+        dsdc()
     {
         assert( adaptiveTimeStepper );
         assert( solver );
@@ -97,7 +97,9 @@ namespace sdc
             solver->nextTimeStep();
 
         Eigen::VectorXd dtsdc = this->dt * dsdc;
-        Eigen::MatrixXd solStages( k, N ), F( k, N );
+        Eigen::MatrixXd solStages( k, N ), F( k, N ), Fembedded( nodesEmbedded.rows(), N ), residual;
+        Eigen::MatrixXd qj( 1, solStages.cols() ), qjEmbedded( 1, solStages.cols() );
+        Eigen::VectorXd errorEstimate( N );
 
         Eigen::VectorXd sol( N ), f( N );
         solver->getSolution( sol );
@@ -163,21 +165,9 @@ namespace sdc
             // Eigen::MatrixXd residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
 
             // Only compute row k-2 of matrix Qj for efficiency
-            Eigen::MatrixXd qj( 1, solStages.cols() );
+            computeResidual( qmat, F, dt, qj );
 
-            int ii = k - 2, jj, kk;
-
-            for ( jj = 0; jj < F.cols(); ++jj )
-            {
-                qj( 0, jj ) = 0;
-
-                for ( kk = 0; kk < F.rows(); ++kk )
-                    qj( 0, jj ) += qmat( ii, kk ) * F( kk, jj );
-
-                qj( 0, jj ) *= dt;
-            }
-
-            Eigen::MatrixXd residual = solStages.row( 0 ) + qj.row( 0 ) - solStages.row( k - 1 );
+            residual = solStages.row( 0 ) + qj.row( 0 ) - solStages.row( k - 1 );
 
             scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
             squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
@@ -206,17 +196,14 @@ namespace sdc
         if ( adaptiveTimeStepper->isEnabled() )
         {
             double newTimeStep = 0;
-            Eigen::VectorXd errorEstimate( N );
-
-            Eigen::MatrixXd Fembedded( nodesEmbedded.rows(), N );
 
             for ( int i = 0; i < Fembedded.rows(); i++ )
                 Fembedded.row( i ) = F.row( i * 2 );
 
-            Eigen::MatrixXd Qj = dt * (qmat * F);
-            Eigen::MatrixXd QjEmbedded = dt * (qmatEmbedded * Fembedded);
+            computeResidual( qmat, F, dt, qj );
+            computeResidual( qmatEmbedded, Fembedded, dt, qjEmbedded );
 
-            errorEstimate = Qj.row( k - 2 ) - QjEmbedded.row( nodesEmbedded.rows() - 2 );
+            errorEstimate = qj.row( 0 ) - qjEmbedded.row( 0 );
 
             bool accepted = adaptiveTimeStepper->determineNewTimeStep( errorEstimate, result, dt, newTimeStep );
 
@@ -228,5 +215,29 @@ namespace sdc
 
         if ( adaptiveTimeStepper->isAccepted() )
             solver->finalizeTimeStep();
+    }
+
+    void SDC::computeResidual(
+        const Eigen::MatrixXd & qmat,
+        const Eigen::MatrixXd & F,
+        const double dt,
+        Eigen::MatrixXd & qj
+        )
+    {
+        // Eigen::MatrixXd Qj = dt * (qmat * F);
+
+        // Only compute row k-2 of matrix Qj for efficiency
+        int k = F.rows();
+        int ii = k - 2, jj, kk;
+
+        for ( jj = 0; jj < F.cols(); ++jj )
+        {
+            qj( 0, jj ) = 0;
+
+            for ( kk = 0; kk < F.rows(); ++kk )
+                qj( 0, jj ) += qmat( ii, kk ) * F( kk, jj );
+
+            qj( 0, jj ) *= dt;
+        }
     }
 }
