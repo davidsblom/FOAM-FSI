@@ -1,0 +1,84 @@
+language: cpp
+
+cache:
+    directories:
+        - $HOME/foam-extend-3.1
+
+compiler:
+    - g++
+
+before_install:
+    - sudo apt-get update -qq
+    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq gcc-4.8 g++-4.8 rpm libboost-system-dev cmake git git-core flex bison libboost-filesystem-dev cmake libopenmpi-dev openmpi-bin openmpi-common openmpi-checkpoint
+    - sudo apt-get install -qq metis-edf libmetis-edf-dev
+    - sudo apt-get install -qq libparmetis-dev
+    - sudo apt-get install -qq scotch libscotch-dev
+    - sudo apt-get install -qq hwloc libhwloc-dev
+    - sudo apt-get install -qq build-essential binutils-dev zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libxt-dev mercurial graphviz
+    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
+    - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+    - gcc --version
+
+before_script:
+    - if [ ! -d "foam-extend-3.1" ]; then git clone --branch nextRelease git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1; fi
+    - export FOAM_INST_DIR=`pwd`
+    - export VERSION=3.1
+    - export WM_THIRD_PARTY_DIR=$FOAM_INST_DIR/foam-extend-${VERSION}/ThirdParty
+    - export PARAVIEW_SYSTEM=1
+    - export CUDA_IGNORE=1
+    - export SWAK4FOAM_SYSTEM=1
+    - export WM_CC="gcc-4.8"
+    - export WM_CXX="g++-4.8"
+    - export CXX="g++-4.8"
+    - export CC="gcc-4.8"
+    - export WM_NCOMPPROCS=2
+    - export CMAKE_SYSTEM=1
+    - export CMAKE_DIR=/usr
+    - export CMAKE_BIN_DIR=/usr/bin
+    - export WM_THIRD_PARTY_USE_CMAKE_322=0
+    - export PYFOAM_SYSTEM=1
+    - export METIS_SYSTEM=1
+    - export METIS_DIR=/usr
+    - export METIS_BIN_DIR=/usr/bin
+    - export METIS_LIB_DIR=/usr/lib
+    - export METIS_INCLUDE_DIR=/usr/include/metis
+    - export PARMETIS_SYSTEM=1
+    - export PARMETIS_DIR=/usr
+    - export PARMETIS_BIN_DIR=/usr/bin
+    - export PARMETIS_LIB_DIR=/usr/lib
+    - export PARMETIS_INCLUDE_DIR=/usr/include/parmetis
+    - export SCOTCH_SYSTEM=1
+    - export SCOTCH_DIR=/usr
+    - export SCOTCH_BIN_DIR=/usr/bin
+    - export SCOTCH_LIB_DIR=/usr/lib
+    - export SCOTCH_INCLUDE_DIR=/usr/include/scotch
+    - export HWLOC_SYSTEM=1
+    - export HWLOC_DIR=/usr
+    - export HWLOC_DIR_DIR=/usr/bin
+    - export WM_MPLIB=SYSTEMOPENMPI
+    - export OPENMPI_DIR=/usr
+    - export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+    - cd $FOAM_INST_DIR/foam-extend-${VERSION}
+    - source etc/bashrc
+    - export WM_NCOMPPROCS=2
+    - export CMAKE_SYSTEM=1
+    - export CMAKE_DIR=/usr
+    - export CMAKE_BIN_DIR=/usr/bin
+    - unset WM_THIRD_PARTY_USE_CMAKE_322
+    - export WM_MPLIB=SYSTEMOPENMPI
+    - export OPENMPI_DIR=/usr
+    - export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+    - ln -fs /usr/bin/make bin/gmake
+    - ( cd wmake/src && make )
+    - ( cd $WM_THIRD_PARTY_DIR && ./AllMake.pre )
+    - . $WM_PROJECT_DIR/etc/settings.sh
+    - cd src        
+    - wmakePrintBuild -check || /bin/rm -f foam/Make/$WM_OPTIONS/global.? 2>/dev/null
+    - wmakeLnInclude foam
+    - wmakeLnInclude meshTools
+    - wmakeLnInclude OSspecific/$WM_OSTYPE
+    - Pstream/Allwmake
+    - wmake libo  OSspecific/$WM_OSTYPE
+    - wmake libso foam
