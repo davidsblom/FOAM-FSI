@@ -50,6 +50,9 @@ before_script:
     - export HWLOC_SYSTEM=1
     - export HWLOC_DIR=/usr
     - export HWLOC_DIR_DIR=/usr/bin
+    - export WM_MPLIB=SYSTEMOPENMPI
+    - export OPENMPI_DIR=/usr
+    - export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
     - cd $FOAM_INST_DIR/foam-extend-${VERSION}
     - source etc/bashrc
     - export WM_NCOMPPROCS=2
