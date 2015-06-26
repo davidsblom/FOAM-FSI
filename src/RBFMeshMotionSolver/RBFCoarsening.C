@@ -445,6 +445,7 @@ namespace rbf
                 Info << "RBFCoarsening::debug 1. interpolate to surface = " << runTimeInterpolate << " s" << endl;
                 Info << "RBFCoarsening::debug 2. find largest error = " << runTimeError << " s" << ". Added second point = " << addedSecondPoint << endl;
                 Info << "RBFCoarsening::debug 3. convergence check = " << runTimeConvergence << " s" << endl;
+                Info << "RBFCoarsening::debug 4. absolute max error = " << ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << " m" << endl;
             }
 
             Info << "RBF interpolation coarsening: selected " << selectedPositions.rows() << "/" << positions.rows() << " points, 2-norm(error) = "
