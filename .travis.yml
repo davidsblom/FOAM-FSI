@@ -5,8 +5,7 @@ before_install:
     - sudo apt-get update -qq
     - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
     - sudo apt-get update -qq
-    - sudo apt-get install -qq gcc-4.8 g++-4.8
-    - sudo apt-get install -qq rpm libboost-system-dev cmake git git-core flex bison libboost-filesystem-dev cmake libopenmpi-dev
+    - sudo apt-get install -qq gcc-4.8 g++-4.8 rpm libboost-system-dev cmake git git-core flex bison libboost-filesystem-dev cmake libopenmpi-dev metis-edf libmetis-edf-dev libparmetis-dev scotch libscotch-dev libscotchmetis-dev
     - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 before_script:
@@ -26,6 +25,10 @@ before_script:
     - export CMAKE_DIR=/usr
     - export CMAKE_BIN_DIR=/usr/bin
     - export WM_THIRD_PARTY_USE_CMAKE_322=0
+    - export PYFOAM_SYSTEM=1
+    - export METIS_SYSTEM=1
+    - export METIS_DIR=/usr
+    - export CMAKE_BIN_DIR=/usr/bin
     - cd $FOAM_INST_DIR/foam-extend-${VERSION}
     - source etc/bashrc
     - export WM_NCOMPPROCS=1
