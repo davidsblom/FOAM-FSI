@@ -2,7 +2,7 @@ language: cpp
 
 cache:
     directories:
-        - $HOME/foam-extend-3.1
+        - $HOME/build/davidsblom/foam-extend-3.1
 
 compiler:
     - g++
