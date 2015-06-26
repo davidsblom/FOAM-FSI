@@ -151,7 +151,7 @@ namespace sdc
                 qold = solStages.row( p );
 
                 // Form right hand side
-                rhs = -dt * F.row( p + 1 ) + Sj.row( p );
+                rhs.noalias() = -dt * F.row( p + 1 ) + Sj.row( p );
 
                 solver->implicitSolve( true, p, t, dt, qold, rhs, f, result );
 
@@ -167,7 +167,7 @@ namespace sdc
             // Only compute row k-2 of matrix Qj for efficiency
             computeResidual( qmat, F, dt, qj );
 
-            residual = solStages.row( 0 ) + qj.row( 0 ) - solStages.row( k - 1 );
+            residual.noalias() = solStages.row( 0 ) + qj.row( 0 ) - solStages.row( k - 1 );
 
             scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
             squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
@@ -203,7 +203,7 @@ namespace sdc
             computeResidual( qmat, F, dt, qj );
             computeResidual( qmatEmbedded, Fembedded, dt, qjEmbedded );
 
-            errorEstimate = qj.row( 0 ) - qjEmbedded.row( 0 );
+            errorEstimate.noalias() = qj.row( 0 ) - qjEmbedded.row( 0 );
 
             bool accepted = adaptiveTimeStepper->determineNewTimeStep( errorEstimate, result, dt, newTimeStep );
 
