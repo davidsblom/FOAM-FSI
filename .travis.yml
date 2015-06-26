@@ -24,6 +24,7 @@ before_install:
 before_script:
     - if [ ! -d "foam-extend-3.1" ]; then git clone --branch nextRelease git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1; fi
     - pwd
+    - echo $HOME
     - export FOAM_INST_DIR=`pwd`
     - export VERSION=3.1
     - export WM_THIRD_PARTY_DIR=$FOAM_INST_DIR/foam-extend-${VERSION}/ThirdParty
