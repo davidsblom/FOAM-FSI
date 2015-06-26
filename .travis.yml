@@ -13,6 +13,7 @@ before_install:
     - sudo apt-get install -qq build-essential binutils-dev zlib1g-dev qt4-dev-tools libqt4-dev libncurses5-dev libxt-dev mercurial graphviz
     - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+    - gcc --version
 before_script:
     - git clone --branch nextRelease git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1
     - export FOAM_INST_DIR=`pwd`
