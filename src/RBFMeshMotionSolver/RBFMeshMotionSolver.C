@@ -24,7 +24,7 @@ scalar RBFMeshMotionSolver::getMaxWallDistance()
     scalarField maxWallDistances(movingPatchIDs.size(),0.0);
     forAll(movingPatchIDs,patchI)
     {
-        const polyPatch& currPatch = mesh().boundaryMesh()[patchI];
+        const polyPatch& currPatch = mesh().boundaryMesh()[movingPatchIDs[patchI]];
         const vectorField& currPatchCf = currPatch.faceCentres();
         const labelList& currPatchCellID = currPatch.faceCells();
         const vectorField& currPatchSf = currPatch.faceAreas();
@@ -37,6 +37,7 @@ scalar RBFMeshMotionSolver::getMaxWallDistance()
         }
         maxWallDistances[patchI] = max(maxDistance);
     }
+    Info << "maxWallDistances: " << maxWallDistances << endl;
     globalMaxWallDistance[Pstream::myProcNo()] = max(maxWallDistances);
 
     reduce( globalMaxWallDistance, sumOp<scalarField>() );
