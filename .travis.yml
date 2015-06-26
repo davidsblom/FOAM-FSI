@@ -1,4 +1,7 @@
 language: cpp
+cache:
+    directories:
+        - $HOME/foam-extend-3.1
 compiler:
     - g++
 before_install:
@@ -15,7 +18,7 @@ before_install:
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
     - gcc --version
 before_script:
-    - git clone --branch nextRelease git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1
+    - if [ ! -d "foam-extend-3.1" ]; then git clone --branch nextRelease git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1; fi
     - export FOAM_INST_DIR=`pwd`
     - export VERSION=3.1
     - export WM_THIRD_PARTY_DIR=$FOAM_INST_DIR/foam-extend-${VERSION}/ThirdParty
