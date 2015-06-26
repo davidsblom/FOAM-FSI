@@ -9,6 +9,7 @@ before_install:
     - sudo apt-get install -qq metis-edf libmetis-edf-dev
     - sudo apt-get install -qq libparmetis-dev
     - sudo apt-get install -qq scotch libscotch-dev
+    - sudo apt-get install -qq hwloc libhwloc-dev
     - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 before_script:
@@ -38,6 +39,9 @@ before_script:
     - export SCOTCH_SYSTEM=1
     - export SCOTCH_DIR=/usr
     - export SCOTCH_DIR_DIR=/usr/bin
+    - export HWLOC_SYSTEM=1
+    - export HWLOC_DIR=/usr
+    - export HWLOC_DIR_DIR=/usr/bin
     - cd $FOAM_INST_DIR/foam-extend-${VERSION}
     - source etc/bashrc
     - export WM_NCOMPPROCS=1
