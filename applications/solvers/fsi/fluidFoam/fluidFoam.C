@@ -11,6 +11,7 @@
 #include "CoupledFluidSolver.H"
 #include "CompressibleFluidSolver.H"
 #include "SDCFluidSolver.H"
+#include "SDCDynamicMeshFluidSolver.H"
 #include "SDC.H"
 #include "SDCLaplacianSolver.H"
 #include "ESDIRK.H"
@@ -43,7 +44,7 @@ int main(
 
     std::string fluidSolver = config["fluid-solver"].as<std::string>();
 
-    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" || fluidSolver == "esdirk-pimple-solver" );
+    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" || fluidSolver == "esdirk-pimple-solver" || fluidSolver == "sdc-pimple-dynamic-mesh-solver" );
 
     std::shared_ptr<foamFluidSolver> fluid;
     std::shared_ptr<sdc::SDC> sdc;
@@ -60,7 +61,7 @@ int main(
 
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
 
-    if ( fluidSolver == "sdc-pimple-solver" || fluidSolver == "esdirk-pimple-solver" || fluidSolver == "sdc-laplacian-solver" )
+    if ( fluidSolver == "sdc-pimple-solver" || fluidSolver == "esdirk-pimple-solver" || fluidSolver == "sdc-laplacian-solver" || fluidSolver == "sdc-pimple-dynamic-mesh-solver" )
     {
         YAML::Node adaptiveTimeConfig( config["adaptive-time-stepping"] );
         assert( adaptiveTimeConfig["enabled"] );
@@ -83,7 +84,7 @@ int main(
         adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( adaptiveTimeStepping, filter, adaptiveTolerance, safetyFactor ) );
     }
 
-    if ( fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" )
+    if ( fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" || fluidSolver == "sdc-pimple-dynamic-mesh-solver" )
     {
         YAML::Node sdcConfig( config["sdc"] );
         assert( sdcConfig["convergence-tolerance"] );
@@ -102,6 +103,9 @@ int main(
 
         if ( fluidSolver == "sdc-laplacian-solver" )
             solver = std::shared_ptr<sdc::SDCSolver>( new SDCLaplacianSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+
+        if ( fluidSolver == "sdc-pimple-dynamic-mesh-solver" )
+            solver = std::shared_ptr<sdc::SDCSolver>( new SDCDynamicMeshFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
         sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( solver, adaptiveTimeStepper, quadratureRule, n, tol ) );
     }
