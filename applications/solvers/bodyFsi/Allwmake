@@ -1,7 +1,5 @@
 #!/bin/bash
 
-wmake libso $FOAM_USER_SRC/bodyFsi
-
 wmake bodyMotionFoam
 wmake moveBodyFoam
 wmake pimpleBodyFoam

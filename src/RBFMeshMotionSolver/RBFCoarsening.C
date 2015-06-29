@@ -461,7 +461,10 @@ namespace rbf
                 Info << "RBFCoarsening::debug 1. interpolate to surface = " << runTimeInterpolate << " s" << endl;
                 Info << "RBFCoarsening::debug 2. find largest error = " << runTimeError << " s" << ". Added second point = " << addedSecondPoint << endl;
                 Info << "RBFCoarsening::debug 3. convergence check = " << runTimeConvergence << " s" << endl;
-                Info << "RBFCoarsening::debug 4. absolute max error = " << ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << " m" << endl;
+                if( livePointSelection )
+                {
+                    Info << "RBFCoarsening::debug 4. absolute max error = " << ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << " m" << endl;
+                }
             }
 
             Info << "RBF interpolation coarsening: selected " << selectedPositions.rows() << "/" << positions.rows() << " points, 2-norm(error) = "
@@ -579,6 +582,30 @@ namespace rbf
                             unitDisplacement( i, j ) = 1;
 
                 greedySelection( unitDisplacement );
+
+                if( debug > 0 )
+                {
+                    //Construct values to interpolate based on unit displacement selected points
+                    rbf::matrix valuesCoarse( selectedPositions.rows(), values.cols() );
+                    rbf::matrix valuesInterpolationCoarse( positions.rows(), valuesInterpolation.cols() );
+                    rbf::vector errorList( positions.rows() );
+
+                    for ( int j = 0; j < selectedPositions.rows(); j++ )
+                        valuesCoarse.row( j ) = values.row( selectedPositions( j ) );
+
+                    //This will return the displaced surface in valuesInterpolationCoarse
+                    rbfCoarse->interpolate2( valuesCoarse, valuesInterpolationCoarse );
+
+                    // Evaluate the error
+                    for ( int j = 0; j < valuesInterpolationCoarse.rows(); j++ )
+                        errorList( j ) = ( valuesInterpolationCoarse.row( j ) - values.row( j ) ).norm();
+
+                    double epsilon = std::sqrt( SMALL );
+                    double error = (errorList).norm() / (values.norm() + epsilon );
+                    double errorMax = errorList.maxCoeff() / ( ( values.rowwise().norm() ).maxCoeff() + epsilon );
+
+                    Info << "RBFCoarsening::UnitDisplacement::debug 1: " << "2-norm error = " << error << ", max error = " << errorMax <<  endl;
+                }
 
                 rbf->Hhat.conservativeResize( rbf->Hhat.rows(), rbf->Hhat.cols() - nbStaticFaceCentersRemove );
             }
