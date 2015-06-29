@@ -297,8 +297,6 @@ namespace rbf
         matrix & valuesInterpolation
         )
     {
-        // Verify input
-
         assert( positions.cols() == positionsInterpolation.cols() );
         assert( positions.rows() > 0 );
         assert( positions.cols() > 0 );
@@ -318,7 +316,6 @@ namespace rbf
             H.resize( n_A + dimGrid + 1, n_A + dimGrid + 1 );
 
         // RBF function evaluation
-
         evaluateH( positions, H );
 
         // Include polynomial contributions

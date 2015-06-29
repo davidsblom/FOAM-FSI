@@ -311,6 +311,22 @@ namespace rbf
             for ( int i = 0; i < selectedPositions.rows(); i++ )
                 selectedPositions( i ) = i;
 
+            //check what the radius is. For TPS the radius should not be 1. If so, select next point
+            bool radius1 = false;
+            do
+            {
+                double radius0 = ( positions.row(selectedPositions( 0 ) ) - positions.row( selectedPositions( 1 ) ) ).norm();
+                if( radius0 > 1.0 - SMALL && radius0 < 1.0 + SMALL )
+                {
+                    radius1 = true;
+                    selectedPositions( 1 ) = selectedPositions( 1 ) + 1;
+                }
+                else
+                {
+                    radius1 = false;
+                }
+            }while( radius1 );
+
             assert( positions.rows() >= selectedPositions.rows() );
 
             rbf::matrix positionsInterpolationCoarse = positions;
