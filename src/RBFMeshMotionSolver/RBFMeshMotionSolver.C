@@ -272,7 +272,6 @@ tmp<pointField> RBFMeshMotionSolver::curPoints() const
 void RBFMeshMotionSolver::setMotion( const Field<vectorField> & motion )
 {
     // Input checking
-
     assert( motion.size() == mesh().boundaryMesh().size() );
 
     forAll( motion, ipatch )
@@ -751,6 +750,7 @@ void RBFMeshMotionSolver::solve()
             assert( index == nbGlobalMovingFaceCenters[Pstream::myProcNo()] );
         }
 
+
         index = 0;
 
         for ( unsigned int i = 0; i < staticControlPointLabels.size(); i++ )
@@ -799,6 +799,7 @@ void RBFMeshMotionSolver::solve()
         }
 
         rbf::matrix positionsInterpolation( nbPoints, positions.cols() );
+
 
         index = 0;
         forAll( points, i )

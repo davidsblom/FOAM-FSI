@@ -5,6 +5,7 @@
  */
 
 #include "TPSFunction.H"
+#include <iostream>
 
 namespace rbf
 {
@@ -17,7 +18,7 @@ namespace rbf
     double TPSFunction::evaluate( double value )
     {
         if ( value > 0 )
-            return std::log10( value ) * value * value;
+            return std::log( value ) * value * value;
 
         return 0;
     }

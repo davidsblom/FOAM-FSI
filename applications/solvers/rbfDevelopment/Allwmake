@@ -3,4 +3,5 @@
 wmake inverseMatrixTesting
 wmake matrixMatrixTesting
 wmake moveBodyFoamDavid
-
+wmake moveBodyFoamPoints
+wmake rbfFunctionFLOPStesting
