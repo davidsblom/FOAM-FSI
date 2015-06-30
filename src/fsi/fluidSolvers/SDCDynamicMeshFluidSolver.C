@@ -703,6 +703,8 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         Uf = UfStages.at( k + 1 );
     }
 
+    mesh.setV0() = volumeStages.at( k );
+
     int index = 0;
 
     forAll( U.oldTime().internalField(), i )
