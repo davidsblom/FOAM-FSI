@@ -161,8 +161,10 @@ private:
     std::deque<volScalarField::DimensionedInternalField> volumeStages;
     IOobject UFHeader;
     IOobject phiFHeader;
+    IOobject VFHeader;
     volVectorField UF;
     surfaceScalarField phiF;
+    volScalarField::DimensionedInternalField VF;
 
     bool turbulenceSwitch;
     bool explicitFirstStage;

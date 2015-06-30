@@ -169,6 +169,14 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     IOobject::READ_IF_PRESENT,
     IOobject::AUTO_WRITE
     ),
+    VFHeader
+    (
+    "VF",
+    runTime->timeName(),
+    mesh,
+    IOobject::READ_IF_PRESENT,
+    IOobject::AUTO_WRITE
+    ),
     UF
     (
     UFHeader,
@@ -180,10 +188,16 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     phiFHeader,
     fvc::interpolate( UF ) & mesh.Sf()
     ),
+    VF
+    (
+    VFHeader,
+    mesh,
+    dimensionedScalar( "VF", dimVolume / dimTime, scalar( 0 ) )
+    ),
     turbulenceSwitch( true ),
     explicitFirstStage( true )
 {
-    if ( UFHeader.headerOk() && phiFHeader.headerOk() )
+    if ( UFHeader.headerOk() && phiFHeader.headerOk() && VFHeader.headerOk() )
         explicitFirstStage = false;
 
     // Ensure that the absolute tolerance of the linear solver is less than the
@@ -462,6 +476,11 @@ int SDCDynamicMeshFluidSolver::getDOF()
         }
     }
 
+    forAll( mesh.V(), i )
+    {
+        index++;
+    }
+
     return index;
 }
 
@@ -503,6 +522,12 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
             solution( index ) = phi.boundaryField()[patchI][i];
             index++;
         }
+    }
+
+    forAll( mesh.V(), i )
+    {
+        solution( index ) = mesh.V()[i];
+        index++;
     }
 
     assert( index == solution.rows() );
@@ -591,6 +616,12 @@ void SDCDynamicMeshFluidSolver::setSolution(
             phiF.boundaryField()[patchI][i] = f( index );
             index++;
         }
+    }
+
+    forAll( VF, i )
+    {
+        VF[i] = f( index );
+        index++;
     }
 
     assert( index == f.rows() );
@@ -692,7 +723,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         pointField points = pointsStages.at( k + 1 );
         pointField pointsOld = pointsStages.at( k );
         tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
-        
+
         // Get the new point field from the RBFMeshMotionSolver
 
         // Move the points to the new location
