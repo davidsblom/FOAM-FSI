@@ -736,7 +736,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         // mesh.points() = pointsStages.at( k + 1 );
     }
 
-    // Compute the swept volumes
+    // Update mesh.phi()
     {
         // Reset the mesh point locations to the old stage
         pointField points = pointsStages.at( k + 1 );
@@ -747,6 +747,24 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
         // Move the points to the new location
         sweptVols = mesh.movePoints( points );
+        sweptVols() -= rhsV;
+
+        // Copied from fvMesh::updatePhi(const scalarField& sweptVols)
+        // fvMesh::updatePhi function is private, so cannot be used directly.
+        surfaceScalarField & phi = mesh.setPhi();
+
+        scalar rDeltaT = 1.0 / runTime->deltaT().value();
+
+        phi.internalField() = scalarField::subField( sweptVols(), mesh.nInternalFaces() );
+        phi.internalField() *= rDeltaT;
+
+        const fvPatchList & patches = mesh.boundary();
+
+        forAll( patches, patchI )
+        {
+            phi.boundaryField()[patchI] = patches[patchI].patchSlice( sweptVols() );
+            phi.boundaryField()[patchI] *= rDeltaT;
+        }
     }
 
     int index = 0;
@@ -836,7 +854,6 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     // -------------------------------------------------------------------------
 
     scalar convergenceTolerance = absoluteTolerance;
-
     dimensionedScalar rDeltaT = 1.0 / mesh.time().deltaT();
 
     // --- PIMPLE loop
