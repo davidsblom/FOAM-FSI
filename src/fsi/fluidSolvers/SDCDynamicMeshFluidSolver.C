@@ -152,6 +152,7 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     UStages(),
     UfStages(),
     pointsStages(),
+    volumeStages(),
     UFHeader
     (
     "UF",
@@ -389,6 +390,7 @@ void SDCDynamicMeshFluidSolver::setNumberOfStages( int k )
         UStages.push_back( volVectorField( U ) );
         UfStages.push_back( surfaceVectorField( Uf ) );
         pointsStages.push_back( mesh.points() );
+        volumeStages.push_back( mesh.V() );
     }
 }
 
@@ -406,6 +408,7 @@ void SDCDynamicMeshFluidSolver::nextTimeStep()
             UStages.at( i ) = U;
             UfStages.at( i ) = Uf;
             pointsStages.at( i ) = mesh.points();
+            volumeStages.at( i ) = mesh.V();
         }
     }
 }
@@ -967,6 +970,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         UStages.at( k + 1 ) = U;
         UfStages.at( k + 1 ) = Uf;
         pointsStages.at( k + 1 ) = mesh.points();
+        volumeStages.at( k + 1 ) = mesh.V();
     }
 
     UF = rDeltaT * (U - U.oldTime() - rhsU);

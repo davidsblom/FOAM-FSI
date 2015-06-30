@@ -157,7 +157,8 @@ private:
     std::deque<surfaceScalarField> phiStages;
     std::deque<volVectorField> UStages;
     std::deque<surfaceVectorField> UfStages;
-    std::deque<Foam::pointField> pointsStages;
+    std::deque<pointField> pointsStages;
+    std::deque<volScalarField::DimensionedInternalField> volumeStages;
     IOobject UFHeader;
     IOobject phiFHeader;
     volVectorField UF;
