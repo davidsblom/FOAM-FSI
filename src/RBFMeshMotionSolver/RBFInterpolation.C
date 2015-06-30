@@ -355,7 +355,8 @@ namespace rbf
         valuesLU.setZero();
         valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
 
-        if ( polynomialTerm )
+        //THIJS: tmp change in solver to be used. When taking lots of point with compact supported function it fails.
+        /*if ( polynomialTerm )
         {
             fullPivLu.compute( H.selfadjointView<Eigen::Lower>() );
             B = fullPivLu.solve( valuesLU );
@@ -370,7 +371,10 @@ namespace rbf
         {
             llt.compute( H.selfadjointView<Eigen::Lower>() );
             B = llt.solve( valuesLU );
-        }
+        }*/
+
+        fullPivLu.compute( H.selfadjointView<Eigen::Lower>() );
+        B = fullPivLu.solve( valuesLU );
 
         // Evaluate Phi_BA which contains the evaluation of the radial basis function
         // This method is only used by the greedy algorithm, and the matrix Phi
@@ -473,7 +477,8 @@ namespace rbf
 
         matrix B;
 
-        if ( polynomialTerm )
+        //THIJS: tmp change in solver to be used. When taking lots of point with compact supported function it fails.
+        /*if ( polynomialTerm )
         {
             B = fullPivLu.solve( valuesLU );
         }
@@ -485,7 +490,8 @@ namespace rbf
         else
         {
             B = llt.solve( valuesLU );
-        }
+        }*/
+        B = fullPivLu.solve( valuesLU );
 
         valuesInterpolation.noalias() = Phi * B;
 
