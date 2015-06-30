@@ -132,6 +132,19 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     ),
     fvc::interpolate( rhsU ) & mesh.Sf()
     ),
+    rhsV
+    (
+    IOobject
+    (
+        "rhsV",
+        runTime->timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar( "rhsV", dimVolume, scalar( 0 ) )
+    ),
     nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
     nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
     minIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "minIter" ) ) ),
@@ -689,6 +702,12 @@ void SDCDynamicMeshFluidSolver::evaluateFunction(
         }
     }
 
+    forAll( VF, i )
+    {
+        f( index ) = VF[i];
+        index++;
+    }
+
     assert( index == f.rows() );
 }
 
@@ -805,6 +824,14 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
             index++;
         }
     }
+
+    forAll( rhsV, i )
+    {
+        rhsV[i] = rhs( index );
+        index++;
+    }
+
+    assert( index == rhs.rows() );
 
     // -------------------------------------------------------------------------
 

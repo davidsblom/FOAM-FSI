@@ -133,6 +133,7 @@ private:
     volVectorField HU;
     volVectorField rhsU;
     surfaceScalarField rhsPhi;
+    volScalarField::DimensionedInternalField rhsV;
 
     // PIMPLE controls
     int nCorr;
