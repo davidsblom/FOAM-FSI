@@ -132,19 +132,7 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     ),
     fvc::interpolate( rhsU ) & mesh.Sf()
     ),
-    rhsV
-    (
-    IOobject
-    (
-        "rhsV",
-        runTime->timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedScalar( "rhsV", dimVolume, scalar( 0 ) )
-    ),
+    rhsV( mesh.nInternalFaces(), scalar( 0 ) ),
     nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
     nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
     minIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "minIter" ) ) ),
@@ -182,14 +170,6 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     IOobject::READ_IF_PRESENT,
     IOobject::AUTO_WRITE
     ),
-    VFHeader
-    (
-    "VF",
-    runTime->timeName(),
-    mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
-    ),
     UF
     (
     UFHeader,
@@ -201,18 +181,9 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     phiFHeader,
     fvc::interpolate( UF ) & mesh.Sf()
     ),
-    VF
-    (
-    VFHeader,
-    mesh,
-    dimensionedScalar( "VF", dimVolume / dimTime, scalar( 0 ) )
-    ),
-    turbulenceSwitch( true ),
-    explicitFirstStage( true )
+    VF( mesh.nInternalFaces(), scalar( 0 ) ),
+    explicitFirstStage( false )
 {
-    if ( UFHeader.headerOk() && phiFHeader.headerOk() && VFHeader.headerOk() )
-        explicitFirstStage = false;
-
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
     scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
@@ -489,10 +460,7 @@ int SDCDynamicMeshFluidSolver::getDOF()
         }
     }
 
-    forAll( mesh.V(), i )
-    {
-        index++;
-    }
+    index += mesh.nInternalFaces();
 
     return index;
 }
@@ -537,9 +505,10 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
         }
     }
 
-    forAll( mesh.V(), i )
+    // Unknown how to compute the actual value of the swept volumes
+    for ( int i = 0; i < mesh.nInternalFaces(); i++ )
     {
-        solution( index ) = mesh.V()[i];
+        solution( index ) = 0.0;
         index++;
     }
 
@@ -732,48 +701,6 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         phi = phiStages.at( k + 1 );
         U = UStages.at( k + 1 );
         Uf = UfStages.at( k + 1 );
-
-        // mesh.points() = pointsStages.at( k + 1 );
-    }
-
-    // Update mesh.phi()
-    {
-        // Reset the mesh point locations to the old stage
-        pointField pointsOld = pointsStages.at( k );
-        tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
-
-        // Get the new point field from the RBFMeshMotionSolver
-
-        RBFMeshRigidMotionSolver & motionSolver =
-            const_cast<RBFMeshRigidMotionSolver &>
-            (
-            mesh.lookupObject<RBFMeshRigidMotionSolver>( "dynamicMeshDict" )
-            );
-
-        motionSolver.solve();
-
-        tmp<pointField> tpoints = motionSolver.curPoints();
-
-        // Move the points to the new location
-        sweptVols = mesh.movePoints( tpoints() );
-        sweptVols() -= rhsV;
-
-        // Copied from fvMesh::updatePhi(const scalarField& sweptVols)
-        // fvMesh::updatePhi function is private, so cannot be used directly.
-        surfaceScalarField & phi = mesh.setPhi();
-
-        scalar rDeltaT = 1.0 / runTime->deltaT().value();
-
-        phi.internalField() = scalarField::subField( sweptVols(), mesh.nInternalFaces() );
-        phi.internalField() *= rDeltaT;
-
-        const fvPatchList & patches = mesh.boundary();
-
-        forAll( patches, patchI )
-        {
-            phi.boundaryField()[patchI] = patches[patchI].patchSlice( sweptVols() );
-            phi.boundaryField()[patchI] *= rDeltaT;
-        }
     }
 
     int index = 0;
@@ -813,6 +740,14 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
             index++;
         }
     }
+
+    for ( int i = 0; i < mesh.nInternalFaces(); i++ )
+    {
+        // Do not set mesh.V().oldTime(). Use the volumesStages for this purpose
+        index++;
+    }
+
+    assert( index == qold.rows() );
 
     index = 0;
 
@@ -860,9 +795,33 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     assert( index == rhs.rows() );
 
+    // Update mesh.phi()
+    {
+        // Reset the mesh point locations to the old stage
+        pointField pointsOld = pointsStages.at( k );
+        tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
+
+        mesh.setOldPoints( pointsOld );
+        mesh.update();
+
+        surfaceScalarField & phi = mesh.setPhi();
+
+        scalar rDeltaT = 1.0 / runTime->deltaT().value();
+
+        phi.internalField() -= rDeltaT * scalarField::subField( rhsV, mesh.nInternalFaces() );
+
+        const fvPatchList & patches = mesh.boundary();
+
+        forAll( patches, patchI )
+        {
+            // phi.boundaryField()[patchI] -= rDeltaT * patches[patchI].patchSlice( rhsV );
+        }
+    }
+
     // -------------------------------------------------------------------------
 
     scalar convergenceTolerance = absoluteTolerance;
+
     dimensionedScalar rDeltaT = 1.0 / mesh.time().deltaT();
 
     // --- PIMPLE loop
@@ -1059,6 +1018,9 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     UF = rDeltaT * (U - U.oldTime() - rhsU);
     phiF = rDeltaT * (phi - phi.oldTime() - rhsPhi);
+
+    const surfaceScalarField & meshPhi = mesh.phi();
+    VF = meshPhi.internalField();
 
     getSolution( result );
     evaluateFunction( k + 1, qold, t, f );

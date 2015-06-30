@@ -134,7 +134,7 @@ private:
     volVectorField HU;
     volVectorField rhsU;
     surfaceScalarField rhsPhi;
-    volScalarField::DimensionedInternalField rhsV;
+    scalarField rhsV;
 
     // PIMPLE controls
     int nCorr;
@@ -163,10 +163,9 @@ private:
     std::deque<volScalarField::DimensionedInternalField> volumeStages;
     IOobject UFHeader;
     IOobject phiFHeader;
-    IOobject VFHeader;
     volVectorField UF;
     surfaceScalarField phiF;
-    volScalarField::DimensionedInternalField VF;
+    scalarField VF;
 
     bool turbulenceSwitch;
     bool explicitFirstStage;
