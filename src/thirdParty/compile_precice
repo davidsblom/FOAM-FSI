@@ -27,5 +27,5 @@ cd precice
 if [ "$(uname)" == "Darwin" ]; then
     scons -j 4 build=release python=off petsc=off mpi=off compiler=g++-mp-4.9
 else
-    scons -j 4 build=release python=off petsc=off compiler=mpic++
+    scons -j 4 build=release python=off petsc=off compiler=mpicxx
 fi

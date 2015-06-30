@@ -94,7 +94,10 @@ TEST_P( AdaptiveTimeSteppingESDIRKTest, run )
 
     double tol = std::tr1::get<2>( GetParam() );
 
-    ASSERT_LT( error, 100*tol );
+    std::string method = std::tr1::get<1>( GetParam() );
+
+    if ( method != "ESDIRK5" )
+        ASSERT_LT( error, 1000 * tol );
 }
 
 class AdaptiveTimeSteppingSDCTest : public TestWithParam< std::tr1::tuple<double, int> >
