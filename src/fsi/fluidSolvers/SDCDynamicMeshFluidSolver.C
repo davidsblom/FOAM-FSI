@@ -683,6 +683,19 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         // mesh.points() = pointsStages.at( k + 1 );
     }
 
+    // Compute the swept volumes
+    {
+        // Reset the mesh point locations to the old stage
+        pointField points = pointsStages.at( k + 1 );
+        pointField pointsOld = pointsStages.at( k );
+        tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
+        
+        // Get the new point field from the RBFMeshMotionSolver
+
+        // Move the points to the new location
+        sweptVols = mesh.movePoints( points );
+    }
+
     int index = 0;
 
     forAll( U.oldTime().internalField(), i )
@@ -768,6 +781,10 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     // --- PIMPLE loop
     for ( label oCorr = 0; oCorr < maxIter; oCorr++ )
     {
+        // Make the fluxes relative to the mesh motion
+        // The absolute fluxes are saved in memory between stages
+        fvc::makeRelative( phi, U );
+
         U.storePrevIter();
 
         fvVectorMatrix UEqn
@@ -892,12 +909,26 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
             p.relax();
 
+            // Make the fluxes relative to the mesh motion
+            fvc::makeRelative( phi, U );
+
             U -= (1.0 / AU) * fvc::grad( p );
             U.correctBoundaryConditions();
 
             if ( currResidual < std::max( tol * initResidual, 1.0e-15 ) )
                 break;
         }
+
+        // Update the face velocities
+        fvc::makeAbsolute( phi, U );
+        {
+            surfaceVectorField nf = mesh.Sf() / mesh.magSf();
+            surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
+            surfaceVectorField Unor = phi / mesh.magSf() * nf;
+
+            Uf = Utang + Unor;
+        }
+        fvc::makeRelative( phi, U );
 
         scalar momentumResidual = evaluateMomentumResidual();
 
@@ -917,6 +948,9 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
             Info << "false";
 
         Info << endl;
+
+        // Make the fluxes absolute to the mesh motion
+        fvc::makeAbsolute( phi, U );
 
         if ( convergence )
             break;
