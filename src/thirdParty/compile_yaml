@@ -4,28 +4,28 @@ set -e
 
 # Assume that preCICE has been built before, and boost is already downloaded.
 
-VERSION=0.5.1
+VERSION=0.5.2
 
 # Define which versions of the different packages are used
 
 export BOOST_VERSION=1_53_0
 
-rm -rf yaml-cpp
+rm -rf yaml-cpp*
 
 rm -rf yaml-cpp-${VERSION}*
 
-wget -O yaml-cpp-${VERSION}.tar.gz https://yaml-cpp.googlecode.com/files/yaml-cpp-${VERSION}.tar.gz
+wget -O yaml-cpp-${VERSION}.tar.gz https://github.com/jbeder/yaml-cpp/archive/release-${VERSION}.tar.gz
 
 tar -zxvf yaml-cpp-${VERSION}.tar.gz
 rm -f yaml-cpp-${VERSION}.tar.gz
 
-ln -s yaml-cpp-${VERSION} yaml-cpp
+ln -s yaml-cpp-release-${VERSION} yaml-cpp
 rm -f boost
 ln -s boost_${BOOST_VERSION} boost
 
 export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
 
-cd yaml-cpp-${VERSION}
+cd yaml-cpp
 
 mkdir build
 
