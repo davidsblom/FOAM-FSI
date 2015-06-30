@@ -925,7 +925,32 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
                     }
                 }
 
-                surfaceScalarField phi0 = phi.oldTime() - ( fvc::interpolate( U.oldTime() ) & mesh.Sf() ) + rhsPhi;
+                // Set volume ratio of oldV over V
+                volScalarField V0oV
+                (
+                    IOobject
+                    (
+                        "V0oV",
+                        mesh.time().timeName(),
+                        mesh,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE
+                    ),
+                    mesh,
+                    dimless,
+                    zeroGradientFvPatchScalarField::typeName
+                );
+
+                V0oV.internalField() = volumeStages.at( k ) / mesh.V();
+                V0oV.correctBoundaryConditions();
+
+                // Construct parts of H which need to be subtracted
+                // term coming from H/A
+                surfaceVectorField UV0oV = -fvc::interpolate( V0oV * U.oldTime() );
+
+                surfaceScalarField phi0 = rhsPhi;
+                phi0 += UV0oV & mesh.Sf();
+                phi0 += ( fvc::interpolate( V0oV ) * Uf.oldTime() ) & mesh.Sf();
 
                 phi += rDeltaT * ddtPhiCoeff * phi0 / fvc::interpolate( AU );
             }
