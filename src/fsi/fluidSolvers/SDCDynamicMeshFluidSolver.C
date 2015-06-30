@@ -739,14 +739,23 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     // Update mesh.phi()
     {
         // Reset the mesh point locations to the old stage
-        pointField points = pointsStages.at( k + 1 );
         pointField pointsOld = pointsStages.at( k );
         tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
 
         // Get the new point field from the RBFMeshMotionSolver
 
+        RBFMeshRigidMotionSolver & motionSolver =
+            const_cast<RBFMeshRigidMotionSolver &>
+            (
+            mesh.lookupObject<RBFMeshRigidMotionSolver>( "dynamicMeshDict" )
+            );
+
+        motionSolver.solve();
+
+        tmp<pointField> tpoints = motionSolver.curPoints();
+
         // Move the points to the new location
-        sweptVols = mesh.movePoints( points );
+        sweptVols = mesh.movePoints( tpoints() );
         sweptVols() -= rhsV;
 
         // Copied from fvMesh::updatePhi(const scalarField& sweptVols)

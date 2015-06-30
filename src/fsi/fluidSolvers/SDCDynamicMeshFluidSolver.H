@@ -20,6 +20,7 @@
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
+#include "RBFMeshRigidMotionSolver.H"
 
 #include "faceTetPolyPatch.H"
 #include "fixedValuePointPatchFields.H"

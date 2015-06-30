@@ -63,6 +63,7 @@ int main(
 
     if ( fluidSolver == "sdc-pimple-solver" || fluidSolver == "esdirk-pimple-solver" || fluidSolver == "sdc-laplacian-solver" || fluidSolver == "sdc-pimple-dynamic-mesh-solver" )
     {
+        assert( config["adaptive-time-stepping"] );
         YAML::Node adaptiveTimeConfig( config["adaptive-time-stepping"] );
         assert( adaptiveTimeConfig["enabled"] );
 
@@ -86,6 +87,7 @@ int main(
 
     if ( fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" || fluidSolver == "sdc-pimple-dynamic-mesh-solver" )
     {
+        assert( config["sdc"] );
         YAML::Node sdcConfig( config["sdc"] );
         assert( sdcConfig["convergence-tolerance"] );
         assert( sdcConfig["number-of-points"] );
