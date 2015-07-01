@@ -241,7 +241,7 @@ namespace sdc
     {
         double t = 0;
 
-        while ( t < solver->getEndTime() )
+        while ( std::abs( t - solver->getEndTime() ) > 1.0e-13 || t > solver->getEndTime() )
         {
             double computedTimeStep = dt;
 
