@@ -399,3 +399,30 @@ TEST( RBFInterpolationTest, rbf3d )
         for ( int j = 0; j < y.cols(); j++ )
             ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-11 );
 }
+
+TEST( RBFInterpolationTest, wendlandC6 )
+{
+    std::shared_ptr<RBFFunctionInterface> rbfFunction ( new WendlandC6Function( 5 ) );
+    RBFInterpolation rbf( rbfFunction );
+
+    matrix x, y, ynew;
+
+    x = Eigen::MatrixXd::Random( 50, 3 ).array() * 50.0 - 2.0;
+    y = Eigen::MatrixXd::Random( 50, 3 ).array() * 32.0 - 2.0;
+
+    rbf.compute( x, x );
+    rbf.interpolate( y, ynew );
+
+    for ( int i = 0; i < y.rows(); i++ )
+        for ( int j = 0; j < y.cols(); j++ )
+            ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-13 );
+}
+
+TEST( RBFInterpolationTest, wendlandC6Unit )
+{
+    std::shared_ptr<RBFFunctionInterface> rbfFunction ( new WendlandC6Function( 5 ) );
+
+    double value = rbfFunction->evaluate( 6 );
+
+    ASSERT_NEAR( value, 0, 1.0e-13 );
+}
