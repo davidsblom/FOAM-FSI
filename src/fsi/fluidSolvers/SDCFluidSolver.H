@@ -21,13 +21,6 @@
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
 
-#include "faceTetPolyPatch.H"
-#include "fixedValuePointPatchFields.H"
-#include "fixedValueTetPolyPatchFields.H"
-#include "tetFemMatrices.H"
-#include "tetPointFields.H"
-#include "tetPolyPatchInterpolation.H"
-
 using namespace fsi;
 using std::shared_ptr;
 
