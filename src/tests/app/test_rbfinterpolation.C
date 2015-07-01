@@ -402,7 +402,7 @@ TEST( RBFInterpolationTest, rbf3d )
 
 TEST( RBFInterpolationTest, wendlandC6 )
 {
-    std::shared_ptr<RBFFunctionInterface> rbfFunction ( new WendlandC6Function( 5 ) );
+    std::shared_ptr<RBFFunctionInterface> rbfFunction( new WendlandC6Function( 5 ) );
     RBFInterpolation rbf( rbfFunction );
 
     matrix x, y, ynew;
@@ -420,9 +420,10 @@ TEST( RBFInterpolationTest, wendlandC6 )
 
 TEST( RBFInterpolationTest, wendlandC6Unit )
 {
-    std::shared_ptr<RBFFunctionInterface> rbfFunction ( new WendlandC6Function( 5 ) );
+    std::shared_ptr<RBFFunctionInterface> rbfFunction( new WendlandC6Function( 1 ) );
 
-    double value = rbfFunction->evaluate( 6 );
-
-    ASSERT_NEAR( value, 0, 1.0e-13 );
+    ASSERT_NEAR( rbfFunction->evaluate( 2 ), 0, 1.0e-13 );
+    ASSERT_NEAR( rbfFunction->evaluate( 2.0e5 ), 0, 1.0e-13 );
+    ASSERT_NEAR( rbfFunction->evaluate( 0.5 ), 0.0595703125, 1.0e-9 );
+    ASSERT_NEAR( rbfFunction->evaluate( 0.69 ), 0.00246782213555, 1.0e-9 );
 }
