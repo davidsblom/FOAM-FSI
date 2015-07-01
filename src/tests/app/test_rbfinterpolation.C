@@ -420,8 +420,6 @@ TEST( RBFInterpolationTest, wendlandC6 )
     rbf.compute( x, x );
     rbf.interpolate( y, ynew );
 
-
-
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
             ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-12 );

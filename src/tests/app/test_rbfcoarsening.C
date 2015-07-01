@@ -89,3 +89,25 @@ TEST_P( RBFCoarseningParametrizedTest, rbf1d_regularity )
     for ( int i = 0; i < ynew.rows(); i++ )
         ASSERT_NEAR( ynew( i, 0 ), std::sin( xnew( i, 0 ) ), 1.0e-1 );
 }
+
+TEST_P( RBFCoarseningParametrizedTest, rbf1d_regularity2 )
+{
+    matrix x( 30, 1 ), y( 30, 1 ), xnew( 30, 1 ), ynew;
+    x.col( 0 ).setLinSpaced( 30, 0, 10 );
+    y.col( 0 ) = x.array().sin();
+    xnew.col( 0 ).setLinSpaced( 30, 0, 10 );
+
+    rbf->compute( x, xnew );
+    rbf->interpolate( y, ynew );
+
+    for ( int i = 0; i < ynew.rows(); i++ )
+        ASSERT_NEAR( ynew( i, 0 ), std::sin( xnew( i, 0 ) ), 1.0e-1 );
+
+    double tol = std::tr1::get<4>( GetParam() );
+
+    if ( tol < 1.0e-20 )
+    {
+        for ( int i = 0; i < y.rows(); i++ )
+            ASSERT_NEAR( ynew( i, 0 ), std::sin( xnew( i, 0 ) ), 1.0e-10 );
+    }
+}
