@@ -1144,7 +1144,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     V0oV.correctBoundaryConditions();
 
     UF = rDeltaT * (U - U.oldTime() * V0oV - rhsU);
-    phiF = rDeltaT * (phi - phi.oldTime() - rhsPhi);
+    phiF = rDeltaT * (phi - ( fvc::interpolate( V0oV ) * Uf.oldTime() & mesh.Sf() ) - rhsPhi);
     meshPhiF = mesh.phi();
 
     getSolution( result );
