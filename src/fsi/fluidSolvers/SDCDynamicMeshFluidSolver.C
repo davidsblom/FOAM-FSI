@@ -236,6 +236,17 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
 
     Info << endl;
 
+    const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>( "fvSchemes" );
+    const dictionary & ddtSchemes = fvSchemes.subDict( "ddtSchemes" );
+    word ddtScheme;
+
+    if ( ddtSchemes.found( "ddt(U)" ) )
+        ddtScheme = word( ddtSchemes.lookup( "ddt(U)" ) );
+    else
+        ddtScheme = word( ddtSchemes.lookup( "default" ) );
+
+    assert( ddtScheme == "bdf1" );
+
     initialize();
 }
 
@@ -802,6 +813,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         // Reset the mesh point locations to the old stage
         pointField pointsOld = pointsStages.at( k );
         tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
+        sweptVols() -= rhsV;
 
         mesh.setOldPoints( pointsOld );
         mesh.update();
@@ -810,13 +822,13 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
         scalar rDeltaT = 1.0 / runTime->deltaT().value();
 
-        phi.internalField() -= rDeltaT * scalarField::subField( rhsV, mesh.nInternalFaces() );
+        phi.internalField() = rDeltaT * scalarField::subField( sweptVols(), mesh.nInternalFaces() );
 
         const fvPatchList & patches = mesh.boundary();
 
         forAll( patches, patchI )
         {
-            // phi.boundaryField()[patchI] -= rDeltaT * patches[patchI].patchSlice( rhsV );
+            //phi.boundaryField()[patchI] = rDeltaT * patches[patchI].patchSlice( sweptVols() );
         }
     }
 
@@ -1043,7 +1055,25 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         volumeStages.at( k + 1 ) = mesh.V();
     }
 
-    UF = rDeltaT * (U - U.oldTime() - rhsU);
+    volScalarField V0oV
+    (
+        IOobject
+        (
+            "V0oV",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimless,
+        zeroGradientFvPatchScalarField::typeName
+    );
+
+    V0oV.internalField() = mesh.V0() / mesh.V();
+    V0oV.correctBoundaryConditions();
+
+    UF = rDeltaT * (U - U.oldTime() * V0oV - rhsU);
     phiF = rDeltaT * (phi - phi.oldTime() - rhsPhi);
 
     const surfaceScalarField & meshPhi = mesh.phi();
