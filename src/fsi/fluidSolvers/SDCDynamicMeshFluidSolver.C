@@ -132,7 +132,19 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     ),
     fvc::interpolate( rhsU ) & mesh.Sf()
     ),
-    rhsV( mesh.nInternalFaces(), scalar( 0 ) ),
+    rhsMeshPhi
+    (
+    IOobject
+    (
+        "rhsMeshPhi",
+        runTime->timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar( "0", dimVolume / dimTime, 0.0 )
+    ),
     nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
     nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
     minIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "minIter" ) ) ),
@@ -181,7 +193,19 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     phiFHeader,
     fvc::interpolate( UF ) & mesh.Sf()
     ),
-    VF( mesh.nInternalFaces(), scalar( 0 ) ),
+    meshPhiF
+    (
+    IOobject
+    (
+        "rhsMeshPhi",
+        runTime->timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar( "0", dimVolume / dimTime, 0.0 )
+    ),
     explicitFirstStage( false )
 {
     // Ensure that the absolute tolerance of the linear solver is less than the
@@ -471,7 +495,19 @@ int SDCDynamicMeshFluidSolver::getDOF()
         }
     }
 
-    index += mesh.nInternalFaces();
+    surfaceScalarField & meshPhi = mesh.setPhi();
+    forAll( meshPhi.internalField(), i )
+    {
+        index++;
+    }
+
+    forAll( meshPhi.boundaryField(), patchI )
+    {
+        forAll( meshPhi.boundaryField()[patchI], i )
+        {
+            index++;
+        }
+    }
 
     return index;
 }
@@ -517,10 +553,20 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
     }
 
     // Unknown how to compute the actual value of the swept volumes
-    for ( int i = 0; i < mesh.nInternalFaces(); i++ )
+    surfaceScalarField & meshPhi = mesh.setPhi();
+    forAll( meshPhi.internalField(), i )
     {
         solution( index ) = 0.0;
         index++;
+    }
+
+    forAll( meshPhi.boundaryField(), patchI )
+    {
+        forAll( meshPhi.boundaryField()[patchI], i )
+        {
+            solution( index ) = 0.0;
+            index++;
+        }
     }
 
     assert( index == solution.rows() );
@@ -611,10 +657,19 @@ void SDCDynamicMeshFluidSolver::setSolution(
         }
     }
 
-    forAll( VF, i )
+    forAll( meshPhiF.internalField(), i )
     {
-        VF[i] = f( index );
+        meshPhiF.internalField()[i] = f( index );
         index++;
+    }
+
+    forAll( meshPhiF.boundaryField(), patchI )
+    {
+        forAll( meshPhiF.boundaryField()[patchI], i )
+        {
+            meshPhiF.boundaryField()[patchI][i] = f( index );
+            index++;
+        }
     }
 
     assert( index == f.rows() );
@@ -682,10 +737,19 @@ void SDCDynamicMeshFluidSolver::evaluateFunction(
         }
     }
 
-    forAll( VF, i )
+    forAll( meshPhiF.internalField(), i )
     {
-        f( index ) = VF[i];
+        f( index ) = meshPhiF.internalField()[i];
         index++;
+    }
+
+    forAll( meshPhiF.boundaryField(), patchI )
+    {
+        forAll( meshPhiF.boundaryField()[patchI], i )
+        {
+            f( index ) = meshPhiF.boundaryField()[patchI][i];
+            index++;
+        }
     }
 
     assert( index == f.rows() );
@@ -754,10 +818,19 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         }
     }
 
-    for ( int i = 0; i < mesh.nInternalFaces(); i++ )
+    forAll( mesh.phi().oldTime().internalField(), i )
     {
-        // Do not set mesh.V().oldTime(). Use the volumesStages for this purpose
+        mesh.setPhi().oldTime().internalField()[i] = qold( index );
         index++;
+    }
+
+    forAll( mesh.phi().oldTime().boundaryField(), patchI )
+    {
+        forAll( mesh.phi().boundaryField()[patchI], i )
+        {
+            mesh.setPhi().oldTime().boundaryField()[patchI][i] = qold( index );
+            index++;
+        }
     }
 
     assert( index == qold.rows() );
@@ -800,10 +873,19 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         }
     }
 
-    forAll( rhsV, i )
+    forAll( rhsMeshPhi.internalField(), i )
     {
-        rhsV[i] = rhs( index );
+        rhsMeshPhi.internalField()[i] = rhs( index );
         index++;
+    }
+
+    forAll( rhsMeshPhi.boundaryField(), patchI )
+    {
+        forAll( rhsMeshPhi.boundaryField()[patchI], i )
+        {
+            rhsMeshPhi.boundaryField()[patchI][i] = rhs( index );
+            index++;
+        }
     }
 
     assert( index == rhs.rows() );
@@ -813,23 +895,12 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         // Reset the mesh point locations to the old stage
         pointField pointsOld = pointsStages.at( k );
         tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
-        sweptVols() -= rhsV;
 
         mesh.setOldPoints( pointsOld );
         mesh.update();
 
-        surfaceScalarField & phi = mesh.setPhi();
-
         scalar rDeltaT = 1.0 / runTime->deltaT().value();
-
-        phi.internalField() = rDeltaT * scalarField::subField( sweptVols(), mesh.nInternalFaces() );
-
-        const fvPatchList & patches = mesh.boundary();
-
-        forAll( patches, patchI )
-        {
-            //phi.boundaryField()[patchI] = rDeltaT * patches[patchI].patchSlice( sweptVols() );
-        }
+        mesh.setPhi() -= rDeltaT * rhsMeshPhi;
     }
 
     // -------------------------------------------------------------------------
@@ -1075,9 +1146,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     UF = rDeltaT * (U - U.oldTime() * V0oV - rhsU);
     phiF = rDeltaT * (phi - phi.oldTime() - rhsPhi);
-
-    const surfaceScalarField & meshPhi = mesh.phi();
-    VF = meshPhi.internalField();
+    meshPhiF = mesh.phi();
 
     getSolution( result );
     evaluateFunction( k + 1, qold, t, f );

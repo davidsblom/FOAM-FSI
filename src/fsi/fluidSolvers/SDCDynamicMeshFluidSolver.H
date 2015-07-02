@@ -126,7 +126,7 @@ private:
     volVectorField HU;
     volVectorField rhsU;
     surfaceScalarField rhsPhi;
-    scalarField rhsV;
+    surfaceScalarField rhsMeshPhi;
 
     // PIMPLE controls
     int nCorr;
@@ -157,7 +157,7 @@ private:
     IOobject phiFHeader;
     volVectorField UF;
     surfaceScalarField phiF;
-    scalarField VF;
+    surfaceScalarField meshPhiF;
 
     bool turbulenceSwitch;
     bool explicitFirstStage;
