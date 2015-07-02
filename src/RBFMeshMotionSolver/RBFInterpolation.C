@@ -157,13 +157,15 @@ namespace rbf
             std::shared_ptr<TPSFunction> function;
             function = std::dynamic_pointer_cast<TPSFunction>( rbfFunction );
 
-            if ( polynomialTerm )
-                fullPivLu.compute( H.selfadjointView<Eigen::Lower>() );
-            else
-            if ( function )
-                lu.compute( H.selfadjointView<Eigen::Lower>() );
-            else
-                llt.compute( H.selfadjointView<Eigen::Lower>() );
+            //THIJS: tmp switch off other solves to prevent crashing
+            // if ( polynomialTerm )
+            //     fullPivLu.compute( H.selfadjointView<Eigen::Lower>() );
+            // else
+            // if ( function )
+            //     lu.compute( H.selfadjointView<Eigen::Lower>() );
+            // else
+            //     llt.compute( H.selfadjointView<Eigen::Lower>() );
+            fullPivLu.compute( H.selfadjointView<Eigen::Lower>() );
         }
 
         if ( not cpu )
@@ -246,13 +248,15 @@ namespace rbf
             valuesLU.setZero();
             valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
 
-            if ( polynomialTerm )
-                B = fullPivLu.solve( valuesLU );
-            else
-            if ( function )
-                B = lu.solve( valuesLU );
-            else
-                B = llt.solve( valuesLU );
+            //THIJS: tmp switched off other solvers to prevent crashing
+            // if ( polynomialTerm )
+            //     B = fullPivLu.solve( valuesLU );
+            // else
+            // if ( function )
+            //     B = lu.solve( valuesLU );
+            // else
+            //     B = llt.solve( valuesLU );
+            B = fullPivLu.solve( valuesLU );
 
             evaluatePhi( positions, positionsInterpolation, Phi );
 
