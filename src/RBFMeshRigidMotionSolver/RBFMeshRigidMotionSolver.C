@@ -274,12 +274,10 @@ void RBFMeshRigidMotionSolver::updateMesh( const mapPolyMesh & )
     assert( false );
 }
 
-Foam::vector RBFMeshRigidMotionSolver::calcTransformation()
+Foam::vector RBFMeshRigidMotionSolver::calcTransformation( double t )
 {
     scalar smoothStartup = 1;
     bool smoothStart = true;
-
-    double t = mesh().time().value();
 
     if ( smoothStart )
     {
@@ -294,16 +292,22 @@ Foam::vector RBFMeshRigidMotionSolver::calcTransformation()
     return transformation;
 }
 
+Foam::vector RBFMeshRigidMotionSolver::calcVelocity()
+{
+    double t = mesh().time().value();
+    double dt = mesh().time().deltaT().value();
+
+    return calcTransformation( t ) - calcTransformation( t - dt );
+}
+
 void RBFMeshRigidMotionSolver::solve()
 {
-    Info << calcTransformation() << endl;
-
     Field<vectorField> motion( mesh().boundaryMesh().size(), vectorField( 0 ) );
     const labelList & meshPoints = mesh().boundaryMesh()[movingPatchIDs[0]].meshPoints();
     motion[movingPatchIDs[0]] = vectorField( meshPoints.size(), Foam::vector::zero );
     forAll( motion[movingPatchIDs[0]], i )
     {
-        motion[movingPatchIDs[0]][i] = calcTransformation();
+        motion[movingPatchIDs[0]][i] = calcVelocity();
     }
 
     motionCenters = motion;

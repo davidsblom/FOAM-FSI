@@ -33,7 +33,8 @@ private:
         // Disallow default bitwise assignment
         void operator=( const RBFMeshRigidMotionSolver & );
 
-        Foam::vector calcTransformation();
+        Foam::vector calcTransformation( double t );
+        Foam::vector calcVelocity();
 
         Field<vectorField> motionCenters;
 
