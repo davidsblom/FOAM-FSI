@@ -353,14 +353,14 @@ TEST_P( MultiLevelAggressiveSpaceMappingSolverParametrizedTest, timeStep )
 
     if ( couplingGridSize == 50 && parallel )
     {
-        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 446 );
+        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 448 );
         ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 53 );
         ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 6 );
     }
 
     if ( couplingGridSize == 50 && !parallel )
     {
-        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 142 );
+        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 135 );
         ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 25 );
         ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 4 );
     }

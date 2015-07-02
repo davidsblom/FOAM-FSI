@@ -713,6 +713,8 @@ void SDCFluidSolver::implicitSolve(
         }
     }
 
+    assert( index == qold.rows() );
+
     index = 0;
 
     forAll( rhsU.internalField(), i )
@@ -750,6 +752,8 @@ void SDCFluidSolver::implicitSolve(
             index++;
         }
     }
+
+    assert( index == rhs.rows() );
 
     // -------------------------------------------------------------------------
 
