@@ -553,16 +553,15 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
     }
 
     // Unknown how to compute the actual value of the swept volumes
-    surfaceScalarField & meshPhi = mesh.setPhi();
-    forAll( meshPhi.internalField(), i )
+    forAll( mesh.phi().internalField(), i )
     {
         solution( index ) = 0.0;
         index++;
     }
 
-    forAll( meshPhi.boundaryField(), patchI )
+    forAll( mesh.phi().boundaryField(), patchI )
     {
-        forAll( meshPhi.boundaryField()[patchI], i )
+        forAll( mesh.phi().boundaryField()[patchI], i )
         {
             solution( index ) = 0.0;
             index++;
