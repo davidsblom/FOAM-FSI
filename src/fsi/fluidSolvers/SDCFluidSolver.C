@@ -953,7 +953,7 @@ void SDCFluidSolver::implicitSolve(
     }
 
     UF = rDeltaT * (U - U.oldTime() - rhsU);
-    phiF = rDeltaT * (phi - ddtPhiCoeff * (phi.oldTime() + rhsPhi));
+    phiF = rDeltaT * ( phi - ddtPhiCoeff * (phi.oldTime() + rhsPhi) );
 
     getSolution( result );
     evaluateFunction( k + 1, qold, t, f );
