@@ -134,7 +134,7 @@ namespace sdc
 
         bool convergence = false;
 
-        for ( int j = 0; j < 10 * k; j++ )
+        for ( int j = 0; j < k; j++ )
         {
             t = t0;
 
