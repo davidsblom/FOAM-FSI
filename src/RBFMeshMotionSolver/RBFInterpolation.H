@@ -89,6 +89,11 @@ private:
             const matrix & positionsInterpolation,
             matrix & Phi
             );
+
+        matrix evaluatePhi(
+            const matrix & positions,
+            const vector & positionsInterpolation
+            );
     };
 }
 

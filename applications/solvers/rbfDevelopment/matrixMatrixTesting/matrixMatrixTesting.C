@@ -52,10 +52,10 @@ Description
 int main(int argc, char *argv[])
 {
     // == options == //
-    int coarsening=1;
-    int Nx=129;
-    int Ny=257;
-    double R=1;
+    int coarsening=4;
+    int Nx=256;
+    int Ny=256;
+    double R=2;
     int nTimes=50;
 
     if(argc==2)
@@ -68,12 +68,20 @@ int main(int argc, char *argv[])
         Ny = atoi(argv[2]);
         Info << "Nx, Ny = " << Nx << ", " << Ny << endl;
     }
-    else if(argc>3)
+    else if(argc==4)
     {
         Nx = atoi(argv[1]);
         Ny = atoi(argv[2]);
-        nTimes = atoi(argv[3]);
-        Info << "Nx, Ny, nTimes = " << Nx << ", " << Ny << ", " << nTimes << endl;
+        coarsening = atoi(argv[3]);
+        Info << "Nx, Ny, coarsening = " << Nx << ", " << Ny << ", " << nTimes << endl;
+    }
+    else if(argc>4)
+    {
+        Nx = atoi(argv[1]);
+        Ny = atoi(argv[2]);
+        coarsening = atoi(argv[3]);
+        nTimes = atoi(argv[4]);
+        Info << "Nx, Ny, coarsening, nTimes = " << Nx << ", " << Ny << ", " << coarsening << ", " << nTimes << endl;
     }
     int N=Nx*Ny;
 
@@ -98,9 +106,12 @@ int main(int argc, char *argv[])
 
     int Nc=int(Nx/coarsening);
     rbf::matrix controlPoints(Nc,2);
+    rbf::matrix controlDisplacement(Nc,2);
     for(int i=0;i<Nc;i++){
         controlPoints(i,0)=surfacePoints(i*coarsening,0);
-        controlPoints(i,0)=surfacePoints(i*coarsening,1);
+        controlPoints(i,1)=surfacePoints(i*coarsening,1);
+        controlDisplacement(i,0)=displacement(i,0);
+        controlDisplacement(i,1)=displacement(i,1);
     }
 
     Info << "==== mesh properties === " << endl;
@@ -119,13 +130,13 @@ int main(int argc, char *argv[])
         }
         else if(k==1)
         {
-            Info << nl << "Using WendlandC2 rbf function" << endl;
-            rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::WendlandC2Function(R) );
+            Info << nl << "Using WendlandC0 rbf function" << endl;
+            rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::WendlandC0Function(R) );
         }
         else if(k==2)
         {
-            Info << nl << "Using WendlandC0 rbf function" << endl;
-            rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::WendlandC0Function(R) );
+            Info << nl << "Using WendlandC2 rbf function" << endl;
+            rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::WendlandC2Function(R) );
         }
         else if(k==3)
         {
@@ -178,8 +189,8 @@ int main(int argc, char *argv[])
         t_start = std::clock();
         for(int i=0;i<nTimes;i++)
         {
-            rbf::vector dx=H*displacement.col(0);
-            rbf::vector dy=H*displacement.col(1);
+            rbf::vector dx=H*controlDisplacement.col(0);
+            rbf::vector dy=H*controlDisplacement.col(1);
         }
         t_end = std::clock();
         double tMEM = 1.0*(t_end-t_start)/CLOCKS_PER_SEC;
@@ -189,8 +200,8 @@ int main(int argc, char *argv[])
         for(int k=0;k<nTimes;k++)
         {
             t_start = std::clock();
-            rbf::vector alphax=Cinv*displacement.col(0);
-            rbf::vector alphay=Cinv*displacement.col(1);
+            rbf::vector alphax=Cinv*controlDisplacement.col(0);
+            rbf::vector alphay=Cinv*controlDisplacement.col(1);
             t_end = std::clock();
             double ta=1.0*(t_end-t_start)/CLOCKS_PER_SEC;
 
@@ -202,7 +213,8 @@ int main(int argc, char *argv[])
                 rbf::vector rbfvalue(Nc);
                 for(int j=0;j<Nc;j++)
                 {
-                    double r = std::sqrt(std::pow(points(i,0)-controlPoints(j,0),2) + std::pow(points(i,1)-controlPoints(j,1),2))/R;
+                    double r = std::sqrt(std::pow(points(i,0)-controlPoints(j,0),2) + std::pow(points(i,1)-controlPoints(j,1),2));
+                    //double r = ( points.row( i ) - controlPoints.row( j ) ).norm();
                     rbfvalue(j) = rbfFunction->evaluate(r);
                 }
                 t_end = std::clock();
@@ -222,12 +234,12 @@ int main(int argc, char *argv[])
         double tCPU=trbfs+tes;
         Info << "Calculating dx,dy [" << N << "," << "2] "<< nTimes << " times using CPU: " << tCPU << "[" << tas << " , " << trbfs << " , " << tes << "]" << endl;
 
-        tas=0;trbfs=0;tes=0;
+        /*tas=0;trbfs=0;tes=0;
         for(int k=0;k<nTimes;k++)
         {
             t_start = std::clock();
-            rbf::vector alphax=Cinv*displacement.col(0);
-            rbf::vector alphay=Cinv*displacement.col(1);
+            rbf::vector alphax=Cinv*controlDisplacement.col(0);
+            rbf::vector alphay=Cinv*controlDisplacement.col(1);
             t_end = std::clock();
             double ta=1.0*(t_end-t_start)/CLOCKS_PER_SEC;
 
@@ -250,10 +262,10 @@ int main(int argc, char *argv[])
             tas+=ta;
         }
         double tCPU2=trbfs+tes;
-        Info << "Calculating dx,dy [" << N << "," << "2] "<< nTimes << " times using CPU: " << tCPU2 << "[" << tas << " , " << trbfs << " , " << tes << "]" << endl;
+        Info << "Calculating dx,dy [" << N << "," << "2] "<< nTimes << " times using CPU: " << tCPU2 << "[" << tas << " , " << trbfs << " , " << tes << "]" << endl;*/
 
         Info << "Ratio tCPU/tMEM = " << tCPU/tMEM << endl;
-        Info << "Ratio tCPU2/tMEM = " << tCPU2/tMEM << endl;
+        //Info << "Ratio tCPU2/tMEM = " << tCPU2/tMEM << endl;
 
     }
     // ========= Testing matrix calculations ==========//

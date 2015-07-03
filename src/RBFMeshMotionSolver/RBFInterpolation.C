@@ -85,6 +85,26 @@ namespace rbf
         }
     }
 
+    matrix RBFInterpolation::evaluatePhi(
+        const matrix & positions,
+        const vector & positionsInterpolation
+        )
+    {
+        // Evaluate Phi which contains the evaluation of the radial basis function
+        assert(positionsInterpolation.rows() == dimGrid);
+
+        double r = 0;
+
+        matrix rowPhi(1,positions.rows());
+        for ( int i = 0; i < n_A; i++ )
+        {
+            r = ( positions.row( i ) - positionsInterpolation.transpose() ).norm();
+            rowPhi( 0, i ) = rbfFunction->evaluate( r );
+        }
+
+        return rowPhi;
+    }
+
     void RBFInterpolation::compute(
         const matrix & positions,
         const matrix & positionsInterpolation
@@ -258,7 +278,8 @@ namespace rbf
             //     B = llt.solve( valuesLU );
             B = fullPivLu.solve( valuesLU );
 
-            evaluatePhi( positions, positionsInterpolation, Phi );
+            // === Building complete matrix === //
+            /*evaluatePhi( positions, positionsInterpolation, Phi );
 
             if ( polynomialTerm )
             {
@@ -270,7 +291,28 @@ namespace rbf
                 Phi.topRightCorner( n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
             }
 
-            valuesInterpolation.noalias() = Phi * B;
+            valuesInterpolation.noalias() = Phi * B;*/
+
+            // === Evaluating row by row ==== //
+            if ( polynomialTerm )
+            {
+                matrix rowPhi( 1, n_A + 1 + dimGrid);
+                for ( int i = 0; i < n_B; i++ )
+                {
+                    rowPhi.topLeftCorner( n_A, 1 ) = evaluatePhi( positions, positionsInterpolation.row( i ) );
+                    rowPhi( n_A, 1 ) = 1.0;
+                    rowPhi.topRightCorner( dimGrid, 1) = positionsInterpolation.row( i );
+                    valuesInterpolation.row(i) = rowPhi * B;
+                }
+            }
+            else
+            {
+                for ( int i = 0; i < n_B; i++ )
+                {
+                    matrix rowPhi = evaluatePhi( positions, positionsInterpolation.row( i ) );
+                    valuesInterpolation.row(i) = rowPhi * B;
+                }
+            }
         }
 
         if ( not cpu )
