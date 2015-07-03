@@ -17,7 +17,11 @@ wmake applications/utilities/mapMesh
 wmake libso src/SRFModelAbs
 wmake libso src/extraSolidBodyMotion
 wmake applications/utilities/addInitialRandomVelocity
-wmake all applications/solvers/consistentSolvers
+wmake applications/solvers/consistentSolvers/consistentIcoFoam
+wmake applications/solvers/consistentSolvers/consistentPimpleDyMFoam
+wmake applications/solvers/consistentSolvers/consistentPimpleFoam
+wmake applications/solvers/consistentSolvers/consistentSimpleFoam
+wmake applications/solvers/consistentSolvers/consistentSimpleSRFAbsFoam
 wmake applications/solvers/unsteadyPUCoupledFoam
 wmake applications/solvers/fsi/fsiFoam
 wmake applications/solvers/fsi/solidFoam
