@@ -1143,8 +1143,31 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     V0oV.internalField() = mesh.V0() / mesh.V();
     V0oV.correctBoundaryConditions();
 
+    // === Set boundaries correct of U === //
+    surfaceScalarField ddtPhiCoeff
+    (
+        IOobject
+        (
+            "ddtPhiCoeff",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensioned<scalar>( "1", dimless, 1.0 )
+    );
+
+    forAll( U.boundaryField(), patchI )
+    {
+        if ( U.boundaryField()[patchI].fixesValue() )
+        {
+            ddtPhiCoeff.boundaryField()[patchI] = 0.0;
+        }
+    }
+
     UF = rDeltaT * (U - U.oldTime() * V0oV - rhsU);
-    phiF = rDeltaT * (phi - ( fvc::interpolate( V0oV ) * Uf.oldTime() & mesh.Sf() ) - rhsPhi);
+    phiF = rDeltaT * (phi - ddtPhiCoeff * ( fvc::interpolate( V0oV ) * Uf.oldTime() & mesh.Sf() ) - rhsPhi);
     meshPhiF = mesh.phi();
 
     getSolution( result );
