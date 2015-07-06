@@ -294,14 +294,19 @@ namespace rbf
             valuesInterpolation.noalias() = Phi * B;*/
 
             // === Evaluating row by row ==== //
+            if (valuesInterpolation.rows() != n_B)
+            {
+                valuesInterpolation = matrix( n_B, values.cols() );
+            }
+
             if ( polynomialTerm )
             {
                 matrix rowPhi( 1, n_A + 1 + dimGrid);
                 for ( int i = 0; i < n_B; i++ )
                 {
-                    rowPhi.topLeftCorner( n_A, 1 ) = evaluatePhi( positions, positionsInterpolation.row( i ) );
-                    rowPhi( n_A, 1 ) = 1.0;
-                    rowPhi.topRightCorner( dimGrid, 1) = positionsInterpolation.row( i );
+                    rowPhi.topLeftCorner( 1, n_A ) = evaluatePhi( positions, positionsInterpolation.row( i ) );
+                    rowPhi( 0, n_A ) = 1.0;
+                    rowPhi.topRightCorner( 1, dimGrid ) = positionsInterpolation.row( i );
                     valuesInterpolation.row(i) = rowPhi * B;
                 }
             }
@@ -310,6 +315,7 @@ namespace rbf
                 for ( int i = 0; i < n_B; i++ )
                 {
                     matrix rowPhi = evaluatePhi( positions, positionsInterpolation.row( i ) );
+                    matrix bla = rowPhi * B;
                     valuesInterpolation.row(i) = rowPhi * B;
                 }
             }
