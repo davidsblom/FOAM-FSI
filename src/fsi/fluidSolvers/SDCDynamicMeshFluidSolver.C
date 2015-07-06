@@ -776,8 +776,22 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         U = UStages.at( k + 1 );
         Uf = UfStages.at( k + 1 );
     }
+    Uf.oldTime() = UfStages.at( k );
 
-    mesh.setV0() = volumeStages.at( k );
+    // Update mesh.phi()
+    {
+        mesh.setV0() = volumeStages.at( k );
+
+        // Reset the mesh point locations to the old stage
+        pointField pointsOld = pointsStages.at( k );
+        tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
+
+        mesh.setOldPoints( pointsOld );
+        mesh.update();
+
+        scalar rDeltaT = 1.0 / runTime->deltaT().value();
+        mesh.setPhi() -= rDeltaT * rhsMeshPhi;
+    }
 
     int index = 0;
 
@@ -888,19 +902,6 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     }
 
     assert( index == rhs.rows() );
-
-    // Update mesh.phi()
-    {
-        // Reset the mesh point locations to the old stage
-        pointField pointsOld = pointsStages.at( k );
-        tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
-
-        mesh.setOldPoints( pointsOld );
-        mesh.update();
-
-        scalar rDeltaT = 1.0 / runTime->deltaT().value();
-        mesh.setPhi() -= rDeltaT * rhsMeshPhi;
-    }
 
     // -------------------------------------------------------------------------
 
@@ -1140,7 +1141,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         zeroGradientFvPatchScalarField::typeName
     );
 
-    V0oV.internalField() = mesh.V0() / mesh.V();
+    V0oV.internalField() = volumeStages.at( k ) / mesh.V();
     V0oV.correctBoundaryConditions();
 
     // === Set boundaries correct of U === //
