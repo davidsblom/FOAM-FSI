@@ -315,7 +315,6 @@ namespace rbf
                 for ( int i = 0; i < n_B; i++ )
                 {
                     matrix rowPhi = evaluatePhi( positions, positionsInterpolation.row( i ) );
-                    matrix bla = rowPhi * B;
                     valuesInterpolation.row(i) = rowPhi * B;
                 }
             }
