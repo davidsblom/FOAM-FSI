@@ -776,6 +776,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         U = UStages.at( k + 1 );
         Uf = UfStages.at( k + 1 );
     }
+
     Uf.oldTime() = UfStages.at( k );
 
     // Update mesh.phi()
@@ -788,9 +789,6 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
         mesh.setOldPoints( pointsOld );
         mesh.update();
-
-        scalar rDeltaT = 1.0 / runTime->deltaT().value();
-        mesh.setPhi() -= rDeltaT * rhsMeshPhi;
     }
 
     int index = 0;
@@ -902,6 +900,11 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     }
 
     assert( index == rhs.rows() );
+
+    {
+        scalar rDeltaT = 1.0 / runTime->deltaT().value();
+        mesh.setPhi() -= rDeltaT * rhsMeshPhi;
+    }
 
     // -------------------------------------------------------------------------
 
