@@ -30,8 +30,8 @@ int main(
         // Make the fluxes absolute
         fvc::makeAbsolute( phi, U );
 
-        //updates V000 if bdf3 is used
-#       include "updateV000.H"
+        // updates V000 if bdf3 is used
+        #include "updateV000.H"
 
         runTime++;
 
