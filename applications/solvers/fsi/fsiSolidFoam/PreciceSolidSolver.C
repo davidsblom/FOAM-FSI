@@ -61,6 +61,11 @@ void PreciceSolidSolver::readData( matrix & data )
 
 void PreciceSolidSolver::run()
 {
+    matrix outputOld( solver->getInterfaceSizeLocal(), precice->getDimensions() );
+    matrix input( solver->getInterfaceSizeLocal(), precice->getDimensions() );
+    matrix output;
+    outputOld.setZero();
+
     while ( solver->isRunning() )
     {
         solver->initTimeStep();
@@ -73,9 +78,6 @@ void PreciceSolidSolver::run()
 
             Info << endl << "Time = " << solver->runTime->timeName() << ", iteration = " << iter + 1 << endl;
 
-            matrix input( solver->getInterfaceSizeLocal(), precice->getDimensions() ), output;
-            input.setZero();
-
             readData( input );
 
             if ( precice->isActionRequired( precice::constants::actionReadIterationCheckpoint() ) )
@@ -85,7 +87,7 @@ void PreciceSolidSolver::run()
             solver->solve();
             solver->getDisplacementLocal( output );
 
-            writeData( output );
+            writeData( output - outputOld );
 
             if ( precice->isActionRequired( precice::constants::actionWriteIterationCheckpoint() ) )
                 precice->fulfilledAction( precice::constants::actionWriteIterationCheckpoint() );
@@ -107,6 +109,8 @@ void PreciceSolidSolver::run()
         }
 
         solver->finalizeTimeStep();
+
+        outputOld = output;
     }
 }
 

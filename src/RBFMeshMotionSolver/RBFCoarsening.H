@@ -31,6 +31,34 @@ public:
             bool exportTxt
             );
 
+        RBFCoarsening(
+            std::shared_ptr<RBFInterpolation> rbf,
+            bool enabled,
+            bool livePointSelection,
+            bool livePointSelectionSumValues,
+            double tol,
+            double tolLivePointSelection,
+            int coarseningMinPoints,
+            int coarseningMaxPoints,
+            bool twoPointSelection,
+            bool exportTxt
+            );
+
+        RBFCoarsening(
+            std::shared_ptr<RBFInterpolation> rbf,
+            bool enabled,
+            bool livePointSelection,
+            bool livePointSelectionSumValues,
+            double tol,
+            double tolLivePointSelection,
+            int coarseningMinPoints,
+            int coarseningMaxPoints,
+            bool twoPointSelection,
+            bool surfaceCorrection,
+            double ratioRadiusError,
+            bool exportTxt
+            );
+
         void greedySelection( const matrix & values );
 
         void compute(
@@ -48,6 +76,8 @@ public:
             int nbStaticFaceCenters
             );
 
+        void correctSurface( matrix & valuesInterpolation );
+
         std::shared_ptr<RBFInterpolation> rbf;
         std::shared_ptr<RBFInterpolation> rbfCoarse;
         bool enabled;
@@ -57,14 +87,23 @@ public:
         double tolLivePointSelection;
         int coarseningMinPoints;
         int coarseningMaxPoints;
+        bool twoPointSelection;
+        bool polynomialTerm;
+        bool surfaceCorrection;
+        double ratioRadiusError;
         bool exportTxt;
         Eigen::VectorXi selectedPositions;
         int nbStaticFaceCentersRemove;
         matrix positions;
         matrix positionsInterpolation;
         matrix values;
+        matrix errorInterpolationCoarse;
+        Eigen::VectorXi closestBoundaryIndexCorrection;
+        matrix valuesCorrection;
         int nbMovingFaceCenters;
         int fileExportIndex;
+
+        static debug::debugSwitch debug;
     };
 }
 

@@ -73,7 +73,7 @@ namespace Foam
             return;
         }
 
-        scalar Umax = 0;
+        scalar Umax = maxValue_;
 
         scalar t = this->db().time().value();
 

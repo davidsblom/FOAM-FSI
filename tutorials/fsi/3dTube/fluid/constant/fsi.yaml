@@ -1,24 +1,92 @@
+# Choose the fluid solver. Possible options: pimple-solver,
+# coupled-pressure-velocity-solver, and compressible-solver.
 fluid-solver: pimple-solver
+
+# Choose the solid solver: Currently, only the segregated-solver is
+# available.
 solid-solver: segregated-solver
+
+# Solve the fluid and solid solver in a staggered/serial or parallel manner.
 parallel-coupling: false
+
+# Settings for interpolation between fluid and solid interfaces. A
+# consistent approach is applied always.
 interpolation:
   radial-basis-function:
+
+    # Available radial basis functions: thin-plate-spline, wendland-c0,
+    # wendland-c2, wendland-c4, wendland-c6
     function: thin-plate-spline
+
+    # Two different RBF interpolation implementations are available.
+    # With cpu switched off, the interpolation matrix is saved in memory,
+    # otherwise it's partly rebuilt during every interpolation step.
+    cpu: true
+
+  # Use coarsening in order to decrease the computational costs of the RBF
+  # interpolation.
   coarsening:
     enabled: false
+
+# Settings for the implicit coupling of the fluid and solid solvers
 coupling-scheme-implicit:
+
+  # Extrapolate the solution from previous time steps to form a good initial
+  # solution for the next time step. Option: 0, 1, or 2.
   extrapolation-order: 2
+
+  # Convergence criterion to determine whether the FSI iterations are
+  # converged.
   convergence-measures:
     - relative-convergence-measure:
         limit: 1e-5
+
+        # data-id = 0: displacement
+        # data-id = 1: pressure/traction acting on the FSI interface. Only
+        # applicable in case the fluid and solid solvers are coupling in
+        # parallel (parallel-coupling equals false).
         data-id: 0
+
+  # Maximum number of iterations per time step. When the maximum iterations
+  # is reached, the FSI solver moves on to the next time step.
   max-iterations: 50
+
+  # Settings for the post processing / coupling algorithm.
   post-processing:
+
+    # Choose the coupling algorithm. Possible options: Anderson, Aitken or
+    # QN (Quasi-Newton based on the Broyden update). Anderson acceleration is
+    # considered state-of-the-art. IQN-ILS is the same algorithm as Anderson
+    # acceleration.
     algorithm: Anderson
+
+    # The beta parameter only used by Anderson acceleration. It can be
+    # interpreted as an underrelaxation parameter for the directions which are
+    # not taken into account by the Jacobian approximation of the Anderson
+    # technique.
     beta: 0.5
+
+    # The under relaxation parameter applied during the first iteration.
+    # Only applied during the first time step in case information from
+    # previous tim steps is reused.
     initial-relaxation: 1.0e-3
+
+    # The number of time steps being reused. Only applicable to Anderson
+    # acceleration and Quasi-Newton coupling (QN).
     timesteps-reused: 0
+
+    # Anderson acceleration: the cut off criterion to determine whether the
+    # coupling vectors are equal.
     singularity-limit: 1.0e-10
+
+    # Starting time index after which reuse of information is switched on.
     reuse-information-starting-from-time-index: 10
+
+    # Maximum number of iterations used by Anderson acceleration and
+    # Quasi-Newton.
     max-used-iterations: 50
+
+    # Anderson acceleration: Switch to load the full interface Jacobian in
+    # memory, and use a secant equation to update the Jacobian at every time
+    # step.
     update-jacobian: true

@@ -11,30 +11,34 @@ namespace sdc
 {
     SDC::SDC(
         std::shared_ptr<SDCSolver> solver,
+        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
         std::string rule,
         int nbNodes,
         double tol
         )
         :
         solver( solver ),
+        adaptiveTimeStepper( adaptiveTimeStepper ),
+        N( solver->getDOF() ),
+        k( 0 ),
+        dt( solver->getTimeStep() ),
+        tol( tol ),
         nodes(),
         smat(),
         qmat(),
-        dsdc(),
-        dt( solver->getTimeStep() ),
-        N( solver->getDOF() ),
-        k( 0 ),
-        tol( tol )
+        dsdc()
     {
+        assert( adaptiveTimeStepper );
         assert( solver );
         assert( nbNodes > 1 );
         assert( nbNodes < 15 );
         assert( dt > 0 );
         assert( tol > 0 );
         assert( tol < 1 );
-        assert( rule == "gauss-radau" || rule == "gauss-lobatto" );
+        assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" );
 
-        quadrature::rules( rule, nbNodes, nodes, smat, qmat );
+        int refine = 1;
+        quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
 
         k = nodes.rows();
 
@@ -44,6 +48,29 @@ namespace sdc
             dsdc( i ) = nodes( i + 1 ) - nodes( i );
 
         solver->setNumberOfStages( k );
+
+        if ( adaptiveTimeStepper->isEnabled() )
+        {
+            refine = 2;
+            quadrature::rules( rule, nbNodes, refine, nodesEmbedded, smatEmbedded, qmatEmbedded );
+
+            int orderEmbedded = 0;
+
+            if ( rule == "gauss-radau" )
+                orderEmbedded = (nodesEmbedded.rows() - 1) * 2 - 1;
+
+            if ( rule == "gauss-lobatto" )
+                orderEmbedded = nodesEmbedded.rows() * 2 - 3;
+
+            if ( rule == "clenshaw-curtis" )
+                orderEmbedded = nodesEmbedded.rows() - 1;
+
+            if ( rule == "uniform" )
+                orderEmbedded = nodesEmbedded.rows();
+
+            adaptiveTimeStepper->setOrderEmbeddedMethod( orderEmbedded );
+            adaptiveTimeStepper->setEndTime( solver->getEndTime() );
+        }
     }
 
     SDC::~SDC()
@@ -51,21 +78,28 @@ namespace sdc
 
     void SDC::run()
     {
-        int i = 0;
+        double t = solver->getStartTime();
 
-        while ( solver->isRunning() )
+        while ( std::abs( t - solver->getEndTime() ) > 1.0e-13 && t < solver->getEndTime() )
         {
-            solveTimeStep( dt * i );
-            i++;
+            double computedTimeStep = dt;
+
+            solveTimeStep( t );
+
+            if ( adaptiveTimeStepper->isAccepted() )
+                t += computedTimeStep;
         }
     }
 
     void SDC::solveTimeStep( const double t0 )
     {
-        solver->nextTimeStep();
+        if ( adaptiveTimeStepper->isPreviousStepAccepted() )
+            solver->nextTimeStep();
 
         Eigen::VectorXd dtsdc = this->dt * dsdc;
-        Eigen::MatrixXd solStages( k, N ), F( k, N );
+        Eigen::MatrixXd solStages( k, N ), F( k, N ), Fembedded( nodesEmbedded.rows(), N ), residual;
+        Eigen::MatrixXd qj( 1, solStages.cols() ), qjEmbedded( 1, solStages.cols() );
+        Eigen::VectorXd errorEstimate( N );
 
         Eigen::VectorXd sol( N ), f( N );
         solver->getSolution( sol );
@@ -76,22 +110,21 @@ namespace sdc
         solver->evaluateFunction( 0, sol, t, f );
         F.row( 0 ) = f;
 
+        Eigen::VectorXd rhs( N ), result( N ), qold( N );
+        rhs.setZero();
+
+        solver->initTimeStep();
+
         for ( int j = 0; j < k - 1; j++ )
         {
             double dt = dtsdc( j );
             t += dt;
 
-            Eigen::VectorXd rhs( N ), result( N ), qold( N );
-            f.setZero();
-            rhs.setZero();
-            result.setZero();
             qold = solStages.row( j );
 
             Info << "\nTime = " << t << ", SDC sweep = 0, SDC substep = " << j + 1 << nl << endl;
 
-            solver->initTimeStep();
             solver->implicitSolve( false, j, t, dt, qold, rhs, f, result );
-            solver->finalizeTimeStep();
 
             solStages.row( j + 1 ) = result;
             F.row( j + 1 ) = f;
@@ -104,12 +137,6 @@ namespace sdc
         for ( int j = 0; j < 10 * k; j++ )
         {
             t = t0;
-            Eigen::MatrixXd Fold = F;
-
-            Eigen::VectorXd rhs( N ), result( N ), qold( N );
-            f.setZero();
-            rhs.setZero();
-            result.setZero();
 
             Eigen::MatrixXd Sj = this->dt * (smat * F);
 
@@ -118,19 +145,15 @@ namespace sdc
             {
                 double dt = dtsdc( p );
                 t += dt;
-                f.setZero();
-                result.setZero();
 
                 Info << "\nTime = " << t << ", SDC sweep = " << j + 1 << ", SDC substep = " << p + 1 << nl << endl;
 
                 qold = solStages.row( p );
 
                 // Form right hand side
-                rhs = -dt * Fold.row( p + 1 ) + Sj.row( p );
+                rhs.noalias() = -dt * F.row( p + 1 ) + Sj.row( p );
 
-                solver->initTimeStep();
                 solver->implicitSolve( true, p, t, dt, qold, rhs, f, result );
-                solver->finalizeTimeStep();
 
                 solStages.row( p + 1 ) = result;
                 F.row( p + 1 ) = f;
@@ -138,13 +161,18 @@ namespace sdc
 
             // Compute the SDC residual
 
-            Eigen::MatrixXd Qj = dt * (qmat * F);
-            Eigen::MatrixXd residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
+            // Eigen::MatrixXd Qj = dt * (qmat * F);
+            // Eigen::MatrixXd residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
 
-            scalarList squaredNorm( Pstream::nProcs() );
+            // Only compute row k-2 of matrix Qj for efficiency
+            computeResidual( qmat, F, dt, qj );
+
+            residual.noalias() = solStages.row( 0 ) + qj.row( 0 ) - solStages.row( k - 1 );
+
+            scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
             squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
             reduce( squaredNorm, sumOp<scalarList>() );
-            double error = std::sqrt( sum( squaredNorm ) / solver->getNbCells() );
+            double error = std::sqrt( sum( squaredNorm ) / N );
             error /= solver->getScalingFactor();
             convergence = error < tol && j >= k - 1;
 
@@ -165,6 +193,51 @@ namespace sdc
                 break;
         }
 
-        solver->setDeltaT( this->dt );
+        if ( adaptiveTimeStepper->isEnabled() )
+        {
+            double newTimeStep = 0;
+
+            for ( int i = 0; i < Fembedded.rows(); i++ )
+                Fembedded.row( i ) = F.row( i * 2 );
+
+            computeResidual( qmat, F, dt, qj );
+            computeResidual( qmatEmbedded, Fembedded, dt, qjEmbedded );
+
+            errorEstimate.noalias() = qj.row( 0 ) - qjEmbedded.row( 0 );
+
+            bool accepted = adaptiveTimeStepper->determineNewTimeStep( errorEstimate, result, dt, newTimeStep );
+
+            dt = newTimeStep;
+
+            if ( not accepted )
+                solver->setSolution( solStages.row( 0 ), F.row( 0 ) );
+        }
+
+        if ( adaptiveTimeStepper->isAccepted() )
+            solver->finalizeTimeStep();
+    }
+
+    void SDC::computeResidual(
+        const Eigen::MatrixXd & qmat,
+        const Eigen::MatrixXd & F,
+        const double dt,
+        Eigen::MatrixXd & qj
+        )
+    {
+        // Eigen::MatrixXd Qj = dt * (qmat * F);
+
+        // Only compute row k-2 of matrix Qj for efficiency
+        int k = F.rows();
+        int ii = k - 2, jj, kk;
+
+        for ( jj = 0; jj < F.cols(); ++jj )
+        {
+            qj( 0, jj ) = 0;
+
+            for ( kk = 0; kk < F.rows(); ++kk )
+                qj( 0, jj ) += qmat( ii, kk ) * F( kk, jj );
+
+            qj( 0, jj ) *= dt;
+        }
     }
 }

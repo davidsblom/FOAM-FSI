@@ -13,6 +13,8 @@
 #include "SDCFluidSolver.H"
 #include "SDC.H"
 #include "SDCLaplacianSolver.H"
+#include "ESDIRK.H"
+#include "AdaptiveTimeStepper.H"
 
 int main(
     int argc,
@@ -41,10 +43,11 @@ int main(
 
     std::string fluidSolver = config["fluid-solver"].as<std::string>();
 
-    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" );
+    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" || fluidSolver == "esdirk-pimple-solver" );
 
     std::shared_ptr<foamFluidSolver> fluid;
     std::shared_ptr<sdc::SDC> sdc;
+    std::shared_ptr<sdc::ESDIRK> esdirk;
 
     if ( fluidSolver == "coupled-pressure-velocity-solver" )
         fluid = std::shared_ptr<foamFluidSolver> ( new CoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
@@ -55,12 +58,38 @@ int main(
     if ( fluidSolver == "compressible-solver" )
         fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
+    std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
+
+    if ( fluidSolver == "sdc-pimple-solver" || fluidSolver == "esdirk-pimple-solver" || fluidSolver == "sdc-laplacian-solver" )
+    {
+        YAML::Node adaptiveTimeConfig( config["adaptive-time-stepping"] );
+        assert( adaptiveTimeConfig["enabled"] );
+
+        bool adaptiveTimeStepping = adaptiveTimeConfig["enabled"].as<bool>();
+        std::string filter = "elementary";
+        double adaptiveTolerance = 1.0e-3;
+        double safetyFactor = 0.5;
+
+        if ( adaptiveTimeStepping )
+        {
+            assert( adaptiveTimeConfig["filter"] );
+            assert( adaptiveTimeConfig["tolerance"] );
+            assert( adaptiveTimeConfig["safety-factor"] );
+            filter = adaptiveTimeConfig["filter"].as<std::string>();
+            adaptiveTolerance = adaptiveTimeConfig["tolerance"].as<double>();
+            safetyFactor = adaptiveTimeConfig["safety-factor"].as<double>();
+        }
+
+        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( adaptiveTimeStepping, filter, adaptiveTolerance, safetyFactor ) );
+    }
+
     if ( fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" )
     {
         YAML::Node sdcConfig( config["sdc"] );
         assert( sdcConfig["convergence-tolerance"] );
         assert( sdcConfig["number-of-points"] );
         assert( sdcConfig["quadrature-rule"] );
+        assert( adaptiveTimeStepper );
 
         int n = sdcConfig["number-of-points"].as<int>();
         double tol = sdcConfig["convergence-tolerance"].as<double>();
@@ -74,16 +103,33 @@ int main(
         if ( fluidSolver == "sdc-laplacian-solver" )
             solver = std::shared_ptr<sdc::SDCSolver>( new SDCLaplacianSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
-        sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( solver, quadratureRule, n, tol ) );
+        sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( solver, adaptiveTimeStepper, quadratureRule, n, tol ) );
     }
 
-    assert( fluid || sdc );
+    if ( fluidSolver == "esdirk-pimple-solver" )
+    {
+        YAML::Node esdirkConfig( config["esdirk"] );
+
+        assert( esdirkConfig["method"] );
+        assert( adaptiveTimeStepper );
+
+        std::string method = esdirkConfig["method"].as<std::string>();
+        std::shared_ptr<sdc::SDCSolver> solver;
+
+        solver = std::shared_ptr<sdc::SDCSolver>( new SDCFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+        esdirk = std::shared_ptr<sdc::ESDIRK>( new sdc::ESDIRK( solver, method, adaptiveTimeStepper ) );
+    }
+
+    assert( fluid || sdc || esdirk );
 
     if ( fluid )
         fluid->run();
 
     if ( sdc )
         sdc->run();
+
+    if ( esdirk )
+        esdirk->run();
 
     Info << "End\n" << endl;
 

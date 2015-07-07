@@ -28,11 +28,21 @@ public:
 
         virtual int getDOF() = 0;
 
-        virtual int getNbCells() = 0;
-
         virtual double getScalingFactor() = 0;
 
         virtual void getSolution( Eigen::VectorXd & solution ) = 0;
+
+        virtual void setSolution(
+            const Eigen::VectorXd & solution,
+            const Eigen::VectorXd & f
+            ) = 0;
+
+        virtual double getEndTime() = 0;
+
+        virtual double getStartTime()
+        {
+            return 0;
+        };
 
         virtual double getTimeStep() = 0;
 

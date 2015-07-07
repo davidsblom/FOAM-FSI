@@ -26,10 +26,7 @@ BOOST_VERSION=1_53_0
 BOOST_VERSION_DOT=1.53.0
 
 rm -rf boost_${BOOST_VERSION}
-rm -rf precice
-
 tar jxfv boost_${BOOST_VERSION}.tar.bz2
-tar -zxvf precice.tar.gz
 
 # Set environment variables necessary for building preCICE
 
@@ -38,10 +35,10 @@ export PRECICE_BOOST_ROOT=${BOOST_ROOT}
 export PRECICE_MPI_LIB=mpi
 export PRECICE_MPI_LIB_PATH=${MPI_BASE}/lib64
 export PRECICE_MPI_INC_PATH=${MPI_BASE}/include64
+export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
 cd precice
 python tools/python_scripts/insert_mpi_header.py
-scons -j 32 build=debug python=off petsc=off compiler=mpicxx > >(tee make_precice.log) 2> >(tee make_precice_error.log >&2)
 scons -j 32 build=release python=off petsc=off compiler=mpicxx > >(tee make_precice.log) 2> >(tee make_precice_error.log >&2)
 cd ..
 

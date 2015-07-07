@@ -21,13 +21,6 @@
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
 
-#include "faceTetPolyPatch.H"
-#include "fixedValuePointPatchFields.H"
-#include "fixedValueTetPolyPatchFields.H"
-#include "tetFemMatrices.H"
-#include "tetPointFields.H"
-#include "tetPolyPatchInterpolation.H"
-
 using namespace fsi;
 using std::shared_ptr;
 
@@ -74,11 +67,18 @@ public:
 
     virtual void getSolution( Eigen::VectorXd & solution );
 
-    virtual int getNbCells();
+    virtual void setSolution(
+        const Eigen::VectorXd & solution,
+        const Eigen::VectorXd & f
+        );
+
+    virtual double getEndTime();
 
     virtual double getScalingFactor();
 
     virtual double getTimeStep();
+
+    virtual double getStartTime();
 
     virtual void implicitSolve(
         bool corrector,
@@ -105,7 +105,7 @@ private:
 
     void createFields();
 
-    double evaluateMomentumResidual( double dt );
+    double evaluateMomentumResidual();
 
     void initialize();
 
@@ -122,12 +122,12 @@ private:
     // Fields
     volScalarField p;
     volVectorField U;
-    surfaceScalarField phi;
     surfaceVectorField Uf;
+    surfaceScalarField phi;
     volScalarField AU;
     volVectorField HU;
     volVectorField rhsU;
-    surfaceVectorField rhsUf;
+    surfaceScalarField rhsPhi;
 
     // PIMPLE controls
     int nCorr;
@@ -152,10 +152,13 @@ private:
     std::deque<surfaceScalarField> phiStages;
     std::deque<volVectorField> UStages;
     std::deque<surfaceVectorField> UfStages;
+    IOobject UFHeader;
+    IOobject phiFHeader;
     volVectorField UF;
-    surfaceVectorField UfF;
+    surfaceScalarField phiF;
 
     bool turbulenceSwitch;
+    bool explicitFirstStage;
 };
 
 #endif

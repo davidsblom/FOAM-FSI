@@ -51,9 +51,13 @@ private:
         labelList nbGlobalStaticFaceCenters;
         labelList nbGlobalFixedFaceCenters;
 
+        List<labelList> globalMovingPointsLabelList;
+
         // 2d corrector
         twoDPointCorrectorRBF twoDCorrector;
         int nbPoints;
+        bool faceCellCenters;
+        bool cpu;
 
 public:
 

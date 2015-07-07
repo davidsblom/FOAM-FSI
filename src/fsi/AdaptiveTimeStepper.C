@@ -1,0 +1,211 @@
+
+/*
+ * Author
+ *   David Blom, TU Delft. All rights reserved.
+ */
+
+#include "AdaptiveTimeStepper.H"
+
+using namespace sdc;
+
+AdaptiveTimeStepper::AdaptiveTimeStepper( bool enabled )
+    :
+    enabled( enabled ),
+    filter( "h211b" ),
+    tol( 1.0e-4 ),
+    safetyFactor( 0.8 ),
+    k( 0 ),
+    cerrold( 0 ),
+    rhoold( 0 ),
+    timeStepIndex( 0 ),
+    accepted( false ),
+    previousTimeStepRejected( false ),
+    endTime( 0 ),
+    t( 0 )
+{}
+
+AdaptiveTimeStepper::AdaptiveTimeStepper(
+    bool enabled,
+    std::string filter,
+    double tol,
+    double safetyFactor
+    )
+    :
+    enabled( enabled ),
+    filter( filter ),
+    tol( tol ),
+    safetyFactor( safetyFactor ),
+    k( 0 ),
+    cerrold( 0 ),
+    rhoold( 0 ),
+    timeStepIndex( 0 ),
+    accepted( false ),
+    previousTimeStepRejected( false ),
+    endTime( 0 ),
+    t( 0 )
+{
+    assert( filter == "h211b" || filter == "elementary" || filter == "pi42" );
+    assert( tol > 0 );
+    assert( tol < 1 );
+    assert( safetyFactor > 0 );
+    assert( safetyFactor <= 1 );
+}
+
+AdaptiveTimeStepper::~AdaptiveTimeStepper()
+{}
+
+bool AdaptiveTimeStepper::determineNewTimeStep(
+    const Eigen::VectorXd & errorEstimate,
+    const Eigen::VectorXd & solution,
+    const double computedTimeStep,
+    double & newTimeStep
+    )
+{
+    assert( endTime > 0 );
+
+    scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
+    squaredNorm[Pstream::myProcNo()] = errorEstimate.squaredNorm();
+    reduce( squaredNorm, sumOp<scalarList>() );
+    double error = std::sqrt( sum( squaredNorm ) );
+
+    squaredNorm = 0;
+    squaredNorm[Pstream::myProcNo()] = solution.squaredNorm();
+    reduce( squaredNorm, sumOp<scalarList>() );
+    error /= std::sqrt( sum( squaredNorm ) );
+
+    return determineNewTimeStep( error, computedTimeStep, newTimeStep );
+}
+
+bool AdaptiveTimeStepper::determineNewTimeStep(
+    const double errorEstimate,
+    const double computedTimeStep,
+    double & newTimeStep
+    )
+{
+    assert( endTime > 0 );
+    assert( k > 0 );
+
+    if ( not enabled )
+    {
+        newTimeStep = computedTimeStep;
+        return true;
+    }
+
+    double cerr = safetyFactor * tol / errorEstimate;
+    accepted = false;
+    double rho = 0;
+
+    if ( tol / errorEstimate > 1 )
+        accepted = true;
+
+    if ( timeStepIndex == 0 || previousTimeStepRejected )
+        rho = elementary( cerr, cerrold, rhoold );
+    else
+    {
+        if ( filter == "h211b" )
+            rho = h211b( cerr, cerrold, rhoold );
+
+        if ( filter == "pi42" )
+            rho = pi42( cerr, cerrold, rhoold );
+    }
+
+    double ratio = limit( rho );
+
+    newTimeStep = ratio * computedTimeStep;
+
+    cerrold = cerr;
+    rhoold = rho;
+
+    if ( accepted )
+    {
+        previousTimeStepRejected = false;
+        timeStepIndex++;
+        t += computedTimeStep;
+
+        if ( t + newTimeStep > endTime )
+            newTimeStep = endTime - t;
+    }
+    else
+        previousTimeStepRejected = true;
+
+    Info << "adaptive time: error = " << errorEstimate;
+    Info << ", accepted = ";
+
+    if ( accepted )
+        Info << "true";
+    else
+        Info << "false";
+
+    Info << ", current time step = " << computedTimeStep;
+    Info << ", new time step = " << newTimeStep << endl;
+
+    return accepted;
+}
+
+double AdaptiveTimeStepper::elementary(
+    const double c1,
+    const double c0,
+    const double rho
+    )
+{
+    // Elementary integrating controller for startup
+    return std::pow( c1, 1.0 / k );
+}
+
+double AdaptiveTimeStepper::h211b(
+    const double c1,
+    const double c0,
+    const double rho
+    )
+{
+    // H211b digital filter, with standard parameter setting b = 4
+    double b = 4;
+
+    return std::pow( c1, 1.0 / b / k ) * std::pow( c0, 1.0 / b / k ) * std::pow( rho, -1.0 / b );
+}
+
+bool AdaptiveTimeStepper::isAccepted()
+{
+    if ( not enabled )
+        return true;
+
+    return accepted;
+}
+
+bool AdaptiveTimeStepper::isEnabled()
+{
+    return enabled;
+}
+
+bool AdaptiveTimeStepper::isPreviousStepAccepted()
+{
+    return not previousTimeStepRejected;
+}
+
+double AdaptiveTimeStepper::limit( const double u )
+{
+    double kappa = 1;
+
+    return 1.0 + kappa * std::atan( (u - 1) / kappa );
+}
+
+double AdaptiveTimeStepper::pi42(
+    const double c1,
+    const double c0,
+    const double rho
+    )
+{
+    // PI.4.2 controller
+    return std::pow( c1, 3.0 / 5.0 / k ) * std::pow( c0, -1.0 / 5.0 / k );
+}
+
+void AdaptiveTimeStepper::setEndTime( double endTime )
+{
+    assert( endTime > 0 );
+    this->endTime = endTime;
+}
+
+void AdaptiveTimeStepper::setOrderEmbeddedMethod( int order )
+{
+    k = order + 1;
+}

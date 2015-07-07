@@ -127,51 +127,27 @@ void CompressibleFluidSolver::continuityErrs()
 
 void CompressibleFluidSolver::getAcousticsPressureLocal( matrix & data )
 {
-    // Use linear interpolation to interpolate the pressure field from the cell
-    // centers to the cell faces.
-    // Return the pressure defined at the cell faces.
-
-    tmp<surfaceScalarField> pface = fvc::interpolate( p );
-
-    scalarField pressureField = pface->boundaryField()[acousticsPatchID];
-
-    data.resize( pressureField.size(), 1 );
+    data.resize( p.boundaryField()[acousticsPatchID].size(), 1 );
 
     for ( int i = 0; i < data.rows(); i++ )
-        data( i, 0 ) = pressureField[i];
+        data( i, 0 ) = p.boundaryField()[acousticsPatchID][i];
 }
 
 void CompressibleFluidSolver::getAcousticsDensityLocal( matrix & data )
 {
-    // Use linear interpolation to interpolate the density field from the cell
-    // centers to the cell faces.
-    // Return the density defined at the cell faces.
-
-    tmp<surfaceScalarField> rhoface = fvc::interpolate( rho );
-
-    scalarField densityField = rhoface->boundaryField()[acousticsPatchID];
-
-    data.resize( densityField.size(), 1 );
+    data.resize( rho.boundaryField()[acousticsPatchID].size(), 1 );
 
     for ( int i = 0; i < data.rows(); i++ )
-        data( i, 0 ) = densityField[i];
+        data( i, 0 ) = rho.boundaryField()[acousticsPatchID][i];
 }
 
 void CompressibleFluidSolver::getAcousticsVelocityLocal( matrix & data )
 {
-    // Use linear interpolation to interpolate the velocity field from the cell
-    // centers to the cell faces.
-    // Return the velocity defined at the cell faces.
-
-    tmp<surfaceVectorField> Uface = fvc::interpolate( U );
-
-    vectorField velocityField = Uface->boundaryField()[acousticsPatchID];
-
-    data.resize( velocityField.size(), mesh.nGeometricD() );
+    data.resize( U.boundaryField()[acousticsPatchID].size(), mesh.nGeometricD() );
 
     for ( int i = 0; i < data.rows(); i++ )
         for ( int j = 0; j < data.cols(); j++ )
-            data( i, j ) = velocityField[i][j];
+            data( i, j ) = U.boundaryField()[acousticsPatchID][i][j];
 }
 
 void CompressibleFluidSolver::getTractionLocal( matrix & traction )

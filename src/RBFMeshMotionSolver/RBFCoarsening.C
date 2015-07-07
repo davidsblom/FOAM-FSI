@@ -5,13 +5,16 @@
  */
 
 #include "RBFCoarsening.H"
+#include "WendlandC2Function.H"
 
 namespace rbf
 {
+    Foam::debug::debugSwitch RBFCoarsening::debug( "RBFInterpolation", 0 );
+
     RBFCoarsening::RBFCoarsening( std::shared_ptr<RBFInterpolation> rbf )
         :
         rbf( rbf ),
-        rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction ) ) ),
+        rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction, rbf->polynomialTerm, rbf->cpu ) ) ),
         enabled( false ),
         livePointSelection( false ),
         livePointSelectionSumValues( false ),
@@ -19,12 +22,18 @@ namespace rbf
         tolLivePointSelection( 0 ),
         coarseningMinPoints( 0 ),
         coarseningMaxPoints( 0 ),
+        twoPointSelection( false ),
+        surfaceCorrection( false ),
+        ratioRadiusError( 10 ),
         exportTxt( false ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
         positions(),
         positionsInterpolation(),
         values(),
+        errorInterpolationCoarse(),
+        closestBoundaryIndexCorrection(),
+        valuesCorrection(),
         nbMovingFaceCenters( 0 ),
         fileExportIndex( 0 )
     {
@@ -44,7 +53,7 @@ namespace rbf
         )
         :
         rbf( rbf ),
-        rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction ) ) ),
+        rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction, rbf->polynomialTerm, rbf->cpu ) ) ),
         enabled( enabled ),
         livePointSelection( livePointSelection ),
         livePointSelectionSumValues( livePointSelectionSumValues ),
@@ -52,12 +61,18 @@ namespace rbf
         tolLivePointSelection( tolLivePointSelection ),
         coarseningMinPoints( coarseningMinPoints ),
         coarseningMaxPoints( coarseningMaxPoints ),
+        twoPointSelection( false ),
+        surfaceCorrection( false ),
+        ratioRadiusError( 10.0 ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
         positions(),
         positionsInterpolation(),
         values(),
+        errorInterpolationCoarse(),
+        closestBoundaryIndexCorrection(),
+        valuesCorrection(),
         nbMovingFaceCenters( 0 ),
         fileExportIndex( 0 )
     {
@@ -69,6 +84,123 @@ namespace rbf
         assert( tol < 1 );
         assert( tolLivePointSelection > 0 );
         assert( tolLivePointSelection < 1 );
+
+        // If unit displacement do not use polynomial for selection
+        if ( enabled && !livePointSelection && rbf->polynomialTerm )
+        {
+            WarningIn( "RBFCoarsening::RBFCoarsening" )
+            << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
+        }
+    }
+
+    RBFCoarsening::RBFCoarsening(
+        std::shared_ptr<RBFInterpolation> rbf,
+        bool enabled,
+        bool livePointSelection,
+        bool livePointSelectionSumValues,
+        double tol,
+        double tolLivePointSelection,
+        int coarseningMinPoints,
+        int coarseningMaxPoints,
+        bool twoPointSelection,
+        bool exportTxt
+        )
+        :
+        rbf( rbf ),
+        rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction, rbf->polynomialTerm, rbf->cpu ) ) ),
+        enabled( enabled ),
+        livePointSelection( livePointSelection ),
+        livePointSelectionSumValues( livePointSelectionSumValues ),
+        tol( tol ),
+        tolLivePointSelection( tolLivePointSelection ),
+        coarseningMinPoints( coarseningMinPoints ),
+        coarseningMaxPoints( coarseningMaxPoints ),
+        twoPointSelection( twoPointSelection ),
+        surfaceCorrection( false ),
+        ratioRadiusError( 10.0 ),
+        exportTxt( exportTxt ),
+        selectedPositions(),
+        nbStaticFaceCentersRemove( 0 ),
+        positions(),
+        positionsInterpolation(),
+        values(),
+        errorInterpolationCoarse(),
+        closestBoundaryIndexCorrection(),
+        valuesCorrection(),
+        nbMovingFaceCenters( 0 ),
+        fileExportIndex( 0 )
+    {
+        assert( rbf );
+        assert( coarseningMinPoints <= coarseningMaxPoints );
+        assert( coarseningMinPoints > 0 );
+        assert( coarseningMaxPoints > 0 );
+        assert( tol > 0 );
+        assert( tol < 1 );
+        assert( tolLivePointSelection > 0 );
+        assert( tolLivePointSelection < 1 );
+
+        // If unit displacement do not use polynomial for selection
+        if ( enabled && !livePointSelection && rbf->polynomialTerm )
+        {
+            WarningIn( "RBFCoarsening::RBFCoarsening" )
+            << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
+        }
+    }
+
+    RBFCoarsening::RBFCoarsening(
+        std::shared_ptr<RBFInterpolation> rbf,
+        bool enabled,
+        bool livePointSelection,
+        bool livePointSelectionSumValues,
+        double tol,
+        double tolLivePointSelection,
+        int coarseningMinPoints,
+        int coarseningMaxPoints,
+        bool twoPointSelection,
+        bool surfaceCorrection,
+        double ratioRadiusError,
+        bool exportTxt
+        )
+        :
+        rbf( rbf ),
+        rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction, rbf->polynomialTerm, rbf->cpu ) ) ),
+        enabled( enabled ),
+        livePointSelection( livePointSelection ),
+        livePointSelectionSumValues( livePointSelectionSumValues ),
+        tol( tol ),
+        tolLivePointSelection( tolLivePointSelection ),
+        coarseningMinPoints( coarseningMinPoints ),
+        coarseningMaxPoints( coarseningMaxPoints ),
+        twoPointSelection( twoPointSelection ),
+        surfaceCorrection( surfaceCorrection ),
+        ratioRadiusError( ratioRadiusError ),
+        exportTxt( exportTxt ),
+        selectedPositions(),
+        nbStaticFaceCentersRemove( 0 ),
+        positions(),
+        positionsInterpolation(),
+        values(),
+        errorInterpolationCoarse(),
+        closestBoundaryIndexCorrection(),
+        valuesCorrection(),
+        nbMovingFaceCenters( 0 ),
+        fileExportIndex( 0 )
+    {
+        assert( rbf );
+        assert( coarseningMinPoints <= coarseningMaxPoints );
+        assert( coarseningMinPoints > 0 );
+        assert( coarseningMaxPoints > 0 );
+        assert( tol > 0 );
+        assert( tol < 1 );
+        assert( tolLivePointSelection > 0 );
+        assert( tolLivePointSelection < 1 );
+
+        // If unit displacement do not use polynomial for selection
+        if ( enabled && !livePointSelection && rbf->polynomialTerm )
+        {
+            WarningIn( "RBFCoarsening::RBFCoarsening" )
+            << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
+        }
     }
 
     /* Select a subset of control point with a greedy algorithm.
@@ -112,29 +244,23 @@ namespace rbf
             int maxNbPoints = std::min( coarseningMaxPoints, static_cast<int>( positions.rows() ) );
             int minPoints = std::min( coarseningMinPoints, static_cast<int>( positions.rows() ) );
             double error = 0;
+            double errorMax = 0;
 
             // Create RBF interpolator
 
-            // Initialize the matrix Phi if more than 1 positions have been selected
-            // before the greedening algorithm starts
-            rbfCoarse->Phi.resize( 0, 0 );
-
-            for ( int i = 1; i < selectedPositions.rows(); i++ )
-            {
-                rbf::matrix positionsCoarse( i, positions.cols() );
-
-                for ( int j = 0; j < i; j++ )
-                    positionsCoarse.row( j ) = positions.row( selectedPositions( j ) );
-
-                rbfCoarse->buildPhi( livePointSelection, positionsCoarse, positionsInterpolationCoarse );
-            }
-
             // Run the greedy algorithm
+            double runTimeInterpolate = 0.0;
+            double runTimeError = 0.0;
+            double runTimeConvergence = 0.0;
+            bool addedSecondPoint = false;
+            int counter = selectedPositions.rows();
 
-            for ( int i = selectedPositions.rows(); i < maxNbPoints + 1; i++ )
+            while ( true )
             {
+                std::clock_t t = std::clock();
+
                 // Build the matrices used for the RBF interpolation
-                rbf::matrix positionsCoarse( i, positions.cols() );
+                rbf::matrix positionsCoarse( counter, positions.cols() );
                 rbf::matrix valuesCoarse( positionsCoarse.rows(), positionsCoarse.cols() );
                 rbf::matrix valuesInterpolationCoarse( positionsInterpolationCoarse.rows(), positionsInterpolationCoarse.cols() );
 
@@ -145,44 +271,110 @@ namespace rbf
                 }
 
                 // Perform the RBF interpolation.
-                rbfCoarse->interpolate( livePointSelection, positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
+                rbfCoarse->interpolate( positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
+
+                if ( debug > 0 )
+                {
+                    t = std::clock() - t;
+                    runTimeInterpolate += static_cast<float>(t) / CLOCKS_PER_SEC;
+                    t = std::clock();
+                }
 
                 // Evaluate the error
                 for ( int j = 0; j < valuesInterpolationCoarse.rows(); j++ )
-                    errorList( j ) = ( valuesInterpolationCoarse.row( j ).array() - values.row( j ).array() ).matrix().norm();
+                    errorList( j ) = ( valuesInterpolationCoarse.row( j ) - values.row( j ) ).norm();
 
                 // Select the point with the largest error which is not already selected.
-
                 int index = -1;
-                double largestError = -1;
+                double largestError = errorList.maxCoeff( &index );
 
-                for ( int j = 0; j < errorList.rows(); j++ )
+                // Additional function to check whether the largestError = 0 (<SMALL) and do select next consecutive point
+                if ( largestError < SMALL )
                 {
-                    bool notSelected = true;
+                    index = selectedPositions.rows();
+                }
 
-                    for ( int k = 0; k < selectedPositions.rows(); k++ )
-                        if ( selectedPositions( k ) == j )
-                            notSelected = false;
+                int index2 = -1;
+                double largestError2 = -1;
 
-                    if ( errorList( j ) > largestError && notSelected )
+                // selected point with largest error in opposite direction (more than 90 degrees differenc in direction)
+                if ( twoPointSelection )
+                {
+                    vector largestErrorVector = valuesInterpolationCoarse.row( index ) - values.row( index );
+
+                    for ( int j = 0; j < errorList.rows(); j++ )
                     {
-                        index = j;
-                        largestError = errorList( j );
+                        vector errorVector = valuesInterpolationCoarse.row( j ) - values.row( j );
+
+                        if ( largestErrorVector.dot( errorVector ) < -SMALL && largestError2 < errorList( j ) )
+                        {
+                            index2 = j;
+                            largestError2 = errorList( j );
+                        }
                     }
                 }
 
+                if ( debug > 0 )
+                {
+                    t = std::clock() - t;
+                    runTimeError += static_cast<float>(t) / CLOCKS_PER_SEC;
+                    t = std::clock();
+                }
+
                 double epsilon = std::sqrt( SMALL );
-                error = ( valuesInterpolationCoarse.array() - values.array() ).matrix().norm() / (values.norm() + epsilon);
-                bool convergence = (error < tol && i >= minPoints) || i >= maxNbPoints;
+                error = (errorList).norm() / (values.norm() + epsilon);
+                errorMax = largestError / ( ( values.rowwise().norm() ).maxCoeff() + epsilon );
+
+                // bool convergence = (error < tol && counter >= minPoints) || counter >= maxNbPoints;
+                bool convergence = (error < tol && errorMax < tol && counter >= minPoints) || counter >= maxNbPoints;
 
                 if ( convergence )
+                {
+                    if ( livePointSelection )
+                        errorInterpolationCoarse = valuesInterpolationCoarse - values;
+
                     break;
+                }
+
+                // Break if maximum point are reached
+                if ( counter >= maxNbPoints )
+                {
+                    if ( livePointSelection )
+                        errorInterpolationCoarse = valuesInterpolationCoarse - values;
+
+                    break;
+                }
 
                 selectedPositions.conservativeResize( selectedPositions.rows() + 1 );
                 selectedPositions( selectedPositions.rows() - 1 ) = index;
+                counter++;
+
+                // Add second point if possible
+                if ( twoPointSelection && index2 >= 0 && index != index2 )
+                {
+                    addedSecondPoint = true;
+                    selectedPositions.conservativeResize( selectedPositions.rows() + 1 );
+                    selectedPositions( selectedPositions.rows() - 1 ) = index2;
+                    counter++;
+                }
+
+                if ( debug > 0 )
+                {
+                    t = std::clock() - t;
+                    runTimeConvergence += static_cast<float>(t) / CLOCKS_PER_SEC;
+                    t = std::clock();
+                }
             }
 
-            Info << "RBF interpolation coarsening: selected " << selectedPositions.rows() << "/" << positions.rows() << " points, error = " << error << ", tol = " << tol << endl;
+            if ( debug > 0 )
+            {
+                Info << "RBFCoarsening::debug 1. interpolate to surface = " << runTimeInterpolate << " s" << endl;
+                Info << "RBFCoarsening::debug 2. find largest error = " << runTimeError << " s" << ". Added second point = " << addedSecondPoint << endl;
+                Info << "RBFCoarsening::debug 3. convergence check = " << runTimeConvergence << " s" << endl;
+            }
+
+            Info << "RBF interpolation coarsening: selected " << selectedPositions.rows() << "/" << positions.rows() << " points, 2-norm(error) = "
+                 << error << ", max(error) = " << errorMax << ", tol = " << tol << endl;
 
             rbf::matrix positionsCoarse( selectedPositions.rows(), positions.cols() );
 
@@ -251,13 +443,18 @@ namespace rbf
                     rbfCoarse->interpolate2( valuesCoarse, valuesInterpolationCoarse );
 
                     double epsilon = std::sqrt( SMALL );
-                    double error = ( valuesInterpolationCoarse.array() - this->values.array() ).matrix().norm() / (this->values.norm() + epsilon);
-                    bool convergence = error < tolLivePointSelection;
+
+                    errorInterpolationCoarse = valuesInterpolationCoarse - this->values;
+                    double error = (errorInterpolationCoarse).matrix().norm() / (this->values.norm() + epsilon);
+                    double errorMax = ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() + epsilon );
+
+                    // bool convergence = error < tolLivePointSelection;
+                    bool convergence = (error < tolLivePointSelection && errorMax < tolLivePointSelection);
 
                     if ( convergence )
                         reselection = false;
 
-                    Info << "RBF interpolation coarsening: error = " << error << ", tol = " << tolLivePointSelection << ", reselection = ";
+                    Info << "RBF interpolation coarsening: 2-norm(error) = " << error << ", max(error) = " << errorMax << ", tol = " << tolLivePointSelection << ", reselection = ";
 
                     if ( reselection )
                         Info << "true";
@@ -312,8 +509,94 @@ namespace rbf
         }
 
         usedValues.conservativeResize( usedValues.rows() - nbStaticFaceCentersRemove, usedValues.cols() );
-
         rbf->interpolate( usedValues, valuesInterpolation );
+
+        // start doing correction of surface is requested
+        if ( livePointSelection && surfaceCorrection )
+        {
+            correctSurface( valuesInterpolation );
+        }
+    }
+
+    void RBFCoarsening::correctSurface( matrix & valuesInterpolation )
+    {
+        if ( valuesCorrection.rows() == 0 )
+        {
+            valuesCorrection.conservativeResize( valuesInterpolation.rows(), valuesInterpolation.cols() );
+            valuesCorrection.setZero();
+        }
+
+        double R = ratioRadiusError * ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff();
+
+        if ( debug > 0 )
+        {
+            Info << nl << "RBFCoarsening::correctSurface::debug 0: ratioRadiusError = " << ratioRadiusError << ", R = " << R << endl;
+        }
+
+        // Find nearest boundary point for each internal point. Do this only the first time
+        vector closestBoundaryRadius( positionsInterpolation.rows() );
+
+        if ( closestBoundaryIndexCorrection.rows() == 0 )
+        {
+            closestBoundaryIndexCorrection.conservativeResize( positionsInterpolation.rows() );
+            std::clock_t t = std::clock();
+            double runTimeNN = 0;
+
+            for ( int i = 0; i < positionsInterpolation.rows(); i++ )
+            {
+                double smallestRadius = GREAT;
+                int boundaryIndex = -1;
+
+                for ( int j = 0; j < positions.rows(); j++ )
+                {
+                    double radius = ( positions.row( j ) - positionsInterpolation.row( i ) ).norm();
+
+                    if ( radius < smallestRadius )
+                    {
+                        boundaryIndex = j;
+                        smallestRadius = radius;
+                    }
+                }
+
+                closestBoundaryIndexCorrection( i ) = boundaryIndex;
+                closestBoundaryRadius( i ) = smallestRadius;
+            }
+
+            if ( debug > 0 )
+            {
+                t = std::clock() - t;
+                runTimeNN += static_cast<float>(t) / CLOCKS_PER_SEC;
+                t = std::clock();
+                Info << "RBFCoarsening::correctSurface::debug 1. nearest neighbour selection = " << runTimeNN << " s" << endl;
+            }
+        }
+        else
+        {
+            for ( int i = 0; i < positionsInterpolation.rows(); i++ )
+            {
+                closestBoundaryRadius( i ) = ( positions.row( closestBoundaryIndexCorrection( i ) ) - positionsInterpolation.row( i ) ).norm();
+            }
+        }
+
+        // Start doing the correction
+        std::clock_t t = std::clock();
+        double runTimeCorr = 0;
+        std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( R ) );
+
+        for ( int i = 0; i < positionsInterpolation.rows(); i++ )
+        {
+            matrix fEval = -( rbfFunction->evaluate( closestBoundaryRadius( i ) ) ) * errorInterpolationCoarse.row( closestBoundaryIndexCorrection( i ) );
+            valuesInterpolation.row( i ) += ( fEval - valuesCorrection.row( i ) );
+            valuesCorrection.row( i ) = fEval;
+        }
+
+        if ( debug > 0 )
+        {
+            t = std::clock() - t;
+            runTimeCorr += static_cast<float>(t) / CLOCKS_PER_SEC;
+            t = std::clock();
+            Info << "RBFCoarsening::correctSurface::debug 2. correction evaluation = " << runTimeCorr << " s" << endl;
+        }
     }
 
     void RBFCoarsening::setNbMovingAndStaticFaceCenters(

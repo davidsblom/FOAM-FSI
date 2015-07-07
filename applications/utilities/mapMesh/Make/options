@@ -21,10 +21,11 @@ EXE_INC = -std=c++11 \
     -I../../../src/RBFMeshMotionSolver/lnInclude/ \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
-    -I../../../../src/thirdParty/boost
+    -I../../../src/thirdParty/boost
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    -L../../../src/thirdParty/yaml-cpp/build/ \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
@@ -45,4 +46,5 @@ EXE_LIBS = \
     -ltetFiniteElement \
     -lbasicThermophysicalModels \
     -lspecie \
-    -lcompressibleRASModels
+    -lcompressibleRASModels \
+    -lyaml-cpp
