@@ -590,7 +590,12 @@ void SDCFluidSolver::setSolution(
 
 double SDCFluidSolver::getEndTime()
 {
-    return runTime->endTime().value() - runTime->startTime().value();
+    return runTime->endTime().value();
+}
+
+double SDCFluidSolver::getStartTime()
+{
+    return runTime->startTime().value();
 }
 
 double SDCFluidSolver::getTimeStep()

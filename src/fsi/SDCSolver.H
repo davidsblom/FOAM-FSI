@@ -39,6 +39,11 @@ public:
 
         virtual double getEndTime() = 0;
 
+        virtual double getStartTime()
+        {
+            return 0;
+        };
+
         virtual double getTimeStep() = 0;
 
         virtual void nextTimeStep() = 0;
