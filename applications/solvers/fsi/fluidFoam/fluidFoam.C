@@ -44,7 +44,7 @@ int main(
 
     std::string fluidSolver = config["fluid-solver"].as<std::string>();
 
-    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" || fluidSolver == "esdirk-pimple-solver" || fluidSolver == "sdc-pimple-dynamic-mesh-solver" );
+    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "sdc-pimple-solver" || fluidSolver == "sdc-laplacian-solver" || fluidSolver == "esdirk-pimple-solver" || fluidSolver == "sdc-pimple-dynamic-mesh-solver" || fluidSolver == "esdirk-pimple-dynamic-mesh-solver" );
 
     std::shared_ptr<foamFluidSolver> fluid;
     std::shared_ptr<sdc::SDC> sdc;
@@ -61,7 +61,7 @@ int main(
 
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
 
-    if ( fluidSolver == "sdc-pimple-solver" || fluidSolver == "esdirk-pimple-solver" || fluidSolver == "sdc-laplacian-solver" || fluidSolver == "sdc-pimple-dynamic-mesh-solver" )
+    if ( fluidSolver == "sdc-pimple-solver" || fluidSolver == "esdirk-pimple-solver" || fluidSolver == "sdc-laplacian-solver" || fluidSolver == "sdc-pimple-dynamic-mesh-solver" || fluidSolver == "esdirk-pimple-dynamic-mesh-solver" )
     {
         assert( config["adaptive-time-stepping"] );
         YAML::Node adaptiveTimeConfig( config["adaptive-time-stepping"] );
@@ -112,7 +112,7 @@ int main(
         sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( solver, adaptiveTimeStepper, quadratureRule, n, tol ) );
     }
 
-    if ( fluidSolver == "esdirk-pimple-solver" )
+    if ( fluidSolver == "esdirk-pimple-solver" || fluidSolver == "esdirk-pimple-dynamic-mesh-solver" )
     {
         YAML::Node esdirkConfig( config["esdirk"] );
 
@@ -122,7 +122,12 @@ int main(
         std::string method = esdirkConfig["method"].as<std::string>();
         std::shared_ptr<sdc::SDCSolver> solver;
 
-        solver = std::shared_ptr<sdc::SDCSolver>( new SDCFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+        if ( fluidSolver == "esdirk-pimple-solver" )
+            solver = std::shared_ptr<sdc::SDCSolver>( new SDCFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+
+        if ( fluidSolver == "esdirk-pimple-dynamic-mesh-solver" )
+            solver = std::shared_ptr<sdc::SDCSolver>( new SDCDynamicMeshFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+
         esdirk = std::shared_ptr<sdc::ESDIRK>( new sdc::ESDIRK( solver, method, adaptiveTimeStepper ) );
     }
 
