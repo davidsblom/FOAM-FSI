@@ -675,7 +675,12 @@ void SDCDynamicMeshFluidSolver::setSolution(
 
 double SDCDynamicMeshFluidSolver::getEndTime()
 {
-    return runTime->endTime().value() - runTime->startTime().value();
+    return runTime->endTime().value();
+}
+
+double SDCDynamicMeshFluidSolver::getStartTime()
+{
+    return runTime->startTime().value();
 }
 
 double SDCDynamicMeshFluidSolver::getTimeStep()
