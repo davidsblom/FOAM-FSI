@@ -779,18 +779,6 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     Uf.oldTime() = UfStages.at( k );
 
-    // Update mesh.phi()
-    {
-        mesh.setV0() = volumeStages.at( k );
-
-        // Reset the mesh point locations to the old stage
-        pointField pointsOld = pointsStages.at( k );
-        tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
-
-        mesh.setOldPoints( pointsOld );
-        mesh.update();
-    }
-
     int index = 0;
 
     forAll( U.oldTime().internalField(), i )
@@ -831,7 +819,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     forAll( mesh.phi().oldTime().internalField(), i )
     {
-        mesh.setPhi().oldTime().internalField()[i] = qold( index );
+        // mesh.setPhi().oldTime().internalField()[i] = qold( index );
         index++;
     }
 
@@ -839,7 +827,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     {
         forAll( mesh.phi().boundaryField()[patchI], i )
         {
-            mesh.setPhi().oldTime().boundaryField()[patchI][i] = qold( index );
+            // mesh.setPhi().oldTime().boundaryField()[patchI][i] = qold( index );
             index++;
         }
     }
@@ -901,7 +889,17 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     assert( index == rhs.rows() );
 
+    // Update mesh.phi()
     {
+        // Reset the mesh point locations to the old stage
+        pointField pointsOld = pointsStages.at( k );
+        tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
+
+        mesh.setOldPoints( pointsOld );
+        mesh.setV0() = volumeStages.at( k );
+
+        mesh.update();
+
         scalar rDeltaT = 1.0 / runTime->deltaT().value();
         mesh.setPhi() -= rDeltaT * rhsMeshPhi;
     }
