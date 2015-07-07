@@ -325,15 +325,15 @@ void SDCDynamicMeshFluidSolver::courantNo()
 
 void SDCDynamicMeshFluidSolver::createFields()
 {
-    U.oldTime();
-    Uf.oldTime();
-    phi.oldTime();
-
     surfaceVectorField nf = mesh.Sf() / mesh.magSf();
     surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
     surfaceVectorField Unor = phi / mesh.magSf() * nf;
 
     Uf = Utang + Unor;
+
+    U.oldTime();
+    Uf.oldTime();
+    phi.oldTime();
 
     // Read pressure properties and create turbulence model
     pRefCell = 0;
@@ -495,15 +495,14 @@ int SDCDynamicMeshFluidSolver::getDOF()
         }
     }
 
-    surfaceScalarField & meshPhi = mesh.setPhi();
-    forAll( meshPhi.internalField(), i )
+    forAll( mesh.phi().internalField(), i )
     {
         index++;
     }
 
-    forAll( meshPhi.boundaryField(), patchI )
+    forAll( mesh.phi().boundaryField(), patchI )
     {
-        forAll( meshPhi.boundaryField()[patchI], i )
+        forAll( mesh.phi().boundaryField()[patchI], i )
         {
             index++;
         }
