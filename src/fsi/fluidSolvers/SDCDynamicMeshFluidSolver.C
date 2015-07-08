@@ -908,6 +908,56 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         mesh.setPhi() -= rDeltaT * rhsMeshPhi;
     }
 
+    // === Set boundaries correct of U === //
+    surfaceScalarField ddtPhiCoeff
+    (
+        IOobject
+        (
+            "ddtPhiCoeff",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensioned<scalar>( "1", dimless, 1.0 )
+    );
+
+    forAll( U.boundaryField(), patchI )
+    {
+        if ( U.boundaryField()[patchI].fixesValue() )
+        {
+            ddtPhiCoeff.boundaryField()[patchI] = 0.0;
+        }
+    }
+
+    volScalarField V0oV
+    (
+        IOobject
+        (
+            "V0oV",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimless,
+        zeroGradientFvPatchScalarField::typeName
+    );
+
+    V0oV.internalField() = volumeStages.at( k ) / mesh.V();
+    V0oV.correctBoundaryConditions();
+
+    volScalarField V = V0oV;
+    volScalarField V0 = V0oV;
+    V.internalField() = mesh.V();
+    V.correctBoundaryConditions();
+    V0.internalField() = mesh.V0();
+    V0.correctBoundaryConditions();
+
+    rhsU /= V;
+
     // -------------------------------------------------------------------------
 
     scalar convergenceTolerance = absoluteTolerance;
@@ -991,48 +1041,6 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
                             );
                     }
                 }
-
-                // === Set boundaries correct of U === //
-                surfaceScalarField ddtPhiCoeff
-                (
-                    IOobject
-                    (
-                        "ddtPhiCoeff",
-                        mesh.time().timeName(),
-                        mesh,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE
-                    ),
-                    mesh,
-                    dimensioned<scalar>( "1", dimless, 1.0 )
-                );
-
-                forAll( U.boundaryField(), patchI )
-                {
-                    if ( U.boundaryField()[patchI].fixesValue() )
-                    {
-                        ddtPhiCoeff.boundaryField()[patchI] = 0.0;
-                    }
-                }
-
-                // Set volume ratio of oldV over V
-                volScalarField V0oV
-                (
-                    IOobject
-                    (
-                        "V0oV",
-                        mesh.time().timeName(),
-                        mesh,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE
-                    ),
-                    mesh,
-                    dimless,
-                    zeroGradientFvPatchScalarField::typeName
-                );
-
-                V0oV.internalField() = volumeStages.at( k ) / mesh.V();
-                V0oV.correctBoundaryConditions();
 
                 // Construct parts of H which need to be subtracted
                 // term coming from H/A
@@ -1131,48 +1139,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         volumeStages.at( k + 1 ) = mesh.V();
     }
 
-    volScalarField V0oV
-    (
-        IOobject
-        (
-            "V0oV",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimless,
-        zeroGradientFvPatchScalarField::typeName
-    );
-
-    V0oV.internalField() = volumeStages.at( k ) / mesh.V();
-    V0oV.correctBoundaryConditions();
-
-    // === Set boundaries correct of U === //
-    surfaceScalarField ddtPhiCoeff
-    (
-        IOobject
-        (
-            "ddtPhiCoeff",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensioned<scalar>( "1", dimless, 1.0 )
-    );
-
-    forAll( U.boundaryField(), patchI )
-    {
-        if ( U.boundaryField()[patchI].fixesValue() )
-        {
-            ddtPhiCoeff.boundaryField()[patchI] = 0.0;
-        }
-    }
-
-    UF = rDeltaT * (U - U.oldTime() * V0oV - rhsU);
+    UF = rDeltaT * (U * V - U.oldTime() * V0 - rhsU * V);
     phiF = rDeltaT * (phi - ddtPhiCoeff * ( fvc::interpolate( V0oV ) * Uf.oldTime() & mesh.Sf() ) - ddtPhiCoeff * rhsPhi);
     meshPhiF = mesh.phi();
 
