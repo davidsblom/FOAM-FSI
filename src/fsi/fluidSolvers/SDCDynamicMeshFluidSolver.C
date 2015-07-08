@@ -925,7 +925,9 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     forAll( U.boundaryField(), patchI )
     {
-        if ( U.boundaryField()[patchI].fixesValue() )
+        if ( U.boundaryField()[patchI].fixesValue()
+            || isA<symmetryFvPatchVectorField>( U.boundaryField()[patchI] )
+            || isA<slipFvPatchVectorField>( U.boundaryField()[patchI] ) )
         {
             ddtPhiCoeff.boundaryField()[patchI] = 0.0;
         }
@@ -1044,11 +1046,21 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
                 // Construct parts of H which need to be subtracted
                 // term coming from H/A
-                surfaceVectorField UV0oV = -fvc::interpolate( V0oV * U.oldTime() );
+
+                surfaceVectorField U0 = fvc::interpolate( V0oV * U.oldTime() );
+                forAll( U0.boundaryField(), patchI )
+                {
+                    if ( !U.boundaryField()[patchI].coupled() )
+                    {
+                        U0.boundaryField()[patchI] =
+                            U.oldTime().boundaryField()[patchI]
+                            .patchInternalField()
+                            * V0oV.boundaryField()[patchI];
+                    }
+                }
 
                 surfaceScalarField phi0 = rhsPhi;
-                phi0 += UV0oV & mesh.Sf();
-                phi0 += ( fvc::interpolate( V0oV ) * Uf.oldTime() ) & mesh.Sf();
+                phi0 += (fvc::interpolate( V0oV ) * Uf.oldTime() - U0) & mesh.Sf();
 
                 phi += rDeltaT * ddtPhiCoeff * phi0 / fvc::interpolate( AU );
             }

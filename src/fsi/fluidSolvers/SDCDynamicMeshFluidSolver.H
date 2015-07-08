@@ -20,6 +20,8 @@
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
+#include "slipFvPatchFields.H"
+#include "symmetryFvPatchFields.H"
 
 using namespace fsi;
 using std::shared_ptr;
