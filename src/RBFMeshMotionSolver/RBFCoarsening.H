@@ -74,6 +74,7 @@ public:
             double ratioRadiusError,
             double maxWallDistance,
             double surfaceCorrectionRadius,
+            bool cleanReselection,
             bool exportTxt
             );
 
@@ -111,6 +112,7 @@ public:
         double ratioRadiusError;
         double maxWallDistance;
         double surfaceCorrectionRadius;
+        bool cleanReselection;
         bool exportTxt;
         Eigen::VectorXi selectedPositions;
         int nbStaticFaceCentersRemove;

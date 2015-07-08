@@ -199,10 +199,12 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     double ratioRadiusError = 10.0;
     double maxWallDistance = -1.0;
     double surfaceCorrectionRadius = -1.0;
+    bool cleanReselection = true;
     if ( livePointSelection )
     {
         tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
         surfaceCorrection = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrection", false );
+        cleanReselection = subDict( "coarsening" ).lookupOrDefault( "cleanReselection", true);
 
         if ( surfaceCorrection )
         {
@@ -216,7 +218,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         }
     }
 
-    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, ratioRadiusError, maxWallDistance, surfaceCorrectionRadius, exportSelectedPoints ) );
+    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, ratioRadiusError, maxWallDistance, surfaceCorrectionRadius, cleanReselection, exportSelectedPoints ) );
 
     faceCellCenters = lookupOrDefault( "faceCellCenters", true );
 

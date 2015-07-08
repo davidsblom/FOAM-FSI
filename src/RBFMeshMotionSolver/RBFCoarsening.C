@@ -27,6 +27,7 @@ namespace rbf
         ratioRadiusError( 10 ),
         maxWallDistance( 1.0 ),
         surfaceCorrectionRadius( -1.0 ),
+        cleanReselection( true ),
         exportTxt( false ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -67,6 +68,7 @@ namespace rbf
         surfaceCorrection( false ),
         ratioRadiusError( 10.0 ),
         surfaceCorrectionRadius( -1.0 ),
+        cleanReselection( true ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -123,6 +125,7 @@ namespace rbf
         ratioRadiusError( 10.0 ),
         maxWallDistance( 1.0 ),
         surfaceCorrectionRadius( -1.0 ),
+        cleanReselection( true ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -182,6 +185,7 @@ namespace rbf
         ratioRadiusError( ratioRadiusError ),
         maxWallDistance( maxWallDistance ),
         surfaceCorrectionRadius( -1.0 ),
+        cleanReselection( true ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -225,6 +229,7 @@ namespace rbf
         double ratioRadiusError,
         double maxWallDistance,
         double surfaceCorrectionRadius,
+        bool cleanReselection,
         bool exportTxt
         )
         :
@@ -242,6 +247,7 @@ namespace rbf
         ratioRadiusError( ratioRadiusError ),
         maxWallDistance( maxWallDistance ),
         surfaceCorrectionRadius( surfaceCorrectionRadius ),
+        cleanReselection( cleanReselection ),
         exportTxt( exportTxt ),
         selectedPositions(),
         nbStaticFaceCentersRemove( 0 ),
@@ -304,12 +310,20 @@ namespace rbf
         if ( enabled )
         {
             // Greedy algorithm
-
+            int maxNbPoints = std::min( coarseningMaxPoints, static_cast<int>( positions.rows() ) );
+            int minPoints = std::min( coarseningMinPoints, static_cast<int>( positions.rows() ) );
+            double error = 0;
+            double errorMax = 0;
             rbf::vector errorList( positions.rows() );
-            selectedPositions.resize( 2 );
 
-            for ( int i = 0; i < selectedPositions.rows(); i++ )
-                selectedPositions( i ) = i;
+            //Clean selected points if requested
+            if ( cleanReselection || selectedPositions.rows() == maxNbPoints || selectedPositions.rows() == 0)
+            {
+                selectedPositions.resize( 2 );
+                for ( int i = 0; i < selectedPositions.rows(); i++ )
+                    selectedPositions( i ) = i;
+
+            }
 
             //check what the radius is. For TPS the radius should not be 1. If so, select next point
             bool radius1 = false;
@@ -331,11 +345,6 @@ namespace rbf
 
             rbf::matrix positionsInterpolationCoarse = positions;
 
-            int maxNbPoints = std::min( coarseningMaxPoints, static_cast<int>( positions.rows() ) );
-            int minPoints = std::min( coarseningMinPoints, static_cast<int>( positions.rows() ) );
-            double error = 0;
-            double errorMax = 0;
-
             // Create RBF interpolator
 
             // Run the greedy algorithm
@@ -344,6 +353,7 @@ namespace rbf
             double runTimeConvergence = 0.0;
             bool addedSecondPoint = false;
             int counter = selectedPositions.rows();
+            int counter0 = counter;
 
             while ( true )
             {
@@ -465,6 +475,8 @@ namespace rbf
                 {
                     Info << "RBFCoarsening::debug 4. absolute max error = " << ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << " m" << endl;
                 }
+                if( !cleanReselection )
+                    Info << "RBFCoarsening::debug 5. re-used selection and added " << counter - counter0 << " points to control points." << endl;
             }
 
             Info << "RBF interpolation coarsening: selected " << selectedPositions.rows() << "/" << positions.rows() << " points, 2-norm(error) = "
