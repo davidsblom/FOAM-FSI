@@ -812,6 +812,7 @@ void SDCDynamicMeshFluidSolver::evaluateFunction(
 void SDCDynamicMeshFluidSolver::implicitSolve(
     bool corrector,
     const int k,
+    const int kold,
     const double t,
     const double dt,
     const Eigen::VectorXd & qold,
@@ -832,9 +833,9 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         Uf = UfStages.at( k + 1 );
     }
 
-    Uf.oldTime() = UfStages.at( k );
-    U.oldTime() = UStages.at( k );
-    phi.oldTime() = phiStages.at( k );
+    Uf.oldTime() = UfStages.at( kold );
+    U.oldTime() = UStages.at( kold );
+    phi.oldTime() = phiStages.at( kold );
 
     int index = 0;
 
@@ -900,11 +901,11 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     // Update mesh.phi()
     {
         // Reset the mesh point locations to the old stage
-        pointField pointsOld = pointsStages.at( k );
+        pointField pointsOld = pointsStages.at( kold );
         tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
 
         mesh.setOldPoints( pointsOld );
-        mesh.setV0() = volumeStages.at( k );
+        mesh.setV0() = volumeStages.at( kold );
 
         mesh.update();
 
@@ -985,7 +986,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
             AU = UEqnt.A();
 
             U = (HU + rDeltaT * U.oldTime() * V0 / V + rDeltaT * rhsU) / AU;
-            Uf = (fvc::interpolate( HU ) + rDeltaT * Uf.oldTime() * interpolateVolumeStages.at( k ) / fvc::interpolate( V ) + rDeltaT * rhsUf) / fvc::interpolate( AU );
+            Uf = (fvc::interpolate( HU ) + rDeltaT * Uf.oldTime() * interpolateVolumeStages.at( kold ) / fvc::interpolate( V ) + rDeltaT * rhsUf) / fvc::interpolate( AU );
 
             {
                 forAll( Uf.boundaryField(), patchI )
@@ -1102,7 +1103,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     }
 
     UF = rDeltaT * (U * V - U.oldTime() * V0 - rhsU * V);
-    UfF = rDeltaT * ( Uf * fvc::interpolate( V ) - Uf.oldTime() * interpolateVolumeStages.at( k ) - rhsUf * fvc::interpolate( V ) );
+    UfF = rDeltaT * ( Uf * fvc::interpolate( V ) - Uf.oldTime() * interpolateVolumeStages.at( kold ) - rhsUf * fvc::interpolate( V ) );
     meshPhiF = mesh.phi();
 
     getSolution( result );

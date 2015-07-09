@@ -661,6 +661,7 @@ void SDCFluidSolver::evaluateFunction(
 void SDCFluidSolver::implicitSolve(
     bool corrector,
     const int k,
+    const int kold,
     const double t,
     const double dt,
     const Eigen::VectorXd & qold,

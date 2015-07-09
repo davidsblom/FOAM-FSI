@@ -125,7 +125,7 @@ void Piston::run()
         f.setZero();
         rhs.setZero();
 
-        implicitSolve( false, 0, t, dt, qold, rhs, f, result );
+        implicitSolve( false, 0, 0, t, dt, qold, rhs, f, result );
 
         qdot( i ) = result( 0 );
         q( i ) = result( 1 );
@@ -135,6 +135,7 @@ void Piston::run()
 void Piston::implicitSolve(
     bool corrector,
     const int k,
+    const int kold,
     const double t,
     const double dt,
     const Eigen::VectorXd & qold,
