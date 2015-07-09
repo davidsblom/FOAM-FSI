@@ -39,11 +39,6 @@ public:
 
         virtual double getEndTime() = 0;
 
-        virtual double getStartTime()
-        {
-            return 0;
-        };
-
         virtual double getTimeStep() = 0;
 
         virtual void nextTimeStep() = 0;
@@ -66,6 +61,17 @@ public:
             Eigen::VectorXd & f,
             Eigen::VectorXd & result
             ) = 0;
+
+        virtual double getStartTime()
+        {
+            return 0;
+        };
+
+        virtual void getVariableDOF( Eigen::VectorXd & variables )
+        {
+            variables.resize( 1 );
+            variables( 0 ) = getDOF();
+        }
     };
 }
 

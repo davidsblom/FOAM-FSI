@@ -99,11 +99,11 @@ public:
 
     virtual void nextTimeStep();
 
+    virtual void getVariableDOF( Eigen::VectorXd & variables );
+
 private:
 
     void continuityErrs();
-
-    void courantNo();
 
     void createFields();
 
@@ -129,7 +129,7 @@ private:
     volScalarField AU;
     volVectorField HU;
     volVectorField rhsU;
-    surfaceScalarField rhsPhi;
+    surfaceVectorField rhsUf;
     surfaceScalarField rhsMeshPhi;
 
     // PIMPLE controls
@@ -160,7 +160,7 @@ private:
     IOobject UFHeader;
     IOobject phiFHeader;
     volVectorField UF;
-    surfaceScalarField phiF;
+    surfaceVectorField UfF;
     surfaceScalarField meshPhiF;
 
     bool turbulenceSwitch;

@@ -130,11 +130,61 @@ namespace sdc
             F.row( j + 1 ) = f;
         }
 
+        computeResidual( qmat, F, dt, qj );
+
+        residual.noalias() = solStages.row( 0 ) + qj.row( 0 ) - solStages.row( k - 1 );
+
+        scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
+        squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
+        reduce( squaredNorm, sumOp<scalarList>() );
+        double error = std::sqrt( sum( squaredNorm ) / N );
+        error /= solver->getScalingFactor();
+        bool convergence = error < tol;
+
+        Info << "SDC residual = " << error;
+        Info << ", tol = " << tol;
+        Info << ", time = " << t;
+        Info << ", sweep = 0";
+        Info << ", convergence = ";
+
+        if ( convergence )
+            Info << "true";
+        else
+            Info << "false";
+
+        Info << endl;
+
+        Eigen::VectorXd variables;
+        solver->getVariableDOF( variables );
+        assert( variables.sum() == N );
+
+        if ( variables.rows() > 1 )
+        {
+            int index = 0;
+
+            for ( int i = 0; i < variables.rows(); i++ )
+            {
+                scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
+
+                for ( int j = 0; j < variables( i ); j++ )
+                {
+                    squaredNorm[Pstream::myProcNo()] += residual( 0, index ) * residual( 0, index );
+                    index++;
+                }
+
+                reduce( squaredNorm, sumOp<scalarList>() );
+                double error = std::sqrt( sum( squaredNorm ) / variables( i ) );
+                Info << "SDC residual variable " << i << " = " << error << endl;
+            }
+
+            assert( index == N );
+        }
+
         // Compute successive corrections
 
-        bool convergence = false;
+        convergence = false;
 
-        for ( int j = 0; j < k; j++ )
+        for ( int j = 0; j < 4 * k; j++ )
         {
             t = t0;
 
@@ -188,6 +238,31 @@ namespace sdc
                 Info << "false";
 
             Info << endl;
+
+            Eigen::VectorXd variables;
+            solver->getVariableDOF( variables );
+
+            if ( variables.rows() > 1 )
+            {
+                int index = 0;
+
+                for ( int i = 0; i < variables.rows(); i++ )
+                {
+                    scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
+
+                    for ( int j = 0; j < variables( i ); j++ )
+                    {
+                        squaredNorm[Pstream::myProcNo()] += residual( 0, index ) * residual( 0, index );
+                        index++;
+                    }
+
+                    reduce( squaredNorm, sumOp<scalarList>() );
+                    double error = std::sqrt( sum( squaredNorm ) / variables( i ) );
+                    Info << "SDC residual variable " << i << " = " << error << endl;
+                }
+
+                assert( index == N );
+            }
 
             if ( convergence )
                 break;
