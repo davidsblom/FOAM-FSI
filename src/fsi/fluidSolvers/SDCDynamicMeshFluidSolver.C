@@ -166,6 +166,7 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     UfStages(),
     pointsStages(),
     volumeStages(),
+    interpolateVolumeStages(),
     UFHeader
     (
     "UF",
@@ -388,6 +389,24 @@ void SDCDynamicMeshFluidSolver::setNumberOfStages( int k )
 {
     this->k = k;
 
+    volScalarField V
+    (
+        IOobject
+        (
+            "V",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimless,
+        zeroGradientFvPatchScalarField::typeName
+    );
+
+    V.internalField() = mesh.V();
+    V.correctBoundaryConditions();
+
     for ( int i = 0; i < k; i++ )
     {
         pStages.push_back( volScalarField( p ) );
@@ -396,6 +415,7 @@ void SDCDynamicMeshFluidSolver::setNumberOfStages( int k )
         UfStages.push_back( surfaceVectorField( Uf ) );
         pointsStages.push_back( mesh.points() );
         volumeStages.push_back( mesh.V() );
+        interpolateVolumeStages.push_back( surfaceScalarField( fvc::interpolate( V ) ) );
     }
 }
 
@@ -406,6 +426,24 @@ void SDCDynamicMeshFluidSolver::nextTimeStep()
 
     if ( pStages.size() == static_cast<unsigned>(k) )
     {
+        volScalarField V
+        (
+            IOobject
+            (
+                "V",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimless,
+            zeroGradientFvPatchScalarField::typeName
+        );
+
+        V.internalField() = mesh.V();
+        V.correctBoundaryConditions();
+
         for ( int i = 0; i < k; i++ )
         {
             pStages.at( i ) = p;
@@ -414,6 +452,7 @@ void SDCDynamicMeshFluidSolver::nextTimeStep()
             UfStages.at( i ) = Uf;
             pointsStages.at( i ) = mesh.points();
             volumeStages.at( i ) = mesh.V();
+            interpolateVolumeStages.at( i ) = fvc::interpolate( V );
         }
     }
 }
@@ -946,7 +985,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
             AU = UEqnt.A();
 
             U = (HU + rDeltaT * U.oldTime() * V0 / V + rDeltaT * rhsU) / AU;
-            Uf = (fvc::interpolate( HU ) + rDeltaT * Uf.oldTime() * fvc::interpolate( V0 ) / fvc::interpolate( V ) + rDeltaT * rhsUf) / fvc::interpolate( AU );
+            Uf = (fvc::interpolate( HU ) + rDeltaT * Uf.oldTime() * interpolateVolumeStages.at( k ) / fvc::interpolate( V ) + rDeltaT * rhsUf) / fvc::interpolate( AU );
 
             {
                 forAll( Uf.boundaryField(), patchI )
@@ -1059,10 +1098,11 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         UfStages.at( k + 1 ) = Uf;
         pointsStages.at( k + 1 ) = mesh.points();
         volumeStages.at( k + 1 ) = mesh.V();
+        interpolateVolumeStages.at( k + 1 ) = fvc::interpolate( V );
     }
 
     UF = rDeltaT * (U * V - U.oldTime() * V0 - rhsU * V);
-    UfF = rDeltaT * ( Uf * fvc::interpolate( V ) - Uf.oldTime() * fvc::interpolate( V0 ) - rhsUf * fvc::interpolate( V ) );
+    UfF = rDeltaT * ( Uf * fvc::interpolate( V ) - Uf.oldTime() * interpolateVolumeStages.at( k ) - rhsUf * fvc::interpolate( V ) );
     meshPhiF = mesh.phi();
 
     getSolution( result );
