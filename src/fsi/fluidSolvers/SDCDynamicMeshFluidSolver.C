@@ -1115,16 +1115,27 @@ double SDCDynamicMeshFluidSolver::getScalingFactor()
     return 1;
 }
 
-void SDCDynamicMeshFluidSolver::getVariableDOF( Eigen::VectorXd & variables )
+void SDCDynamicMeshFluidSolver::getVariablesInfo(
+    std::deque<int> & dof,
+    std::deque<bool> & enabled,
+    std::deque<std::string> & names
+    )
 {
-    variables.resize( 3 );
-    variables.setZero();
+    dof.push_back( 0 );
+    dof.push_back( 0 );
+    dof.push_back( 0 );
+    enabled.push_back( true );
+    enabled.push_back( true );
+    enabled.push_back( false );
+    names.push_back( "U" );
+    names.push_back( "Uf" );
+    names.push_back( "meshPhi" );
 
     forAll( U.internalField(), i )
     {
         for ( int j = 0; j < 3; j++ )
         {
-            variables( 0 ) += 1;
+            dof.at( 0 ) += 1;
         }
     }
 
@@ -1134,7 +1145,7 @@ void SDCDynamicMeshFluidSolver::getVariableDOF( Eigen::VectorXd & variables )
         {
             for ( int j = 0; j < 3; j++ )
             {
-                variables( 0 ) += 1;
+                dof.at( 0 ) += 1;
             }
         }
     }
@@ -1142,7 +1153,7 @@ void SDCDynamicMeshFluidSolver::getVariableDOF( Eigen::VectorXd & variables )
     forAll( Uf.internalField(), i )
     {
         for ( int j = 0; j < 3; j++ )
-            variables( 1 ) += 1;
+            dof.at( 1 ) += 1;
     }
 
     forAll( Uf.boundaryField(), patchI )
@@ -1150,20 +1161,20 @@ void SDCDynamicMeshFluidSolver::getVariableDOF( Eigen::VectorXd & variables )
         forAll( Uf.boundaryField()[patchI], i )
         {
             for ( int j = 0; j < 3; j++ )
-                variables( 1 ) += 1;
+                dof.at( 1 ) += 1;
         }
     }
 
     forAll( mesh.phi().internalField(), i )
     {
-        variables( 2 ) += 1;
+        dof.at( 2 ) += 1;
     }
 
     forAll( mesh.phi().boundaryField(), patchI )
     {
         forAll( mesh.phi().boundaryField()[patchI], i )
         {
-            variables( 2 ) += 1;
+            dof.at( 2 ) += 1;
         }
     }
 }

@@ -100,7 +100,11 @@ public:
 
     virtual void nextTimeStep();
 
-    virtual void getVariableDOF( Eigen::VectorXd & variables );
+    virtual void getVariablesInfo(
+        std::deque<int> & dof,
+        std::deque<bool> & enabled,
+        std::deque<std::string> & names
+        );
 
 private:
 

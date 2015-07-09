@@ -130,61 +130,11 @@ namespace sdc
             F.row( j + 1 ) = f;
         }
 
-        computeResidual( qmat, F, dt, qj );
-
-        residual.noalias() = solStages.row( 0 ) + qj.row( 0 ) - solStages.row( k - 1 );
-
-        scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
-        squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
-        reduce( squaredNorm, sumOp<scalarList>() );
-        double error = std::sqrt( sum( squaredNorm ) / N );
-        error /= solver->getScalingFactor();
-        bool convergence = error < tol;
-
-        Info << "SDC residual = " << error;
-        Info << ", tol = " << tol;
-        Info << ", time = " << t;
-        Info << ", sweep = 0";
-        Info << ", convergence = ";
-
-        if ( convergence )
-            Info << "true";
-        else
-            Info << "false";
-
-        Info << endl;
-
-        Eigen::VectorXd variables;
-        solver->getVariableDOF( variables );
-        assert( variables.sum() == N );
-
-        if ( variables.rows() > 1 )
-        {
-            int index = 0;
-
-            for ( int i = 0; i < variables.rows(); i++ )
-            {
-                scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
-
-                for ( int j = 0; j < variables( i ); j++ )
-                {
-                    squaredNorm[Pstream::myProcNo()] += residual( 0, index ) * residual( 0, index );
-                    index++;
-                }
-
-                reduce( squaredNorm, sumOp<scalarList>() );
-                double error = std::sqrt( sum( squaredNorm ) / variables( i ) );
-                Info << "SDC residual variable " << i << " = " << error << endl;
-            }
-
-            assert( index == N );
-        }
-
         // Compute successive corrections
 
-        convergence = false;
+        bool convergence = false;
 
-        for ( int j = 0; j < 4 * k; j++ )
+        for ( int j = 0; j < 10 * k; j++ )
         {
             t = t0;
 
@@ -239,30 +189,73 @@ namespace sdc
 
             Info << endl;
 
-            Eigen::VectorXd variables;
-            solver->getVariableDOF( variables );
+            std::deque<int> dofVariables;
+            std::deque<bool> enabledVariables;
+            std::deque<std::string> namesVariables;
+            solver->getVariablesInfo( dofVariables, enabledVariables, namesVariables );
 
-            if ( variables.rows() > 1 )
+            assert( enabledVariables.size() == dofVariables.size() );
+            assert( enabledVariables.size() == namesVariables.size() );
+
+            std::deque<bool> convergenceVariables;
+
+            for ( unsigned int i = 0; i < enabledVariables.size(); i++ )
+                convergenceVariables.push_back( not enabledVariables.at( i ) );
+
+            if ( dofVariables.size() > 1 )
             {
                 int index = 0;
 
-                for ( int i = 0; i < variables.rows(); i++ )
+                for ( unsigned int i = 0; i < dofVariables.size(); i++ )
                 {
                     scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
 
-                    for ( int j = 0; j < variables( i ); j++ )
+                    for ( int j = 0; j < dofVariables.at( i ); j++ )
                     {
                         squaredNorm[Pstream::myProcNo()] += residual( 0, index ) * residual( 0, index );
                         index++;
                     }
 
                     reduce( squaredNorm, sumOp<scalarList>() );
-                    double error = std::sqrt( sum( squaredNorm ) / variables( i ) );
-                    Info << "SDC residual variable " << i << " = " << error << endl;
+                    double error = std::sqrt( sum( squaredNorm ) / dofVariables.at( i ) );
+
+                    bool convergence = error < tol && j >= k - 1;
+
+                    Info << "SDC " << namesVariables.at( i ).c_str();
+                    Info << " residual = " << error;
+                    Info << ", enabled = ";
+
+                    if ( enabledVariables.at( i ) )
+                        Info << "true";
+                    else
+                        Info << "false";
+
+                    Info << ", time = " << t;
+                    Info << ", sweep = " << j + 1;
+                    Info << ", convergence = ";
+
+                    if ( convergence )
+                        Info << "true";
+                    else
+                        Info << "false";
+
+                    Info << endl;
+
+                    if ( enabledVariables.at( i ) )
+                        convergenceVariables.at( i ) = convergence;
                 }
 
                 assert( index == N );
             }
+
+            if ( convergence )
+                break;
+
+            convergence = true;
+
+            for ( unsigned int i = 0; i < convergenceVariables.size(); i++ )
+                if ( not convergenceVariables.at( i ) )
+                    convergence = false;
 
             if ( convergence )
                 break;

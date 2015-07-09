@@ -8,6 +8,7 @@
 #define SDCSolver_H
 
 #include <Eigen/Dense>
+#include <deque>
 
 namespace sdc
 {
@@ -66,12 +67,17 @@ public:
         virtual double getStartTime()
         {
             return 0;
-        };
+        }
 
-        virtual void getVariableDOF( Eigen::VectorXd & variables )
+        virtual void getVariablesInfo(
+            std::deque<int> & dof,
+            std::deque<bool> & enabled,
+            std::deque<std::string> & names
+            )
         {
-            variables.resize( 1 );
-            variables( 0 ) = getDOF();
+            dof.push_back( 1 );
+            enabled.push_back( true );
+            names.push_back( "0" );
         }
     };
 }
