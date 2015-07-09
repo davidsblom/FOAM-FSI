@@ -90,7 +90,7 @@ tmp<Field<vectorField> > circularExpansion::getChildMotion()
 
 void circularExpansion::setInitialPoints(){
     forAll(patchIDs_,ipatch){
-        initialPoints_[ipatch] = mesh_.Cf().boundaryField()[patchIDs_[ipatch]];
+        initialPoints_[ipatch] = mesh_.boundaryMesh()[patchIDs_[ipatch]].localPoints();
     }
 }
 
@@ -139,7 +139,7 @@ ofBody_("body-"+name+"-state.dat")
 
     //Initialize old and current position
     forAll(patchIDs_,ipatch){
-        currentPosition_[ipatch] = mesh_.Cf().boundaryField()[patchIDs_[ipatch]];
+        currentPosition_[ipatch] = mesh_.boundaryMesh()[patchIDs_[ipatch]].localPoints();
         prevPosition_[ipatch] = currentPosition_[ipatch];
 
     }
