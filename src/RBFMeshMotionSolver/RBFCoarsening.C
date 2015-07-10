@@ -5,6 +5,7 @@
  */
 #include <sys/stat.h>
 #include "RBFCoarsening.H"
+#include "WendlandC0Function.H"
 #include "WendlandC2Function.H"
 
 namespace rbf

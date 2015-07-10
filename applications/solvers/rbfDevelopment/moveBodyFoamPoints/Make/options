@@ -1,4 +1,4 @@
-EXE_INC = -std=c++0x \
+EXE_INC = -std=c++0x\
     -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \

@@ -37,13 +37,87 @@ scalar RBFMeshMotionSolver::getMaxWallDistance()
         }
         maxWallDistances[patchI] = max(maxDistance);
     }
-    Info << "maxWallDistances: " << maxWallDistances << endl;
     globalMaxWallDistance[Pstream::myProcNo()] = max(maxWallDistances);
 
     reduce( globalMaxWallDistance, sumOp<scalarField>() );
     scalar maxWallDistance = max(globalMaxWallDistance);
+    Info << "maxWallDistance: " << maxWallDistance << endl;
 
     return maxWallDistance;
+}
+
+scalar RBFMeshMotionSolver::getMaxAspectRatio()
+{
+    scalarField globalMaxAspectRatio(Pstream::nProcs(),0.0);
+    const labelListList& cellEdges = mesh().cellEdges();
+    const edgeList& edges = mesh().edges();
+
+    //Determine 3rd direction for 2D meshes
+    vector emptyDir = vector::zero;
+    if(mesh().nGeometricD()<3)
+    {
+        if(mesh().geometricD()[0]==-1)
+        {
+            emptyDir = vector(1,0,0);
+        }
+        else if(mesh().geometricD()[1]==-1)
+        {
+            emptyDir = vector(0,1,0);
+        }
+        else if(mesh().geometricD()[2]==-1)
+        {
+            emptyDir = vector(0,0,1);
+        }
+    }
+
+    scalarField maxAspectRatios(movingPatchIDs.size(),0.0);
+    forAll(movingPatchIDs,patchI)
+    {
+        const polyPatch& currPatch = mesh().boundaryMesh()[movingPatchIDs[patchI]];
+        const labelList& currPatchCellID = currPatch.faceCells();
+
+        scalarField maxAspectRatio(currPatch.size(),0.0);
+        forAll(maxAspectRatio,iface)
+        {
+            label cellID = currPatchCellID[iface];
+            const labelList& curEdges = cellEdges[cellID];
+
+            //if 2d ensure that 3rd dicrection is not used
+            if(mesh().nGeometricD()<3)
+            {
+                scalarField edgeLengths(curEdges.size(),0.0);
+                label counter = 0;
+                forAll(curEdges,iedge)
+                {
+                    vector edgeVec = edges[curEdges[iedge]].vec(mesh().points());
+                    if((edgeVec & emptyDir) < SMALL)
+                    {
+                        edgeLengths[counter] = edges[curEdges[iedge]].mag(mesh().points());
+                        counter++;
+                    }
+                }
+                edgeLengths.resize(counter);
+                maxAspectRatio[iface] = max(edgeLengths)/min(edgeLengths);
+            }
+            else
+            {
+                scalarField edgeLengths(curEdges.size(),0.0);
+                forAll(curEdges,iedge)
+                {
+                    edgeLengths[iedge] = edges[curEdges[iedge]].mag(mesh().points());
+                }
+                maxAspectRatio[iface] = max(edgeLengths)/min(edgeLengths);
+            }
+        }
+        maxAspectRatios[patchI] = max(maxAspectRatio);
+    }
+    globalMaxAspectRatio[Pstream::myProcNo()] = max(maxAspectRatios);
+
+    reduce( globalMaxAspectRatio, sumOp<scalarField>() );
+    scalar maxAspectRatio = max(globalMaxAspectRatio);
+    Info << "maxAspectRatio: " << maxAspectRatio << endl;
+
+    return maxAspectRatio;
 }
 
 RBFMeshMotionSolver::RBFMeshMotionSolver(
@@ -198,6 +272,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
     double ratioRadiusError = 10.0;
     double maxWallDistance = -1.0;
+    double maxAspectRatio = -1.0;
     double surfaceCorrectionRadius = -1.0;
     bool cleanReselection = true;
     if ( livePointSelection )
@@ -213,6 +288,14 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
             if ( maxWallDistance < SMALL )
             {
                 maxWallDistance = getMaxWallDistance();
+                maxAspectRatio = getMaxAspectRatio();
+
+                //THIJS: FAST FIX FOR DISTANCE
+                maxWallDistance = std::sqrt(maxAspectRatio)*maxWallDistance;//WendlandC2
+                if(debug>0)
+                {
+                    Info << "RBFMeshMotionSolver::debug::surfaceCorrection: Used 'maxWallDistance' = sqrt(maxAspectRatio)*maxWallDistance = " << maxWallDistance << endl;
+                }
             }
             surfaceCorrectionRadius = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionRadius", -1.0 );
         }

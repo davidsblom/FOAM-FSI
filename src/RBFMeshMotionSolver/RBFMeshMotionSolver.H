@@ -62,6 +62,8 @@ private:
 
         scalar getMaxWallDistance();
 
+        scalar getMaxAspectRatio();
+
 public:
 
         // Runtime type information
