@@ -1,4 +1,5 @@
 myMovingWallVelocity/myMovingWallVelocityFvPatchVectorField.C
 setInletVelocity/setInletVelocityFvPatchVectorField.C
+SDCMovingWallVelocity/SDCMovingWallVelocityFvPatchVectorField.C
 
 LIB = $(FOAM_USER_LIBBIN)/libboundaryConditions

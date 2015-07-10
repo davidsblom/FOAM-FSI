@@ -23,8 +23,9 @@ EXE_INC = -std=c++11 \
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    -L../../../../src/thirdParty/yaml-cpp/build/ \
     -L../../../../src/thirdParty/precice/build/last \
-    -lfsi \
+    -lprecice \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
@@ -35,14 +36,15 @@ EXE_LIBS = \
     -lincompressibleRASModels \
     -lincompressibleLESModels \
     -llduSolvers \
-    -lsolidModels \
     -lfvSchemes \
     -lboundaryConditions \
     -lsolidModels \
     -lsampling \
     -llagrangian \
-    -lprecice \
+    -lyaml-cpp \
     -lRBFMeshMotionSolver \
+    -lRBFMeshRigidMotionSolver \
+    -lfsi \
     -ltetFiniteElement \
     -lbasicThermophysicalModels \
     -lspecie \

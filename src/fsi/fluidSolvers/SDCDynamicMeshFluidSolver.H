@@ -22,6 +22,7 @@
 #include "turbulenceModel.H"
 #include "slipFvPatchFields.H"
 #include "symmetryFvPatchFields.H"
+#include "SDCMovingWallVelocityFvPatchVectorField.H"
 
 using namespace fsi;
 using std::shared_ptr;

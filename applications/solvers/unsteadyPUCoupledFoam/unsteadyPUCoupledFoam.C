@@ -4,6 +4,7 @@
 #include "singlePhaseTransportModel.H"
 #include "RASModel.H"
 #include <assert.h>
+#include <yaml-cpp/yaml.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -26,11 +26,34 @@ public:
             double tol
             );
 
+        SDC(
+            std::string rule,
+            int nbNodes,
+            double tol
+            );
+
         ~SDC();
 
         void run();
 
         void solveTimeStep( const double t0 );
+
+        void getSourceTerm(
+            const bool corrector,
+            const int k,
+            const double deltaT,
+            Eigen::VectorXd & rhs
+            );
+
+        void setFunction(
+            const int k,
+            const Eigen::VectorXd & f,
+            const Eigen::VectorXd & result
+            );
+
+        void setOldsolution( const Eigen::VectorXd & result );
+
+        void outputResidual();
 
 private:
 
@@ -58,6 +81,16 @@ private:
         Eigen::MatrixXd smatEmbedded;
         Eigen::MatrixXd qmatEmbedded;
         Eigen::VectorXd dsdc;
+
+        // Store function in memory in case the source term is requested
+        // by the solver
+        bool corrector;
+        int stageIndex;
+        double stageDeltaT;
+        Eigen::MatrixXd F;
+        Eigen::MatrixXd Fold;
+        Eigen::MatrixXd Sj;
+        Eigen::MatrixXd solStages;
     };
 }
 

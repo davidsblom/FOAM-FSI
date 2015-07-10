@@ -10,6 +10,44 @@
 namespace sdc
 {
     SDC::SDC(
+        std::string rule,
+        int nbNodes,
+        double tol
+        )
+        :
+        solver( false ),
+        adaptiveTimeStepper( false ),
+        N( 0 ),
+        k( 0 ),
+        dt( -1 ),
+        tol( tol ),
+        nodes(),
+        smat(),
+        qmat(),
+        dsdc(),
+        corrector( false ),
+        stageIndex( 0 ),
+        F(),
+        Fold(),
+        Sj(),
+        solStages()
+    {
+        assert( tol > 0 );
+        assert( tol < 1 );
+        assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" );
+
+        int refine = 1;
+        quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
+
+        k = nodes.rows();
+
+        dsdc.resize( nodes.rows() - 1 );
+
+        for ( int i = 0; i < dsdc.rows(); i++ )
+            dsdc( i ) = nodes( i + 1 ) - nodes( i );
+    }
+
+    SDC::SDC(
         std::shared_ptr<SDCSolver> solver,
         std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
         std::string rule,
@@ -26,7 +64,13 @@ namespace sdc
         nodes(),
         smat(),
         qmat(),
-        dsdc()
+        dsdc(),
+        corrector( false ),
+        stageIndex( 0 ),
+        F(),
+        Fold(),
+        Sj(),
+        solStages()
     {
         assert( adaptiveTimeStepper );
         assert( solver );
@@ -307,5 +351,92 @@ namespace sdc
 
             qj( 0, jj ) *= dt;
         }
+    }
+
+    void SDC::getSourceTerm(
+        const bool corrector,
+        const int k,
+        const double deltaT,
+        Eigen::VectorXd & rhs
+        )
+    {
+        assert( k <= this->k - 1 );
+
+        // Compute the time step from the stage deltaT
+        if ( dt < 0 )
+        {
+            // first time step, first prediction step
+            dt = deltaT / dsdc( 0 );
+        }
+
+        if ( not corrector )
+            rhs.setZero();
+
+        if ( corrector )
+        {
+            if ( k == 0 && stageIndex != 0 )
+            {
+                assert( dt > 0 );
+                Sj = dt * (smat * F);
+                Fold = F;
+            }
+
+            rhs.noalias() = -dt * dsdc( k ) * Fold.row( k + 1 ) + Sj.row( k );
+        }
+
+        this->stageIndex = k;
+        this->corrector = corrector;
+    }
+
+    void SDC::setFunction(
+        const int k,
+        const Eigen::VectorXd & f,
+        const Eigen::VectorXd & result
+        )
+    {
+        assert( f.rows() == result.rows() );
+        assert( k <= this->k - 1 );
+
+        if ( F.cols() == 0 )
+            F.resize( this->k, f.rows() );
+
+        if ( solStages.cols() == 0 )
+            solStages.resize( this->k, f.rows() );
+
+        F.row( k + 1 ) = f;
+        solStages.row( k + 1 ) = result;
+
+        if ( k + 1 == this->k - 1 && corrector )
+            outputResidual();
+    }
+
+    void SDC::setOldsolution( const Eigen::VectorXd & result )
+    {
+        if ( solStages.cols() == 0 )
+            solStages.resize( this->k, result.rows() );
+
+        solStages.row( 0 ) = result;
+    }
+
+    void SDC::outputResidual()
+    {
+        Eigen::MatrixXd Qj = dt * (qmat * F);
+        Eigen::MatrixXd residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
+
+        scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
+        squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
+        reduce( squaredNorm, sumOp<scalarList>() );
+        double error = std::sqrt( sum( squaredNorm ) / F.cols() );
+        bool convergence = error < tol;
+
+        Info << "SDC residual = " << error;
+        Info << ", convergence = ";
+
+        if ( convergence )
+            Info << "true";
+        else
+            Info << "false";
+
+        Info << endl;
     }
 }
