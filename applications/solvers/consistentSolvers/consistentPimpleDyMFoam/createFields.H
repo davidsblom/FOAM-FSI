@@ -33,6 +33,7 @@ U.oldTime();
 phi.oldTime();
 
 #include "createUf.H"
+#include "createV000.H"
 
 // Read pressure properties and create turbulence model
 label pRefCell = 0;

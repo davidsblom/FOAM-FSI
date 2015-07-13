@@ -590,7 +590,12 @@ void SDCFluidSolver::setSolution(
 
 double SDCFluidSolver::getEndTime()
 {
-    return runTime->endTime().value() - runTime->startTime().value();
+    return runTime->endTime().value();
+}
+
+double SDCFluidSolver::getStartTime()
+{
+    return runTime->startTime().value();
 }
 
 double SDCFluidSolver::getTimeStep()
@@ -929,8 +934,31 @@ void SDCFluidSolver::implicitSolve(
         UStages.at( k + 1 ) = U;
     }
 
+    // === Set boundaries correct of U === //
+    surfaceScalarField ddtPhiCoeff
+    (
+        IOobject
+        (
+            "ddtPhiCoeff",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensioned<scalar>( "1", dimless, 1.0 )
+    );
+
+    forAll( U.boundaryField(), patchI )
+    {
+        if ( U.boundaryField()[patchI].fixesValue() )
+        {
+            ddtPhiCoeff.boundaryField()[patchI] = 0.0;
+        }
+    }
+
     UF = rDeltaT * (U - U.oldTime() - rhsU);
-    phiF = rDeltaT * (phi - phi.oldTime() - rhsPhi);
+    phiF = rDeltaT * ( phi - ddtPhiCoeff * (phi.oldTime() + rhsPhi) );
 
     getSolution( result );
     evaluateFunction( k + 1, qold, t, f );

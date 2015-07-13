@@ -78,7 +78,7 @@ namespace sdc
 
     void SDC::run()
     {
-        double t = 0;
+        double t = solver->getStartTime();
 
         while ( std::abs( t - solver->getEndTime() ) > 1.0e-13 && t < solver->getEndTime() )
         {

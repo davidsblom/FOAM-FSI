@@ -78,6 +78,8 @@ public:
 
     virtual double getTimeStep();
 
+    virtual double getStartTime();
+
     virtual void implicitSolve(
         bool corrector,
         const int k,

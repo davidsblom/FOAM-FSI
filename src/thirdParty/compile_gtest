@@ -4,26 +4,30 @@ set -e
 
 VERSION=1.7.0
 
-rm -rf gtest-${VERSION}*
+if [ ! -d "gtest-${VERSION}" ]; then
 
-wget -O gtest-${VERSION}.zip http://googletest.googlecode.com/files/gtest-${VERSION}.zip
+    rm -rf gtest-${VERSION}*
 
-unzip gtest-${VERSION}
+    wget -O gtest-${VERSION}.zip http://googletest.googlecode.com/files/gtest-${VERSION}.zip
 
-cd gtest-${VERSION}
+    unzip gtest-${VERSION}
 
-if [ "$(uname)" == "Darwin" ]; then
-    CC=gcc-mp-4.9 CXX=g++-mp-4.9 cmake -DCMAKE_CXX_COMPILER=g++-mp-4.9
-else
-    cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CC_COMPILER=gcc
+    cd gtest-${VERSION}
+
+    if [ "$(uname)" == "Darwin" ]; then
+        CC=gcc-mp-4.9 CXX=g++-mp-4.9 cmake -DCMAKE_CXX_COMPILER=g++-mp-4.9
+    else
+        cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CC_COMPILER=gcc
+    fi
+
+    make
+
+    cd ../
+
+    rm -rf gtest
+
+    rm -rf gtest-${VERSION}.zip
+
+    ln -s gtest-${VERSION} gtest
+
 fi
-
-make
-
-cd ../
-
-rm -rf gtest
-
-rm -rf gtest-${VERSION}.zip
-
-ln -s gtest-${VERSION} gtest
