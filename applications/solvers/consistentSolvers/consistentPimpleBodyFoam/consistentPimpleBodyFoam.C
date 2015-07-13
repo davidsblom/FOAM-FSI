@@ -39,6 +39,7 @@ Description
 #include "dynamicFvMesh.H"
 #include "bodyCollector.H"
 #include "RBFMeshMotionSolver.H"
+#include "lduMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,6 +63,9 @@ int main(int argc, char *argv[])
 #       include "setDeltaT.H"
 
         fvc::makeAbsolute(phi, U);
+
+        // updates V000 if bdf3 is used
+        #include "updateV000.H"
 
         runTime++;
 

@@ -897,7 +897,8 @@ namespace rbf
         // Start doing the correction
         std::clock_t t = std::clock();
         double runTimeCorr = 0;
-        std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( R ) );
+        //std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( R ) );
+        std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC0Function( R ) );
 
         for ( int i = 0; i < positionsInterpolation.rows(); i++ )
         {
