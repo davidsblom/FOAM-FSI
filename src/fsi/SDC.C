@@ -17,6 +17,7 @@ namespace sdc
         :
         solver( false ),
         adaptiveTimeStepper( false ),
+        nbNodes( nbNodes ),
         N( 0 ),
         k( 0 ),
         dt( -1 ),
@@ -58,6 +59,7 @@ namespace sdc
         :
         solver( solver ),
         adaptiveTimeStepper( adaptiveTimeStepper ),
+        nbNodes( nbNodes ),
         N( solver->getDOF() ),
         k( 0 ),
         dt( solver->getTimeStep() ),
@@ -373,14 +375,15 @@ namespace sdc
             dt = deltaT / dsdc( 0 );
         }
 
+        assert( dt > 0 );
+
         if ( not corrector )
             rhs.setZero();
 
         if ( corrector )
         {
-            if ( k == 0 && stageIndex != 0 )
+            if ( (k == 0 && stageIndex != 0) || (k == 0 && nbNodes == 2) )
             {
-                assert( dt > 0 );
                 Sj = dt * (smat * F);
                 Fold = F;
             }
