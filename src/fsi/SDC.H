@@ -55,6 +55,8 @@ public:
 
         void outputResidual();
 
+        bool isConverged();
+
 private:
 
         void computeResidual(
@@ -91,6 +93,7 @@ private:
         Eigen::MatrixXd Fold;
         Eigen::MatrixXd Sj;
         Eigen::MatrixXd solStages;
+        bool convergence;
     };
 }
 

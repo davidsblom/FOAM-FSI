@@ -91,11 +91,11 @@ public:
             int k
             );
 
+        std::shared_ptr<sdc::SDC> sdc;
+
 private:
 
         void init();
-
-        std::shared_ptr<sdc::SDC> sdc;
 
         int k;
         bool corrector;

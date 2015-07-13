@@ -484,11 +484,14 @@ int SDCDynamicMeshFluidSolver::getDOF()
 
     forAll( U.boundaryField(), patchI )
     {
-        forAll( U.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
         {
-            for ( int j = 0; j < 3; j++ )
+            forAll( U.boundaryField()[patchI], i )
             {
-                index++;
+                for ( int j = 0; j < 3; j++ )
+                {
+                    index++;
+                }
             }
         }
     }
@@ -543,9 +546,7 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
 
     V.internalField() = mesh.V();
     V.correctBoundaryConditions();
-
-    volVectorField U = this->U * V;
-    surfaceVectorField Uf = this->Uf * fvc::interpolate( V );
+    surfaceScalarField interpolateV = fvc::interpolate( V );
 
     int index = 0;
 
@@ -553,19 +554,22 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
     {
         for ( int j = 0; j < 3; j++ )
         {
-            solution( index ) = U.internalField()[i][j];
+            solution( index ) = U.internalField()[i][j] * V.internalField()[i];
             index++;
         }
     }
 
     forAll( U.boundaryField(), patchI )
     {
-        forAll( U.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
         {
-            for ( int j = 0; j < 3; j++ )
+            forAll( U.boundaryField()[patchI], i )
             {
-                solution( index ) = U.boundaryField()[patchI][i][j];
-                index++;
+                for ( int j = 0; j < 3; j++ )
+                {
+                    solution( index ) = U.boundaryField()[patchI][i][j] * V.boundaryField()[patchI][i];
+                    index++;
+                }
             }
         }
     }
@@ -574,7 +578,7 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
     {
         for ( int j = 0; j < 3; j++ )
         {
-            solution( index ) = Uf.internalField()[i][j];
+            solution( index ) = Uf.internalField()[i][j] * interpolateV.internalField()[i];
             index++;
         }
     }
@@ -585,7 +589,7 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
         {
             for ( int j = 0; j < 3; j++ )
             {
-                solution( index ) = Uf.boundaryField()[patchI][i][j];
+                solution( index ) = Uf.boundaryField()[patchI][i][j] * interpolateV.boundaryField()[patchI][i];
                 index++;
             }
         }
@@ -760,12 +764,15 @@ void SDCDynamicMeshFluidSolver::evaluateFunction(
 
     forAll( UF.boundaryField(), patchI )
     {
-        forAll( UF.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
         {
-            for ( int j = 0; j < 3; j++ )
+            forAll( UF.boundaryField()[patchI], i )
             {
-                f( index ) = UF.boundaryField()[patchI][i][j];
-                index++;
+                for ( int j = 0; j < 3; j++ )
+                {
+                    f( index ) = UF.boundaryField()[patchI][i][j];
+                    index++;
+                }
             }
         }
     }
@@ -841,6 +848,8 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     forAll( U.boundaryField().types(), i )
     {
+        assert( U.boundaryField().types()[i] != "movingWallVelocity" );
+
         if ( U.boundaryField().types()[i] == "SDCMovingWallVelocity" )
         {
             SDCMovingWallVelocityFvPatchVectorField & bc = static_cast<SDCMovingWallVelocityFvPatchVectorField &>(U.boundaryField()[i]);
@@ -861,12 +870,15 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     forAll( rhsU.boundaryField(), patchI )
     {
-        forAll( rhsU.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
         {
-            for ( int j = 0; j < 3; j++ )
+            forAll( rhsU.boundaryField()[patchI], i )
             {
-                rhsU.boundaryField()[patchI][i][j] = rhs( index );
-                index++;
+                for ( int j = 0; j < 3; j++ )
+                {
+                    rhsU.boundaryField()[patchI][i][j] = rhs( index );
+                    index++;
+                }
             }
         }
     }
@@ -996,7 +1008,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
             HU = UEqn.H();
             AU = UEqnt.A();
 
-            U = (HU + rDeltaT * U.oldTime() * V0 / V + rDeltaT * rhsU) / AU;
+            U = (UEqnt.H() + rDeltaT * rhsU) / AU;
             Uf = (fvc::interpolate( HU ) + rDeltaT * Uf.oldTime() * interpolateVolumeStages.at( kold ) / fvc::interpolate( V ) + rDeltaT * rhsUf) / fvc::interpolate( AU );
 
             {
@@ -1012,18 +1024,6 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
                 }
 
                 phi = Uf & mesh.Sf();
-
-                forAll( phi.boundaryField(), patchI )
-                {
-                    if ( !phi.boundaryField()[patchI].coupled() )
-                    {
-                        phi.boundaryField()[patchI] =
-                            (
-                            U.boundaryField()[patchI]
-                            & mesh.Sf().boundaryField()[patchI]
-                            );
-                    }
-                }
             }
 
             for ( int nonOrth = 0; nonOrth <= nNonOrthCorr; nonOrth++ )
@@ -1152,11 +1152,14 @@ void SDCDynamicMeshFluidSolver::getVariablesInfo(
 
     forAll( U.boundaryField(), patchI )
     {
-        forAll( U.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
         {
-            for ( int j = 0; j < 3; j++ )
+            forAll( U.boundaryField()[patchI], i )
             {
-                dof.at( 0 ) += 1;
+                for ( int j = 0; j < 3; j++ )
+                {
+                    dof.at( 0 ) += 1;
+                }
             }
         }
     }
@@ -1188,4 +1191,25 @@ void SDCDynamicMeshFluidSolver::getVariablesInfo(
             dof.at( 2 ) += 1;
         }
     }
+}
+
+bool SDCDynamicMeshFluidSolver::isConverged()
+{
+    bool convergence = true;
+
+    forAll( U.boundaryField().types(), i )
+    {
+        assert( U.boundaryField().types()[i] != "movingWallVelocity" );
+
+        if ( U.boundaryField().types()[i] == "SDCMovingWallVelocity" )
+        {
+            SDCMovingWallVelocityFvPatchVectorField & bc = static_cast<SDCMovingWallVelocityFvPatchVectorField &>(U.boundaryField()[i]);
+            bc.sdc->outputResidual();
+
+            if ( not bc.sdc->isConverged() )
+                convergence = false;
+        }
+    }
+
+    return convergence;
 }

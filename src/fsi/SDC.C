@@ -30,7 +30,8 @@ namespace sdc
         F(),
         Fold(),
         Sj(),
-        solStages()
+        solStages(),
+        convergence( false )
     {
         assert( tol > 0 );
         assert( tol < 1 );
@@ -70,7 +71,8 @@ namespace sdc
         F(),
         Fold(),
         Sj(),
-        solStages()
+        solStages(),
+        convergence( false )
     {
         assert( adaptiveTimeStepper );
         assert( solver );
@@ -292,10 +294,12 @@ namespace sdc
                 assert( index == N );
             }
 
-            if ( convergence )
+            bool solverConverged = solver->isConverged();
+
+            if ( convergence && solverConverged )
                 break;
 
-            convergence = true;
+            convergence = solverConverged;
 
             for ( unsigned int i = 0; i < convergenceVariables.size(); i++ )
                 if ( not convergenceVariables.at( i ) )
@@ -405,9 +409,6 @@ namespace sdc
 
         F.row( k + 1 ) = f;
         solStages.row( k + 1 ) = result;
-
-        if ( k + 1 == this->k - 1 && corrector )
-            outputResidual();
     }
 
     void SDC::setOldsolution( const Eigen::VectorXd & result )
@@ -427,7 +428,7 @@ namespace sdc
         squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
         reduce( squaredNorm, sumOp<scalarList>() );
         double error = std::sqrt( sum( squaredNorm ) / F.cols() );
-        bool convergence = error < tol;
+        convergence = error < tol;
 
         Info << "SDC residual = " << error;
         Info << ", convergence = ";
@@ -438,5 +439,10 @@ namespace sdc
             Info << "false";
 
         Info << endl;
+    }
+
+    bool SDC::isConverged()
+    {
+        return convergence;
     }
 }

@@ -79,6 +79,11 @@ public:
             enabled.push_back( true );
             names.push_back( "0" );
         }
+
+        virtual bool isConverged()
+        {
+            return true;
+        }
     };
 }
 

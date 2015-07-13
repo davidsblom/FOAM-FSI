@@ -107,6 +107,8 @@ public:
         std::deque<std::string> & names
         );
 
+    virtual bool isConverged();
+
 private:
 
     void continuityErrs();
