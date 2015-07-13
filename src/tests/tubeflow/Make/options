@@ -16,21 +16,30 @@ EXE_INC = -std=c++11 -fopenmp \
     -I../../RBFMeshMotionSolver/lnInclude/ \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/solidModels/lnInclude \
+    -I../../../../src/thirdParty/boost
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -lfsi \
-    -lfiniteVolume \
-    -lsolidModels \
-    -ldynamicMesh \
+    -L../../thirdParty/yaml-cpp/build/ \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lmeshTools \
+    -lfiniteVolume \
     -lincompressibleTransportModels \
     -lincompressibleTurbulenceModel \
     -lincompressibleRASModels \
     -lincompressibleLESModels \
-    -lRBFMeshMotionSolver \
+    -llduSolvers \
+    -lfvSchemes \
+    -lboundaryConditions \
+    -lsolidModels \
     -lsampling \
+    -llagrangian \
+    -lyaml-cpp \
+    -lRBFMeshMotionSolver \
+    -lfsi \
+    -ltetFiniteElement \
     -lbasicThermophysicalModels \
     -lspecie \
     -lcompressibleRASModels
