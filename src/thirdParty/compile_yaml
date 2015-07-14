@@ -6,35 +6,39 @@ set -e
 
 VERSION=0.5.2
 
-# Define which versions of the different packages are used
+if [ ! -d "yaml-cpp-release-${VERSION}" ]; then
 
-export BOOST_VERSION=1_53_0
+    # Define which versions of the different packages are used
 
-rm -rf yaml-cpp*
+    export BOOST_VERSION=1_53_0
 
-rm -rf yaml-cpp-${VERSION}*
+    rm -rf yaml-cpp*
 
-wget -O yaml-cpp-${VERSION}.tar.gz https://github.com/jbeder/yaml-cpp/archive/release-${VERSION}.tar.gz
+    rm -rf yaml-cpp-${VERSION}*
 
-tar -zxvf yaml-cpp-${VERSION}.tar.gz
-rm -f yaml-cpp-${VERSION}.tar.gz
+    wget -O yaml-cpp-${VERSION}.tar.gz https://github.com/jbeder/yaml-cpp/archive/release-${VERSION}.tar.gz
 
-ln -s yaml-cpp-release-${VERSION} yaml-cpp
-rm -f boost
-ln -s boost_${BOOST_VERSION} boost
+    tar -zxvf yaml-cpp-${VERSION}.tar.gz
+    rm -f yaml-cpp-${VERSION}.tar.gz
 
-export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
+    ln -s yaml-cpp-release-${VERSION} yaml-cpp
+    rm -f boost
+    ln -s boost_${BOOST_VERSION} boost
 
-cd yaml-cpp
+    export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
 
-mkdir build
+    cd yaml-cpp
 
-cd build
+    mkdir build
 
-if [ "$(uname)" == "Darwin" ]; then
-    CC=gcc-mp-4.9 CXX=g++-mp-4.9 cmake ..
-else
-    cmake ..
+    cd build
+
+    if [ "$(uname)" == "Darwin" ]; then
+        CC=gcc-mp-4.9 CXX=g++-mp-4.9 cmake ..
+    else
+        cmake ..
+    fi
+
+    make -j 8
+
 fi
-
-make -j 8
