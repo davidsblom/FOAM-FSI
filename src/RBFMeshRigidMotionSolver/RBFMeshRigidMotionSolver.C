@@ -45,7 +45,8 @@ RBFMeshRigidMotionSolver::RBFMeshRigidMotionSolver(
     translationDirection( Foam::vector::zero ),
     rotationAmplitude( 0 ),
     rotationFrequency( 0 ),
-    rotationOrigin( Foam::vector::zero )
+    rotationOrigin( Foam::vector::zero ),
+    told(0)
 {
     // Find IDs of staticPatches
     forAll( staticPatches, patchI )
@@ -287,7 +288,9 @@ Foam::vector RBFMeshRigidMotionSolver::calcTransformation( double t )
         }
     }
 
-    Foam::vector transformation = smoothStartup * translationAmplitude * sin( 2 * M_PI * translationFrequency * t ) * translationDirection;
+    //Foam::vector transformation = smoothStartup * translationAmplitude * sin( 2 * M_PI * translationFrequency * t ) * translationDirection;
+
+    Foam::vector transformation = smoothStartup * translationAmplitude * translationDirection * ( 0.5 - 0.5 * Foam::cos( M_PI * translationFrequency * t ) );
 
     return transformation;
 }
@@ -295,9 +298,12 @@ Foam::vector RBFMeshRigidMotionSolver::calcTransformation( double t )
 Foam::vector RBFMeshRigidMotionSolver::calcVelocity()
 {
     double t = mesh().time().value();
-    double dt = mesh().time().deltaT().value();
 
-    return calcTransformation( t ) - calcTransformation( t - dt );
+    Foam::vector transformation = calcTransformation( t ) - calcTransformation( told );
+
+    told = t;
+
+    return transformation;
 }
 
 void RBFMeshRigidMotionSolver::solve()
@@ -305,9 +311,12 @@ void RBFMeshRigidMotionSolver::solve()
     Field<vectorField> motion( mesh().boundaryMesh().size(), vectorField( 0 ) );
     const labelList & meshPoints = mesh().boundaryMesh()[movingPatchIDs[0]].meshPoints();
     motion[movingPatchIDs[0]] = vectorField( meshPoints.size(), Foam::vector::zero );
+
+    Foam::vector transformation = calcVelocity();
+
     forAll( motion[movingPatchIDs[0]], i )
     {
-        motion[movingPatchIDs[0]][i] = calcVelocity();
+        motion[movingPatchIDs[0]][i] = transformation;
     }
 
     motionCenters = motion;

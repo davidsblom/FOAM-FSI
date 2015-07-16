@@ -1026,7 +1026,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
                 (
                 fvm::ddt( U )
                 + fvm::div( phi, U )
-                -fvm::laplacian( nu, U )
+                - fvm::laplacian( nu, U )
                 );
 
             UEqnt.source() = S0;

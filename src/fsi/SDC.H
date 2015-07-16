@@ -42,7 +42,8 @@ public:
             const bool corrector,
             const int k,
             const double deltaT,
-            Eigen::VectorXd & rhs
+            Eigen::VectorXd & rhs,
+            Eigen::VectorXd & qold
             );
 
         void setFunction(
@@ -51,7 +52,7 @@ public:
             const Eigen::VectorXd & result
             );
 
-        void setOldsolution( const Eigen::VectorXd & result );
+        void setOldSolution( const Eigen::VectorXd & result );
 
         void outputResidual();
 

@@ -84,10 +84,19 @@ namespace Foam
 
         const fvMesh & mesh = dimensionedInternalField().mesh();
 
-        if ( mesh.changing() )
+        const fvPatch & p = patch();
+        const polyPatch & pp = p.patch();
+
+        // Get wall-parallel mesh motion velocity from geometry
+        vectorField Up =
+            pp.faceCentres() / mesh.time().deltaT().value();
+
+        int dim = mesh.nGeometricD();
+
+        Eigen::VectorXd rhs( Up.size() * dim ), f( Up.size() * dim ), result( Up.size() * dim ), qold;
+
+        if ( not corrector && k == 0 )
         {
-            const fvPatch & p = patch();
-            const polyPatch & pp = p.patch();
             const pointField & oldPoints = mesh.oldPoints();
 
             vectorField oldFc( pp.size() );
@@ -95,52 +104,40 @@ namespace Foam
             forAll( oldFc, i )
             {
                 oldFc[i] = pp[i].centre( oldPoints );
+
+                for ( int j = 0; j < dim; j++ )
+                    result( i * dim + j ) = oldFc[i][j];
             }
-
-            // Get wall-parallel mesh motion velocity from geometry
-            vectorField Up =
-                (pp.faceCentres() - oldFc) / mesh.time().deltaT().value();
-
-            Eigen::VectorXd rhs( Up.size() * 3 ), f( Up.size() * 3 ), result( Up.size() * 3 );
-
-            if ( not corrector && k == 0 )
-            {
-                forAll( oldFc, i )
-                {
-                    for ( int j = 0; j < 3; j++ )
-                        result( i * 3 + j ) = oldFc[i][j];
-                }
-                sdc->setOldsolution( result );
-            }
-
-            sdc->getSourceTerm( corrector, k, mesh.time().deltaT().value(), rhs );
-            forAll( Up, i )
-            {
-                for ( int j = 0; j < 3; j++ )
-                {
-                    Up[i][j] -= rhs( i * 3 + j ) / mesh.time().deltaT().value();
-                    f( i * 3 + j ) = Up[i][j];
-                    result( i * 3 + j ) = pp.faceCentres()[i][j];
-                }
-            }
-            sdc->setFunction( k, f, result );
-
-            const volVectorField & U =
-                mesh.lookupObject<volVectorField>
-                (
-                dimensionedInternalField().name()
-                );
-
-            scalarField phip =
-                p.patchField<surfaceScalarField, scalar>( fvc::meshPhi( U ) );
-
-            vectorField n = p.nf();
-            const scalarField & magSf = p.magSf();
-            scalarField Un = phip / (magSf + VSMALL);
-
-            // Adjust for surface-normal mesh motion flux
-            vectorField::operator=( Up + n *( Un - (n & Up) ) );
+            sdc->setOldSolution( result );
         }
+
+        sdc->getSourceTerm( corrector, k, mesh.time().deltaT().value(), rhs, qold );
+        forAll( Up, i )
+        {
+            for ( int j = 0; j < dim; j++ )
+            {
+                Up[i][j] -= ( qold( i * dim + j ) + rhs( i * dim + j ) ) / mesh.time().deltaT().value();
+                f( i * dim + j ) = Up[i][j];
+                result( i * dim + j ) = pp.faceCentres()[i][j];
+            }
+        }
+        sdc->setFunction( k, f, result );
+
+        const volVectorField & U =
+            mesh.lookupObject<volVectorField>
+            (
+            dimensionedInternalField().name()
+            );
+
+        scalarField phip =
+            p.patchField<surfaceScalarField, scalar>( fvc::meshPhi( U ) );
+
+        vectorField n = p.nf();
+        const scalarField & magSf = p.magSf();
+        scalarField Un = phip / (magSf + VSMALL);
+
+        // Adjust for surface-normal mesh motion flux
+        vectorField::operator=( Up + n *( Un - (n & Up) ) );
 
         fixedValueFvPatchVectorField::updateCoeffs();
     }

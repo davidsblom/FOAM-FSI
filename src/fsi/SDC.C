@@ -363,10 +363,13 @@ namespace sdc
         const bool corrector,
         const int k,
         const double deltaT,
-        Eigen::VectorXd & rhs
+        Eigen::VectorXd & rhs,
+        Eigen::VectorXd & qold
         )
     {
         assert( k <= this->k - 1 );
+
+        qold = solStages.row( k );
 
         // Compute the time step from the stage deltaT
         if ( dt < 0 )
@@ -414,7 +417,7 @@ namespace sdc
         solStages.row( k + 1 ) = result;
     }
 
-    void SDC::setOldsolution( const Eigen::VectorXd & result )
+    void SDC::setOldSolution( const Eigen::VectorXd & result )
     {
         if ( solStages.cols() == 0 )
             solStages.resize( this->k, result.rows() );

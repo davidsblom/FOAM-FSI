@@ -70,6 +70,8 @@ private:
         double rotationFrequency;
         Foam::vector rotationOrigin;
 
+        double told;
+
 public:
 
         // Runtime type information
