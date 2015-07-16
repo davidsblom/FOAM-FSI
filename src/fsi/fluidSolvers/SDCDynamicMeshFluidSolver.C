@@ -923,16 +923,33 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     // Update mesh.phi()
     {
-        // Reset the mesh point locations to the old stage
-        pointField pointsOld = pointsStages.at( kold );
-        tmp<scalarField> sweptVols = mesh.movePoints( pointsOld );
-
-        mesh.setOldPoints( pointsOld );
         mesh.setV0() = volumeStages.at( kold );
 
         mesh.update();
 
         scalar rDeltaT = 1.0 / runTime->deltaT().value();
+
+        // Create swept volumes
+        const faceList & f = mesh.faces();
+
+        scalarField sweptVols( f.size() );
+
+        forAll( f, faceI )
+        {
+            sweptVols[faceI] = f[faceI].sweptVol( pointsStages.at( kold ), mesh.points() );
+        }
+
+        mesh.setPhi().internalField() = scalarField::subField( sweptVols, mesh.nInternalFaces() );
+        mesh.setPhi().internalField() *= rDeltaT;
+
+        const fvPatchList & patches = mesh.boundary();
+
+        forAll( patches, patchI )
+        {
+            mesh.setPhi().boundaryField()[patchI] = patches[patchI].patchSlice( sweptVols );
+            mesh.setPhi().boundaryField()[patchI] *= rDeltaT;
+        }
+
         mesh.setPhi() -= rDeltaT * rhsMeshPhi;
     }
 
