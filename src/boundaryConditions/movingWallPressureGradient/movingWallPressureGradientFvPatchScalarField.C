@@ -74,6 +74,28 @@ Foam::vectorField Foam::movingWallPressureGradientFvPatchScalarField::ddtU(const
     return ddtU;
 }
 
+Foam::vectorField Foam::movingWallPressureGradientFvPatchScalarField::ddtU(const volVectorField& U,const surfaceVectorField& Uf) const
+{
+    scalar deltaT = deltaT_();
+    scalar deltaT0 = deltaT0_( U );
+
+    scalar coefft = 1 + deltaT / (deltaT + deltaT0);
+    scalar coefft00 = deltaT * deltaT / ( deltaT0 * (deltaT + deltaT0) );
+    scalar coefft0 = coefft + coefft00;
+
+    const scalar& patchID = this->patch().index();
+
+    vectorField ddtU = (coefft * U.boundaryField()[patchID] - coefft0 * U.oldTime().boundaryField()[patchID] + coefft00 * U.oldTime().oldTime().boundaryField()[patchID])/deltaT;
+    vectorField ddtUf = (coefft * Uf.boundaryField()[patchID] - coefft0 * Uf.oldTime().boundaryField()[patchID] + coefft00 * Uf.oldTime().oldTime().boundaryField()[patchID])/deltaT;
+
+    /*Info << "movingWallPressureGradientFvPatchScalarField::ddtU(U,Uf): ddtU-ddtUf = " << max(mag(ddtU-ddtUf)) << endl;
+    Info << "movingWallPressureGradientFvPatchScalarField::ddtU(U,Uf): ddtU-ddtUf = " << max(mag(Uf.boundaryField()[patchID] - U.boundaryField()[patchID])) << endl;
+    Info << "movingWallPressureGradientFvPatchScalarField::ddtU(U,Uf): ddtU-ddtUf = " << max(mag(Uf.oldTime().boundaryField()[patchID] - U.oldTime().boundaryField()[patchID])) << endl;
+    Info << "movingWallPressureGradientFvPatchScalarField::ddtU(U,Uf): ddtU-ddtUf = " << max(mag(Uf.oldTime().oldTime().boundaryField()[patchID] - U.oldTime().oldTime().boundaryField()[patchID])) << endl;*/
+
+    return ddtUf;
+}
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::movingWallPressureGradientFvPatchScalarField::movingWallPressureGradientFvPatchScalarField
@@ -162,6 +184,9 @@ void Foam::movingWallPressureGradientFvPatchScalarField::updateCoeffs()
     const volVectorField& U =
         db().lookupObject<volVectorField>(UName_);
 
+    const surfaceVectorField& Uf =
+        db().lookupObject<surfaceVectorField>("Uf");
+
     const fvPatchField<vector>& Up =
         lookupPatchField<volVectorField, vector>(UName_);
 
@@ -173,8 +198,9 @@ void Foam::movingWallPressureGradientFvPatchScalarField::updateCoeffs()
         phip /= rhop;
     }*/
 
+    ddtU(U,Uf);
 
-    gradient() = -(ddtU(U) & patch().Sf())/patch().magSf();
+    gradient() = -(ddtU(U,Uf) & patch().Sf())/patch().magSf();
 
     fixedGradientFvPatchScalarField::updateCoeffs();
 }

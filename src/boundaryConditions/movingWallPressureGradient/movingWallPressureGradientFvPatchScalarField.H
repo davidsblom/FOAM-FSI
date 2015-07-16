@@ -69,6 +69,8 @@ class movingWallPressureGradientFvPatchScalarField
 
         vectorField ddtU(const volVectorField& U) const;
 
+        vectorField ddtU(const volVectorField& U, const surfaceVectorField& Uf) const;
+
 public:
 
     //- Runtime type information
