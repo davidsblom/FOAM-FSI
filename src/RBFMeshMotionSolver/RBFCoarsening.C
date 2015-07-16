@@ -530,7 +530,7 @@ namespace rbf
         {
             if ( livePointSelection )
             {
-                if( debug == 3  && livePointSelection )
+                if( debug == 3 )
                 {
                     tp = std::clock();
                 }
@@ -600,7 +600,7 @@ namespace rbf
                         surfaceErrorFile.close();
                     }
                 }
-                if( debug == 3  && livePointSelection )
+                if( debug == 3 )
                 {
                     tp = std::clock() - tp;
                     runTimeError = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -656,7 +656,7 @@ namespace rbf
                         }
                     }
                 }
-                if( debug == 3  && livePointSelection )
+                if( debug == 3 )
                 {
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -666,6 +666,10 @@ namespace rbf
             else
             if ( !rbf->computed )
             {
+                if( debug == 3 )
+                {
+                    tp = std::clock();
+                }
                 // Unit displacement of control points
                 matrix unitDisplacement( positions.rows(), positions.cols() );
                 unitDisplacement.setZero();
@@ -680,6 +684,13 @@ namespace rbf
                             unitDisplacement( i, j ) = 1;
 
                 greedySelection( unitDisplacement );
+
+                if( debug == 3 )
+                {
+                    tp = std::clock() - tp;
+                    runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
+                    tp = std::clock();
+                }
 
                 if( debug > 0 )
                 {
@@ -719,9 +730,21 @@ namespace rbf
                 }
 
                 rbf->Hhat.conservativeResize( rbf->Hhat.rows(), rbf->Hhat.cols() - nbStaticFaceCentersRemove );
+
+                if( debug == 3 )
+                {
+                    tp = std::clock() - tp;
+                    runTimeError = static_cast<float>(tp) / CLOCKS_PER_SEC;
+                    tp = std::clock();
+                }
             }
             else //This means there is unit displacement used, but rbf is already computed. Only used for debug things to track error.
             {
+                if( debug == 3 )
+                {
+                    tp = std::clock();
+                }
+
                 if( debug > 0 )
                 {
                     //Construct values to interpolate based on unit displacement selected points
@@ -757,6 +780,13 @@ namespace rbf
 
                         surfaceErrorFile.close();
                     }
+                }
+
+                if( debug == 3 )
+                {
+                    tp = std::clock() - tp;
+                    runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
+                    tp = std::clock();
                 }
             }
 
@@ -779,7 +809,7 @@ namespace rbf
         usedValues.conservativeResize( usedValues.rows() - nbStaticFaceCentersRemove, usedValues.cols() );
         rbf->interpolate( usedValues, valuesInterpolation );
 
-        if( debug == 3  && livePointSelection )
+        if( debug == 3 )
         {
             tp = std::clock() - tp;
             runTimeInterpolate = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -792,7 +822,7 @@ namespace rbf
             correctSurface( valuesInterpolation );
         }
 
-        if( debug == 3 && livePointSelection )
+        if( debug == 3 )
         {
             tp = std::clock() - tp;
             runTimeCorrect = static_cast<float>(tp) / CLOCKS_PER_SEC;
