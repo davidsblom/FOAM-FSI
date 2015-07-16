@@ -120,6 +120,9 @@ namespace Foam
                 f( i * dim + j ) = Up[i][j];
                 result( i * dim + j ) = pp.faceCentres()[i][j];
             }
+
+            if ( dim == 2 )
+                Up[i][2] = 0;
         }
         sdc->setFunction( k, f, result );
 
