@@ -476,7 +476,7 @@ int SDCDynamicMeshFluidSolver::getDOF()
     int index = 0;
     forAll( U.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             index++;
         }
@@ -488,7 +488,7 @@ int SDCDynamicMeshFluidSolver::getDOF()
         {
             forAll( U.boundaryField()[patchI], i )
             {
-                for ( int j = 0; j < 3; j++ )
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
                 {
                     index++;
                 }
@@ -498,7 +498,7 @@ int SDCDynamicMeshFluidSolver::getDOF()
 
     forAll( Uf.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
             index++;
     }
 
@@ -506,7 +506,7 @@ int SDCDynamicMeshFluidSolver::getDOF()
     {
         forAll( Uf.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
                 index++;
         }
     }
@@ -552,7 +552,7 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
 
     forAll( U.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             solution( index ) = U.internalField()[i][j] * V.internalField()[i];
             index++;
@@ -565,7 +565,7 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
         {
             forAll( U.boundaryField()[patchI], i )
             {
-                for ( int j = 0; j < 3; j++ )
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
                 {
                     solution( index ) = U.boundaryField()[patchI][i][j] * V.boundaryField()[patchI][i];
                     index++;
@@ -576,7 +576,7 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
 
     forAll( Uf.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             solution( index ) = Uf.internalField()[i][j] * interpolateV.internalField()[i];
             index++;
@@ -587,7 +587,7 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
     {
         forAll( Uf.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 solution( index ) = Uf.boundaryField()[patchI][i][j] * interpolateV.boundaryField()[patchI][i];
                 index++;
@@ -625,7 +625,7 @@ void SDCDynamicMeshFluidSolver::setSolution(
 
     forAll( U.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             U.internalField()[i][j] = solution( index );
             index++;
@@ -636,7 +636,7 @@ void SDCDynamicMeshFluidSolver::setSolution(
     {
         forAll( U.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 U.boundaryField()[patchI][i][j] = solution( index );
                 index++;
@@ -646,7 +646,7 @@ void SDCDynamicMeshFluidSolver::setSolution(
 
     forAll( Uf.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             Uf.internalField()[i][j] = solution( index );
             index++;
@@ -657,7 +657,7 @@ void SDCDynamicMeshFluidSolver::setSolution(
     {
         forAll( Uf.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 Uf.boundaryField()[patchI][i][j] = solution( index );
                 index++;
@@ -671,7 +671,7 @@ void SDCDynamicMeshFluidSolver::setSolution(
 
     forAll( UF.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             UF.internalField()[i][j] = f( index );
             index++;
@@ -682,7 +682,7 @@ void SDCDynamicMeshFluidSolver::setSolution(
     {
         forAll( UF.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 UF.boundaryField()[patchI][i][j] = f( index );
                 index++;
@@ -692,7 +692,7 @@ void SDCDynamicMeshFluidSolver::setSolution(
 
     forAll( UfF.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             UfF.internalField()[i][j] = f( index );
             index++;
@@ -703,7 +703,7 @@ void SDCDynamicMeshFluidSolver::setSolution(
     {
         forAll( UfF.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 UfF.boundaryField()[patchI][i][j] = f( index );
                 index++;
@@ -755,7 +755,7 @@ void SDCDynamicMeshFluidSolver::evaluateFunction(
 
     forAll( UF.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             f( index ) = UF.internalField()[i][j];
             index++;
@@ -768,7 +768,7 @@ void SDCDynamicMeshFluidSolver::evaluateFunction(
         {
             forAll( UF.boundaryField()[patchI], i )
             {
-                for ( int j = 0; j < 3; j++ )
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
                 {
                     f( index ) = UF.boundaryField()[patchI][i][j];
                     index++;
@@ -779,7 +779,7 @@ void SDCDynamicMeshFluidSolver::evaluateFunction(
 
     forAll( UfF.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             f( index ) = UfF.internalField()[i][j];
             index++;
@@ -790,7 +790,7 @@ void SDCDynamicMeshFluidSolver::evaluateFunction(
     {
         forAll( UfF.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 f( index ) = UfF.boundaryField()[patchI][i][j];
                 index++;
@@ -861,7 +861,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     forAll( rhsU.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             rhsU.internalField()[i][j] = rhs( index );
             index++;
@@ -874,7 +874,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         {
             forAll( rhsU.boundaryField()[patchI], i )
             {
-                for ( int j = 0; j < 3; j++ )
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
                 {
                     rhsU.boundaryField()[patchI][i][j] = rhs( index );
                     index++;
@@ -885,7 +885,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     forAll( rhsUf.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             rhsUf.internalField()[i][j] = rhs( index );
             index++;
@@ -896,7 +896,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     {
         forAll( rhsUf.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 rhsUf.boundaryField()[patchI][i][j] = rhs( index );
                 index++;
@@ -1005,7 +1005,33 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
             - fvm::laplacian( nu, U )
         );
 
-        Foam::solve( UEqnt == -fvc::grad( p ) + rDeltaT * rhsU );
+        {
+            // To ensure S0 and B0 are thrown out of memory
+            // Source and boundaryCoeffs need to be saved when relexation is applied
+            // to still obtain time consistent behavior.
+            // Only source is affected by relaxation, boundaryCoeffs is not relaxation
+            // dependent.
+            // BoundaryCoeffs needs to be saved to generate the correct UEqn after
+            // solving. Explicit terms (depending on U(n)) need to remain depending
+            // on U(n) and not on new solution)
+            vectorField S0 = UEqnt.source();
+            FieldField<Field, Foam::vector> B0 = UEqnt.boundaryCoeffs();
+
+            UEqnt.relax();
+
+            Foam::solve( UEqnt == -fvc::grad( p ) + rDeltaT * rhsU );
+
+            // Reset equation to ensure relaxation parameter is not causing problems for time order
+            UEqnt =
+                (
+                fvm::ddt( U )
+                + fvm::div( phi, U )
+                -fvm::laplacian( nu, U )
+                );
+
+            UEqnt.source() = S0;
+            UEqnt.boundaryCoeffs() = B0;
+        }
 
         // Relative convergence measure for the PISO loop:
         // Perform at maximum nCorr PISO corrections.
@@ -1161,7 +1187,7 @@ void SDCDynamicMeshFluidSolver::getVariablesInfo(
 
     forAll( U.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             dof.at( 0 ) += 1;
         }
@@ -1173,7 +1199,7 @@ void SDCDynamicMeshFluidSolver::getVariablesInfo(
         {
             forAll( U.boundaryField()[patchI], i )
             {
-                for ( int j = 0; j < 3; j++ )
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
                 {
                     dof.at( 0 ) += 1;
                 }
@@ -1183,7 +1209,7 @@ void SDCDynamicMeshFluidSolver::getVariablesInfo(
 
     forAll( Uf.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
             dof.at( 1 ) += 1;
     }
 
@@ -1191,7 +1217,7 @@ void SDCDynamicMeshFluidSolver::getVariablesInfo(
     {
         forAll( Uf.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
                 dof.at( 1 ) += 1;
         }
     }
