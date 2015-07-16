@@ -54,7 +54,7 @@ public:
 
         void setOldSolution( const Eigen::VectorXd & result );
 
-        void outputResidual();
+        void outputResidual( std::string name );
 
         bool isConverged();
 

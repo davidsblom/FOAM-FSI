@@ -1247,7 +1247,7 @@ bool SDCDynamicMeshFluidSolver::isConverged()
         if ( U.boundaryField().types()[i] == "SDCMovingWallVelocity" )
         {
             SDCMovingWallVelocityFvPatchVectorField & bc = static_cast<SDCMovingWallVelocityFvPatchVectorField &>(U.boundaryField()[i]);
-            bc.sdc->outputResidual();
+            bc.sdc->outputResidual( "moving wall velocity" );
 
             if ( not bc.sdc->isConverged() )
                 convergence = false;

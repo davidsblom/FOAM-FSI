@@ -425,7 +425,7 @@ namespace sdc
         solStages.row( 0 ) = result;
     }
 
-    void SDC::outputResidual()
+    void SDC::outputResidual( std::string name )
     {
         Eigen::MatrixXd Qj = dt * (qmat * F);
         Eigen::MatrixXd residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
@@ -436,7 +436,8 @@ namespace sdc
         double error = std::sqrt( sum( squaredNorm ) / F.cols() );
         convergence = error < tol;
 
-        Info << "SDC residual = " << error;
+        Info << "SDC " << name.c_str();
+        Info << " residual = " << error;
         Info << ", convergence = ";
 
         if ( convergence )
