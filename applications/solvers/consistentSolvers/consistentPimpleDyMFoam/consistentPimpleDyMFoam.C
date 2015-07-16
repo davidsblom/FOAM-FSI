@@ -87,9 +87,9 @@ int main(
         // Update the face velocities
         fvc::makeAbsolute( phi, U );
         #include "updateUf.H"
-        fvc::makeRelative( phi, U );
 
         runTime.write();
+        fvc::makeRelative( phi, U );
 
         Info << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
              << "  ClockTime = " << runTime.elapsedClockTime() << " s"
