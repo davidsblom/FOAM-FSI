@@ -9,6 +9,7 @@
 
 #include "ESDIRK.H"
 
+
 using namespace sdc;
 
 /*
@@ -88,7 +89,7 @@ public:
         this->dt = dt;
     }
 
-    virtual void setNumberOfStages( int k ){}
+    virtual void setNumberOfStages( int k );
 
     virtual void nextTimeStep();
 
@@ -116,6 +117,9 @@ public:
     double t;
     double timeIndex;
     double endTime;
+    int k;
+
+    std::deque<Eigen::VectorXd> solStages;
 };
 
 #endif

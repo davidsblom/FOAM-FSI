@@ -284,6 +284,8 @@ namespace sdc
 
         solver->initTimeStep();
 
+        int iImplicitStage = 0;
+
         for ( int j = 0; j < nbStages; j++ )
         {
             if ( !isStageImplicit( A( j, j ) ) )
@@ -301,10 +303,12 @@ namespace sdc
 
             rhs.array() *= dt;
 
-            solver->implicitSolve( false, j, 0, t, A( j, j ) * dt, qold, rhs, f, result );
+            solver->implicitSolve( false, iImplicitStage, 0, t, A( j, j ) * dt, qold, rhs, f, result );
 
             solStages.row( j ) = result;
             F.row( j ) = f;
+
+            iImplicitStage++;
         }
 
         if ( adaptiveTimeStepper->isEnabled() )

@@ -67,6 +67,12 @@ void Piston::nextTimeStep()
 {
     t += dt;
     timeIndex++;
+
+    Eigen::VectorXd sol(2);
+    sol << qdot, q;
+
+    for ( int i = 0; i < k; i++ )
+        solStages.at( i ) = sol;
 }
 
 int Piston::getDOF()
@@ -163,4 +169,20 @@ void Piston::implicitSolve(
     q = result( 1 );
 
     this->t = t;
+
+    solStages.at( k + 1 ) = result;
+
+    assert( std::abs( solStages.at( kold )(0) - qold(0) ) < 1.0e-13 );
+    assert( std::abs( solStages.at( kold )(1) - qold(1) ) < 1.0e-13 );
+}
+
+void Piston::setNumberOfStages( int k )
+{
+    this->k = k;
+
+    Eigen::VectorXd sol(2);
+    sol << qdot, q;
+
+    for ( int i = 0; i < k; i++ )
+        solStages.push_back( sol );
 }
