@@ -58,15 +58,15 @@ public:
 
         bool isConverged();
 
+        std::shared_ptr<SDCSolver> solver;
+        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
+
         int nbNodes;
         int N;
         int k;
 
         double dt;
         double tol;
-
-        std::shared_ptr<SDCSolver> solver;
-        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
 
         Eigen::VectorXd nodes;
         Eigen::MatrixXd smat;

@@ -190,6 +190,9 @@ void Piston::run()
             f.setZero();
             rhs.setZero();
 
+            evaluateFunction( 0, qold, t0, f );
+            sdc->setFunction( -1, f, qold );
+
             for ( int j = 0; j < 10 * k; j++ )
             {
                 bool corrector = false;
@@ -218,7 +221,9 @@ void Piston::run()
                     q( i ) = result( 1 );
                 }
 
-                if ( sdc->isConverged() )
+                sdc->outputResidual( "piston" );
+
+                if ( sdc->isConverged() && j >= k )
                     break;
             }
         }
