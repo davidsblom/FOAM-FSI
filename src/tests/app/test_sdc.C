@@ -43,7 +43,7 @@ protected:
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
         sdc = std::shared_ptr<SDC> ( new SDC( piston, adaptiveTimeStepper, rule, nbNodes, tol ) );
 
-        std::shared_ptr<sdc::SDC> sdc ( new SDC( rule, nbNodes, tol ) );
+        std::shared_ptr<sdc::SDC> sdc( new SDC( rule, nbNodes, tol ) );
         piston_sdc = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, sdc, nbNodes ) );
     }
 
@@ -169,7 +169,6 @@ TEST_P( SDCTest, runCompareSDC )
     piston->getSolution( solution_piston );
     piston_sdc->getSolution( solution_piston_sdc );
 
-    ASSERT_NEAR( solution_piston_sdc(0), solution_piston(0), 1.0e-10 );
-    ASSERT_NEAR( solution_piston_sdc(1), solution_piston(1), 1.0e-10 );
-
+    ASSERT_NEAR( solution_piston_sdc( 0 ), solution_piston( 0 ), 1.0e-10 );
+    ASSERT_NEAR( solution_piston_sdc( 1 ), solution_piston( 1 ), 1.0e-10 );
 }

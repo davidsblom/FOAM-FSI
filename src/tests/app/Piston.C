@@ -183,7 +183,7 @@ void Piston::run()
         {
             nextTimeStep();
 
-            double t0 = dt * (i-1);
+            double t0 = dt * (i - 1);
 
             qold << qdot( i - 1 ), q( i - 1 );
 
@@ -196,6 +196,7 @@ void Piston::run()
             for ( int j = 0; j < 10 * k; j++ )
             {
                 bool corrector = false;
+
                 if ( j > 0 )
                     corrector = true;
 
@@ -206,7 +207,7 @@ void Piston::run()
 
                 for ( int l = 0; l < k - 1; l++ )
                 {
-                    double deltaT = dt * sdc->dsdc(l);
+                    double deltaT = dt * sdc->dsdc( l );
                     t += deltaT;
 
                     Info << "Time = " << t << ", SDC sweep = " << j << ", SDC substep = " << l << endl;
