@@ -44,7 +44,7 @@ protected:
         sdc = std::shared_ptr<SDC> ( new SDC( piston, adaptiveTimeStepper, rule, nbNodes, tol ) );
 
         std::shared_ptr<sdc::SDC> sdc( new SDC( rule, nbNodes, tol ) );
-        piston_sdc = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, sdc, nbNodes ) );
+        piston_sdc = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, sdc, sdc->nodes.rows() ) );
     }
 
     virtual void TearDown()
