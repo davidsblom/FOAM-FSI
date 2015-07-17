@@ -13,6 +13,9 @@ fi
 
 source $FOAM_SRC/../etc/bashrc
 
+git submodule init
+git submodule update
+
 cd src/thirdParty
 ./Allmake
 cd ../../
