@@ -21,7 +21,7 @@ protected:
 
     virtual void SetUp()
     {
-        double dt, q0, qdot0, As, Ac, omega, endTime;
+        double dt, q0, qdot0, As, Ac, omega, endTime, tol;
 
         int nbNodes = std::tr1::get<0>( GetParam() );
         int nbTimeSteps = std::tr1::get<1>( GetParam() );
@@ -34,26 +34,32 @@ protected:
         omega = 1;
         q0 = -As;
         qdot0 = -As;
+        tol = 1.0e-10;
 
         std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
 
         adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
 
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc = std::shared_ptr<SDC> ( new SDC( piston, adaptiveTimeStepper, rule, nbNodes, 1.0e-10 ) );
+        sdc = std::shared_ptr<SDC> ( new SDC( piston, adaptiveTimeStepper, rule, nbNodes, tol ) );
+
+        std::shared_ptr<sdc::SDC> sdc ( new SDC( rule, nbNodes, tol ) );
+        piston_sdc = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, sdc, nbNodes ) );
     }
 
     virtual void TearDown()
     {
         piston.reset();
         sdc.reset();
+        piston_sdc.reset();
     }
 
     std::shared_ptr<Piston> piston;
     std::shared_ptr<SDC> sdc;
+    std::shared_ptr<Piston> piston_sdc;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, SDCTest, ::testing::Combine( Values( 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ), Values( 10, 20, 40, 80, 100, 160 ), Values( "gauss-radau", "gauss-lobatto", "clenshaw-curtis", "uniform" ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, SDCTest, ::testing::Combine( Values( 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ), Values( 1, 10, 20, 40, 80, 100, 160 ), Values( "gauss-radau", "gauss-lobatto", "clenshaw-curtis", "uniform" ) ) );
 
 TEST_P( SDCTest, object )
 {
@@ -152,4 +158,18 @@ TEST_P( SDCTest, run )
 
     if ( nbTimeSteps == 160 && nbNodes == 3 && rule == "gauss-lobatto" )
         ASSERT_NEAR( error, 1.47661061e-02, 1.0e-5 );
+}
+
+TEST_P( SDCTest, runCompareSDC )
+{
+    piston_sdc->run();
+    sdc->run();
+
+    Eigen::VectorXd solution_piston_sdc( 2 ), solution_piston( 2 );
+    piston->getSolution( solution_piston );
+    piston_sdc->getSolution( solution_piston_sdc );
+
+    ASSERT_NEAR( solution_piston_sdc(0), solution_piston(0), 1.0e-13 );
+    ASSERT_NEAR( solution_piston_sdc(1), solution_piston(1), 1.0e-13 );
+
 }

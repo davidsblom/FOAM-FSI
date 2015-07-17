@@ -8,7 +8,7 @@
 #define Piston_H
 
 #include "ESDIRK.H"
-
+#include "SDC.H"
 
 using namespace sdc;
 
@@ -38,6 +38,18 @@ public:
         double As,
         double Ac,
         double omega
+        );
+
+    Piston(
+        int nbTimeSteps,
+        double dt,
+        double q0,
+        double qdot0,
+        double As,
+        double Ac,
+        double omega,
+        std::shared_ptr<sdc::SDC> sdc,
+        int k
         );
 
     ~Piston();
@@ -120,6 +132,7 @@ public:
     int k;
 
     std::deque<Eigen::VectorXd> solStages;
+    std::shared_ptr<sdc::SDC> sdc;
 };
 
 #endif

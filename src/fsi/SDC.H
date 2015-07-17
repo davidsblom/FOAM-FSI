@@ -58,24 +58,15 @@ public:
 
         bool isConverged();
 
-private:
-
-        void computeResidual(
-            const Eigen::MatrixXd & qmat,
-            const Eigen::MatrixXd & F,
-            const double dt,
-            Eigen::MatrixXd & qj
-            );
-
-        std::shared_ptr<SDCSolver> solver;
-        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
-
         int nbNodes;
         int N;
         int k;
 
         double dt;
         double tol;
+
+        std::shared_ptr<SDCSolver> solver;
+        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
 
         Eigen::VectorXd nodes;
         Eigen::MatrixXd smat;
@@ -84,6 +75,15 @@ private:
         Eigen::MatrixXd smatEmbedded;
         Eigen::MatrixXd qmatEmbedded;
         Eigen::VectorXd dsdc;
+
+private:
+
+        void computeResidual(
+            const Eigen::MatrixXd & qmat,
+            const Eigen::MatrixXd & F,
+            const double dt,
+            Eigen::MatrixXd & qj
+            );
 
         // Store function in memory in case the source term is requested
         // by the solver

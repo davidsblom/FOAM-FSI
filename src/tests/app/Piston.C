@@ -36,6 +36,41 @@ Piston::Piston(
     assert( dt > 0 );
 }
 
+Piston::Piston(
+    int nbTimeSteps,
+    double dt,
+    double q0,
+    double qdot0,
+    double As,
+    double Ac,
+    double omega,
+    std::shared_ptr<sdc::SDC> sdc,
+    int k
+    )
+    :
+    SDCSolver(),
+    nbTimeSteps( nbTimeSteps ),
+    dt( dt ),
+    q0( q0 ),
+    c1( q0 + Ac / std::pow( omega, 2 ) ),
+    c2( qdot0 + As / omega ),
+    As( As ),
+    Ac( Ac ),
+    omega( omega ),
+    N( 2 ),
+    q( q0 ),
+    qdot( qdot0 ),
+    t( 0 ),
+    timeIndex( 0 ),
+    endTime( nbTimeSteps * dt ),
+    k( k ),
+    sdc( sdc )
+{
+    assert( nbTimeSteps > 0 );
+    assert( dt > 0 );
+    assert( sdc );
+}
+
 Piston::~Piston()
 {}
 
@@ -122,19 +157,71 @@ void Piston::run()
     q( 0 ) = -Ac;
     qdot( 0 ) = q( 0 );
 
-    for ( int i = 1; i < nbTimeSteps + 1; i++ )
+    if ( not sdc )
     {
-        double t = dt * i;
+        for ( int i = 1; i < nbTimeSteps + 1; i++ )
+        {
+            double t = dt * i;
 
-        qold << qdot( i - 1 ), q( i - 1 );
+            qold << qdot( i - 1 ), q( i - 1 );
 
-        f.setZero();
-        rhs.setZero();
+            f.setZero();
+            rhs.setZero();
 
-        implicitSolve( false, 0, 0, t, dt, qold, rhs, f, result );
+            implicitSolve( false, 0, 0, t, dt, qold, rhs, f, result );
 
-        qdot( i ) = result( 0 );
-        q( i ) = result( 1 );
+            qdot( i ) = result( 0 );
+            q( i ) = result( 1 );
+        }
+    }
+
+    if ( sdc )
+    {
+        setNumberOfStages( k );
+
+        for ( int i = 1; i < nbTimeSteps + 1; i++ )
+        {
+            nextTimeStep();
+
+            double t0 = dt * (i-1);
+
+            qold << qdot( i - 1 ), q( i - 1 );
+
+            f.setZero();
+            rhs.setZero();
+
+            for ( int j = 0; j < 10 * k; j++ )
+            {
+                bool corrector = false;
+                if ( j > 0 )
+                    corrector = true;
+
+                if ( j == 0 )
+                    sdc->setOldSolution( qold );
+
+                double t = t0;
+
+                for ( int l = 0; l < k - 1; l++ )
+                {
+                    double deltaT = dt * sdc->dsdc(l);
+                    t += deltaT;
+
+                    Info << "Time = " << t << ", SDC sweep = " << j << ", SDC substep = " << l << endl;
+
+                    sdc->getSourceTerm( corrector, l, deltaT, rhs, qold );
+
+                    implicitSolve( corrector, l, l, t, deltaT, qold, rhs, f, result );
+
+                    sdc->setFunction( l, f, result );
+
+                    qdot( i ) = result( 0 );
+                    q( i ) = result( 1 );
+                }
+
+                if ( sdc->isConverged() )
+                    break;
+            }
+        }
     }
 }
 
@@ -153,6 +240,7 @@ void Piston::implicitSolve(
     assert( f.rows() == 2 );
     assert( rhs.rows() == 2 );
     assert( result.rows() == 2 );
+    assert( solStages.size() > 0 );
 
     f( 0 ) = As * std::sin( omega * t );
     f( 0 ) += Ac * std::cos( omega * t );
