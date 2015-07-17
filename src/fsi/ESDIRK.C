@@ -224,7 +224,8 @@ namespace sdc
         for ( int i = 0; i < nbStages; i++ )
             B( i ) = A( nbStages - 1, i );
 
-        bool firstStageImplicit = isStageImplicit( A(0,0) );
+        bool firstStageImplicit = isStageImplicit( A( 0, 0 ) );
+
         if ( firstStageImplicit )
             solver->setNumberOfStages( nbStages + 1 );
         else
