@@ -215,7 +215,7 @@ namespace sdc
         // source: http://www.sciencedirect.com/science/article/pii/S0168927415000501
         if ( method == "ESDIRK53PR" )
         {
-            adaptiveTimeStepper->setOrderEmbeddedMethod( 3 );
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 2 );
             A.resize( 5, 5 );
             A.setZero();
             Bhat.resize( A.cols() );
@@ -245,7 +245,7 @@ namespace sdc
         // source: http://www.sciencedirect.com/science/article/pii/S0168927415000501
         if ( method == "ESDIRK63PR" )
         {
-            adaptiveTimeStepper->setOrderEmbeddedMethod( 3 );
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 2 );
             A.resize( 6, 6 );
             A.setZero();
             Bhat.resize( A.cols() );
@@ -277,6 +277,51 @@ namespace sdc
             Bhat( 3 ) = 4.972384722615363e-03;
             Bhat( 4 ) = 4.166666666666667e-01;
             Bhat( 5 ) = 0.0;
+        }
+
+        // source: http://www.sciencedirect.com/science/article/pii/S0168927415000501
+        if ( method == "ESDIRK74PR" )
+        {
+            adaptiveTimeStepper->setOrderEmbeddedMethod( 3 );
+            A.resize( 7, 7 );
+            A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
+            A( 0, 0 ) = 0.0;
+            A( 1, 0 ) = 1.666666666666667e-01;
+            A( 1, 1 ) = 1.666666666666667e-01;;
+            A( 2, 0 ) = 4.166666666666666e-02;
+            A( 2, 1 ) = -4.166666666666666e-02;
+            A( 2, 2 ) = 1.666666666666667e-01;
+            A( 3, 0 ) = -1.500000000000000e+00;
+            A( 3, 1 ) = -1.333333333333333e+00;
+            A( 3, 2 ) = 3.333333333333333e+00;
+            A( 3, 3 ) = 1.666666666666667e-01;
+            A( 4, 0 ) = -1.580729166666667e+00;
+            A( 4, 1 ) = -1.349609375000000e+00;
+            A( 4, 2 ) = 3.472656250000000e+00;
+            A( 4, 3 ) = 4.101562500000000e-02;
+            A( 4, 4 ) = 1.666666666666667e-01;
+            A( 5, 0 ) = -2.005366150605651e+00;
+            A( 5, 1 ) = -1.768688648609954e+00;
+            A( 5, 2 ) = 4.341269295345690e+00;
+            A( 5, 3 ) = 2.326169434610579e-02;
+            A( 5, 4 ) = 1.000000000000000e-01;
+            A( 5, 5 ) = 1.666666666666667e-01;
+            A( 6, 0 ) = 1.684854267805816e-01;
+            A( 6, 1 ) = 7.501080898831836e-01;
+            A( 6, 2 ) = -2.255843889686931e-01;
+            A( 6, 3 ) = -9.134421504267402e-01;
+            A( 6, 4 ) = 1.618140253772232e+00;
+            A( 6, 5 ) = -5.643738977072310e-01;
+            A( 6, 6 ) = 1.666666666666667e-01;
+            Bhat( 0 ) = -3.930182461751728e-01;
+            Bhat( 1 ) = 1.000000000000000e-01;
+            Bhat( 2 ) = 9.916346405575472e-01;
+            Bhat( 3 ) = 0.0;
+            Bhat( 4 ) = -2.511232158528943e-01;
+            Bhat( 5 ) = 4.393912810497486e-01;
+            Bhat( 6 ) = 1.131155404207712e-01;
         }
 
         nbStages = A.cols();

@@ -67,7 +67,7 @@ protected:
     std::shared_ptr<ESDIRK> esdirk;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, ESDIRKTest, ::testing::Combine( Values( 2, 100, 200, 400, 800, 1600, 3200 ), Values( "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5" ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, ESDIRKTest, ::testing::Combine( Values( 2, 100, 200, 400, 800, 1600, 3200 ), Values( "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5", "ESDIRK53PR", "ESDIRK63PR", "ESDIRK74PR" ) ) );
 
 TEST_P( ESDIRKTest, object )
 {
