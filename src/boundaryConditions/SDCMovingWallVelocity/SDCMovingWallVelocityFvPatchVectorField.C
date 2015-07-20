@@ -108,10 +108,10 @@ namespace Foam
                 for ( int j = 0; j < dim; j++ )
                     result( i * dim + j ) = oldFc[i][j];
             }
-            sdc->setOldSolution( result );
+            timeIntegrationScheme->setOldSolution( result );
         }
 
-        sdc->getSourceTerm( corrector, k, mesh.time().deltaT().value(), rhs, qold );
+        timeIntegrationScheme->getSourceTerm( corrector, k, mesh.time().deltaT().value(), rhs, qold );
         forAll( Up, i )
         {
             for ( int j = 0; j < dim; j++ )
@@ -124,7 +124,7 @@ namespace Foam
             if ( dim == 2 )
                 Up[i][2] = 0;
         }
-        sdc->setFunction( k, f, result );
+        timeIntegrationScheme->setFunction( k, f, result );
 
         const volVectorField & U =
             mesh.lookupObject<volVectorField>
@@ -168,7 +168,7 @@ namespace Foam
         double tol = sdcConfig["convergence-tolerance"].as<double>();
         std::string quadratureRule = sdcConfig["quadrature-rule"].as<std::string>();
 
-        sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( quadratureRule, n, tol ) );
+        timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( quadratureRule, n, tol ) );
     }
 
     void SDCMovingWallVelocityFvPatchVectorField::setSDCInfo(

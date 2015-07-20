@@ -5,7 +5,10 @@
 #include "fvPatchFields.H"
 #include "fixedValueFvPatchFields.H"
 
+#include <Eigen/Dense>
 #include "SDC.H"
+#include "ESDIRK.H"
+#include "TimeIntegrationScheme.H"
 #include <yaml-cpp/yaml.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -91,7 +94,7 @@ public:
             int k
             );
 
-        std::shared_ptr<sdc::SDC> sdc;
+        std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
 
 private:
 
