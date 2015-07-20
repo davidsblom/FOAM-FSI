@@ -220,13 +220,7 @@ void Piston::run()
                     corrector = true;
 
                 if ( j == 0 )
-                {
-                    if ( sdc )
-                        sdc->setOldSolution( qold );
-
-                    if ( esdirk )
-                        esdirk->setOldSolution( qold );
-                }
+                    timeIntegrationScheme->setOldSolution( qold );
 
                 double t = t0;
 
