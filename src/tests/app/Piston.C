@@ -194,7 +194,7 @@ void Piston::run()
 
     if ( not sdc && not esdirk )
     {
-        setNumberOfStages( 2 );
+        setNumberOfImplicitStages( 1 );
 
         for ( int i = 1; i < nbTimeSteps + 1; i++ )
         {
@@ -216,16 +216,7 @@ void Piston::run()
 
     if ( sdc || esdirk )
     {
-        if ( sdc )
-            setNumberOfStages( k );
-
-        if ( esdirk )
-        {
-            if ( esdirk->isStageImplicit( esdirk->A( 0, 0 ) ) )
-                setNumberOfStages( k + 1 );
-            else
-                setNumberOfStages( k );
-        }
+        setNumberOfImplicitStages( k - 1 );
 
         for ( int i = 1; i < nbTimeSteps + 1; i++ )
         {
@@ -272,12 +263,8 @@ void Piston::run()
                 int iImplicitStage = 0;
 
                 int nbStages = k - 1;
-
-                if ( esdirk )
-                {
-                    if ( not esdirk->isStageImplicit( esdirk->A( 0, 0 ) ) )
-                        nbStages = k;
-                }
+                if ( esdirk && not esdirk->isStageImplicit( esdirk->A( 0, 0 ) ) )
+                    nbStages = k;
 
                 for ( int l = 0; l < nbStages; l++ )
                 {
@@ -298,6 +285,8 @@ void Piston::run()
                         deltaT = dt * esdirk->A( l, l );
                         t = t0 + esdirk->C( l ) * dt;
                     }
+
+                    Info << "Time = " << t << ", dt = " << dt << ", l = " << l << endl;
 
                     if ( sdc )
                         sdc->getSourceTerm( corrector, l, deltaT, rhs, qold );
@@ -373,13 +362,13 @@ void Piston::implicitSolve(
     assert( std::abs( solStages.at( kold ) ( 1 ) - qold( 1 ) ) < 1.0e-13 );
 }
 
-void Piston::setNumberOfStages( int k )
+void Piston::setNumberOfImplicitStages( int k )
 {
-    this->k = k;
+    this->k = k + 1;
 
     Eigen::VectorXd sol( 2 );
     sol << qdot, q;
 
-    for ( int i = 0; i < k; i++ )
+    for ( int i = 0; i < k + 1; i++ )
         solStages.push_back( sol );
 }

@@ -385,9 +385,9 @@ void SDCDynamicMeshFluidSolver::setDeltaT( double dt )
     runTime->setDeltaT( dt );
 }
 
-void SDCDynamicMeshFluidSolver::setNumberOfStages( int k )
+void SDCDynamicMeshFluidSolver::setNumberOfImplicitStages( int k )
 {
-    this->k = k;
+    this->k = k + 1;
 
     volScalarField V
     (
@@ -407,7 +407,7 @@ void SDCDynamicMeshFluidSolver::setNumberOfStages( int k )
     V.internalField() = mesh.V();
     V.correctBoundaryConditions();
 
-    for ( int i = 0; i < k; i++ )
+    for ( int i = 0; i < k + 1; i++ )
     {
         pStages.push_back( volScalarField( p ) );
         phiStages.push_back( surfaceScalarField( phi ) );
@@ -828,6 +828,13 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     Eigen::VectorXd & result
     )
 {
+    assert( k < this->k );
+    assert( kold < this->k );
+    assert( kold <= k );
+    assert( qold.rows() == rhs.rows() );
+    assert( qold.rows() == f.rows() );
+    assert( qold.rows() == result.rows() );
+
     bool convergence = false;
     runTime->setDeltaT( dt );
     runTime->setTime( t, runTime->timeIndex() );

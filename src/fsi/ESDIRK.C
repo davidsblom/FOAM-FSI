@@ -33,9 +33,9 @@ namespace sdc
         bool firstStageImplicit = isStageImplicit( A( 0, 0 ) );
 
         if ( firstStageImplicit )
-            solver->setNumberOfStages( nbStages + 1 );
+            solver->setNumberOfImplicitStages( nbStages );
         else
-            solver->setNumberOfStages( nbStages );
+            solver->setNumberOfImplicitStages( nbStages - 1 );
 
         adaptiveTimeStepper->setEndTime( solver->getEndTime() );
     }
@@ -213,10 +213,16 @@ namespace sdc
         qold = result;
     }
 
-    int ESDIRK::getNbStages()
+    int ESDIRK::getNbImplicitStages()
     {
         assert( nbStages > 0 );
-        return nbStages;
+
+        bool firstStageImplicit = isStageImplicit( A( 0, 0 ) );
+
+        if ( firstStageImplicit )
+            return nbStages;
+        else
+            return nbStages - 1;
     }
 
     void ESDIRK::initializeButcherTableau( std::string method )

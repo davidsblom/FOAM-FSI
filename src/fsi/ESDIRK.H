@@ -46,7 +46,7 @@ public:
             const Eigen::VectorXd & result
             );
 
-        int getNbStages();
+        int getNbImplicitStages();
 
         bool isStageImplicit( double Akk );
 

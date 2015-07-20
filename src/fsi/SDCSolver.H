@@ -50,7 +50,7 @@ public:
 
         virtual void setDeltaT( double dt ) = 0;
 
-        virtual void setNumberOfStages( int k ) = 0;
+        virtual void setNumberOfImplicitStages( int k ) = 0;
 
         virtual void implicitSolve(
             bool corrector,

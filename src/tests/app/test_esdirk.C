@@ -57,7 +57,7 @@ protected:
         esdirk = std::shared_ptr<ESDIRK> ( new ESDIRK( piston, method, adaptiveTimeStepper ) );
 
         std::shared_ptr<sdc::ESDIRK> esdirk( new ESDIRK( method ) );
-        piston_esdirk = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, esdirk, esdirk->getNbStages() ) );
+        piston_esdirk = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, esdirk, esdirk->getNbImplicitStages() + 1 ) );
     }
 
     virtual void TearDown()

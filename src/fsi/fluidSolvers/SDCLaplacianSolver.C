@@ -171,11 +171,11 @@ void SDCLaplacianSolver::setDeltaT( double dt )
     runTime->setDeltaT( dt );
 }
 
-void SDCLaplacianSolver::setNumberOfStages( int k )
+void SDCLaplacianSolver::setNumberOfImplicitStages( int k )
 {
-    this->k = k;
+    this->k = k + 1;
 
-    for ( int i = 0; i < k; i++ )
+    for ( int i = 0; i < k + 1; i++ )
         TStages.push_back( volScalarField( T ) );
 }
 

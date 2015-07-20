@@ -95,7 +95,7 @@ namespace sdc
         for ( int i = 0; i < dsdc.rows(); i++ )
             dsdc( i ) = nodes( i + 1 ) - nodes( i );
 
-        solver->setNumberOfStages( k );
+        solver->setNumberOfImplicitStages( k - 1 );
 
         if ( adaptiveTimeStepper->isEnabled() )
         {

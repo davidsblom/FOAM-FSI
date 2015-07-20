@@ -113,7 +113,7 @@ public:
         this->dt = dt;
     }
 
-    virtual void setNumberOfStages( int k );
+    virtual void setNumberOfImplicitStages( int k );
 
     virtual void nextTimeStep();
 

@@ -377,11 +377,11 @@ void SDCFluidSolver::setDeltaT( double dt )
     runTime->setDeltaT( dt );
 }
 
-void SDCFluidSolver::setNumberOfStages( int k )
+void SDCFluidSolver::setNumberOfImplicitStages( int k )
 {
-    this->k = k;
+    this->k = k + 1;
 
-    for ( int i = 0; i < k; i++ )
+    for ( int i = 0; i < k + 1; i++ )
     {
         pStages.push_back( volScalarField( p ) );
         phiStages.push_back( surfaceScalarField( phi ) );
