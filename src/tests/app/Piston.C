@@ -44,7 +44,7 @@ Piston::Piston(
     double As,
     double Ac,
     double omega,
-    std::shared_ptr<sdc::SDC> sdc,
+    std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme,
     int k
     )
     :
@@ -64,46 +64,11 @@ Piston::Piston(
     timeIndex( 0 ),
     endTime( nbTimeSteps * dt ),
     k( k ),
-    sdc( sdc )
+    timeIntegrationScheme( timeIntegrationScheme )
 {
     assert( nbTimeSteps > 0 );
     assert( dt > 0 );
-    assert( sdc );
-}
-
-Piston::Piston(
-    int nbTimeSteps,
-    double dt,
-    double q0,
-    double qdot0,
-    double As,
-    double Ac,
-    double omega,
-    std::shared_ptr<sdc::ESDIRK> esdirk,
-    int k
-    )
-    :
-    SDCSolver(),
-    nbTimeSteps( nbTimeSteps ),
-    dt( dt ),
-    q0( q0 ),
-    c1( q0 + Ac / std::pow( omega, 2 ) ),
-    c2( qdot0 + As / omega ),
-    As( As ),
-    Ac( Ac ),
-    omega( omega ),
-    N( 2 ),
-    q( q0 ),
-    qdot( qdot0 ),
-    t( 0 ),
-    timeIndex( 0 ),
-    endTime( nbTimeSteps * dt ),
-    k( k ),
-    esdirk( esdirk )
-{
-    assert( nbTimeSteps > 0 );
-    assert( dt > 0 );
-    assert( esdirk );
+    assert( timeIntegrationScheme );
 }
 
 Piston::~Piston()
@@ -188,6 +153,11 @@ bool Piston::isRunning()
 void Piston::run()
 {
     Eigen::VectorXd q( nbTimeSteps + 1 ), qdot( nbTimeSteps + 1 ), qold( 2 ), f( 2 ), rhs( 2 ), result( 2 );
+
+    std::shared_ptr<sdc::SDC> sdc;
+    std::shared_ptr<sdc::ESDIRK> esdirk;
+    sdc = std::dynamic_pointer_cast<sdc::SDC>( timeIntegrationScheme );
+    esdirk = std::dynamic_pointer_cast<sdc::ESDIRK>( timeIntegrationScheme );
 
     q( 0 ) = -Ac;
     qdot( 0 ) = q( 0 );
@@ -288,11 +258,7 @@ void Piston::run()
 
                     Info << "Time = " << t << ", dt = " << dt << ", l = " << l << endl;
 
-                    if ( sdc )
-                        sdc->getSourceTerm( corrector, l, deltaT, rhs, qold );
-
-                    if ( esdirk )
-                        esdirk->getSourceTerm( corrector, l, deltaT, rhs, qold );
+                    timeIntegrationScheme->getSourceTerm( corrector, l, deltaT, rhs, qold );
 
                     if ( sdc )
                         implicitSolve( corrector, l, l, t, deltaT, qold, rhs, f, result );
@@ -300,11 +266,7 @@ void Piston::run()
                     if ( esdirk )
                         implicitSolve( corrector, iImplicitStage, 0, t, deltaT, qold, rhs, f, result );
 
-                    if ( sdc )
-                        sdc->setFunction( l, f, result );
-
-                    if ( esdirk )
-                        esdirk->setFunction( l, f, result );
+                    timeIntegrationScheme->setFunction( l, f, result );
 
                     qdot( i ) = result( 0 );
                     q( i ) = result( 1 );
@@ -312,12 +274,10 @@ void Piston::run()
                     iImplicitStage++;
                 }
 
-                if ( sdc )
-                    sdc->outputResidual( "piston" );
+                timeIntegrationScheme->outputResidual( "piston" );
 
-                if ( sdc )
-                    if ( sdc->isConverged() && j >= k )
-                        break;
+                if ( timeIntegrationScheme->isConverged() && j >= k )
+                    break;
             }
         }
     }
