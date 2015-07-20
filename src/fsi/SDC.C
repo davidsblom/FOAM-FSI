@@ -452,4 +452,9 @@ namespace sdc
     {
         return convergence;
     }
+
+    int SDC::getNbImplicitStages()
+    {
+        return this->k - 1;
+    }
 }

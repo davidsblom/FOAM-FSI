@@ -554,4 +554,14 @@ namespace sdc
         for ( int i = 0; i < nbStages; i++ )
             B( i ) = A( nbStages - 1, i );
     }
+
+    void ESDIRK::outputResidual( std::string name )
+    {
+
+    }
+
+    bool ESDIRK::isConverged()
+    {
+        return true;
+    }
 }

@@ -11,10 +11,11 @@
 #include "SDCSolver.H"
 #include "fvCFD.H"
 #include "AdaptiveTimeStepper.H"
+#include "TimeIntegrationScheme.H"
 
 namespace sdc
 {
-    class SDC
+    class SDC : public TimeIntegrationScheme
     {
 public:
 
@@ -38,7 +39,7 @@ public:
 
         void solveTimeStep( const double t0 );
 
-        void getSourceTerm(
+        virtual void getSourceTerm(
             const bool corrector,
             const int k,
             const double deltaT,
@@ -46,17 +47,19 @@ public:
             Eigen::VectorXd & qold
             );
 
-        void setFunction(
+        virtual  void setFunction(
             const int k,
             const Eigen::VectorXd & f,
             const Eigen::VectorXd & result
             );
 
-        void setOldSolution( const Eigen::VectorXd & result );
+        virtual void setOldSolution( const Eigen::VectorXd & result );
 
-        void outputResidual( std::string name );
+        virtual int getNbImplicitStages();
 
-        bool isConverged();
+        virtual void outputResidual( std::string name );
+
+        virtual bool isConverged();
 
         std::shared_ptr<SDCSolver> solver;
         std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
