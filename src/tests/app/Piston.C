@@ -159,8 +159,12 @@ void Piston::run()
 
     if ( not sdc )
     {
+        setNumberOfStages( 2 );
+
         for ( int i = 1; i < nbTimeSteps + 1; i++ )
         {
+            nextTimeStep();
+
             double t = dt * i;
 
             qold << qdot( i - 1 ), q( i - 1 );
