@@ -71,6 +71,41 @@ Piston::Piston(
     assert( sdc );
 }
 
+Piston::Piston(
+    int nbTimeSteps,
+    double dt,
+    double q0,
+    double qdot0,
+    double As,
+    double Ac,
+    double omega,
+    std::shared_ptr<sdc::ESDIRK> esdirk,
+    int k
+    )
+    :
+    SDCSolver(),
+    nbTimeSteps( nbTimeSteps ),
+    dt( dt ),
+    q0( q0 ),
+    c1( q0 + Ac / std::pow( omega, 2 ) ),
+    c2( qdot0 + As / omega ),
+    As( As ),
+    Ac( Ac ),
+    omega( omega ),
+    N( 2 ),
+    q( q0 ),
+    qdot( qdot0 ),
+    t( 0 ),
+    timeIndex( 0 ),
+    endTime( nbTimeSteps * dt ),
+    k( k ),
+    esdirk( esdirk )
+{
+    assert( nbTimeSteps > 0 );
+    assert( dt > 0 );
+    assert( esdirk );
+}
+
 Piston::~Piston()
 {}
 
@@ -157,7 +192,7 @@ void Piston::run()
     q( 0 ) = -Ac;
     qdot( 0 ) = q( 0 );
 
-    if ( not sdc )
+    if ( not sdc && not esdirk )
     {
         setNumberOfStages( 2 );
 
@@ -179,9 +214,18 @@ void Piston::run()
         }
     }
 
-    if ( sdc )
+    if ( sdc || esdirk )
     {
-        setNumberOfStages( k );
+        if ( sdc )
+            setNumberOfStages( k );
+
+        if ( esdirk )
+        {
+            if ( esdirk->isStageImplicit( esdirk->A( 0, 0 ) ) )
+                setNumberOfStages( k + 1 );
+            else
+                setNumberOfStages( k );
+        }
 
         for ( int i = 1; i < nbTimeSteps + 1; i++ )
         {
@@ -195,9 +239,19 @@ void Piston::run()
             rhs.setZero();
 
             evaluateFunction( 0, qold, t0, f );
-            sdc->setFunction( -1, f, qold );
 
-            for ( int j = 0; j < 10 * k; j++ )
+            if ( sdc )
+                sdc->setFunction( -1, f, qold );
+
+            if ( esdirk )
+                esdirk->setFunction( 0, f, qold );
+
+            int nbSweeps = 1;
+
+            if ( sdc )
+                nbSweeps = 10 * k;
+
+            for ( int j = 0; j < nbSweeps; j++ )
             {
                 bool corrector = false;
 
@@ -205,31 +259,76 @@ void Piston::run()
                     corrector = true;
 
                 if ( j == 0 )
-                    sdc->setOldSolution( qold );
+                {
+                    if ( sdc )
+                        sdc->setOldSolution( qold );
+
+                    if ( esdirk )
+                        esdirk->setOldSolution( qold );
+                }
 
                 double t = t0;
 
-                for ( int l = 0; l < k - 1; l++ )
+                int iImplicitStage = 0;
+
+                int nbStages = k - 1;
+
+                if ( esdirk )
                 {
-                    double deltaT = dt * sdc->dsdc( l );
-                    t += deltaT;
+                    if ( not esdirk->isStageImplicit( esdirk->A( 0, 0 ) ) )
+                        nbStages = k;
+                }
 
-                    Info << "Time = " << t << ", SDC sweep = " << j << ", SDC substep = " << l << endl;
+                for ( int l = 0; l < nbStages; l++ )
+                {
+                    if ( esdirk )
+                        if ( not esdirk->isStageImplicit( esdirk->A( l, l ) ) )
+                            continue;
 
-                    sdc->getSourceTerm( corrector, l, deltaT, rhs, qold );
+                    double deltaT = 0;
 
-                    implicitSolve( corrector, l, l, t, deltaT, qold, rhs, f, result );
+                    if ( sdc )
+                    {
+                        deltaT = dt * sdc->dsdc( l );
+                        t += deltaT;
+                    }
 
-                    sdc->setFunction( l, f, result );
+                    if ( esdirk )
+                    {
+                        deltaT = dt * esdirk->A( l, l );
+                        t = t0 + esdirk->C( l ) * dt;
+                    }
+
+                    if ( sdc )
+                        sdc->getSourceTerm( corrector, l, deltaT, rhs, qold );
+
+                    if ( esdirk )
+                        esdirk->getSourceTerm( corrector, l, deltaT, rhs, qold );
+
+                    if ( sdc )
+                        implicitSolve( corrector, l, l, t, deltaT, qold, rhs, f, result );
+
+                    if ( esdirk )
+                        implicitSolve( corrector, iImplicitStage, 0, t, deltaT, qold, rhs, f, result );
+
+                    if ( sdc )
+                        sdc->setFunction( l, f, result );
+
+                    if ( esdirk )
+                        esdirk->setFunction( l, f, result );
 
                     qdot( i ) = result( 0 );
                     q( i ) = result( 1 );
+
+                    iImplicitStage++;
                 }
 
-                sdc->outputResidual( "piston" );
+                if ( sdc )
+                    sdc->outputResidual( "piston" );
 
-                if ( sdc->isConverged() && j >= k )
-                    break;
+                if ( sdc )
+                    if ( sdc->isConverged() && j >= k )
+                        break;
             }
         }
     }

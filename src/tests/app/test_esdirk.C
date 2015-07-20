@@ -55,16 +55,21 @@ protected:
 
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
         esdirk = std::shared_ptr<ESDIRK> ( new ESDIRK( piston, method, adaptiveTimeStepper ) );
+
+        std::shared_ptr<sdc::ESDIRK> esdirk( new ESDIRK( method ) );
+        piston_esdirk = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, esdirk, esdirk->getNbStages() ) );
     }
 
     virtual void TearDown()
     {
         piston.reset();
         esdirk.reset();
+        piston_esdirk.reset();
     }
 
     std::shared_ptr<Piston> piston;
     std::shared_ptr<ESDIRK> esdirk;
+    std::shared_ptr<Piston> piston_esdirk;
 };
 
 INSTANTIATE_TEST_CASE_P( testParameters, ESDIRKTest, ::testing::Combine( Values( 2, 100, 200, 400, 800, 1600, 3200 ), Values( "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5", "ESDIRK53PR", "ESDIRK63PR", "ESDIRK74PR" ) ) );
@@ -182,4 +187,17 @@ TEST_P( ESDIRKTest, run )
 
     if ( nbTimeSteps == 1600 && method == "ESDIRK5" )
         ASSERT_NEAR( error, 9.23400561e-09, 1.0e-7 );
+}
+
+TEST_P( ESDIRKTest, runCompareESDIRK )
+{
+    piston_esdirk->run();
+    esdirk->run();
+
+    Eigen::VectorXd solution_piston_esdirk( 2 ), solution_piston( 2 );
+    piston->getSolution( solution_piston );
+    piston_esdirk->getSolution( solution_piston_esdirk );
+
+    ASSERT_NEAR( solution_piston_esdirk( 0 ), solution_piston( 0 ), 1.0e-10 );
+    ASSERT_NEAR( solution_piston_esdirk( 1 ), solution_piston( 1 ), 1.0e-10 );
 }

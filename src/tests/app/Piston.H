@@ -52,6 +52,18 @@ public:
         int k
         );
 
+    Piston(
+        int nbTimeSteps,
+        double dt,
+        double q0,
+        double qdot0,
+        double As,
+        double Ac,
+        double omega,
+        std::shared_ptr<sdc::ESDIRK> esdirk,
+        int k
+        );
+
     ~Piston();
 
     double referenceSolution( double t );
@@ -133,6 +145,7 @@ public:
 
     std::deque<Eigen::VectorXd> solStages;
     std::shared_ptr<sdc::SDC> sdc;
+    std::shared_ptr<sdc::ESDIRK> esdirk;
 };
 
 #endif

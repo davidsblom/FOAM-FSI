@@ -24,15 +24,33 @@ public:
             std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper
             );
 
+        ESDIRK( std::string method );
+
         ~ESDIRK();
 
         void run();
 
         void solveTimeStep( const double t0 );
 
-private:
+        void getSourceTerm(
+            const bool corrector,
+            const int k,
+            const double deltaT,
+            Eigen::VectorXd & rhs,
+            Eigen::VectorXd & qold
+            );
+
+        void setFunction(
+            const int k,
+            const Eigen::VectorXd & f,
+            const Eigen::VectorXd & result
+            );
+
+        int getNbStages();
 
         bool isStageImplicit( double Akk );
+
+        void setOldSolution( const Eigen::VectorXd & result );
 
         std::shared_ptr<SDCSolver> solver;
         std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
@@ -43,6 +61,18 @@ private:
         Eigen::VectorXd C;
         Eigen::VectorXd Bhat;
         int N;
+
+private:
+
+        void initializeButcherTableau( std::string method );
+
+        // Store function in memory in case the source term is requested
+        // by the solver. This functionality is used by the moving wall
+        // velocity boundary condition.
+        int stageIndex;
+        Eigen::MatrixXd F;
+        Eigen::MatrixXd solStages;
+        Eigen::VectorXd qold;
     };
 }
 
