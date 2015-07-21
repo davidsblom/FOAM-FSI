@@ -157,18 +157,33 @@ namespace Foam
 
         YAML::Node config = YAML::LoadFile( filename );
 
-        assert( config["sdc"] );
+        assert( config["sdc"] || config["esdirk"] );
 
-        YAML::Node sdcConfig( config["sdc"] );
-        assert( sdcConfig["convergence-tolerance"] );
-        assert( sdcConfig["number-of-points"] );
-        assert( sdcConfig["quadrature-rule"] );
+        if ( config["sdc"] )
+        {
+            YAML::Node sdcConfig( config["sdc"] );
+            assert( sdcConfig["convergence-tolerance"] );
+            assert( sdcConfig["number-of-points"] );
+            assert( sdcConfig["quadrature-rule"] );
 
-        int n = sdcConfig["number-of-points"].as<int>();
-        double tol = sdcConfig["convergence-tolerance"].as<double>();
-        std::string quadratureRule = sdcConfig["quadrature-rule"].as<std::string>();
+            int n = sdcConfig["number-of-points"].as<int>();
+            double tol = sdcConfig["convergence-tolerance"].as<double>();
+            std::string quadratureRule = sdcConfig["quadrature-rule"].as<std::string>();
 
-        timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( quadratureRule, n, tol ) );
+            timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( quadratureRule, n, tol ) );
+        }
+
+        if ( config["esdirk"] )
+        {
+            YAML::Node esdirkConfig( config["esdirk"] );
+
+            assert( esdirkConfig["method"] );
+
+            std::string method = esdirkConfig["method"].as<std::string>();
+
+            timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::ESDIRK( method ) );
+        }
+
     }
 
     void SDCMovingWallVelocityFvPatchVectorField::setSDCInfo(
