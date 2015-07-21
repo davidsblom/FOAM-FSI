@@ -556,9 +556,7 @@ namespace sdc
     }
 
     void ESDIRK::outputResidual( std::string name )
-    {
-
-    }
+    {}
 
     bool ESDIRK::isConverged()
     {

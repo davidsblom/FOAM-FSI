@@ -9,6 +9,7 @@
 #include "Piston.H"
 #include "AdaptiveTimeStepper.H"
 #include "gtest/gtest.h"
+#include "Cos.H"
 
 using namespace sdc;
 using::testing::TestWithParam;
@@ -200,4 +201,35 @@ TEST_P( ESDIRKTest, runCompareESDIRK )
 
     ASSERT_NEAR( solution_piston_esdirk( 0 ), solution_piston( 0 ), 1.0e-10 );
     ASSERT_NEAR( solution_piston_esdirk( 1 ), solution_piston( 1 ), 1.0e-10 );
+}
+
+
+TEST( CosTest, ESDIRK )
+{
+    std::string method = "ESDIRK74PR";
+
+    int nbTimeSteps = 160;
+    double endTime = 0.05;
+    double dt = endTime / nbTimeSteps;
+    double amplitude = 0.2;
+    double frequency = 5;
+
+    std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
+    std::shared_ptr<Cos> cos1( new Cos( nbTimeSteps, dt, endTime, amplitude, frequency ) );
+    std::shared_ptr<ESDIRK> esdirk1( new ESDIRK( cos1, method, adaptiveTimeStepper ) );
+    std::shared_ptr<Cos> cos2( new Cos( nbTimeSteps * 2, dt / 2, endTime, amplitude, frequency ) );
+    std::shared_ptr<ESDIRK> esdirk2( new ESDIRK( cos2, method, adaptiveTimeStepper ) );
+
+    esdirk1->run();
+    esdirk2->run();
+
+    double ref = 0.5 * amplitude * std::sin( M_PI * frequency * endTime ) * M_PI * frequency;
+    double error1 = std::abs( cos1->f - ref ) / std::abs( ref );
+    double error2 = std::abs( cos2->f - ref ) / std::abs( ref );
+    std::cout << "error1 = " << error1 << std::endl;
+    std::cout << "error2 = " << error2 << std::endl;
+
+    double order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
+
+    std::cout << "order = " << order << std::endl;
 }

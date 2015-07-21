@@ -7,6 +7,7 @@
 #include <Eigen/Dense>
 #include "SDC.H"
 #include "Piston.H"
+#include "Cos.H"
 #include "gtest/gtest.h"
 
 using namespace sdc;
@@ -171,4 +172,40 @@ TEST_P( SDCTest, runCompareSDC )
 
     ASSERT_NEAR( solution_piston_sdc( 0 ), solution_piston( 0 ), 1.0e-10 );
     ASSERT_NEAR( solution_piston_sdc( 1 ), solution_piston( 1 ), 1.0e-10 );
+}
+
+TEST( CosTest, SDC )
+{
+    std::string rule = "gauss-radau";
+
+    rule = "gauss-lobatto";
+    // rule = "uniform";
+    //rule = "clenshaw-curtis";
+    int nbNodes = 7;
+    double tol = 1.0e-25;
+
+    int nbTimeSteps = 150;
+    double endTime = 0.05;
+    double dt = endTime / nbTimeSteps;
+    double amplitude = 0.2;
+    double frequency = 5;
+
+    std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
+    std::shared_ptr<Cos> cos1( new Cos( nbTimeSteps, dt, endTime, amplitude, frequency ) );
+    std::shared_ptr<SDC> sdc1( new SDC( cos1, adaptiveTimeStepper, rule, nbNodes, tol ) );
+    std::shared_ptr<Cos> cos2( new Cos( nbTimeSteps * 2, dt / 2, endTime, amplitude, frequency ) );
+    std::shared_ptr<SDC> sdc2( new SDC( cos2, adaptiveTimeStepper, rule, nbNodes, tol ) );
+
+    sdc1->run();
+    sdc2->run();
+
+    double ref = 0.5 * amplitude * std::sin( M_PI * frequency * endTime ) * M_PI * frequency;
+    double error1 = std::abs( cos1->f - ref ) / std::abs( ref );
+    double error2 = std::abs( cos2->f - ref ) / std::abs( ref );
+    std::cout << "error1 = " << error1 << std::endl;
+    std::cout << "error2 = " << error2 << std::endl;
+
+    double order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
+
+    std::cout << "order = " << order << std::endl;
 }

@@ -47,7 +47,7 @@ public:
             Eigen::VectorXd & qold
             );
 
-        virtual  void setFunction(
+        virtual void setFunction(
             const int k,
             const Eigen::VectorXd & f,
             const Eigen::VectorXd & result

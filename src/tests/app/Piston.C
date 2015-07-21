@@ -227,6 +227,7 @@ void Piston::run()
                 int iImplicitStage = 0;
 
                 int nbStages = k - 1;
+
                 if ( esdirk && not esdirk->isStageImplicit( esdirk->A( 0, 0 ) ) )
                     nbStages = k;
 
