@@ -17,6 +17,7 @@ Cos::Cos(
     )
     :
     f( 0 ),
+    sol( 0 ),
     nbTimeSteps( nbTimeSteps ),
     dt( dt ),
     endTime( endTime ),
@@ -111,8 +112,10 @@ void Cos::implicitSolve(
     Eigen::VectorXd & result
     )
 {
-    result( 0 ) = amplitude * ( 0.5 - 0.5 * std::cos( M_PI * frequency * t ) );
+    f( 0 ) = 0.5 * amplitude * std::sin( M_PI * frequency * t ) * M_PI * frequency;
+    result = dt * f + qold + rhs;
 
+    result( 0 ) = amplitude * ( 0.5 - 0.5 * std::cos( M_PI * frequency * t ) );
     f = (result - qold - rhs) / dt;
 
     sol = result( 0 );

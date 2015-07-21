@@ -69,6 +69,7 @@ public:
         );
 
     double f;
+    double sol;
 
 private:
 
@@ -77,7 +78,6 @@ private:
     double endTime;
     double amplitude;
     double frequency;
-    double sol;
     double t;
 };
 

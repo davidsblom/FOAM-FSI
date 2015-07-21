@@ -181,10 +181,10 @@ TEST( CosTest, SDC )
     rule = "gauss-lobatto";
     // rule = "uniform";
     //rule = "clenshaw-curtis";
-    int nbNodes = 7;
+    int nbNodes = 3;
     double tol = 1.0e-25;
 
-    int nbTimeSteps = 150;
+    int nbTimeSteps = 5;
     double endTime = 0.05;
     double dt = endTime / nbTimeSteps;
     double amplitude = 0.2;
@@ -202,10 +202,18 @@ TEST( CosTest, SDC )
     double ref = 0.5 * amplitude * std::sin( M_PI * frequency * endTime ) * M_PI * frequency;
     double error1 = std::abs( cos1->f - ref ) / std::abs( ref );
     double error2 = std::abs( cos2->f - ref ) / std::abs( ref );
-    std::cout << "error1 = " << error1 << std::endl;
-    std::cout << "error2 = " << error2 << std::endl;
-
     double order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
 
+    std::cout << "error1 = " << error1 << std::endl;
+    std::cout << "error2 = " << error2 << std::endl;
+    std::cout << "order = " << order << std::endl;
+
+    ref = amplitude * ( 0.5 - 0.5 * std::cos( M_PI * frequency * endTime ) );
+    error1 = std::abs( cos1->sol - ref ) / std::abs( ref );
+    error2 = std::abs( cos2->sol - ref ) / std::abs( ref );
+    order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
+
+    std::cout << "error1 = " << error1 << std::endl;
+    std::cout << "error2 = " << error2 << std::endl;
     std::cout << "order = " << order << std::endl;
 }

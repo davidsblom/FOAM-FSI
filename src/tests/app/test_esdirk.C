@@ -208,7 +208,7 @@ TEST( CosTest, ESDIRK )
 {
     std::string method = "ESDIRK74PR";
 
-    int nbTimeSteps = 160;
+    int nbTimeSteps = 5;
     double endTime = 0.05;
     double dt = endTime / nbTimeSteps;
     double amplitude = 0.2;
@@ -226,10 +226,18 @@ TEST( CosTest, ESDIRK )
     double ref = 0.5 * amplitude * std::sin( M_PI * frequency * endTime ) * M_PI * frequency;
     double error1 = std::abs( cos1->f - ref ) / std::abs( ref );
     double error2 = std::abs( cos2->f - ref ) / std::abs( ref );
-    std::cout << "error1 = " << error1 << std::endl;
-    std::cout << "error2 = " << error2 << std::endl;
-
     double order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
 
+    std::cout << "error1 = " << error1 << std::endl;
+    std::cout << "error2 = " << error2 << std::endl;
+    std::cout << "order = " << order << std::endl;
+
+    ref = amplitude * ( 0.5 - 0.5 * std::cos( M_PI * frequency * endTime ) );
+    error1 = std::abs( cos1->sol - ref ) / std::abs( ref );
+    error2 = std::abs( cos2->sol - ref ) / std::abs( ref );
+    order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
+
+    std::cout << "error1 = " << error1 << std::endl;
+    std::cout << "error2 = " << error2 << std::endl;
     std::cout << "order = " << order << std::endl;
 }
