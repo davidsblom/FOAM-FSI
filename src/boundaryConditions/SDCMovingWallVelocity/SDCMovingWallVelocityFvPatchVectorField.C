@@ -108,7 +108,7 @@ namespace Foam
                 for ( int j = 0; j < dim; j++ )
                     result( i * dim + j ) = oldFc[i][j];
             }
-            timeIntegrationScheme->setOldSolution( result );
+            timeIntegrationScheme->setOldSolution( mesh.time().timeIndex(), result );
         }
 
         timeIntegrationScheme->getSourceTerm( corrector, k, mesh.time().deltaT().value(), rhs, qold );

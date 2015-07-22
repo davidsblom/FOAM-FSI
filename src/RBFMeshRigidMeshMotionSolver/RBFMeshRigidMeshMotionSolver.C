@@ -353,7 +353,7 @@ Foam::vector RBFMeshRigidMeshMotionSolver::calcVelocity()
     fsi::vector rhs( 3 ), result( 3 ), f( 3 ), qold;
 
     if ( not corrector && k == 0 )
-        timeIntegrationScheme->setOldSolution( dispold );
+        timeIntegrationScheme->setOldSolution( mesh().time().timeIndex(), dispold );
 
     timeIntegrationScheme->getSourceTerm( corrector, k, dt, rhs, qold );
 

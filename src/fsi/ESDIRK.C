@@ -22,7 +22,8 @@ namespace sdc
         B(),
         C(),
         Bhat(),
-        N( solver->getDOF() )
+        N( solver->getDOF() ),
+        timeIndex( 0 )
     {
         assert( solver );
         assert( adaptiveTimeStepper );
@@ -50,7 +51,8 @@ namespace sdc
         B(),
         C(),
         Bhat(),
-        N( 0 )
+        N( 0 ),
+        timeIndex( 0 )
     {
         initializeButcherTableau( method );
     }
@@ -208,12 +210,20 @@ namespace sdc
         solStages.row( k ) = result;
     }
 
-    void ESDIRK::setOldSolution( const fsi::vector & result )
+    void ESDIRK::setOldSolution(
+        int timeIndex,
+        const fsi::vector & result
+        )
     {
+        assert( timeIndex >= this->timeIndex );
+
         if ( qold.rows() == result.rows() )
             qold = solStages.bottomRows( 1 ).transpose();
         else
+        if ( timeIndex > this->timeIndex )
             qold = result;
+
+        this->timeIndex = timeIndex;
     }
 
     int ESDIRK::getNbImplicitStages()

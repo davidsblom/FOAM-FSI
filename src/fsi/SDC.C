@@ -32,7 +32,8 @@ namespace sdc
         Fold(),
         Sj(),
         solStages(),
-        convergence( false )
+        convergence( false ),
+        timeIndex( 0 )
     {
         assert( tol > 0 );
         assert( tol < 1 );
@@ -74,7 +75,8 @@ namespace sdc
         Fold(),
         Sj(),
         solStages(),
-        convergence( false )
+        convergence( false ),
+        timeIndex( 0 )
     {
         assert( adaptiveTimeStepper );
         assert( solver );
@@ -428,8 +430,13 @@ namespace sdc
         solStages.row( k + 1 ) = result;
     }
 
-    void SDC::setOldSolution( const fsi::vector & result )
+    void SDC::setOldSolution(
+        int timeIndex,
+        const fsi::vector & result
+        )
     {
+        assert( timeIndex >= this->timeIndex );
+
         if ( solStages.cols() == 0 )
         {
             solStages.resize( this->k, result.rows() );
@@ -437,7 +444,10 @@ namespace sdc
             solStages.row( 0 ) = result;
         }
         else
+        if ( timeIndex > this->timeIndex )
             solStages.row( 0 ) = solStages.bottomRows( 1 );
+
+        this->timeIndex = timeIndex;
     }
 
     void SDC::outputResidual( std::string name )

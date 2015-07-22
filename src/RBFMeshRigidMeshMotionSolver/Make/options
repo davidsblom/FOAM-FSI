@@ -1,8 +1,8 @@
 c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs
 
-EXE_INC = -std=c++11 -g \
-    -I$(FOAM_USER_SRC)/thirdParty/eigen \
-    -I$(FOAM_USER_SRC)/RBFMeshMotionSolver/lnInclude \
+EXE_INC = -std=c++11 \
+    -I./../thirdParty/eigen \
+    -I./../RBFMeshMotionSolver/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \

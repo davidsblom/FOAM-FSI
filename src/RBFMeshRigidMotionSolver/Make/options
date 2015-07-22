@@ -8,10 +8,13 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude \
     -I$(LIB_SRC)/foam/lnInclude \
+    -I./../fsi/lnInclude \
+    -I./../thirdParty/yaml-cpp/include
 
-LIB_LIBS = \
+EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
     -lfiniteVolume \
     -ldynamicMesh \
     -lmeshTools \
-    -ltriSurface
+    -ltriSurface \
+    -whole-archive -lyaml-cpp

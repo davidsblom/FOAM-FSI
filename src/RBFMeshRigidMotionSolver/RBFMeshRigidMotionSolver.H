@@ -21,6 +21,11 @@
 #include <memory>
 #include <assert.h>
 
+#include "SDC.H"
+#include "ESDIRK.H"
+#include "TimeIntegrationScheme.H"
+#include <yaml-cpp/yaml.h>
+
 namespace Foam
 {
     class RBFMeshRigidMotionSolver : public motionSolver
@@ -69,8 +74,9 @@ private:
         double rotationAmplitude;
         double rotationFrequency;
         Foam::vector rotationOrigin;
+        Foam::vector oldTransformation;
 
-        double told;
+        scalar told;
 
 public:
 
@@ -100,6 +106,13 @@ public:
 
         // Update the mesh corresponding to given map
         virtual void updateMesh( const mapPolyMesh & );
+
+        void setTimeIntegrationInfo( const bool corrector, const int k );
+
+        std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
+
+        bool corrector;
+        int k;
     };
 }
 

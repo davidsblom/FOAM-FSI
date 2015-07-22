@@ -49,7 +49,10 @@ public:
 
         virtual int getNbImplicitStages();
 
-        virtual void setOldSolution( const fsi::vector & result );
+        virtual void setOldSolution(
+            int timeIndex,
+            const fsi::vector & result
+            );
 
         virtual void outputResidual( std::string name );
 
@@ -78,6 +81,7 @@ private:
         fsi::matrix F;
         fsi::matrix solStages;
         fsi::vector qold;
+        int timeIndex;
     };
 }
 

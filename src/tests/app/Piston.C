@@ -201,7 +201,7 @@ void Piston::run()
 
             evaluateFunction( 0, qold, t0, f );
 
-            timeIntegrationScheme->setOldSolution( qold );
+            timeIntegrationScheme->setOldSolution( i, qold );
 
             if ( sdc )
                 sdc->setFunction( -1, f, qold );

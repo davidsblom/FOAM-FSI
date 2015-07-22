@@ -31,7 +31,10 @@ public:
 
         virtual int getNbImplicitStages() = 0;
 
-        virtual void setOldSolution( const fsi::vector & result ) = 0;
+        virtual void setOldSolution(
+            int timeIndex,
+            const fsi::vector & result
+            ) = 0;
 
         virtual void outputResidual( std::string name ) = 0;
 

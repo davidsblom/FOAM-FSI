@@ -53,7 +53,10 @@ public:
             const fsi::vector & result
             );
 
-        virtual void setOldSolution( const fsi::vector & result );
+        virtual void setOldSolution(
+            int timeIndex,
+            const fsi::vector & result
+            );
 
         virtual int getNbImplicitStages();
 
@@ -98,6 +101,7 @@ private:
         fsi::matrix Sj;
         fsi::matrix solStages;
         bool convergence;
+        int timeIndex;
     };
 }
 
