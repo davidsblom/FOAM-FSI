@@ -1,0 +1,20 @@
+c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs
+
+EXE_INC = -std=c++11 -g \
+    -I$(FOAM_USER_SRC)/thirdParty/eigen \
+    -I$(FOAM_USER_SRC)/RBFMeshMotionSolver/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/triSurface/lnInclude \
+    -I$(LIB_SRC)/foam/lnInclude \
+    -I$(FOAM_USER_SRC)/fsi/lnInclude \
+    -I$(FOAM_USER_SRC)/thirdParty/yaml-cpp/include
+
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -lfiniteVolume \
+    -ldynamicMesh \
+    -lmeshTools \
+    -ltriSurface \
+    -whole-archive -lyaml-cpp
