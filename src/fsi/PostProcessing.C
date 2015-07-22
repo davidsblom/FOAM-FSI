@@ -10,7 +10,7 @@ using namespace fsi;
 
 PostProcessing::PostProcessing(
     shared_ptr<MultiLevelFsiSolver> fsi,
-    double initialRelaxation,
+    scalar initialRelaxation,
     int maxIter,
     int maxUsedIterations,
     int nbReuse,

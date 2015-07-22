@@ -19,7 +19,7 @@ public:
 
         virtual ~TPSFunction();
 
-        virtual double evaluate( double value );
+        virtual scalar evaluate( scalar value );
     };
 }
 

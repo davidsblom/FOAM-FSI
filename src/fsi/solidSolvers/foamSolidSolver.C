@@ -305,7 +305,7 @@ void foamSolidSolver::solve(
     if ( debug > 0 )
     {
         t = std::clock() - t;
-        double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+        scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
         totalRunTime += runTime;
         totalNbIterations++;
         Info << "runtime = " << runTime << " s" << endl;

@@ -27,7 +27,7 @@ public:
 
         ConvergenceMeasure(
             int dataId,
-            double convergenceLimit
+            scalar convergenceLimit
             )
             :
             dataId( dataId ),

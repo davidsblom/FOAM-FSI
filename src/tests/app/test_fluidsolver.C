@@ -18,22 +18,22 @@ protected:
 
     virtual void SetUp()
     {
-        double r0 = 0.2;
-        double a0 = M_PI * r0 * r0;
-        double u0 = 0.1;
-        double p0 = 0;
-        double dt = 0.1;
+        scalar r0 = 0.2;
+        scalar a0 = M_PI * r0 * r0;
+        scalar u0 = 0.1;
+        scalar p0 = 0;
+        scalar dt = 0.1;
         int N = 5;
-        double L = 1;
-        double T = 1;
-        double dx = L / N;
-        double rho = 1.225;
-        double E = 490;
-        double h = 1.0e-3;
-        double cmk = std::sqrt( E * h / (2 * rho * r0) );
-        double c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
-        double kappa = c0 / u0;
-        double tau = u0 * dt / L;
+        scalar L = 1;
+        scalar T = 1;
+        scalar dx = L / N;
+        scalar rho = 1.225;
+        scalar E = 490;
+        scalar h = 1.0e-3;
+        scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
+        scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
+        scalar kappa = c0 / u0;
+        scalar tau = u0 * dt / L;
 
         ASSERT_NEAR( tau, 0.01, 1.0e-13 );
         ASSERT_NEAR( kappa, 10, 1.0e-13 );
@@ -85,7 +85,7 @@ TEST_F( FluidSolverTest, inletVelocityBoundaryCondition )
 {
     fluid->init = true;
 
-    double u_in = fluid->evaluateInletVelocityBoundaryCondition();
+    scalar u_in = fluid->evaluateInletVelocityBoundaryCondition();
 
     ASSERT_NEAR( u_in, 0.1, 1.0e-14 );
 
@@ -101,7 +101,7 @@ TEST_F( FluidSolverTest, outputPressureBoundaryCondition )
 {
     fluid->initTimeStep();
 
-    double p_out = fluid->evaluateOutputPressureBoundaryCondition( 0.5, 1, 1 );
+    scalar p_out = fluid->evaluateOutputPressureBoundaryCondition( 0.5, 1, 1 );
 
     ASSERT_NEAR( p_out, 0.5, 1.0e-13 );
 
@@ -119,10 +119,10 @@ TEST_F( FluidSolverTest, residual )
     fluid->initTimeStep();
 
     int N = 5;
-    double r0 = 0.2;
-    double a0 = M_PI * r0 * r0;
-    double u0 = 0.1;
-    double p0 = 0;
+    scalar r0 = 0.2;
+    scalar a0 = M_PI * r0 * r0;
+    scalar u0 = 0.1;
+    scalar p0 = 0;
 
     fsi::vector R( 2 * N ), x( 2 * N ), a( N ), un( N ), pn( N ), an( N );
     an.fill( a0 );
@@ -173,7 +173,7 @@ struct Functor
     }
 };
 
-struct residualFunctor : Functor<double>
+struct residualFunctor : Functor<scalar>
 {
     residualFunctor(
         TubeFlowFluidSolver * fluid,
@@ -183,7 +183,7 @@ struct residualFunctor : Functor<double>
         fsi::vector * an
         )
         :
-        Functor<double>( 2 * fluid->N, 2 * fluid->N ),
+        Functor<scalar>( 2 * fluid->N, 2 * fluid->N ),
         fluid( fluid ),
         a( a ),
         un( un ),
@@ -192,8 +192,8 @@ struct residualFunctor : Functor<double>
     {}
 
     int operator()(
-        Eigen::VectorXd & x,
-        Eigen::VectorXd & fvec
+        fsi::vector & x,
+        fsi::vector & fvec
         ) const
     {
         fluid->evaluateResidual( x, *a, *un, *pn, *an, fvec );
@@ -212,10 +212,10 @@ TEST_F( FluidSolverTest, jacobian )
     fluid->initTimeStep();
 
     int N = 5;
-    double r0 = 0.2;
-    double a0 = M_PI * r0 * r0;
-    double u0 = 0.1;
-    double p0 = 0;
+    scalar r0 = 0.2;
+    scalar a0 = M_PI * r0 * r0;
+    scalar u0 = 0.1;
+    scalar p0 = 0;
 
     fsi::vector R( 2 * N ), x( 2 * N ), a( N ), un( N ), pn( N ), an( N );
     matrix J( 2 * N, 2 * N );
@@ -229,7 +229,7 @@ TEST_F( FluidSolverTest, jacobian )
 
     fluid->evaluateJacobian( x, a, un, pn, an, J );
 
-    double normJ = J.norm();
+    scalar normJ = J.norm();
 
     residualFunctor functor( fluid, &a, &un, &pn, &an );
     Eigen::NumericalDiff<residualFunctor, Eigen::Central> numDiff( functor );

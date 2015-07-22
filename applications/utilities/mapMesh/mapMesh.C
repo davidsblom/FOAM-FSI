@@ -193,7 +193,7 @@ int main(
     rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
     rbfSolidToFluidInterface = std::shared_ptr<rbf::RBFCoarsening>( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, livePointSelectionSumValues, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, exportTxt ) );
 
-    Eigen::MatrixXd positions, positionsInterpolation, values, valuesInterpolation;
+    matrix positions, positionsInterpolation, values, valuesInterpolation;
 
     solid->getWritePositionsLocal( positions );
     fluid->getReadPositions( positionsInterpolation );

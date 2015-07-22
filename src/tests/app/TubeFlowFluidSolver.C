@@ -10,15 +10,15 @@
 namespace tubeflow
 {
     TubeFlowFluidSolver::TubeFlowFluidSolver(
-        double a0,
-        double u0,
-        double p0,
-        double dt,
-        double cmk,
+        scalar a0,
+        scalar u0,
+        scalar p0,
+        scalar dt,
+        scalar cmk,
         int N,
-        double L,
-        double T,
-        double rho
+        scalar L,
+        scalar T,
+        scalar rho
         ) :
         BaseMultiLevelSolver( N, 1, p0 ),
         a0( a0 ),
@@ -82,22 +82,22 @@ namespace tubeflow
         }
     }
 
-    double TubeFlowFluidSolver::evaluateInletVelocityBoundaryCondition()
+    scalar TubeFlowFluidSolver::evaluateInletVelocityBoundaryCondition()
     {
         assert( init );
 
         return u0 + u0 / 10.0 * std::pow( std::sin( M_PI * timeIndex * tau ), 2 );
     }
 
-    double TubeFlowFluidSolver::evaluateOutputPressureBoundaryCondition(
-        double pout_n,
-        double uout_n,
-        double uout
+    scalar TubeFlowFluidSolver::evaluateOutputPressureBoundaryCondition(
+        scalar pout_n,
+        scalar uout_n,
+        scalar uout
         )
     {
         assert( init );
 
-        double value = std::sqrt( cmk * cmk - pout_n / (2.0 * rho) );
+        scalar value = std::sqrt( cmk * cmk - pout_n / (2.0 * rho) );
 
         value = 2 * rho * ( cmk * cmk - std::pow( value - (uout - uout_n) / 4.0, 2 ) );
 
@@ -234,10 +234,10 @@ namespace tubeflow
         fsi::vector p = x.tail( N );
 
         // Boundary conditions
-        double u_in = evaluateInletVelocityBoundaryCondition();
-        double u_out = 2 * u( N - 2 ) - u( N - 3 );
-        double u_outn = 2 * un( N - 2 ) - un( N - 3 );
-        double p_in = 2 * p( 1 ) - p( 2 );
+        scalar u_in = evaluateInletVelocityBoundaryCondition();
+        scalar u_out = 2 * u( N - 2 ) - u( N - 3 );
+        scalar u_outn = 2 * un( N - 2 ) - un( N - 3 );
+        scalar p_in = 2 * p( 1 ) - p( 2 );
         p_out = evaluateOutputPressureBoundaryCondition( p_outn, u_outn, u_out );
 
         // Apply boundary conditions
@@ -332,7 +332,7 @@ namespace tubeflow
         assert( init );
         assert( iter <= maxIter );
 
-        double norm = R.norm();
+        scalar norm = R.norm();
 
         if ( std::isinf( norm ) )
             throw std::string( "The residual function of the fluid solver contains infinite numbers. Unable to continue the computation." );
@@ -416,7 +416,7 @@ namespace tubeflow
         }
     };
 
-    struct lmderFunctor : Functor<double>
+    struct lmderFunctor : Functor<scalar>
     {
         lmderFunctor(
             TubeFlowFluidSolver * fluid,
@@ -426,7 +426,7 @@ namespace tubeflow
             const fsi::vector * an
             )
             :
-            Functor<double>( 2 * fluid->N, 2 * fluid->N ),
+            Functor<scalar>( 2 * fluid->N, 2 * fluid->N ),
             fluid( fluid ),
             a( a ),
             un( un ),
@@ -435,8 +435,8 @@ namespace tubeflow
         {}
 
         int operator()(
-            const Eigen::VectorXd & x,
-            Eigen::VectorXd & fvec
+            const fsi::vector & x,
+            fsi::vector & fvec
             ) const
         {
             fluid->evaluateResidual( x, *a, *un, *pn, *an, fvec );
@@ -444,8 +444,8 @@ namespace tubeflow
         }
 
         int df(
-            const Eigen::VectorXd & x,
-            Eigen::MatrixXd & fjac
+            const fsi::vector & x,
+            matrix & fjac
             ) const
         {
             fluid->evaluateJacobian( x, *a, *un, *pn, *an, fjac );
@@ -483,8 +483,8 @@ namespace tubeflow
         iter = 0;
 
         // Wolfe conditions settings
-        double c1 = 1.0e-4;
-        double c2 = 0.9;
+        scalar c1 = 1.0e-4;
+        scalar c2 = 0.9;
         int nbBackTrack = 0;
 
         // Initialize variables
@@ -516,7 +516,7 @@ namespace tubeflow
 
             bool armijo = false;
             bool wolfe = false;
-            double alpha = 1.0;
+            scalar alpha = 1.0;
 
             while ( !armijo || !wolfe )
             {

@@ -24,8 +24,8 @@ public:
             bool enabled,
             bool livePointSelection,
             bool livePointSelectionSumValues,
-            double tol,
-            double tolLivePointSelection,
+            scalar tol,
+            scalar tolLivePointSelection,
             int coarseningMinPoints,
             int coarseningMaxPoints,
             bool exportTxt
@@ -36,8 +36,8 @@ public:
             bool enabled,
             bool livePointSelection,
             bool livePointSelectionSumValues,
-            double tol,
-            double tolLivePointSelection,
+            scalar tol,
+            scalar tolLivePointSelection,
             int coarseningMinPoints,
             int coarseningMaxPoints,
             bool twoPointSelection,
@@ -49,13 +49,13 @@ public:
             bool enabled,
             bool livePointSelection,
             bool livePointSelectionSumValues,
-            double tol,
-            double tolLivePointSelection,
+            scalar tol,
+            scalar tolLivePointSelection,
             int coarseningMinPoints,
             int coarseningMaxPoints,
             bool twoPointSelection,
             bool surfaceCorrection,
-            double ratioRadiusError,
+            scalar ratioRadiusError,
             bool exportTxt
             );
 
@@ -83,14 +83,14 @@ public:
         bool enabled;
         bool livePointSelection;
         bool livePointSelectionSumValues;
-        double tol;
-        double tolLivePointSelection;
+        scalar tol;
+        scalar tolLivePointSelection;
         int coarseningMinPoints;
         int coarseningMaxPoints;
         bool twoPointSelection;
         bool polynomialTerm;
         bool surfaceCorrection;
-        double ratioRadiusError;
+        scalar ratioRadiusError;
         bool exportTxt;
         Eigen::VectorXi selectedPositions;
         int nbStaticFaceCentersRemove;

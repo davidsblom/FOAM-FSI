@@ -15,13 +15,13 @@ namespace rbf
     {
 public:
 
-        WendlandC2Function( double radius );
+        WendlandC2Function( scalar radius );
 
         virtual ~WendlandC2Function();
 
-        virtual double evaluate( double value );
+        virtual scalar evaluate( scalar value );
 
-        double radius;
+        scalar radius;
     };
 }
 

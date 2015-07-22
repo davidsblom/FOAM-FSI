@@ -18,20 +18,20 @@ public:
         virtual void getSourceTerm(
             const bool corrector,
             const int k,
-            const double deltaT,
-            Eigen::VectorXd & rhs,
-            Eigen::VectorXd & qold
+            const scalar deltaT,
+            fsi::vector & rhs,
+            fsi::vector & qold
             ) = 0;
 
         virtual void setFunction(
             const int k,
-            const Eigen::VectorXd & f,
-            const Eigen::VectorXd & result
+            const fsi::vector & f,
+            const fsi::vector & result
             ) = 0;
 
         virtual int getNbImplicitStages() = 0;
 
-        virtual void setOldSolution( const Eigen::VectorXd & result ) = 0;
+        virtual void setOldSolution( const fsi::vector & result ) = 0;
 
         virtual void outputResidual( std::string name ) = 0;
 

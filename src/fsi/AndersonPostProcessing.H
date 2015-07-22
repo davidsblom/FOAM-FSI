@@ -22,13 +22,13 @@ public:
         AndersonPostProcessing(
             shared_ptr<MultiLevelFsiSolver> fsi,
             int maxIter,
-            double initialRelaxation,
+            scalar initialRelaxation,
             int maxUsedIterations,
             int nbReuse,
-            double singularityLimit,
+            scalar singularityLimit,
             int reuseInformationStartingFromTimeIndex,
             bool scaling,
-            double beta,
+            scalar beta,
             bool updateJacobian
             );
 
@@ -68,8 +68,8 @@ public:
         void determineScalingFactors( const vector & output );
 
         bool scaling;
-        double beta;
-        double singularityLimit;
+        scalar beta;
+        scalar singularityLimit;
         bool updateJacobian;
         vector scalingFactors;
         matrix Jprev;

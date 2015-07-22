@@ -38,7 +38,7 @@ private:
         // Disallow default bitwise assignment
         void operator=( const RBFMeshRigidMeshMotionSolver & );
 
-        Foam::vector calcTransformation( double t );
+        Foam::vector calcTransformation( scalar t );
         Foam::vector calcVelocity();
 
         Field<vectorField> motionCenters;
@@ -68,15 +68,15 @@ private:
         bool cpu;
 
         // Rigid body motion
-        double translationAmplitude;
-        double translationFrequency;
+        scalar translationAmplitude;
+        scalar translationFrequency;
         Foam::vector translationDirection;
-        double rotationAmplitude;
-        double rotationFrequency;
+        scalar rotationAmplitude;
+        scalar rotationFrequency;
         Foam::vector rotationOrigin;
         Foam::vector oldTransformation;
 
-        double told;
+        scalar told;
 
 public:
 

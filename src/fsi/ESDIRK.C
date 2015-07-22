@@ -58,18 +58,18 @@ namespace sdc
     ESDIRK::~ESDIRK()
     {}
 
-    bool ESDIRK::isStageImplicit( double Akk )
+    bool ESDIRK::isStageImplicit( scalar Akk )
     {
         return Akk > 0;
     }
 
     void ESDIRK::run()
     {
-        double t = solver->getStartTime();
+        scalar t = solver->getStartTime();
 
         while ( std::abs( t - solver->getEndTime() ) > 1.0e-13 && t < solver->getEndTime() )
         {
-            double computedTimeStep = dt;
+            scalar computedTimeStep = dt;
 
             solveTimeStep( t );
 
@@ -78,29 +78,29 @@ namespace sdc
         }
     }
 
-    void ESDIRK::solveTimeStep( const double t0 )
+    void ESDIRK::solveTimeStep( const scalar t0 )
     {
         if ( adaptiveTimeStepper->isPreviousStepAccepted() )
             solver->nextTimeStep();
 
-        Eigen::MatrixXd solStages( nbStages, N ), F( nbStages, N );
+        fsi::matrix solStages( nbStages, N ), F( nbStages, N );
         F.setZero();
 
-        Eigen::VectorXd sol( N ), f( N ), qold( N ), result( N ), rhs( N );
+        fsi::vector sol( N ), f( N ), qold( N ), result( N ), rhs( N );
         solver->getSolution( sol );
         solStages.row( 0 ) = sol;
 
         qold = sol;
 
-        double t = t0;
+        scalar t = t0;
 
         solver->evaluateFunction( 0, sol, t, f );
         F.row( 0 ) = f;
 
         // Keep the solution of the first stage and function evaluate
         // in memory in case the time step is rejected
-        Eigen::VectorXd solOld = sol;
-        Eigen::VectorXd fOld = f;
+        fsi::vector solOld = sol;
+        fsi::vector fOld = f;
 
         // Loop over the stages
 
@@ -135,8 +135,8 @@ namespace sdc
 
         if ( adaptiveTimeStepper->isEnabled() )
         {
-            double newTimeStep = 0;
-            Eigen::VectorXd errorEstimate( N );
+            scalar newTimeStep = 0;
+            fsi::vector errorEstimate( N );
             errorEstimate.setZero();
 
             for ( int iStage = 0; iStage < nbStages; iStage++ )
@@ -159,9 +159,9 @@ namespace sdc
     void ESDIRK::getSourceTerm(
         const bool corrector,
         const int k,
-        const double deltaT,
-        Eigen::VectorXd & rhs,
-        Eigen::VectorXd & qold
+        const scalar deltaT,
+        fsi::vector & rhs,
+        fsi::vector & qold
         )
     {
         assert( k <= nbStages - 1 );
@@ -191,8 +191,8 @@ namespace sdc
 
     void ESDIRK::setFunction(
         const int k,
-        const Eigen::VectorXd & f,
-        const Eigen::VectorXd & result
+        const fsi::vector & f,
+        const fsi::vector & result
         )
     {
         assert( f.rows() == result.rows() );
@@ -208,9 +208,12 @@ namespace sdc
         solStages.row( k ) = result;
     }
 
-    void ESDIRK::setOldSolution( const Eigen::VectorXd & result )
+    void ESDIRK::setOldSolution( const fsi::vector & result )
     {
-        qold = result;
+        if ( qold.rows() == result.rows() )
+            qold = solStages.bottomRows( 1 ).transpose();
+        else
+            qold = result;
     }
 
     int ESDIRK::getNbImplicitStages()
@@ -235,8 +238,8 @@ namespace sdc
             if ( adaptiveTimeStepper )
                 adaptiveTimeStepper->setOrderEmbeddedMethod( 1 );
 
-            double alpha = 1.0 - 0.5 * std::sqrt( 2 );
-            double alphahat = 2.0 - 5.0 / 4.0 * std::sqrt( 2 );
+            scalar alpha = 1.0 - 0.5 * std::sqrt( 2 );
+            scalar alphahat = 2.0 - 5.0 / 4.0 * std::sqrt( 2 );
             A.resize( 2, 2 );
             A.setZero();
             Bhat.resize( A.cols() );
@@ -258,12 +261,12 @@ namespace sdc
             A.setZero();
             Bhat.resize( A.cols() );
             Bhat.setZero();
-            double alpha = 1.2084966491760101;
-            double beta = -0.6443631706844691;
-            double gamma = 0.4358665215084580;
-            double delta = 0.7179332607542295;
-            double alphahat = 0.7726301276675511;
-            double betahat = 0.2273698723324489;
+            scalar alpha = 1.2084966491760101;
+            scalar beta = -0.6443631706844691;
+            scalar gamma = 0.4358665215084580;
+            scalar delta = 0.7179332607542295;
+            scalar alphahat = 0.7726301276675511;
+            scalar betahat = 0.2273698723324489;
             A( 0, 0 ) = gamma;
             A( 1, 0 ) = delta - gamma;
             A( 1, 1 ) = gamma;

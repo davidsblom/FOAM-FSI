@@ -32,42 +32,42 @@ public:
 
     Piston(
         int nbTimeSteps,
-        double dt,
-        double q0,
-        double qdot0,
-        double As,
-        double Ac,
-        double omega
+        scalar dt,
+        scalar q0,
+        scalar qdot0,
+        scalar As,
+        scalar Ac,
+        scalar omega
         );
 
     Piston(
         int nbTimeSteps,
-        double dt,
-        double q0,
-        double qdot0,
-        double As,
-        double Ac,
-        double omega,
+        scalar dt,
+        scalar q0,
+        scalar qdot0,
+        scalar As,
+        scalar Ac,
+        scalar omega,
         std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme,
         int k
         );
 
     ~Piston();
 
-    double referenceSolution( double t );
+    scalar referenceSolution( scalar t );
 
     void run();
 
     virtual void finalizeTimeStep(){}
 
-    virtual void getSolution( Eigen::VectorXd & solution );
+    virtual void getSolution( fsi::vector & solution );
 
     virtual void setSolution(
-        const Eigen::VectorXd & solution,
-        const Eigen::VectorXd & f
+        const fsi::vector & solution,
+        const fsi::vector & f
         );
 
-    virtual double getEndTime();
+    virtual scalar getEndTime();
 
     virtual void initTimeStep(){}
 
@@ -77,26 +77,26 @@ public:
         bool corrector,
         const int k,
         const int kold,
-        const double t,
-        const double dt,
-        const Eigen::VectorXd & qold,
-        const Eigen::VectorXd & rhs,
-        Eigen::VectorXd & f,
-        Eigen::VectorXd & result
+        const scalar t,
+        const scalar dt,
+        const fsi::vector & qold,
+        const fsi::vector & rhs,
+        fsi::vector & f,
+        fsi::vector & result
         );
 
     virtual int getDOF();
 
-    virtual double getTimeStep();
+    virtual scalar getTimeStep();
 
     virtual void evaluateFunction(
         const int k,
-        const Eigen::VectorXd & q,
-        const double t,
-        Eigen::VectorXd & f
+        const fsi::vector & q,
+        const scalar t,
+        fsi::vector & f
         );
 
-    virtual void setDeltaT( double dt )
+    virtual void setDeltaT( scalar dt )
     {
         this->dt = dt;
     }
@@ -110,28 +110,28 @@ public:
         return 2;
     }
 
-    virtual double getScalingFactor()
+    virtual scalar getScalingFactor()
     {
         return 1;
     }
 
     int nbTimeSteps;
-    double dt;
-    double q0;
-    double c1;
-    double c2;
-    double As;
-    double Ac;
-    double omega;
+    scalar dt;
+    scalar q0;
+    scalar c1;
+    scalar c2;
+    scalar As;
+    scalar Ac;
+    scalar omega;
     int N;
-    double q;
-    double qdot;
-    double t;
-    double timeIndex;
-    double endTime;
+    scalar q;
+    scalar qdot;
+    scalar t;
+    scalar timeIndex;
+    scalar endTime;
     int k;
 
-    std::deque<Eigen::VectorXd> solStages;
+    std::deque<fsi::vector> solStages;
     std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
 };
 

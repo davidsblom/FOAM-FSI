@@ -45,8 +45,8 @@ namespace rbf
         bool enabled,
         bool livePointSelection,
         bool livePointSelectionSumValues,
-        double tol,
-        double tolLivePointSelection,
+        scalar tol,
+        scalar tolLivePointSelection,
         int coarseningMinPoints,
         int coarseningMaxPoints,
         bool exportTxt
@@ -98,8 +98,8 @@ namespace rbf
         bool enabled,
         bool livePointSelection,
         bool livePointSelectionSumValues,
-        double tol,
-        double tolLivePointSelection,
+        scalar tol,
+        scalar tolLivePointSelection,
         int coarseningMinPoints,
         int coarseningMaxPoints,
         bool twoPointSelection,
@@ -152,13 +152,13 @@ namespace rbf
         bool enabled,
         bool livePointSelection,
         bool livePointSelectionSumValues,
-        double tol,
-        double tolLivePointSelection,
+        scalar tol,
+        scalar tolLivePointSelection,
         int coarseningMinPoints,
         int coarseningMaxPoints,
         bool twoPointSelection,
         bool surfaceCorrection,
-        double ratioRadiusError,
+        scalar ratioRadiusError,
         bool exportTxt
         )
         :
@@ -243,15 +243,15 @@ namespace rbf
 
             int maxNbPoints = std::min( coarseningMaxPoints, static_cast<int>( positions.rows() ) );
             int minPoints = std::min( coarseningMinPoints, static_cast<int>( positions.rows() ) );
-            double error = 0;
-            double errorMax = 0;
+            scalar error = 0;
+            scalar errorMax = 0;
 
             // Create RBF interpolator
 
             // Run the greedy algorithm
-            double runTimeInterpolate = 0.0;
-            double runTimeError = 0.0;
-            double runTimeConvergence = 0.0;
+            scalar runTimeInterpolate = 0.0;
+            scalar runTimeError = 0.0;
+            scalar runTimeConvergence = 0.0;
             bool addedSecondPoint = false;
             int counter = selectedPositions.rows();
 
@@ -286,7 +286,7 @@ namespace rbf
 
                 // Select the point with the largest error which is not already selected.
                 int index = -1;
-                double largestError = errorList.maxCoeff( &index );
+                scalar largestError = errorList.maxCoeff( &index );
 
                 // Additional function to check whether the largestError = 0 (<SMALL) and do select next consecutive point
                 if ( largestError < SMALL )
@@ -295,7 +295,7 @@ namespace rbf
                 }
 
                 int index2 = -1;
-                double largestError2 = -1;
+                scalar largestError2 = -1;
 
                 // selected point with largest error in opposite direction (more than 90 degrees differenc in direction)
                 if ( twoPointSelection )
@@ -321,7 +321,7 @@ namespace rbf
                     t = std::clock();
                 }
 
-                double epsilon = std::sqrt( SMALL );
+                scalar epsilon = std::sqrt( SMALL );
                 error = (errorList).norm() / (values.norm() + epsilon);
                 errorMax = largestError / ( ( values.rowwise().norm() ).maxCoeff() + epsilon );
 
@@ -442,11 +442,11 @@ namespace rbf
 
                     rbfCoarse->interpolate2( valuesCoarse, valuesInterpolationCoarse );
 
-                    double epsilon = std::sqrt( SMALL );
+                    scalar epsilon = std::sqrt( SMALL );
 
                     errorInterpolationCoarse = valuesInterpolationCoarse - this->values;
-                    double error = (errorInterpolationCoarse).matrix().norm() / (this->values.norm() + epsilon);
-                    double errorMax = ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() + epsilon );
+                    scalar error = (errorInterpolationCoarse).matrix().norm() / (this->values.norm() + epsilon);
+                    scalar errorMax = ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() + epsilon );
 
                     // bool convergence = error < tolLivePointSelection;
                     bool convergence = (error < tolLivePointSelection && errorMax < tolLivePointSelection);
@@ -526,7 +526,7 @@ namespace rbf
             valuesCorrection.setZero();
         }
 
-        double R = ratioRadiusError * ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff();
+        scalar R = ratioRadiusError * ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff();
 
         if ( debug > 0 )
         {
@@ -540,16 +540,16 @@ namespace rbf
         {
             closestBoundaryIndexCorrection.conservativeResize( positionsInterpolation.rows() );
             std::clock_t t = std::clock();
-            double runTimeNN = 0;
+            scalar runTimeNN = 0;
 
             for ( int i = 0; i < positionsInterpolation.rows(); i++ )
             {
-                double smallestRadius = GREAT;
+                scalar smallestRadius = GREAT;
                 int boundaryIndex = -1;
 
                 for ( int j = 0; j < positions.rows(); j++ )
                 {
-                    double radius = ( positions.row( j ) - positionsInterpolation.row( i ) ).norm();
+                    scalar radius = ( positions.row( j ) - positionsInterpolation.row( i ) ).norm();
 
                     if ( radius < smallestRadius )
                     {
@@ -580,7 +580,7 @@ namespace rbf
 
         // Start doing the correction
         std::clock_t t = std::clock();
-        double runTimeCorr = 0;
+        scalar runTimeCorr = 0;
         std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( R ) );
 
         for ( int i = 0; i < positionsInterpolation.rows(); i++ )

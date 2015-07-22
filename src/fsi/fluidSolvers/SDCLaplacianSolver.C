@@ -80,9 +80,9 @@ SDCLaplacianSolver::~SDCLaplacianSolver()
 
 void SDCLaplacianSolver::evaluateFunction(
     const int k,
-    const Eigen::VectorXd & q,
-    const double t,
-    Eigen::VectorXd & f
+    const fsi::vector & q,
+    const scalar t,
+    fsi::vector & f
     )
 {
     for ( int i = 0; i < T.size(); i++ )
@@ -111,32 +111,32 @@ int SDCLaplacianSolver::getNbCells()
     return mesh.globalData().nTotalCells();
 }
 
-double SDCLaplacianSolver::getScalingFactor()
+scalar SDCLaplacianSolver::getScalingFactor()
 {
     return 1;
 }
 
-void SDCLaplacianSolver::getSolution( Eigen::VectorXd & solution )
+void SDCLaplacianSolver::getSolution( fsi::vector & solution )
 {
     for ( int i = 0; i < T.size(); i++ )
         solution( i ) = T[i];
 }
 
 void SDCLaplacianSolver::setSolution(
-    const Eigen::VectorXd & solution,
-    const Eigen::VectorXd & f
+    const fsi::vector & solution,
+    const fsi::vector & f
     )
 {
     for ( int i = 0; i < T.size(); i++ )
         T[i] = solution( i );
 }
 
-double SDCLaplacianSolver::getEndTime()
+scalar SDCLaplacianSolver::getEndTime()
 {
     return runTime->endTime().value() - runTime->startTime().value();
 }
 
-double SDCLaplacianSolver::getTimeStep()
+scalar SDCLaplacianSolver::getTimeStep()
 {
     return runTime->deltaT().value();
 }
@@ -166,7 +166,7 @@ bool SDCLaplacianSolver::isRunning()
     return runTime->loop();
 }
 
-void SDCLaplacianSolver::setDeltaT( double dt )
+void SDCLaplacianSolver::setDeltaT( scalar dt )
 {
     runTime->setDeltaT( dt );
 }
@@ -183,12 +183,12 @@ void SDCLaplacianSolver::implicitSolve(
     bool corrector,
     const int k,
     const int kold,
-    const double t,
-    const double dt,
-    const Eigen::VectorXd & qold,
-    const Eigen::VectorXd & rhs,
-    Eigen::VectorXd & f,
-    Eigen::VectorXd & result
+    const scalar t,
+    const scalar dt,
+    const fsi::vector & qold,
+    const fsi::vector & rhs,
+    fsi::vector & f,
+    fsi::vector & result
     )
 {
     assert( init );

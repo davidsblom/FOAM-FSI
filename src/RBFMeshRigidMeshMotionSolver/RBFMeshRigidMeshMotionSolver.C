@@ -47,7 +47,9 @@ RBFMeshRigidMeshMotionSolver::RBFMeshRigidMeshMotionSolver(
     rotationFrequency( 0 ),
     rotationOrigin( Foam::vector::zero ),
     oldTransformation( Foam::vector::zero ),
-    told( 0 )
+    told( 0 ),
+    corrector( false ),
+    k( 0 )
 {
     // Find IDs of staticPatches
     forAll( staticPatches, patchI )
@@ -157,15 +159,15 @@ RBFMeshRigidMeshMotionSolver::RBFMeshRigidMeshMotionSolver(
         assert( cpu == true );
 
     bool coarsening = readBool( subDict( "coarsening" ).lookup( "enabled" ) );
-    double tol = 0.1;
-    double tolLivePointSelection = 0.1;
+    scalar tol = 0.1;
+    scalar tolLivePointSelection = 0.1;
     bool livePointSelection = false;
     bool exportSelectedPoints = false;
     int coarseningMinPoints = 1;
     int coarseningMaxPoints = 2;
     bool twoPointSelection = false;
     bool surfaceCorrection = false;
-    double ratioRadiusError = 10.0;
+    scalar ratioRadiusError = 10.0;
 
     if ( coarsening )
     {
@@ -226,7 +228,7 @@ RBFMeshRigidMeshMotionSolver::RBFMeshRigidMeshMotionSolver(
         assert( sdcConfig["quadrature-rule"] );
 
         int n = sdcConfig["number-of-points"].as<int>();
-        double tol = sdcConfig["convergence-tolerance"].as<double>();
+        scalar tol = sdcConfig["convergence-tolerance"].as<scalar>();
         std::string quadratureRule = sdcConfig["quadrature-rule"].as<std::string>();
 
         timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( quadratureRule, n, tol ) );
@@ -307,7 +309,7 @@ void RBFMeshRigidMeshMotionSolver::updateMesh( const mapPolyMesh & )
     assert( false );
 }
 
-Foam::vector RBFMeshRigidMeshMotionSolver::calcTransformation( double t )
+Foam::vector RBFMeshRigidMeshMotionSolver::calcTransformation( scalar t )
 {
     scalar smoothStartup = 1;
     bool smoothStart = false;
@@ -316,7 +318,6 @@ Foam::vector RBFMeshRigidMeshMotionSolver::calcTransformation( double t )
     {
         if ( t < 1.0 / (translationFrequency + SMALL) )
         {
-            Info << "smoothStart" << endl;
             smoothStartup = 0.5 - 0.5 * Foam::cos( M_PI * translationFrequency * t );
         }
     }
@@ -336,61 +337,40 @@ void RBFMeshRigidMeshMotionSolver::setTimeIntegrationInfo( const bool corrector,
 
 Foam::vector RBFMeshRigidMeshMotionSolver::calcVelocity()
 {
-    double t = mesh().time().value();
-    double dt = mesh().time().deltaT().value();
+    assert( timeIntegrationScheme );
+
+    scalar t = mesh().time().value();
+    scalar dt = mesh().time().deltaT().value();
 
     Foam::vector transformation = calcTransformation( t ) - calcTransformation( told );
 
     Foam::vector transformationT = calcTransformation( t );
     Foam::vector transformationTold = calcTransformation( told );
-    Eigen::VectorXd disp ( 3 ), dudt( 3 ), dispold( 3 );
+    fsi::vector disp ( 3 ), dudt( 3 ), dispold( 3 );
     disp << transformationT(0), transformationT(1), transformationT(2);
     dispold << transformationTold(0), transformationTold(1), transformationTold(2);
 
+    fsi::vector rhs( 3 ), result( 3 ), f( 3 ), qold;
 
-        dudt = disp / dt;
+    if ( not corrector && k == 0 )
+        timeIntegrationScheme->setOldSolution( dispold );
 
-        Eigen::VectorXd rhs( 3 ), result( 3 ), f( 3 ), qold;
+    timeIntegrationScheme->getSourceTerm( corrector, k, dt, rhs, qold );
 
-        if ( not corrector && k == 0 )
-            timeIntegrationScheme->setOldSolution( dispold );
+    f( 0 ) = 0;
+    f( 1 ) = 0.5 * translationAmplitude * std::sin( M_PI * translationFrequency * t ) * M_PI * translationFrequency;
+    f( 2 ) = 0;
+    result = dt * f + qold + rhs;
+    dudt = ( result - qold - rhs ) / dt;
 
-        timeIntegrationScheme->getSourceTerm( corrector, k, dt, rhs, qold );
+    timeIntegrationScheme->setFunction( k, f, result );
 
-        dudt -= ( qold + rhs ) / dt;
-        f = dudt;
-        result = disp;
-
-        f( 0 ) = 0;
-        f( 1 ) = 0.5 * translationAmplitude * std::sin( M_PI * translationFrequency * t ) * M_PI * translationFrequency;
-        f( 2 ) = 0;
-        result = dt * f + qold + rhs;
-        dudt = ( result - qold - rhs ) / dt;
-
-        std::cout << "dudt(0) = " << result(0) << std::endl;
-        std::cout << "dudt(1) = " << result(1) << std::endl;
-        std::cout << "dudt(2) = " << result(2) << std::endl;
-
-        std::cout << "diff(0) = " << result(0) - oldTransformation(0) << std::endl;
-        std::cout << "diff(1) = " << result(1) - oldTransformation(1) << std::endl;
-        std::cout << "diff(2) = " << result(2) - oldTransformation(2) << std::endl;
-
-        timeIntegrationScheme->setFunction( k, f, result );
-
-        for ( int i = 0 ; i < 3; i++ )
-            transformation[i] = result(i) - oldTransformation(i);
-
-
-
-    Info << "oldTransformation = " << oldTransformation << endl;
-    Info << "calcTransformation( told ) = " << calcTransformation( told ) << endl;
+    for ( int i = 0 ; i < 3; i++ )
+        transformation[i] = result(i) - oldTransformation[i];
 
     told = t;
     //oldTransformation = calcTransformation( told );
     oldTransformation(1) = result(1);
-
-    Info << "transformation = " << transformation << endl;
-    Info << "calcTransformation( t ) = " << calcTransformation( t ) << endl;
 
     return transformation;
 }
@@ -579,7 +559,7 @@ void RBFMeshRigidMeshMotionSolver::solve()
 
             assert( pointProcAddressing.size() == mesh().points().size() );
 
-            // Count the number of global static points including double points
+            // Count the number of global static points including scalar points
             nbGlobalStaticFaceCenters[Pstream::myProcNo()] = nbStaticFaceCenters;
             nbGlobalFixedFaceCenters[Pstream::myProcNo()] = nbFixedFaceCenters;
             nbGlobalMovingFaceCenters[Pstream::myProcNo()] = nbMovingFaceCenters;
@@ -593,7 +573,7 @@ void RBFMeshRigidMeshMotionSolver::solve()
                 nbMovingFaceCenters = sum( nbGlobalMovingFaceCenters );
 
             // Construct a list with all the global point labels, thus including
-            // also double points. Thereafter, construct a list of static control
+            // also scalar points. Thereafter, construct a list of static control
             // list which indicates whether the point is already included or not.
             // Use this later to build a list of the unique static control points.
             labelList globalStaticPointsList( nbStaticFaceCenters, 0 );

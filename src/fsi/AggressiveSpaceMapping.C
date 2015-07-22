@@ -15,7 +15,7 @@ AggressiveSpaceMapping::AggressiveSpaceMapping(
     int maxUsedIterations,
     int nbReuse,
     int reuseInformationStartingFromTimeIndex,
-    double singularityLimit
+    scalar singularityLimit
     )
     :
     SpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit )
@@ -81,7 +81,7 @@ void AggressiveSpaceMapping::performPostProcessing(
 
     for ( int k = 0; k < maxIter - 1; k++ )
     {
-        matrix J = Eigen::MatrixXd::Identity( m, m );
+        matrix J = fsi::matrix::Identity( m, m );
 
         // Determine the number of columns used to calculate the mapping matrix J
 

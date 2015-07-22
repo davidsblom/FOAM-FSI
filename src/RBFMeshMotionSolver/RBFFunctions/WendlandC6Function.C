@@ -8,7 +8,7 @@
 
 namespace rbf
 {
-    WendlandC6Function::WendlandC6Function( double radius )
+    WendlandC6Function::WendlandC6Function( scalar radius )
         :
         radius( radius )
     {
@@ -18,7 +18,7 @@ namespace rbf
     WendlandC6Function::~WendlandC6Function()
     {}
 
-    double WendlandC6Function::evaluate( double value )
+    scalar WendlandC6Function::evaluate( scalar value )
     {
         value /= radius;
 

@@ -93,7 +93,7 @@ namespace Foam
 
         int dim = mesh.nGeometricD();
 
-        Eigen::VectorXd rhs( Up.size() * dim ), f( Up.size() * dim ), result( Up.size() * dim ), qold;
+        fsi::vector rhs( Up.size() * dim ), f( Up.size() * dim ), result( Up.size() * dim ), qold;
 
         if ( not corrector && k == 0 )
         {
@@ -183,7 +183,6 @@ namespace Foam
 
             timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::ESDIRK( method ) );
         }
-
     }
 
     void SDCMovingWallVelocityFvPatchVectorField::setSDCInfo(

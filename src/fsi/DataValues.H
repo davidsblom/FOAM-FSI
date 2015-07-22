@@ -7,18 +7,20 @@
 #ifndef DataValues_H
 #define DataValues_H
 
+#include "fvCFD.H"
 #include <Eigen/Dense>
 
 namespace fsi
 {
-    typedef Eigen::MatrixXd matrix;
-    typedef Eigen::VectorXd vector;
+    typedef Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic> matrix;
+    typedef Eigen::Matrix<scalar, Eigen::Dynamic, 1> vector;
 
     class DataValues
     {
 public:
 
         DataValues();
+
         ~DataValues();
 
         void setData( matrix & data );

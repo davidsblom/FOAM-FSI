@@ -10,7 +10,7 @@ namespace fsi
 {
     RelativeConvergenceMeasure::RelativeConvergenceMeasure(
         int dataId,
-        double convergenceLimit
+        scalar convergenceLimit
         )
         :
         ConvergenceMeasure( dataId, convergenceLimit ),

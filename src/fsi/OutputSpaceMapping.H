@@ -29,7 +29,7 @@ public:
             int maxUsedIterations,
             int nbReuse,
             int reuseInformationStartingFromTimeIndex,
-            double singularityLimit,
+            scalar singularityLimit,
             int order
             );
 

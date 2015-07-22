@@ -19,7 +19,7 @@ ManifoldMapping::ManifoldMapping(
     initialSolutionCoarseModel( false ),
     scaling( false ),
     iter( 0 ),
-    scalingFactors( Eigen::VectorXd::Ones( 2 ) ),
+    scalingFactors( fsi::vector::Ones( 2 ) ),
     sizeVar0( 0 ),
     sizeVar1( 0 )
 {}
@@ -31,7 +31,7 @@ ManifoldMapping::ManifoldMapping(
     int maxUsedIterations,
     int nbReuse,
     int reuseInformationStartingFromTimeIndex,
-    double singularityLimit,
+    scalar singularityLimit,
     bool updateJacobian
     )
     :
@@ -40,7 +40,7 @@ ManifoldMapping::ManifoldMapping(
     initialSolutionCoarseModel( false ),
     scaling( false ),
     iter( 0 ),
-    scalingFactors( Eigen::VectorXd::Ones( 2 ) ),
+    scalingFactors( fsi::vector::Ones( 2 ) ),
     sizeVar0( 0 ),
     sizeVar1( 0 )
 {}
@@ -52,7 +52,7 @@ ManifoldMapping::ManifoldMapping(
     int maxUsedIterations,
     int nbReuse,
     int reuseInformationStartingFromTimeIndex,
-    double singularityLimit,
+    scalar singularityLimit,
     bool updateJacobian,
     bool initialSolutionCoarseModel
     )
@@ -62,7 +62,7 @@ ManifoldMapping::ManifoldMapping(
     initialSolutionCoarseModel( initialSolutionCoarseModel ),
     scaling( false ),
     iter( 0 ),
-    scalingFactors( Eigen::VectorXd::Ones( 2 ) ),
+    scalingFactors( fsi::vector::Ones( 2 ) ),
     sizeVar0( 0 ),
     sizeVar1( 0 )
 {}
@@ -368,7 +368,7 @@ void ManifoldMapping::performPostProcessing(
 
                 if ( updateJacobian )
                 {
-                    matrix I = Eigen::MatrixXd::Identity( DeltaF.rows(), DeltaF.rows() );
+                    matrix I = fsi::matrix::Identity( DeltaF.rows(), DeltaF.rows() );
 
                     if ( Tkprev.rows() == DeltaF.rows() )
                         Tk = Tkprev + (DeltaC - Tkprev * DeltaF) * pseudoDeltaF;

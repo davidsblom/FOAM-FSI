@@ -31,7 +31,7 @@ public:
             int maxUsedIterations,
             int nbReuse,
             int reuseInformationStartingFromTimeIndex,
-            double singularityLimit,
+            scalar singularityLimit,
             bool updateJacobian
             );
 
@@ -42,7 +42,7 @@ public:
             int maxUsedIterations,
             int nbReuse,
             int reuseInformationStartingFromTimeIndex,
-            double singularityLimit,
+            scalar singularityLimit,
             bool updateJacobian,
             bool initialSolutionCoarseModel
             );

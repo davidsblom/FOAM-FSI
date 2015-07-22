@@ -306,7 +306,7 @@ void SDCFluidSolver::createFields()
     setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
 }
 
-double SDCFluidSolver::evaluateMomentumResidual()
+scalar SDCFluidSolver::evaluateMomentumResidual()
 {
     dimensionedScalar rDeltaT = 1.0 / mesh.time().deltaT();
     volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p ) - rDeltaT * rhsU;
@@ -372,7 +372,7 @@ void SDCFluidSolver::resetSolution()
     assert( false );
 }
 
-void SDCFluidSolver::setDeltaT( double dt )
+void SDCFluidSolver::setDeltaT( scalar dt )
 {
     runTime->setDeltaT( dt );
 }
@@ -457,7 +457,7 @@ int SDCFluidSolver::getDOF()
     return index;
 }
 
-void SDCFluidSolver::getSolution( Eigen::VectorXd & solution )
+void SDCFluidSolver::getSolution( fsi::vector & solution )
 {
     int index = 0;
 
@@ -501,8 +501,8 @@ void SDCFluidSolver::getSolution( Eigen::VectorXd & solution )
 }
 
 void SDCFluidSolver::setSolution(
-    const Eigen::VectorXd & solution,
-    const Eigen::VectorXd & f
+    const fsi::vector & solution,
+    const fsi::vector & f
     )
 {
     p = pStages.at( 0 );
@@ -588,26 +588,26 @@ void SDCFluidSolver::setSolution(
     assert( index == f.rows() );
 }
 
-double SDCFluidSolver::getEndTime()
+scalar SDCFluidSolver::getEndTime()
 {
     return runTime->endTime().value();
 }
 
-double SDCFluidSolver::getStartTime()
+scalar SDCFluidSolver::getStartTime()
 {
     return runTime->startTime().value();
 }
 
-double SDCFluidSolver::getTimeStep()
+scalar SDCFluidSolver::getTimeStep()
 {
     return runTime->deltaT().value();
 }
 
 void SDCFluidSolver::evaluateFunction(
     const int k,
-    const Eigen::VectorXd & q,
-    const double t,
-    Eigen::VectorXd & f
+    const fsi::vector & q,
+    const scalar t,
+    fsi::vector & f
     )
 {
     if ( explicitFirstStage )
@@ -662,12 +662,12 @@ void SDCFluidSolver::implicitSolve(
     bool corrector,
     const int k,
     const int kold,
-    const double t,
-    const double dt,
-    const Eigen::VectorXd & qold,
-    const Eigen::VectorXd & rhs,
-    Eigen::VectorXd & f,
-    Eigen::VectorXd & result
+    const scalar t,
+    const scalar dt,
+    const fsi::vector & qold,
+    const fsi::vector & rhs,
+    fsi::vector & f,
+    fsi::vector & result
     )
 {
     bool convergence = false;
@@ -812,10 +812,10 @@ void SDCFluidSolver::implicitSolve(
         // If the relative residual with respect to the initial
         // residual is decreased by factor tol: assume convergence.
 
-        double initResidual = 1;
-        double currResidual = 1;
-        double pressureResidual = 1;
-        double tol = 1.0e-2;
+        scalar initResidual = 1;
+        scalar currResidual = 1;
+        scalar pressureResidual = 1;
+        scalar tol = 1.0e-2;
 
         // --- PISO loop
         for ( int corr = 0; corr < nCorr; corr++ )
@@ -897,7 +897,7 @@ void SDCFluidSolver::implicitSolve(
             U -= (1.0 / AU) * fvc::grad( p );
             U.correctBoundaryConditions();
 
-            if ( currResidual < std::max( tol * initResidual, 1.0e-15 ) )
+            if ( currResidual < std::max( tol * initResidual, scalar( 1.0e-15 ) ) )
                 break;
         }
 
@@ -965,7 +965,7 @@ void SDCFluidSolver::implicitSolve(
     evaluateFunction( k + 1, qold, t, f );
 }
 
-double SDCFluidSolver::getScalingFactor()
+scalar SDCFluidSolver::getScalingFactor()
 {
     return 1;
     scalar rmsU = gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells();

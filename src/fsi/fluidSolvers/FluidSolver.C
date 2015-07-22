@@ -275,7 +275,7 @@ void FluidSolver::courantNo()
          << endl;
 }
 
-double FluidSolver::evaluateMomentumResidual()
+scalar FluidSolver::evaluateMomentumResidual()
 {
     volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p );
 
@@ -441,10 +441,10 @@ void FluidSolver::solve()
         // If the relative residual with respect to the initial
         // residual is decreased by factor tol: assume convergence.
 
-        double initResidual = 1;
-        double currResidual = 1;
-        double pressureResidual = 1;
-        double tol = 1.0e-2;
+        scalar initResidual = 1;
+        scalar currResidual = 1;
+        scalar pressureResidual = 1;
+        scalar tol = 1.0e-2;
 
         // --- PISO loop
         for ( int corr = 0; corr < nCorr; corr++ )
@@ -504,7 +504,7 @@ void FluidSolver::solve()
             U -= (1.0 / AU) * fvc::grad( p );
             U.correctBoundaryConditions();
 
-            if ( currResidual < std::max( tol * initResidual, 1.0e-15 ) )
+            if ( currResidual < std::max( tol * initResidual, scalar( 1.0e-15 ) ) )
                 break;
         }
 

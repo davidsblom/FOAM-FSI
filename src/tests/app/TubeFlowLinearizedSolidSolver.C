@@ -10,14 +10,14 @@ using namespace tubeflow;
 
 TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     int N,
-    double nu,
-    double rho,
-    double h,
-    double L,
-    double dt,
-    double G,
-    double E0,
-    double r0
+    scalar nu,
+    scalar rho,
+    scalar h,
+    scalar L,
+    scalar dt,
+    scalar G,
+    scalar E0,
+    scalar r0
     )
     :
     BaseMultiLevelSolver( N, 1, M_PI * r0 * r0 ),
@@ -49,7 +49,7 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     rn.setZero();
     r.setZero();
 
-    double a0 = M_PI * r0 * r0;
+    scalar a0 = M_PI * r0 * r0;
     data.fill( a0 );
 
     factorizeMatrix();

@@ -19,7 +19,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class RBFCoarseningParametrizedTest : public TestWithParam < std::tr1::tuple<bool, int, int, int, double, bool> >
+class RBFCoarseningParametrizedTest : public TestWithParam < std::tr1::tuple<bool, int, int, int, scalar, bool> >
 {
 protected:
 
@@ -58,7 +58,7 @@ protected:
         bool enabled = std::tr1::get<0>( GetParam() );
         int coarseningMinPoints = std::tr1::get<2>( GetParam() );
         int coarseningMaxPoints = std::tr1::get<3>( GetParam() );
-        double tol = std::tr1::get<4>( GetParam() );
+        scalar tol = std::tr1::get<4>( GetParam() );
 
         rbf = std::shared_ptr<RBFCoarsening>( new RBFCoarsening( rbfInterpolator, enabled, false, false, tol, 0.1, coarseningMinPoints, coarseningMaxPoints, false ) );
     }
@@ -103,7 +103,7 @@ TEST_P( RBFCoarseningParametrizedTest, rbf1d_regularity2 )
     for ( int i = 0; i < ynew.rows(); i++ )
         ASSERT_NEAR( ynew( i, 0 ), std::sin( xnew( i, 0 ) ), 1.0e-1 );
 
-    double tol = std::tr1::get<4>( GetParam() );
+    scalar tol = std::tr1::get<4>( GetParam() );
     int coarseningMaxPoints = std::tr1::get<3>( GetParam() );
 
     if ( tol < 1.0e-20 && coarseningMaxPoints == 100 )
@@ -123,7 +123,7 @@ TEST_P( RBFCoarseningParametrizedTest, rbf_interpolation_comparison )
     rbf->compute( x, xnew );
     rbf->interpolate( y, ynew );
 
-    double tol = std::tr1::get<4>( GetParam() );
+    scalar tol = std::tr1::get<4>( GetParam() );
     int coarseningMaxPoints = std::tr1::get<3>( GetParam() );
 
     if ( tol < 1.0e-20 && coarseningMaxPoints == 100 )

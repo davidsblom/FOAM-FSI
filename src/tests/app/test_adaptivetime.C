@@ -31,17 +31,17 @@ using::testing::Combine;
  * http://en.wikipedia.org/wiki/Legendre_polynomials
  */
 
-class AdaptiveTimeSteppingESDIRKTest : public TestWithParam< std::tr1::tuple<int, std::string, double> >
+class AdaptiveTimeSteppingESDIRKTest : public TestWithParam< std::tr1::tuple<int, std::string, scalar> >
 {
 protected:
 
     virtual void SetUp()
     {
-        double dt, q0, qdot0, As, Ac, omega, endTime;
+        scalar dt, q0, qdot0, As, Ac, omega, endTime;
 
         int nbTimeSteps = std::tr1::get<0>( GetParam() );
         std::string method = std::tr1::get<1>( GetParam() );
-        double tol = std::tr1::get<2>( GetParam() );
+        scalar tol = std::tr1::get<2>( GetParam() );
 
         endTime = 100;
         dt = endTime / nbTimeSteps;
@@ -88,11 +88,11 @@ TEST_P( AdaptiveTimeSteppingESDIRKTest, run )
     Eigen::VectorXd solution( 2 );
     piston->getSolution( solution );
 
-    double result = solution( 1 );
-    double ref = piston->referenceSolution( 100 );
-    double error = std::abs( result - ref ) / std::abs( ref );
+    scalar result = solution( 1 );
+    scalar ref = piston->referenceSolution( 100 );
+    scalar error = std::abs( result - ref ) / std::abs( ref );
 
-    double tol = std::tr1::get<2>( GetParam() );
+    scalar tol = std::tr1::get<2>( GetParam() );
 
     std::string method = std::tr1::get<1>( GetParam() );
 
@@ -100,18 +100,18 @@ TEST_P( AdaptiveTimeSteppingESDIRKTest, run )
         ASSERT_LT( error, 1000 * tol );
 }
 
-class AdaptiveTimeSteppingSDCTest : public TestWithParam< std::tr1::tuple<double, int> >
+class AdaptiveTimeSteppingSDCTest : public TestWithParam< std::tr1::tuple<scalar, int> >
 {
 protected:
 
     virtual void SetUp()
     {
-        double dt, q0, qdot0, As, Ac, omega, endTime;
+        scalar dt, q0, qdot0, As, Ac, omega, endTime;
 
         int nbTimeSteps = 2;
         std::string rule = "clenshaw-curtis";
 
-        double tol = std::tr1::get<0>( GetParam() );
+        scalar tol = std::tr1::get<0>( GetParam() );
         int nbNodes = std::tr1::get<1>( GetParam() );
 
         endTime = 100;
@@ -161,11 +161,11 @@ TEST_P( AdaptiveTimeSteppingSDCTest, run )
     Eigen::VectorXd solution( 2 );
     piston->getSolution( solution );
 
-    double result = solution( 1 );
-    double ref = piston->referenceSolution( 100 );
-    double error = std::abs( result - ref ) / std::abs( ref );
+    scalar result = solution( 1 );
+    scalar ref = piston->referenceSolution( 100 );
+    scalar error = std::abs( result - ref ) / std::abs( ref );
 
-    double tol = std::tr1::get<0>( GetParam() );
+    scalar tol = std::tr1::get<0>( GetParam() );
 
     ASSERT_LT( error, tol );
 }

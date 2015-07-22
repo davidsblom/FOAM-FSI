@@ -22,7 +22,7 @@ protected:
 
     virtual void SetUp()
     {
-        double dt, q0, qdot0, As, Ac, omega, endTime, tol;
+        scalar dt, q0, qdot0, As, Ac, omega, endTime, tol;
 
         int nbNodes = std::tr1::get<0>( GetParam() );
         int nbTimeSteps = std::tr1::get<1>( GetParam() );
@@ -69,7 +69,7 @@ TEST_P( SDCTest, object )
 
 TEST_P( SDCTest, referenceSolution )
 {
-    double result = piston->referenceSolution( 100 );
+    scalar result = piston->referenceSolution( 100 );
 
     ASSERT_NEAR( result, -35.5953231178, 1.0e-11 );
 }
@@ -81,7 +81,7 @@ TEST_P( SDCTest, solve )
     Eigen::VectorXd solution( 2 );
     piston->getSolution( solution );
 
-    double result = solution( 1 );
+    scalar result = solution( 1 );
 
     int nbTimeSteps = std::tr1::get<1>( GetParam() );
 
@@ -94,7 +94,7 @@ TEST_P( SDCTest, solve )
 TEST_P( SDCTest, evaluateFunction )
 {
     Eigen::VectorXd q( 2 ), f( 2 );
-    double t;
+    scalar t;
 
     q << -100, -100;
     t = 1;
@@ -117,9 +117,9 @@ TEST_P( SDCTest, run )
     Eigen::VectorXd solution( 2 );
     piston->getSolution( solution );
 
-    double result = solution( 1 );
-    double ref = piston->referenceSolution( 100 );
-    double error = std::abs( result - ref ) / std::abs( ref );
+    scalar result = solution( 1 );
+    scalar ref = piston->referenceSolution( 100 );
+    scalar error = std::abs( result - ref ) / std::abs( ref );
 
     int nbTimeSteps = std::tr1::get<1>( GetParam() );
     int nbNodes = std::tr1::get<0>( GetParam() );
@@ -179,16 +179,17 @@ TEST( CosTest, SDC )
     std::string rule = "gauss-radau";
 
     rule = "gauss-lobatto";
+
     // rule = "uniform";
-    //rule = "clenshaw-curtis";
+    // rule = "clenshaw-curtis";
     int nbNodes = 3;
-    double tol = 1.0e-25;
+    scalar tol = 1.0e-25;
 
     int nbTimeSteps = 5;
-    double endTime = 0.05;
-    double dt = endTime / nbTimeSteps;
-    double amplitude = 0.2;
-    double frequency = 5;
+    scalar endTime = 0.05;
+    scalar dt = endTime / nbTimeSteps;
+    scalar amplitude = 0.2;
+    scalar frequency = 5;
 
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
     std::shared_ptr<Cos> cos1( new Cos( nbTimeSteps, dt, endTime, amplitude, frequency ) );
@@ -199,10 +200,10 @@ TEST( CosTest, SDC )
     sdc1->run();
     sdc2->run();
 
-    double ref = 0.5 * amplitude * std::sin( M_PI * frequency * endTime ) * M_PI * frequency;
-    double error1 = std::abs( cos1->f - ref ) / std::abs( ref );
-    double error2 = std::abs( cos2->f - ref ) / std::abs( ref );
-    double order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
+    scalar ref = 0.5 * amplitude * std::sin( M_PI * frequency * endTime ) * M_PI * frequency;
+    scalar error1 = std::abs( cos1->f - ref ) / std::abs( ref );
+    scalar error2 = std::abs( cos2->f - ref ) / std::abs( ref );
+    scalar order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
 
     std::cout << "error1 = " << error1 << std::endl;
     std::cout << "error2 = " << error2 << std::endl;

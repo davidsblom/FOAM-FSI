@@ -14,8 +14,8 @@
 #include <memory>
 #include <assert.h>
 #include <math.h>
+#include "BaseMultiLevelSolver.H"
 #include "fvCFD.H"
-#include <Eigen/Dense>
 
 namespace sdc
 {
@@ -28,35 +28,35 @@ public:
         AdaptiveTimeStepper(
             bool enabled,
             std::string filter,
-            double tol,
-            double safetyFactor
+            scalar tol,
+            scalar safetyFactor
             );
 
         ~AdaptiveTimeStepper();
 
         bool determineNewTimeStep(
-            const Eigen::VectorXd & errorEstimate,
-            const Eigen::VectorXd & solution,
-            const double computedTimeStep,
-            double & newTimeStep
+            const fsi::vector & errorEstimate,
+            const fsi::vector & solution,
+            const scalar computedTimeStep,
+            scalar & newTimeStep
             );
 
         bool determineNewTimeStep(
-            const double errorEstimate,
-            const double computedTimeStep,
-            double & newTimeStep
+            const scalar errorEstimate,
+            const scalar computedTimeStep,
+            scalar & newTimeStep
             );
 
-        double elementary(
-            const double c1,
-            const double c0,
-            const double rho
+        scalar elementary(
+            const scalar c1,
+            const scalar c0,
+            const scalar rho
             );
 
-        double h211b(
-            const double c1,
-            const double c0,
-            const double rho
+        scalar h211b(
+            const scalar c1,
+            const scalar c0,
+            const scalar rho
             );
 
         bool isAccepted();
@@ -65,15 +65,15 @@ public:
 
         bool isPreviousStepAccepted();
 
-        double limit( const double u );
+        scalar limit( const scalar u );
 
-        double pi42(
-            const double c1,
-            const double c0,
-            const double rho
+        scalar pi42(
+            const scalar c1,
+            const scalar c0,
+            const scalar rho
             );
 
-        void setEndTime( double endTime );
+        void setEndTime( scalar endTime );
 
         void setOrderEmbeddedMethod( int order );
 
@@ -81,16 +81,16 @@ private:
 
         bool enabled;
         std::string filter;
-        double tol;
-        double safetyFactor;
+        scalar tol;
+        scalar safetyFactor;
         int k;
-        double cerrold;
-        double rhoold;
+        scalar cerrold;
+        scalar rhoold;
         int timeStepIndex;
         bool accepted;
         bool previousTimeStepRejected;
-        double endTime;
-        double t;
+        scalar endTime;
+        scalar t;
     };
 }
 

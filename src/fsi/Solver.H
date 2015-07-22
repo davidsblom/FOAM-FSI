@@ -8,6 +8,7 @@
 #define Solver_H
 
 #include <ctime>
+#include "DataValues.H"
 
 class Solver
 {
@@ -17,10 +18,10 @@ public:
 
     virtual void run() = 0;
 
-    virtual double timeElapsed()
+    virtual scalar timeElapsed()
     {
         time = std::clock() - time;
-        return static_cast<double>(time) / CLOCKS_PER_SEC;
+        return static_cast<scalar>(time) / CLOCKS_PER_SEC;
     }
 
     std::clock_t time;

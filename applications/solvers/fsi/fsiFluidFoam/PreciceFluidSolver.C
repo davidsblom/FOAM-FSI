@@ -6,7 +6,7 @@
 
 #include "PreciceFluidSolver.H"
 
-typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> matrixRowMajor;
+typedef Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> matrixRowMajor;
 
 PreciceFluidSolver::PreciceFluidSolver( shared_ptr<foamFluidSolver> solver )
     :
@@ -103,7 +103,7 @@ void PreciceFluidSolver::run()
                 precice->fulfilledAction( precice::constants::actionWriteIterationCheckpoint() );
 
             t = std::clock() - t;
-            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+            scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
             totalRunTime += runTime;
             totalNbIterations++;
             Info << "runtime = " << runTime << " s" << endl;

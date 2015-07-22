@@ -19,15 +19,15 @@ public:
 
         TubeFlowLinearizedFluidSolver(
             int N,
-            double p0,
-            double r0,
-            double u0,
-            double rho,
-            double E,
-            double h,
-            double T,
-            double dt,
-            double L
+            scalar p0,
+            scalar r0,
+            scalar u0,
+            scalar rho,
+            scalar E,
+            scalar h,
+            scalar T,
+            scalar dt,
+            scalar L
             );
 
         virtual ~TubeFlowLinearizedFluidSolver();
@@ -60,18 +60,18 @@ public:
 
         // Constants
 
-        double p0;
-        double r0;
-        double u0;
-        double a0;
-        double rho;
-        double h;
-        double T;
-        double dt;
-        double dx;
-        double tau;
-        double cmk;
-        double alpha;
+        scalar p0;
+        scalar r0;
+        scalar u0;
+        scalar a0;
+        scalar rho;
+        scalar h;
+        scalar T;
+        scalar dt;
+        scalar dx;
+        scalar tau;
+        scalar cmk;
+        scalar alpha;
 
         matrix grid;
 

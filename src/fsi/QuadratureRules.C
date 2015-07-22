@@ -6,9 +6,9 @@ namespace quadrature {
         std::string rule,
         int n,
         int refine,
-        Eigen::VectorXd & nodes,
-        Eigen::MatrixXd & smat,
-        Eigen::MatrixXd & qmat
+        fsi::vector & nodes,
+        fsi::matrix & smat,
+        fsi::matrix & qmat
         )
     {
         if ( n == 2 && rule == "gauss-radau" && refine == 1 )

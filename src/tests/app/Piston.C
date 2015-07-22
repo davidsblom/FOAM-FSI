@@ -8,12 +8,12 @@
 
 Piston::Piston(
     int nbTimeSteps,
-    double dt,
-    double q0,
-    double qdot0,
-    double As,
-    double Ac,
-    double omega
+    scalar dt,
+    scalar q0,
+    scalar qdot0,
+    scalar As,
+    scalar Ac,
+    scalar omega
     )
     :
     SDCSolver(),
@@ -38,12 +38,12 @@ Piston::Piston(
 
 Piston::Piston(
     int nbTimeSteps,
-    double dt,
-    double q0,
-    double qdot0,
-    double As,
-    double Ac,
-    double omega,
+    scalar dt,
+    scalar q0,
+    scalar qdot0,
+    scalar As,
+    scalar Ac,
+    scalar omega,
     std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme,
     int k
     )
@@ -74,9 +74,9 @@ Piston::Piston(
 Piston::~Piston()
 {}
 
-double Piston::referenceSolution( double t )
+scalar Piston::referenceSolution( scalar t )
 {
-    double result = c1;
+    scalar result = c1;
     result += c2 * t;
     result += -As / std::pow( omega, 2 ) * std::sin( omega * t );
     result += -Ac / std::pow( omega, 2 ) * std::cos( omega * t );
@@ -86,9 +86,9 @@ double Piston::referenceSolution( double t )
 
 void Piston::evaluateFunction(
     const int k,
-    const Eigen::VectorXd & q,
-    const double t,
-    Eigen::VectorXd & f
+    const fsi::vector & q,
+    const scalar t,
+    fsi::vector & f
     )
 {
     assert( f.rows() == 2 );
@@ -103,7 +103,7 @@ void Piston::nextTimeStep()
     t += dt;
     timeIndex++;
 
-    Eigen::VectorXd sol( 2 );
+    fsi::vector sol( 2 );
     sol << qdot, q;
 
     for ( int i = 0; i < k; i++ )
@@ -115,12 +115,12 @@ int Piston::getDOF()
     return 2;
 }
 
-double Piston::getEndTime()
+scalar Piston::getEndTime()
 {
     return endTime;
 }
 
-void Piston::getSolution( Eigen::VectorXd & solution )
+void Piston::getSolution( fsi::vector & solution )
 {
     assert( solution.rows() == 2 );
     solution( 0 ) = qdot;
@@ -128,8 +128,8 @@ void Piston::getSolution( Eigen::VectorXd & solution )
 }
 
 void Piston::setSolution(
-    const Eigen::VectorXd & solution,
-    const Eigen::VectorXd & f
+    const fsi::vector & solution,
+    const fsi::vector & f
     )
 {
     assert( solution.rows() == 2 );
@@ -137,7 +137,7 @@ void Piston::setSolution(
     q = solution( 1 );
 }
 
-double Piston::getTimeStep()
+scalar Piston::getTimeStep()
 {
     return dt;
 }
@@ -152,7 +152,7 @@ bool Piston::isRunning()
 
 void Piston::run()
 {
-    Eigen::VectorXd q( nbTimeSteps + 1 ), qdot( nbTimeSteps + 1 ), qold( 2 ), f( 2 ), rhs( 2 ), result( 2 );
+    fsi::vector q( nbTimeSteps + 1 ), qdot( nbTimeSteps + 1 ), qold( 2 ), f( 2 ), rhs( 2 ), result( 2 );
 
     std::shared_ptr<sdc::SDC> sdc;
     std::shared_ptr<sdc::ESDIRK> esdirk;
@@ -170,7 +170,7 @@ void Piston::run()
         {
             nextTimeStep();
 
-            double t = dt * i;
+            scalar t = dt * i;
 
             qold << qdot( i - 1 ), q( i - 1 );
 
@@ -192,7 +192,7 @@ void Piston::run()
         {
             nextTimeStep();
 
-            double t0 = dt * (i - 1);
+            scalar t0 = dt * (i - 1);
 
             qold << qdot( i - 1 ), q( i - 1 );
 
@@ -200,6 +200,8 @@ void Piston::run()
             rhs.setZero();
 
             evaluateFunction( 0, qold, t0, f );
+
+            timeIntegrationScheme->setOldSolution( qold );
 
             if ( sdc )
                 sdc->setFunction( -1, f, qold );
@@ -219,10 +221,7 @@ void Piston::run()
                 if ( j > 0 )
                     corrector = true;
 
-                if ( j == 0 )
-                    timeIntegrationScheme->setOldSolution( qold );
-
-                double t = t0;
+                scalar t = t0;
 
                 int iImplicitStage = 0;
 
@@ -237,7 +236,7 @@ void Piston::run()
                         if ( not esdirk->isStageImplicit( esdirk->A( l, l ) ) )
                             continue;
 
-                    double deltaT = 0;
+                    scalar deltaT = 0;
 
                     if ( sdc )
                     {
@@ -282,12 +281,12 @@ void Piston::implicitSolve(
     bool corrector,
     const int k,
     const int kold,
-    const double t,
-    const double dt,
-    const Eigen::VectorXd & qold,
-    const Eigen::VectorXd & rhs,
-    Eigen::VectorXd & f,
-    Eigen::VectorXd & result
+    const scalar t,
+    const scalar dt,
+    const fsi::vector & qold,
+    const fsi::vector & rhs,
+    fsi::vector & f,
+    fsi::vector & result
     )
 {
     assert( f.rows() == 2 );
@@ -321,7 +320,7 @@ void Piston::setNumberOfImplicitStages( int k )
 {
     this->k = k + 1;
 
-    Eigen::VectorXd sol( 2 );
+    fsi::vector sol( 2 );
     sol << qdot, q;
 
     for ( int i = 0; i < k + 1; i++ )

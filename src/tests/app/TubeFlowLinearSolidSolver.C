@@ -10,14 +10,14 @@ using namespace tubeflow;
 
 TubeFlowLinearSolidSolver::TubeFlowLinearSolidSolver(
     int N,
-    double nu,
-    double rho,
-    double h,
-    double L,
-    double dt,
-    double G,
-    double E0,
-    double r0
+    scalar nu,
+    scalar rho,
+    scalar h,
+    scalar L,
+    scalar dt,
+    scalar G,
+    scalar E0,
+    scalar r0
     )
     :
     TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0 ),

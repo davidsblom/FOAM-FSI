@@ -24,7 +24,7 @@ public:
             int maxUsedIterations,
             int nbReuse,
             int reuseInformationStartingFromTimeIndex,
-            double singularityLimit
+            scalar singularityLimit
             );
 
         virtual ~ASMILS();

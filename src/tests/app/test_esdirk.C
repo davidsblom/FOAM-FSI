@@ -37,7 +37,7 @@ protected:
 
     virtual void SetUp()
     {
-        double dt, q0, qdot0, As, Ac, omega, endTime;
+        scalar dt, q0, qdot0, As, Ac, omega, endTime;
 
         int nbTimeSteps = std::tr1::get<0>( GetParam() );
         std::string method = std::tr1::get<1>( GetParam() );
@@ -92,9 +92,9 @@ TEST_P( ESDIRKTest, run )
     Eigen::VectorXd solution( 2 );
     piston->getSolution( solution );
 
-    double result = solution( 1 );
-    double ref = piston->referenceSolution( 100 );
-    double error = std::abs( result - ref ) / std::abs( ref );
+    scalar result = solution( 1 );
+    scalar ref = piston->referenceSolution( 100 );
+    scalar error = std::abs( result - ref ) / std::abs( ref );
 
     int nbTimeSteps = std::tr1::get<0>( GetParam() );
     std::string method = std::tr1::get<1>( GetParam() );
@@ -209,10 +209,10 @@ TEST( CosTest, ESDIRK )
     std::string method = "ESDIRK74PR";
 
     int nbTimeSteps = 5;
-    double endTime = 0.05;
-    double dt = endTime / nbTimeSteps;
-    double amplitude = 0.2;
-    double frequency = 5;
+    scalar endTime = 0.05;
+    scalar dt = endTime / nbTimeSteps;
+    scalar amplitude = 0.2;
+    scalar frequency = 5;
 
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
     std::shared_ptr<Cos> cos1( new Cos( nbTimeSteps, dt, endTime, amplitude, frequency ) );
@@ -223,10 +223,10 @@ TEST( CosTest, ESDIRK )
     esdirk1->run();
     esdirk2->run();
 
-    double ref = 0.5 * amplitude * std::sin( M_PI * frequency * endTime ) * M_PI * frequency;
-    double error1 = std::abs( cos1->f - ref ) / std::abs( ref );
-    double error2 = std::abs( cos2->f - ref ) / std::abs( ref );
-    double order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
+    scalar ref = 0.5 * amplitude * std::sin( M_PI * frequency * endTime ) * M_PI * frequency;
+    scalar error1 = std::abs( cos1->f - ref ) / std::abs( ref );
+    scalar error2 = std::abs( cos2->f - ref ) / std::abs( ref );
+    scalar order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
 
     std::cout << "error1 = " << error1 << std::endl;
     std::cout << "error2 = " << error2 << std::endl;

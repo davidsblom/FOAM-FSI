@@ -53,7 +53,7 @@ namespace rbf
     {
         // RBF function evaluation
 
-        double r = 0;
+        scalar r = 0;
 
         for ( int i = 0; i < n_A; i++ )
         {
@@ -73,7 +73,7 @@ namespace rbf
     {
         // Evaluate Phi which contains the evaluation of the radial basis function
 
-        double r = 0;
+        scalar r = 0;
 
         for ( int i = 0; i < n_A; i++ )
         {
@@ -138,7 +138,7 @@ namespace rbf
         if ( debug )
         {
             t = std::clock() - t;
-            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+            scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
             Info << "RBFInterpolation::debug 1. evaluate H = " << runTime << " s" << endl;
             t = std::clock();
         }
@@ -187,7 +187,7 @@ namespace rbf
             if ( debug )
             {
                 t = std::clock() - t;
-                double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+                scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
                 Info << "RBFInterpolation::debug 2. evaluate Phi = " << runTime << " s" << endl;
                 t = std::clock();
             }
@@ -204,7 +204,7 @@ namespace rbf
             if ( debug )
             {
                 t = std::clock() - t;
-                double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+                scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
                 Info << "RBFInterpolation::debug 3. compute Hhat = " << runTime << " s" << endl;
             }
         }
@@ -277,7 +277,7 @@ namespace rbf
         if ( debug )
         {
             t = std::clock() - t;
-            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+            scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
             Info << "RBFInterpolation::debug 4. interpolation = " << runTime << " s" << endl;
         }
 
@@ -415,7 +415,7 @@ namespace rbf
         if ( nNewPoints == Phi.cols() )
             nNewPoints = n_A;
 
-        double r = 0;
+        scalar r = 0;
 
         for ( int i = 0; i < nNewPoints; i++ )
         {

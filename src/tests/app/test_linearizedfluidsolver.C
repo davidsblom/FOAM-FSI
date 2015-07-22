@@ -15,15 +15,15 @@ protected:
 
     virtual void SetUp()
     {
-        double p0 = 0;
-        double r0 = 0.2;
-        double u0 = 0.1;
-        double dt = 0.1;
-        double rho = 1.225;
-        double L = 1;
-        double T = 1;
-        double h = 1.0e-3;
-        double E = 490;
+        scalar p0 = 0;
+        scalar r0 = 0.2;
+        scalar u0 = 0.1;
+        scalar dt = 0.1;
+        scalar rho = 1.225;
+        scalar L = 1;
+        scalar T = 1;
+        scalar h = 1.0e-3;
+        scalar E = 490;
         int N = 5;
 
         fluid = new tubeflow::TubeFlowLinearizedFluidSolver( N, p0, r0, u0, rho, E, h, T, dt, L );
@@ -51,8 +51,8 @@ TEST_F( TubeFlowLinearizedFluidSolverTest, solve )
     int N = 5;
     fsi::vector p( N ), a( N );
     p.setZero();
-    double r0 = 0.2;
-    double a0 = M_PI * r0 * r0;
+    scalar r0 = 0.2;
+    scalar a0 = M_PI * r0 * r0;
     a.fill( a0 );
 
     fluid->solve( a, p );

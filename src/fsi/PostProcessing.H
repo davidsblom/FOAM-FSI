@@ -19,7 +19,7 @@ public:
 
         PostProcessing(
             shared_ptr<MultiLevelFsiSolver> fsi,
-            double initialRelaxation,
+            scalar initialRelaxation,
             int maxIter,
             int maxUsedIterations,
             int nbReuse,
@@ -58,7 +58,7 @@ public:
 
         shared_ptr<MultiLevelFsiSolver> fsi;
 
-        double initialRelaxation;
+        scalar initialRelaxation;
 
         int maxIter;
         int maxUsedIterations;

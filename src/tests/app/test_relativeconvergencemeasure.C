@@ -11,7 +11,7 @@ using namespace fsi;
 
 TEST( RelativeConvergenceMeasure, measure )
 {
-    double convergenceLimit = 0.1;
+    scalar convergenceLimit = 0.1;
 
     RelativeConvergenceMeasure measure( 0, convergenceLimit );
 

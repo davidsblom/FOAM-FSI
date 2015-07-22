@@ -11,6 +11,7 @@
 #include <string>
 #include <memory>
 #include <Eigen/Dense>
+#include "fvCFD.H"
 
 namespace rbf
 {
@@ -20,7 +21,7 @@ public:
 
         virtual ~RBFFunctionInterface(){}
 
-        virtual double evaluate( double value ) = 0;
+        virtual scalar evaluate( scalar value ) = 0;
     };
 }
 

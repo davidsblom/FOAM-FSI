@@ -19,14 +19,14 @@ public:
 
         TubeFlowLinearizedSolidSolver(
             int N,
-            double nu,
-            double rho,
-            double h,
-            double L,
-            double dt,
-            double G,
-            double E0,
-            double r0
+            scalar nu,
+            scalar rho,
+            scalar h,
+            scalar L,
+            scalar dt,
+            scalar G,
+            scalar E0,
+            scalar r0
             );
 
         virtual ~TubeFlowLinearizedSolidSolver();
@@ -60,13 +60,13 @@ public:
         // Constants
 
         int N;
-        double dt;
-        double r0;
-        double kappa;
-        double dx;
-        double alpha;
-        double beta;
-        double gamma;
+        scalar dt;
+        scalar r0;
+        scalar kappa;
+        scalar dx;
+        scalar alpha;
+        scalar beta;
+        scalar gamma;
 
         matrix grid;
 

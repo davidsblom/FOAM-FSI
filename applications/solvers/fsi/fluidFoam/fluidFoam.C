@@ -69,8 +69,8 @@ int main(
 
         bool adaptiveTimeStepping = adaptiveTimeConfig["enabled"].as<bool>();
         std::string filter = "elementary";
-        double adaptiveTolerance = 1.0e-3;
-        double safetyFactor = 0.5;
+        scalar adaptiveTolerance = 1.0e-3;
+        scalar safetyFactor = 0.5;
 
         if ( adaptiveTimeStepping )
         {
@@ -78,8 +78,8 @@ int main(
             assert( adaptiveTimeConfig["tolerance"] );
             assert( adaptiveTimeConfig["safety-factor"] );
             filter = adaptiveTimeConfig["filter"].as<std::string>();
-            adaptiveTolerance = adaptiveTimeConfig["tolerance"].as<double>();
-            safetyFactor = adaptiveTimeConfig["safety-factor"].as<double>();
+            adaptiveTolerance = adaptiveTimeConfig["tolerance"].as<scalar>();
+            safetyFactor = adaptiveTimeConfig["safety-factor"].as<scalar>();
         }
 
         adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( adaptiveTimeStepping, filter, adaptiveTolerance, safetyFactor ) );
@@ -95,7 +95,7 @@ int main(
         assert( adaptiveTimeStepper );
 
         int n = sdcConfig["number-of-points"].as<int>();
-        double tol = sdcConfig["convergence-tolerance"].as<double>();
+        scalar tol = sdcConfig["convergence-tolerance"].as<scalar>();
         std::string quadratureRule = sdcConfig["quadrature-rule"].as<std::string>();
 
         std::shared_ptr<sdc::SDCSolver> solver;

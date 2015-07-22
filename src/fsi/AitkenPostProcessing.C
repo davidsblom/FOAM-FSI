@@ -12,7 +12,7 @@ using namespace fsi;
 
 AitkenPostProcessing::AitkenPostProcessing(
     shared_ptr<MultiLevelFsiSolver> fsi,
-    double initialRelaxation,
+    scalar initialRelaxation,
     int maxIter,
     int maxUsedIterations,
     int nbReuse,
@@ -100,7 +100,7 @@ void AitkenPostProcessing::performPostProcessing(
 
             // Safe guards for the aitken relaxation factor
             aitkenFactor = std::max( aitkenFactor, initialRelaxation );
-            aitkenFactor = std::min( aitkenFactor, 2.0 );
+            aitkenFactor = std::min( aitkenFactor, scalar( 2.0 ) );
 
             assert( !std::isnan( aitkenFactor ) );
 

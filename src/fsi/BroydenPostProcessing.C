@@ -11,10 +11,10 @@ using namespace fsi;
 BroydenPostProcessing::BroydenPostProcessing(
     shared_ptr<MultiLevelFsiSolver> fsi,
     int maxIter,
-    double initialRelaxation,
+    scalar initialRelaxation,
     int maxUsedIterations,
     int nbReuse,
-    double singularityLimit,
+    scalar singularityLimit,
     int reuseInformationStartingFromTimeIndex
     )
     :
@@ -49,7 +49,7 @@ void BroydenPostProcessing::finalizeTimeStep()
         for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
             nbCols += solsTimeList.at( i ).at( j ).size() - 1;
 
-    J = -Eigen::MatrixXd::Identity( J.rows(), J.cols() );
+    J = -fsi::matrix::Identity( J.rows(), J.cols() );
 
     int nbColsCurrentTimeStep = std::max( static_cast<int>(sols.size() - 1), 0 );
 
@@ -187,7 +187,7 @@ void BroydenPostProcessing::performPostProcessing(
     }
 
     if ( J.cols() != R.rows() || J.rows() != R.rows() )
-        J = -Eigen::MatrixXd::Identity( R.rows(), R.rows() );
+        J = -fsi::matrix::Identity( R.rows(), R.rows() );
 
     for ( int iter = 0; iter < maxIter - 1; iter++ )
     {

@@ -24,36 +24,36 @@ public:
             std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
             std::string rule,
             int nbNodes,
-            double tol
+            scalar tol
             );
 
         SDC(
             std::string rule,
             int nbNodes,
-            double tol
+            scalar tol
             );
 
         ~SDC();
 
         void run();
 
-        void solveTimeStep( const double t0 );
+        void solveTimeStep( const scalar t0 );
 
         virtual void getSourceTerm(
             const bool corrector,
             const int k,
-            const double deltaT,
-            Eigen::VectorXd & rhs,
-            Eigen::VectorXd & qold
+            const scalar deltaT,
+            fsi::vector & rhs,
+            fsi::vector & qold
             );
 
         virtual void setFunction(
             const int k,
-            const Eigen::VectorXd & f,
-            const Eigen::VectorXd & result
+            const fsi::vector & f,
+            const fsi::vector & result
             );
 
-        virtual void setOldSolution( const Eigen::VectorXd & result );
+        virtual void setOldSolution( const fsi::vector & result );
 
         virtual int getNbImplicitStages();
 
@@ -68,35 +68,35 @@ public:
         int N;
         int k;
 
-        double dt;
-        double tol;
+        scalar dt;
+        scalar tol;
 
-        Eigen::VectorXd nodes;
-        Eigen::MatrixXd smat;
-        Eigen::MatrixXd qmat;
-        Eigen::VectorXd nodesEmbedded;
-        Eigen::MatrixXd smatEmbedded;
-        Eigen::MatrixXd qmatEmbedded;
-        Eigen::VectorXd dsdc;
+        fsi::vector nodes;
+        fsi::matrix smat;
+        fsi::matrix qmat;
+        fsi::vector nodesEmbedded;
+        fsi::matrix smatEmbedded;
+        fsi::matrix qmatEmbedded;
+        fsi::vector dsdc;
 
 private:
 
         void computeResidual(
-            const Eigen::MatrixXd & qmat,
-            const Eigen::MatrixXd & F,
-            const double dt,
-            Eigen::MatrixXd & qj
+            const fsi::matrix & qmat,
+            const fsi::matrix & F,
+            const scalar dt,
+            fsi::matrix & qj
             );
 
         // Store function in memory in case the source term is requested
         // by the solver
         bool corrector;
         int stageIndex;
-        double stageDeltaT;
-        Eigen::MatrixXd F;
-        Eigen::MatrixXd Fold;
-        Eigen::MatrixXd Sj;
-        Eigen::MatrixXd solStages;
+        scalar stageDeltaT;
+        fsi::matrix F;
+        fsi::matrix Fold;
+        fsi::matrix Sj;
+        fsi::matrix solStages;
         bool convergence;
     };
 }

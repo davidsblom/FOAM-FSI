@@ -26,7 +26,7 @@ public:
         int maxUsedIterations,
         int nbReuse,
         int reuseInformationStartingFromTimeIndex,
-        double singularityLimit
+        scalar singularityLimit
         );
 
     virtual ~SpaceMapping(){}
@@ -66,7 +66,7 @@ public:
     int maxUsedIterations;
     int nbReuse;
     int reuseInformationStartingFromTimeIndex;
-    double singularityLimit;
+    scalar singularityLimit;
     int timeIndex;
 
     deque<fsi::vector> coarseResiduals;

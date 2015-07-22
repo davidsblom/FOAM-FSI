@@ -14,7 +14,7 @@ namespace rbf
     TPSFunction::~TPSFunction()
     {}
 
-    double TPSFunction::evaluate( double value )
+    scalar TPSFunction::evaluate( scalar value )
     {
         if ( value > 0 )
             return std::log( value ) * value * value;

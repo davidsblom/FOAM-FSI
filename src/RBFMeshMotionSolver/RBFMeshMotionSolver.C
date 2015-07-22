@@ -147,15 +147,15 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         assert( cpu == true );
 
     bool coarsening = readBool( subDict( "coarsening" ).lookup( "enabled" ) );
-    double tol = 0.1;
-    double tolLivePointSelection = 0.1;
+    scalar tol = 0.1;
+    scalar tolLivePointSelection = 0.1;
     bool livePointSelection = false;
     bool exportSelectedPoints = false;
     int coarseningMinPoints = 1;
     int coarseningMaxPoints = 2;
     bool twoPointSelection = false;
     bool surfaceCorrection = false;
-    double ratioRadiusError = 10.0;
+    scalar ratioRadiusError = 10.0;
 
     if ( coarsening )
     {
@@ -440,7 +440,7 @@ void RBFMeshMotionSolver::solve()
 
             assert( pointProcAddressing.size() == mesh().points().size() );
 
-            // Count the number of global static points including double points
+            // Count the number of global static points including scalar points
             nbGlobalStaticFaceCenters[Pstream::myProcNo()] = nbStaticFaceCenters;
             nbGlobalFixedFaceCenters[Pstream::myProcNo()] = nbFixedFaceCenters;
             nbGlobalMovingFaceCenters[Pstream::myProcNo()] = nbMovingFaceCenters;
@@ -454,7 +454,7 @@ void RBFMeshMotionSolver::solve()
                 nbMovingFaceCenters = sum( nbGlobalMovingFaceCenters );
 
             // Construct a list with all the global point labels, thus including
-            // also double points. Thereafter, construct a list of static control
+            // also scalar points. Thereafter, construct a list of static control
             // list which indicates whether the point is already included or not.
             // Use this later to build a list of the unique static control points.
             labelList globalStaticPointsList( nbStaticFaceCenters, 0 );

@@ -18,19 +18,19 @@ protected:
     virtual void SetUp()
     {
         // Physical settings
-        double r0 = 0.2;
-        double a0 = M_PI * r0 * r0;
-        double u0 = 0.1;
-        double p0 = 0;
-        double dt = 0.1;
+        scalar r0 = 0.2;
+        scalar a0 = M_PI * r0 * r0;
+        scalar u0 = 0.1;
+        scalar p0 = 0;
+        scalar dt = 0.1;
         int N = 5;
         int couplingGridSize = 2 * N;
-        double L = 1;
-        double T = 10;
-        double rho = 1.225;
-        double E = 490;
-        double h = 1.0e-3;
-        double cmk = std::sqrt( E * h / (2 * rho * r0) );
+        scalar L = 1;
+        scalar T = 10;
+        scalar rho = 1.225;
+        scalar E = 490;
+        scalar h = 1.0e-3;
+        scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
 
         // Initialize variables
         fluid = shared_ptr<TubeFlowFluidSolver>( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
@@ -184,7 +184,7 @@ TEST_F( MultiLevelSolverTest, solidFineSolver )
 TEST_F( MultiLevelSolverTest, gridFluid )
 {
     fluid->calcGrid();
-    double tol = 1.0e-14;
+    scalar tol = 1.0e-14;
     ASSERT_NEAR( fluid->grid( 0, 0 ), 0.1, tol );
     ASSERT_NEAR( fluid->grid( 1, 0 ), 0.3, tol );
     ASSERT_NEAR( fluid->grid( 2, 0 ), 0.5, tol );
@@ -197,7 +197,7 @@ TEST_F( MultiLevelSolverTest, gridFluid )
 TEST_F( MultiLevelSolverTest, gridSolid )
 {
     solid->calcGrid();
-    double tol = 1.0e-14;
+    scalar tol = 1.0e-14;
     ASSERT_NEAR( solid->grid( 0, 0 ), 0.1, tol );
     ASSERT_NEAR( solid->grid( 1, 0 ), 0.3, tol );
     ASSERT_NEAR( solid->grid( 2, 0 ), 0.5, tol );
@@ -210,7 +210,7 @@ TEST_F( MultiLevelSolverTest, gridSolid )
 TEST_F( MultiLevelSolverTest, fineGridFluid )
 {
     fluidFine->calcGrid();
-    double tol = 1.0e-14;
+    scalar tol = 1.0e-14;
     ASSERT_NEAR( fluidFine->grid( 0, 0 ), 0.05, tol );
     ASSERT_NEAR( fluidFine->grid( 1, 0 ), 0.15, tol );
     ASSERT_NEAR( fluidFine->grid( 2, 0 ), 0.25, tol );
@@ -228,7 +228,7 @@ TEST_F( MultiLevelSolverTest, fineGridFluid )
 TEST_F( MultiLevelSolverTest, fineGridSolid )
 {
     solidFine->calcGrid();
-    double tol = 1.0e-14;
+    scalar tol = 1.0e-14;
     ASSERT_NEAR( solidFine->grid( 0, 0 ), 0.05, tol );
     ASSERT_NEAR( solidFine->grid( 1, 0 ), 0.15, tol );
     ASSERT_NEAR( solidFine->grid( 2, 0 ), 0.25, tol );

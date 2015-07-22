@@ -19,15 +19,15 @@ namespace tubeflow
 public:
 
         TubeFlowFluidSolver(
-            double a0,
-            double u0,
-            double p0,
-            double dt,
-            double cmk,
+            scalar a0,
+            scalar u0,
+            scalar p0,
+            scalar dt,
+            scalar cmk,
             int N,
-            double L,
-            double T,
-            double rho
+            scalar L,
+            scalar T,
+            scalar rho
             );
 
         virtual ~TubeFlowFluidSolver();
@@ -58,12 +58,12 @@ public:
             fsi::vector & output
             );
 
-        double evaluateInletVelocityBoundaryCondition();
+        scalar evaluateInletVelocityBoundaryCondition();
 
-        double evaluateOutputPressureBoundaryCondition(
-            double pout_n,
-            double uout_n,
-            double uout
+        scalar evaluateOutputPressureBoundaryCondition(
+            scalar pout_n,
+            scalar uout_n,
+            scalar uout
             );
 
         void evaluateJacobian(
@@ -84,18 +84,18 @@ public:
             fsi::vector & R
             );
 
-        double a0;
-        double u0;
-        double p0;
-        double dt;
-        double dx;
-        double cmk;
-        double rho;
-        double T;
-        double alpha;
-        double tau;
-        double p_outn;
-        double p_out;
+        scalar a0;
+        scalar u0;
+        scalar p0;
+        scalar dt;
+        scalar dx;
+        scalar cmk;
+        scalar rho;
+        scalar T;
+        scalar alpha;
+        scalar tau;
+        scalar p_outn;
+        scalar p_out;
 
         fsi::vector un;
         fsi::vector pn;
@@ -107,7 +107,7 @@ public:
         int iter;
         int minIter;
         int maxIter;
-        double tol;
+        scalar tol;
         int nbRes;
         int nbJac;
 
