@@ -7,6 +7,8 @@
 #ifndef TimeIntegrationScheme_H
 #define TimeIntegrationScheme_H
 
+#include "DataValues.H"
+
 namespace sdc
 {
     class TimeIntegrationScheme
