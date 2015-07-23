@@ -20,12 +20,13 @@
 #include "twoDPointCorrectorRBF.H"
 #include <memory>
 #include <assert.h>
+#include "TimeIntegrationScheme.H"
 
 namespace Foam
 {
     class RBFMeshMotionSolver : public motionSolver
     {
-private:
+protected:
 
         // Disallow default bitwise copy construct
         RBFMeshMotionSolver( const RBFMeshMotionSolver & );
@@ -87,6 +88,11 @@ public:
 
         // Update the mesh corresponding to given map
         virtual void updateMesh( const mapPolyMesh & );
+
+        std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
+
+        bool corrector;
+        int k;
     };
 }
 

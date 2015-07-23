@@ -21,6 +21,7 @@
 #include <memory>
 #include <assert.h>
 
+#include "RBFMeshMotionSolver.H"
 #include "SDC.H"
 #include "ESDIRK.H"
 #include "TimeIntegrationScheme.H"
@@ -28,7 +29,7 @@
 
 namespace Foam
 {
-    class RBFMeshRigidMotionSolver : public motionSolver
+    class RBFMeshRigidMotionSolver : public RBFMeshMotionSolver
     {
 private:
 
@@ -40,32 +41,6 @@ private:
 
         Foam::vector calcTransformation( double t );
         Foam::vector calcVelocity();
-
-        Field<vectorField> motionCenters;
-
-        wordList staticPatches;
-        labelList staticPatchIDs;
-        wordList movingPatches;
-        labelList movingPatchIDs;
-        wordList fixedPatches;
-        labelList fixedPatchIDs;
-
-        pointField newPoints;
-
-        std::shared_ptr<rbf::RBFCoarsening> rbf;
-
-        labelList nbGlobalFaceCenters;
-        labelList nbGlobalMovingFaceCenters;
-        labelList nbGlobalStaticFaceCenters;
-        labelList nbGlobalFixedFaceCenters;
-
-        List<labelList> globalMovingPointsLabelList;
-
-        // 2d corrector
-        twoDPointCorrectorRBF twoDCorrector;
-        int nbPoints;
-        bool faceCellCenters;
-        bool cpu;
 
         // Rigid body motion
         double translationAmplitude;
@@ -94,25 +69,8 @@ public:
         // Destructor
         virtual ~RBFMeshRigidMotionSolver();
 
-        // Set the motion of every boundary patch, where m is equal to number of patches and with non-empty vectorFields for moving patches.
-        // The motion is defined at the face centers of the boundary patch.
-        void setMotion( const Field<vectorField> & motion );
-
-        // Return point location obtained from the current motion field
-        virtual tmp<pointField> curPoints() const;
-
         // Solve for motion
         virtual void solve();
-
-        // Update the mesh corresponding to given map
-        virtual void updateMesh( const mapPolyMesh & );
-
-        void setTimeIntegrationInfo( const bool corrector, const int k );
-
-        std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
-
-        bool corrector;
-        int k;
     };
 }
 
