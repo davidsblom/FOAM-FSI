@@ -11,10 +11,10 @@ EXE_INC = -std=c++11 \
     -I./../fsi/lnInclude \
     -I./../thirdParty/yaml-cpp/include
 
-EXE_LIBS = \
+LIB_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
     -lfiniteVolume \
     -ldynamicMesh \
     -lmeshTools \
     -ltriSurface \
-    -whole-archive -lyaml-cpp
+    -lyaml-cpp

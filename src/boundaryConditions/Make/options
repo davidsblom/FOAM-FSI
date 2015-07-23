@@ -6,7 +6,6 @@ EXE_INC = -std=c++11 \
 	-I../thirdParty/eigen \
 	-I../thirdParty/yaml-cpp/include
 
-EXE_LIBS = \
+LIB_LIBS = \
 	-L$(FOAM_USER_LIBBIN) \
-	-L../thirdParty/yaml-cpp/build \
-	-whole-archive -lyaml-cpp
+	-lyaml-cpp

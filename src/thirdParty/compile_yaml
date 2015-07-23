@@ -34,11 +34,16 @@ if [ ! -d "yaml-cpp-release-${VERSION}" ]; then
     cd build
 
     if [ "$(uname)" == "Darwin" ]; then
-        CC=gcc-mp-4.9 CXX=g++-mp-4.9 cmake ..
+        CC=gcc-mp-4.9 CXX=g++-mp-4.9 -DBUILD_SHARED_LIBS=ON cmake ..
     else
-        cmake ..
+        cmake -DBUILD_SHARED_LIBS=ON ..
     fi
 
     make -j 8
+
+    # Copy the shared library to $FOAM_USER_LIBBIN
+    cp libyaml-cpp.so.0.5.2 ${FOAM_USER_LIBBIN}/
+    cp libyaml-cpp.so.0.5 ${FOAM_USER_LIBBIN}/
+    cp libyaml-cpp.so ${FOAM_USER_LIBBIN}/
 
 fi
