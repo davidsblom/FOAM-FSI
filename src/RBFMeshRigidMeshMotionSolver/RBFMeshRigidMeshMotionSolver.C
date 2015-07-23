@@ -22,24 +22,7 @@ RBFMeshRigidMeshMotionSolver::RBFMeshRigidMeshMotionSolver(
     Istream & msData
     )
     :
-    motionSolver( mesh ),
-    motionCenters( mesh.boundaryMesh().size(), vectorField( 0 ) ),
-    staticPatches( lookup( "staticPatches" ) ),
-    staticPatchIDs( staticPatches.size() ),
-    movingPatches( lookup( "movingPatches" ) ),
-    movingPatchIDs( movingPatches.size() ),
-    fixedPatches( lookup( "fixedPatches" ) ),
-    fixedPatchIDs( fixedPatches.size() ),
-    newPoints( mesh.points().size(), vector::zero ),
-    nbGlobalFaceCenters( Pstream::nProcs(), 0 ),
-    nbGlobalMovingFaceCenters( Pstream::nProcs(), 0 ),
-    nbGlobalStaticFaceCenters( Pstream::nProcs(), 0 ),
-    nbGlobalFixedFaceCenters( Pstream::nProcs(), 0 ),
-    globalMovingPointsLabelList( mesh.boundaryMesh().size(), labelList( 0 ) ),
-    twoDCorrector( mesh ),
-    nbPoints( 0 ),
-    faceCellCenters( true ),
-    cpu( false ),
+    RBFMeshMotionSolver( mesh, msData ),
     translationAmplitude( 0 ),
     translationFrequency( 0 ),
     translationDirection( Foam::vector::zero ),
@@ -47,165 +30,8 @@ RBFMeshRigidMeshMotionSolver::RBFMeshRigidMeshMotionSolver(
     rotationFrequency( 0 ),
     rotationOrigin( Foam::vector::zero ),
     oldTransformation( Foam::vector::zero ),
-    told( 0 ),
-    corrector( false ),
-    k( 0 )
+    told( 0 )
 {
-    // Find IDs of staticPatches
-    forAll( staticPatches, patchI )
-    {
-        label patchIndex = mesh.boundaryMesh().findPatchID( staticPatches[patchI] );
-
-        assert( patchIndex >= 0 );
-
-        staticPatchIDs[patchI] = patchIndex;
-    }
-
-    // Find IDs of movingPatches
-    forAll( movingPatches, patchI )
-    {
-        label patchIndex = mesh.boundaryMesh().findPatchID( movingPatches[patchI] );
-
-        assert( patchIndex >= 0 );
-
-        movingPatchIDs[patchI] = patchIndex;
-    }
-
-    assert( movingPatches.size() == 0 );
-
-    // Find IDs of fixedPatches
-    forAll( fixedPatches, patchI )
-    {
-        label patchIndex = mesh.boundaryMesh().findPatchID( fixedPatches[patchI] );
-
-        assert( patchIndex >= 0 );
-
-        fixedPatchIDs[patchI] = patchIndex;
-    }
-
-    // Verify that a patch is not defined as a static and a moving patch
-
-    forAll( staticPatchIDs, staticPatchI )
-    {
-        // Search the moving patches for static patchI
-        forAll( movingPatchIDs, movingPatchI )
-        {
-            assert( movingPatchIDs[movingPatchI] != staticPatchIDs[staticPatchI] );
-        }
-
-        // Search the fixed patches for static patchI
-        forAll( fixedPatchIDs, fixedPatchI )
-        {
-            assert( fixedPatchIDs[fixedPatchI] != staticPatchIDs[staticPatchI] );
-        }
-    }
-
-    forAll( fixedPatchIDs, fixedPatchI )
-    {
-        // Search the moving patches for fixed patchI
-        forAll( movingPatchIDs, movingPatchI )
-        {
-            assert( movingPatchIDs[movingPatchI] != fixedPatchIDs[fixedPatchI] );
-        }
-    }
-
-    // Initialize RBF interpolator
-
-    dictionary & dict = subDict( "interpolation" );
-
-    word function = dict.lookup( "function" );
-
-    assert( function == "TPS" || function == "WendlandC0" || function == "WendlandC2" || function == "WendlandC4" || function == "WendlandC6" );
-
-    std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
-
-    Info << "Radial Basis Function interpolation: Selecting RBF function: " << function << endl;
-
-    if ( function == "TPS" )
-        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::TPSFunction() );
-
-    if ( function == "WendlandC0" )
-    {
-        scalar radius = readScalar( dict.lookup( "radius" ) );
-        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC0Function( radius ) );
-    }
-
-    if ( function == "WendlandC2" )
-    {
-        scalar radius = readScalar( dict.lookup( "radius" ) );
-        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( radius ) );
-    }
-
-    if ( function == "WendlandC4" )
-    {
-        scalar radius = readScalar( dict.lookup( "radius" ) );
-        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC4Function( radius ) );
-    }
-
-    if ( function == "WendlandC6" )
-    {
-        scalar radius = readScalar( dict.lookup( "radius" ) );
-        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC6Function( radius ) );
-    }
-
-    assert( rbfFunction );
-
-    bool polynomialTerm = dict.lookupOrDefault( "polynomial", false );
-    bool cpu = dict.lookupOrDefault( "cpu", false );
-    this->cpu = dict.lookupOrDefault( "fullCPU", false );
-    std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator( new rbf::RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
-
-    if ( this->cpu == true )
-        assert( cpu == true );
-
-    bool coarsening = readBool( subDict( "coarsening" ).lookup( "enabled" ) );
-    scalar tol = 0.1;
-    scalar tolLivePointSelection = 0.1;
-    bool livePointSelection = false;
-    bool exportSelectedPoints = false;
-    int coarseningMinPoints = 1;
-    int coarseningMaxPoints = 2;
-    bool twoPointSelection = false;
-    bool surfaceCorrection = false;
-    scalar ratioRadiusError = 10.0;
-
-    if ( coarsening )
-    {
-        tol = readScalar( subDict( "coarsening" ).lookup( "tol" ) );
-        coarseningMinPoints = readLabel( subDict( "coarsening" ).lookup( "minPoints" ) );
-        coarseningMaxPoints = readLabel( subDict( "coarsening" ).lookup( "maxPoints" ) );
-        livePointSelection = readBool( subDict( "coarsening" ).lookup( "livePointSelection" ) );
-        exportSelectedPoints = readBool( subDict( "coarsening" ).lookup( "exportSelectedPoints" ) );
-        twoPointSelection = subDict( "coarsening" ).lookupOrDefault( "twoPointSelection", false );
-    }
-
-    if ( livePointSelection )
-    {
-        tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
-        surfaceCorrection = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrection", false );
-
-        if ( surfaceCorrection )
-        {
-            ratioRadiusError = subDict( "coarsening" ).lookupOrDefault( "ratioRadiusError", 10.0 );
-        }
-    }
-
-    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, ratioRadiusError, exportSelectedPoints ) );
-
-    faceCellCenters = lookupOrDefault( "faceCellCenters", true );
-
-    Info << "RBF mesh deformation settings:" << endl;
-    Info << "    interpolation function = " << function << endl;
-    Info << "    interpolation polynomial term = " << polynomialTerm << endl;
-    Info << "    interpolation cpu formulation = " << cpu << endl;
-    Info << "    coarsening = " << coarsening << endl;
-    Info << "        coarsening tolerance = " << tol << endl;
-    Info << "        coarsening reselection tolerance = " << tolLivePointSelection << endl;
-    Info << "        coarsening two-point selection = " << twoPointSelection << endl;
-
-    // Rigid body motion parameters
-    assert( faceCellCenters == false );
-
     dictionary & rigidBodyMotionDict = subDict( "rigidBodyMotion" );
     translationAmplitude = readScalar( rigidBodyMotionDict.lookup( "translationAmplitude" ) );
     translationFrequency = readScalar( rigidBodyMotionDict.lookup( "translationFrequency" ) );
@@ -249,66 +75,6 @@ RBFMeshRigidMeshMotionSolver::RBFMeshRigidMeshMotionSolver(
 RBFMeshRigidMeshMotionSolver::~RBFMeshRigidMeshMotionSolver()
 {}
 
-tmp<pointField> RBFMeshRigidMeshMotionSolver::curPoints() const
-{
-    // Prepare new points: same as old point
-    tmp<pointField> tnewPoints
-    (
-        new vectorField( mesh().nPoints(), vector::zero )
-    );
-
-    pointField & newPoints = tnewPoints();
-
-    newPoints = this->newPoints;
-
-    // Add old point positions
-    newPoints += mesh().points();
-
-    return tnewPoints;
-}
-
-// As a first step, the motion is defined in the
-void RBFMeshRigidMeshMotionSolver::setMotion( const Field<vectorField> & motion )
-{
-    // Input checking
-
-    assert( motion.size() == mesh().boundaryMesh().size() );
-
-    forAll( motion, ipatch )
-    {
-        const vectorField & mpatch = motion[ipatch];
-
-        // Check whether the size of patch motion is equal to number of face centers in patch
-        if ( faceCellCenters && mpatch.size() > 0 )
-            assert( mpatch.size() == mesh().boundaryMesh()[ipatch].faceCentres().size() );
-
-        if ( not faceCellCenters && mpatch.size() > 0 )
-            assert( mpatch.size() == mesh().boundaryMesh()[ipatch].meshPoints().size() );
-
-        // Check whether the size of a moving patch is equal to the number of face centers in the patch
-        // First check if patchid is a moving patch
-        bool movingPatch = false;
-        forAll( movingPatchIDs, movingPatchI )
-        {
-            if ( movingPatchIDs[movingPatchI] == ipatch )
-                movingPatch = true;
-        }
-
-        if ( faceCellCenters && movingPatch )
-            assert( mpatch.size() == mesh().boundaryMesh()[ipatch].faceCentres().size() );
-
-        if ( not faceCellCenters && movingPatch )
-            assert( mpatch.size() == mesh().boundaryMesh()[ipatch].meshPoints().size() );
-    }
-
-    motionCenters = motion;
-}
-
-void RBFMeshRigidMeshMotionSolver::updateMesh( const mapPolyMesh & )
-{
-    assert( false );
-}
-
 Foam::vector RBFMeshRigidMeshMotionSolver::calcTransformation( scalar t )
 {
     scalar smoothStartup = 1;
@@ -327,12 +93,6 @@ Foam::vector RBFMeshRigidMeshMotionSolver::calcTransformation( scalar t )
     Foam::vector transformation = smoothStartup * translationAmplitude * translationDirection * ( 0.5 - 0.5 * Foam::cos( M_PI * translationFrequency * t ) );
 
     return transformation;
-}
-
-void RBFMeshRigidMeshMotionSolver::setTimeIntegrationInfo( const bool corrector, const int k )
-{
-    this->corrector = corrector;
-    this->k = k;
 }
 
 Foam::vector RBFMeshRigidMeshMotionSolver::calcVelocity()

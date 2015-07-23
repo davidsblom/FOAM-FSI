@@ -8,8 +8,8 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude \
     -I$(LIB_SRC)/foam/lnInclude \
-    -I$(FOAM_USER_SRC)/fsi/lnInclude \
-    -I$(FOAM_USER_SRC)/thirdParty/yaml-cpp/include
+    -I./../fsi/lnInclude \
+    -I./../thirdParty/yaml-cpp/include
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
