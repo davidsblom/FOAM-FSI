@@ -59,43 +59,43 @@ public:
 
     virtual void evaluateFunction(
         const int k,
-        const Eigen::VectorXd & q,
-        const double t,
-        Eigen::VectorXd & f
+        const fsi::vector & q,
+        const scalar t,
+        fsi::vector & f
         );
 
     virtual void finalizeTimeStep();
 
     virtual int getDOF();
 
-    virtual void getSolution( Eigen::VectorXd & solution );
+    virtual void getSolution( fsi::vector & solution );
 
     virtual void setSolution(
-        const Eigen::VectorXd & solution,
-        const Eigen::VectorXd & f
+        const fsi::vector & solution,
+        const fsi::vector & f
         );
 
-    virtual double getEndTime();
+    virtual scalar getEndTime();
 
-    virtual double getScalingFactor();
+    virtual scalar getScalingFactor();
 
-    virtual double getTimeStep();
+    virtual scalar getTimeStep();
 
-    virtual double getStartTime();
+    virtual scalar getStartTime();
 
     virtual void implicitSolve(
         bool corrector,
         const int k,
         const int kold,
-        const double t,
-        const double dt,
-        const Eigen::VectorXd & qold,
-        const Eigen::VectorXd & rhs,
-        Eigen::VectorXd & f,
-        Eigen::VectorXd & result
+        const scalar t,
+        const scalar dt,
+        const fsi::vector & qold,
+        const fsi::vector & rhs,
+        fsi::vector & f,
+        fsi::vector & result
         );
 
-    virtual void setDeltaT( double dt );
+    virtual void setDeltaT( scalar dt );
 
     virtual void setNumberOfImplicitStages( int k );
 
@@ -115,7 +115,7 @@ private:
 
     void createFields();
 
-    double evaluateMomentumResidual();
+    scalar evaluateMomentumResidual();
 
     void initialize();
 

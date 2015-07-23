@@ -314,7 +314,7 @@ void SDCDynamicMeshFluidSolver::createFields()
     setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
 }
 
-double SDCDynamicMeshFluidSolver::evaluateMomentumResidual()
+scalar SDCDynamicMeshFluidSolver::evaluateMomentumResidual()
 {
     dimensionedScalar rDeltaT = 1.0 / mesh.time().deltaT();
     volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p ) - rDeltaT * rhsU;
@@ -380,7 +380,7 @@ void SDCDynamicMeshFluidSolver::resetSolution()
     assert( false );
 }
 
-void SDCDynamicMeshFluidSolver::setDeltaT( double dt )
+void SDCDynamicMeshFluidSolver::setDeltaT( scalar dt )
 {
     runTime->setDeltaT( dt );
 }
@@ -527,7 +527,7 @@ int SDCDynamicMeshFluidSolver::getDOF()
     return index;
 }
 
-void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
+void SDCDynamicMeshFluidSolver::getSolution( fsi::vector & solution )
 {
     volScalarField V
     (
@@ -615,8 +615,8 @@ void SDCDynamicMeshFluidSolver::getSolution( Eigen::VectorXd & solution )
 }
 
 void SDCDynamicMeshFluidSolver::setSolution(
-    const Eigen::VectorXd & solution,
-    const Eigen::VectorXd & f
+    const fsi::vector & solution,
+    const fsi::vector & f
     )
 {
     p = pStages.at( 0 );
@@ -729,26 +729,26 @@ void SDCDynamicMeshFluidSolver::setSolution(
     assert( index == f.rows() );
 }
 
-double SDCDynamicMeshFluidSolver::getEndTime()
+scalar SDCDynamicMeshFluidSolver::getEndTime()
 {
     return runTime->endTime().value();
 }
 
-double SDCDynamicMeshFluidSolver::getStartTime()
+scalar SDCDynamicMeshFluidSolver::getStartTime()
 {
     return runTime->startTime().value();
 }
 
-double SDCDynamicMeshFluidSolver::getTimeStep()
+scalar SDCDynamicMeshFluidSolver::getTimeStep()
 {
     return runTime->deltaT().value();
 }
 
 void SDCDynamicMeshFluidSolver::evaluateFunction(
     const int k,
-    const Eigen::VectorXd & q,
-    const double t,
-    Eigen::VectorXd & f
+    const fsi::vector & q,
+    const scalar t,
+    fsi::vector & f
     )
 {
     int index = 0;
@@ -820,12 +820,12 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     bool corrector,
     const int k,
     const int kold,
-    const double t,
-    const double dt,
-    const Eigen::VectorXd & qold,
-    const Eigen::VectorXd & rhs,
-    Eigen::VectorXd & f,
-    Eigen::VectorXd & result
+    const scalar t,
+    const scalar dt,
+    const fsi::vector & qold,
+    const fsi::vector & rhs,
+    fsi::vector & f,
+    fsi::vector & result
     )
 {
     assert( k < this->k );
@@ -931,6 +931,14 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     // Update mesh.phi()
     {
         mesh.setV0() = volumeStages.at( kold );
+
+        RBFMeshMotionSolver & motionSolver =
+            const_cast<RBFMeshMotionSolver &>
+            (
+            mesh.lookupObject<RBFMeshMotionSolver>( "dynamicMeshDict" )
+            );
+        motionSolver.corrector = corrector;
+        motionSolver.k = k;
 
         mesh.update();
 
@@ -1045,10 +1053,10 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         // If the relative residual with respect to the initial
         // residual is decreased by factor tol: assume convergence.
 
-        double initResidual = 1;
-        double currResidual = 1;
-        double pressureResidual = 1;
-        double tol = 1.0e-2;
+        scalar initResidual = 1;
+        scalar currResidual = 1;
+        scalar pressureResidual = 1;
+        scalar tol = 1.0e-2;
 
         // --- PISO loop
         for ( int corr = 0; corr < nCorr; corr++ )
@@ -1107,7 +1115,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
             U -= fvc::grad( p ) / AU;
             U.correctBoundaryConditions();
 
-            if ( currResidual < std::max( tol * initResidual, 1.0e-15 ) )
+            if ( currResidual < std::max( tol * initResidual, scalar( 1.0e-15 ) ) )
                 break;
         }
 
@@ -1171,7 +1179,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     evaluateFunction( k + 1, qold, t, f );
 }
 
-double SDCDynamicMeshFluidSolver::getScalingFactor()
+scalar SDCDynamicMeshFluidSolver::getScalingFactor()
 {
     return 1;
 }
@@ -1259,6 +1267,20 @@ bool SDCDynamicMeshFluidSolver::isConverged()
             if ( not bc.timeIntegrationScheme->isConverged() )
                 convergence = false;
         }
+    }
+
+    RBFMeshMotionSolver & motionSolver =
+        const_cast<RBFMeshMotionSolver &>
+        (
+        mesh.lookupObject<RBFMeshMotionSolver>( "dynamicMeshDict" )
+        );
+
+    if ( motionSolver.timeIntegrationScheme )
+    {
+        motionSolver.timeIntegrationScheme->outputResidual( "mesh motion" );
+
+        if ( not motionSolver.timeIntegrationScheme->isConverged() )
+            convergence = false;
     }
 
     return convergence;
