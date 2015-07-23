@@ -39,11 +39,12 @@ if [ ! -d "yaml-cpp-release-${VERSION}" ]; then
         cmake -DBUILD_SHARED_LIBS=ON ..
     fi
 
-    make -j 4
+    make -j 8
 
     # Copy the shared library to $FOAM_USER_LIBBIN
-    cp -p libyaml-cpp.so.0.5.2 ${FOAM_USER_LIBBIN}/
-    cp -p libyaml-cpp.so.0.5 ${FOAM_USER_LIBBIN}/
-    cp -p libyaml-cpp.so ${FOAM_USER_LIBBIN}/
+    mkdir -p ${FOAM_USER_LIBBIN}
+    cp libyaml-cpp.so.0.5.2 ${FOAM_USER_LIBBIN}/
+    cp libyaml-cpp.so.0.5 ${FOAM_USER_LIBBIN}/
+    cp libyaml-cpp.so ${FOAM_USER_LIBBIN}/
 
 fi
