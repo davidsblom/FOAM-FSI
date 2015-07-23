@@ -384,9 +384,6 @@ void RBFMeshRigidMotionSolver::solve()
     motion[movingPatchIDs[0]] = vectorField( meshPoints.size(), Foam::vector::zero );
 
     Foam::vector transformation = calcVelocity();
-    Info << "transformation = " << transformation << endl;
-    //transformation = Foam::vector::zero;
-    Info << "transformation = " << transformation << endl;
 
     forAll( motion[movingPatchIDs[0]], i )
     {
