@@ -6,7 +6,13 @@ set -e
 
 VERSION=0.5.2
 
-if [ ! -e ${FOAM_USER_LIBBIN}/libyaml-cpp.so.0.5.2 ]; then
+if [ "$(uname)" == "Darwin" ]; then
+    extension=dylib
+else
+    extension=so
+fi
+
+if [ ! -e ${FOAM_USER_LIBBIN}/libyaml-cpp.${extension}.0.5.2 ]; then
 
     # Define which versions of the different packages are used
 
@@ -43,8 +49,8 @@ if [ ! -e ${FOAM_USER_LIBBIN}/libyaml-cpp.so.0.5.2 ]; then
 
     # Copy the shared library to $FOAM_USER_LIBBIN
     mkdir -p ${FOAM_USER_LIBBIN}
-    cp libyaml-cpp.so.0.5.2 ${FOAM_USER_LIBBIN}/
-    cp libyaml-cpp.so.0.5 ${FOAM_USER_LIBBIN}/
-    cp libyaml-cpp.so ${FOAM_USER_LIBBIN}/
+    cp libyaml-cpp.${extension}.0.5.2 ${FOAM_USER_LIBBIN}/
+    cp libyaml-cpp.${extension}.0.5 ${FOAM_USER_LIBBIN}/
+    cp libyaml-cpp.${extension} ${FOAM_USER_LIBBIN}/
 
 fi
