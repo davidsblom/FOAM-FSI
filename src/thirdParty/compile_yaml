@@ -34,7 +34,7 @@ if [ ! -e ${FOAM_USER_LIBBIN}/libyaml-cpp.so.0.5.2 ]; then
     cd build
 
     if [ "$(uname)" == "Darwin" ]; then
-        CC=gcc-mp-4.9 CXX=g++-mp-4.9 -DBUILD_SHARED_LIBS=ON cmake ..
+        CC=gcc-mp-4.9 CXX=g++-mp-4.9 cmake -DBUILD_SHARED_LIBS=ON ..
     else
         cmake -DBUILD_SHARED_LIBS=ON ..
     fi
