@@ -8,6 +8,7 @@
 #include "SDC.H"
 #include "Piston.H"
 #include "Cos.H"
+#include "Oscillator.H"
 #include "gtest/gtest.h"
 
 using namespace sdc;
@@ -209,7 +210,6 @@ TEST( CosTest, SDC )
     std::cout << "error2 = " << error2 << std::endl;
     std::cout << "order = " << order << std::endl;
 
-    ref = amplitude * ( 0.5 - 0.5 * std::cos( M_PI * frequency * endTime ) );
     error1 = std::abs( cos1->sol - ref ) / std::abs( ref );
     error2 = std::abs( cos2->sol - ref ) / std::abs( ref );
     order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
@@ -217,4 +217,46 @@ TEST( CosTest, SDC )
     std::cout << "error1 = " << error1 << std::endl;
     std::cout << "error2 = " << error2 << std::endl;
     std::cout << "order = " << order << std::endl;
+}
+
+TEST( OscillatorTest, SDC )
+{
+    std::string rule = "gauss-radau";
+
+    rule = "gauss-lobatto";
+
+    // rule = "uniform";
+    // rule = "clenshaw-curtis";
+    int nbNodes = 3;
+    scalar tol = 1.0e-25;
+
+    int nbTimeSteps = 100;
+    scalar endTime = 10;
+    scalar dt = endTime / nbTimeSteps;
+    scalar amplitude = 0;
+    scalar frequency = 1;
+    scalar m = 1;
+    scalar k = 1;
+    fsi::vector q0( 2 );
+    q0 << 1, 0;
+
+    std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
+    std::shared_ptr<Oscillator> oscillator1( new Oscillator( nbTimeSteps, dt, q0, amplitude, frequency, m, k ) );
+    std::shared_ptr<SDC> sdc1( new SDC( oscillator1, adaptiveTimeStepper, rule, nbNodes, tol ) );
+    std::shared_ptr<Oscillator> oscillator2( new Oscillator( nbTimeSteps * 2, dt / 2, q0, amplitude, frequency, m, k ) );
+    std::shared_ptr<SDC> sdc2( new SDC( oscillator2, adaptiveTimeStepper, rule, nbNodes, tol ) );
+
+    sdc1->run();
+    sdc2->run();
+
+    scalar ref = std::cos( endTime );
+    scalar error1 = std::abs( oscillator1->sol( 0 ) - ref ) / std::abs( ref );
+    scalar error2 = std::abs( oscillator2->sol( 0 ) - ref ) / std::abs( ref );
+    scalar order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
+
+    std::cout << "error1 = " << error1 << std::endl;
+    std::cout << "error2 = " << error2 << std::endl;
+    std::cout << "order = " << order << std::endl;
+
+    ASSERT_NEAR( order, 4, 1.0e-3 );
 }

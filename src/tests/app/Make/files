@@ -29,6 +29,7 @@ Piston.C
 AdaptiveTimeStepper.C
 QuadratureRules.C
 Cos.C
+Oscillator.C
 
 tests.C
 test_fluidsolver.C

@@ -121,4 +121,5 @@ void Cos::implicitSolve(
     sol = result( 0 );
 
     this->f = f( 0 );
+    this->t = t;
 }
