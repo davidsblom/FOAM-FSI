@@ -10,10 +10,10 @@ using namespace sdc;
 
 Cos::Cos(
     int nbTimeSteps,
-    double dt,
-    double endTime,
-    double amplitude,
-    double frequency
+    scalar dt,
+    scalar endTime,
+    scalar amplitude,
+    scalar frequency
     )
     :
     f( 0 ),
@@ -36,9 +36,9 @@ Cos::Cos(
 
 void Cos::evaluateFunction(
     const int k,
-    const Eigen::VectorXd & q,
-    const double t,
-    Eigen::VectorXd & f
+    const fsi::vector & q,
+    const scalar t,
+    fsi::vector & f
     )
 {
     if ( t > 0 )
@@ -55,30 +55,30 @@ int Cos::getDOF()
     return 1;
 }
 
-double Cos::getScalingFactor()
+scalar Cos::getScalingFactor()
 {
     return 1.0;
 }
 
-void Cos::getSolution( Eigen::VectorXd & solution )
+void Cos::getSolution( fsi::vector & solution )
 {
     solution( 0 ) = sol;
 }
 
 void Cos::setSolution(
-    const Eigen::VectorXd & solution,
-    const Eigen::VectorXd & f
+    const fsi::vector & solution,
+    const fsi::vector & f
     )
 {
     assert( false );
 }
 
-double Cos::getEndTime()
+scalar Cos::getEndTime()
 {
     return endTime;
 }
 
-double Cos::getTimeStep()
+scalar Cos::getTimeStep()
 {
     return dt;
 }
@@ -104,12 +104,12 @@ void Cos::implicitSolve(
     bool corrector,
     const int k,
     const int kold,
-    const double t,
-    const double dt,
-    const Eigen::VectorXd & qold,
-    const Eigen::VectorXd & rhs,
-    Eigen::VectorXd & f,
-    Eigen::VectorXd & result
+    const scalar t,
+    const scalar dt,
+    const fsi::vector & qold,
+    const fsi::vector & rhs,
+    fsi::vector & f,
+    fsi::vector & result
     )
 {
     f( 0 ) = 0.5 * amplitude * std::sin( M_PI * frequency * t ) * M_PI * frequency;

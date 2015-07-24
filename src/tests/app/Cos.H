@@ -18,35 +18,35 @@ public:
 
     Cos(
         int nbTimeSteps,
-        double dt,
-        double endTime,
-        double amplitude,
-        double frequency
+        scalar dt,
+        scalar endTime,
+        scalar amplitude,
+        scalar frequency
         );
 
     virtual void evaluateFunction(
         const int k,
-        const Eigen::VectorXd & q,
-        const double t,
-        Eigen::VectorXd & f
+        const fsi::vector & q,
+        const scalar t,
+        fsi::vector & f
         );
 
     virtual void finalizeTimeStep();
 
     virtual int getDOF();
 
-    virtual double getScalingFactor();
+    virtual scalar getScalingFactor();
 
-    virtual void getSolution( Eigen::VectorXd & solution );
+    virtual void getSolution( fsi::vector & solution );
 
     virtual void setSolution(
-        const Eigen::VectorXd & solution,
-        const Eigen::VectorXd & f
+        const fsi::vector & solution,
+        const fsi::vector & f
         );
 
-    virtual double getEndTime();
+    virtual scalar getEndTime();
 
-    virtual double getTimeStep();
+    virtual scalar getTimeStep();
 
     virtual void nextTimeStep();
 
@@ -60,25 +60,25 @@ public:
         bool corrector,
         const int k,
         const int kold,
-        const double t,
-        const double dt,
-        const Eigen::VectorXd & qold,
-        const Eigen::VectorXd & rhs,
-        Eigen::VectorXd & f,
-        Eigen::VectorXd & result
+        const scalar t,
+        const scalar dt,
+        const fsi::vector & qold,
+        const fsi::vector & rhs,
+        fsi::vector & f,
+        fsi::vector & result
         );
 
-    double f;
-    double sol;
+    scalar f;
+    scalar sol;
 
 private:
 
     int nbTimeSteps;
-    double dt;
-    double endTime;
-    double amplitude;
-    double frequency;
-    double t;
+    scalar dt;
+    scalar endTime;
+    scalar amplitude;
+    scalar frequency;
+    scalar t;
 };
 
 #endif
