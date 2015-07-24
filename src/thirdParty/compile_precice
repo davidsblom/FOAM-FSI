@@ -33,4 +33,6 @@ else
 fi
 
 mkdir -p ${FOAM_USER_LIBBIN}
+mkdir -p ${FOAM_USER_APPBIN}
 cp build/last/libprecice.so ${FOAM_USER_LIBBIN}/
+cp build/last/binprecice ${FOAM_USER_APPBIN}/
