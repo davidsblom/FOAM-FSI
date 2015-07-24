@@ -79,7 +79,7 @@ TEST_P( SDCTest, solve )
 {
     piston->run();
 
-    Eigen::VectorXd solution( 2 );
+    fsi::vector solution( 2 );
     piston->getSolution( solution );
 
     scalar result = solution( 1 );
@@ -94,7 +94,7 @@ TEST_P( SDCTest, solve )
 
 TEST_P( SDCTest, evaluateFunction )
 {
-    Eigen::VectorXd q( 2 ), f( 2 );
+    fsi::vector q( 2 ), f( 2 );
     scalar t;
 
     q << -100, -100;
@@ -115,7 +115,7 @@ TEST_P( SDCTest, run )
 {
     sdc->run();
 
-    Eigen::VectorXd solution( 2 );
+    fsi::vector solution( 2 );
     piston->getSolution( solution );
 
     scalar result = solution( 1 );
@@ -167,7 +167,7 @@ TEST_P( SDCTest, runCompareSDC )
     piston_sdc->run();
     sdc->run();
 
-    Eigen::VectorXd solution_piston_sdc( 2 ), solution_piston( 2 );
+    fsi::vector solution_piston_sdc( 2 ), solution_piston( 2 );
     piston->getSolution( solution_piston );
     piston_sdc->getSolution( solution_piston_sdc );
 

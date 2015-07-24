@@ -419,8 +419,8 @@ struct residualFunctor : Functor<scalar>
     {}
 
     int operator()(
-        Eigen::VectorXd & x,
-        Eigen::VectorXd & fvec
+        fsi::vector & x,
+        fsi::vector & fvec
         ) const
     {
         fluid->evaluateResidual( x, *a, *un, *pn, *an, fvec );

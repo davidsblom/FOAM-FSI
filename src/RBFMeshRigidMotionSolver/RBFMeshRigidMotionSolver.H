@@ -43,11 +43,11 @@ private:
         Foam::vector calcVelocity();
 
         // Rigid body motion
-        double translationAmplitude;
-        double translationFrequency;
+        scalar translationAmplitude;
+        scalar translationFrequency;
         Foam::vector translationDirection;
-        double rotationAmplitude;
-        double rotationFrequency;
+        scalar rotationAmplitude;
+        scalar rotationFrequency;
         Foam::vector rotationOrigin;
         Foam::vector oldTransformation;
 

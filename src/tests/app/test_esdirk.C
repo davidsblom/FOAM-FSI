@@ -89,7 +89,7 @@ TEST_P( ESDIRKTest, run )
 {
     esdirk->run();
 
-    Eigen::VectorXd solution( 2 );
+    fsi::vector solution( 2 );
     piston->getSolution( solution );
 
     scalar result = solution( 1 );
@@ -195,7 +195,7 @@ TEST_P( ESDIRKTest, runCompareESDIRK )
     piston_esdirk->run();
     esdirk->run();
 
-    Eigen::VectorXd solution_piston_esdirk( 2 ), solution_piston( 2 );
+    fsi::vector solution_piston_esdirk( 2 ), solution_piston( 2 );
     piston->getSolution( solution_piston );
     piston_esdirk->getSolution( solution_piston_esdirk );
 

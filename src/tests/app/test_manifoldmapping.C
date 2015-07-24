@@ -149,8 +149,8 @@ struct fineModelParabolaFunctor : Functor<scalar>
     {}
 
     int operator()(
-        const Eigen::VectorXd & x,
-        Eigen::VectorXd & fvec
+        const fsi::vector & x,
+        fsi::vector & fvec
         ) const
     {
         fsi::vector output( x.rows() );
@@ -291,8 +291,8 @@ struct fineModelSimpleFunctor : Functor<scalar>
     {}
 
     int operator()(
-        const Eigen::VectorXd & x,
-        Eigen::VectorXd & fvec
+        const fsi::vector & x,
+        fsi::vector & fvec
         ) const
     {
         fsi::vector output( x.rows() );
@@ -348,7 +348,7 @@ public:
         fsi::vector t( 3 );
         t << -1, 0, 1;
 
-        R = x( 0 ) * t + x( 1 ) * Eigen::MatrixXd::Ones( 3, 1 );
+        R = x( 0 ) * t + x( 1 ) * fsi::matrix::Ones( 3, 1 );
         output = R;
     }
 
