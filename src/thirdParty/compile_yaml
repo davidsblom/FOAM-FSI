@@ -5,14 +5,13 @@ set -e
 # Assume that preCICE has been built before, and boost is already downloaded.
 
 VERSION=0.5.2
+SHARED_LIBRARY=${FOAM_USER_LIBBIN}/libyaml-cpp.so.${VERSION}
 
 if [ "$(uname)" == "Darwin" ]; then
-    extension=dylib
-else
-    extension=so
+    SHARED_LIBRARY=${FOAM_USER_LIBBIN}/libyaml-cpp.${VERSION}.dylib
 fi
 
-if [ ! -e ${FOAM_USER_LIBBIN}/libyaml-cpp.${extension}.0.5.2 ]; then
+if [ ! -e ${SHARED_LIBRARY} ]; then
 
     # Define which versions of the different packages are used
 
@@ -49,8 +48,15 @@ if [ ! -e ${FOAM_USER_LIBBIN}/libyaml-cpp.${extension}.0.5.2 ]; then
 
     # Copy the shared library to $FOAM_USER_LIBBIN
     mkdir -p ${FOAM_USER_LIBBIN}
-    cp libyaml-cpp.${extension}.0.5.2 ${FOAM_USER_LIBBIN}/
-    cp libyaml-cpp.${extension}.0.5 ${FOAM_USER_LIBBIN}/
-    cp libyaml-cpp.${extension} ${FOAM_USER_LIBBIN}/
+
+    if [ "$(uname)" == "Darwin" ]; then
+        cp libyaml-cpp.0.5.2.dylib ${FOAM_USER_LIBBIN}/
+        cp libyaml-cpp.0.5.dylib ${FOAM_USER_LIBBIN}/
+        cp libyaml-cpp.dylib ${FOAM_USER_LIBBIN}/
+    else
+        cp libyaml-cpp.so.0.5.2 ${FOAM_USER_LIBBIN}/
+        cp libyaml-cpp.so.0.5 ${FOAM_USER_LIBBIN}/
+        cp libyaml-cpp.so ${FOAM_USER_LIBBIN}/
+    fi
 
 fi
