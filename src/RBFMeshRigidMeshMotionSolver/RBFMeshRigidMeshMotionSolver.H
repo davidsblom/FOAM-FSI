@@ -26,6 +26,7 @@
 #include "ESDIRK.H"
 #include "TimeIntegrationScheme.H"
 #include <yaml-cpp/yaml.h>
+#include "Oscillator.H"
 
 namespace Foam
 {
@@ -39,7 +40,6 @@ private:
         // Disallow default bitwise assignment
         void operator=( const RBFMeshRigidMeshMotionSolver & );
 
-        Foam::vector calcTransformation( scalar t );
         Foam::vector calcVelocity();
 
         // Rigid body motion
@@ -52,6 +52,8 @@ private:
         Foam::vector oldTransformation;
 
         scalar told;
+
+        std::shared_ptr<Oscillator> oscillator;
 
 public:
 

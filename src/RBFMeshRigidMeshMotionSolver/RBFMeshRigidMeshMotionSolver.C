@@ -70,30 +70,20 @@ RBFMeshRigidMeshMotionSolver::RBFMeshRigidMeshMotionSolver(
 
         timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::ESDIRK( method ) );
     }
+
+    int nbTimeSteps = mesh.time().endTime().value() / mesh.time().deltaT().value();
+    scalar dt = mesh.time().deltaT().value();
+    fsi::vector q0 ( 2 );
+    q0 << 1, 0;
+    scalar amplitude = 0;
+    scalar frequency = 1;
+    scalar m = 1;
+    scalar k = 100;
+    oscillator = std::shared_ptr<Oscillator>( new Oscillator( nbTimeSteps, dt, q0, amplitude, frequency, m, k ) );
 }
 
 RBFMeshRigidMeshMotionSolver::~RBFMeshRigidMeshMotionSolver()
 {}
-
-Foam::vector RBFMeshRigidMeshMotionSolver::calcTransformation( scalar t )
-{
-    scalar smoothStartup = 1;
-    bool smoothStart = false;
-
-    if ( smoothStart )
-    {
-        if ( t < 1.0 / (translationFrequency + SMALL) )
-        {
-            smoothStartup = 0.5 - 0.5 * Foam::cos( M_PI * translationFrequency * t );
-        }
-    }
-
-    // Foam::vector transformation = smoothStartup * translationAmplitude * sin( 2 * M_PI * translationFrequency * t ) * translationDirection;
-
-    Foam::vector transformation = smoothStartup * translationAmplitude * translationDirection * ( 0.5 - 0.5 * Foam::cos( M_PI * translationFrequency * t ) );
-
-    return transformation;
-}
 
 Foam::vector RBFMeshRigidMeshMotionSolver::calcVelocity()
 {
@@ -102,35 +92,30 @@ Foam::vector RBFMeshRigidMeshMotionSolver::calcVelocity()
     scalar t = mesh().time().value();
     scalar dt = mesh().time().deltaT().value();
 
-    Foam::vector transformation = calcTransformation( t ) - calcTransformation( told );
-
-    Foam::vector transformationT = calcTransformation( t );
-    Foam::vector transformationTold = calcTransformation( told );
-    fsi::vector disp ( 3 ), dudt( 3 ), dispold( 3 );
-    disp << transformationT(0), transformationT(1), transformationT(2);
-    dispold << transformationTold(0), transformationTold(1), transformationTold(2);
-
-    fsi::vector rhs( 3 ), result( 3 ), f( 3 ), qold;
+    fsi::vector rhs( 2 ), result( 2 ), f( 2 ), qold;
 
     if ( not corrector && k == 0 )
-        timeIntegrationScheme->setOldSolution( mesh().time().timeIndex(), dispold );
+        timeIntegrationScheme->setOldSolution( mesh().time().timeIndex(), oscillator->sol );
 
     timeIntegrationScheme->getSourceTerm( corrector, k, dt, rhs, qold );
 
-    f( 0 ) = 0;
-    f( 1 ) = 0.5 * translationAmplitude * std::sin( M_PI * translationFrequency * t ) * M_PI * translationFrequency;
-    f( 2 ) = 0;
-    result = dt * f + qold + rhs;
-    dudt = ( result - qold - rhs ) / dt;
+    oscillator->implicitSolve( corrector, k, k, t, dt, qold, rhs, f, result );
 
     timeIntegrationScheme->setFunction( k, f, result );
 
-    for ( int i = 0 ; i < 3; i++ )
-        transformation[i] = result(i) - oldTransformation[i];
+    scalar disp = oscillator->sol(0);
+    // change reference frame
+    disp *= -1;
+    disp += 1;
+    disp *= translationAmplitude;
+
+    Foam::vector transformation = Foam::vector::zero;
+    transformation[1] = disp - oldTransformation[1];
+
+    Info << "dudt(1) = " << oscillator->sol(0) << endl;
 
     told = t;
-    //oldTransformation = calcTransformation( told );
-    oldTransformation(1) = result(1);
+    oldTransformation[1] = disp;
 
     return transformation;
 }

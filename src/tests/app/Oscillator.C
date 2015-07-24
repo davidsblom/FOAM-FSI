@@ -39,6 +39,7 @@ void Oscillator::evaluateFunction(
     )
 {
     assert( f.rows() == 2 );
+    assert( q.rows() == 2 );
 
     scalar F = 0.5 * amplitude - 0.5 * amplitude * std::cos( frequency * M_PI * t );
 
@@ -60,6 +61,8 @@ scalar Oscillator::getScalingFactor()
 
 void Oscillator::getSolution( fsi::vector & solution )
 {
+    assert( sol.rows() == 2 );
+
     solution = sol;
 }
 
@@ -112,6 +115,11 @@ void Oscillator::implicitSolve(
     fsi::vector & result
     )
 {
+    assert( f.rows() == 2 );
+    assert( result.rows() == 2 );
+    assert( qold.rows() == 2 );
+    assert( rhs.rows() == 2 );
+
     fsi::matrix Ainv( 2, 2 );
     fsi::vector b( 2 );
     scalar F;

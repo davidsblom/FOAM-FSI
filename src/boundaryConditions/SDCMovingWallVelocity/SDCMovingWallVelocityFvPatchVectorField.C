@@ -82,6 +82,8 @@ namespace Foam
             return;
         }
 
+        assert( timeIntegrationScheme );
+
         const fvMesh & mesh = dimensionedInternalField().mesh();
 
         const fvPatch & p = patch();
