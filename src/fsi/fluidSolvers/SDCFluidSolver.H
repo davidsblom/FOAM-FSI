@@ -158,7 +158,6 @@ protected:
     std::deque<volScalarField> pStages;
     std::deque<surfaceScalarField> phiStages;
     std::deque<volVectorField> UStages;
-    std::deque<surfaceVectorField> UfStages;
     IOobject UFHeader;
     IOobject phiFHeader;
     volVectorField UF;

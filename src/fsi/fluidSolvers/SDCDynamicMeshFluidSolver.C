@@ -41,6 +41,7 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     mesh,
     dimensionedScalar( "0", dimVolume / dimTime, 0.0 )
     ),
+    UfStages(),
     pointsStages(),
     volumeStages(),
     interpolateVolumeStages(),

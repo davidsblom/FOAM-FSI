@@ -150,7 +150,6 @@ SDCFluidSolver::SDCFluidSolver(
     pStages(),
     phiStages(),
     UStages(),
-    UfStages(),
     UFHeader
     (
     "UF",
@@ -775,6 +774,8 @@ void SDCFluidSolver::implicitSolve(
     assert( index == rhs.rows() );
 
     // -------------------------------------------------------------------------
+
+    courantNo();
 
     scalar convergenceTolerance = absoluteTolerance;
 
