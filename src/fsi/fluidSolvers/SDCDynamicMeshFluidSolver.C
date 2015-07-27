@@ -116,9 +116,6 @@ void SDCDynamicMeshFluidSolver::initialize()
     createFields();
 }
 
-void SDCDynamicMeshFluidSolver::initTimeStep()
-{}
-
 void SDCDynamicMeshFluidSolver::resetSolution()
 {
     assert( false );

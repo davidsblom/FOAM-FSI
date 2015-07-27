@@ -10,18 +10,6 @@
 #ifndef SDCDynamicMeshFluidSolver_H
 #define SDCDynamicMeshFluidSolver_H
 
-#include <memory>
-#include <deque>
-
-#include "foamFluidSolver.H"
-#include "SDCSolver.H"
-
-#include "dynamicFvMesh.H"
-#include "fvCFD.H"
-#include "singlePhaseTransportModel.H"
-#include "turbulenceModel.H"
-#include "slipFvPatchFields.H"
-#include "symmetryFvPatchFields.H"
 #include "SDCMovingWallVelocityFvPatchVectorField.H"
 #include "SDCFluidSolver.H"
 
@@ -39,8 +27,6 @@ public:
         );
 
     virtual ~SDCDynamicMeshFluidSolver();
-
-    virtual void initTimeStep();
 
     virtual void resetSolution();
 
@@ -91,8 +77,6 @@ private:
     void createFields();
 
     void initialize();
-
-    void readPIMPLEControls();
 
     // Fields
     surfaceVectorField rhsUf;
