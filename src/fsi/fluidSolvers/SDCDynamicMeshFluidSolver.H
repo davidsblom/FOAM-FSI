@@ -23,11 +23,12 @@
 #include "slipFvPatchFields.H"
 #include "symmetryFvPatchFields.H"
 #include "SDCMovingWallVelocityFvPatchVectorField.H"
+#include "SDCFluidSolver.H"
 
 using namespace fsi;
 using std::shared_ptr;
 
-class SDCDynamicMeshFluidSolver : public foamFluidSolver, public sdc::SDCSolver
+class SDCDynamicMeshFluidSolver : public SDCFluidSolver
 {
 public:
 
@@ -39,23 +40,9 @@ public:
 
     virtual ~SDCDynamicMeshFluidSolver();
 
-    virtual void getAcousticsDensityLocal( matrix & data );
-
-    virtual void getAcousticsVelocityLocal( matrix & data );
-
-    virtual void getAcousticsPressureLocal( matrix & data );
-
-    virtual void getTractionLocal( matrix & traction );
-
-    virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
-
     virtual void initTimeStep();
 
-    virtual bool isRunning();
-
     virtual void resetSolution();
-
-    virtual void solve();
 
     virtual void evaluateFunction(
         const int k,
@@ -63,8 +50,6 @@ public:
         const scalar t,
         fsi::vector & f
         );
-
-    virtual void finalizeTimeStep();
 
     virtual int getDOF();
 
@@ -75,13 +60,7 @@ public:
         const fsi::vector & f
         );
 
-    virtual scalar getEndTime();
-
     virtual scalar getScalingFactor();
-
-    virtual scalar getTimeStep();
-
-    virtual scalar getStartTime();
 
     virtual void implicitSolve(
         bool corrector,
@@ -94,8 +73,6 @@ public:
         fsi::vector & f,
         fsi::vector & result
         );
-
-    virtual void setDeltaT( scalar dt );
 
     virtual void setNumberOfImplicitStages( int k );
 
@@ -111,58 +88,16 @@ public:
 
 private:
 
-    void continuityErrs();
-
     void createFields();
-
-    scalar evaluateMomentumResidual();
 
     void initialize();
 
     void readPIMPLEControls();
 
-    // Dictionaries
-    IOdictionary transportProperties;
-    dictionary pimple;
-
-    // Dimensioned scalars
-    dimensionedScalar nu;
-    dimensionedScalar rho;
-
     // Fields
-    volScalarField p;
-    volVectorField U;
-    surfaceVectorField Uf;
-    surfaceScalarField phi;
-    volScalarField AU;
-    volVectorField HU;
-    volVectorField rhsU;
     surfaceVectorField rhsUf;
     surfaceScalarField rhsMeshPhi;
 
-    // PIMPLE controls
-    int nCorr;
-    int nNonOrthCorr;
-    int minIter;
-    int maxIter;
-    scalar absoluteTolerance;
-    scalar relativeTolerance;
-
-    // Continuity errors
-    scalar sumLocalContErr;
-    scalar globalContErr;
-    scalar cumulativeContErr;
-
-    label pRefCell;
-    scalar pRefValue;
-    singlePhaseTransportModel laminarTransport;
-    autoPtr<incompressible::turbulenceModel> turbulence;
-
-    int k;
-    std::deque<volScalarField> pStages;
-    std::deque<surfaceScalarField> phiStages;
-    std::deque<volVectorField> UStages;
-    std::deque<surfaceVectorField> UfStages;
     std::deque<pointField> pointsStages;
     std::deque<volScalarField::DimensionedInternalField> volumeStages;
     std::deque<surfaceScalarField> interpolateVolumeStages;
@@ -171,9 +106,6 @@ private:
     volVectorField UF;
     surfaceVectorField UfF;
     surfaceScalarField meshPhiF;
-
-    bool turbulenceSwitch;
-    bool explicitFirstStage;
 };
 
 #endif

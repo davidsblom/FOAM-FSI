@@ -98,7 +98,7 @@ public:
 
     virtual void nextTimeStep();
 
-private:
+protected:
 
     void continuityErrs();
 

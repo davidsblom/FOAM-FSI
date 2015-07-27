@@ -236,6 +236,17 @@ SDCFluidSolver::SDCFluidSolver(
 
     Info << endl;
 
+    const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>( "fvSchemes" );
+    const dictionary & ddtSchemes = fvSchemes.subDict( "ddtSchemes" );
+    word ddtScheme;
+
+    if ( ddtSchemes.found( "ddt(U)" ) )
+        ddtScheme = word( ddtSchemes.lookup( "ddt(U)" ) );
+    else
+        ddtScheme = word( ddtSchemes.lookup( "default" ) );
+
+    assert( ddtScheme == "bdf1" );
+
     initialize();
 }
 
