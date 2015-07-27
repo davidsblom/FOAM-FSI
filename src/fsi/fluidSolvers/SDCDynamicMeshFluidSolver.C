@@ -1103,7 +1103,8 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
                 if ( nonOrth == nNonOrthCorr )
                 {
-                    phi -= pEqn.flux();
+                    Uf -= pEqn.flux() * mesh.Sf() / ( mesh.magSf() * mesh.magSf() );
+                    phi = Uf & mesh.Sf();
                 }
             }
 
@@ -1118,17 +1119,6 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
             if ( currResidual < std::max( tol * initResidual, scalar( 1.0e-15 ) ) )
                 break;
         }
-
-        // Update the face velocities
-        fvc::makeAbsolute( phi, U );
-        {
-            surfaceVectorField nf = mesh.Sf() / mesh.magSf();
-            surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
-            surfaceVectorField Unor = phi / mesh.magSf() * nf;
-
-            Uf = Utang + Unor;
-        }
-        fvc::makeRelative( phi, U );
 
         scalar momentumResidual = evaluateMomentumResidual();
 
