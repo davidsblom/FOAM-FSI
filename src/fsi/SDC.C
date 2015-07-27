@@ -262,6 +262,9 @@ namespace sdc
                 for ( unsigned int i = 0; i < dofVariables.size(); i++ )
                 {
                     scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
+                    labelList dofVariablesGlobal( Pstream::nProcs(), 0 );
+                    dofVariablesGlobal[Pstream::myProcNo()] = dofVariables.at( i );
+                    reduce( dofVariablesGlobal, sumOp<labelList>() );
 
                     for ( int j = 0; j < dofVariables.at( i ); j++ )
                     {
@@ -270,7 +273,7 @@ namespace sdc
                     }
 
                     reduce( squaredNorm, sumOp<scalarList>() );
-                    scalar error = std::sqrt( sum( squaredNorm ) / dofVariables.at( i ) );
+                    scalar error = std::sqrt( sum( squaredNorm ) / sum( dofVariablesGlobal ) );
 
                     bool convergence = error < tol && j >= k - 1;
 
