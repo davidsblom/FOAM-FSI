@@ -198,11 +198,11 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     (
     IOobject
     (
-        "rhsMeshPhi",
+        "meshPhiF",
         runTime->timeName(),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
     ),
     mesh,
     dimensionedScalar( "0", dimVolume / dimTime, 0.0 )
