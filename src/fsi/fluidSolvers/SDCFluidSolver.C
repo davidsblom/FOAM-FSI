@@ -301,15 +301,17 @@ void SDCFluidSolver::courantNo()
 
 void SDCFluidSolver::createFields()
 {
-    U.oldTime();
-    Uf.oldTime();
-    phi.oldTime();
-
     surfaceVectorField nf = mesh.Sf() / mesh.magSf();
     surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
     surfaceVectorField Unor = phi / mesh.magSf() * nf;
 
     Uf = Utang + Unor;
+
+    phi = Uf & mesh.Sf();
+
+    U.oldTime();
+    Uf.oldTime();
+    phi.oldTime();
 
     // Read pressure properties and create turbulence model
     pRefCell = 0;
@@ -785,6 +787,12 @@ void SDCFluidSolver::implicitSolve(
 
         fvVectorMatrix UEqn
         (
+            fvm::div( phi, U )
+            - fvm::laplacian( nu, U )
+        );
+
+        fvVectorMatrix UEqnt
+        (
             fvm::ddt( U )
             + fvm::div( phi, U )
             - fvm::laplacian( nu, U )
@@ -804,10 +812,10 @@ void SDCFluidSolver::implicitSolve(
 
             UEqn.relax();
 
-            Foam::solve( UEqn == -fvc::grad( p ) + rDeltaT * rhsU );
+            Foam::solve( UEqnt == -fvc::grad( p ) + rDeltaT * rhsU );
 
             // Reset equation to ensure relaxation parameter is not causing problems for time order
-            UEqn =
+            UEqnt =
                 (
                 fvm::ddt( U )
                 + fvm::div( phi, U )
@@ -834,50 +842,20 @@ void SDCFluidSolver::implicitSolve(
             p.storePrevIter();
 
             HU = UEqn.H();
-            AU = UEqn.A();
-            U = HU / AU + 1 / AU * rDeltaT * rhsU;
+            AU = UEqnt.A();
 
+            U = (UEqnt.H() + rDeltaT * rhsU) / AU;
+
+            phi = fvc::interpolate( HU ) / fvc::interpolate( AU ) & mesh.Sf();
+            phi += rDeltaT * phi.oldTime() / fvc::interpolate( AU );
+            phi += rDeltaT * rhsPhi / fvc::interpolate( AU );
+
+            forAll( phi.boundaryField(), patchI )
             {
-                phi = ( fvc::interpolate( HU ) / fvc::interpolate( AU ) ) & mesh.Sf();
-
-                forAll( phi.boundaryField(), patchI )
+                if ( !phi.boundaryField()[patchI].coupled() )
                 {
-                    if ( !phi.boundaryField()[patchI].coupled() )
-                    {
-                        phi.boundaryField()[patchI] =
-                            (
-                            U.boundaryField()[patchI]
-                            & mesh.Sf().boundaryField()[patchI]
-                            );
-                    }
+                    phi.boundaryField()[patchI] = U.boundaryField()[patchI] & mesh.Sf().boundaryField()[patchI];
                 }
-
-                // === Set boundaries correct of U === //
-                surfaceScalarField ddtPhiCoeff
-                (
-                    IOobject
-                    (
-                        "ddtPhiCoeff",
-                        mesh.time().timeName(),
-                        mesh,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE
-                    ),
-                    mesh,
-                    dimensioned<scalar>( "1", dimless, 1.0 )
-                );
-
-                forAll( U.boundaryField(), patchI )
-                {
-                    if ( U.boundaryField()[patchI].fixesValue() )
-                    {
-                        ddtPhiCoeff.boundaryField()[patchI] = 0.0;
-                    }
-                }
-
-                surfaceScalarField phi0 = phi.oldTime() - ( fvc::interpolate( U.oldTime() ) & mesh.Sf() ) + rhsPhi;
-
-                phi += rDeltaT * ddtPhiCoeff * phi0 / fvc::interpolate( AU );
             }
 
             for ( int nonOrth = 0; nonOrth <= nNonOrthCorr; nonOrth++ )
@@ -946,31 +924,8 @@ void SDCFluidSolver::implicitSolve(
         UStages.at( k + 1 ) = U;
     }
 
-    // === Set boundaries correct of U === //
-    surfaceScalarField ddtPhiCoeff
-    (
-        IOobject
-        (
-            "ddtPhiCoeff",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensioned<scalar>( "1", dimless, 1.0 )
-    );
-
-    forAll( U.boundaryField(), patchI )
-    {
-        if ( U.boundaryField()[patchI].fixesValue() )
-        {
-            ddtPhiCoeff.boundaryField()[patchI] = 0.0;
-        }
-    }
-
     UF = rDeltaT * (U - U.oldTime() - rhsU);
-    phiF = rDeltaT * ( phi - ddtPhiCoeff * (phi.oldTime() + rhsPhi) );
+    phiF = rDeltaT * (phi - phi.oldTime() - rhsPhi);
 
     getSolution( result );
     evaluateFunction( k + 1, qold, t, f );
@@ -985,4 +940,50 @@ scalar SDCFluidSolver::getScalingFactor()
     rmsU /= runTime->deltaT().value();
 
     return rmsU;
+}
+
+void SDCFluidSolver::getVariablesInfo(
+    std::deque<int> & dof,
+    std::deque<bool> & enabled,
+    std::deque<std::string> & names
+    )
+{
+    dof.push_back( 0 );
+    dof.push_back( 0 );
+    enabled.push_back( true );
+    enabled.push_back( true );
+    names.push_back( "U" );
+    names.push_back( "phi" );
+
+    forAll( U.internalField(), i )
+    {
+        for ( int j = 0; j < 3; j++ )
+        {
+            dof.at( 0 ) += 1;
+        }
+    }
+
+    forAll( U.boundaryField(), patchI )
+    {
+        forAll( U.boundaryField()[patchI], i )
+        {
+            for ( int j = 0; j < 3; j++ )
+            {
+                dof.at( 0 ) += 1;
+            }
+        }
+    }
+
+    forAll( phi.internalField(), i )
+    {
+        dof.at( 1 ) += 1;
+    }
+
+    forAll( phi.boundaryField(), patchI )
+    {
+        forAll( phi.boundaryField()[patchI], i )
+        {
+            dof.at( 1 ) += 1;
+        }
+    }
 }

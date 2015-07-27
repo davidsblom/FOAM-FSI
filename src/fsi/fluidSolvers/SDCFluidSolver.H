@@ -98,6 +98,12 @@ public:
 
     virtual void nextTimeStep();
 
+    virtual void getVariablesInfo(
+        std::deque<int> & dof,
+        std::deque<bool> & enabled,
+        std::deque<std::string> & names
+        );
+
 protected:
 
     void continuityErrs();
