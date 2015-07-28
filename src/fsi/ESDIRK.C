@@ -135,6 +135,18 @@ namespace sdc
             iImplicitStage++;
         }
 
+        // Output ESDIRK residual
+        fsi::vector residual = qold - result;
+
+        for ( int iStage = 0; iStage < nbStages; iStage++ )
+            residual += dt * B( iStage ) * F.row( iStage );
+
+        scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
+        squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
+        reduce( squaredNorm, sumOp<scalarList>() );
+        scalar error = std::sqrt( sum( squaredNorm ) / N );
+        Info << "ESDIRK residual = " << error << endl;
+
         if ( adaptiveTimeStepper->isEnabled() )
         {
             scalar newTimeStep = 0;

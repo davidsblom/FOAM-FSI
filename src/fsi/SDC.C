@@ -226,19 +226,6 @@ namespace sdc
             error /= solver->getScalingFactor();
             convergence = error < tol && j >= k - 1;
 
-            Info << "SDC residual = " << error;
-            Info << ", tol = " << tol;
-            Info << ", time = " << t;
-            Info << ", sweep = " << j + 1;
-            Info << ", convergence = ";
-
-            if ( convergence )
-                Info << "true";
-            else
-                Info << "false";
-
-            Info << endl;
-
             std::deque<int> dofVariables;
             std::deque<bool> enabledVariables;
             std::deque<std::string> namesVariables;
@@ -252,6 +239,22 @@ namespace sdc
             for ( unsigned int i = 0; i < enabledVariables.size(); i++ )
                 convergenceVariables.push_back( not enabledVariables.at( i ) );
 
+            if ( dofVariables.size() == 1 )
+            {
+                Info << "SDC residual = " << error;
+                Info << ", tol = " << tol;
+                Info << ", time = " << t;
+                Info << ", sweep = " << j + 1;
+                Info << ", convergence = ";
+
+                if ( convergence )
+                    Info << "true";
+                else
+                    Info << "false";
+
+                Info << endl;
+            }
+
             if ( dofVariables.size() > 1 )
             {
                 int index = 0;
@@ -259,6 +262,9 @@ namespace sdc
                 for ( unsigned int i = 0; i < dofVariables.size(); i++ )
                 {
                     scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
+                    labelList dofVariablesGlobal( Pstream::nProcs(), 0 );
+                    dofVariablesGlobal[Pstream::myProcNo()] = dofVariables.at( i );
+                    reduce( dofVariablesGlobal, sumOp<labelList>() );
 
                     for ( int j = 0; j < dofVariables.at( i ); j++ )
                     {
@@ -267,29 +273,25 @@ namespace sdc
                     }
 
                     reduce( squaredNorm, sumOp<scalarList>() );
-                    scalar error = std::sqrt( sum( squaredNorm ) / dofVariables.at( i ) );
+                    scalar error = std::sqrt( sum( squaredNorm ) / sum( dofVariablesGlobal ) );
 
                     bool convergence = error < tol && j >= k - 1;
 
-                    Info << "SDC " << namesVariables.at( i ).c_str();
-                    Info << " residual = " << error;
-                    Info << ", enabled = ";
-
                     if ( enabledVariables.at( i ) )
-                        Info << "true";
-                    else
-                        Info << "false";
+                    {
+                        Info << "SDC " << namesVariables.at( i ).c_str();
+                        Info << " residual = " << error;
+                        Info << ", time = " << t;
+                        Info << ", sweep = " << j + 1;
+                        Info << ", convergence = ";
 
-                    Info << ", time = " << t;
-                    Info << ", sweep = " << j + 1;
-                    Info << ", convergence = ";
+                        if ( convergence )
+                            Info << "true";
+                        else
+                            Info << "false";
 
-                    if ( convergence )
-                        Info << "true";
-                    else
-                        Info << "false";
-
-                    Info << endl;
+                        Info << endl;
+                    }
 
                     if ( enabledVariables.at( i ) )
                         convergenceVariables.at( i ) = convergence;

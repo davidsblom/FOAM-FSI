@@ -15,111 +15,7 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     std::shared_ptr<Time> runTime
     )
     :
-    foamFluidSolver( name, args, runTime ),
-    transportProperties
-    (
-    IOobject
-    (
-        "transportProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-
-    )
-    ),
-    pimple( mesh.solutionDict().subDict( "PIMPLE" ) ),
-    nu( transportProperties.lookup( "nu" ) ),
-    rho( transportProperties.lookup( "rho" ) ),
-    p
-    (
-    IOobject
-    (
-        "p",
-        runTime->timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
-    ),
-    U
-    (
-    IOobject
-    (
-        "U",
-        runTime->timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
-    ),
-    Uf
-    (
-    IOobject
-    (
-        "Uf",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    linearInterpolate( U )
-    ),
-    phi
-    (
-    IOobject
-    (
-        "phi",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    Uf & mesh.Sf()
-    ),
-    AU
-    (
-    IOobject
-    (
-        "AU",
-        runTime->timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    1.0 / runTime->deltaT(),
-    zeroGradientFvPatchScalarField::typeName
-    ),
-    HU
-    (
-    IOobject
-    (
-        "HU",
-        runTime->timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    U.dimensions() / runTime->deltaT().dimensions(),
-    zeroGradientFvPatchVectorField::typeName
-    ),
-    rhsU
-    (
-    IOobject
-    (
-        "rhsU",
-        runTime->timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedVector( "rhsU", dimVelocity, Foam::vector::zero )
-    ),
+    SDCFluidSolver( name, args, runTime ),
     rhsUf
     (
     IOobject
@@ -145,24 +41,6 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     mesh,
     dimensionedScalar( "0", dimVolume / dimTime, 0.0 )
     ),
-    nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
-    nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
-    minIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "minIter" ) ) ),
-    maxIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "maxIter" ) ) ),
-    absoluteTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "tolerance" ) ) ),
-    relativeTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "relTol" ) ) ),
-    sumLocalContErr( 0 ),
-    globalContErr( 0 ),
-    cumulativeContErr( 0 ),
-    laminarTransport( U, phi ),
-    turbulence( autoPtr<incompressible::turbulenceModel>
-    (
-        incompressible::turbulenceModel::New( U, phi, laminarTransport )
-    ) ),
-    k( 0 ),
-    pStages(),
-    phiStages(),
-    UStages(),
     UfStages(),
     pointsStages(),
     volumeStages(),
@@ -198,103 +76,21 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     (
     IOobject
     (
-        "rhsMeshPhi",
+        "meshPhiF",
         runTime->timeName(),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
     ),
     mesh,
     dimensionedScalar( "0", dimVolume / dimTime, 0.0 )
-    ),
-    explicitFirstStage( false )
+    )
 {
-    // Ensure that the absolute tolerance of the linear solver is less than the
-    // used convergence tolerance for the non-linear system.
-    scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
-    assert( absTolerance < absoluteTolerance );
-
-    absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
-    assert( absTolerance < absoluteTolerance );
-
-    {
-        IOdictionary dict
-        (
-            IOobject
-            (
-                "turbulenceProperties",
-                runTime->constant(),
-                *runTime,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            )
-        );
-
-        if ( word( dict.lookup( "simulationType" ) ) == "laminar" )
-            turbulenceSwitch = false;
-
-        if ( word( dict.lookup( "simulationType" ) ) == "RASModel" )
-        {
-            IOdictionary dict
-            (
-                IOobject
-                (
-                    "RASProperties",
-                    runTime->constant(),
-                    *runTime,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            );
-
-            if ( word( dict.lookup( "RASModel" ) ) == "laminar" )
-                turbulenceSwitch = false;
-        }
-    }
-
-    Info << "Turbulence ";
-
-    if ( turbulenceSwitch )
-        Info << "enabled";
-    else
-        Info << "disabled";
-
-    Info << endl;
-
-    const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>( "fvSchemes" );
-    const dictionary & ddtSchemes = fvSchemes.subDict( "ddtSchemes" );
-    word ddtScheme;
-
-    if ( ddtSchemes.found( "ddt(U)" ) )
-        ddtScheme = word( ddtSchemes.lookup( "ddt(U)" ) );
-    else
-        ddtScheme = word( ddtSchemes.lookup( "default" ) );
-
-    assert( ddtScheme == "bdf1" );
-
     initialize();
 }
 
 SDCDynamicMeshFluidSolver::~SDCDynamicMeshFluidSolver()
 {}
-
-void SDCDynamicMeshFluidSolver::continuityErrs()
-{
-    volScalarField contErr = fvc::div( phi );
-
-    sumLocalContErr = runTime->deltaT().value() *
-        mag( contErr ) ().weightedAverage( mesh.V() ).value();
-
-    globalContErr = runTime->deltaT().value() *
-        contErr.weightedAverage( mesh.V() ).value();
-
-    cumulativeContErr += globalContErr;
-
-    Info << "time step continuity errors : sum local = " << sumLocalContErr
-         << ", global = " << globalContErr
-         << ", cumulative = " << cumulativeContErr
-         << endl;
-}
 
 void SDCDynamicMeshFluidSolver::createFields()
 {
@@ -314,52 +110,6 @@ void SDCDynamicMeshFluidSolver::createFields()
     setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
 }
 
-scalar SDCDynamicMeshFluidSolver::evaluateMomentumResidual()
-{
-    dimensionedScalar rDeltaT = 1.0 / mesh.time().deltaT();
-    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p ) - rDeltaT * rhsU;
-
-    if ( turbulenceSwitch )
-        residual += turbulence->divDevReff( U ) & U;
-    else
-        residual += -fvc::laplacian( nu, U );
-
-    scalarField magResU = mag( residual.internalField() );
-    scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
-    scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
-    rmsU /= runTime->deltaT().value();
-
-    // Scale the residual by the root mean square of the velocity field
-    momentumResidual /= rmsU;
-
-    return momentumResidual;
-}
-
-void SDCDynamicMeshFluidSolver::getAcousticsDensityLocal( matrix & data )
-{
-    assert( false );
-}
-
-void SDCDynamicMeshFluidSolver::getAcousticsVelocityLocal( matrix & data )
-{
-    assert( false );
-}
-
-void SDCDynamicMeshFluidSolver::getAcousticsPressureLocal( matrix & data )
-{
-    assert( false );
-}
-
-void SDCDynamicMeshFluidSolver::getTractionLocal( matrix & traction )
-{
-    assert( false );
-}
-
-void SDCDynamicMeshFluidSolver::getWritePositionsLocalAcoustics( matrix & writePositions )
-{
-    assert( false );
-}
-
 void SDCDynamicMeshFluidSolver::initialize()
 {
     assert( !init );
@@ -367,22 +117,9 @@ void SDCDynamicMeshFluidSolver::initialize()
     createFields();
 }
 
-void SDCDynamicMeshFluidSolver::initTimeStep()
-{}
-
-bool SDCDynamicMeshFluidSolver::isRunning()
-{
-    return runTime->run();
-}
-
 void SDCDynamicMeshFluidSolver::resetSolution()
 {
     assert( false );
-}
-
-void SDCDynamicMeshFluidSolver::setDeltaT( scalar dt )
-{
-    runTime->setDeltaT( dt );
 }
 
 void SDCDynamicMeshFluidSolver::setNumberOfImplicitStages( int k )
@@ -455,20 +192,6 @@ void SDCDynamicMeshFluidSolver::nextTimeStep()
             interpolateVolumeStages.at( i ) = fvc::interpolate( V );
         }
     }
-}
-
-void SDCDynamicMeshFluidSolver::solve()
-{
-    assert( false );
-}
-
-void SDCDynamicMeshFluidSolver::finalizeTimeStep()
-{
-    runTime->writeNow();
-
-    Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
-         << "  ClockTime = " << runTime->elapsedClockTime() << " s"
-         << endl << endl;
 }
 
 int SDCDynamicMeshFluidSolver::getDOF()
@@ -727,21 +450,6 @@ void SDCDynamicMeshFluidSolver::setSolution(
     }
 
     assert( index == f.rows() );
-}
-
-scalar SDCDynamicMeshFluidSolver::getEndTime()
-{
-    return runTime->endTime().value();
-}
-
-scalar SDCDynamicMeshFluidSolver::getStartTime()
-{
-    return runTime->startTime().value();
-}
-
-scalar SDCDynamicMeshFluidSolver::getTimeStep()
-{
-    return runTime->deltaT().value();
 }
 
 void SDCDynamicMeshFluidSolver::evaluateFunction(
@@ -1103,7 +811,8 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
                 if ( nonOrth == nNonOrthCorr )
                 {
-                    phi -= pEqn.flux();
+                    Uf -= pEqn.flux() * mesh.Sf() / ( mesh.magSf() * mesh.magSf() );
+                    phi = Uf & mesh.Sf();
                 }
             }
 
@@ -1118,17 +827,6 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
             if ( currResidual < std::max( tol * initResidual, scalar( 1.0e-15 ) ) )
                 break;
         }
-
-        // Update the face velocities
-        fvc::makeAbsolute( phi, U );
-        {
-            surfaceVectorField nf = mesh.Sf() / mesh.magSf();
-            surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
-            surfaceVectorField Unor = phi / mesh.magSf() * nf;
-
-            Uf = Utang + Unor;
-        }
-        fvc::makeRelative( phi, U );
 
         scalar momentumResidual = evaluateMomentumResidual();
 

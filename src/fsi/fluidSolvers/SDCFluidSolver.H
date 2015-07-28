@@ -98,7 +98,13 @@ public:
 
     virtual void nextTimeStep();
 
-private:
+    virtual void getVariablesInfo(
+        std::deque<int> & dof,
+        std::deque<bool> & enabled,
+        std::deque<std::string> & names
+        );
+
+protected:
 
     void continuityErrs();
 
@@ -152,7 +158,6 @@ private:
     std::deque<volScalarField> pStages;
     std::deque<surfaceScalarField> phiStages;
     std::deque<volVectorField> UStages;
-    std::deque<surfaceVectorField> UfStages;
     IOobject UFHeader;
     IOobject phiFHeader;
     volVectorField UF;

@@ -34,5 +34,12 @@ fi
 
 mkdir -p ${FOAM_USER_LIBBIN}
 mkdir -p ${FOAM_USER_APPBIN}
-cp build/last/libprecice.so ${FOAM_USER_LIBBIN}/
+
+SHARED_LIBRARY=libprecice.so
+
+if [ "$(uname)" == "Darwin" ]; then
+    SHARED_LIBRARY=libprecice.dylib
+fi
+
+cp build/last/${SHARED_LIBRARY} ${FOAM_USER_LIBBIN}/
 cp build/last/binprecice ${FOAM_USER_APPBIN}/
