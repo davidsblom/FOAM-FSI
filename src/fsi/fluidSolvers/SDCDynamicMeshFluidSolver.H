@@ -79,6 +79,7 @@ private:
     void initialize();
 
     // Fields
+    surfaceVectorField Uf;
     surfaceVectorField rhsUf;
     surfaceScalarField rhsMeshPhi;
 

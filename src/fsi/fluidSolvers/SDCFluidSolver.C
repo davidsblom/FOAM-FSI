@@ -55,18 +55,6 @@ SDCFluidSolver::SDCFluidSolver(
     ),
     mesh
     ),
-    Uf
-    (
-    IOobject
-    (
-        "Uf",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    linearInterpolate( U )
-    ),
     phi
     (
     IOobject
@@ -77,7 +65,7 @@ SDCFluidSolver::SDCFluidSolver(
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
-    Uf & mesh.Sf()
+    linearInterpolate( U ) & mesh.Sf()
     ),
     AU
     (
@@ -300,16 +288,7 @@ void SDCFluidSolver::courantNo()
 
 void SDCFluidSolver::createFields()
 {
-    surfaceVectorField nf = mesh.Sf() / mesh.magSf();
-    surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
-    surfaceVectorField Unor = phi / mesh.magSf() * nf;
-
-    Uf = Utang + Unor;
-
-    phi = Uf & mesh.Sf();
-
     U.oldTime();
-    Uf.oldTime();
     phi.oldTime();
 
     // Read pressure properties and create turbulence model
@@ -436,7 +415,7 @@ int SDCFluidSolver::getDOF()
     int index = 0;
     forAll( U.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             index++;
         }
@@ -446,7 +425,7 @@ int SDCFluidSolver::getDOF()
     {
         forAll( U.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 index++;
             }
@@ -475,7 +454,7 @@ void SDCFluidSolver::getSolution( fsi::vector & solution )
 
     forAll( U.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             solution( index ) = U.internalField()[i][j];
             index++;
@@ -486,7 +465,7 @@ void SDCFluidSolver::getSolution( fsi::vector & solution )
     {
         forAll( U.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 solution( index ) = U.boundaryField()[patchI][i][j];
                 index++;
@@ -523,7 +502,7 @@ void SDCFluidSolver::setSolution(
 
     forAll( U.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             U.internalField()[i][j] = solution( index );
             index++;
@@ -534,7 +513,7 @@ void SDCFluidSolver::setSolution(
     {
         forAll( U.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 U.boundaryField()[patchI][i][j] = solution( index );
                 index++;
@@ -563,7 +542,7 @@ void SDCFluidSolver::setSolution(
 
     forAll( UF.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             UF.internalField()[i][j] = f( index );
             index++;
@@ -574,7 +553,7 @@ void SDCFluidSolver::setSolution(
     {
         forAll( UF.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 UF.boundaryField()[patchI][i][j] = f( index );
                 index++;
@@ -633,7 +612,7 @@ void SDCFluidSolver::evaluateFunction(
 
     forAll( UF.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             f( index ) = UF.internalField()[i][j];
             index++;
@@ -644,7 +623,7 @@ void SDCFluidSolver::evaluateFunction(
     {
         forAll( UF.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 f( index ) = UF.boundaryField()[patchI][i][j];
                 index++;
@@ -697,7 +676,7 @@ void SDCFluidSolver::implicitSolve(
 
     forAll( U.oldTime().internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             U.oldTime().internalField()[i][j] = qold( index );
             index++;
@@ -708,7 +687,7 @@ void SDCFluidSolver::implicitSolve(
     {
         forAll( U.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 U.oldTime().boundaryField()[patchI][i][j] = qold( index );
                 index++;
@@ -737,7 +716,7 @@ void SDCFluidSolver::implicitSolve(
 
     forAll( rhsU.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             rhsU.internalField()[i][j] = rhs( index );
             index++;
@@ -748,7 +727,7 @@ void SDCFluidSolver::implicitSolve(
     {
         forAll( rhsU.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 rhsU.boundaryField()[patchI][i][j] = rhs( index );
                 index++;
@@ -958,7 +937,7 @@ void SDCFluidSolver::getVariablesInfo(
 
     forAll( U.internalField(), i )
     {
-        for ( int j = 0; j < 3; j++ )
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             dof.at( 0 ) += 1;
         }
@@ -968,7 +947,7 @@ void SDCFluidSolver::getVariablesInfo(
     {
         forAll( U.boundaryField()[patchI], i )
         {
-            for ( int j = 0; j < 3; j++ )
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 dof.at( 0 ) += 1;
             }

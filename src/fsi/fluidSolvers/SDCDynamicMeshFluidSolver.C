@@ -16,6 +16,18 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     )
     :
     SDCFluidSolver( name, args, runTime ),
+    Uf
+    (
+    IOobject
+    (
+        "Uf",
+        runTime->timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    fvc::interpolate( U )
+    ),
     rhsUf
     (
     IOobject

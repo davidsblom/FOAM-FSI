@@ -129,7 +129,6 @@ protected:
     // Fields
     volScalarField p;
     volVectorField U;
-    surfaceVectorField Uf;
     surfaceScalarField phi;
     volScalarField AU;
     volVectorField HU;
