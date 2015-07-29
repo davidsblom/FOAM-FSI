@@ -87,9 +87,7 @@ private:
     std::deque<pointField> pointsStages;
     std::deque<volScalarField::DimensionedInternalField> volumeStages;
     std::deque<surfaceScalarField> interpolateVolumeStages;
-    IOobject UFHeader;
-    IOobject phiFHeader;
-    volVectorField UF;
+    IOobject UfFHeader;
     surfaceVectorField UfF;
     surfaceScalarField meshPhiF;
 };

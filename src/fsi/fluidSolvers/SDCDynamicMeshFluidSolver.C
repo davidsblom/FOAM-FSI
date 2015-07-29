@@ -57,15 +57,7 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     pointsStages(),
     volumeStages(),
     interpolateVolumeStages(),
-    UFHeader
-    (
-    "UF",
-    runTime->timeName(),
-    mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
-    ),
-    phiFHeader
+    UfFHeader
     (
     "UfF",
     runTime->timeName(),
@@ -73,15 +65,9 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     IOobject::READ_IF_PRESENT,
     IOobject::AUTO_WRITE
     ),
-    UF
-    (
-    UFHeader,
-    mesh,
-    dimensionedVector( "UF", dimVelocity / dimTime, Foam::vector::zero )
-    ),
     UfF
     (
-    phiFHeader,
+    UfFHeader,
     fvc::interpolate( UF )
     ),
     meshPhiF
@@ -114,7 +100,6 @@ void SDCDynamicMeshFluidSolver::createFields()
 
     U.oldTime();
     Uf.oldTime();
-    phi.oldTime();
 
     // Read pressure properties and create turbulence model
     pRefCell = 0;
@@ -569,7 +554,6 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     Uf.oldTime() = UfStages.at( kold );
     U.oldTime() = UStages.at( kold );
-    phi.oldTime() = phiStages.at( kold );
 
     // Moving wall boundary condition
 

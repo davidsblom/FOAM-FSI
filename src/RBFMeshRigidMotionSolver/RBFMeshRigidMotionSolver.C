@@ -97,6 +97,12 @@ Foam::vector RBFMeshRigidMotionSolver::calcVelocity()
     if ( not corrector && k == 0 )
         timeIntegrationScheme->setOldSolution( mesh().time().timeIndex(), oscillator->sol );
 
+    if ( not corrector && k == 0 )
+    {
+        oscillator->evaluateFunction( 0, oscillator->sol, t - dt, f );
+        timeIntegrationScheme->setFunction( k-1, f, oscillator->sol );
+    }
+
     timeIntegrationScheme->getSourceTerm( corrector, k, dt, rhs, qold );
 
     oscillator->implicitSolve( corrector, k, k, t, dt, qold, rhs, f, result );
