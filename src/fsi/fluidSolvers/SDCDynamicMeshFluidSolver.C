@@ -698,6 +698,8 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     // -------------------------------------------------------------------------
 
+    courantNo();
+
     scalar convergenceTolerance = absoluteTolerance;
 
     dimensionedScalar rDeltaT = 1.0 / mesh.time().deltaT();
