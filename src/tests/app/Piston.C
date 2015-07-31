@@ -30,7 +30,10 @@ Piston::Piston(
     qdot( qdot0 ),
     t( 0 ),
     timeIndex( 0 ),
-    endTime( nbTimeSteps * dt )
+    endTime( nbTimeSteps * dt ),
+    k( 0 ),
+    solStages(),
+    timeIntegrationScheme( false )
 {
     assert( nbTimeSteps > 0 );
     assert( dt > 0 );
@@ -64,6 +67,7 @@ Piston::Piston(
     timeIndex( 0 ),
     endTime( nbTimeSteps * dt ),
     k( k ),
+    solStages(),
     timeIntegrationScheme( timeIntegrationScheme )
 {
     assert( nbTimeSteps > 0 );

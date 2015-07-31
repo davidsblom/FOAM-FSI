@@ -27,6 +27,7 @@ namespace fsi
         singularityLimit( singularityLimit ),
         updateJacobian( updateJacobian ),
         scalingFactors( fsi::vector::Ones( 2 ) ),
+        Jprev(),
         sizeVar0( 0 ),
         sizeVar1( 0 )
     {

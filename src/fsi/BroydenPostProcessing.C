@@ -19,6 +19,7 @@ BroydenPostProcessing::BroydenPostProcessing(
     )
     :
     PostProcessing( fsi, initialRelaxation, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex ),
+    J(),
     singularityLimit( singularityLimit )
 {
     assert( singularityLimit > 0 );

@@ -215,7 +215,14 @@ namespace tubeflow
 
         int m_inputs, m_values;
 
-        Functor() : m_inputs( InputsAtCompileTime ), m_values( ValuesAtCompileTime ) {}
+        Functor()
+            :
+            m_inputs( InputsAtCompileTime ),
+            m_values( ValuesAtCompileTime )
+        {}
+
+        virtual ~Functor()
+        {}
 
         Functor(
             int inputs,
@@ -247,6 +254,9 @@ namespace tubeflow
             un( un ),
             pn( pn ),
             an( an )
+        {}
+
+        virtual ~residualFunctor()
         {}
 
         int operator()(

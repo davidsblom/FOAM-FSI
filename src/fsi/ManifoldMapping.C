@@ -20,6 +20,7 @@ ManifoldMapping::ManifoldMapping(
     scaling( false ),
     iter( 0 ),
     scalingFactors( fsi::vector::Ones( 2 ) ),
+    Tkprev(),
     sizeVar0( 0 ),
     sizeVar1( 0 )
 {}
@@ -41,6 +42,7 @@ ManifoldMapping::ManifoldMapping(
     scaling( false ),
     iter( 0 ),
     scalingFactors( fsi::vector::Ones( 2 ) ),
+    Tkprev(),
     sizeVar0( 0 ),
     sizeVar1( 0 )
 {}
@@ -63,6 +65,7 @@ ManifoldMapping::ManifoldMapping(
     scaling( false ),
     iter( 0 ),
     scalingFactors( fsi::vector::Ones( 2 ) ),
+    Tkprev(),
     sizeVar0( 0 ),
     sizeVar1( 0 )
 {}

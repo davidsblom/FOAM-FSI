@@ -95,7 +95,6 @@ private:
         // by the solver
         bool corrector;
         int stageIndex;
-        scalar stageDeltaT;
         fsi::matrix F;
         fsi::matrix Fold;
         fsi::matrix Sj;

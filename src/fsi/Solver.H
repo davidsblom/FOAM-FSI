@@ -14,6 +14,11 @@ class Solver
 {
 public:
 
+    Solver()
+        :
+        time()
+    {}
+
     virtual ~Solver(){}
 
     virtual void run() = 0;

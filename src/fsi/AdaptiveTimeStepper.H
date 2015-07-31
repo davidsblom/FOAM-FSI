@@ -47,11 +47,7 @@ public:
             scalar & newTimeStep
             );
 
-        scalar elementary(
-            const scalar c1,
-            const scalar c0,
-            const scalar rho
-            );
+        scalar elementary( const scalar c1 );
 
         scalar h211b(
             const scalar c1,
@@ -69,8 +65,7 @@ public:
 
         scalar pi42(
             const scalar c1,
-            const scalar c0,
-            const scalar rho
+            const scalar c0
             );
 
         void setEndTime( scalar endTime );

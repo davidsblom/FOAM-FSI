@@ -31,7 +31,8 @@ public:
             initialValue( initialValue ),
             timeIndex( 0 ),
             t( 0 ),
-            dim( dim )
+            dim( dim ),
+            couplingData()
         {
             assert( N >= 5 );
             assert( dim > 0 );

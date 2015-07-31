@@ -21,6 +21,9 @@ OutputSpaceMapping::OutputSpaceMapping(
     :
     SpaceMapping( fineModel, surrogateModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
     surrogateModel( surrogateModel ),
+    sols(),
+    solsList(),
+    solsTimeList(),
     order( order )
 {
     assert( surrogateModel );

@@ -9,6 +9,10 @@
 using namespace fsi;
 
 DataValues::DataValues()
+    :
+    data(),
+    dataprev(),
+    dataPreviousTimeStep()
 {}
 
 DataValues::~DataValues()

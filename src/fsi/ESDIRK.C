@@ -23,6 +23,10 @@ namespace sdc
         C(),
         Bhat(),
         N( solver->getDOF() ),
+        stageIndex( 0 ),
+        F(),
+        solStages(),
+        qold(),
         timeIndex( 0 )
     {
         assert( solver );
@@ -52,6 +56,10 @@ namespace sdc
         C(),
         Bhat(),
         N( 0 ),
+        stageIndex( 0 ),
+        F(),
+        solStages(),
+        qold(),
         timeIndex( 0 )
     {
         initializeButcherTableau( method );

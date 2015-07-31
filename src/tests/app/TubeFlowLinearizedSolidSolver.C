@@ -29,10 +29,12 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     alpha( rho * h / dt ),
     beta( -kappa * G * h / (dx * dx) ),
     gamma( E0 * h / (1.0 - nu * nu) * ( 1.0 / (r0 * r0) ) ),
+    grid(),
     un( N ),
     rn( N ),
     u( N ),
-    r( N )
+    r( N ),
+    lu()
 {
     assert( N > 0 );
     assert( nu > 0 );

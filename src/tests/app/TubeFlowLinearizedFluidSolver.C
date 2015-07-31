@@ -33,12 +33,14 @@ TubeFlowLinearizedFluidSolver::TubeFlowLinearizedFluidSolver(
     tau( u0 * dt / L ),
     cmk( std::sqrt( E * h / (2 * rho * r0) ) ),
     alpha( a0 / (u0 + dx / dt) ),
+    grid(),
     un( N ),
     an( N ),
     pn( N ),
     u( N ),
     a( N ),
-    p( N )
+    p( N ),
+    lu()
 {
     assert( N > 0 );
     assert( p0 >= 0 );

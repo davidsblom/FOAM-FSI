@@ -99,14 +99,14 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
         accepted = true;
 
     if ( timeStepIndex == 0 || previousTimeStepRejected )
-        rho = elementary( cerr, cerrold, rhoold );
+        rho = elementary( cerr );
     else
     {
         if ( filter == "h211b" )
             rho = h211b( cerr, cerrold, rhoold );
 
         if ( filter == "pi42" )
-            rho = pi42( cerr, cerrold, rhoold );
+            rho = pi42( cerr, cerrold );
     }
 
     scalar ratio = limit( rho );
@@ -142,11 +142,7 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
     return accepted;
 }
 
-scalar AdaptiveTimeStepper::elementary(
-    const scalar c1,
-    const scalar c0,
-    const scalar rho
-    )
+scalar AdaptiveTimeStepper::elementary( const scalar c1 )
 {
     // Elementary integrating controller for startup
     return std::pow( c1, 1.0 / k );
@@ -191,8 +187,7 @@ scalar AdaptiveTimeStepper::limit( const scalar u )
 
 scalar AdaptiveTimeStepper::pi42(
     const scalar c1,
-    const scalar c0,
-    const scalar rho
+    const scalar c0
     )
 {
     // PI.4.2 controller
