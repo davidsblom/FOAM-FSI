@@ -18,4 +18,3 @@ wclean applications/solvers/fsi/fsiSolidFoam
 wclean src/tests/app
 wclean src/tests/tubeflow
 rmdepall
-find . -name 'lnInclude' -exec rm -rf {} \;
