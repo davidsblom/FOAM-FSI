@@ -16,10 +16,7 @@ namespace fsi
     {
 public:
 
-        ConvergenceMeasure(
-            int dataId,
-            int minIter
-            )
+        ConvergenceMeasure( int dataId )
             :
             dataId( dataId ),
             isConvergence_( false )

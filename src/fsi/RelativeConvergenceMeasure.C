@@ -13,7 +13,7 @@ namespace fsi
         scalar convergenceLimit
         )
         :
-        ConvergenceMeasure( dataId, convergenceLimit ),
+        ConvergenceMeasure( dataId ),
         normDiff( 0 ),
         norm( 0 ),
         convergenceLimit( convergenceLimit ),

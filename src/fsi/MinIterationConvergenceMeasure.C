@@ -14,7 +14,7 @@ namespace fsi
         int minimumIterationCount
         )
         :
-        ConvergenceMeasure( dataId, minimumIterationCount ),
+        ConvergenceMeasure( dataId ),
         minimumIterationCount( minimumIterationCount ),
         currentIteration( 0 )
     {
