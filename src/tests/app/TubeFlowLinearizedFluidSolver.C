@@ -56,6 +56,7 @@ TubeFlowLinearizedFluidSolver::TubeFlowLinearizedFluidSolver(
     un.setZero();
     a.setZero();
     an.setZero();
+    data.fill( p0 );
 
     factorizeMatrix();
 }
