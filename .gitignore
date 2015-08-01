@@ -26,6 +26,7 @@ lnInclude
 linux64GccDPOpt
 linux64GccLDPOpt
 darwinIntel64GccDPOpt
+linux64GccLDPOpt
 
 # Specific files
 *.log
