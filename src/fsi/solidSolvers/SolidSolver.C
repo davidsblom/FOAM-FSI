@@ -47,6 +47,10 @@ SolidSolver::SolidSolver (
     muf( fvc::interpolate( mu, "mu" ) ),
     lambdaf( fvc::interpolate( lambda, "lambda" ) ),
     n( mesh.Sf() / mesh.magSf() ),
+    minIter( 0 ),
+    maxIter( 0 ),
+    absoluteTolerance( 0 ),
+    relativeTolerance( 0 ),
     couplingProperties
     (
     IOobject
@@ -57,7 +61,8 @@ SolidSolver::SolidSolver (
         IOobject::MUST_READ,
         IOobject::NO_WRITE
     )
-    )
+    ),
+    interpolator( false )
 {}
 
 SolidSolver::SolidSolver (
