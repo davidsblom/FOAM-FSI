@@ -40,7 +40,7 @@ namespace sdc
     {
         assert( tol > 0 );
         assert( tol < 1 );
-        assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" );
+        assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" || rule == "uniform-right-sided" );
 
         int refine = 1;
         quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
@@ -91,7 +91,7 @@ namespace sdc
         assert( dt > 0 );
         assert( tol > 0 );
         assert( tol < 1 );
-        assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" );
+        assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" || rule == "uniform-right-sided" );
 
         int refine = 1;
         quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
@@ -123,6 +123,9 @@ namespace sdc
 
             if ( rule == "uniform" )
                 orderEmbedded = nodesEmbedded.rows();
+
+            if ( rule == "uniform-right-sided" )
+                orderEmbedded = nodesEmbedded.rows() - 1;
 
             adaptiveTimeStepper->setOrderEmbeddedMethod( orderEmbedded );
             adaptiveTimeStepper->setEndTime( solver->getEndTime() );
