@@ -31,6 +31,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     fixedPatches( lookup( "fixedPatches" ) ),
     fixedPatchIDs( fixedPatches.size() ),
     newPoints( mesh.points().size(), vector::zero ),
+    rbf( false ),
     nbGlobalFaceCenters( Pstream::nProcs(), 0 ),
     nbGlobalMovingFaceCenters( Pstream::nProcs(), 0 ),
     nbGlobalStaticFaceCenters( Pstream::nProcs(), 0 ),
@@ -39,7 +40,10 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     twoDCorrector( mesh ),
     nbPoints( 0 ),
     faceCellCenters( true ),
-    cpu( false )
+    cpu( false ),
+    timeIntegrationScheme( false ),
+    corrector( false ),
+    k( 0 )
 {
     // Find IDs of staticPatches
     forAll( staticPatches, patchI )

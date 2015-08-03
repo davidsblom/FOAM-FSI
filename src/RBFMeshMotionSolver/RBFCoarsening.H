@@ -88,7 +88,6 @@ public:
         int coarseningMinPoints;
         int coarseningMaxPoints;
         bool twoPointSelection;
-        bool polynomialTerm;
         bool surfaceCorrection;
         scalar ratioRadiusError;
         bool exportTxt;

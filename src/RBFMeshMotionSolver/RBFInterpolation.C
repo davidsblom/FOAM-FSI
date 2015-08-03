@@ -20,6 +20,10 @@ namespace rbf
         n_B( 0 ),
         dimGrid( 0 ),
         Hhat(),
+        Phi(),
+        lu(),
+        fullPivLu(),
+        llt(),
         positions(),
         positionsInterpolation()
     {
@@ -40,6 +44,10 @@ namespace rbf
         n_B( 0 ),
         dimGrid( 0 ),
         Hhat(),
+        Phi(),
+        lu(),
+        fullPivLu(),
+        llt(),
         positions(),
         positionsInterpolation()
     {
