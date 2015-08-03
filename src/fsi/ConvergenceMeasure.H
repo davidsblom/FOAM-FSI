@@ -22,15 +22,6 @@ public:
             isConvergence_( false )
         {}
 
-        ConvergenceMeasure(
-            int dataId,
-            scalar convergenceLimit
-            )
-            :
-            dataId( dataId ),
-            isConvergence_( false )
-        {}
-
         virtual ~ConvergenceMeasure(){}
 
         virtual void measure(

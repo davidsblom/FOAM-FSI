@@ -389,6 +389,9 @@ struct Functor
         int values
         ) : m_inputs( inputs ), m_values( values ) {}
 
+    virtual ~Functor()
+    {}
+
     int inputs() const
     {
         return m_inputs;

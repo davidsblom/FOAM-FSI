@@ -155,12 +155,23 @@ struct Functor
 
     int m_inputs, m_values;
 
-    Functor() : m_inputs( InputsAtCompileTime ), m_values( ValuesAtCompileTime ) {}
+    Functor()
+        :
+        m_inputs( InputsAtCompileTime ),
+        m_values( ValuesAtCompileTime )
+    {}
 
     Functor(
         int inputs,
         int values
-        ) : m_inputs( inputs ), m_values( values ) {}
+        )
+        :
+        m_inputs( inputs ),
+        m_values( values )
+    {}
+
+    virtual ~Functor()
+    {}
 
     int inputs() const
     {
