@@ -129,6 +129,8 @@ SDCFluidSolver::SDCFluidSolver(
     sumLocalContErr( 0 ),
     globalContErr( 0 ),
     cumulativeContErr( 0 ),
+    pRefCell( 0 ),
+    pRefValue( 0.0 ),
     laminarTransport( U, phi ),
     turbulence( autoPtr<incompressible::turbulenceModel>
     (
@@ -292,8 +294,6 @@ void SDCFluidSolver::createFields()
     phi.oldTime();
 
     // Read pressure properties and create turbulence model
-    pRefCell = 0;
-    pRefValue = 0.0;
     setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
 }
 

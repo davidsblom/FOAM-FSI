@@ -69,7 +69,8 @@ SDCLaplacianSolver::SDCLaplacianSolver(
     (
     transportProperties.lookup( "DT" )
     ),
-    nNonOrthCorr( mesh.solutionDict().subDict( "SIMPLE" ).lookupOrDefault<int>("nNonOrthogonalCorrectors", 0) )
+    nNonOrthCorr( mesh.solutionDict().subDict( "SIMPLE" ).lookupOrDefault<int>("nNonOrthogonalCorrectors", 0) ),
+    k( 0 )
 {
     assert( args );
     assert( runTime );

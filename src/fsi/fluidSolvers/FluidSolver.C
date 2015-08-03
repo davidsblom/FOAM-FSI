@@ -116,11 +116,16 @@ FluidSolver::FluidSolver(
     sumLocalContErr( 0 ),
     globalContErr( 0 ),
     cumulativeContErr( 0 ),
+    pRefCell( 0 ),
+    pRefValue( 0.0 ),
     laminarTransport( U, phi ),
     turbulence( autoPtr<incompressible::turbulenceModel>
     (
         incompressible::turbulenceModel::New( U, phi, laminarTransport )
     ) ),
+    CoNum( 0 ),
+    meanCoNum( 0 ),
+    velMag( 0 ),
     turbulenceSwitch( true )
 {
     assert( absoluteTolerance < 1 );
@@ -157,8 +162,6 @@ FluidSolver::FluidSolver(
         Uf = Utang + Unor;
     }
 
-    pRefCell = 0;
-    pRefValue = 0.0;
     setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
 
     {
@@ -249,10 +252,6 @@ void FluidSolver::continuityErrs()
 
 void FluidSolver::courantNo()
 {
-    CoNum = 0.0;
-    meanCoNum = 0.0;
-    velMag = 0.0;
-
     if ( mesh.nInternalFaces() )
     {
         surfaceScalarField magPhi = mag( phi );
