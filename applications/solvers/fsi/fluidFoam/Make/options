@@ -19,7 +19,6 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/solidModels/lnInclude \
     -I../../../../src/thirdParty/yaml-cpp/include \
     -I../../../../src/RBFMeshMotionSolver/lnInclude/ \
-    -I../../../../src/RBFMeshRigidMotionSolver/lnInclude/ \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
     -I../../../../src/thirdParty/boost \
@@ -44,7 +43,6 @@ EXE_LIBS = \
     -llagrangian \
     -lyaml-cpp \
     -lRBFMeshMotionSolver \
-    -lRBFMeshRigidMotionSolver \
     -lfsi \
     -ltetFiniteElement \
     -lbasicThermophysicalModels \

@@ -41,7 +41,6 @@ EXE_LIBS = \
     -llagrangian \
     -lyaml-cpp \
     -lRBFMeshMotionSolver \
-    -lRBFMeshRigidMotionSolver \
     -lfsi \
     -ltetFiniteElement \
     -lbasicThermophysicalModels \
