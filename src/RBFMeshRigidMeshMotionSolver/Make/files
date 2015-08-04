@@ -1,4 +1,0 @@
-RBFMeshRigidMeshMotionSolver.C
-Oscillator.C
-
-LIB = $(FOAM_USER_LIBBIN)/libRBFMeshRigidMeshMotionSolver
