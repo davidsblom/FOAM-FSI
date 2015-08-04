@@ -4,5 +4,6 @@ setInletVelocity/setInletVelocityFvPatchVectorField.C
 rotatingWallVelocitySmooth/rotatingWallVelocitySmoothFvPatchVectorField.C
 movingWallPressureGradient/movingWallPressureGradientFvPatchScalarField.C
 movingWallPressureGradient3/movingWallPressureGradient3FvPatchScalarField.C
+increasingFixedValue/increasingFixedValueFvPatchFields.C
 
 LIB = $(FOAM_USER_LIBBIN)/libboundaryConditions
