@@ -246,7 +246,7 @@ TEST_P( SDCEstimateOrderTest, order )
 
     Info << "error1 = " << error1 << ", error2 = " << error2 << endl;
 
-     int nbTimeSteps = 10;
+    int nbTimeSteps = 10;
     scalar order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
 
     int nbNodes = std::tr1::get<0>( GetParam() );
