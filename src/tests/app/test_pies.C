@@ -32,4 +32,6 @@ TEST( PIESTest, coefficients )
     piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
 
     std::shared_ptr<sdc::PIES> pies( new sdc::PIES( piston, adaptiveTimeStepper, tol, delta ) );
+
+    pies->run();
 }

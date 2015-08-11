@@ -27,6 +27,8 @@ namespace sdc
 
         for ( int i = 0; i < dsdc.rows(); i++ )
             dsdc( i ) = nodes( i + 1 ) - nodes( i );
+
+        solver->setNumberOfImplicitStages( k - 1 );
     }
 
     PIES::~PIES()
@@ -175,10 +177,33 @@ namespace sdc
         matrixc omega = A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( b );
         matrix omegaReal = omega.real();
 
+        // Compute the qmat matrix ( t = -1 .. 1 )
+
+        b.setZero();
+
+        for ( int i = 0; i < b.rows(); i++ )
+        {
+            for ( int j = 1; j < b.cols(); j++ )
+            {
+                std::complex<longDouble> gamma = gamma_k( i );
+                longDouble t0 = 0;
+                longDouble t1 = t( j );
+
+                if ( std::abs( gamma ) < 1.0e-14 )
+                    b( i, j ) = t1 - t0;
+                else
+                    b( i, j ) = -( std::exp( gamma * t0 ) - std::exp( gamma * t1 ) ) / gamma;
+            }
+        }
+
+        matrixc qmatOmega = A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( b );
+        matrix qmatReal = qmatOmega.real();
+
         t.array() += 1;
         t *= 0.5;
         nodes = t.cast<scalar>();
 
         smat = omegaReal.cast<scalar>();
+        qmat = qmatReal.cast<scalar>();
     }
 }
