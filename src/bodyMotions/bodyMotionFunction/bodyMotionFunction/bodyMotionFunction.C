@@ -28,7 +28,7 @@ bodyMotionFunction
 \*---------------------------------------------------------------------------*/
 
 #include "bodyMotionFunction.H"
-#include "Time.H"
+#include "foamTime.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,7 +2,7 @@
 #include "mathematicalConstants.H"
 #include "tensor.H"
 #include "addToRunTimeSelectionTable.H"
-#include "Time.H"
+#include "foamTime.H"
 #include "globalMeshData.H"
 #include "processorFvPatch.H"
 

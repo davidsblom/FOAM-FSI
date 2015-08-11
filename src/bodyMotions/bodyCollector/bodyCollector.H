@@ -48,7 +48,7 @@ SourceFiles
 #include "fvMesh.H"
 #include "volFields.H"
 #include "vectorField.H"
-#include "Time.H"
+#include "foamTime.H"
 #include "bodyMotionFunction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

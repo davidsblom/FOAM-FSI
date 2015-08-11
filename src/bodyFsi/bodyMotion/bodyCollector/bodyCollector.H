@@ -46,7 +46,6 @@ SourceFiles
 #include "autoPtr.H"
 #include "primitiveFields.H"
 #include "fvMesh.H"
-#include "Time.H"
 #include "bodyMotionFunction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
