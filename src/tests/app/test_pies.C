@@ -34,4 +34,11 @@ TEST( PIESTest, coefficients )
     std::shared_ptr<sdc::PIES> pies( new sdc::PIES( piston, adaptiveTimeStepper, tol, delta ) );
 
     pies->run();
+
+    fsi::vector solution( 2 );
+    piston->getSolution( solution );
+
+    scalar ref = piston->referenceSolution( 100 );
+    scalar error = std::abs( solution( 1 ) - ref ) / std::abs( ref );
+    Info << "error = " << error << endl;
 }
