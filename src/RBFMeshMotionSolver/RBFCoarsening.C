@@ -365,8 +365,6 @@ namespace rbf
 
             while ( true )
             {
-                std::clock_t t = std::clock();
-
                 // Build the matrices used for the RBF interpolation
                 rbf::matrix positionsCoarse( counter, positions.cols() );
                 rbf::matrix valuesCoarse( positionsCoarse.rows(), positionsCoarse.cols() );
@@ -377,6 +375,8 @@ namespace rbf
                     positionsCoarse.row( j ) = positions.row( selectedPositions( j ) );
                     valuesCoarse.row( j ) = values.row( selectedPositions( j ) );
                 }
+                
+                std::clock_t t = std::clock();
 
                 // Perform the RBF interpolation.
                 rbfCoarse->interpolate( positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
