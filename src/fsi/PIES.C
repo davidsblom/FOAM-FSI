@@ -176,6 +176,7 @@ namespace sdc
 
         matrixc omega = A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( b );
         matrix omegaReal = omega.real();
+        omegaReal *= 0.5;
 
         // Compute the qmat matrix ( t = -1 .. 1 )
 
@@ -198,6 +199,7 @@ namespace sdc
 
         matrixc qmatOmega = A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( b );
         matrix qmatReal = qmatOmega.real();
+        qmatReal *= 0.5;
 
         t.array() += 1;
         t *= 0.5;
