@@ -28,4 +28,15 @@ namespace rbf
         //return std::pow( 1 - value, 2 );
         return ( 1 - value )*( 1 - value );
     }
+
+    double WendlandC0Function::correctionPower()
+    {
+        return 1;
+    }
+
+    void WendlandC0Function::setRadius( double value)
+    {
+        assert( value > 0 );
+        radius = value;
+    }
 }

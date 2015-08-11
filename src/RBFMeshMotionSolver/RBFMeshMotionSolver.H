@@ -13,11 +13,14 @@
 #include "addToRunTimeSelectionTable.H"
 #include "RBFInterpolation.H"
 #include "RBFCoarsening.H"
+#include "RBFFunctionInterface.H"
 #include "TPSFunction.H"
 #include "WendlandC0Function.H"
 #include "WendlandC2Function.H"
 #include "WendlandC4Function.H"
 #include "WendlandC6Function.H"
+#include "GillebaartR3Function.H"
+#include "GillebaartR3aFunction.H"
 #include "twoDPointCorrectorRBF.H"
 #include <memory>
 #include <assert.h>
@@ -63,6 +66,8 @@ private:
         scalar getMaxWallDistance();
 
         scalar getMaxAspectRatio();
+
+        void setSurfaceCorrectionFunction( std::shared_ptr<rbf::RBFFunctionInterface>& surfaceCorrectionFunction, word surfaceCorrectionFunctionName);
 
 public:
 

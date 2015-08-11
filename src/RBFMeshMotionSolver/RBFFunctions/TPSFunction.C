@@ -22,4 +22,14 @@ namespace rbf
 
         return 0;
     }
+
+    double TPSFunction::correctionPower()
+    {
+        return 0;
+    }
+
+    void TPSFunction::setRadius( double value)
+    {
+
+    }
 }

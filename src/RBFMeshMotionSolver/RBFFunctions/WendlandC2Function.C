@@ -27,4 +27,15 @@ namespace rbf
 
         return (1 - value)*(1 - value)*(1 - value)*(1 - value) * (4 * value + 1);
     }
+
+    double WendlandC2Function::correctionPower()
+    {
+        return 2;
+    }
+
+    void WendlandC2Function::setRadius( double value)
+    {
+        assert( value > 0 );
+        radius = value;
+    }
 }

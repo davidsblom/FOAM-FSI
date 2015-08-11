@@ -120,6 +120,45 @@ scalar RBFMeshMotionSolver::getMaxAspectRatio()
     return maxAspectRatio;
 }
 
+void RBFMeshMotionSolver::setSurfaceCorrectionFunction(std::shared_ptr<rbf::RBFFunctionInterface>& surfaceCorrectionFunction, word surfaceCorrectionFunctionName)
+{
+    assert(surfaceCorrectionFunctionName == "WendlandC0" || surfaceCorrectionFunctionName == "WendlandC2" || surfaceCorrectionFunctionName == "WendlandC4" || surfaceCorrectionFunctionName == "WendlandC6" || surfaceCorrectionFunctionName == "GillebaartR3" || surfaceCorrectionFunctionName == "GillebaartR3a");
+
+    Info << "Radial Basis Function coarsening: Selecting surface correction RBF function: " << surfaceCorrectionFunctionName << endl;
+
+    if ( surfaceCorrectionFunctionName == "WendlandC0" )
+    {
+        surfaceCorrectionFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC0Function( 1.0 ) );
+    }
+
+    if ( surfaceCorrectionFunctionName == "WendlandC2" )
+    {
+        surfaceCorrectionFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( 1.0 ) );
+    }
+
+    if ( surfaceCorrectionFunctionName == "WendlandC4" )
+    {
+        surfaceCorrectionFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC4Function( 1.0 ) );
+    }
+
+    if ( surfaceCorrectionFunctionName == "WendlandC6" )
+    {
+        surfaceCorrectionFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC6Function( 1.0 ) );
+    }
+
+    if ( surfaceCorrectionFunctionName == "GillebaartR3" )
+    {
+        surfaceCorrectionFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::GillebaartR3Function( 1.0 ) );
+    }
+
+    if ( surfaceCorrectionFunctionName == "GillebaartR3a" )
+    {
+        surfaceCorrectionFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::GillebaartR3aFunction( 1.0 ) );
+    }
+
+    assert( surfaceCorrectionFunction );
+}
+
 RBFMeshMotionSolver::RBFMeshMotionSolver(
     const polyMesh & mesh,
     Istream & msData
@@ -206,7 +245,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
     word function = dict.lookup( "function" );
 
-    assert( function == "TPS" || function == "WendlandC0" || function == "WendlandC2" || function == "WendlandC4" || function == "WendlandC6" );
+    assert( function == "TPS" || function == "WendlandC0" || function == "WendlandC2" || function == "WendlandC4" || function == "WendlandC6" || function == "GillebaartR3" || function == "GillebaartR3a");
 
     std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
 
@@ -237,6 +276,18 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     {
         scalar radius = readScalar( dict.lookup( "radius" ) );
         rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC6Function( radius ) );
+    }
+
+    if ( function == "GillebaartR3" )
+    {
+        scalar radius = readScalar( dict.lookup( "radius" ) );
+        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::GillebaartR3Function( radius ) );
+    }
+
+    if ( function == "GillebaartR3a" )
+    {
+        scalar radius = readScalar( dict.lookup( "radius" ) );
+        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::GillebaartR3aFunction( radius ) );
     }
 
     assert( rbfFunction );
@@ -270,9 +321,10 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         twoPointSelection = subDict( "coarsening" ).lookupOrDefault( "twoPointSelection", false );
     }
 
+    std::shared_ptr<rbf::RBFFunctionInterface> surfaceCorrectionFunction;
+    word surfaceCorrectionFunctionName = "";
     double ratioRadiusError = 10.0;
-    double maxWallDistance = -1.0;
-    double maxAspectRatio = -1.0;
+    double minCorrectionRadius = -1.0;
     double surfaceCorrectionRadius = -1.0;
     bool cleanReselection = true;
     if ( livePointSelection )
@@ -283,25 +335,28 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
         if ( surfaceCorrection )
         {
+            surfaceCorrectionFunctionName = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionFunction", word("WendlandC2") );
+            setSurfaceCorrectionFunction(surfaceCorrectionFunction, surfaceCorrectionFunctionName);
             ratioRadiusError = subDict( "coarsening" ).lookupOrDefault( "ratioRadiusError", 10.0 );
-            maxWallDistance = subDict( "coarsening" ).lookupOrDefault( "firstCellHeight", -1.0 );
-            if ( maxWallDistance < SMALL )
-            {
-                maxWallDistance = getMaxWallDistance();
-                maxAspectRatio = getMaxAspectRatio();
 
-                //THIJS: FAST FIX FOR DISTANCE
-                maxWallDistance = std::sqrt(maxAspectRatio)*maxWallDistance;//WendlandC2
-                if(debug>0)
-                {
-                    Info << "RBFMeshMotionSolver::debug::surfaceCorrection: Used 'maxWallDistance' = sqrt(maxAspectRatio)*maxWallDistance = " << maxWallDistance << endl;
-                }
+            scalar firstCellHeight = subDict( "coarsening" ).lookupOrDefault( "firstCellHeight", -1.0 );
+            scalar maxAspectRatio = subDict( "coarsening" ).lookupOrDefault( "maxAspectRatio", -1.0 );
+            if ( firstCellHeight < SMALL )
+            {
+                firstCellHeight = getMaxWallDistance();
             }
+            if ( maxAspectRatio < SMALL )
+            {
+                maxAspectRatio = getMaxAspectRatio();
+            }
+
+            minCorrectionRadius = pow(maxAspectRatio, 1.0/surfaceCorrectionFunction->correctionPower()) * firstCellHeight;
+
             surfaceCorrectionRadius = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionRadius", -1.0 );
         }
     }
 
-    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, ratioRadiusError, maxWallDistance, surfaceCorrectionRadius, cleanReselection, exportSelectedPoints ) );
+    rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, surfaceCorrectionFunction, ratioRadiusError, minCorrectionRadius, surfaceCorrectionRadius, cleanReselection, exportSelectedPoints ) );
 
     faceCellCenters = lookupOrDefault( "faceCellCenters", true );
 
@@ -320,6 +375,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     Info << "        coarsening surface correction = " << surfaceCorrection << endl;
     if (debug > 0 && surfaceCorrection )
     {
+        Info << "           surface correction function = " << surfaceCorrectionFunctionName << endl;
         if( surfaceCorrectionRadius > 0 )
         {
             Info << "           surface correction surfaceCorrectionRadius = " << surfaceCorrectionRadius << endl;
@@ -327,7 +383,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         else
         {
             Info << "           surface correction ratioRadiusError = " << ratioRadiusError << endl;
-            Info << "           surface correction firstCellHeight = " << maxWallDistance << endl;
+            Info << "           surface correction minCorrectionRadius = " << minCorrectionRadius << endl;
         }
     }
 }

@@ -55,8 +55,9 @@ public:
             int coarseningMaxPoints,
             bool twoPointSelection,
             bool surfaceCorrection,
+            std::shared_ptr<RBFFunctionInterface> surfaceCorrectionRbfFunction,
             double ratioRadiusError,
-            double maxWallDistance,
+            double minCorrectionRadius,
             bool exportTxt
             );
 
@@ -71,8 +72,9 @@ public:
             int coarseningMaxPoints,
             bool twoPointSelection,
             bool surfaceCorrection,
+            std::shared_ptr<RBFFunctionInterface> surfaceCorrectionRbfFunction,
             double ratioRadiusError,
-            double maxWallDistance,
+            double minCorrectionRadius,
             double surfaceCorrectionRadius,
             bool cleanReselection,
             bool exportTxt
@@ -109,8 +111,9 @@ public:
         bool twoPointSelection;
         bool polynomialTerm;
         bool surfaceCorrection;
+        std::shared_ptr<RBFFunctionInterface> surfaceCorrectionRbfFunction;
         double ratioRadiusError;
-        double maxWallDistance;
+        double minCorrectionRadius;
         double surfaceCorrectionRadius;
         bool cleanReselection;
         bool exportTxt;

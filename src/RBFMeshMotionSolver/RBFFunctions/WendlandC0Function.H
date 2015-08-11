@@ -21,6 +21,10 @@ public:
 
         virtual double evaluate( double value );
 
+        virtual double correctionPower();
+
+        virtual void setRadius( double value);
+
         double radius;
     };
 }

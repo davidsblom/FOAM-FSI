@@ -25,8 +25,9 @@ namespace rbf
         coarseningMaxPoints( 0 ),
         twoPointSelection( false ),
         surfaceCorrection( false ),
+        surfaceCorrectionRbfFunction(),
         ratioRadiusError( 10 ),
-        maxWallDistance( 1.0 ),
+        minCorrectionRadius( 1.0 ),
         surfaceCorrectionRadius( -1.0 ),
         cleanReselection( true ),
         exportTxt( false ),
@@ -67,6 +68,7 @@ namespace rbf
         coarseningMaxPoints( coarseningMaxPoints ),
         twoPointSelection( false ),
         surfaceCorrection( false ),
+        surfaceCorrectionRbfFunction( ),
         ratioRadiusError( 10.0 ),
         surfaceCorrectionRadius( -1.0 ),
         cleanReselection( true ),
@@ -123,8 +125,9 @@ namespace rbf
         coarseningMaxPoints( coarseningMaxPoints ),
         twoPointSelection( twoPointSelection ),
         surfaceCorrection( false ),
+        surfaceCorrectionRbfFunction( ),
         ratioRadiusError( 10.0 ),
-        maxWallDistance( 1.0 ),
+        minCorrectionRadius( 1.0 ),
         surfaceCorrectionRadius( -1.0 ),
         cleanReselection( true ),
         exportTxt( exportTxt ),
@@ -167,8 +170,9 @@ namespace rbf
         int coarseningMaxPoints,
         bool twoPointSelection,
         bool surfaceCorrection,
+        std::shared_ptr<RBFFunctionInterface> surfaceCorrectionRbfFunction,
         double ratioRadiusError,
-        double maxWallDistance,
+        double minCorrectionRadius,
         bool exportTxt
         )
         :
@@ -183,8 +187,9 @@ namespace rbf
         coarseningMaxPoints( coarseningMaxPoints ),
         twoPointSelection( twoPointSelection ),
         surfaceCorrection( surfaceCorrection ),
+        surfaceCorrectionRbfFunction( surfaceCorrectionRbfFunction ),
         ratioRadiusError( ratioRadiusError ),
-        maxWallDistance( maxWallDistance ),
+        minCorrectionRadius( minCorrectionRadius ),
         surfaceCorrectionRadius( -1.0 ),
         cleanReselection( true ),
         exportTxt( exportTxt ),
@@ -227,8 +232,9 @@ namespace rbf
         int coarseningMaxPoints,
         bool twoPointSelection,
         bool surfaceCorrection,
+        std::shared_ptr<RBFFunctionInterface> surfaceCorrectionRbfFunction,
         double ratioRadiusError,
-        double maxWallDistance,
+        double minCorrectionRadius,
         double surfaceCorrectionRadius,
         bool cleanReselection,
         bool exportTxt
@@ -245,8 +251,9 @@ namespace rbf
         coarseningMaxPoints( coarseningMaxPoints ),
         twoPointSelection( twoPointSelection ),
         surfaceCorrection( surfaceCorrection ),
+        surfaceCorrectionRbfFunction( surfaceCorrectionRbfFunction ),
         ratioRadiusError( ratioRadiusError ),
-        maxWallDistance( maxWallDistance ),
+        minCorrectionRadius( minCorrectionRadius ),
         surfaceCorrectionRadius( surfaceCorrectionRadius ),
         cleanReselection( cleanReselection ),
         exportTxt( exportTxt ),
@@ -863,7 +870,7 @@ namespace rbf
         else
         {
             double Rerror = ratioRadiusError * ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff();
-            double Rwall = ratioRadiusError * maxWallDistance;
+            double Rwall = ratioRadiusError * minCorrectionRadius;
             R = max(Rerror,Rwall);
         }
 
@@ -927,12 +934,14 @@ namespace rbf
         // Start doing the correction
         std::clock_t t = std::clock();
         double runTimeCorr = 0;
-        std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( R ) );
-        //std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC0Function( R ) );
+        surfaceCorrectionRbfFunction->setRadius( R );
+
+        //std::shared_ptr<rbf::RBFFunctionInterface> surfaceCorrectionRbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( R ) );
+        //std::shared_ptr<rbf::RBFFunctionInterface> surfaceCorrectionRbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC0Function( R ) );
 
         for ( int i = 0; i < positionsInterpolation.rows(); i++ )
         {
-            matrix fEval = -( rbfFunction->evaluate( closestBoundaryRadius( i ) ) ) * errorInterpolationCoarse.row( closestBoundaryIndexCorrection( i ) );
+            matrix fEval = -( surfaceCorrectionRbfFunction->evaluate( closestBoundaryRadius( i ) ) ) * errorInterpolationCoarse.row( closestBoundaryIndexCorrection( i ) );
             valuesInterpolation.row( i ) += ( fEval - valuesCorrection.row( i ) );
             valuesCorrection.row( i ) = fEval;
         }

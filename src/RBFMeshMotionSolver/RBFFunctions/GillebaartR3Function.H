@@ -4,20 +4,20 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#ifndef WendlandC4Function_H
-#define WendlandC4Function_H
+#ifndef GillebaartR3Function_H
+#define GillebaartR3Function_H
 
 #include "RBFFunctionInterface.H"
 
 namespace rbf
 {
-    class WendlandC4Function : public RBFFunctionInterface
+    class GillebaartR3Function : public RBFFunctionInterface
     {
 public:
 
-        WendlandC4Function( double radius );
+        GillebaartR3Function( double radius );
 
-        virtual ~WendlandC4Function();
+        virtual ~GillebaartR3Function();
 
         virtual double evaluate( double value );
 

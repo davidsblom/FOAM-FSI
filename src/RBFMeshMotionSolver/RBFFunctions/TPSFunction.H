@@ -20,6 +20,10 @@ public:
         virtual ~TPSFunction();
 
         virtual double evaluate( double value );
+
+        virtual double correctionPower();
+
+        virtual void setRadius( double value);
     };
 }
 

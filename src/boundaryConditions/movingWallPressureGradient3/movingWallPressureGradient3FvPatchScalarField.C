@@ -169,18 +169,18 @@ void Foam::movingWallPressureGradient3FvPatchScalarField::updateCoeffs()
     const volVectorField& U =
         db().lookupObject<volVectorField>(UName_);
 
-    const volVectorField& gradPbc =
-        db().lookupObject<volVectorField>("gradPbc");
+    //const volVectorField& gradPbc =
+    //    db().lookupObject<volVectorField>("gradPbc");
 
     const fvPatchField<vector>& Up =
         lookupPatchField<volVectorField, vector>(UName_);
 
-    //gradient() = -(ddtU(U) & patch().Sf())/patch().magSf();
-    const scalar& patchID = this->patch().index();
+    gradient() = -(ddtU(U) & patch().Sf())/patch().magSf();
+    //const scalar& patchID = this->patch().index();
 
-    gradient() = (gradPbc.boundaryField()[patchID] & patch().Sf())/patch().magSf();
+    //gradient() = (gradPbc.boundaryField()[patchID] & patch().Sf())/patch().magSf();
 
-    Info << "gradient = " << max(mag(gradient())) << endl;
+    //Info << "gradient = " << max(mag(gradient())) << endl;
 
     fixedGradientFvPatchScalarField::updateCoeffs();
 }

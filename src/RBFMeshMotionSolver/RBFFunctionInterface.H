@@ -21,6 +21,10 @@ public:
         virtual ~RBFFunctionInterface(){}
 
         virtual double evaluate( double value ) = 0;
+
+        virtual double correctionPower() = 0;
+
+        virtual void setRadius( double value ) = 0;
     };
 }
 
