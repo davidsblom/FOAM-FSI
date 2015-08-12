@@ -147,10 +147,14 @@ namespace sdc
         vectorc gamma_k( nbNodes );
 
         index = 0;
+        int zeroIndex = -1;
 
         for ( int i = 0; i < k; i++ )
         {
             std::complex<longDouble> value = gamma( idx( i ) );
+
+            if ( idx( i ) == N_disk )
+                zeroIndex = index;
 
             if ( idx( i ) == N_disk || idx( i ) == N_disk - 1 )
             {
@@ -164,6 +168,8 @@ namespace sdc
                 index += 2;
             }
         }
+
+        assert( zeroIndex > -1 );
 
         // Compute the coefficients omega
 
@@ -192,20 +198,18 @@ namespace sdc
                 longDouble t0 = t( j - 1 );
                 longDouble t1 = t( j );
 
-                if ( std::abs( gamma ) < 1.0e-14 )
+                if ( i == zeroIndex )
                     b( i, j ) = t1 - t0;
                 else
                     b( i, j ) = -( std::exp( gamma * t0 ) - std::exp( gamma * t1 ) ) / gamma;
             }
         }
 
-        matrixc omega = A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( b );
+        matrixc smatOmega = A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( b );
+        matrix smatReal = smatOmega.real().transpose();
+        smatReal *= 0.5;
 
-        matrix omegaReal = omega.real().transpose();
-
-        omegaReal *= 0.5;
-
-        matrix smatWeights = omegaReal.bottomLeftCorner( omegaReal.rows() - 1, omegaReal.cols() );
+        matrix smatWeights = smatReal.bottomLeftCorner( smatReal.rows() - 1, smatReal.cols() );
 
         // Compute the qmat matrix ( t = -1 .. 1 )
 
@@ -216,10 +220,10 @@ namespace sdc
             for ( int j = 1; j < b.cols(); j++ )
             {
                 std::complex<longDouble> gamma = gamma_k( i );
-                longDouble t0 = 0;
+                longDouble t0 = -1;
                 longDouble t1 = t( j );
 
-                if ( std::abs( gamma ) < 1.0e-14 )
+                if ( i == zeroIndex )
                     b( i, j ) = t1 - t0;
                 else
                     b( i, j ) = -( std::exp( gamma * t0 ) - std::exp( gamma * t1 ) ) / gamma;
