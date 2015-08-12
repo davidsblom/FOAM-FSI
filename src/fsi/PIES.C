@@ -40,6 +40,8 @@ namespace sdc
         longDouble tstart, tend, tinterval, rho;
         label N, M;
 
+        const longDouble pi = 4 * std::atan( 1 );
+
         tstart = -1;
         tend = 1;
         tinterval = tend - tstart;
@@ -57,8 +59,8 @@ namespace sdc
         // to complex numbers.
 
         // Compute the number of points on the arc
-        longDouble length = 0.5 * M_PI * rho + rho;
-        longDouble ratio = 0.5 * M_PI * rho / length;
+        longDouble length = 0.5 * pi * rho + rho;
+        longDouble ratio = 0.5 * pi * rho / length;
         int N_disk = int( ratio * N );
         int N_imag = N - N_disk + 1;
 
@@ -70,7 +72,7 @@ namespace sdc
         for ( int i = 0; i < N_disk; i++ )
             phi( i ) = 0.5 + dphi * i;
 
-        phi *= M_PI;
+        phi *= pi;
 
         // Convert the polar coordinates r and phi to complex numbers
         vectorc gamma( N );
