@@ -17,7 +17,7 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/solidModels/lnInclude \
     -I../../../../src/thirdParty/boost \
     -I../../../../src/thirdParty/precice/src \
-    -I../../../../src/thirdParty/boost \
+    -isystem ../../../../src/thirdParty/boost \
     -I../../../../src/thirdParty \
     -I../../../../src/RBFMeshMotionSolver/lnInclude/ \
     $(WM_DECOMP_INC) \

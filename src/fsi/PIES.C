@@ -31,6 +31,24 @@ namespace sdc
         solver->setNumberOfImplicitStages( k - 1 );
     }
 
+    PIES::PIES(
+        scalar tol,
+        scalar delta
+        )
+        :
+        SDC( "gauss-radau", 2, tol ),
+        delta( delta )
+    {
+        computeCoefficients();
+
+        k = nodes.rows();
+
+        dsdc.resize( nodes.rows() - 1 );
+
+        for ( int i = 0; i < dsdc.rows(); i++ )
+            dsdc( i ) = nodes( i + 1 ) - nodes( i );
+    }
+
     PIES::~PIES()
     {}
 
@@ -51,7 +69,7 @@ namespace sdc
         M = N;
 
         // Radius of the complex semi-disk S
-        rho = longDouble(3.15);
+        rho = longDouble( 3.15 );
 
         // Skeletonization of a semi-disk in the complex plane
         // Discretize the semi-disk with N-steps using polar
@@ -59,20 +77,20 @@ namespace sdc
         // to complex numbers.
 
         // Compute the number of points on the arc
-        longDouble length = longDouble(0.5) * pi * rho + rho;
-        longDouble ratio = longDouble(0.5) * pi * rho / length;
+        longDouble length = longDouble( 0.5 ) * pi * rho + rho;
+        longDouble ratio = longDouble( 0.5 ) * pi * rho / length;
         longDouble N_disk_float = ratio * N;
 
         int N_disk = N_disk_float.convert_to<int>();
         int N_imag = N - N_disk + 1;
 
         longDouble r = rho;
-        longDouble dphi = longDouble(0.5) / (N_disk - 1);
+        longDouble dphi = longDouble( 0.5 ) / (N_disk - 1);
         vector phi( N_disk );
         phi.setZero();
 
         for ( int i = 0; i < N_disk; i++ )
-            phi( i ) = longDouble(0.5) + dphi * i;
+            phi( i ) = longDouble( 0.5 ) + dphi * i;
 
         phi *= pi;
 

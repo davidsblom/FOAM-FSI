@@ -13,6 +13,7 @@
 #include "SDCFluidSolver.H"
 #include "SDCDynamicMeshFluidSolver.H"
 #include "SDC.H"
+#include "PIES.H"
 #include "SDCLaplacianSolver.H"
 #include "ESDIRK.H"
 #include "AdaptiveTimeStepper.H"

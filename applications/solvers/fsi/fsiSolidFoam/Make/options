@@ -15,7 +15,7 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/solidModels/lnInclude \
     -I../../../../src/thirdParty/boost \
     -I../../../../src/thirdParty/precice/src \
-    -I../../../../src/thirdParty/boost \
+    -isystem ../../../../src/thirdParty/boost \
     -I../../../../src/thirdParty \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \

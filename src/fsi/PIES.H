@@ -46,6 +46,11 @@ public:
             scalar delta
             );
 
+        PIES(
+            scalar tol,
+            scalar delta
+            );
+
         virtual ~PIES();
 
 private:
