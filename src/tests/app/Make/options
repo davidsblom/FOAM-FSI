@@ -12,6 +12,7 @@ EXE_INC = --coverage -fprofile-arcs -ftest-coverage -g -std=c++11 \
     -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
     -I$(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
     -I../../thirdParty/eigen \
+    -isystem ../../thirdParty/boost \
     -I../../thirdParty/gtest/include \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \

@@ -21,6 +21,7 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I../boundaryConditions/lnInclude \
-    -I../thirdParty/yaml-cpp/include
+    -I../thirdParty/yaml-cpp/include \
+    -isystem ../thirdParty/boost
 
 EXE_LIBS =

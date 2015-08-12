@@ -12,14 +12,28 @@
 
 #include "SDC.H"
 #include <complex>
+#include <boost/multiprecision/cpp_dec_float.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/math/constants/constants.hpp>
 
 namespace sdc
 {
-    typedef long double longDouble;
+    namespace mp = boost::multiprecision;
+
+    typedef mp::cpp_dec_float_50 longDouble;
     typedef Eigen::Matrix<std::complex<longDouble>, Eigen::Dynamic, Eigen::Dynamic> matrixc;
     typedef Eigen::Matrix<longDouble, Eigen::Dynamic, Eigen::Dynamic> matrix;
     typedef Eigen::Matrix<std::complex<longDouble>, Eigen::Dynamic, 1> vectorc;
     typedef Eigen::Matrix<longDouble, Eigen::Dynamic, 1> vector;
+
+    template<typename T>
+    inline std::complex<T>
+    exp( const std::complex<T> & x )
+    {
+        using std::exp; // use ADL
+        T const & r = exp( x.real() );
+        return std::polar( r, x.imag() );
+    }
 
     class PIES : public SDC
     {

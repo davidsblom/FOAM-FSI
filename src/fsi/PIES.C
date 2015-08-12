@@ -38,20 +38,20 @@ namespace sdc
     {
         // Initialize variables
         longDouble tstart, tend, tinterval, rho;
-        label N, M;
+        int N, M;
 
-        const longDouble pi = 4 * std::atan( 1 );
+        const longDouble pi = boost::math::constants::pi<longDouble>();
 
-        tstart = -1;
+        tstart = 0;
         tend = 1;
         tinterval = tend - tstart;
 
         // Fine discretization of the semi-disk
-        N = 1000;
+        N = 500;
         M = N;
 
         // Radius of the complex semi-disk S
-        rho = 3.15;
+        rho = longDouble(3.15);
 
         // Skeletonization of a semi-disk in the complex plane
         // Discretize the semi-disk with N-steps using polar
@@ -59,18 +59,20 @@ namespace sdc
         // to complex numbers.
 
         // Compute the number of points on the arc
-        longDouble length = 0.5 * pi * rho + rho;
-        longDouble ratio = 0.5 * pi * rho / length;
-        int N_disk = int( ratio * N );
+        longDouble length = longDouble(0.5) * pi * rho + rho;
+        longDouble ratio = longDouble(0.5) * pi * rho / length;
+        longDouble N_disk_float = ratio * N;
+
+        int N_disk = N_disk_float.convert_to<int>();
         int N_imag = N - N_disk + 1;
 
         longDouble r = rho;
-        longDouble dphi = 0.5 / (N_disk - 1);
+        longDouble dphi = longDouble(0.5) / (N_disk - 1);
         vector phi( N_disk );
         phi.setZero();
 
         for ( int i = 0; i < N_disk; i++ )
-            phi( i ) = 0.5 + dphi * i;
+            phi( i ) = longDouble(0.5) + dphi * i;
 
         phi *= pi;
 
@@ -110,7 +112,7 @@ namespace sdc
 
         for ( int i = 0; i < A.rows(); i++ )
             for ( int j = 0; j < A.cols(); j++ )
-                A( i, j ) = std::exp( gamma( j ) * t( i ) );
+                A( i, j ) = sdc::exp( gamma( j ) * t( i ) );
 
         // Matrix compression by QR decomposition with full pivoting
         Eigen::FullPivHouseholderQR<matrixc> qr = A.fullPivHouseholderQr();
@@ -187,7 +189,7 @@ namespace sdc
 
         for ( int i = 0; i < A.rows(); i++ )
             for ( int j = 0; j < A.cols(); j++ )
-                A( i, j ) = std::exp( gamma_k( i ) * t( j ) );
+                A( i, j ) = sdc::exp( gamma_k( i ) * t( j ) );
 
         matrixc b( A.rows(), A.cols() );
         b.setZero();
@@ -203,17 +205,15 @@ namespace sdc
                 if ( i == zeroIndex )
                     b( i, j ) = t1 - t0;
                 else
-                    b( i, j ) = -( std::exp( gamma * t0 ) - std::exp( gamma * t1 ) ) / gamma;
+                    b( i, j ) = -( sdc::exp( gamma * t0 ) - sdc::exp( gamma * t1 ) ) / gamma;
             }
         }
 
-        matrixc smatOmega = A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( b );
+        matrixc smatOmega = A.fullPivHouseholderQr().solve( b );
         matrix smatReal = smatOmega.real().transpose();
-        smatReal *= 0.5;
-
         matrix smatWeights = smatReal.bottomLeftCorner( smatReal.rows() - 1, smatReal.cols() );
 
-        // Compute the qmat matrix ( t = -1 .. 1 )
+        // Compute the qmat matrix ( t = 0 .. 1 )
 
         b.setZero();
 
@@ -222,26 +222,21 @@ namespace sdc
             for ( int j = 1; j < b.cols(); j++ )
             {
                 std::complex<longDouble> gamma = gamma_k( i );
-                longDouble t0 = -1;
+                longDouble t0 = tstart;
                 longDouble t1 = t( j );
 
                 if ( i == zeroIndex )
                     b( i, j ) = t1 - t0;
                 else
-                    b( i, j ) = -( std::exp( gamma * t0 ) - std::exp( gamma * t1 ) ) / gamma;
+                    b( i, j ) = -( sdc::exp( gamma * t0 ) - sdc::exp( gamma * t1 ) ) / gamma;
             }
         }
 
-        matrixc qmatOmega = A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( b );
+        matrixc qmatOmega = A.fullPivHouseholderQr().solve( b );
         matrix qmatReal = qmatOmega.real().transpose();
-        qmatReal *= 0.5;
-
         matrix qmatWeights = qmatReal.bottomLeftCorner( qmatReal.rows() - 1, qmatReal.cols() );
 
-        t.array() += 1;
-        t *= 0.5;
         nodes = t.cast<scalar>();
-
         smat = smatWeights.cast<scalar>();
         qmat = qmatWeights.cast<scalar>();
     }
