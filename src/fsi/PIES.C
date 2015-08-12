@@ -45,7 +45,8 @@ namespace sdc
         tinterval = tend - tstart;
 
         // Fine discretization of the semi-disk
-        N = 500;
+        N = 1000;
+        M = N;
 
         // Radius of the complex semi-disk S
         rho = 3.15;
@@ -63,44 +64,36 @@ namespace sdc
 
         longDouble r = rho;
         longDouble dphi = 0.5 / (N_disk - 1);
-        vector phi( 2 * N_disk - 1 );
+        vector phi( N_disk );
         phi.setZero();
 
         for ( int i = 0; i < N_disk; i++ )
             phi( i ) = 0.5 + dphi * i;
 
-        for ( int i = N_disk; i < phi.rows(); i++ )
-            phi( i ) = -phi( i - N_disk );
-
         phi *= M_PI;
 
         // Convert the polar coordinates r and phi to complex numbers
-        // Gamma exludes the corners of the compex semi-disk
-        vectorc gamma( phi.rows() + 2 * N_imag - 1 );
+        vectorc gamma( N );
         gamma.setZero();
 
         for ( int i = 0; i < phi.rows(); i++ )
             gamma( i ) = std::polar( r, phi( i ) );
 
-        phi.resize( 2 * N_imag - 1 );
+        phi.resize( N_imag - 1 );
         phi.setZero();
 
-        for ( int i = 0; i < N_imag; i++ )
-            phi( i ) = rho / (N_imag - 1) * i;
+        longDouble drho = rho / (N_imag - 1);
 
-        for ( int i = N_imag; i < phi.rows(); i++ )
-            phi( i ) = -phi( i - N_imag + 1 );
+        for ( int i = 0; i < phi.rows(); i++ )
+            phi( i ) = drho * i;
 
         int index = 0;
 
-        for ( int i = 2 * N_disk - 1; i < gamma.rows(); i++ )
+        for ( int i = N_disk; i < N_disk + N_imag - 1; i++ )
         {
             gamma( i ) = std::complex<longDouble>( 0, phi( index ) );
             index++;
         }
-
-        N = gamma.rows();
-        M = N;
 
         // Discretize the time interval
         longDouble dt = tinterval / (M - 1);
@@ -122,23 +115,55 @@ namespace sdc
 
         matrixc R = qr.matrixQR().triangularView<Eigen::Upper>();
 
-        int nbNodes = 0;
+        int k = 0;
 
         for ( int i = 0; i < R.rows() - 1; i++ )
         {
             if ( std::abs( R( i + 1, i + 1 ) ) < delta )
             {
-                nbNodes = i + 1;
+                k = i + 1;
                 break;
             }
         }
 
+        assert( k > 0 );
+
+        int nbNodes = 0;
+
+        Eigen::VectorXi idx = qr.colsPermutation().indices();
+
+        index = 0;
+
+        for ( int i = 0; i < k; i++ )
+        {
+            if ( idx( i ) == N_disk or idx( i ) == N_disk - 1 )
+                nbNodes += 1;
+            else
+                nbNodes += 2;
+        }
+
+        assert( nbNodes == k * 2 - 2 );
+
         vectorc gamma_k( nbNodes );
 
-        Eigen::MatrixXi indices = qr.colsPermutation().indices();
+        index = 0;
 
-        for ( int i = 0; i < gamma_k.rows(); i++ )
-            gamma_k( i ) = gamma( qr.colsPermutation().indices() ( i ) );
+        for ( int i = 0; i < k; i++ )
+        {
+            std::complex<longDouble> value = gamma( idx( i ) );
+
+            if ( idx( i ) == N_disk || idx( i ) == N_disk - 1 )
+            {
+                gamma_k( index ) = value;
+                index += 1;
+            }
+            else
+            {
+                gamma_k( index ) = value;
+                gamma_k( index + 1 ) = std::complex<longDouble>( std::real( value ), -std::imag( value ) );
+                index += 2;
+            }
+        }
 
         // Compute the coefficients omega
 
@@ -154,7 +179,7 @@ namespace sdc
 
         for ( int i = 0; i < A.rows(); i++ )
             for ( int j = 0; j < A.cols(); j++ )
-                A( i, j ) = std::abs( gamma_k( i ) * t( j ) );
+                A( i, j ) = std::exp( gamma_k( i ) * t( j ) );
 
         matrixc b( A.rows(), A.cols() );
         b.setZero();
@@ -175,8 +200,12 @@ namespace sdc
         }
 
         matrixc omega = A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( b );
-        matrix omegaReal = omega.real();
+
+        matrix omegaReal = omega.real().transpose();
+
         omegaReal *= 0.5;
+
+        matrix smatWeights = omegaReal.bottomLeftCorner( omegaReal.rows() - 1, omegaReal.cols() );
 
         // Compute the qmat matrix ( t = -1 .. 1 )
 
@@ -198,14 +227,16 @@ namespace sdc
         }
 
         matrixc qmatOmega = A.jacobiSvd( Eigen::ComputeThinU | Eigen::ComputeThinV ).solve( b );
-        matrix qmatReal = qmatOmega.real();
+        matrix qmatReal = qmatOmega.real().transpose();
         qmatReal *= 0.5;
+
+        matrix qmatWeights = qmatReal.bottomLeftCorner( qmatReal.rows() - 1, qmatReal.cols() );
 
         t.array() += 1;
         t *= 0.5;
         nodes = t.cast<scalar>();
 
-        smat = omegaReal.cast<scalar>();
-        qmat = qmatReal.cast<scalar>();
+        smat = smatWeights.cast<scalar>();
+        qmat = qmatWeights.cast<scalar>();
     }
 }

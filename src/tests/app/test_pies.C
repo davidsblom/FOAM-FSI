@@ -12,7 +12,7 @@ TEST( PIESTest, coefficients )
 {
     scalar dt, q0, qdot0, As, Ac, omega, endTime, tol, delta;
 
-    int nbTimeSteps = 10;
+    int nbTimeSteps = 100;
 
     endTime = 100;
     dt = endTime / nbTimeSteps;
@@ -22,7 +22,7 @@ TEST( PIESTest, coefficients )
     q0 = -As;
     qdot0 = -As;
     tol = 1.0e-10;
-    delta = 1.0e-12;
+    delta = 1.0e-9;
 
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
     std::shared_ptr<Piston> piston;
@@ -41,4 +41,5 @@ TEST( PIESTest, coefficients )
     scalar ref = piston->referenceSolution( 100 );
     scalar error = std::abs( solution( 1 ) - ref ) / std::abs( ref );
     Info << "error = " << error << endl;
+    ASSERT_LT( error, 1.0e-10 );
 }
