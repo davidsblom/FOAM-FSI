@@ -372,6 +372,10 @@ void SDCFluidSolver::setNumberOfImplicitStages( int k )
 {
     this->k = k + 1;
 
+    pStages.clear();
+    phiStages.clear();
+    UStages.clear();
+
     for ( int i = 0; i < k + 1; i++ )
     {
         pStages.push_back( volScalarField( p ) );
@@ -385,14 +389,11 @@ void SDCFluidSolver::nextTimeStep()
     timeIndex++;
     (*runTime)++;
 
-    if ( pStages.size() == static_cast<unsigned>(k) )
+    for ( int i = 0; i < k; i++ )
     {
-        for ( int i = 0; i < k; i++ )
-        {
-            pStages.at( i ) = p;
-            phiStages.at( i ) = phi;
-            UStages.at( i ) = U;
-        }
+        pStages.at( i ) = p;
+        phiStages.at( i ) = phi;
+        UStages.at( i ) = U;
     }
 }
 
@@ -897,12 +898,9 @@ void SDCFluidSolver::implicitSolve(
 
     // -------------------------------------------------------------------------
 
-    if ( static_cast<int>( pStages.size() ) >= k + 2 )
-    {
-        pStages.at( k + 1 ) = p;
-        phiStages.at( k + 1 ) = phi;
-        UStages.at( k + 1 ) = U;
-    }
+    pStages.at( k + 1 ) = p;
+    phiStages.at( k + 1 ) = phi;
+    UStages.at( k + 1 ) = U;
 
     UF = rDeltaT * (U - U.oldTime() - rhsU);
     phiF = rDeltaT * (phi - phi.oldTime() - rhsPhi);
