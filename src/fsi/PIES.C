@@ -24,7 +24,7 @@ namespace sdc
         delta( delta )
     {
         assert( not adaptiveTimeStepper->isEnabled() );
-        assert( tol <= delta );
+        assert( tol >= delta );
         assert( rho > 0 );
 
         computeCoefficients();
@@ -50,7 +50,7 @@ namespace sdc
         SDC( "gauss-radau", 2, tol ),
         delta( delta )
     {
-        assert( tol <= delta );
+        assert( tol >= delta );
         assert( rho > 0 );
 
         computeCoefficients();
@@ -244,6 +244,7 @@ namespace sdc
         matrixc smatOmega = A.fullPivHouseholderQr().solve( b );
         matrix smatReal = smatOmega.real().transpose();
         matrix smatWeights = smatReal.bottomLeftCorner( smatReal.rows() - 1, smatReal.cols() );
+        smatWeights /= tinterval;
 
         // Compute the qmat matrix ( t = 0 .. 1 )
 
@@ -267,6 +268,10 @@ namespace sdc
         matrixc qmatOmega = A.fullPivHouseholderQr().solve( b );
         matrix qmatReal = qmatOmega.real().transpose();
         matrix qmatWeights = qmatReal.bottomLeftCorner( qmatReal.rows() - 1, qmatReal.cols() );
+        qmatWeights /= tinterval;
+
+        t.array() += -tstart;
+        t /= tinterval;
 
         nodes = t.cast<scalar>();
         smat = smatWeights.cast<scalar>();

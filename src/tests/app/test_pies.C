@@ -21,7 +21,7 @@ TEST( PIESTest, coefficients )
     omega = 1;
     q0 = -As;
     qdot0 = -As;
-    tol = 1.0e-10;
+    tol = 1.0e-8;
     delta = 1.0e-9;
     nbNodes = 10;
     rho = 3.15;
@@ -43,5 +43,5 @@ TEST( PIESTest, coefficients )
     scalar ref = piston->referenceSolution( 100 );
     scalar error = std::abs( solution( 1 ) - ref ) / std::abs( ref );
     Info << "error = " << error << endl;
-    ASSERT_LT( error, 1.0e-10 );
+    ASSERT_LT( error, 1.0e-8 );
 }
