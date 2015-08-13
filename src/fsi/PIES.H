@@ -42,13 +42,17 @@ public:
         PIES(
             std::shared_ptr<SDCSolver> solver,
             std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
+            scalar rho,
+            scalar delta,
             scalar tol,
-            scalar delta
+            int minSweeps,
+            int maxSweeps
             );
 
         PIES(
-            scalar tol,
-            scalar delta
+            scalar rho,
+            scalar delta,
+            scalar tol
             );
 
         virtual ~PIES();
@@ -57,6 +61,7 @@ private:
 
         void computeCoefficients();
 
+        scalar rho;
         scalar delta;
     };
 }

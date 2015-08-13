@@ -36,7 +36,9 @@ namespace sdc
         Sj(),
         solStages(),
         convergence( false ),
-        timeIndex( 0 )
+        timeIndex( 0 ),
+        minSweeps( 0 ),
+        maxSweeps( 0 )
     {
         assert( tol > 0 );
         assert( tol < 1 );
@@ -58,7 +60,9 @@ namespace sdc
         std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
         std::string rule,
         int nbNodes,
-        scalar tol
+        scalar tol,
+        int minSweeps,
+        int maxSweeps
         )
         :
         solver( solver ),
@@ -82,7 +86,9 @@ namespace sdc
         Sj(),
         solStages(),
         convergence( false ),
-        timeIndex( 0 )
+        timeIndex( 0 ),
+        minSweeps( minSweeps ),
+        maxSweeps( maxSweeps )
     {
         assert( adaptiveTimeStepper );
         assert( solver );
@@ -92,6 +98,9 @@ namespace sdc
         assert( tol > 0 );
         assert( tol < 1 );
         assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" || rule == "uniform-right-sided" );
+        assert( maxSweeps > 0 );
+        assert( maxSweeps >= minSweeps );
+        assert( minSweeps > 0 );
 
         int refine = 1;
         quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
@@ -193,7 +202,7 @@ namespace sdc
 
         bool convergence = false;
 
-        for ( int j = 0; j < 10 * k; j++ )
+        for ( int j = 0; j < maxSweeps; j++ )
         {
             t = t0;
 
@@ -233,7 +242,7 @@ namespace sdc
             reduce( squaredNorm, sumOp<scalarList>() );
             scalar error = std::sqrt( sum( squaredNorm ) / N );
             error /= solver->getScalingFactor();
-            convergence = error < tol && j >= k - 1;
+            convergence = error < tol && j >= minSweeps - 1;
 
             std::deque<int> dofVariables;
             std::deque<bool> enabledVariables;
@@ -284,7 +293,7 @@ namespace sdc
                     reduce( squaredNorm, sumOp<scalarList>() );
                     scalar error = std::sqrt( sum( squaredNorm ) / sum( dofVariablesGlobal ) );
 
-                    bool convergence = error < tol && j >= k - 1;
+                    bool convergence = error < tol && j >= minSweeps - 1;
 
                     if ( enabledVariables.at( i ) )
                     {

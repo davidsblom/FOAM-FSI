@@ -10,9 +10,9 @@
 
 TEST( PIESTest, coefficients )
 {
-    scalar dt, q0, qdot0, As, Ac, omega, endTime, tol, delta;
+    scalar dt, q0, qdot0, As, Ac, omega, endTime, tol, delta, rho;
 
-    int nbTimeSteps = 100;
+    int nbTimeSteps = 100, nbNodes;
 
     endTime = 100;
     dt = endTime / nbTimeSteps;
@@ -23,6 +23,8 @@ TEST( PIESTest, coefficients )
     qdot0 = -As;
     tol = 1.0e-10;
     delta = 1.0e-9;
+    nbNodes = 10;
+    rho = 3.15;
 
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
     std::shared_ptr<Piston> piston;
@@ -31,7 +33,7 @@ TEST( PIESTest, coefficients )
 
     piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
 
-    std::shared_ptr<sdc::PIES> pies( new sdc::PIES( piston, adaptiveTimeStepper, tol, delta ) );
+    std::shared_ptr<sdc::PIES> pies( new sdc::PIES( piston, adaptiveTimeStepper, rho, delta, tol, nbNodes, 10 * nbNodes ) );
 
     pies->run();
 

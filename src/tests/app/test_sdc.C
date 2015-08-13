@@ -43,7 +43,7 @@ protected:
         adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
 
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc = std::shared_ptr<SDC> ( new SDC( piston, adaptiveTimeStepper, rule, nbNodes, tol ) );
+        sdc = std::shared_ptr<SDC> ( new SDC( piston, adaptiveTimeStepper, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
 
         std::shared_ptr<sdc::SDC> sdc( new SDC( rule, nbNodes, tol ) );
         piston_sdc = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, sdc, sdc->nodes.rows() ) );
@@ -91,13 +91,13 @@ protected:
         adaptiveTimeStepper2 = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
 
         piston1 = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc1 = std::shared_ptr<SDC> ( new SDC( piston1, adaptiveTimeStepper1, rule, nbNodes, tol ) );
+        sdc1 = std::shared_ptr<SDC> ( new SDC( piston1, adaptiveTimeStepper1, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
 
         nbTimeSteps *= 2;
         dt = endTime / nbTimeSteps;
 
         piston2 = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc2 = std::shared_ptr<SDC> ( new SDC( piston2, adaptiveTimeStepper2, rule, nbNodes, tol ) );
+        sdc2 = std::shared_ptr<SDC> ( new SDC( piston2, adaptiveTimeStepper2, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
     }
 
     virtual void TearDown()
@@ -289,9 +289,9 @@ TEST( CosTest, SDC )
 
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
     std::shared_ptr<Cos> cos1( new Cos( nbTimeSteps, dt, endTime, amplitude, frequency ) );
-    std::shared_ptr<SDC> sdc1( new SDC( cos1, adaptiveTimeStepper, rule, nbNodes, tol ) );
+    std::shared_ptr<SDC> sdc1( new SDC( cos1, adaptiveTimeStepper, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
     std::shared_ptr<Cos> cos2( new Cos( nbTimeSteps * 2, dt / 2, endTime, amplitude, frequency ) );
-    std::shared_ptr<SDC> sdc2( new SDC( cos2, adaptiveTimeStepper, rule, nbNodes, tol ) );
+    std::shared_ptr<SDC> sdc2( new SDC( cos2, adaptiveTimeStepper, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
 
     sdc1->run();
     sdc2->run();
@@ -316,12 +316,7 @@ TEST( CosTest, SDC )
 
 TEST( OscillatorTest, SDC )
 {
-    std::string rule = "gauss-radau";
-
-    rule = "gauss-lobatto";
-
-    // rule = "uniform";
-    // rule = "clenshaw-curtis";
+    std::string rule = "gauss-lobatto";
     int nbNodes = 3;
     scalar tol = 1.0e-25;
 
@@ -337,9 +332,9 @@ TEST( OscillatorTest, SDC )
 
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
     std::shared_ptr<Oscillator> oscillator1( new Oscillator( nbTimeSteps, dt, q0, amplitude, frequency, m, k ) );
-    std::shared_ptr<SDC> sdc1( new SDC( oscillator1, adaptiveTimeStepper, rule, nbNodes, tol ) );
+    std::shared_ptr<SDC> sdc1( new SDC( oscillator1, adaptiveTimeStepper, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
     std::shared_ptr<Oscillator> oscillator2( new Oscillator( nbTimeSteps * 2, dt / 2, q0, amplitude, frequency, m, k ) );
-    std::shared_ptr<SDC> sdc2( new SDC( oscillator2, adaptiveTimeStepper, rule, nbNodes, tol ) );
+    std::shared_ptr<SDC> sdc2( new SDC( oscillator2, adaptiveTimeStepper, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
 
     sdc1->run();
     sdc2->run();

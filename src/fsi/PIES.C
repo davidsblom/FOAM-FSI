@@ -12,16 +12,26 @@ namespace sdc
     PIES::PIES(
         std::shared_ptr<SDCSolver> solver,
         std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
+        scalar rho,
+        scalar delta,
         scalar tol,
-        scalar delta
+        int minSweeps,
+        int maxSweeps
         )
         :
-        SDC( solver, adaptiveTimeStepper, "gauss-radau", 2, tol ),
+        SDC( solver, adaptiveTimeStepper, "gauss-radau", 2, tol, minSweeps, maxSweeps ),
+        rho( rho ),
         delta( delta )
     {
+        assert( not adaptiveTimeStepper->isEnabled() );
+        assert( tol <= delta );
+        assert( rho > 0 );
+
         computeCoefficients();
 
         k = nodes.rows();
+
+        Info << "Picard Integral Exponential Solver: number of nodes = " << k << endl;
 
         dsdc.resize( nodes.rows() - 1 );
 
@@ -32,13 +42,17 @@ namespace sdc
     }
 
     PIES::PIES(
-        scalar tol,
-        scalar delta
+        scalar rho,
+        scalar delta,
+        scalar tol
         )
         :
         SDC( "gauss-radau", 2, tol ),
         delta( delta )
     {
+        assert( tol <= delta );
+        assert( rho > 0 );
+
         computeCoefficients();
 
         k = nodes.rows();
@@ -69,7 +83,7 @@ namespace sdc
         M = N;
 
         // Radius of the complex semi-disk S
-        rho = longDouble( 3.15 );
+        rho = longDouble( this->rho );
 
         // Skeletonization of a semi-disk in the complex plane
         // Discretize the semi-disk with N-steps using polar

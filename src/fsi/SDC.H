@@ -24,7 +24,9 @@ public:
             std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
             std::string rule,
             int nbNodes,
-            scalar tol
+            scalar tol,
+            int minSweeps,
+            int maxSweeps
             );
 
         SDC(
@@ -35,9 +37,9 @@ public:
 
         ~SDC();
 
-        void run();
-
         void solveTimeStep( const scalar t0 );
+
+        virtual void run();
 
         virtual void getSourceTerm(
             const bool corrector,
@@ -101,6 +103,8 @@ private:
         fsi::matrix solStages;
         bool convergence;
         int timeIndex;
+        int minSweeps;
+        int maxSweeps;
     };
 }
 

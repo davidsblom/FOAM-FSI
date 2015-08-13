@@ -41,6 +41,8 @@ public:
         virtual void outputResidual( std::string name ) = 0;
 
         virtual bool isConverged() = 0;
+
+        virtual void run() = 0;
     };
 }
 
