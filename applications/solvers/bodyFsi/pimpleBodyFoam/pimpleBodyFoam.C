@@ -63,6 +63,8 @@ int main(int argc, char *argv[])
 
         fvc::makeAbsolute(phi, U);
 
+#       include "updateV000.H"
+
         runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;

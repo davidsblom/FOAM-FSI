@@ -1,3 +1,0 @@
-pimpleBodyFsiFoamBDF3.C
-
-EXE = $(FOAM_USER_APPBIN)/pimpleBodyFsiFoamBDF3

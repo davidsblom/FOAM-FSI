@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
 #       include "CourantNo.H"//Calculate Co
 #       include "setDeltaT.H"//Set dT according to Co if requested
 
+#       include "updateV000.H"
+
         // New time
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;

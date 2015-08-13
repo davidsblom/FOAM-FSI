@@ -72,7 +72,11 @@ int main(int argc, char *argv[])
 		//Re-initialize variables each time step
 		fsiInter.reset();
 
-		do{
+        scalar relTol = 1e-2;//relative tolernace for each loop of fluid equations
+        scalar initMomentumResidual = 1;
+        scalar initPressureResidual = 1;
+        
+        do{
         	Info<< "Fsi iteration = " << fsiInter.iter() << endl;
 
 #           include "setMotion.H"

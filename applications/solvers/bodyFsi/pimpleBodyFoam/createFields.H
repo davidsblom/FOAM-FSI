@@ -33,6 +33,7 @@
 
     //Creating field to store old face areas needed voor ddtPhiCorr
 #   include "createUf.H"
+#   include "createV000.H"
 
     //Read pressure properties and create turbulence model
     label pRefCell = 0;
