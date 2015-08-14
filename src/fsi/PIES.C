@@ -226,7 +226,7 @@ namespace sdc
 
         // Enforce right-hand-rule based nodes, which results in
         // a L-stable time integration scheme
-        A( nbNodes, 0 ) = 0;
+        A( nbNodes, 0 ) = 1;
 
         matrixc b( nbNodes + 1, M );
         b.setZero();
