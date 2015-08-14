@@ -11,7 +11,7 @@
     if(oCorr==0)
     {
         initMomentumResidual = residualMomentum;
-        initPressureResidual = residualPressure;
+        initPressureResidual = initInnerResidualPressure;
     }
 
     // == Check convergence & display residual

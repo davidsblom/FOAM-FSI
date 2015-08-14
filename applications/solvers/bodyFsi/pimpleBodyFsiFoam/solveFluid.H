@@ -9,6 +9,7 @@
 #   	include "meshCourantNo.H"
 	}
 
+	outerLoopConverged = false;
 	label oCorr=0;
 	do
 	{

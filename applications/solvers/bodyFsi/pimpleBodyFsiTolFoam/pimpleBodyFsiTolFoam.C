@@ -38,6 +38,7 @@ Description
 #include "RBFMotionSolverExt.H"
 #include "fsiInterface.H"
 #include "bodyCollector.H"
+#include "lduMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +54,11 @@ int main(int argc, char *argv[])
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
+
+    scalar runTimeSolid = 0;
+    scalar runTimeMesh = 0;
+    scalar runTimeFluid = 0;
+    label oCorrSum = 0;
 
     while (runTime.run())
     {
@@ -75,13 +81,18 @@ int main(int argc, char *argv[])
         scalar relTol = 1e-2;//relative tolernace for each loop of fluid equations
         scalar initMomentumResidual = 1;
         scalar initPressureResidual = 1;
-        
+        scalar initInnerResidualPressure = 1;
+
+        scalar t = std::clock();
         do{
         	Info<< "Fsi iteration = " << fsiInter.iter() << endl;
 
 #           include "setMotion.H"
 
 #           include "solveFluid.H"
+            t = std::clock() - t;
+            runTimeFluid += static_cast<float>(t) / CLOCKS_PER_SEC;
+            t = std::clock();
 
 			fsiInter.update(rhoFluid,nu,U,p);
 		} while(!fsiInter.converged());
@@ -102,7 +113,10 @@ int main(int argc, char *argv[])
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl <<  " ===> tSold | tMesh | tFluid = " << runTimeSolid << " | " << runTimeMesh << " | " << runTimeFluid << " s"
+            << nl << "oCorr = " << oCorr << " | oCorrSum = " << oCorrSum
             << nl << endl;
+
     }
 
     Info<< "End\n" << endl;

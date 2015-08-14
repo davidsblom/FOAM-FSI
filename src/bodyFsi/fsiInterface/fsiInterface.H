@@ -62,22 +62,25 @@ class fsiInterface
 
 		//- Coupling dictionary
 		IOdictionary dict_;
-		
+
 		//- Fluid mesh
 		const fvMesh& mesh_;
-	
+
 		//- fsi subiteractions counter
 		label fsiIter_;
-		
+
+		//- total fsi subiteractions counter
+		label fsiIterTotal_;
+
 		//- Minimum Fsi Subiterations
 		label minFsiIter_;
-	
+
 		//- Maximum Fsi Subiterations
 		label maxFsiIter_;
-	
+
 		//- Minimum fsi residual
 		scalar minResidual_;
-	
+
 		//- Upper bound relaxation factor
 		scalar relaxFsiUpper_;
 
@@ -86,36 +89,36 @@ class fsiInterface
 
 		//- Initial relaxation factor
 		scalar relaxFsi0_;
-		
+
 		//- relaxation factor
 		scalar relaxFsi_;
-	
+
 		//- Previous relaxation factor
 		scalar relaxFsiPrev_;
-	
+
 		//- Fsi coupling scheme
 		word couplingScheme_;
-	
+
 		//- Boolean if write to file
 		bool writeToFile_;
 
 		//- Boolean if relaxFsi_ should be reused from previous time step. Default is false
 		bool reuseRelaxFsi_;
-		
+
 		//- forces on fluid patches per patch
 		Field<vectorField> fluidPatchForces_;
 
 		//- forces on fluid patches in single vectorfield
 		vectorField fluidForces_;
-		
+
 		//- previous forces on fluid patches in single vectorfield
 		vectorField fluidForcesPrev_;
-		
+
 		//- residual
 		vectorField residual_;
 		vectorField residualPrev_;
 		scalar normRes_;
-		
+
 		//- Output file
 		OFstream ofFsiProp_;
 
@@ -124,7 +127,7 @@ class fsiInterface
 
 		//- forces object
 		aeroForces forcesObj_;
-	
+
 	// Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -132,19 +135,19 @@ class fsiInterface
 
         //- Disallow default bitwise assignment
         void operator=(const fsiInterface&);
-        
+
         //- Calculate relaxation factor based on chosen scheme
         void setRelexationParamter();
-        
+
         //- Set forces based on pressure, velocity, viscosity and density
         void setInterfaceForce(const dimensionedScalar& rhoFluid, const dimensionedScalar& nu,const volVectorField& U,const volScalarField& p);
-        
+
         //- Fill fluidPatchForces_ with relaxed forces from patchForces_
 		void syncPatchForcesAfterRelax();
 
         //- Relaxate the forces @(k+1) based on relaxFsi_
         void relax();
-        
+
         //- Return normalised residual
         scalar normResidual();
 
@@ -165,10 +168,10 @@ public:
         virtual ~fsiInterface();
 
     // Member Functions
-    
+
 		//- Set initial force based on this parameters
 		void initializeForce(const dimensionedScalar& rhoFluid, const dimensionedScalar& nu,const volVectorField& U,const volScalarField& p);
-		
+
 		//- Return reference to forces on patches
 		const Field<vectorField>& getPatchForces() const;
 
@@ -177,19 +180,19 @@ public:
 
 		//- Get sum of forces
 		vector getTotalForce() const;
-		
+
 		//- Reset relaxation parameters to initial (relaxFsi0_)->used for new time step
 		void reset();
 
 		//- Update fsiInterface parameters based on new force->needed at end of subiteration
 		void update(const dimensionedScalar& rhoFluid, const dimensionedScalar& nu,const volVectorField& U,const volScalarField& p);
-		
+
 		//- Check if converged or not (can also be based on maximum iter)
 		bool converged();
-		
+
 		//- Return index of current subiteration
 		label iter() const;
-		
+
 		//- Write subiteration properties
 		void write();
 };

@@ -150,7 +150,7 @@ forcesObj_(word("forces"),mesh,dict.subDict("forces"),movingPatchIDs_)
     	relaxFsiUpper_ = readScalar(dict_.lookup("fsiRelaxationUpper"));
     	Info << "Upper bound for Aitkens relaxation paramter set to " << relaxFsiUpper_ << endl;
     }
-	//- Check if lowerbound is specified. Otherwise = -1.0
+	//- Check if lowerbound is specified. Otherwise = 0.0
     if(dict_.found("fsiRelaxationLower")){
     	relaxFsiLower_ = readScalar(dict_.lookup("fsiRelaxationLower"));
     	Info << "Lower bound for Aitkens relaxation paramter set to " << relaxFsiLower_ << endl;
@@ -208,6 +208,7 @@ vector fsiInterface::getTotalForce() const
 //- Reset variables when new time is entered
 void fsiInterface::reset()
 {
+	fsiIterTotal_ += fsiIter_;
 	fsiIter_ = 0;
 	if(!reuseRelaxFsi_){
 		relaxFsi_ = relaxFsi0_;
@@ -258,7 +259,7 @@ void fsiInterface::write()
 {
 	if(writeToFile_)
 	{
-		ofFsiProp_ << mesh_.time().value()<<"\t"<<fsiIter_<<"\t" << normRes_ << endl;
+		ofFsiProp_ << mesh_.time().value() << "\t" << fsiIter_ << "\t" << fsiIterTotal_ << "\t" << normRes_ << endl;
 	}
 }
 

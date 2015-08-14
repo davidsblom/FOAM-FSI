@@ -9,7 +9,8 @@
 #   	include "meshCourantNo.H"
 	}
 
-	label oCorr=0;
+	outerLoopConverged = false;
+	oCorr=0;
 	do
 	{
 		Info << "outer iteration: " << oCorr+1 << endl;
@@ -24,7 +25,7 @@
 			p.storePrevIter();
 #           include "pEqn.H"
 			corr++;
-		}while(innerResidual > innerTolerance && corr < nCorr);
+		}while(residualPressure > max(initInnerResidualPressure*relTol,1e-14) && corr < nCorr);
 
 		//Correct turbulence
 		turbulence->correct();
@@ -34,4 +35,6 @@
 
 		oCorr++;
 	}while(!outerLoopConverged);
+
+	oCorrSum += oCorr;
 }
