@@ -25,7 +25,7 @@
 			p.storePrevIter();
 #           include "pEqn.H"
 			corr++;
-		}while(residualPressure > max(initInnerResidualPressure*relTol,1e-14) && corr < nCorr);
+		}while(residualPressure > max(initInnerResidualPressure*relTol, absoluteTolerance) && corr < nCorr);
 
 		//Correct turbulence
 		turbulence->correct();

@@ -159,7 +159,7 @@ forcesObj_(word("forces"),mesh,dict.subDict("forces"),movingPatchIDs_)
 	//Create header in output file or delete the file
 	if(writeToFile_)
 	{
-		ofFsiProp_ << "time\tnIters\tresidual" << endl;
+		ofFsiProp_ << "time\tnIters\tnTotalIters\tresidual" << endl;
 	}
 	else
 	{
