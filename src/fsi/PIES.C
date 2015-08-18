@@ -27,11 +27,18 @@ namespace sdc
         assert( tol >= delta );
         assert( rho > 0 );
 
+        std::clock_t start;
+        double duration;
+
+        start = std::clock();
+
         computeCoefficients();
+
+        duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 
         k = nodes.rows();
 
-        Info << "Picard Integral Exponential Solver: number of nodes = " << k << endl;
+        Info << "Picard Integral Exponential Solver: number of nodes = " << k << ", timing = " << duration << " s" << endl;
 
         dsdc.resize( nodes.rows() - 1 );
 
