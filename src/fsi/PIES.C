@@ -34,7 +34,7 @@ namespace sdc
 
         computeCoefficients();
 
-        duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+        duration = (std::clock() - start) / (double) CLOCKS_PER_SEC;
 
         k = nodes.rows();
 
