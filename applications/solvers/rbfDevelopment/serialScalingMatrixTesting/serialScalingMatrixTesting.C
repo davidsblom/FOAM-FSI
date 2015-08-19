@@ -61,13 +61,13 @@ int main(int argc, char *argv[])
     int N=Nx*Ny;
 
     Info << "Building position matrix" << endl;
-    Eigen::MatrixXd x1(Ny,1);
+    Eigen::MatrixXd x1(Ny,3);
     Eigen::MatrixXd M1(Nx,Ny);
     Eigen::MatrixXd M2(int(Nx/2),Ny);
     Eigen::MatrixXd M4(int(Nx/4),Ny);
-    Eigen::MatrixXd b1(Nx,1);
-    Eigen::MatrixXd b2(int(Nx/2),1);
-    Eigen::MatrixXd b4(int(Nx/4),1);
+    Eigen::MatrixXd b1(Nx,3);
+    Eigen::MatrixXd b2(int(Nx/2),3);
+    Eigen::MatrixXd b4(int(Nx/4),3);
 
     //Standard testing
     std::clock_t t = std::clock();
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     double t4na = 1.0*t/CLOCKS_PER_SEC;
     t = std::clock();
 
-    std::cout << "Testing matrix X vector of " << Nx << " by " << Ny << "with noalias" << nl;
+    std::cout << "Testing matrix X vector of " << Nx << " by " << Ny << " by " << 3 <<  " with noalias" << nl;
     std::cout << "t1 | t2 | t4 = " << t1na << " | " << t2na << " | " << t4na << nl << nl;
 
 

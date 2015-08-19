@@ -3,6 +3,7 @@
     label oCorr=0;
     lduMatrix::solverPerformance UEqnPerformance;
     lduMatrix::solverPerformance pEqnPerformance;
+    scalar absoluteTolerance = 1e-12;
 
     bool correctPhi = false;
     if (pimple.found("correctPhi"))

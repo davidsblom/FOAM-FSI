@@ -2,6 +2,7 @@
 
 wmake inverseMatrixTesting
 wmake matrixMatrixTesting
+wmake serialScalingMatrixTesting
 wmake moveBodyFoamDavid
 wmake moveBodyFoamPoints
 wmake rbfFunctionFLOPStesting

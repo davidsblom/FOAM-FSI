@@ -16,6 +16,7 @@ tmp<fvVectorMatrix> UEqn
     UEqn().relax();
 
     UEqnPerformance = solve(UEqn() == -fvc::grad(p));
+    UIterationsSum += UEqnPerformance.nIterations();
 
     //Reset equation to ensure relaxation parameter is not causing problems for time order
     UEqn() =

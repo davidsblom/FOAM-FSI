@@ -59,6 +59,12 @@ int main(int argc, char *argv[])
     scalar runTimeMesh = 0;
     scalar runTimeFluid = 0;
     label oCorrSum = 0;
+    label pIterationsSum = 0;
+    label UIterationsSum = 0;
+
+    //file for writing out timings iterations
+    OFstream timings("fsiTimings.txt");
+    timings << "t_step\tt_solid\tt_mesh\tt_fluid\tt_cpu\tt_clock\toCorrSum\tUiterSum\tpIterSum" << endl;
 
     while (runTime.run())
     {
@@ -114,8 +120,11 @@ int main(int argc, char *argv[])
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl <<  " ===> tSold | tMesh | tFluid = " << runTimeSolid << " | " << runTimeMesh << " | " << runTimeFluid << " s"
-            << nl << "oCorr = " << oCorr << " | oCorrSum = " << oCorrSum
+            << nl << "pIterations = " << pIterationsSum << " | UIterations = " << UIterationsSum << " | oCorrSum = " << oCorrSum
             << nl << endl;
+
+        timings << runTime.timeName() << "\t" << runTimeSolid << "\t" << runTimeMesh << "\t" << runTimeFluid << "\t"
+                << runTime.elapsedCpuTime() << "\t" << runTime.elapsedClockTime() << "\t" << oCorrSum << "\t" << UIterationsSum << "\t" << pIterationsSum << endl;
 
     }
 

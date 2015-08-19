@@ -289,6 +289,14 @@ namespace rbf
             WarningIn( "RBFCoarsening::RBFCoarsening" )
             << "Using surfaceCorrection and radius is manually set by surfaceCorrectionRadius: " <<surfaceCorrectionRadius <<". This could lead to bad/invalid meshes." << endl;
         }
+
+        if(debug == 3)
+        {
+            std::string filename = "totalInterpolationTimings.txt";
+            std::ofstream timingFile( filename, std::ofstream::app );
+            timingFile << "t_total, t_error, t_reselect, t_interpolate, t_correct" << "\n";
+        }
+
     }
 
     /* Select a subset of control point with a greedy algorithm.
@@ -375,7 +383,7 @@ namespace rbf
                     positionsCoarse.row( j ) = positions.row( selectedPositions( j ) );
                     valuesCoarse.row( j ) = values.row( selectedPositions( j ) );
                 }
-                
+
                 std::clock_t t = std::clock();
 
                 // Perform the RBF interpolation.

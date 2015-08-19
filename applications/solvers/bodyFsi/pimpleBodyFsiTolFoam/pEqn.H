@@ -16,6 +16,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     pEqn.setReference(pRefCell, pRefValue);
     pEqnPerformance = pEqn.solve();
     innerResidual = pEqnPerformance.initialResidual();
+    pIterationsSum += pEqnPerformance.nIterations();
 
     if(nonOrth==0 && corr==0)
         initInnerResidualPressure = innerResidual;
