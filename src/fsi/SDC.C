@@ -161,6 +161,11 @@ namespace sdc
 
     void SDC::solveTimeStep( const scalar t0 )
     {
+        assert( qmat.rows() == smat.rows() );
+        assert( qmat.cols() == smat.cols() );
+        assert( qmat.rows() == k - 1 );
+        assert( qmat.cols() == k );
+
         if ( adaptiveTimeStepper->isPreviousStepAccepted() )
             solver->nextTimeStep();
 
