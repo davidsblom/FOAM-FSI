@@ -8,33 +8,54 @@
 #include "Piston.H"
 #include "gtest/gtest.h"
 
-TEST( PIESTest, coefficients )
+class PIESTest : public::testing::Test
 {
-    scalar dt, q0, qdot0, As, Ac, omega, endTime, tol, delta, rho;
+protected:
 
-    int nbTimeSteps = 100, nbNodes;
+    virtual void SetUp()
+    {
+        scalar dt, q0, qdot0, As, Ac, omega, endTime, tol, delta, rho;
 
-    endTime = 100;
-    dt = endTime / nbTimeSteps;
-    As = 100;
-    Ac = As;
-    omega = 1;
-    q0 = -As;
-    qdot0 = -As;
-    tol = 1.0e-8;
-    delta = 1.0e-9;
-    nbNodes = 10;
-    rho = 3.15;
+        int nbTimeSteps = 100, nbNodes;
 
-    std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
+        endTime = 100;
+        dt = endTime / nbTimeSteps;
+        As = 100;
+        Ac = As;
+        omega = 1;
+        q0 = -As;
+        qdot0 = -As;
+        tol = 1.0e-8;
+        delta = 1.0e-9;
+        nbNodes = 10;
+        rho = 3.15;
+
+        std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
+
+        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
+
+        piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+
+        pies = std::shared_ptr<sdc::PIES> ( new sdc::PIES( piston, adaptiveTimeStepper, rho, delta, tol, nbNodes, 10 * nbNodes ) );
+    }
+
+    virtual void TearDown()
+    {
+        pies.reset();
+        piston.reset();
+    }
+
+    std::shared_ptr<sdc::PIES> pies;
     std::shared_ptr<Piston> piston;
+};
 
-    adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
+TEST_F( PIESTest, coefficients )
+{
+    ASSERT_TRUE( true );
+}
 
-    piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-
-    std::shared_ptr<sdc::PIES> pies( new sdc::PIES( piston, adaptiveTimeStepper, rho, delta, tol, nbNodes, 10 * nbNodes ) );
-
+TEST_F( PIESTest, run )
+{
     pies->run();
 
     fsi::vector solution( 2 );
