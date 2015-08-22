@@ -2,6 +2,12 @@
 /*
  * Author
  *   David Blom, TU Delft. All rights reserved.
+ *
+ * This class implements the Picard Integral Exponential Solver as proposed
+ * in D. Kushnir and V. Rokhlin, "A Highly Accurate Solver for Stiff Ordinary
+ * Differential Equations" (2011).
+ * The basis functionality is implemented in the SDC class. The method
+ * updateCoefficients() computes the coefficients for the PIES solver.
  */
 
 #include "PIES.H"
