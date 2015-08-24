@@ -464,7 +464,7 @@ TEST_F( AggressiveSpaceMappingSolverTest, solveTimeStep )
     solver->solveTimeStep();
 
     ASSERT_EQ( solver->fineModel->fsi->nbIter, 44 );
-    // ASSERT_EQ( solver->coarseModel->fsi->nbIter, 231 );
-    // ASSERT_EQ( fineModelFluid->nbRes, 220 );
-    // ASSERT_EQ( fineModelFluid->nbJac, 132 );
+    ASSERT_EQ( solver->coarseModel->fsi->nbIter, 231 );
+    ASSERT_EQ( fineModelFluid->nbRes, 220 );
+    ASSERT_EQ( fineModelFluid->nbJac, 132 );
 }
