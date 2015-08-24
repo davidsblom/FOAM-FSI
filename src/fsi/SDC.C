@@ -101,6 +101,7 @@ namespace sdc
         assert( maxSweeps > 0 );
         assert( maxSweeps >= minSweeps );
         assert( minSweeps > 0 );
+        assert( N > 0 );
 
         int refine = 1;
         quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
