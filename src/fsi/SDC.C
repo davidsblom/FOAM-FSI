@@ -257,6 +257,7 @@ namespace sdc
 
             assert( enabledVariables.size() == dofVariables.size() );
             assert( enabledVariables.size() == namesVariables.size() );
+            assert( std::accumulate( dofVariables.begin(), dofVariables.end(), 0 ) == N );
 
             std::deque<bool> convergenceVariables;
 
@@ -285,6 +286,8 @@ namespace sdc
 
                 for ( unsigned int i = 0; i < dofVariables.size(); i++ )
                 {
+                    assert( dofVariables.at( i ) > 0 );
+
                     scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
                     labelList dofVariablesGlobal( Pstream::nProcs(), 0 );
                     dofVariablesGlobal[Pstream::myProcNo()] = dofVariables.at( i );
