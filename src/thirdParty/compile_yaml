@@ -15,7 +15,7 @@ if [ ! -e ${SHARED_LIBRARY} ]; then
 
     # Define which versions of the different packages are used
 
-    export BOOST_VERSION=1_53_0
+    export BOOST_VERSION=1_55_0
 
     rm -rf yaml-cpp*
 
