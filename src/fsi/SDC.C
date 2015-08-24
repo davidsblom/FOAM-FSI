@@ -257,7 +257,6 @@ namespace sdc
 
             assert( enabledVariables.size() == dofVariables.size() );
             assert( enabledVariables.size() == namesVariables.size() );
-            assert( std::accumulate( dofVariables.begin(), dofVariables.end(), 0 ) == N );
 
             std::deque<bool> convergenceVariables;
 
@@ -282,6 +281,8 @@ namespace sdc
 
             if ( dofVariables.size() > 1 )
             {
+                assert( std::accumulate( dofVariables.begin(), dofVariables.end(), 0 ) == N );
+                
                 int index = 0;
 
                 for ( unsigned int i = 0; i < dofVariables.size(); i++ )
