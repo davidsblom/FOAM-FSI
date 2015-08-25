@@ -4,6 +4,7 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 #include <sys/stat.h>
+#include <iomanip>
 #include "RBFCoarsening.H"
 #include "WendlandC0Function.H"
 #include "WendlandC2Function.H"
@@ -287,14 +288,15 @@ namespace rbf
         if ( surfaceCorrection && surfaceCorrectionRadius > 0 )
         {
             WarningIn( "RBFCoarsening::RBFCoarsening" )
-            << "Using surfaceCorrection and radius is manually set by surfaceCorrectionRadius: " <<surfaceCorrectionRadius <<". This could lead to bad/invalid meshes." << endl;
+            << "Using surfaceCorrection and radius is manually set by surfaceCorrectionRadius: " << surfaceCorrectionRadius <<". This could lead to bad/invalid meshes." << endl;
         }
 
         if(debug == 3)
         {
             std::string filename = "totalInterpolationTimings.txt";
             std::ofstream timingFile( filename, std::ofstream::app );
-            timingFile << "t_total, t_error, t_reselect, t_interpolate, t_correct" << "\n";
+            if ( Pstream::myProcNo() == 0 && not rbf->polynomialTerm )
+                timingFile << std::setprecision(9) << "t_total, t_error, t_reselect, t_interpolate, t_correct" << "\n";
         }
 
     }
@@ -852,13 +854,16 @@ namespace rbf
             Info << "RBFCoarsening::interpolate::debug 1. total time = " << runTimeINTP << " s" << endl;
 
             //write to file
-            std::string filename = "totalInterpolationTimings.txt";
-            std::ofstream timingFile( filename, std::ofstream::app );
-            if ( timingFile.is_open() )
+            if ( Pstream::myProcNo() == 0 )
             {
-                timingFile << runTimeINTP << ", "<< runTimeError << ", " << runTimeReselect << ", " << runTimeInterpolate << ", " << runTimeCorrect << "\n";
+                std::string filename = "totalInterpolationTimings.txt";
+                std::ofstream timingFile( filename, std::ofstream::app );
+                if ( timingFile.is_open() )
+                {
+                    timingFile << std::setprecision(9) << runTimeINTP << ", "<< runTimeError << ", " << runTimeReselect << ", " << runTimeInterpolate << ", " << runTimeCorrect << "\n";
+                }
+                timingFile.close();
             }
-            timingFile.close();
         }
     }
 
