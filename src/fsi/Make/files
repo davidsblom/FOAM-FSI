@@ -33,5 +33,6 @@ fluidSolvers/SDCLaplacianSolver.C
 
 solidSolvers/foamSolidSolver.C
 solidSolvers/SolidSolver.C
+solidSolvers/SDCSolidSolver.C
 
 LIB = $(FOAM_USER_LIBBIN)/libfsi

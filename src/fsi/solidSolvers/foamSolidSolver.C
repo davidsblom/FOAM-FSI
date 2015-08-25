@@ -240,6 +240,8 @@ void foamSolidSolver::run()
 {
     while ( isRunning() )
     {
+        Info << "Time = " << runTime->timeName() << endl;
+
         initTimeStep();
         solve();
         finalizeTimeStep();

@@ -235,13 +235,10 @@ namespace sdc
 
             // Compute the SDC residual
 
-            // fsi::matrix Qj = dt * (qmat * F);
-            // fsi::matrix residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
+            residual = dt * (qmat * F);
 
-            // Only compute row k-2 of matrix Qj for efficiency
-            computeResidual( qmat, F, dt, qj );
-
-            residual.noalias() = solStages.row( 0 ) + qj.row( 0 ) - solStages.row( k - 1 );
+            for ( int i = 0; i < residual.rows(); i++ )
+                residual.row( i ) += solStages.row( 0 ) - solStages.row( i + 1 );
 
             scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
             squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
@@ -263,6 +260,8 @@ namespace sdc
             for ( unsigned int i = 0; i < enabledVariables.size(); i++ )
                 convergenceVariables.push_back( not enabledVariables.at( i ) );
 
+            bool solverConverged = solver->isConverged();
+
             if ( dofVariables.size() == 1 )
             {
                 Info << "SDC residual = " << error;
@@ -277,70 +276,75 @@ namespace sdc
                     Info << "false";
 
                 Info << endl;
+
+                if ( convergence && solverConverged )
+                    break;
             }
 
             if ( dofVariables.size() > 1 )
             {
                 assert( std::accumulate( dofVariables.begin(), dofVariables.end(), 0 ) == N );
-                
-                int index = 0;
 
-                for ( unsigned int i = 0; i < dofVariables.size(); i++ )
+                bool convergence = solverConverged;
+
+                for ( unsigned int substep = 0; substep < residual.rows(); substep++ )
                 {
-                    assert( dofVariables.at( i ) > 0 );
+                    int index = 0;
 
-                    scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
-                    labelList dofVariablesGlobal( Pstream::nProcs(), 0 );
-                    dofVariablesGlobal[Pstream::myProcNo()] = dofVariables.at( i );
-                    reduce( dofVariablesGlobal, sumOp<labelList>() );
-
-                    for ( int j = 0; j < dofVariables.at( i ); j++ )
+                    for ( unsigned int i = 0; i < dofVariables.size(); i++ )
                     {
-                        squaredNorm[Pstream::myProcNo()] += residual( 0, index ) * residual( 0, index );
-                        index++;
+                        assert( dofVariables.at( i ) > 0 );
+
+                        scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
+                        labelList dofVariablesGlobal( Pstream::nProcs(), 0 );
+                        dofVariablesGlobal[Pstream::myProcNo()] = dofVariables.at( i );
+                        reduce( dofVariablesGlobal, sumOp<labelList>() );
+
+                        for ( int j = 0; j < dofVariables.at( i ); j++ )
+                        {
+                            squaredNorm[Pstream::myProcNo()] += residual( substep, index ) * residual( substep, index );
+                            index++;
+                        }
+
+                        reduce( squaredNorm, sumOp<scalarList>() );
+                        scalar error = std::sqrt( sum( squaredNorm ) / sum( dofVariablesGlobal ) );
+
+                        if ( error > tol || j < minSweeps - 1 )
+                            convergence = false;
+
+                        if ( enabledVariables.at( i ) )
+                        {
+                            Info << "SDC " << namesVariables.at( i ).c_str();
+                            Info << " residual = " << error;
+                            Info << " substep = " << substep + 1;
+                            Info << ", time = " << t;
+                            Info << ", sweep = " << j + 1;
+                            Info << ", convergence = ";
+
+                            if ( error < tol && j >= minSweeps - 1 )
+                                Info << "true";
+                            else
+                                Info << "false";
+
+                            Info << endl;
+                        }
+
+                        if ( enabledVariables.at( i ) )
+                            convergenceVariables.at( i ) = convergence;
                     }
 
-                    reduce( squaredNorm, sumOp<scalarList>() );
-                    scalar error = std::sqrt( sum( squaredNorm ) / sum( dofVariablesGlobal ) );
-
-                    bool convergence = error < tol && j >= minSweeps - 1;
-
-                    if ( enabledVariables.at( i ) )
-                    {
-                        Info << "SDC " << namesVariables.at( i ).c_str();
-                        Info << " residual = " << error;
-                        Info << ", time = " << t;
-                        Info << ", sweep = " << j + 1;
-                        Info << ", convergence = ";
-
-                        if ( convergence )
-                            Info << "true";
-                        else
-                            Info << "false";
-
-                        Info << endl;
-                    }
-
-                    if ( enabledVariables.at( i ) )
-                        convergenceVariables.at( i ) = convergence;
+                    assert( index == N );
                 }
 
-                assert( index == N );
+                convergence = solverConverged;
+
+                for ( unsigned int i = 0; i < convergenceVariables.size(); i++ )
+                    if ( not convergenceVariables.at( i ) )
+                        convergence = false;
+
+                if ( convergence )
+                    break;
             }
-
-            bool solverConverged = solver->isConverged();
-
-            if ( convergence && solverConverged )
-                break;
-
-            convergence = solverConverged;
-
-            for ( unsigned int i = 0; i < convergenceVariables.size(); i++ )
-                if ( not convergenceVariables.at( i ) )
-                    convergence = false;
-
-            if ( convergence )
-                break;
         }
 
         if ( adaptiveTimeStepper->isEnabled() )
