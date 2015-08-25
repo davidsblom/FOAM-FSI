@@ -103,8 +103,8 @@ private:
         fsi::matrix solStages;
         bool convergence;
         int timeIndex;
-        int minSweeps;
-        int maxSweeps;
+        const int minSweeps;
+        const int maxSweeps;
     };
 }
 

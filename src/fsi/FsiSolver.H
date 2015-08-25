@@ -61,13 +61,13 @@ public:
         shared_ptr<BaseMultiLevelSolver> fluid;
         shared_ptr<BaseMultiLevelSolver> solid;
         shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
-        bool parallel;
+        const bool parallel;
         int N;
         int iter;
         int nbIter;
         bool allConverged;
         vector x;
-        int extrapolationOrder;
+        const int extrapolationOrder;
         std::deque<vector> previousSolutions;
     };
 }

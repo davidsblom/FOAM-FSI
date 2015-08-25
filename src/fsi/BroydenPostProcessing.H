@@ -48,7 +48,7 @@ public:
             );
 
         matrix J;
-        scalar singularityLimit;
+        const scalar singularityLimit;
     };
 }
 

@@ -54,8 +54,8 @@ public:
         shared_ptr<BaseMultiLevelSolver> couplingGridSolver;
         shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
         shared_ptr<RBFCoarsening> rbfInterpToMesh;
-        int participantId;
-        int level;
+        const int participantId;
+        const int level;
         int couplingGridSize;
     };
 }

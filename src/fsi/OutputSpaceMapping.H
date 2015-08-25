@@ -56,7 +56,7 @@ public:
         deque<deque<vector> > solsList;
         deque<deque<deque<vector> > > solsTimeList;
 
-        int order;
+        const int order;
     };
 }
 

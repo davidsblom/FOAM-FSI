@@ -67,10 +67,10 @@ public:
 
         void determineScalingFactors( const vector & output );
 
-        bool scaling;
-        scalar beta;
-        scalar singularityLimit;
-        bool updateJacobian;
+        const bool scaling;
+        const scalar beta;
+        const scalar singularityLimit;
+        const bool updateJacobian;
         vector scalingFactors;
         matrix Jprev;
         int sizeVar0;

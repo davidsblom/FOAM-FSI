@@ -74,10 +74,10 @@ public:
 
 private:
 
-        bool enabled;
-        std::string filter;
-        scalar tol;
-        scalar safetyFactor;
+        const bool enabled;
+        const std::string filter;
+        const scalar tol;
+        const scalar safetyFactor;
         int k;
         scalar cerrold;
         scalar rhoold;

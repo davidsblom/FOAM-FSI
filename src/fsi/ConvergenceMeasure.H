@@ -35,7 +35,7 @@ public:
 
         virtual void printState() = 0;
 
-        int dataId;
+        const int dataId;
 
         bool isConvergence_;
     };

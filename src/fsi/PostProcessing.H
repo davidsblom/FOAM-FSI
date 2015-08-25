@@ -60,11 +60,11 @@ public:
 
         scalar initialRelaxation;
 
-        int maxIter;
-        int maxUsedIterations;
-        int nbReuse;
+        const int maxIter;
+        const int maxUsedIterations;
+        const int nbReuse;
         int timeIndex;
-        int reuseInformationStartingFromTimeIndex;
+        const int reuseInformationStartingFromTimeIndex;
 
         deque<vector> residuals;
         deque<vector> sols;

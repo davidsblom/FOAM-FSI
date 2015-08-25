@@ -34,7 +34,7 @@ public:
 
         scalar normDiff;
         scalar norm;
-        scalar convergenceLimit;
+        const scalar convergenceLimit;
         scalar epsilon;
     };
 }

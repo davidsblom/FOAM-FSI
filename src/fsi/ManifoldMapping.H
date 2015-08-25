@@ -67,8 +67,8 @@ public:
             int col
             );
 
-        bool updateJacobian;
-        bool initialSolutionCoarseModel;
+        const bool updateJacobian;
+        const bool initialSolutionCoarseModel;
         bool scaling;
         int iter;
         vector scalingFactors;
