@@ -17,7 +17,3 @@ wclean applications/solvers/fsi/fsiFluidFoam
 wclean applications/solvers/fsi/fsiSolidFoam
 wclean src/tests/app
 wclean src/tests/tubeflow
-rm -rf src/thirdParty/gtest*
-rm -rf src/thirdParty/yaml-cpp*
-rm -rf src/thirdParty/boost*
-rm -rf $FOAM_USER_LIBBIN/libprecice* $FOAM_USER_LIBBIN/libyaml-cpp*
