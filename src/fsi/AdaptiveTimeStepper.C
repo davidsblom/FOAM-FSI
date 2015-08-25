@@ -84,6 +84,7 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
 {
     assert( endTime > 0 );
     assert( k > 0 );
+    assert( errorEstimate > 0 );
 
     if ( not enabled )
     {
@@ -138,6 +139,8 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
 
     Info << ", current time step = " << computedTimeStep;
     Info << ", new time step = " << newTimeStep << endl;
+
+    assert( newTimeStep > 0 );
 
     return accepted;
 }
