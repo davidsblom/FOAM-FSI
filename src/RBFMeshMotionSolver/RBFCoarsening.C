@@ -733,7 +733,7 @@ namespace rbf
                     Info << "RBFCoarsening::UnitDisplacement::debug 1: " << "2-norm error = " << error << ", max error = " << errorMax <<  endl;
 
                     //If debug is 2: Print out surface error to file
-                    if( debug == 2 )
+                    if( debug >= 2 )
                     {
                         std::string filename = "unitSelection-rbf-surfaceError.txt";
                         std::ofstream surfaceErrorFile( filename, std::ofstream::app );
