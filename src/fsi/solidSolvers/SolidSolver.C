@@ -347,6 +347,7 @@ void SolidSolver::solve()
         {
             initialResidual = displacementResidual;
             convergenceTolerance = std::max( relativeTolerance * displacementResidual, absoluteTolerance );
+            assert( convergenceTolerance > 0 );
         }
 
         bool convergence = displacementResidual <= convergenceTolerance && iCorr >= minIter - 1;
