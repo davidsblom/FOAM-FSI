@@ -115,6 +115,12 @@ public:
         return 1;
     }
 
+    virtual void getVariablesInfo(
+        std::deque<int> & dof,
+        std::deque<bool> & enabled,
+        std::deque<std::string> & names
+    );
+
     int nbTimeSteps;
     scalar dt;
     scalar q0;
