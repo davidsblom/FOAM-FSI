@@ -61,6 +61,7 @@ namespace sdc
         )
         :
         SDC( "gauss-radau", 2, tol ),
+        rho( rho ),
         delta( delta )
     {
         assert( tol >= delta );
