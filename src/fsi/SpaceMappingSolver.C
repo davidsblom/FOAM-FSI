@@ -17,8 +17,7 @@ SpaceMappingSolver::SpaceMappingSolver(
     ImplicitMultiLevelFsiSolver( fineModel->fsi, fineModel->postProcessing ),
     fineModel( fineModel ),
     coarseModel( coarseModel ),
-    spaceMapping( spaceMapping ),
-    init( false )
+    spaceMapping( spaceMapping )
 {
     assert( fineModel );
     assert( coarseModel );

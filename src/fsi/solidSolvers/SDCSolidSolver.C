@@ -63,17 +63,6 @@ SDCSolidSolver::SDCSolidSolver (
     maxIter( readInt( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "maxIter" ) ) ),
     absoluteTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "tolerance" ) ) ),
     relativeTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "relTol" ) ) ),
-    couplingProperties
-    (
-    IOobject
-    (
-        "couplingProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    )
-    ),
     interpolator( false ),
     k( 0 ),
     UStages(),
@@ -201,17 +190,6 @@ SDCSolidSolver::SDCSolidSolver (
     maxIter( readInt( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "maxIter" ) ) ),
     absoluteTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "tolerance" ) ) ),
     relativeTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "relTol" ) ) ),
-    couplingProperties
-    (
-    IOobject
-    (
-        "couplingProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    )
-    ),
     interpolator( interpolator ),
     k( 0 ),
     UStages(),

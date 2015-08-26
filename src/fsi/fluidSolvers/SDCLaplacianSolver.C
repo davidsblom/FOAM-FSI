@@ -108,11 +108,6 @@ int SDCLaplacianSolver::getDOF()
     return T.size();
 }
 
-int SDCLaplacianSolver::getNbCells()
-{
-    return mesh.globalData().nTotalCells();
-}
-
 scalar SDCLaplacianSolver::getScalingFactor()
 {
     return 1;

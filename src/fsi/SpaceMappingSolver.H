@@ -72,7 +72,6 @@ public:
     shared_ptr<ImplicitMultiLevelFsiSolver> fineModel;
     shared_ptr<ImplicitMultiLevelFsiSolver> coarseModel;
     shared_ptr<SpaceMapping> spaceMapping;
-    bool init;
 };
 
 #endif

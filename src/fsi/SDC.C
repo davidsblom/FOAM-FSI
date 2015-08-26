@@ -206,8 +206,6 @@ namespace sdc
 
         // Compute successive corrections
 
-        bool convergence = false;
-
         for ( int j = 0; j < maxSweeps; j++ )
         {
             t = t0;
@@ -245,7 +243,7 @@ namespace sdc
             reduce( squaredNorm, sumOp<scalarList>() );
             scalar error = std::sqrt( sum( squaredNorm ) / N );
             error /= solver->getScalingFactor();
-            convergence = error < tol && j >= minSweeps - 1;
+            bool convergence = error < tol && j >= minSweeps - 1;
 
             std::deque<int> dofVariables;
             std::deque<bool> enabledVariables;

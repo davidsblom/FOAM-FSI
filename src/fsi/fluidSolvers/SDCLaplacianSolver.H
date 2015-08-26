@@ -40,8 +40,6 @@ public:
 
     virtual int getDOF();
 
-    virtual int getNbCells();
-
     virtual scalar getScalingFactor();
 
     virtual void getSolution( fsi::vector & solution );

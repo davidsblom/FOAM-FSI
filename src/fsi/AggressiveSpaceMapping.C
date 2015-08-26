@@ -87,7 +87,6 @@ void AggressiveSpaceMapping::performPostProcessing(
 
         int nbCols = k;
         int nbColsCurrentTimeStep = nbCols;
-        int colIndex = 0;
 
         // Include information from previous optimization cycles
 
@@ -105,6 +104,8 @@ void AggressiveSpaceMapping::performPostProcessing(
             Info << "Aggressive space mapping with ";
             Info << nbCols;
             Info << " cols for the Jacobian" << endl;
+
+            int colIndex = 0;
 
             // Include information from previous time steps
 

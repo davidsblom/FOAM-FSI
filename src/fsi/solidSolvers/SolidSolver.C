@@ -51,17 +51,6 @@ SolidSolver::SolidSolver (
     maxIter( 0 ),
     absoluteTolerance( 0 ),
     relativeTolerance( 0 ),
-    couplingProperties
-    (
-    IOobject
-    (
-        "couplingProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    )
-    ),
     interpolator( false )
 {}
 
@@ -111,17 +100,6 @@ SolidSolver::SolidSolver (
     maxIter( 0 ),
     absoluteTolerance( 0 ),
     relativeTolerance( 0 ),
-    couplingProperties
-    (
-    IOobject
-    (
-        "couplingProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    )
-    ),
     interpolator( interpolator )
 {}
 

@@ -96,6 +96,8 @@ CoupledFluidSolver::CoupledFluidSolver(
     // used convergence tolerance for the non-linear system.
     scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "Up" ).lookup( "tolerance" ) );
     assert( absTolerance < convergenceTolerance );
+
+    readBlockSolverControls();
 }
 
 CoupledFluidSolver::~CoupledFluidSolver(){}

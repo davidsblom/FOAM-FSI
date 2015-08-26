@@ -662,7 +662,6 @@ void SDCFluidSolver::implicitSolve(
     fsi::vector & result
     )
 {
-    bool convergence = false;
     runTime->setDeltaT( dt );
     runTime->setTime( t, runTime->timeIndex() );
 
@@ -876,7 +875,7 @@ void SDCFluidSolver::implicitSolve(
         if ( oCorr == 0 )
             convergenceTolerance = std::max( relativeTolerance * momentumResidual, absoluteTolerance );
 
-        convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
+        bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
 
         Info << "root mean square residual norm = " << momentumResidual;
         Info << ", tolerance = " << convergenceTolerance;
@@ -912,12 +911,6 @@ void SDCFluidSolver::implicitSolve(
 scalar SDCFluidSolver::getScalingFactor()
 {
     return 1;
-    scalar rmsU = gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells();
-    rmsU += gSumSqr( mag( phi.internalField() ) ) / mesh.globalData().nTotalFaces();
-    rmsU = std::sqrt( rmsU );
-    rmsU /= runTime->deltaT().value();
-
-    return rmsU;
 }
 
 void SDCFluidSolver::getVariablesInfo(

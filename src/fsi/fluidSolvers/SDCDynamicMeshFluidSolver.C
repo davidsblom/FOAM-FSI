@@ -540,7 +540,6 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     assert( qold.rows() == f.rows() );
     assert( qold.rows() == result.rows() );
 
-    bool convergence = false;
     runTime->setDeltaT( dt );
     runTime->setTime( t, runTime->timeIndex() );
 
@@ -831,7 +830,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
         if ( oCorr == 0 )
             convergenceTolerance = std::max( relativeTolerance * momentumResidual, absoluteTolerance );
 
-        convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
+        bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
 
         Info << "root mean square residual norm = " << momentumResidual;
         Info << ", tolerance = " << convergenceTolerance;
