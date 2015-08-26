@@ -58,7 +58,7 @@ public:
 
         virtual bool isConverged();
 
-        bool isStageImplicit( scalar Akk );
+        static bool isStageImplicit( scalar Akk );
 
         std::shared_ptr<SDCSolver> solver;
         std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;

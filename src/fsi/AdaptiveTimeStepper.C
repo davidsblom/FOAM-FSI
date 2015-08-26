@@ -156,7 +156,7 @@ scalar AdaptiveTimeStepper::h211b(
     return std::pow( c1, 1.0 / b / k ) * std::pow( c0, 1.0 / b / k ) * std::pow( rho, -1.0 / b );
 }
 
-bool AdaptiveTimeStepper::isAccepted()
+bool AdaptiveTimeStepper::isAccepted() const
 {
     if ( not enabled )
         return true;
@@ -164,12 +164,12 @@ bool AdaptiveTimeStepper::isAccepted()
     return accepted;
 }
 
-bool AdaptiveTimeStepper::isEnabled()
+bool AdaptiveTimeStepper::isEnabled() const
 {
     return enabled;
 }
 
-bool AdaptiveTimeStepper::isPreviousStepAccepted()
+bool AdaptiveTimeStepper::isPreviousStepAccepted() const
 {
     return not previousTimeStepRejected;
 }

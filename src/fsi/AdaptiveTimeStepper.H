@@ -55,13 +55,13 @@ public:
             const scalar rho
             );
 
-        bool isAccepted();
+        bool isAccepted() const;
 
-        bool isEnabled();
+        bool isEnabled() const;
 
-        bool isPreviousStepAccepted();
+        bool isPreviousStepAccepted() const;
 
-        scalar limit( const scalar u );
+        static scalar limit( const scalar u );
 
         scalar pi42(
             const scalar c1,

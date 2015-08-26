@@ -60,7 +60,7 @@ public:
 
         void applyScaling( matrix & mat );
 
-        void removeColumnFromMatrix(
+        static void removeColumnFromMatrix(
             matrix & A,
             int col
             );
