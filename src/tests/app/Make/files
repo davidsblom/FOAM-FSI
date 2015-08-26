@@ -31,14 +31,6 @@ QuadratureRules.C
 Cos.C
 Oscillator.C
 PIES.C
-RBFInterpolation.C
-RBFCoarsening.C
-
-RBFFunctions/TPSFunction.C
-RBFFunctions/WendlandC0Function.C
-RBFFunctions/WendlandC2Function.C
-RBFFunctions/WendlandC4Function.C
-RBFFunctions/WendlandC6Function.C
 
 tests.C
 test_fluidsolver.C
