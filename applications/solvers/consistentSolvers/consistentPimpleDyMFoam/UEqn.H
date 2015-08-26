@@ -15,7 +15,7 @@ tmp<fvVectorMatrix> UEqn
 
     UEqn().relax();
 
-    solve( UEqn() == -fvc::grad( p ) );
+    UEqnPerformance = solve( UEqn() == -fvc::grad( p ) );
 
     // Reset equation to ensure relaxation parameter is not causing problems for time order
     UEqn() =

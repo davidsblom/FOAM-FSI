@@ -1,9 +1,16 @@
+// Momentum predictor
 tmp<fvVectorMatrix> UEqn
 (
-    fvm::ddt(U)
-  + fvm::div(phi, U)
-  + turbulence->divDevReff(U)
+    fvm::div( phi, U )
+    + turbulence->divDevReff( U )
+
+    // + SRF->Fcoriolis()
 );
+SRF->addCoriolis( UEqn() );
+
+/*UEqn().relax();
+
+solve( UEqn() == -fvc::grad( p ) );*/
 
 {//To ensure S0 and B0 are thrown out of memory
 
@@ -15,15 +22,21 @@ tmp<fvVectorMatrix> UEqn
 
     UEqn().relax();
 
-    UEqnPerformance = solve(UEqn() == -fvc::grad(p));
+    eqnResidual = solve
+        (
+            UEqn() == -fvc::grad( p )
+        ).initialResidual();
+
+    maxResidual = max( eqnResidual, maxResidual );
 
     //Reset equation to ensure relaxation parameter is not causing problems for time order
     UEqn() =
     (
-        fvm::ddt(U)
-      + fvm::div(phi, U)
-      + turbulence->divDevReff(U)
+        fvm::div( phi, U )
+        + turbulence->divDevReff( U )
     );
+    SRF->addCoriolis( UEqn() );
+    
     UEqn().source() = S0;
     UEqn().boundaryCoeffs() = B0;
 }

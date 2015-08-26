@@ -69,8 +69,7 @@ int main(
                 p.storePrevIter();
                 #include "pEqn.H"
                 corr++;
-            }
-            while ( innerResidual > innerTolerance && corr < nCorr );
+            }while(residualPressure > max(initInnerResidualPressure*relativeInnerTolerance, absoluteInnerTolerance) && corr < nCorr);
 
             #include "movingMeshContinuityErrs.H"
 

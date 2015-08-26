@@ -24,6 +24,7 @@ wmake applications/solvers/fsi/fsiFoam
 wmake applications/solvers/fsi/solidFoam
 wmake applications/solvers/fsi/fluidFoam
 
+wmake applications/utilities/writeNonOrthogonality
 wmake applications/utilities/addInitialRandomVelocity
 wmake applications/utilities/mapMesh
 wmake applications/utilities/writeSets

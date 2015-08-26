@@ -14,8 +14,8 @@ tmp<fvVectorMatrix> UEqn
     FieldField<Field,vector> B0 = UEqn().boundaryCoeffs();
 
     UEqn().relax();
-    lduMatrix::solverPerformance momentumPerformance = solve(UEqn() == -fvc::grad(p));
-    residualMomentum = momentumPerformance.initialResidual();
+    
+    UEqnPerformance = solve( UEqn() == -fvc::grad( p ) );
 
     //Reset equation to ensure relaxation parameter is not causing problems for time order
     UEqn() =

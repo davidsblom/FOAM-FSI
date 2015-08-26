@@ -84,11 +84,6 @@ int main(int argc, char *argv[])
 		//Re-initialize variables each time step
 		fsiInter.reset();
 
-        scalar relTol = 1e-2;//relative tolernace for each loop of fluid equations
-        scalar initMomentumResidual = 1;
-        scalar initPressureResidual = 1;
-        scalar initInnerResidualPressure = 1;
-
         scalar t = std::clock();
         do{
         	Info<< "Fsi iteration = " << fsiInter.iter() << endl;

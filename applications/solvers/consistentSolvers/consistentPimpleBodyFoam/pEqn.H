@@ -14,11 +14,13 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     );
 
     pEqn.setReference(pRefCell, pRefValue);
-    innerResidual = pEqn.solve().initialResidual();
+    pEqnPerformance = pEqn.solve();
 
-    if(nonOrth==0 && corr==0){
-        residualPressure = innerResidual;
-    }
+    if(nonOrth==0 && corr==0)
+        initInnerResidualPressure = pEqnPerformance.initialResidual();
+
+    if(nonOrth==0)
+        residualPressure = pEqnPerformance.initialResidual();
 
     if (nonOrth == nNonOrthCorr)
     {

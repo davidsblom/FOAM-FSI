@@ -45,6 +45,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::validOptions.insert("writeField", "");
     timeSelector::addOptions();
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -95,7 +96,12 @@ int main(int argc, char *argv[])
             #include "calculateNonOrthogonality.H"
         }
 
-        //nonOrthoFaces.write();
+        if (args.optionFound("writeField"))
+        {
+            nonOrthoFaces.write();
+        }
+
+
     }
 
     Info<< "End\n" << endl;

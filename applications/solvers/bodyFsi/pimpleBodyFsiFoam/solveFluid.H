@@ -10,7 +10,7 @@
 	}
 
 	outerLoopConverged = false;
-	label oCorr=0;
+	oCorr=0;
 	do
 	{
 		Info << "outer iteration: " << oCorr+1 << endl;
@@ -25,7 +25,7 @@
 			p.storePrevIter();
 #           include "pEqn.H"
 			corr++;
-		}while(innerResidual > innerTolerance && corr < nCorr);
+		}while(residualPressure > max(initInnerResidualPressure*relativeInnerTolerance, absoluteInnerTolerance) && corr < nCorr);
 
 		//Correct turbulence
 		turbulence->correct();

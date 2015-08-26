@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
                 p.storePrevIter();
 #               include "pEqn.H"
                 corr++;
-            }while(innerResidual > innerTolerance && corr < nCorr);
+            }while(residualPressure > max(initInnerResidualPressure*relativeInnerTolerance, absoluteInnerTolerance) && corr < nCorr);
 
 #           include "movingMeshContinuityErrs.H"
 
