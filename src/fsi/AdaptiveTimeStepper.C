@@ -140,8 +140,6 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
     Info << ", current time step = " << computedTimeStep;
     Info << ", new time step = " << newTimeStep << endl;
 
-    assert( newTimeStep > 0 );
-
     return accepted;
 }
 
