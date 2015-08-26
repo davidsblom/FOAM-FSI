@@ -43,13 +43,13 @@ using std::list;
 void setConvergenceMeasures(
     YAML::Node & configMeasures,
     std::shared_ptr<list<std::shared_ptr<ConvergenceMeasure> > > & convergenceMeasures
-);
+    );
 
 std::shared_ptr<rbf::RBFInterpolation> createRBFInterpolator(
     std::string interpolationFunction,
     scalar radius,
     bool cpu
-);
+    );
 
 void setConvergenceMeasures(
     YAML::Node & configMeasures,

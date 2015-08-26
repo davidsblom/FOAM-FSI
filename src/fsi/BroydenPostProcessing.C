@@ -31,6 +31,8 @@ BroydenPostProcessing::~BroydenPostProcessing()
 
 void BroydenPostProcessing::finalizeTimeStep()
 {
+    assert( sols.size() == 0 );
+
     PostProcessing::finalizeTimeStep();
 
     Info << "Broyden post processing: rebuild Jacobian with information from " << nbReuse << " previous time steps" << endl;
@@ -51,10 +53,6 @@ void BroydenPostProcessing::finalizeTimeStep()
             nbCols += solsTimeList.at( i ).at( j ).size() - 1;
 
     J = -fsi::matrix::Identity( J.rows(), J.cols() );
-
-    int nbColsCurrentTimeStep = std::max( static_cast<int>(sols.size() - 1), 0 );
-
-    assert( nbColsCurrentTimeStep == 0 );
 
     int colIndex = 0;
 
@@ -103,24 +101,6 @@ void BroydenPostProcessing::finalizeTimeStep()
             // Sherman–Morrison formula
             J += (dx - J * dR) / (dx.transpose() * J * dR) * (dx.transpose() * J);
         }
-    }
-
-    // Include information from previous iterations
-
-    for ( int i = 0; i < nbColsCurrentTimeStep; i++ )
-    {
-        assert( sols.size() >= 2 );
-
-        colIndex++;
-
-        fsi::vector dx = sols.at( i + 1 ) - sols.at( i );
-        fsi::vector dR = residuals.at( i + 1 ) - residuals.at( i );
-
-        if ( dx.norm() < singularityLimit )
-            continue;
-
-        // Sherman–Morrison formula
-        J += (dx - J * dR) / (dx.transpose() * J * dR) * (dx.transpose() * J);
     }
 
     assert( colIndex == nbCols );
@@ -260,4 +240,10 @@ void BroydenPostProcessing::performPostProcessing(
         assert( sols.at( 0 ).rows() == residuals.at( 0 ).rows() );
         assert( fsi->iter <= maxIter );
     }
+
+    // Do not save the iteration vectors since the scheme did not converge
+    // A large number of those vectors do not contain any information which
+    // can speedup subsequent optimizations
+    bool keepIterations = false;
+    iterationsConverged( keepIterations );
 }
