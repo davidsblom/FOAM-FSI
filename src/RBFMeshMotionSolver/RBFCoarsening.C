@@ -566,7 +566,6 @@ namespace rbf
             {
                 t = std::clock() - t;
                 runTimeNN += static_cast<float>(t) / CLOCKS_PER_SEC;
-                t = std::clock();
                 Info << "RBFCoarsening::correctSurface::debug 1. nearest neighbour selection = " << runTimeNN << " s" << endl;
             }
         }
@@ -594,7 +593,6 @@ namespace rbf
         {
             t = std::clock() - t;
             runTimeCorr += static_cast<float>(t) / CLOCKS_PER_SEC;
-            t = std::clock();
             Info << "RBFCoarsening::correctSurface::debug 2. correction evaluation = " << runTimeCorr << " s" << endl;
         }
     }

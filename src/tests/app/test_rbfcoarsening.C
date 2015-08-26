@@ -48,9 +48,6 @@ protected:
         if ( rbfFunctionId == 4 )
             rbfFunction = std::shared_ptr<RBFFunctionInterface>( new TPSFunction() );
 
-        else
-            assert( false );
-
         bool polynomialTerm = false;
         bool cpu = std::tr1::get<5>( GetParam() );
         std::shared_ptr<RBFInterpolation> rbfInterpolator( new RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
