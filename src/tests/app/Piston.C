@@ -330,3 +330,17 @@ void Piston::setNumberOfImplicitStages( int k )
     for ( int i = 0; i < k + 1; i++ )
         solStages.push_back( sol );
 }
+
+void Piston::getVariablesInfo(
+    std::deque<int> & dof,
+    std::deque<bool> & enabled,
+    std::deque<std::string> & names
+    )
+{
+    dof.push_back( 1 );
+    dof.push_back( 1 );
+    enabled.push_back( true );
+    enabled.push_back( true );
+    names.push_back( "qdot" );
+    names.push_back( "q" );
+}

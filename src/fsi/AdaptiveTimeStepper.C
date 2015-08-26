@@ -84,6 +84,7 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
 {
     assert( endTime > 0 );
     assert( k > 0 );
+    assert( errorEstimate > 0 );
 
     if ( not enabled )
     {
