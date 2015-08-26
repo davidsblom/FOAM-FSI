@@ -24,6 +24,7 @@ scalar initInnerResidualPressure = 1;//first pressure residual of outer correcto
 scalar residualPressure = 1; // residual initialization for pressure outer correctors
 scalar initMomentumResidual = 1;// residual initialization for momentum
 scalar initPressureResidual = 1;// residual initialization for pressure outer correctors
+label oCorr = 0;
 
 lduMatrix::solverPerformance UEqnPerformance;
 lduMatrix::solverPerformance pEqnPerformance;

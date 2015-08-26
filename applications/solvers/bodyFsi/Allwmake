@@ -2,6 +2,5 @@
 
 wmake bodyMotionFoam
 wmake moveBodyFoam
-wmake pimpleBodyFoam
 wmake pimpleBodyFsiFoam
 wmake pimpleBodyFsiTolFoam
