@@ -24,7 +24,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class MultiLevelSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<int, int, int, int, bool, int, int, int> >
+class MultiLevelSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<int, int, int, int, bool, int, int> >
 {
 protected:
 
@@ -69,7 +69,6 @@ protected:
         bool convergenceMeasureTraction = std::tr1::get<4>( GetParam() );
         int spaceMappingAlgorithm = std::tr1::get<5>( GetParam() );
         int reuseInformationStartingFromTimeIndex = std::tr1::get<6>( GetParam() );
-        int couplingScheme = std::tr1::get<7>( GetParam() );
         bool coarsening = false;
         bool liveSelection = false;
 
@@ -144,11 +143,7 @@ protected:
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
-        if ( couplingScheme == 0 )
-            postProcessing = shared_ptr<AndersonPostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
-
-        if ( couplingScheme == 1 )
-            postProcessing = shared_ptr<BroydenPostProcessing> ( new BroydenPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex ) );
+        postProcessing = shared_ptr<AndersonPostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
 
         shared_ptr<ImplicitMultiLevelFsiSolver> coarseModel( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
 
@@ -310,7 +305,7 @@ protected:
     shared_ptr<MultiLevelSpaceMappingSolver> solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelSpaceMappingSolverParametrizedTest, ::testing::Combine( Values( 0, 2 ), Values( 0, 2 ), Values( 3 ), Values( 20, 40 ), Bool(), Values( 0, 1, 2 ), Values( 0, 5 ), Values( 0, 1 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelSpaceMappingSolverParametrizedTest, ::testing::Combine( Values( 0, 2 ), Values( 0, 2 ), Values( 3 ), Values( 20, 40 ), Bool(), Values( 0, 1, 2 ), Values( 0, 5 ) ) );
 
 TEST_P( MultiLevelSpaceMappingSolverParametrizedTest, run )
 {
