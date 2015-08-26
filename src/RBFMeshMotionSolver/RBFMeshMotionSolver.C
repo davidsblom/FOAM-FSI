@@ -326,6 +326,8 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     double ratioRadiusError = 10.0;
     double minCorrectionRadius = -1.0;
     double surfaceCorrectionRadius = -1.0;
+    double firstCellHeight = -1.0;
+    double maxAspectRatio = -1.0;
     bool cleanReselection = true;
     if ( livePointSelection )
     {
@@ -339,8 +341,8 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
             setSurfaceCorrectionFunction(surfaceCorrectionFunction, surfaceCorrectionFunctionName);
             ratioRadiusError = subDict( "coarsening" ).lookupOrDefault( "ratioRadiusError", 10.0 );
 
-            scalar firstCellHeight = subDict( "coarsening" ).lookupOrDefault( "firstCellHeight", -1.0 );
-            scalar maxAspectRatio = subDict( "coarsening" ).lookupOrDefault( "maxAspectRatio", -1.0 );
+            firstCellHeight = subDict( "coarsening" ).lookupOrDefault( "firstCellHeight", -1.0 );
+            maxAspectRatio = subDict( "coarsening" ).lookupOrDefault( "maxAspectRatio", -1.0 );
             if ( firstCellHeight < SMALL )
             {
                 firstCellHeight = getMaxWallDistance();
@@ -383,7 +385,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         else
         {
             Info << "           surface correction ratioRadiusError = " << ratioRadiusError << endl;
-            Info << "           surface correction minCorrectionRadius = " << minCorrectionRadius << endl;
+            Info << "           surface correction minCorrectionRadius = " << minCorrectionRadius << " ( = {" <<  maxAspectRatio << " ^ " << 1.0/surfaceCorrectionFunction->correctionPower() << "} * " << firstCellHeight <<" ) " << endl;
         }
     }
 }

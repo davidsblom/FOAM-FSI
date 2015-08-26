@@ -17,7 +17,6 @@ wclean applications/solvers/fsi/fsiFluidFoam
 wclean applications/solvers/fsi/fsiSolidFoam
 wclean src/tests/app
 wclean src/tests/tubeflow
-rmdepall
 rm -rf src/thirdParty/gtest*
 rm -rf src/thirdParty/yaml-cpp*
 rm -rf src/thirdParty/boost*
