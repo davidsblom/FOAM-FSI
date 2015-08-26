@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
             #include "calculateNonOrthogonality.H"
         }
 
-        nonOrthoFaces.write();
+        //nonOrthoFaces.write();
     }
 
     Info<< "End\n" << endl;
