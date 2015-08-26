@@ -58,7 +58,6 @@ protected:
         scalar beta = 1;
         int coarseningMinPoints = 5;
         int coarseningMaxPoints = 2000;
-        int order = 2;
         bool parallel = false;
 
         // Parametrized settings
@@ -207,7 +206,10 @@ protected:
             spaceMapping = shared_ptr<SpaceMapping>( new ManifoldMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
 
         if ( spaceMappingAlgorithm == 1 )
+        {
+            int order = 2;
             spaceMapping = shared_ptr<SpaceMapping>( new OutputSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
+        }
 
         if ( spaceMappingAlgorithm == 2 )
             spaceMapping = shared_ptr<SpaceMapping>( new AggressiveSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );

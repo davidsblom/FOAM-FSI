@@ -272,9 +272,7 @@ TEST_P( SDCEstimateOrderTest, order )
 
 TEST( CosTest, SDC )
 {
-    std::string rule = "gauss-radau";
-
-    rule = "gauss-lobatto";
+    std::string rule = "gauss-lobatto";
 
     // rule = "uniform";
     // rule = "clenshaw-curtis";
