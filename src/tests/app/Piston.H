@@ -96,19 +96,9 @@ public:
         fsi::vector & f
         );
 
-    virtual void setDeltaT( scalar dt )
-    {
-        this->dt = dt;
-    }
-
     virtual void setNumberOfImplicitStages( int k );
 
     virtual void nextTimeStep();
-
-    virtual int getNbCells()
-    {
-        return 2;
-    }
 
     virtual scalar getScalingFactor()
     {
