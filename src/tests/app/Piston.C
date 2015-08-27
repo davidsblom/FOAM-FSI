@@ -146,14 +146,6 @@ scalar Piston::getTimeStep()
     return dt;
 }
 
-bool Piston::isRunning()
-{
-    if ( std::abs( t - endTime ) < 1.0e-13 )
-        return false;
-
-    return t <= endTime;
-}
-
 void Piston::run()
 {
     fsi::vector q( nbTimeSteps + 1 ), qdot( nbTimeSteps + 1 ), qold( 2 ), f( 2 ), rhs( 2 ), result( 2 );

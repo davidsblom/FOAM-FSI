@@ -71,8 +71,6 @@ public:
 
     virtual void initTimeStep(){}
 
-    virtual bool isRunning();
-
     virtual void implicitSolve(
         bool corrector,
         const int k,
