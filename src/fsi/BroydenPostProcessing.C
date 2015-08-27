@@ -35,6 +35,8 @@ void BroydenPostProcessing::finalizeTimeStep()
 
     PostProcessing::finalizeTimeStep();
 
+    assert( residualsList.size() == 0 );
+
     Info << "Broyden post processing: rebuild Jacobian with information from " << nbReuse << " previous time steps" << endl;
 
     // Rebuild the Jacobian at the end of each time step
@@ -78,28 +80,6 @@ void BroydenPostProcessing::finalizeTimeStep()
                 // Sherman–Morrison formula
                 J += (dx - J * dR) / (dx.transpose() * J * dR) * (dx.transpose() * J);
             }
-        }
-    }
-
-    // Include information from previous optimization solves
-
-    for ( unsigned i = residualsList.size(); i-- > 0; )
-    {
-        for ( unsigned j = residualsList.at( i ).size() - 1; j-- > 0; )
-        {
-            assert( residualsList.at( i ).size() >= 2 );
-            assert( residualsList.at( i ).size() == solsList.at( i ).size() );
-
-            colIndex++;
-
-            fsi::vector dx = solsList.at( i ).at( j + 1 ) - solsList.at( i ).at( j );
-            fsi::vector dR = residualsList.at( i ).at( j + 1 ) - residualsList.at( i ).at( j );
-
-            if ( dx.norm() < singularityLimit )
-                continue;
-
-            // Sherman–Morrison formula
-            J += (dx - J * dR) / (dx.transpose() * J * dR) * (dx.transpose() * J);
         }
     }
 
