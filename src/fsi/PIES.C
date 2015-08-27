@@ -114,7 +114,7 @@ namespace sdc
 
         longDouble r = rho;
         longDouble dphi = longDouble( 0.5 ) / (N_disk - 1);
-        vector phi( N_disk );
+        vector50 phi( N_disk );
         phi.setZero();
 
         for ( int i = 0; i < N_disk; i++ )
@@ -123,7 +123,7 @@ namespace sdc
         phi *= pi;
 
         // Convert the polar coordinates r and phi to complex numbers
-        vectorc gamma( N );
+        vector50c gamma( N );
         gamma.setZero();
 
         for ( int i = 0; i < phi.rows(); i++ )
@@ -147,23 +147,23 @@ namespace sdc
 
         // Discretize the time interval
         longDouble dt = tinterval / (M - 1);
-        vector t( M );
+        vector50 t( M );
         t.setZero();
 
         for ( int i = 0; i < t.rows(); i++ )
             t( i ) = tstart + dt * i;
 
         // Compute the matrix A
-        matrixc A( M, N );
+        matrix50c A( M, N );
 
         for ( int i = 0; i < A.rows(); i++ )
             for ( int j = 0; j < A.cols(); j++ )
                 A( i, j ) = sdc::exp( gamma( j ) * t( i ) );
 
         // Matrix compression by QR decomposition with full pivoting
-        Eigen::FullPivHouseholderQR<matrixc> qr = A.fullPivHouseholderQr();
+        Eigen::FullPivHouseholderQR<matrix50c> qr = A.fullPivHouseholderQr();
 
-        matrixc R = qr.matrixQR().triangularView<Eigen::Upper>();
+        matrix50c R = qr.matrixQR().triangularView<Eigen::Upper>();
 
         int k = 0;
 
@@ -194,7 +194,7 @@ namespace sdc
 
         assert( nbNodes == k * 2 - 2 );
 
-        vectorc gamma_k( nbNodes );
+        vector50c gamma_k( nbNodes );
 
         index = 0;
         int zeroIndex = -1;
@@ -242,7 +242,7 @@ namespace sdc
         // a L-stable time integration scheme
         A( nbNodes, 0 ) = 1;
 
-        matrixc b( nbNodes + 1, M );
+        matrix50c b( nbNodes + 1, M );
         b.setZero();
 
         for ( int i = 0; i < nbNodes; i++ )
@@ -260,9 +260,9 @@ namespace sdc
             }
         }
 
-        matrixc smatOmega = A.fullPivHouseholderQr().solve( b );
-        matrix smatReal = smatOmega.real().transpose();
-        matrix smatWeights = smatReal.bottomLeftCorner( smatReal.rows() - 1, smatReal.cols() );
+        matrix50c smatOmega = A.fullPivHouseholderQr().solve( b );
+        matrix50 smatReal = smatOmega.real().transpose();
+        matrix50 smatWeights = smatReal.bottomLeftCorner( smatReal.rows() - 1, smatReal.cols() );
         smatWeights /= tinterval;
 
         assert( (A * smatOmega - b).norm() < 1.0e-1 * delta );
@@ -286,9 +286,9 @@ namespace sdc
             }
         }
 
-        matrixc qmatOmega = A.fullPivHouseholderQr().solve( b );
-        matrix qmatReal = qmatOmega.real().transpose();
-        matrix qmatWeights = qmatReal.bottomLeftCorner( qmatReal.rows() - 1, qmatReal.cols() );
+        matrix50c qmatOmega = A.fullPivHouseholderQr().solve( b );
+        matrix50 qmatReal = qmatOmega.real().transpose();
+        matrix50 qmatWeights = qmatReal.bottomLeftCorner( qmatReal.rows() - 1, qmatReal.cols() );
         qmatWeights /= tinterval;
 
         assert( (A * qmatOmega - b).norm() < 1.0e-1 * delta );

@@ -21,10 +21,10 @@ namespace sdc
     namespace mp = boost::multiprecision;
 
     typedef mp::cpp_dec_float_50 longDouble;
-    typedef Eigen::Matrix<std::complex<longDouble>, Eigen::Dynamic, Eigen::Dynamic> matrixc;
-    typedef Eigen::Matrix<longDouble, Eigen::Dynamic, Eigen::Dynamic> matrix;
-    typedef Eigen::Matrix<std::complex<longDouble>, Eigen::Dynamic, 1> vectorc;
-    typedef Eigen::Matrix<longDouble, Eigen::Dynamic, 1> vector;
+    typedef Eigen::Matrix<std::complex<longDouble>, Eigen::Dynamic, Eigen::Dynamic> matrix50c;
+    typedef Eigen::Matrix<longDouble, Eigen::Dynamic, Eigen::Dynamic> matrix50;
+    typedef Eigen::Matrix<std::complex<longDouble>, Eigen::Dynamic, 1> vector50c;
+    typedef Eigen::Matrix<longDouble, Eigen::Dynamic, 1> vector50;
 
     template<typename T>
     inline std::complex<T>
