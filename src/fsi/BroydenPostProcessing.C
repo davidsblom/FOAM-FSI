@@ -36,6 +36,7 @@ void BroydenPostProcessing::finalizeTimeStep()
     PostProcessing::finalizeTimeStep();
 
     assert( residualsList.size() == 0 );
+    assert( solsList.size() == 0 );
 
     Info << "Broyden post processing: rebuild Jacobian with information from " << nbReuse << " previous time steps" << endl;
 
@@ -44,10 +45,6 @@ void BroydenPostProcessing::finalizeTimeStep()
     // Determine the number of columns of the V and W matrices
     int nbCols = residuals.size() - 1;
     nbCols = std::max( nbCols, 0 );
-
-    // Include information from previous optimization solves
-    for ( unsigned i = 0; i < solsList.size(); i++ )
-        nbCols += solsList.at( i ).size() - 1;
 
     // Include information from previous time steps
     for ( unsigned i = 0; i < solsTimeList.size(); i++ )
