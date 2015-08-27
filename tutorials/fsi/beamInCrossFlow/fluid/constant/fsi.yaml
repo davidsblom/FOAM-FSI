@@ -1,6 +1,7 @@
 fluid-solver: pimple-solver
 solid-solver: segregated-solver
 parallel-coupling: false
+first-participant: fluid-solver
 interpolation:
   radial-basis-function:
     function: thin-plate-spline

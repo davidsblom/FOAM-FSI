@@ -9,6 +9,17 @@ solid-solver: segregated-solver
 # Solve the fluid and solid solver in a staggered/serial or parallel manner.
 parallel-coupling: false
 
+# In case the fluid and solid solvers are not coupled in a parallel manner,
+# the first-participant is the solver in which order the fluid and solid
+# solver are executed.
+# 1. fluid-solver: the fluid solver is executed first, thereafter the solid
+# solver. The convergence measure for the FSI iterations is based on the 
+# displacement of the FSI interface.
+# 2. solid-solver: the solid solver is executed first, thereafter the fluid
+# solver. The convergence measure for the FSI iterations is based on the
+# traction acting on the FSI interface.
+first-participant: fluid-solver
+
 # Settings for interpolation between fluid and solid interfaces. A
 # consistent approach is applied always.
 interpolation:

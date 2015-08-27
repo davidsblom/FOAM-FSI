@@ -125,6 +125,9 @@ void SolidSolver::initTimeStep()
 {
     assert( !init );
 
+    timeIndex++;
+    t = runTime->time().value();
+
     readSolidMechanicsControls();
 
     init = true;

@@ -351,7 +351,7 @@ void FluidSolver::initTimeStep()
     assert( !init );
 
     timeIndex++;
-    t = timeIndex * runTime->deltaT().value();
+    t = runTime->time().value();
 
     Info << "\nTime = " << runTime->value() << endl;
 

@@ -504,6 +504,14 @@ int main(
         std::string algorithm = configPostProcessing["algorithm"].as<std::string>();
         scalar beta = 1;
         bool updateJacobian = false;
+        std::string firstParticipant = "fluid-solver";
+
+        if ( not parallel )
+        {
+            assert( config["first-participant"] );
+            firstParticipant = config["first-participant"].as<std::string>();
+            assert( firstParticipant == "fluid-solver" || firstParticipant == "solid-solver" );
+        }
 
         assert( algorithm == "QN" or algorithm == "Aitken" or algorithm == "Anderson" );
 
@@ -571,7 +579,11 @@ int main(
         rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false ) );
 
-        multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+        if ( firstParticipant == "fluid-solver" )
+            multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+
+        if ( firstParticipant == "solid-solver" )
+            multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 1 ) );
 
         rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false ) );
@@ -579,9 +591,17 @@ int main(
         rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false ) );
 
-        multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
+        if ( firstParticipant == "fluid-solver" )
+            multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
 
-        multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
+        if ( firstParticipant == "solid-solver" )
+            multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 1 ) );
+
+        if ( firstParticipant == "fluid-solver" )
+            multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
+
+        if ( firstParticipant == "solid-solver" )
+            multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelSolidSolver, multiLevelFluidSolver, convergenceMeasures, parallel, extrapolation ) );
 
         if ( algorithm == "Aitken" )
             postProcessing = std::shared_ptr<PostProcessing> ( new AitkenPostProcessing( multiLevelFsiSolver, initialRelaxation, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex ) );
