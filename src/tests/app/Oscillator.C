@@ -90,16 +90,6 @@ void Oscillator::nextTimeStep()
 void Oscillator::initTimeStep()
 {}
 
-bool Oscillator::isRunning()
-{
-    scalar endTime = getEndTime();
-
-    if ( std::abs( t - endTime ) < 1.0e-13 )
-        return false;
-
-    return t <= endTime;
-}
-
 void Oscillator::setNumberOfImplicitStages( int k )
 {}
 

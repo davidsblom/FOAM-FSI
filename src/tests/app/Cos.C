@@ -89,14 +89,6 @@ void Cos::nextTimeStep()
 void Cos::initTimeStep()
 {}
 
-bool Cos::isRunning()
-{
-    if ( std::abs( t - endTime ) < 1.0e-13 )
-        return false;
-
-    return t <= endTime;
-}
-
 void Cos::setNumberOfImplicitStages( int k )
 {}
 

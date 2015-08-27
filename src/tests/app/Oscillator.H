@@ -55,8 +55,6 @@ public:
 
     virtual void initTimeStep();
 
-    virtual bool isRunning();
-
     virtual void setNumberOfImplicitStages( int k );
 
     virtual void implicitSolve(
