@@ -20,7 +20,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class MLIQNILSSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int> >
+class MLIQNILSSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int, bool> >
 {
 protected:
 
@@ -60,6 +60,7 @@ protected:
         int extrapolation = std::tr1::get<2>( GetParam() );
         int minIter = std::tr1::get<3>( GetParam() );
         int couplingGridSize = std::tr1::get<4>( GetParam() );
+        bool synchronization = std::tr1::get<5>( GetParam() );
 
         ASSERT_NEAR( tau, 0.01, 1.0e-13 );
         ASSERT_NEAR( kappa, 10, 1.0e-13 );
@@ -193,7 +194,7 @@ protected:
         models->push_back( fineModel );
 
         // Create manifold mapping solver
-        solver = new MLIQNILSSolver( models, true );
+        solver = new MLIQNILSSolver( models, synchronization );
 
         // Monolithic solver
         monolithicSolver = new MonolithicFsiSolver( a0, u0, p0, dt, cmk, couplingGridSize, L, T, rho );
@@ -215,7 +216,7 @@ protected:
     MLIQNILSSolver * solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, MLIQNILSSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 2 ), Values( 0 ), Values( 3 ), Values( 10, 20 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, MLIQNILSSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 2 ), Values( 0 ), Values( 3 ), Values( 10, 20 ), Bool() ) );
 
 TEST_P( MLIQNILSSolverParametrizedTest, object )
 {
