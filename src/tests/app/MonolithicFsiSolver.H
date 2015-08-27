@@ -51,7 +51,7 @@ public:
 
         void initTimeStep();
 
-        bool isRunning();
+        bool isRunning() const;
 
         void run();
 

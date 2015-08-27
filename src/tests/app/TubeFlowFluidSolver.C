@@ -542,37 +542,7 @@ namespace tubeflow
 
                 // Fall back to Levenberg-Marquardt algorithm when exact Newton method is not converging
                 if ( alpha < 0.01 )
-                {
                     throw std::string( "Newton-Raphson method is not converging. Unable to solve fluid problem." );
-
-                    std::cout << "Newton-Raphson method is not converging. Fall back to Levenberg-Marquardt algorithm." << std::endl;
-
-                    x.head( N ) = un;
-                    x.tail( N ) = this->pn;
-                    fsi::vector x0 = x;
-
-                    // Optimize the residual function
-                    lmderFunctor functor( this, &a, &un, &pn, &an );
-                    Eigen::LevenbergMarquardt<lmderFunctor> lm( functor );
-
-                    // Optimization parameters
-                    lm.parameters.maxfev = 5000;
-                    lm.parameters.xtol = 1.0e-15;
-                    lm.parameters.ftol = 1.0e-15;
-
-                    // Minimize the residual function with exact jacobian
-                    int info = lm.minimize( x );
-
-                    // std::cout << "Result Levenberg-Marquardt algorithm = " << info << std::endl;
-
-                    // 2: RelativeErrorTooSmall
-                    assert( info == 1 || info == 2 || info == 3 );
-
-                    dx = x - x0;
-                    x = x0;
-                    alpha = 1.0;
-                    break;
-                }
             }
 
             x += alpha * dx;

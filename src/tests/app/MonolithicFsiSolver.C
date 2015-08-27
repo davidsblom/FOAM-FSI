@@ -187,7 +187,7 @@ namespace tubeflow
         init = true;
     }
 
-    bool MonolithicFsiSolver::isRunning()
+    bool MonolithicFsiSolver::isRunning() const
     {
         return t < T;
     }
