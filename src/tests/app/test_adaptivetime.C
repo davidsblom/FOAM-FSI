@@ -142,7 +142,7 @@ protected:
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, AdaptiveTimeSteppingSDCTest, ::testing::Combine( Values( 1.0e-2, 1.0e-4, 1.0e-6, 1.0e-8 ), Values( 5, 7, 9, 11, 13 ), Values( "h211b", "pi42" ), Values( "clenshaw-curtis", "gauss-radau", "gauss-lobatto", "uniform", "uniform-right-sided" ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, AdaptiveTimeSteppingSDCTest, ::testing::Combine( Values( 1.0e-2, 1.0e-4, 1.0e-6, 1.0e-8 ), Values( 5, 7, 9, 11, 13 ), Values( "h211b", "pi42" ), Values( "clenshaw-curtis", "gauss-radau", "gauss-lobatto" ) ) );
 
 TEST_P( AdaptiveTimeSteppingSDCTest, object )
 {
