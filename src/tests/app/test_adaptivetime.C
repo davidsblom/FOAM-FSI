@@ -101,7 +101,7 @@ TEST_P( AdaptiveTimeSteppingESDIRKTest, run )
         ASSERT_LT( error, 1000 * tol );
 }
 
-class AdaptiveTimeSteppingSDCTest : public TestWithParam< std::tr1::tuple<scalar, int, std::string> >
+class AdaptiveTimeSteppingSDCTest : public TestWithParam< std::tr1::tuple<scalar, int, std::string, std::string> >
 {
 protected:
 
@@ -114,7 +114,7 @@ protected:
         scalar tol = std::tr1::get<0>( GetParam() );
         int nbNodes = std::tr1::get<1>( GetParam() );
         std::string filter = std::tr1::get<2>( GetParam() );
-        std::string rule = "clenshaw-curtis";
+        std::string rule = std::tr1::get<3>( GetParam() );
 
         endTime = 100;
         dt = endTime / nbTimeSteps;
@@ -142,7 +142,7 @@ protected:
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, AdaptiveTimeSteppingSDCTest, ::testing::Combine( Values( 1.0e-2, 1.0e-4, 1.0e-6, 1.0e-8 ), Values( 5, 7, 9 ), Values( "h211b", "pi42" ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, AdaptiveTimeSteppingSDCTest, ::testing::Combine( Values( 1.0e-2, 1.0e-4, 1.0e-6, 1.0e-8 ), Values( 5, 7, 9, 11, 13 ), Values( "h211b", "pi42" ), Values( "clenshaw-curtis", "gauss-radau", "gauss-lobatto", "uniform", "uniform-right-sided" ) ) );
 
 TEST_P( AdaptiveTimeSteppingSDCTest, object )
 {
@@ -169,5 +169,5 @@ TEST_P( AdaptiveTimeSteppingSDCTest, run )
 
     scalar tol = std::tr1::get<0>( GetParam() );
 
-    ASSERT_LT( error, tol );
+    ASSERT_LT( error, 100 * tol );
 }

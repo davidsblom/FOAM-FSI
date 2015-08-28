@@ -115,6 +115,8 @@ namespace sdc
 
         solver->setNumberOfImplicitStages( k - 1 );
 
+        assert( std::abs( nodes.tail( 1 )( 0 ) - 1 ) < 1.0e-13 );
+
         if ( adaptiveTimeStepper->isEnabled() )
         {
             refine = 2;
@@ -139,6 +141,8 @@ namespace sdc
 
             adaptiveTimeStepper->setOrderEmbeddedMethod( orderEmbedded );
             adaptiveTimeStepper->setEndTime( solver->getEndTime() );
+
+            assert( std::abs( nodesEmbedded.tail( 1 )( 0 ) - 1 ) < 1.0e-13 );
         }
     }
 
