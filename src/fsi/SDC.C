@@ -115,7 +115,7 @@ namespace sdc
 
         solver->setNumberOfImplicitStages( k - 1 );
 
-        assert( std::abs( nodes.tail( 1 )( 0 ) - 1 ) < 1.0e-13 );
+        assert( std::abs( nodes.tail( 1 ) ( 0 ) - 1 ) < 1.0e-13 );
 
         if ( adaptiveTimeStepper->isEnabled() )
         {
@@ -142,7 +142,7 @@ namespace sdc
             adaptiveTimeStepper->setOrderEmbeddedMethod( orderEmbedded );
             adaptiveTimeStepper->setEndTime( solver->getEndTime() );
 
-            assert( std::abs( nodesEmbedded.tail( 1 )( 0 ) - 1 ) < 1.0e-13 );
+            assert( std::abs( nodesEmbedded.tail( 1 ) ( 0 ) - 1 ) < 1.0e-13 );
         }
     }
 
@@ -151,6 +151,8 @@ namespace sdc
 
     void SDC::run()
     {
+        assert( solver );
+
         scalar t = solver->getStartTime();
 
         while ( std::abs( t - solver->getEndTime() ) > 1.0e-13 && t < solver->getEndTime() )
@@ -170,6 +172,7 @@ namespace sdc
         assert( qmat.cols() == smat.cols() );
         assert( qmat.rows() == k - 1 );
         assert( qmat.cols() == k );
+        assert( solver );
 
         if ( adaptiveTimeStepper->isPreviousStepAccepted() )
             solver->nextTimeStep();

@@ -106,7 +106,7 @@ protected:
 
 TEST_F( PIESRunTest, run )
 {
-    pies->run();
+    piston->run();
 
     fsi::vector solution( 2 );
     piston->getSolution( solution );
