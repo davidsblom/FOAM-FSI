@@ -234,40 +234,40 @@ TEST_P( OutputSpaceMappingSolverParametrizedTest, iterations )
     int couplingGridSize = std::tr1::get<4>( GetParam() );
     int order = std::tr1::get<5>( GetParam() );
 
-    if ( !parallel && couplingGridSize == 20 && nbReuse == 0 && extrapolation == 0 && minIter == 3 && order == 0 )
+    if ( !parallel && couplingGridSize == 20 && nbReuse == 0 && extrapolation == 2 && minIter == 3 && order == 0 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 1223 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 6686 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 874 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 4076 );
     }
 
-    if ( !parallel && couplingGridSize == 20 && nbReuse == 1 && extrapolation == 0 && minIter == 3 && order == 0 )
+    if ( !parallel && couplingGridSize == 20 && nbReuse == 1 && extrapolation == 2 && minIter == 3 && order == 0 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 1219 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 5942 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 874 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3842 );
     }
 
-    if ( !parallel && couplingGridSize == 20 && nbReuse == 4 && extrapolation == 0 && minIter == 3 && order == 0 )
+    if ( !parallel && couplingGridSize == 20 && nbReuse == 4 && extrapolation == 2 && minIter == 3 && order == 0 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 1223 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 6753 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 877 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3892 );
     }
 
-    if ( !parallel && couplingGridSize == 20 && nbReuse == 0 && extrapolation == 0 && minIter == 3 && order == 1 )
+    if ( !parallel && couplingGridSize == 20 && nbReuse == 0 && extrapolation == 2 && minIter == 3 && order == 1 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 925 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 8919 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 709 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 4746 );
     }
 
-    if ( !parallel && couplingGridSize == 20 && nbReuse == 1 && extrapolation == 0 && minIter == 3 && order == 1 )
+    if ( !parallel && couplingGridSize == 20 && nbReuse == 1 && extrapolation == 2 && minIter == 3 && order == 1 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 902 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 11232 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 654 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 5184 );
     }
 
-    if ( !parallel && couplingGridSize == 20 && nbReuse == 4 && extrapolation == 0 && minIter == 3 && order == 1 )
+    if ( !parallel && couplingGridSize == 20 && nbReuse == 4 && extrapolation == 2 && minIter == 3 && order == 1 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 820 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 9649 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 556 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 4002 );
     }
 }
 
