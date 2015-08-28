@@ -239,13 +239,16 @@ TEST_P( MLIQNILSSolverParametrizedTest, run )
     ASSERT_FALSE( solver->fineModel->fsi->fluid->isRunning() );
 
     int couplingGridSize = std::tr1::get<4>( GetParam() );
+    bool synchronization = std::tr1::get<5>( GetParam() );
 
-    if ( couplingGridSize == 10 )
+    if ( couplingGridSize == 10 && synchronization )
         ASSERT_EQ( solver->fineModel->fsi->nbIter, 100 );
 }
 
 TEST_P( MLIQNILSSolverParametrizedTest, monolithic )
 {
+    bool synchronization = std::tr1::get<5>( GetParam() );
+
     for ( int i = 0; i < 100; i++ )
     {
         solver->solveTimeStep();
@@ -266,11 +269,12 @@ TEST_P( MLIQNILSSolverParametrizedTest, monolithic )
         ASSERT_TRUE( monolithicSolver->pn.norm() > 0 );
 
         // Verify that the coarse models are synchronized with the fine model
-        for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = solver->models->begin(); it != solver->models->end(); ++it )
-        {
-            shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
-            ASSERT_NEAR( model->fsi->x.norm(), solver->fineModel->fsi->x.norm(), 1.0e-13 );
-        }
+        if ( synchronization )
+            for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = solver->models->begin(); it != solver->models->end(); ++it )
+            {
+                shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
+                ASSERT_NEAR( model->fsi->x.norm(), solver->fineModel->fsi->x.norm(), 1.0e-13 );
+            }
     }
 }
 
