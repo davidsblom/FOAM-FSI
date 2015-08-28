@@ -170,9 +170,6 @@ struct Functor
         m_values( values )
     {}
 
-    virtual ~Functor()
-    {}
-
     int inputs() const
     {
         return m_inputs;
