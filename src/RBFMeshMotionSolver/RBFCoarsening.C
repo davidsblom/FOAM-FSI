@@ -638,7 +638,7 @@ namespace rbf
                         bool fileExists = (stat (filename.c_str(), &buffer) == 0);
 
                         // ==== START Re-calculate error ==== //
-                        rbf::matrix valuesCoarse( selectedPositions.rows(), values.cols() );
+                        rbf::matrix valuesCoarse( selectedPositions.rows(), this->values.cols() );
                         rbf::matrix valuesInterpolationCoarse( positions.rows(), valuesInterpolation.cols() );
 
                         for ( int j = 0; j < selectedPositions.rows(); j++ )
@@ -711,24 +711,32 @@ namespace rbf
 
                 if( debug > 0 )
                 {
+                    if ( livePointSelectionSumValues )
+                    {
+                        if ( this->values.cols() != values.cols() )
+                            this->values = values;
+                        else
+                            this->values.array() += values.array();
+                    }
+
                     //Construct values to interpolate based on unit displacement selected points
-                    rbf::matrix valuesCoarse( selectedPositions.rows(), values.cols() );
+                    rbf::matrix valuesCoarse( selectedPositions.rows(), this->values.cols() );
                     rbf::matrix valuesInterpolationCoarse( positions.rows(), valuesInterpolation.cols() );
                     rbf::vector errorList( positions.rows() );
 
                     for ( int j = 0; j < selectedPositions.rows(); j++ )
-                        valuesCoarse.row( j ) = values.row( selectedPositions( j ) );
+                        valuesCoarse.row( j ) = this->values.row( selectedPositions( j ) );
 
                     //This will return the displaced surface in valuesInterpolationCoarse
                     rbfCoarse->interpolate2( valuesCoarse, valuesInterpolationCoarse );
 
                     // Evaluate the error
                     for ( int j = 0; j < valuesInterpolationCoarse.rows(); j++ )
-                        errorList( j ) = ( valuesInterpolationCoarse.row( j ) - values.row( j ) ).norm();
+                        errorList( j ) = ( valuesInterpolationCoarse.row( j ) - this->values.row( j ) ).norm();
 
                     double epsilon = std::sqrt( SMALL );
-                    double error = (errorList).norm() / (values.norm() + epsilon );
-                    double errorMax = errorList.maxCoeff() / ( ( values.rowwise().norm() ).maxCoeff() + epsilon );
+                    double error = (errorList).norm() / (this->values.norm() + epsilon );
+                    double errorMax = errorList.maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() + epsilon );
 
                     Info << "RBFCoarsening::UnitDisplacement::debug 1: " << "2-norm error = " << error << ", max error = " << errorMax <<  endl;
 
@@ -764,24 +772,32 @@ namespace rbf
 
                 if( debug > 0 )
                 {
+                    if ( livePointSelectionSumValues )
+                    {
+                        if ( this->values.cols() != values.cols() )
+                            this->values = values;
+                        else
+                            this->values.array() += values.array();
+                    }
+
                     //Construct values to interpolate based on unit displacement selected points
                     rbf::matrix valuesCoarse( selectedPositions.rows(), values.cols() );
                     rbf::matrix valuesInterpolationCoarse( positions.rows(), valuesInterpolation.cols() );
                     rbf::vector errorList( positions.rows() );
 
                     for ( int j = 0; j < selectedPositions.rows(); j++ )
-                        valuesCoarse.row( j ) = values.row( selectedPositions( j ) );
+                        valuesCoarse.row( j ) = this->values.row( selectedPositions( j ) );
 
                     //This will return the displaced surface in valuesInterpolationCoarse
                     rbfCoarse->interpolate2( valuesCoarse, valuesInterpolationCoarse );
 
                     // Evaluate the error
                     for ( int j = 0; j < valuesInterpolationCoarse.rows(); j++ )
-                        errorList( j ) = ( valuesInterpolationCoarse.row( j ) - values.row( j ) ).norm();
+                        errorList( j ) = ( valuesInterpolationCoarse.row( j ) - this->values.row( j ) ).norm();
 
                     double epsilon = std::sqrt( SMALL );
-                    double error = (errorList).norm() / (values.norm() + epsilon );
-                    double errorMax = errorList.maxCoeff() / ( ( values.rowwise().norm() ).maxCoeff() + epsilon );
+                    double error = (errorList).norm() / (this->values.norm() + epsilon );
+                    double errorMax = errorList.maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() + epsilon );
 
                     Info << "RBFCoarsening::UnitDisplacement::debug 1: " << "2-norm error = " << error << ", max error = " << errorMax <<  endl;
 
