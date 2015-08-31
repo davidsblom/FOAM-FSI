@@ -22,6 +22,7 @@ ESDIRK.C
 AdaptiveTimeStepper.C
 QuadratureRules.C
 PIES.C
+SDCFsiSolver.C
 
 fluidSolvers/CoupledFluidSolver.C
 fluidSolvers/FluidSolver.C
