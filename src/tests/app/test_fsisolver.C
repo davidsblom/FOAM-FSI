@@ -13,7 +13,7 @@
 
 using namespace tubeflow;
 
-class FsiSolverTest : public::testing::Test
+class FsiSolverTest : public::testing::TestWithParam<bool>
 {
 protected:
 
@@ -38,9 +38,10 @@ protected:
         scalar tau = u0 * dt / L;
 
         // Computational settings
-        bool parallel = false;
         scalar tol = 1.0e-5;
         int extrapolationOrder = 0;
+
+        bool parallel = GetParam();
 
         ASSERT_NEAR( tau, 0.01, 1.0e-13 );
         ASSERT_NEAR( kappa, 10, 1.0e-13 );
@@ -69,12 +70,14 @@ protected:
     FsiSolver * fsi;
 };
 
-TEST_F( FsiSolverTest, object )
+INSTANTIATE_TEST_CASE_P( testParameters, FsiSolverTest, ::testing::Bool() );
+
+TEST_P( FsiSolverTest, object )
 {
     ASSERT_TRUE( true );
 }
 
-TEST_F( FsiSolverTest, initTimeStep )
+TEST_P( FsiSolverTest, initTimeStep )
 {
     ASSERT_FALSE( fsi->init );
     ASSERT_FALSE( fsi->fluid->init );
@@ -87,10 +90,24 @@ TEST_F( FsiSolverTest, initTimeStep )
     ASSERT_TRUE( fsi->solid->init );
 }
 
-TEST_F( FsiSolverTest, evaluate )
+TEST_P( FsiSolverTest, evaluate )
 {
+    bool parallel = GetParam();
+
     fsi::vector input( 5 ), output( 5 ), R( 5 );
-    input = fsi->solid->data.col( 0 );
+
+    if ( not parallel )
+        input = fsi->solid->data.col( 0 );
+
+    if ( parallel )
+    {
+        input.resize( 10 );
+        output.resize( 10 );
+        R.resize( 10 );
+        input.head( 5 ) = fsi->solid->data.col( 0 );
+        input.tail( 5 ) = fsi->fluid->data.col( 0 );
+    }
+
     output.setZero();
     R.setZero();
 
