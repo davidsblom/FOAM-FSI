@@ -14,7 +14,7 @@
 #include <deque>
 
 #include "foamFluidSolver.H"
-#include "SDCSolver.H"
+#include "SDCFsiSolverInterface.H"
 
 #include "dynamicFvMesh.H"
 #include "fvCFD.H"
@@ -24,7 +24,7 @@
 using namespace fsi;
 using std::shared_ptr;
 
-class SDCFluidSolver : public foamFluidSolver, public sdc::SDCSolver
+class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
 {
 public:
 

@@ -83,6 +83,8 @@ private:
         std::shared_ptr<SDCSolver> fluid;
         std::shared_ptr<SDCSolver> solid;
         std::shared_ptr<PostProcessing> postProcessing;
+        int dofFluid;
+        int dofSolid;
     };
 }
 

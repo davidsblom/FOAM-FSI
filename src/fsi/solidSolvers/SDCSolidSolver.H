@@ -13,12 +13,12 @@
 #include "constitutiveModel.H"
 #include "RBFCoarsening.H"
 #include "meshToMesh.H"
-#include "SDCSolver.H"
+#include "SDCFsiSolverInterface.H"
 
 using namespace fsi;
 using namespace rbf;
 
-class SDCSolidSolver : public foamSolidSolver, public sdc::SDCSolver
+class SDCSolidSolver : public foamSolidSolver, public sdc::SDCFsiSolverInterface
 {
 public:
 
