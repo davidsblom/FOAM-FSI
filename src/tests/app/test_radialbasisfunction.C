@@ -20,7 +20,7 @@ TEST( RBFinterpolationTest, oneD_small )
     int n_A = 7;
     int n_B = 6;
 
-    Eigen::VectorXd x( n_A ), y( n_A ), xnew( n_B ), ynew( n_B );
+    fsi::vector x( n_A ), y( n_A ), xnew( n_B ), ynew( n_B );
 
     // Location of original values
 
@@ -74,7 +74,7 @@ TEST( RBFinterpolationTest, oneD_smallSamePosition )
     int n_A = 7;
     int n_B = n_A;
 
-    Eigen::VectorXd x( n_A ), y( n_A ), xnew( n_B ), ynew( n_B );
+    fsi::vector x( n_A ), y( n_A ), xnew( n_B ), ynew( n_B );
 
     x << 0, 1, 2, 3, 4, 5, 6;
     xnew = x;
@@ -109,7 +109,7 @@ TEST( RBFinterpolationTest, oneD_smallDoublePositions )
     int n_A = 17;
     int n_B = 11;
 
-    Eigen::VectorXd x( n_A ), y( n_A ), xnew( n_B ), ynew( n_B );
+    fsi::vector x( n_A ), y( n_A ), xnew( n_B ), ynew( n_B );
 
     // Location of original values
 
@@ -220,7 +220,7 @@ TEST( RBFinterpolationTest, oneD_large )
     int n_A = 7;
     int n_B = 11;
 
-    Eigen::VectorXd x( n_A ), y( n_A ), xnew( n_B ), ynew( n_B );
+    fsi::vector x( n_A ), y( n_A ), xnew( n_B ), ynew( n_B );
 
     // Location of original values
 
@@ -281,8 +281,8 @@ TEST( RBFinterpolationTest, oneD_sin )
     RBF::RBFinterpolation rbf = RBF::RBFinterpolation();
 
     int dim = 1;
-    Eigen::VectorXd x( 9 ), y( 9 ), xnew( 101 ), ynew( 101 );
-    Eigen::VectorXd fexpected( 101 );
+    fsi::vector x( 9 ), y( 9 ), xnew( 101 ), ynew( 101 );
+    fsi::vector fexpected( 101 );
 
     x << 0., 1.25, 2.5, 3.75, 5., 6.25, 7.5, 8.75, 10.;
     y << 0., 0.9489846193555862, 0.5984721441039564,

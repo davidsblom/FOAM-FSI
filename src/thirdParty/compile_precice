@@ -4,8 +4,8 @@ set -e
 
 # Define which versions of the different packages are used
 
-export BOOST_VERSION=1_53_0
-export BOOST_VERSION_DOT=1.53.0
+export BOOST_VERSION=1_55_0
+export BOOST_VERSION_DOT=1.55.0
 
 # Download Boost
 if [ ! -d "boost_${BOOST_VERSION}" ]; then
@@ -25,7 +25,21 @@ export CPLUS_INCLUDE_PATH=`pwd`/eigen
 # Build preCICE
 cd precice
 if [ "$(uname)" == "Darwin" ]; then
+    scons -j 4 build=release python=off petsc=off mpi=off compiler=g++-mp-4.9 solib
     scons -j 4 build=release python=off petsc=off mpi=off compiler=g++-mp-4.9
 else
     scons -j 4 build=release python=off petsc=off compiler=mpicxx
+    scons -j 4 build=release python=off petsc=off compiler=mpicxx solib
 fi
+
+mkdir -p ${FOAM_USER_LIBBIN}
+mkdir -p ${FOAM_USER_APPBIN}
+
+SHARED_LIBRARY=libprecice.so
+
+if [ "$(uname)" == "Darwin" ]; then
+    SHARED_LIBRARY=libprecice.dylib
+fi
+
+cp build/last/${SHARED_LIBRARY} ${FOAM_USER_LIBBIN}/
+cp build/last/binprecice ${FOAM_USER_APPBIN}/

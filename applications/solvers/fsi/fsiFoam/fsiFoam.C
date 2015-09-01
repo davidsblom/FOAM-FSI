@@ -43,6 +43,17 @@ using std::list;
 void setConvergenceMeasures(
     YAML::Node & configMeasures,
     std::shared_ptr<list<std::shared_ptr<ConvergenceMeasure> > > & convergenceMeasures
+    );
+
+std::shared_ptr<rbf::RBFInterpolation> createRBFInterpolator(
+    std::string interpolationFunction,
+    scalar radius,
+    bool cpu
+    );
+
+void setConvergenceMeasures(
+    YAML::Node & configMeasures,
+    std::shared_ptr<list<std::shared_ptr<ConvergenceMeasure> > > & convergenceMeasures
     )
 {
     for ( unsigned i = 0; i < configMeasures.size(); i++ )
@@ -54,7 +65,7 @@ void setConvergenceMeasures(
             assert( measure["relative-convergence-measure"]["limit"] );
             assert( measure["relative-convergence-measure"]["data-id"] );
 
-            double tol = measure["relative-convergence-measure"]["limit"].as<double>();
+            scalar tol = measure["relative-convergence-measure"]["limit"].as<scalar>();
             int dataId = measure["relative-convergence-measure"]["data-id"].as<int>();
             convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( dataId, tol ) ) );
         }
@@ -74,7 +85,7 @@ void setConvergenceMeasures(
 
 std::shared_ptr<rbf::RBFInterpolation> createRBFInterpolator(
     std::string interpolationFunction,
-    double radius,
+    scalar radius,
     bool cpu
     )
 {
@@ -142,12 +153,12 @@ int main(
     assert( configInterpolation["radial-basis-function"]["function"] );
     bool coarsening = configInterpolation["coarsening"]["enabled"].as<bool>();
     std::string interpolationFunction = configInterpolation["radial-basis-function"]["function"].as<std::string>();
-    double coarseningTol = 1.0e-5;
+    scalar coarseningTol = 1.0e-5;
     int coarseningMinPoints = 1;
     int coarseningMaxPoints = 10;
-    double radius = 1;
+    scalar radius = 1;
     bool livePointSelection = false;
-    double tolLivePointSelection = 1.0e-5;
+    scalar tolLivePointSelection = 1.0e-5;
     bool cpu = false;
 
     assert( interpolationFunction == "thin-plate-spline" || interpolationFunction == "wendland-c0" || interpolationFunction == "wendland-c2" || interpolationFunction == "wendland-c4" || interpolationFunction == "wendland-c6" );
@@ -160,7 +171,7 @@ int main(
     if ( interpolationFunction != "thin-plate-spline" )
     {
         assert( configInterpolation["radial-basis-function"]["radius"] );
-        radius = configInterpolation["radial-basis-function"]["radius"].as<double>();
+        radius = configInterpolation["radial-basis-function"]["radius"].as<scalar>();
     }
 
     if ( coarsening )
@@ -170,7 +181,7 @@ int main(
         assert( configInterpolation["coarsening"]["max-points"] );
         assert( configInterpolation["coarsening"]["live-point-selection"] );
 
-        coarseningTol = configInterpolation["coarsening"]["tol"].as<double>();
+        coarseningTol = configInterpolation["coarsening"]["tol"].as<scalar>();
         coarseningMinPoints = configInterpolation["coarsening"]["min-points"].as<int>();
         coarseningMaxPoints = configInterpolation["coarsening"]["max-points"].as<int>();
         livePointSelection = configInterpolation["coarsening"]["live-point-selection"].as<bool>();
@@ -178,7 +189,7 @@ int main(
         if ( livePointSelection )
         {
             assert( configInterpolation["coarsening"]["tol-live-point-selection"] );
-            tolLivePointSelection = configInterpolation["coarsening"]["tol-live-point-selection"].as<double>();
+            tolLivePointSelection = configInterpolation["coarsening"]["tol-live-point-selection"].as<scalar>();
         }
     }
 
@@ -245,12 +256,12 @@ int main(
 
         int extrapolation = configLevel["extrapolation-order"].as<int>();
         int maxIter = configLevel["max-iterations"].as<int>();
-        double initialRelaxation = configPostProcessing["initial-relaxation"].as<double>();
+        scalar initialRelaxation = configPostProcessing["initial-relaxation"].as<scalar>();
         int nbReuse = configPostProcessing["timesteps-reused"].as<int>();
-        double singularityLimit = configPostProcessing["singularity-limit"].as<double>();
+        scalar singularityLimit = configPostProcessing["singularity-limit"].as<scalar>();
         int reuseInformationStartingFromTimeIndex = configPostProcessing["reuse-information-starting-from-time-index"].as<int>();
         int maxUsedIterations = configPostProcessing["max-used-iterations"].as<int>();
-        double beta = configPostProcessing["beta"].as<double>();
+        scalar beta = configPostProcessing["beta"].as<scalar>();
         bool updateJacobian = configPostProcessing["update-jacobian"].as<bool>();
 
         assert( extrapolation >= 0 );
@@ -331,12 +342,12 @@ int main(
             bool parallel = config["parallel-coupling"].as<bool>();
             int extrapolation = configLevel["extrapolation-order"].as<int>();
             int maxIter = configLevel["max-iterations"].as<int>();
-            double initialRelaxation = configPostProcessing["initial-relaxation"].as<double>();
+            scalar initialRelaxation = configPostProcessing["initial-relaxation"].as<scalar>();
             int nbReuse = configPostProcessing["timesteps-reused"].as<int>();
-            double singularityLimit = configPostProcessing["singularity-limit"].as<double>();
+            scalar singularityLimit = configPostProcessing["singularity-limit"].as<scalar>();
             int reuseInformationStartingFromTimeIndex = configPostProcessing["reuse-information-starting-from-time-index"].as<int>();
             int maxUsedIterations = configPostProcessing["max-used-iterations"].as<int>();
-            double beta = configPostProcessing["beta"].as<double>();
+            scalar beta = configPostProcessing["beta"].as<scalar>();
             bool scaling = false;
             bool updateJacobian = configPostProcessing["update-jacobian"].as<bool>();
 
@@ -417,7 +428,7 @@ int main(
 
                 int maxIter = configLevel["max-iterations"].as<int>();
                 int nbReuse = configPostProcessing["timesteps-reused"].as<int>();
-                double singularityLimit = configPostProcessing["singularity-limit"].as<double>();
+                scalar singularityLimit = configPostProcessing["singularity-limit"].as<scalar>();
                 int reuseInformationStartingFromTimeIndex = configPostProcessing["reuse-information-starting-from-time-index"].as<int>();
                 bool updateJacobian = configPostProcessing["update-jacobian"].as<bool>();
                 bool initialSolutionCoarseModel = config["multi-level-acceleration"]["initial-solution-coarse-model"].as<bool>();
@@ -484,15 +495,23 @@ int main(
         bool parallel = config["parallel-coupling"].as<bool>();
         int extrapolation = config["coupling-scheme-implicit"]["extrapolation-order"].as<int>();
         int maxIter = config["coupling-scheme-implicit"]["max-iterations"].as<int>();
-        double initialRelaxation = configPostProcessing["initial-relaxation"].as<double>();
+        scalar initialRelaxation = configPostProcessing["initial-relaxation"].as<scalar>();
         int nbReuse = configPostProcessing["timesteps-reused"].as<int>();
-        double singularityLimit = configPostProcessing["singularity-limit"].as<double>();
+        scalar singularityLimit = configPostProcessing["singularity-limit"].as<scalar>();
         int reuseInformationStartingFromTimeIndex = configPostProcessing["reuse-information-starting-from-time-index"].as<int>();
         int maxUsedIterations = configPostProcessing["max-used-iterations"].as<int>();
         bool scaling = false;
         std::string algorithm = configPostProcessing["algorithm"].as<std::string>();
-        double beta = 1;
+        scalar beta = 1;
         bool updateJacobian = false;
+        std::string firstParticipant = "fluid-solver";
+
+        if ( not parallel )
+        {
+            assert( config["first-participant"] );
+            firstParticipant = config["first-participant"].as<std::string>();
+            assert( firstParticipant == "fluid-solver" || firstParticipant == "solid-solver" );
+        }
 
         assert( algorithm == "QN" or algorithm == "Aitken" or algorithm == "Anderson" );
 
@@ -500,7 +519,7 @@ int main(
         {
             assert( configPostProcessing["beta"] );
             assert( configPostProcessing["update-jacobian"] );
-            beta = configPostProcessing["beta"].as<double>();
+            beta = configPostProcessing["beta"].as<scalar>();
             updateJacobian = configPostProcessing["update-jacobian"].as<bool>();
         }
 
@@ -560,7 +579,11 @@ int main(
         rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
-        multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+        if ( firstParticipant == "fluid-solver" )
+            multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+
+        if ( firstParticipant == "solid-solver" )
+            multiLevelFluidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 1 ) );
 
         rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
@@ -568,9 +591,17 @@ int main(
         rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
         rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false, false ) );
 
-        multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
+        if ( firstParticipant == "fluid-solver" )
+            multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
 
-        multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
+        if ( firstParticipant == "solid-solver" )
+            multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 1 ) );
+
+        if ( firstParticipant == "fluid-solver" )
+            multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
+
+        if ( firstParticipant == "solid-solver" )
+            multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelSolidSolver, multiLevelFluidSolver, convergenceMeasures, parallel, extrapolation ) );
 
         if ( algorithm == "Aitken" )
             postProcessing = std::shared_ptr<PostProcessing> ( new AitkenPostProcessing( multiLevelFsiSolver, initialRelaxation, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex ) );

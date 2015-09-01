@@ -28,8 +28,6 @@ namespace rbf
         return 0;
     }
 
-    void TPSFunction::setRadius( double value)
-    {
-
-    }
+    void TPSFunction::setRadius( double value )
+    {}
 }

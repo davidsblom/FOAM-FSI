@@ -70,10 +70,6 @@ protected:
 
     void courantNo();
 
-    void createFields();
-
-    void initialize();
-
     void readBlockSolverControls();
 
     // Fields
@@ -105,8 +101,6 @@ protected:
     // Convergence tolerance fluid domain
     scalar convergenceTolerance;
     label nOuterCorr;
-    Foam::VectorN<double, 4> initialResidual;
-    Foam::VectorN<double, 4> currResidual;
 
     // Total volume
     scalar totalVolume;

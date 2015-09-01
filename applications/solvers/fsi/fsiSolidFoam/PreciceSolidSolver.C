@@ -6,7 +6,7 @@
 
 #include "PreciceSolidSolver.H"
 
-typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> matrixRowMajor;
+typedef Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> matrixRowMajor;
 
 PreciceSolidSolver::PreciceSolidSolver( shared_ptr<foamSolidSolver> solver )
     :
@@ -93,7 +93,7 @@ void PreciceSolidSolver::run()
                 precice->fulfilledAction( precice::constants::actionWriteIterationCheckpoint() );
 
             t = std::clock() - t;
-            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+            scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
             totalRunTime += runTime;
             totalNbIterations++;
             Info << "runtime = " << runTime << " s" << endl;
@@ -136,7 +136,8 @@ void PreciceSolidSolver::setReadPositions()
     idsReadPositions.resize( readPositions.rows() );
     idsReadPositions.setZero();
 
-    precice->setMeshVertices( meshId, readPositions.rows(), readPositions.data(), idsReadPositions.data() );
+    if ( readPositions.rows() > 0 )
+        precice->setMeshVertices( meshId, readPositions.rows(), readPositions.data(), idsReadPositions.data() );
 }
 
 void PreciceSolidSolver::setWritePositions()
@@ -161,7 +162,8 @@ void PreciceSolidSolver::setWritePositions()
     idsWritePositions.resize( writePositions.rows() );
     idsWritePositions.setZero();
 
-    precice->setMeshVertices( meshId, writePositions.rows(), writePositions.data(), idsWritePositions.data() );
+    if ( writePositions.rows() > 0 )
+        precice->setMeshVertices( meshId, writePositions.rows(), writePositions.data(), idsWritePositions.data() );
 }
 
 void PreciceSolidSolver::writeData( const matrix & data )

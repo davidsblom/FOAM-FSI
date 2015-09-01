@@ -18,8 +18,8 @@
 
 namespace rbf
 {
-    typedef Eigen::MatrixXd matrix;
-    typedef Eigen::VectorXd vector;
+    typedef Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic> matrix;
+    typedef Eigen::Matrix<scalar, Eigen::Dynamic, 1> vector;
 
     class RBFInterpolation
     {

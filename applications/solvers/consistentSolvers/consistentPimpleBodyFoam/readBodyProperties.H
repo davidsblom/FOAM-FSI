@@ -1,22 +1,23 @@
-    Info<< "Reading solid body properties\n" << endl;
 
-    IOdictionary bodyMotionDict
+Info << "Reading solid body properties\n" << endl;
+
+IOdictionary bodyMotionDict
+(
+    IOobject
     (
-        IOobject
-        (
-            "bodyMotionDict",
-            runTime.constant(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
+        "bodyMotionDict",
+        runTime.constant(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    )
+);
+
+bodyCollector bodyCol( bodyMotionDict, mesh );
+
+// === Setting up fluid mesh motionSolver === //
+RBFMeshMotionSolver & ms =
+    const_cast<RBFMeshMotionSolver &>
+    (
+    mesh.lookupObject<RBFMeshMotionSolver>( "dynamicMeshDict" )
     );
-
-    bodyCollector bodyCol(bodyMotionDict,mesh);
-
-    // === Setting up fluid mesh motionSolver === //
-    RBFMeshMotionSolver& ms =
-        const_cast<RBFMeshMotionSolver&>
-        (
-            mesh.lookupObject<RBFMeshMotionSolver>("dynamicMeshDict")
-        );

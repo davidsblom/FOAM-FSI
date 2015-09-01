@@ -18,7 +18,7 @@ public:
 
         RelativeConvergenceMeasure(
             int dataId,
-            double convergenceLimit
+            scalar convergenceLimit
             );
 
         virtual void measure(
@@ -32,10 +32,10 @@ public:
 
         virtual void printState();
 
-        double normDiff;
-        double norm;
-        double convergenceLimit;
-        double epsilon;
+        scalar normDiff;
+        scalar norm;
+        const scalar convergenceLimit;
+        scalar epsilon;
     };
 }
 

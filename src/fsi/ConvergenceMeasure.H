@@ -16,19 +16,7 @@ namespace fsi
     {
 public:
 
-        ConvergenceMeasure(
-            int dataId,
-            int minIter
-            )
-            :
-            dataId( dataId ),
-            isConvergence_( false )
-        {}
-
-        ConvergenceMeasure(
-            int dataId,
-            double convergenceLimit
-            )
+        ConvergenceMeasure( int dataId )
             :
             dataId( dataId ),
             isConvergence_( false )
@@ -47,7 +35,7 @@ public:
 
         virtual void printState() = 0;
 
-        int dataId;
+        const int dataId;
 
         bool isConvergence_;
     };

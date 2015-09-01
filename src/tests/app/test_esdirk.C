@@ -9,6 +9,7 @@
 #include "Piston.H"
 #include "AdaptiveTimeStepper.H"
 #include "gtest/gtest.h"
+#include "Cos.H"
 
 using namespace sdc;
 using::testing::TestWithParam;
@@ -36,7 +37,7 @@ protected:
 
     virtual void SetUp()
     {
-        double dt, q0, qdot0, As, Ac, omega, endTime;
+        scalar dt, q0, qdot0, As, Ac, omega, endTime;
 
         int nbTimeSteps = std::tr1::get<0>( GetParam() );
         std::string method = std::tr1::get<1>( GetParam() );
@@ -55,19 +56,24 @@ protected:
 
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
         esdirk = std::shared_ptr<ESDIRK> ( new ESDIRK( piston, method, adaptiveTimeStepper ) );
+
+        std::shared_ptr<sdc::ESDIRK> esdirk( new ESDIRK( method ) );
+        piston_esdirk = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, esdirk, esdirk->getNbImplicitStages() + 1 ) );
     }
 
     virtual void TearDown()
     {
         piston.reset();
         esdirk.reset();
+        piston_esdirk.reset();
     }
 
     std::shared_ptr<Piston> piston;
     std::shared_ptr<ESDIRK> esdirk;
+    std::shared_ptr<Piston> piston_esdirk;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, ESDIRKTest, ::testing::Combine( Values( 2, 100, 200, 400, 800, 1600, 3200 ), Values( "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5" ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, ESDIRKTest, ::testing::Combine( Values( 2, 100, 200, 400, 800, 1600, 3200 ), Values( "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5", "ESDIRK53PR", "ESDIRK63PR", "ESDIRK74PR" ) ) );
 
 TEST_P( ESDIRKTest, object )
 {
@@ -83,12 +89,12 @@ TEST_P( ESDIRKTest, run )
 {
     esdirk->run();
 
-    Eigen::VectorXd solution( 2 );
+    fsi::vector solution( 2 );
     piston->getSolution( solution );
 
-    double result = solution( 1 );
-    double ref = piston->referenceSolution( 100 );
-    double error = std::abs( result - ref ) / std::abs( ref );
+    scalar result = solution( 1 );
+    scalar ref = piston->referenceSolution( 100 );
+    scalar error = std::abs( result - ref ) / std::abs( ref );
 
     int nbTimeSteps = std::tr1::get<0>( GetParam() );
     std::string method = std::tr1::get<1>( GetParam() );
@@ -182,4 +188,56 @@ TEST_P( ESDIRKTest, run )
 
     if ( nbTimeSteps == 1600 && method == "ESDIRK5" )
         ASSERT_NEAR( error, 9.23400561e-09, 1.0e-7 );
+}
+
+TEST_P( ESDIRKTest, runCompareESDIRK )
+{
+    piston_esdirk->run();
+    esdirk->run();
+
+    fsi::vector solution_piston_esdirk( 2 ), solution_piston( 2 );
+    piston->getSolution( solution_piston );
+    piston_esdirk->getSolution( solution_piston_esdirk );
+
+    ASSERT_NEAR( solution_piston_esdirk( 0 ), solution_piston( 0 ), 1.0e-10 );
+    ASSERT_NEAR( solution_piston_esdirk( 1 ), solution_piston( 1 ), 1.0e-10 );
+}
+
+
+TEST( CosTest, ESDIRK )
+{
+    std::string method = "ESDIRK74PR";
+
+    int nbTimeSteps = 5;
+    scalar endTime = 0.05;
+    scalar dt = endTime / nbTimeSteps;
+    scalar amplitude = 0.2;
+    scalar frequency = 5;
+
+    std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
+    std::shared_ptr<Cos> cos1( new Cos( nbTimeSteps, dt, endTime, amplitude, frequency ) );
+    std::shared_ptr<ESDIRK> esdirk1( new ESDIRK( cos1, method, adaptiveTimeStepper ) );
+    std::shared_ptr<Cos> cos2( new Cos( nbTimeSteps * 2, dt / 2, endTime, amplitude, frequency ) );
+    std::shared_ptr<ESDIRK> esdirk2( new ESDIRK( cos2, method, adaptiveTimeStepper ) );
+
+    esdirk1->run();
+    esdirk2->run();
+
+    scalar ref = 0.5 * amplitude * std::sin( M_PI * frequency * endTime ) * M_PI * frequency;
+    scalar error1 = std::abs( cos1->f - ref ) / std::abs( ref );
+    scalar error2 = std::abs( cos2->f - ref ) / std::abs( ref );
+    scalar order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
+
+    std::cout << "error1 = " << error1 << std::endl;
+    std::cout << "error2 = " << error2 << std::endl;
+    std::cout << "order = " << order << std::endl;
+
+    ref = amplitude * ( 0.5 - 0.5 * std::cos( M_PI * frequency * endTime ) );
+    error1 = std::abs( cos1->sol - ref ) / std::abs( ref );
+    error2 = std::abs( cos2->sol - ref ) / std::abs( ref );
+    order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
+
+    std::cout << "error1 = " << error1 << std::endl;
+    std::cout << "error2 = " << error2 << std::endl;
+    std::cout << "order = " << order << std::endl;
 }

@@ -345,7 +345,7 @@ void CompressibleFluidSolver::solve()
 
         // Solve the block matrix
 
-        Foam::VectorN<double, 4> initialResidual = UpEqn.solve().initialResidual();
+        Foam::VectorN<scalar, 4> initialResidual = UpEqn.solve().initialResidual();
         forAll( initialResidual, j )
         {
             residual = std::max( initialResidual[j], residual );

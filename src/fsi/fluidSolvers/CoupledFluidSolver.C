@@ -66,6 +66,7 @@ CoupledFluidSolver::CoupledFluidSolver(
     dimensionedVector4( "zero", dimless, vector4::zero )
     ),
     laminarTransport( U, phi ),
+    turbulence( incompressible::turbulenceModel::New( U, phi, laminarTransport ) ),
     sumLocalContErr( 0 ),
     globalContErr( 0 ),
     cumulativeContErr( 0 ),
@@ -91,12 +92,12 @@ CoupledFluidSolver::CoupledFluidSolver(
     meanCoNum( 0 ),
     velMag( 0 )
 {
-    initialize();
-
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
     scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "Up" ).lookup( "tolerance" ) );
     assert( absTolerance < convergenceTolerance );
+
+    readBlockSolverControls();
 }
 
 CoupledFluidSolver::~CoupledFluidSolver(){}
@@ -157,19 +158,6 @@ void CoupledFluidSolver::courantNo()
          << " max: " << CoNum
          << " velocity magnitude: " << velMag
          << endl;
-}
-
-void CoupledFluidSolver::createFields()
-{
-    turbulence = autoPtr<incompressible::turbulenceModel>
-        (
-        incompressible::turbulenceModel::New( U, phi, laminarTransport )
-        );
-}
-
-void CoupledFluidSolver::initialize()
-{
-    createFields();
 }
 
 void CoupledFluidSolver::getAcousticsDensityLocal( matrix & data )

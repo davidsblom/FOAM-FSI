@@ -9,15 +9,15 @@
 namespace tubeflow
 {
     MonolithicFsiSolver::MonolithicFsiSolver(
-        double a0,
-        double u0,
-        double p0,
-        double dt,
-        double cmk,
+        scalar a0,
+        scalar u0,
+        scalar p0,
+        scalar dt,
+        scalar cmk,
         int N,
-        double L,
-        double T,
-        double rho
+        scalar L,
+        scalar T,
+        scalar rho
         )
         :
         a0( a0 ),
@@ -52,22 +52,22 @@ namespace tubeflow
         a.fill( a0 );
     }
 
-    double MonolithicFsiSolver::evaluateInletVelocityBoundaryCondition()
+    scalar MonolithicFsiSolver::evaluateInletVelocityBoundaryCondition()
     {
         assert( init );
 
         return u0 + u0 / 10.0 * std::pow( std::sin( M_PI * timeIndex * tau ), 2 );
     }
 
-    double MonolithicFsiSolver::evaluateOutputPressureBoundaryCondition(
-        double pout_n,
-        double uout_n,
-        double uout
+    scalar MonolithicFsiSolver::evaluateOutputPressureBoundaryCondition(
+        scalar pout_n,
+        scalar uout_n,
+        scalar uout
         )
     {
         assert( init );
 
-        double value = std::sqrt( cmk * cmk - pout_n / (2.0 * rho) );
+        scalar value = std::sqrt( cmk * cmk - pout_n / (2.0 * rho) );
 
         value = 2 * rho * ( cmk * cmk - std::pow( value - (uout - uout_n) / 4.0, 2 ) );
 
@@ -98,10 +98,10 @@ namespace tubeflow
         fsi::vector a = x.tail( N );
 
         // Boundary conditions
-        double u_in = evaluateInletVelocityBoundaryCondition();
-        double u_out = 2 * u( N - 2 ) - u( N - 3 );
-        double u_outn = 2 * un( N - 2 ) - un( N - 3 );
-        double p_in = 2 * p( 1 ) - p( 2 );
+        scalar u_in = evaluateInletVelocityBoundaryCondition();
+        scalar u_out = 2 * u( N - 2 ) - u( N - 3 );
+        scalar u_outn = 2 * un( N - 2 ) - un( N - 3 );
+        scalar p_in = 2 * p( 1 ) - p( 2 );
         p_out = evaluateOutputPressureBoundaryCondition( p_outn, u_outn, u_out );
 
         // Apply boundary conditions
@@ -157,7 +157,7 @@ namespace tubeflow
         // Structure part
         for ( int i = 0; i < N; i++ )
         {
-            double tmp = p0 / (2 * rho) - cmk * cmk;
+            scalar tmp = p0 / (2 * rho) - cmk * cmk;
             tmp /= p( i ) / (2 * rho) - cmk * cmk;
             tmp = a0 * tmp * tmp;
 
@@ -187,7 +187,7 @@ namespace tubeflow
         init = true;
     }
 
-    bool MonolithicFsiSolver::isRunning()
+    bool MonolithicFsiSolver::isRunning() const
     {
         return t < T;
     }
@@ -215,7 +215,14 @@ namespace tubeflow
 
         int m_inputs, m_values;
 
-        Functor() : m_inputs( InputsAtCompileTime ), m_values( ValuesAtCompileTime ) {}
+        Functor()
+            :
+            m_inputs( InputsAtCompileTime ),
+            m_values( ValuesAtCompileTime )
+        {}
+
+        virtual ~Functor()
+        {}
 
         Functor(
             int inputs,
@@ -233,7 +240,7 @@ namespace tubeflow
         }
     };
 
-    struct residualFunctor : Functor<double>
+    struct residualFunctor : Functor<scalar>
     {
         residualFunctor(
             MonolithicFsiSolver * fsi,
@@ -242,16 +249,19 @@ namespace tubeflow
             fsi::vector * an
             )
             :
-            Functor<double>( 3 * fsi->N, 3 * fsi->N ),
+            Functor<scalar>( 3 * fsi->N, 3 * fsi->N ),
             fsi( fsi ),
             un( un ),
             pn( pn ),
             an( an )
         {}
 
+        virtual ~residualFunctor()
+        {}
+
         int operator()(
-            Eigen::VectorXd & x,
-            Eigen::VectorXd & fvec
+            fsi::vector & x,
+            fsi::vector & fvec
             ) const
         {
             fsi->evaluateResidual( x, *un, *pn, *an, fvec );
@@ -279,7 +289,7 @@ namespace tubeflow
         // Optimize the residual function
         residualFunctor functor( this, &un, &pn, &an );
         Eigen::NumericalDiff<residualFunctor, Eigen::Central> numDiff( functor );
-        Eigen::LevenbergMarquardt<Eigen::NumericalDiff<residualFunctor, Eigen::Central>, double> lm( numDiff );
+        Eigen::LevenbergMarquardt<Eigen::NumericalDiff<residualFunctor, Eigen::Central>, scalar> lm( numDiff );
 
         lm.parameters.maxfev = 2000;
         lm.parameters.xtol = 1.0e-13;

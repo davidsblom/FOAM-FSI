@@ -29,7 +29,7 @@ public:
             int maxUsedIterations,
             int nbReuse,
             int reuseInformationStartingFromTimeIndex,
-            double singularityLimit,
+            scalar singularityLimit,
             int order
             );
 
@@ -56,7 +56,7 @@ public:
         deque<deque<vector> > solsList;
         deque<deque<deque<vector> > > solsTimeList;
 
-        int order;
+        const int order;
     };
 }
 

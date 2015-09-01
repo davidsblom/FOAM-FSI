@@ -31,7 +31,7 @@ public:
 
         virtual void printState();
 
-        int minimumIterationCount;
+        const int minimumIterationCount;
         int currentIteration;
     };
 }

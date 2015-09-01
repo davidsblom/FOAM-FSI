@@ -47,7 +47,7 @@ int main(
                 #include "pEqn.H"
                 corr++;
             }
-            while(residualPressure > max(initInnerResidualPressure*relativeInnerTolerance, absoluteInnerTolerance) && corr < nCorr);
+            while ( residualPressure > max( initInnerResidualPressure * relativeInnerTolerance, absoluteInnerTolerance ) && corr < nCorr );
 
             #include "continuityErrs.H"
 

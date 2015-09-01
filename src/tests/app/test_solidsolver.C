@@ -15,21 +15,21 @@ protected:
 
     virtual void SetUp()
     {
-        double r0 = 0.2;
-        double a0 = M_PI * r0 * r0;
-        double u0 = 0.1;
-        double p0 = 0;
-        double dt = 0.1;
+        scalar r0 = 0.2;
+        scalar a0 = M_PI * r0 * r0;
+        scalar u0 = 0.1;
+        scalar p0 = 0;
+        scalar dt = 0.1;
         int N = 5;
-        double L = 1;
-        double dx = L / N;
-        double rho = 1.225;
-        double E = 490;
-        double h = 1.0e-3;
-        double cmk = std::sqrt( E * h / (2 * rho * r0) );
-        double c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
-        double kappa = c0 / u0;
-        double tau = u0 * dt / L;
+        scalar L = 1;
+        scalar dx = L / N;
+        scalar rho = 1.225;
+        scalar E = 490;
+        scalar h = 1.0e-3;
+        scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
+        scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
+        scalar kappa = c0 / u0;
+        scalar tau = u0 * dt / L;
 
         ASSERT_NEAR( tau, 0.01, 1.0e-13 );
         ASSERT_NEAR( kappa, 10, 1.0e-13 );
@@ -58,8 +58,8 @@ TEST_F( SolidSolverTest, timestep )
     solid->initTimeStep();
 
     // Initialize variables
-    double r0 = 0.2;
-    double a0 = M_PI * r0 * r0;
+    scalar r0 = 0.2;
+    scalar a0 = M_PI * r0 * r0;
     int N = 5;
     fsi::vector p( N ), a( N );
     p.setZero();

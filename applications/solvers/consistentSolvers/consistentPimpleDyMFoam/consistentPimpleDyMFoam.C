@@ -69,7 +69,8 @@ int main(
                 p.storePrevIter();
                 #include "pEqn.H"
                 corr++;
-            }while(residualPressure > max(initInnerResidualPressure*relativeInnerTolerance, absoluteInnerTolerance) && corr < nCorr);
+            }
+            while ( residualPressure > max( initInnerResidualPressure * relativeInnerTolerance, absoluteInnerTolerance ) && corr < nCorr );
 
             #include "movingMeshContinuityErrs.H"
 
@@ -86,9 +87,9 @@ int main(
         // Update the face velocities
         fvc::makeAbsolute( phi, U );
         #include "updateUf.H"
-        fvc::makeRelative( phi, U );
 
         runTime.write();
+        fvc::makeRelative( phi, U );
 
         Info << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
              << "  ClockTime = " << runTime.elapsedClockTime() << " s"

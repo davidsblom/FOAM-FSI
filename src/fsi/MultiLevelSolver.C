@@ -22,7 +22,8 @@ namespace fsi
         rbfInterpToCouplingMesh( rbfInterpToCouplingMesh ),
         rbfInterpToMesh( rbfInterpToMesh ),
         participantId( participantId ),
-        level( level )
+        level( level ),
+        couplingGridSize( 0 )
     {
         assert( solver );
         assert( couplingGridSolver );
@@ -40,6 +41,8 @@ namespace fsi
             couplingGridSolver->getReadPositions( couplingGridPositions );
 
         couplingGridSize = couplingGridPositions.rows();
+
+        assert( couplingGridSize > 0 );
     }
 
     void MultiLevelSolver::interpToCouplingMesh(

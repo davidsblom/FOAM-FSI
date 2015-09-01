@@ -222,45 +222,8 @@ namespace fsi
 
     bool FsiSolver::isConvergence()
     {
-        assert( init );
-        assert( convergenceMeasures->size() > 0 );
-        assert( fluid->t > 0 );
-
-        allConverged = true;
-
-        for ( std::list<std::shared_ptr<ConvergenceMeasure> >::const_iterator iterator = convergenceMeasures->begin(), end = convergenceMeasures->end(); iterator != end; ++iterator )
-        {
-            // Initialize variables
-            std::shared_ptr<ConvergenceMeasure> measure = *iterator;
-            vector oldValues, newValues;
-
-            // Subtract initial values
-            if ( measure->dataId == 0 )
-            {
-                oldValues = solid->couplingData.dataprev.array() - solid->initialValue;
-                newValues = solid->couplingData.data.array() - solid->initialValue;
-            }
-
-            if ( measure->dataId == 1 )
-            {
-                oldValues = fluid->couplingData.dataprev.array() - fluid->initialValue;
-                newValues = fluid->couplingData.data.array() - fluid->initialValue;
-            }
-
-            // Measure convergence
-            measure->measure( oldValues, newValues );
-
-            // Print state
-            measure->printState();
-
-            if ( !measure->isConvergence() )
-                allConverged = false;
-        }
-
-        if ( allConverged )
-            Info << "All converged" << endl;
-
-        return allConverged;
+        assert( false );
+        return true;
     }
 
     bool FsiSolver::isConvergence(
@@ -268,46 +231,8 @@ namespace fsi
         const vector & xprev
         )
     {
-        assert( init );
-        assert( convergenceMeasures->size() > 0 );
-        assert( x.rows() == xprev.rows() );
-        assert( fluid->t > 0 );
-
-        allConverged = true;
-
-        for ( std::list<std::shared_ptr<ConvergenceMeasure> >::const_iterator iterator = convergenceMeasures->begin(), end = convergenceMeasures->end(); iterator != end; ++iterator )
-        {
-            // Initialize variables
-            std::shared_ptr<ConvergenceMeasure> measure = *iterator;
-            vector oldValues, newValues;
-
-            // Subtract initial values
-            if ( measure->dataId == 0 )
-            {
-                oldValues = xprev.head( N ).array() - solid->initialValue;
-                newValues = x.head( N ).array() - solid->initialValue;
-            }
-
-            if ( measure->dataId == 1 )
-            {
-                oldValues = xprev.tail( N ).array() - fluid->initialValue;
-                newValues = x.tail( N ).array() - fluid->initialValue;
-            }
-
-            // Measure convergence
-            measure->measure( oldValues, newValues );
-
-            // Print state
-            measure->printState();
-
-            if ( !measure->isConvergence() )
-                allConverged = false;
-        }
-
-        if ( allConverged )
-            Info << "All converged" << endl;
-
-        return allConverged;
+        assert( false );
+        return true;
     }
 
     bool FsiSolver::isRunning()

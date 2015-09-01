@@ -18,10 +18,10 @@ public:
         BroydenPostProcessing(
             shared_ptr<MultiLevelFsiSolver> fsi,
             int maxIter,
-            double initialRelaxation,
+            scalar initialRelaxation,
             int maxUsedIterations,
             int nbReuse,
-            double singularityLimit,
+            scalar singularityLimit,
             int reuseInformationStartingFromTimeIndex
             );
 
@@ -48,7 +48,7 @@ public:
             );
 
         matrix J;
-        double singularityLimit;
+        const scalar singularityLimit;
     };
 }
 

@@ -7,8 +7,8 @@ find . -name '*~' -exec rm -rf {} \;
 # Define which versions of the different packages are used
 
 export SCONS_VERSION=2.3.4
-export BOOST_VERSION=1_53_0
-export BOOST_VERSION_DOT=1.53.0
+export BOOST_VERSION=1_55_0
+export BOOST_VERSION_DOT=1.55.0
 
 # Download SCons
 

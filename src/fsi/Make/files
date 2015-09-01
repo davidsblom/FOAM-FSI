@@ -21,15 +21,18 @@ SDC.C
 ESDIRK.C
 AdaptiveTimeStepper.C
 QuadratureRules.C
+PIES.C
 
 fluidSolvers/CoupledFluidSolver.C
 fluidSolvers/FluidSolver.C
 fluidSolvers/foamFluidSolver.C
 fluidSolvers/CompressibleFluidSolver.C
 fluidSolvers/SDCFluidSolver.C
+fluidSolvers/SDCDynamicMeshFluidSolver.C
 fluidSolvers/SDCLaplacianSolver.C
 
 solidSolvers/foamSolidSolver.C
 solidSolvers/SolidSolver.C
+solidSolvers/SDCSolidSolver.C
 
 LIB = $(FOAM_USER_LIBBIN)/libfsi

@@ -19,28 +19,27 @@ addToRunTimeSelectionTable
 
 scalar RBFMeshMotionSolver::getMaxWallDistance()
 {
-    scalarField globalMaxWallDistance(Pstream::nProcs(),0.0);
+    scalarField globalMaxWallDistance( Pstream::nProcs(), 0.0 );
 
-    scalarField maxWallDistances(movingPatchIDs.size(),0.0);
-    forAll(movingPatchIDs,patchI)
+    scalarField maxWallDistances( movingPatchIDs.size(), 0.0 );
+    forAll( movingPatchIDs, patchI )
     {
-        const polyPatch& currPatch = mesh().boundaryMesh()[movingPatchIDs[patchI]];
-        const vectorField& currPatchCf = currPatch.faceCentres();
-        const labelList& currPatchCellID = currPatch.faceCells();
-        const vectorField& currPatchSf = currPatch.faceAreas();
+        const polyPatch & currPatch = mesh().boundaryMesh()[movingPatchIDs[patchI]];
+        const vectorField & currPatchCf = currPatch.faceCentres();
+        const vectorField & currPatchSf = currPatch.faceAreas();
 
-        scalarField maxDistance(currPatch.size(),0.0);
-        forAll(maxDistance,iface)
+        scalarField maxDistance( currPatch.size(), 0.0 );
+        forAll( maxDistance, iface )
         {
-            const vector& cellC = mesh().cellCentres()[currPatch.faceCells()[iface]];
-            maxDistance[iface] = 2*((currPatchCf[iface]-cellC) & currPatchSf[iface])/mag(currPatchSf[iface]);
+            const vector & cellC = mesh().cellCentres()[currPatch.faceCells()[iface]];
+            maxDistance[iface] = 2 * ( (currPatchCf[iface] - cellC) & currPatchSf[iface] ) / mag( currPatchSf[iface] );
         }
-        maxWallDistances[patchI] = max(maxDistance);
+        maxWallDistances[patchI] = max( maxDistance );
     }
-    globalMaxWallDistance[Pstream::myProcNo()] = max(maxWallDistances);
+    globalMaxWallDistance[Pstream::myProcNo()] = max( maxWallDistances );
 
     reduce( globalMaxWallDistance, sumOp<scalarField>() );
-    scalar maxWallDistance = max(globalMaxWallDistance);
+    scalar maxWallDistance = max( globalMaxWallDistance );
     Info << "maxWallDistance: " << maxWallDistance << endl;
 
     return maxWallDistance;
@@ -48,81 +47,88 @@ scalar RBFMeshMotionSolver::getMaxWallDistance()
 
 scalar RBFMeshMotionSolver::getMaxAspectRatio()
 {
-    scalarField globalMaxAspectRatio(Pstream::nProcs(),0.0);
-    const labelListList& cellEdges = mesh().cellEdges();
-    const edgeList& edges = mesh().edges();
+    scalarField globalMaxAspectRatio( Pstream::nProcs(), 0.0 );
+    const labelListList & cellEdges = mesh().cellEdges();
+    const edgeList & edges = mesh().edges();
 
-    //Determine 3rd direction for 2D meshes
+    // Determine 3rd direction for 2D meshes
     vector emptyDir = vector::zero;
-    if(mesh().nGeometricD()<3)
+
+    if ( mesh().nGeometricD() < 3 )
     {
-        if(mesh().geometricD()[0]==-1)
+        if ( mesh().geometricD()[0] == -1 )
         {
-            emptyDir = vector(1,0,0);
+            emptyDir = vector( 1, 0, 0 );
         }
-        else if(mesh().geometricD()[1]==-1)
+        else
+        if ( mesh().geometricD()[1] == -1 )
         {
-            emptyDir = vector(0,1,0);
+            emptyDir = vector( 0, 1, 0 );
         }
-        else if(mesh().geometricD()[2]==-1)
+        else
+        if ( mesh().geometricD()[2] == -1 )
         {
-            emptyDir = vector(0,0,1);
+            emptyDir = vector( 0, 0, 1 );
         }
     }
 
-    scalarField maxAspectRatios(movingPatchIDs.size(),0.0);
-    forAll(movingPatchIDs,patchI)
+    scalarField maxAspectRatios( movingPatchIDs.size(), 0.0 );
+    forAll( movingPatchIDs, patchI )
     {
-        const polyPatch& currPatch = mesh().boundaryMesh()[movingPatchIDs[patchI]];
-        const labelList& currPatchCellID = currPatch.faceCells();
+        const polyPatch & currPatch = mesh().boundaryMesh()[movingPatchIDs[patchI]];
+        const labelList & currPatchCellID = currPatch.faceCells();
 
-        scalarField maxAspectRatio(currPatch.size(),0.0);
-        forAll(maxAspectRatio,iface)
+        scalarField maxAspectRatio( currPatch.size(), 0.0 );
+        forAll( maxAspectRatio, iface )
         {
             label cellID = currPatchCellID[iface];
-            const labelList& curEdges = cellEdges[cellID];
+            const labelList & curEdges = cellEdges[cellID];
 
-            //if 2d ensure that 3rd dicrection is not used
-            if(mesh().nGeometricD()<3)
+            // if 2d ensure that 3rd dicrection is not used
+            if ( mesh().nGeometricD() < 3 )
             {
-                scalarField edgeLengths(curEdges.size(),0.0);
+                scalarField edgeLengths( curEdges.size(), 0.0 );
                 label counter = 0;
-                forAll(curEdges,iedge)
+                forAll( curEdges, iedge )
                 {
-                    vector edgeVec = edges[curEdges[iedge]].vec(mesh().points());
-                    if((edgeVec & emptyDir) < SMALL)
+                    vector edgeVec = edges[curEdges[iedge]].vec( mesh().points() );
+
+                    if ( (edgeVec & emptyDir) < SMALL )
                     {
-                        edgeLengths[counter] = edges[curEdges[iedge]].mag(mesh().points());
+                        edgeLengths[counter] = edges[curEdges[iedge]].mag( mesh().points() );
                         counter++;
                     }
                 }
-                edgeLengths.resize(counter);
-                maxAspectRatio[iface] = max(edgeLengths)/min(edgeLengths);
+                edgeLengths.resize( counter );
+                maxAspectRatio[iface] = max( edgeLengths ) / min( edgeLengths );
             }
             else
             {
-                scalarField edgeLengths(curEdges.size(),0.0);
-                forAll(curEdges,iedge)
+                scalarField edgeLengths( curEdges.size(), 0.0 );
+                forAll( curEdges, iedge )
                 {
-                    edgeLengths[iedge] = edges[curEdges[iedge]].mag(mesh().points());
+                    edgeLengths[iedge] = edges[curEdges[iedge]].mag( mesh().points() );
                 }
-                maxAspectRatio[iface] = max(edgeLengths)/min(edgeLengths);
+                maxAspectRatio[iface] = max( edgeLengths ) / min( edgeLengths );
             }
         }
-        maxAspectRatios[patchI] = max(maxAspectRatio);
+        maxAspectRatios[patchI] = max( maxAspectRatio );
     }
-    globalMaxAspectRatio[Pstream::myProcNo()] = max(maxAspectRatios);
+    globalMaxAspectRatio[Pstream::myProcNo()] = max( maxAspectRatios );
 
     reduce( globalMaxAspectRatio, sumOp<scalarField>() );
-    scalar maxAspectRatio = max(globalMaxAspectRatio);
+    scalar maxAspectRatio = max( globalMaxAspectRatio );
     Info << "maxAspectRatio: " << maxAspectRatio << endl;
 
     return maxAspectRatio;
 }
 
-void RBFMeshMotionSolver::setSurfaceCorrectionFunction(std::shared_ptr<rbf::RBFFunctionInterface>& surfaceCorrectionFunction, word surfaceCorrectionFunctionName)
+void RBFMeshMotionSolver::setSurfaceCorrectionFunction(
+    std::shared_ptr<rbf::RBFFunctionInterface> & surfaceCorrectionFunction,
+    word surfaceCorrectionFunctionName
+    )
 {
-    assert(surfaceCorrectionFunctionName == "WendlandC0" || surfaceCorrectionFunctionName == "WendlandC2" || surfaceCorrectionFunctionName == "WendlandC4" || surfaceCorrectionFunctionName == "WendlandC6" || surfaceCorrectionFunctionName == "GillebaartR3" || surfaceCorrectionFunctionName == "GillebaartR3a");
+    assert( surfaceCorrectionFunctionName == "WendlandC0" || surfaceCorrectionFunctionName == "WendlandC2" || surfaceCorrectionFunctionName == "WendlandC4" || surfaceCorrectionFunctionName == "WendlandC6" || surfaceCorrectionFunctionName == "GillebaartR3" || surfaceCorrectionFunctionName == "GillebaartR3a" );
 
     Info << "Radial Basis Function coarsening: Selecting surface correction RBF function: " << surfaceCorrectionFunctionName << endl;
 
@@ -245,7 +251,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
     word function = dict.lookup( "function" );
 
-    assert( function == "TPS" || function == "WendlandC0" || function == "WendlandC2" || function == "WendlandC4" || function == "WendlandC6" || function == "GillebaartR3" || function == "GillebaartR3a");
+    assert( function == "TPS" || function == "WendlandC0" || function == "WendlandC2" || function == "WendlandC4" || function == "WendlandC6" || function == "GillebaartR3" || function == "GillebaartR3a" );
 
     std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
 
@@ -310,7 +316,6 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     bool twoPointSelection = false;
     bool surfaceCorrection = false;
 
-
     if ( coarsening )
     {
         tol = readScalar( subDict( "coarsening" ).lookup( "tol" ) );
@@ -329,30 +334,33 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     double firstCellHeight = -1.0;
     double maxAspectRatio = -1.0;
     bool cleanReselection = true;
+
     if ( livePointSelection )
     {
         tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
         surfaceCorrection = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrection", false );
-        cleanReselection = subDict( "coarsening" ).lookupOrDefault( "cleanReselection", true);
+        cleanReselection = subDict( "coarsening" ).lookupOrDefault( "cleanReselection", true );
 
         if ( surfaceCorrection )
         {
-            surfaceCorrectionFunctionName = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionFunction", word("WendlandC2") );
-            setSurfaceCorrectionFunction(surfaceCorrectionFunction, surfaceCorrectionFunctionName);
+            surfaceCorrectionFunctionName = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionFunction", word( "WendlandC2" ) );
+            setSurfaceCorrectionFunction( surfaceCorrectionFunction, surfaceCorrectionFunctionName );
             ratioRadiusError = subDict( "coarsening" ).lookupOrDefault( "ratioRadiusError", 10.0 );
 
             firstCellHeight = subDict( "coarsening" ).lookupOrDefault( "firstCellHeight", -1.0 );
             maxAspectRatio = subDict( "coarsening" ).lookupOrDefault( "maxAspectRatio", -1.0 );
+
             if ( firstCellHeight < SMALL )
             {
                 firstCellHeight = getMaxWallDistance();
             }
+
             if ( maxAspectRatio < SMALL )
             {
                 maxAspectRatio = getMaxAspectRatio();
             }
 
-            minCorrectionRadius = pow(maxAspectRatio, 1.0/surfaceCorrectionFunction->correctionPower()) * firstCellHeight;
+            minCorrectionRadius = pow( maxAspectRatio, 1.0 / surfaceCorrectionFunction->correctionPower() ) * firstCellHeight;
 
             surfaceCorrectionRadius = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionRadius", -1.0 );
         }
@@ -366,26 +374,30 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     Info << "    interpolation function = " << function << endl;
     Info << "    interpolation polynomial term = " << polynomialTerm << endl;
     Info << "    interpolation cpu formulation = " << cpu << endl;
-    if( debug > 0 )
+
+    if ( debug > 0 )
     {
         Info << "    interpolation from face cell centers = " << faceCellCenters << endl;
     }
+
     Info << "    coarsening = " << coarsening << endl;
     Info << "        coarsening tolerance = " << tol << endl;
     Info << "        coarsening reselection tolerance = " << tolLivePointSelection << endl;
     Info << "        coarsening two-point selection = " << twoPointSelection << endl;
     Info << "        coarsening surface correction = " << surfaceCorrection << endl;
-    if (debug > 0 && surfaceCorrection )
+
+    if ( debug > 0 && surfaceCorrection )
     {
         Info << "           surface correction function = " << surfaceCorrectionFunctionName << endl;
-        if( surfaceCorrectionRadius > 0 )
+
+        if ( surfaceCorrectionRadius > 0 )
         {
             Info << "           surface correction surfaceCorrectionRadius = " << surfaceCorrectionRadius << endl;
         }
         else
         {
             Info << "           surface correction ratioRadiusError = " << ratioRadiusError << endl;
-            Info << "           surface correction minCorrectionRadius = " << minCorrectionRadius << " ( = {" <<  maxAspectRatio << " ^ " << 1.0/surfaceCorrectionFunction->correctionPower() << "} * " << firstCellHeight <<" ) " << endl;
+            Info << "           surface correction minCorrectionRadius = " << minCorrectionRadius << " ( = {" << maxAspectRatio << " ^ " << 1.0 / surfaceCorrectionFunction->correctionPower() << "} * " << firstCellHeight << " ) " << endl;
         }
     }
 }
@@ -892,7 +904,6 @@ void RBFMeshMotionSolver::solve()
 
             assert( index == nbGlobalMovingFaceCenters[Pstream::myProcNo()] );
         }
-
 
         index = 0;
 

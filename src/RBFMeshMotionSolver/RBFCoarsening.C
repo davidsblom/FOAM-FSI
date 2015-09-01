@@ -69,7 +69,7 @@ namespace rbf
         coarseningMaxPoints( coarseningMaxPoints ),
         twoPointSelection( false ),
         surfaceCorrection( false ),
-        surfaceCorrectionRbfFunction( ),
+        surfaceCorrectionRbfFunction(),
         ratioRadiusError( 10.0 ),
         surfaceCorrectionRadius( -1.0 ),
         cleanReselection( true ),
@@ -126,7 +126,7 @@ namespace rbf
         coarseningMaxPoints( coarseningMaxPoints ),
         twoPointSelection( twoPointSelection ),
         surfaceCorrection( false ),
-        surfaceCorrectionRbfFunction( ),
+        surfaceCorrectionRbfFunction(),
         ratioRadiusError( 10.0 ),
         minCorrectionRadius( 1.0 ),
         surfaceCorrectionRadius( -1.0 ),
@@ -288,17 +288,17 @@ namespace rbf
         if ( surfaceCorrection && surfaceCorrectionRadius > 0 )
         {
             WarningIn( "RBFCoarsening::RBFCoarsening" )
-            << "Using surfaceCorrection and radius is manually set by surfaceCorrectionRadius: " << surfaceCorrectionRadius <<". This could lead to bad/invalid meshes." << endl;
+            << "Using surfaceCorrection and radius is manually set by surfaceCorrectionRadius: " << surfaceCorrectionRadius << ". This could lead to bad/invalid meshes." << endl;
         }
 
-        if(debug == 3)
+        if ( debug == 3 )
         {
             std::string filename = "totalInterpolationTimings.txt";
             std::ofstream timingFile( filename, std::ofstream::app );
-            if ( Pstream::myProcNo() == 0 && not rbf->polynomialTerm )
-                timingFile << std::setprecision(9) << "t_total, t_error, t_reselect, t_interpolate, t_correct" << "\n";
-        }
 
+            if ( Pstream::myProcNo() == 0 && not rbf->polynomialTerm )
+                timingFile << std::setprecision( 9 ) << "t_total, t_error, t_reselect, t_interpolate, t_correct" << "\n";
+        }
     }
 
     /* Select a subset of control point with a greedy algorithm.
@@ -334,21 +334,23 @@ namespace rbf
             double errorMax = 0;
             rbf::vector errorList( positions.rows() );
 
-            //Clean selected points if requested
-            if ( cleanReselection || selectedPositions.rows() == maxNbPoints || selectedPositions.rows() == 0)
+            // Clean selected points if requested
+            if ( cleanReselection || selectedPositions.rows() == maxNbPoints || selectedPositions.rows() == 0 )
             {
                 selectedPositions.resize( 2 );
+
                 for ( int i = 0; i < selectedPositions.rows(); i++ )
                     selectedPositions( i ) = i;
-
             }
 
-            //check what the radius is. For TPS the radius should not be 1. If so, select next point
+            // check what the radius is. For TPS the radius should not be 1. If so, select next point
             bool radius1 = false;
+
             do
             {
-                double radius0 = ( positions.row(selectedPositions( 0 ) ) - positions.row( selectedPositions( 1 ) ) ).norm();
-                if( radius0 > 1.0 - SMALL && radius0 < 1.0 + SMALL )
+                double radius0 = ( positions.row( selectedPositions( 0 ) ) - positions.row( selectedPositions( 1 ) ) ).norm();
+
+                if ( radius0 > 1.0 - SMALL && radius0 < 1.0 + SMALL )
                 {
                     radius1 = true;
                     selectedPositions( 1 ) = selectedPositions( 1 ) + 1;
@@ -357,7 +359,8 @@ namespace rbf
                 {
                     radius1 = false;
                 }
-            }while( radius1 );
+            }
+            while ( radius1 );
 
             assert( positions.rows() >= selectedPositions.rows() );
 
@@ -489,11 +492,13 @@ namespace rbf
                 Info << "RBFCoarsening::debug 1. interpolate to surface = " << runTimeInterpolate << " s" << endl;
                 Info << "RBFCoarsening::debug 2. find largest error = " << runTimeError << " s" << ". Added second point = " << addedSecondPoint << endl;
                 Info << "RBFCoarsening::debug 3. convergence check = " << runTimeConvergence << " s" << endl;
-                if( livePointSelection )
+
+                if ( livePointSelection )
                 {
                     Info << "RBFCoarsening::debug 4. absolute max error = " << ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << " m" << endl;
                 }
-                if( !cleanReselection )
+
+                if ( !cleanReselection )
                     Info << "RBFCoarsening::debug 5. re-used selection and added " << counter - counter0 << " points to control points." << endl;
             }
 
@@ -547,10 +552,11 @@ namespace rbf
         {
             if ( livePointSelection )
             {
-                if( debug == 3 )
+                if ( debug == 3 )
                 {
                     tp = std::clock();
                 }
+
                 // For RBF mesh interpolation, the values to be interpolated need to be
                 // the total displacements. As input, the incremental displacements
                 // are given.
@@ -598,17 +604,18 @@ namespace rbf
 
                     Info << endl;
 
-                    //If debug is 2: Print out surface error to file
-                    if( debug == 2 )
+                    // If debug is 2: Print out surface error to file
+                    if ( debug == 2 )
                     {
                         std::string filename = "liveSelection-rbf-surfaceError.txt";
 
                         std::ofstream surfaceErrorFile( filename, std::ofstream::app );
+
                         if ( surfaceErrorFile.is_open() )
                         {
                             surfaceErrorFile << error << ", " << errorMax;
 
-                            if( !reselection )
+                            if ( !reselection )
                             {
                                 surfaceErrorFile << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << "\n";
                             }
@@ -617,7 +624,8 @@ namespace rbf
                         surfaceErrorFile.close();
                     }
                 }
-                if( debug == 3 )
+
+                if ( debug == 3 )
                 {
                     tp = std::clock() - tp;
                     runTimeError = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -630,12 +638,12 @@ namespace rbf
 
                     rbf->Hhat.conservativeResize( rbf->Hhat.rows(), rbf->Hhat.cols() - nbStaticFaceCentersRemove );
 
-                    //If debug is 2: Print out surface error to file
+                    // If debug is 2: Print out surface error to file
                     if ( debug == 2 )
                     {
                         std::string filename = "liveSelection-rbf-surfaceError.txt";
                         struct stat buffer;
-                        bool fileExists = (stat (filename.c_str(), &buffer) == 0);
+                        bool fileExists = (stat( filename.c_str(), &buffer ) == 0);
 
                         // ==== START Re-calculate error ==== //
                         rbf::matrix valuesCoarse( selectedPositions.rows(), this->values.cols() );
@@ -651,11 +659,13 @@ namespace rbf
                         errorInterpolationCoarse = valuesInterpolationCoarse - this->values;
                         double error = (errorInterpolationCoarse).matrix().norm() / (this->values.norm() + epsilon);
                         double errorMax = ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() + epsilon );
+
                         // ==== END Re-calculate error ==== //
 
-                        if( !fileExists )
+                        if ( !fileExists )
                         {
                             std::ofstream surfaceErrorFile( filename, std::ofstream::app );
+
                             if ( surfaceErrorFile.is_open() )
                             {
                                 surfaceErrorFile << error << ", " << errorMax << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << "\n";
@@ -666,6 +676,7 @@ namespace rbf
                         else
                         {
                             std::ofstream surfaceErrorFile( filename, std::ofstream::app );
+
                             if ( surfaceErrorFile.is_open() )
                             {
                                 surfaceErrorFile << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << "\n";
@@ -673,7 +684,8 @@ namespace rbf
                         }
                     }
                 }
-                if( debug == 3 )
+
+                if ( debug == 3 )
                 {
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -683,10 +695,11 @@ namespace rbf
             else
             if ( !rbf->computed )
             {
-                if( debug == 3 )
+                if ( debug == 3 )
                 {
                     tp = std::clock();
                 }
+
                 // Unit displacement of control points
                 matrix unitDisplacement( positions.rows(), positions.cols() );
                 unitDisplacement.setZero();
@@ -702,14 +715,14 @@ namespace rbf
 
                 greedySelection( unitDisplacement );
 
-                if( debug == 3 )
+                if ( debug == 3 )
                 {
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
                     tp = std::clock();
                 }
 
-                if( debug > 0 )
+                if ( debug > 0 )
                 {
                     if ( livePointSelectionSumValues )
                     {
@@ -719,7 +732,7 @@ namespace rbf
                             this->values.array() += values.array();
                     }
 
-                    //Construct values to interpolate based on unit displacement selected points
+                    // Construct values to interpolate based on unit displacement selected points
                     rbf::matrix valuesCoarse( selectedPositions.rows(), this->values.cols() );
                     rbf::matrix valuesInterpolationCoarse( positions.rows(), valuesInterpolation.cols() );
                     rbf::vector errorList( positions.rows() );
@@ -727,7 +740,7 @@ namespace rbf
                     for ( int j = 0; j < selectedPositions.rows(); j++ )
                         valuesCoarse.row( j ) = this->values.row( selectedPositions( j ) );
 
-                    //This will return the displaced surface in valuesInterpolationCoarse
+                    // This will return the displaced surface in valuesInterpolationCoarse
                     rbfCoarse->interpolate2( valuesCoarse, valuesInterpolationCoarse );
 
                     // Evaluate the error
@@ -735,16 +748,17 @@ namespace rbf
                         errorList( j ) = ( valuesInterpolationCoarse.row( j ) - this->values.row( j ) ).norm();
 
                     double epsilon = std::sqrt( SMALL );
-                    double error = (errorList).norm() / (this->values.norm() + epsilon );
+                    double error = (errorList).norm() / (this->values.norm() + epsilon);
                     double errorMax = errorList.maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() + epsilon );
 
-                    Info << "RBFCoarsening::UnitDisplacement::debug 1: " << "2-norm error = " << error << ", max error = " << errorMax <<  endl;
+                    Info << "RBFCoarsening::UnitDisplacement::debug 1: " << "2-norm error = " << error << ", max error = " << errorMax << endl;
 
-                    //If debug is 2: Print out surface error to file
-                    if( debug >= 2 )
+                    // If debug is 2: Print out surface error to file
+                    if ( debug >= 2 )
                     {
                         std::string filename = "unitSelection-rbf-surfaceError.txt";
                         std::ofstream surfaceErrorFile( filename, std::ofstream::app );
+
                         if ( surfaceErrorFile.is_open() )
                         {
                             surfaceErrorFile << error << ", " << errorMax << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << "\n";
@@ -756,21 +770,21 @@ namespace rbf
 
                 rbf->Hhat.conservativeResize( rbf->Hhat.rows(), rbf->Hhat.cols() - nbStaticFaceCentersRemove );
 
-                if( debug == 3 )
+                if ( debug == 3 )
                 {
                     tp = std::clock() - tp;
                     runTimeError = static_cast<float>(tp) / CLOCKS_PER_SEC;
                     tp = std::clock();
                 }
             }
-            else //This means there is unit displacement used, but rbf is already computed. Only used for debug things to track error.
+            else // This means there is unit displacement used, but rbf is already computed. Only used for debug things to track error.
             {
-                if( debug == 3 )
+                if ( debug == 3 )
                 {
                     tp = std::clock();
                 }
 
-                if( debug > 0 )
+                if ( debug > 0 )
                 {
                     if ( livePointSelectionSumValues )
                     {
@@ -780,7 +794,7 @@ namespace rbf
                             this->values.array() += values.array();
                     }
 
-                    //Construct values to interpolate based on unit displacement selected points
+                    // Construct values to interpolate based on unit displacement selected points
                     rbf::matrix valuesCoarse( selectedPositions.rows(), values.cols() );
                     rbf::matrix valuesInterpolationCoarse( positions.rows(), valuesInterpolation.cols() );
                     rbf::vector errorList( positions.rows() );
@@ -788,7 +802,7 @@ namespace rbf
                     for ( int j = 0; j < selectedPositions.rows(); j++ )
                         valuesCoarse.row( j ) = this->values.row( selectedPositions( j ) );
 
-                    //This will return the displaced surface in valuesInterpolationCoarse
+                    // This will return the displaced surface in valuesInterpolationCoarse
                     rbfCoarse->interpolate2( valuesCoarse, valuesInterpolationCoarse );
 
                     // Evaluate the error
@@ -796,16 +810,17 @@ namespace rbf
                         errorList( j ) = ( valuesInterpolationCoarse.row( j ) - this->values.row( j ) ).norm();
 
                     double epsilon = std::sqrt( SMALL );
-                    double error = (errorList).norm() / (this->values.norm() + epsilon );
+                    double error = (errorList).norm() / (this->values.norm() + epsilon);
                     double errorMax = errorList.maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() + epsilon );
 
-                    Info << "RBFCoarsening::UnitDisplacement::debug 1: " << "2-norm error = " << error << ", max error = " << errorMax <<  endl;
+                    Info << "RBFCoarsening::UnitDisplacement::debug 1: " << "2-norm error = " << error << ", max error = " << errorMax << endl;
 
-                    //If debug is 2: Print out surface error to file
-                    if( debug >= 2 )
+                    // If debug is 2: Print out surface error to file
+                    if ( debug >= 2 )
                     {
                         std::string filename = "unitSelection-rbf-surfaceError.txt";
                         std::ofstream surfaceErrorFile( filename, std::ofstream::app );
+
                         if ( surfaceErrorFile.is_open() )
                         {
                             surfaceErrorFile << error << ", " << errorMax << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << "\n";
@@ -815,7 +830,7 @@ namespace rbf
                     }
                 }
 
-                if( debug == 3 )
+                if ( debug == 3 )
                 {
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -842,7 +857,7 @@ namespace rbf
         usedValues.conservativeResize( usedValues.rows() - nbStaticFaceCentersRemove, usedValues.cols() );
         rbf->interpolate( usedValues, valuesInterpolation );
 
-        if( debug == 3 )
+        if ( debug == 3 )
         {
             tp = std::clock() - tp;
             runTimeInterpolate = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -855,29 +870,31 @@ namespace rbf
             correctSurface( valuesInterpolation );
         }
 
-        if( debug == 3 )
+        if ( debug == 3 )
         {
             tp = std::clock() - tp;
             runTimeCorrect = static_cast<float>(tp) / CLOCKS_PER_SEC;
             tp = std::clock();
         }
 
-        if( debug == 3 )
+        if ( debug == 3 )
         {
             t = std::clock() - t;
             double runTimeINTP = static_cast<float>(t) / CLOCKS_PER_SEC;
             t = std::clock();
             Info << "RBFCoarsening::interpolate::debug 1. total time = " << runTimeINTP << " s" << endl;
 
-            //write to file
+            // write to file
             if ( Pstream::myProcNo() == 0 && not rbf->polynomialTerm )
             {
                 std::string filename = "totalInterpolationTimings.txt";
                 std::ofstream timingFile( filename, std::ofstream::app );
+
                 if ( timingFile.is_open() )
                 {
-                    timingFile << std::setprecision(9) << runTimeINTP << ", "<< runTimeError << ", " << runTimeReselect << ", " << runTimeInterpolate << ", " << runTimeCorrect << "\n";
+                    timingFile << std::setprecision( 9 ) << runTimeINTP << ", " << runTimeError << ", " << runTimeReselect << ", " << runTimeInterpolate << ", " << runTimeCorrect << "\n";
                 }
+
                 timingFile.close();
             }
         }
@@ -892,6 +909,7 @@ namespace rbf
         }
 
         double R = 1.0;
+
         if ( surfaceCorrectionRadius > 0 )
         {
             R = surfaceCorrectionRadius;
@@ -900,7 +918,7 @@ namespace rbf
         {
             double Rerror = ratioRadiusError * ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff();
             double Rwall = ratioRadiusError * minCorrectionRadius;
-            R = max(Rerror,Rwall);
+            R = max( Rerror, Rwall );
         }
 
         if ( debug > 0 )
@@ -965,8 +983,8 @@ namespace rbf
         double runTimeCorr = 0;
         surfaceCorrectionRbfFunction->setRadius( R );
 
-        //std::shared_ptr<rbf::RBFFunctionInterface> surfaceCorrectionRbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( R ) );
-        //std::shared_ptr<rbf::RBFFunctionInterface> surfaceCorrectionRbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC0Function( R ) );
+        // std::shared_ptr<rbf::RBFFunctionInterface> surfaceCorrectionRbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( R ) );
+        // std::shared_ptr<rbf::RBFFunctionInterface> surfaceCorrectionRbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC0Function( R ) );
 
         for ( int i = 0; i < positionsInterpolation.rows(); i++ )
         {

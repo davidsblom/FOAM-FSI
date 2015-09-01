@@ -15,15 +15,15 @@ protected:
 
     virtual void SetUp()
     {
-        double r0 = 3.0e-3;
-        double h = 3.0e-4;
-        double L = 0.126;
-        double rho = 1000;
-        double E0 = 4.0e5;
-        double G = 4.0e5;
-        double nu = 0.5;
+        scalar r0 = 3.0e-3;
+        scalar h = 3.0e-4;
+        scalar L = 0.126;
+        scalar rho = 1000;
+        scalar E0 = 4.0e5;
+        scalar G = 4.0e5;
+        scalar nu = 0.5;
 
-        double dt = 0.1;
+        scalar dt = 0.1;
         int N = 5;
 
         solid = new tubeflow::TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0 );

@@ -187,10 +187,7 @@ void Foam::movingWallPressureGradientFvPatchScalarField::updateCoeffs()
     const surfaceVectorField& Uf =
         db().lookupObject<surfaceVectorField>("Uf");
 
-    const fvPatchField<vector>& Up =
-        lookupPatchField<volVectorField, vector>(UName_);
-
-    /*if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+        /*if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
         const fvPatchField<scalar>& rhop =
             lookupPatchField<volScalarField, scalar>(rhoName_);

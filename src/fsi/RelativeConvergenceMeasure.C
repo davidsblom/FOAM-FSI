@@ -10,18 +10,17 @@ namespace fsi
 {
     RelativeConvergenceMeasure::RelativeConvergenceMeasure(
         int dataId,
-        double convergenceLimit
+        scalar convergenceLimit
         )
         :
-        ConvergenceMeasure( dataId, convergenceLimit ),
+        ConvergenceMeasure( dataId ),
         normDiff( 0 ),
         norm( 0 ),
-        convergenceLimit( convergenceLimit )
+        convergenceLimit( convergenceLimit ),
+        epsilon( std::sqrt( SMALL ) )
     {
         assert( convergenceLimit > 0 );
         assert( convergenceLimit < 1 );
-
-        epsilon = std::sqrt( SMALL );
     }
 
     void RelativeConvergenceMeasure::measure(

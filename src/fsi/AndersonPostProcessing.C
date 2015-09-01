@@ -11,13 +11,13 @@ namespace fsi
     AndersonPostProcessing::AndersonPostProcessing(
         shared_ptr<MultiLevelFsiSolver> fsi,
         int maxIter,
-        double initialRelaxation,
+        scalar initialRelaxation,
         int maxUsedIterations,
         int nbReuse,
-        double singularityLimit,
+        scalar singularityLimit,
         int reuseInformationStartingFromTimeIndex,
         bool scaling,
-        double beta,
+        scalar beta,
         bool updateJacobian
         )
         :
@@ -26,7 +26,8 @@ namespace fsi
         beta( beta ),
         singularityLimit( singularityLimit ),
         updateJacobian( updateJacobian ),
-        scalingFactors( Eigen::VectorXd::Ones( 2 ) ),
+        scalingFactors( fsi::vector::Ones( 2 ) ),
+        Jprev(),
         sizeVar0( 0 ),
         sizeVar1( 0 )
     {
@@ -292,7 +293,7 @@ namespace fsi
 
                     Eigen::HouseholderQR<matrix> qr = V.householderQr();
                     matrix R = qr.matrixQR().triangularView <Eigen::Upper> ();
-                    Eigen::VectorXd diagonals = R.diagonal();
+                    fsi::vector diagonals = R.diagonal();
 
                     for ( int i = 0; i < diagonals.rows(); i++ )
                     {
@@ -325,7 +326,7 @@ namespace fsi
 
                         matrix Vinverse = svd.matrixV() * svd.singularValues().asDiagonal().inverse() * svd.matrixU().transpose();
 
-                        matrix I = Eigen::MatrixXd::Identity( V.rows(), V.rows() );
+                        matrix I = fsi::matrix::Identity( V.rows(), V.rows() );
 
                         if ( Jprev.cols() == R.rows() )
                         {

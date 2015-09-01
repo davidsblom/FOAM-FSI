@@ -25,7 +25,7 @@ namespace rbf
         if ( 1 - value < 0 )
             return 0;
 
-        return (1 - value)*(1 - value)*(1 - value)*(1 - value) * (4 * value + 1);
+        return (1 - value) * (1 - value) * (1 - value) * (1 - value) * (4 * value + 1);
     }
 
     double WendlandC2Function::correctionPower()
@@ -33,7 +33,7 @@ namespace rbf
         return 2;
     }
 
-    void WendlandC2Function::setRadius( double value)
+    void WendlandC2Function::setRadius( double value )
     {
         assert( value > 0 );
         radius = value;

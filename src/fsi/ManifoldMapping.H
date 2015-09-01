@@ -31,7 +31,7 @@ public:
             int maxUsedIterations,
             int nbReuse,
             int reuseInformationStartingFromTimeIndex,
-            double singularityLimit,
+            scalar singularityLimit,
             bool updateJacobian
             );
 
@@ -42,7 +42,7 @@ public:
             int maxUsedIterations,
             int nbReuse,
             int reuseInformationStartingFromTimeIndex,
-            double singularityLimit,
+            scalar singularityLimit,
             bool updateJacobian,
             bool initialSolutionCoarseModel
             );
@@ -67,8 +67,8 @@ public:
             int col
             );
 
-        bool updateJacobian;
-        bool initialSolutionCoarseModel;
+        const bool updateJacobian;
+        const bool initialSolutionCoarseModel;
         bool scaling;
         int iter;
         vector scalingFactors;

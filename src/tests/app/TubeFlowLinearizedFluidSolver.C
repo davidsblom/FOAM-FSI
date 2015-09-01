@@ -10,15 +10,15 @@ using namespace tubeflow;
 
 TubeFlowLinearizedFluidSolver::TubeFlowLinearizedFluidSolver(
     int N,
-    double p0,
-    double r0,
-    double u0,
-    double rho,
-    double E,
-    double h,
-    double T,
-    double dt,
-    double L
+    scalar p0,
+    scalar r0,
+    scalar u0,
+    scalar rho,
+    scalar E,
+    scalar h,
+    scalar T,
+    scalar dt,
+    scalar L
     ) :
     BaseMultiLevelSolver( N, 1, p0 ),
     p0( p0 ),
@@ -33,12 +33,14 @@ TubeFlowLinearizedFluidSolver::TubeFlowLinearizedFluidSolver(
     tau( u0 * dt / L ),
     cmk( std::sqrt( E * h / (2 * rho * r0) ) ),
     alpha( a0 / (u0 + dx / dt) ),
+    grid(),
     un( N ),
     an( N ),
     pn( N ),
     u( N ),
     a( N ),
-    p( N )
+    p( N ),
+    lu()
 {
     assert( N > 0 );
     assert( p0 >= 0 );

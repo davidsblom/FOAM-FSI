@@ -47,17 +47,11 @@ SolidSolver::SolidSolver (
     muf( fvc::interpolate( mu, "mu" ) ),
     lambdaf( fvc::interpolate( lambda, "lambda" ) ),
     n( mesh.Sf() / mesh.magSf() ),
-    couplingProperties
-    (
-    IOobject
-    (
-        "couplingProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    )
-    )
+    minIter( 0 ),
+    maxIter( 0 ),
+    absoluteTolerance( 0 ),
+    relativeTolerance( 0 ),
+    interpolator( false )
 {}
 
 SolidSolver::SolidSolver (
@@ -102,17 +96,10 @@ SolidSolver::SolidSolver (
     muf( fvc::interpolate( mu, "mu" ) ),
     lambdaf( fvc::interpolate( lambda, "lambda" ) ),
     n( mesh.Sf() / mesh.magSf() ),
-    couplingProperties
-    (
-    IOobject
-    (
-        "couplingProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    )
-    ),
+    minIter( 0 ),
+    maxIter( 0 ),
+    absoluteTolerance( 0 ),
+    relativeTolerance( 0 ),
     interpolator( interpolator )
 {}
 
@@ -137,6 +124,9 @@ void SolidSolver::initialize()
 void SolidSolver::initTimeStep()
 {
     assert( !init );
+
+    timeIndex++;
+    t = runTime->time().value();
 
     readSolidMechanicsControls();
 
@@ -338,7 +328,7 @@ void SolidSolver::solve()
         {
             initialResidual = displacementResidual;
             convergenceTolerance = std::max( relativeTolerance * displacementResidual, absoluteTolerance );
-            convergenceTolerance = std::min( relativeTolerance, convergenceTolerance );
+            assert( convergenceTolerance > 0 );
         }
 
         bool convergence = displacementResidual <= convergenceTolerance && iCorr >= minIter - 1;

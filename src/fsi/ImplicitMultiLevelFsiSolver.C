@@ -13,6 +13,7 @@ ImplicitMultiLevelFsiSolver::ImplicitMultiLevelFsiSolver(
     shared_ptr<PostProcessing> postProcessing
     )
     :
+    Solver(),
     fsi( fsi ),
     postProcessing( postProcessing ),
     init( false )

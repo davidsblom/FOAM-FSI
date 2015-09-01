@@ -16,7 +16,7 @@ class FineModelParabola : public SurrogateModel
 {
 public:
 
-    FineModelParabola ( double tol )
+    FineModelParabola ( scalar tol )
         :
         tol( tol ),
         iter( 0 ),
@@ -98,7 +98,7 @@ public:
     virtual void setUseJacobian( bool useJacobian )
     {}
 
-    double tol;
+    scalar tol;
     int iter;
     bool allConverged_;
 };
@@ -136,21 +136,21 @@ struct Functor
     }
 };
 
-struct fineModelParabolaFunctor : Functor<double>
+struct fineModelParabolaFunctor : Functor<scalar>
 {
     fineModelParabolaFunctor(
         FineModelParabola * model,
         const fsi::vector * y
         )
         :
-        Functor<double>( 2, 3 ),
+        Functor<scalar>( 2, 3 ),
         model( model ),
         y( y )
     {}
 
     int operator()(
-        const Eigen::VectorXd & x,
-        Eigen::VectorXd & fvec
+        const fsi::vector & x,
+        fsi::vector & fvec
         ) const
     {
         fsi::vector output( x.rows() );
@@ -171,7 +171,7 @@ void FineModelParabola::optimize(
 {
     fineModelParabolaFunctor functor( this, &y );
     Eigen::NumericalDiff<fineModelParabolaFunctor, Eigen::Central> numDiff( functor );
-    Eigen::LevenbergMarquardt<Eigen::NumericalDiff<fineModelParabolaFunctor, Eigen::Central>, double> lm( numDiff );
+    Eigen::LevenbergMarquardt<Eigen::NumericalDiff<fineModelParabolaFunctor, Eigen::Central>, scalar> lm( numDiff );
 
     lm.parameters.maxfev = 2000;
     lm.parameters.xtol = 1.0e-13;
@@ -189,7 +189,7 @@ class FineModelSimple : public SurrogateModel
 {
 public:
 
-    FineModelSimple( double tol )
+    FineModelSimple( scalar tol )
         :
         tol( tol ),
         iter( 0 ),
@@ -273,26 +273,26 @@ public:
     virtual void setUseJacobian( bool useJacobian )
     {}
 
-    double tol;
+    scalar tol;
     int iter;
     bool allConverged_;
 };
 
-struct fineModelSimpleFunctor : Functor<double>
+struct fineModelSimpleFunctor : Functor<scalar>
 {
     fineModelSimpleFunctor(
         FineModelSimple * model,
         const fsi::vector * y
         )
         :
-        Functor<double>( 2, 3 ),
+        Functor<scalar>( 2, 3 ),
         model( model ),
         y( y )
     {}
 
     int operator()(
-        const Eigen::VectorXd & x,
-        Eigen::VectorXd & fvec
+        const fsi::vector & x,
+        fsi::vector & fvec
         ) const
     {
         fsi::vector output( x.rows() );
@@ -313,7 +313,7 @@ void FineModelSimple::optimize(
 {
     fineModelSimpleFunctor functor( this, &y );
     Eigen::NumericalDiff<fineModelSimpleFunctor, Eigen::Central> numDiff( functor );
-    Eigen::LevenbergMarquardt<Eigen::NumericalDiff<fineModelSimpleFunctor, Eigen::Central>, double> lm( numDiff );
+    Eigen::LevenbergMarquardt<Eigen::NumericalDiff<fineModelSimpleFunctor, Eigen::Central>, scalar> lm( numDiff );
 
     lm.parameters.maxfev = 2000;
     lm.parameters.xtol = 1.0e-13;
@@ -348,7 +348,7 @@ public:
         fsi::vector t( 3 );
         t << -1, 0, 1;
 
-        R = x( 0 ) * t + x( 1 ) * Eigen::MatrixXd::Ones( 3, 1 );
+        R = x( 0 ) * t + x( 1 ) * fsi::matrix::Ones( 3, 1 );
         output = R;
     }
 

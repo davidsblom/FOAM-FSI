@@ -25,7 +25,7 @@ namespace rbf
         if ( 1 - value < 0 )
             return 0;
 
-        return 1 - 4*value*value*value + 3*value*value*value*value;
+        return 1 - 4 * value * value * value + 3 * value * value * value * value;
     }
 
     double GillebaartR3Function::correctionPower()
@@ -33,7 +33,7 @@ namespace rbf
         return 3;
     }
 
-    void GillebaartR3Function::setRadius( double value)
+    void GillebaartR3Function::setRadius( double value )
     {
         assert( value > 0 );
         radius = value;

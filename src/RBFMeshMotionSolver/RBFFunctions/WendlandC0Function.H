@@ -23,7 +23,7 @@ public:
 
         virtual double correctionPower();
 
-        virtual void setRadius( double value);
+        virtual void setRadius( double value );
 
         double radius;
     };

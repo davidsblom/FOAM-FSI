@@ -59,7 +59,7 @@ private:
 
     void courantNo();
 
-    double evaluateMomentumResidual();
+    scalar evaluateMomentumResidual();
 
     // Dictionaries
     IOdictionary transportProperties;

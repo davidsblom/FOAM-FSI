@@ -2,6 +2,8 @@
 
 cd ${0%/*}
 
+set -e
+
 pwdstring=`pwd`
 prefLocation=$WM_PROJECT_DIR/etc/prefs.sh
 
@@ -16,7 +18,5 @@ source $FOAM_SRC/../etc/bashrc
 cd src/thirdParty
 ./Allmake
 cd ../../
-
-set -e
 
 ./Allwmake

@@ -26,7 +26,7 @@ public:
         int maxUsedIterations,
         int nbReuse,
         int reuseInformationStartingFromTimeIndex,
-        double singularityLimit
+        scalar singularityLimit
         );
 
     virtual ~SpaceMapping(){}
@@ -62,11 +62,11 @@ public:
     shared_ptr<SurrogateModel> fineModel;
     shared_ptr<SurrogateModel> coarseModel;
 
-    int maxIter;
-    int maxUsedIterations;
-    int nbReuse;
-    int reuseInformationStartingFromTimeIndex;
-    double singularityLimit;
+    const int maxIter;
+    const int maxUsedIterations;
+    const int nbReuse;
+    const int reuseInformationStartingFromTimeIndex;
+    const scalar singularityLimit;
     int timeIndex;
 
     deque<fsi::vector> coarseResiduals;

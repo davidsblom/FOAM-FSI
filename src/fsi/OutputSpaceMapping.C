@@ -15,12 +15,15 @@ OutputSpaceMapping::OutputSpaceMapping(
     int maxUsedIterations,
     int nbReuse,
     int reuseInformationStartingFromTimeIndex,
-    double singularityLimit,
+    scalar singularityLimit,
     int order
     )
     :
     SpaceMapping( fineModel, surrogateModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
     surrogateModel( surrogateModel ),
+    sols(),
+    solsList(),
+    solsTimeList(),
     order( order )
 {
     assert( surrogateModel );
@@ -169,7 +172,7 @@ void OutputSpaceMapping::performPostProcessing(
             assert( solsList.size() == coarseResidualsList.size() );
 
             // Initialize mapping matrix
-            matrix J = -Eigen::MatrixXd::Identity( m, m );
+            matrix J = -fsi::matrix::Identity( m, m );
             fsi::vector d, dprev, deltad, deltax;
             int colIndex = 0;
 
@@ -356,7 +359,7 @@ void OutputSpaceMapping::performPostProcessing(
                     Info << "Output space mapping: remove " << nbRemoveCols << " columns from the Jacobian matrices" << endl;
             }
 
-            matrix I = Eigen::MatrixXd::Identity( m, m );
+            matrix I = fsi::matrix::Identity( m, m );
 
             Eigen::JacobiSVD<matrix> svd( DeltaX, Eigen::ComputeThinU | Eigen::ComputeThinV );
 

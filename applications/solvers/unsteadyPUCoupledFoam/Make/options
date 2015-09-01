@@ -1,17 +1,36 @@
-EXE_INC = \
+c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs
+
+EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/turbulenceModels \
     -I$(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/VectorN/lnInclude
+    -I$(LIB_SRC)/VectorN/lnInclude \
+    -I../../../src/thirdParty/yaml-cpp/include \
+    -I../../../src/thirdParty/boost
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -lincompressibleRASModels \
-    -lincompressibleTransportModels \
-    -lfiniteVolume \
-    -llduSolvers \
+    -ldynamicFvMesh \
     -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lmeshTools \
+    -lfiniteVolume \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -llduSolvers \
+    -lfvSchemes \
     -lboundaryConditions \
-    -lfvSchemes
+    -lsolidModels \
+    -lsampling \
+    -llagrangian \
+    -lyaml-cpp \
+    -lRBFMeshMotionSolver \
+    -lfsi \
+    -ltetFiniteElement \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels

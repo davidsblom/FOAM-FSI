@@ -22,19 +22,242 @@ namespace sdc
         B(),
         C(),
         Bhat(),
-        N( solver->getDOF() )
+        N( solver->getDOF() ),
+        stageIndex( 0 ),
+        F(),
+        solStages(),
+        qold(),
+        timeIndex( 0 )
     {
-        assert( method == "SDIRK2" || method == "SDIRK3" || method == "SDIRK4" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK5" );
         assert( solver );
         assert( adaptiveTimeStepper );
         assert( dt > 0 );
 
+        initializeButcherTableau( method );
+
+        bool firstStageImplicit = isStageImplicit( A( 0, 0 ) );
+
+        if ( firstStageImplicit )
+            solver->setNumberOfImplicitStages( nbStages );
+        else
+            solver->setNumberOfImplicitStages( nbStages - 1 );
+
+        adaptiveTimeStepper->setEndTime( solver->getEndTime() );
+    }
+
+    ESDIRK::ESDIRK( std::string method )
+        :
+        solver( false ),
+        adaptiveTimeStepper( false ),
+        dt( -1 ),
+        nbStages( 0 ),
+        A(),
+        B(),
+        C(),
+        Bhat(),
+        N( 0 ),
+        stageIndex( 0 ),
+        F(),
+        solStages(),
+        qold(),
+        timeIndex( 0 )
+    {
+        initializeButcherTableau( method );
+    }
+
+    ESDIRK::~ESDIRK()
+    {}
+
+    bool ESDIRK::isStageImplicit( scalar Akk )
+    {
+        return Akk > 0;
+    }
+
+    void ESDIRK::run()
+    {
+        scalar t = solver->getStartTime();
+
+        while ( std::abs( t - solver->getEndTime() ) > 1.0e-13 && t < solver->getEndTime() )
+        {
+            scalar computedTimeStep = dt;
+
+            solveTimeStep( t );
+
+            if ( adaptiveTimeStepper->isAccepted() )
+                t += computedTimeStep;
+        }
+    }
+
+    void ESDIRK::solveTimeStep( const scalar t0 )
+    {
+        if ( adaptiveTimeStepper->isPreviousStepAccepted() )
+            solver->nextTimeStep();
+
+        fsi::matrix solStages( nbStages, N ), F( nbStages, N );
+        F.setZero();
+
+        fsi::vector sol( N ), f( N ), qold( N ), result( N ), rhs( N );
+        solver->getSolution( sol );
+        solStages.row( 0 ) = sol;
+
+        qold = sol;
+
+        scalar t = t0;
+
+        solver->evaluateFunction( 0, sol, t, f );
+        F.row( 0 ) = f;
+
+        // Keep the solution of the first stage and function evaluate
+        // in memory in case the time step is rejected
+        fsi::vector solOld = sol;
+        fsi::vector fOld = f;
+
+        // Loop over the stages
+
+        solver->initTimeStep();
+
+        int iImplicitStage = 0;
+
+        for ( int j = 0; j < nbStages; j++ )
+        {
+            if ( !isStageImplicit( A( j, j ) ) )
+                continue;
+
+            t = t0 + C( j ) * dt;
+
+            Info << "\nTime = " << t << ", ESDIRK stage = " << j + 1 << "/" << nbStages << nl << endl;
+
+            rhs.setZero();
+
+            // Calculate sum of the stage residuals
+            for ( int iStage = 0; iStage < j; iStage++ )
+                rhs += A( j, iStage ) * F.row( iStage ).transpose();
+
+            rhs.array() *= dt;
+
+            solver->implicitSolve( false, iImplicitStage, 0, t, A( j, j ) * dt, qold, rhs, f, result );
+
+            solStages.row( j ) = result;
+            F.row( j ) = f;
+
+            iImplicitStage++;
+        }
+
+        if ( adaptiveTimeStepper->isEnabled() )
+        {
+            scalar newTimeStep = 0;
+            fsi::vector errorEstimate( N );
+            errorEstimate.setZero();
+
+            for ( int iStage = 0; iStage < nbStages; iStage++ )
+                errorEstimate += ( B( iStage ) - Bhat( iStage ) ) * F.row( iStage );
+
+            errorEstimate *= dt;
+
+            bool accepted = adaptiveTimeStepper->determineNewTimeStep( errorEstimate, result, dt, newTimeStep );
+
+            dt = newTimeStep;
+
+            if ( not accepted )
+                solver->setSolution( solOld, fOld );
+        }
+
+        if ( adaptiveTimeStepper->isAccepted() )
+            solver->finalizeTimeStep();
+    }
+
+    void ESDIRK::getSourceTerm(
+        const bool corrector,
+        const int k,
+        const scalar deltaT,
+        fsi::vector & rhs,
+        fsi::vector & qold
+        )
+    {
+        assert( k <= nbStages - 1 );
+        assert( corrector == false );
+
+        qold = this->qold;
+
+        // Compute the time step from the stage deltaT
+        if ( dt < 0 )
+        {
+            // first time step, first prediction step
+            dt = deltaT / A( k, k );
+        }
+
+        assert( dt > 0 );
+
+        rhs.setZero();
+
+        // Calculate sum of the stage residuals
+        for ( int iStage = 0; iStage < k; iStage++ )
+            rhs += A( k, iStage ) * F.row( iStage ).transpose();
+
+        rhs.array() *= dt;
+
+        this->stageIndex = k;
+    }
+
+    void ESDIRK::setFunction(
+        const int k,
+        const fsi::vector & f,
+        const fsi::vector & result
+        )
+    {
+        assert( f.rows() == result.rows() );
+        assert( k <= nbStages - 1 );
+
+        if ( F.cols() == 0 )
+            F.resize( nbStages, f.rows() );
+
+        if ( solStages.cols() == 0 )
+            solStages.resize( nbStages, f.rows() );
+
+        F.row( k ) = f;
+        solStages.row( k ) = result;
+    }
+
+    void ESDIRK::setOldSolution(
+        int timeIndex,
+        const fsi::vector & result
+        )
+    {
+        assert( timeIndex >= this->timeIndex );
+
+        if ( qold.rows() == result.rows() )
+            qold = solStages.bottomRows( 1 ).transpose();
+        else
+        if ( timeIndex > this->timeIndex )
+            qold = result;
+
+        this->timeIndex = timeIndex;
+    }
+
+    int ESDIRK::getNbImplicitStages()
+    {
+        assert( nbStages > 0 );
+
+        bool firstStageImplicit = isStageImplicit( A( 0, 0 ) );
+
+        if ( firstStageImplicit )
+            return nbStages;
+        else
+            return nbStages - 1;
+    }
+
+    void ESDIRK::initializeButcherTableau( std::string method )
+    {
+        assert( method == "SDIRK2" || method == "SDIRK3" || method == "SDIRK4" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK5" || method == "ESDIRK53PR" || method == "ESDIRK63PR" || method == "ESDIRK74PR" );
+
         // source: Ellsiepen. Habilitation thesis Philipp Birken
         if ( method == "SDIRK2" )
         {
-            adaptiveTimeStepper->setOrderEmbeddedMethod( 1 );
-            double alpha = 1.0 - 0.5 * std::sqrt( 2 );
-            double alphahat = 2.0 - 5.0 / 4.0 * std::sqrt( 2 );
+            if ( adaptiveTimeStepper )
+                adaptiveTimeStepper->setOrderEmbeddedMethod( 1 );
+
+            scalar alpha = 1.0 - 0.5 * std::sqrt( 2 );
+            scalar alphahat = 2.0 - 5.0 / 4.0 * std::sqrt( 2 );
             A.resize( 2, 2 );
             A.setZero();
             Bhat.resize( A.cols() );
@@ -49,17 +272,19 @@ namespace sdc
         // source: Cash. Habilitation thesis Philipp Birken
         if ( method == "SDIRK3" )
         {
-            adaptiveTimeStepper->setOrderEmbeddedMethod( 2 );
+            if ( adaptiveTimeStepper )
+                adaptiveTimeStepper->setOrderEmbeddedMethod( 2 );
+
             A.resize( 3, 3 );
             A.setZero();
             Bhat.resize( A.cols() );
             Bhat.setZero();
-            double alpha = 1.2084966491760101;
-            double beta = -0.6443631706844691;
-            double gamma = 0.4358665215084580;
-            double delta = 0.7179332607542295;
-            double alphahat = 0.7726301276675511;
-            double betahat = 0.2273698723324489;
+            scalar alpha = 1.2084966491760101;
+            scalar beta = -0.6443631706844691;
+            scalar gamma = 0.4358665215084580;
+            scalar delta = 0.7179332607542295;
+            scalar alphahat = 0.7726301276675511;
+            scalar betahat = 0.2273698723324489;
             A( 0, 0 ) = gamma;
             A( 1, 0 ) = delta - gamma;
             A( 1, 1 ) = gamma;
@@ -74,7 +299,9 @@ namespace sdc
         // source: Cash-5-3-4 http://runge.math.smu.edu/arkode_dev/doc/guide/build/html/Butcher.html
         if ( method == "SDIRK4" )
         {
-            adaptiveTimeStepper->setOrderEmbeddedMethod( 3 );
+            if ( adaptiveTimeStepper )
+                adaptiveTimeStepper->setOrderEmbeddedMethod( 3 );
+
             A.resize( 5, 5 );
             A.setZero();
             Bhat.resize( A.cols() );
@@ -103,7 +330,9 @@ namespace sdc
 
         if ( method == "ESDIRK3" )
         {
-            adaptiveTimeStepper->setOrderEmbeddedMethod( 2 );
+            if ( adaptiveTimeStepper )
+                adaptiveTimeStepper->setOrderEmbeddedMethod( 2 );
+
             A.resize( 4, 4 );
             A.setZero();
             Bhat.resize( A.cols() );
@@ -126,7 +355,9 @@ namespace sdc
 
         if ( method == "ESDIRK4" )
         {
-            adaptiveTimeStepper->setOrderEmbeddedMethod( 3 );
+            if ( adaptiveTimeStepper )
+                adaptiveTimeStepper->setOrderEmbeddedMethod( 3 );
+
             A.resize( 6, 6 );
             A.setZero();
             Bhat.resize( A.cols() );
@@ -161,7 +392,9 @@ namespace sdc
 
         if ( method == "ESDIRK5" )
         {
-            adaptiveTimeStepper->setOrderEmbeddedMethod( 4 );
+            if ( adaptiveTimeStepper )
+                adaptiveTimeStepper->setOrderEmbeddedMethod( 4 );
+
             A.resize( 8, 8 );
             A.setZero();
             Bhat.resize( A.cols() );
@@ -212,6 +445,124 @@ namespace sdc
             Bhat( 7 ) = 4035322873751.e0 / 18575991585200.e0;
         }
 
+        // source: http://www.sciencedirect.com/science/article/pii/S0168927415000501
+        if ( method == "ESDIRK53PR" )
+        {
+            if ( adaptiveTimeStepper )
+                adaptiveTimeStepper->setOrderEmbeddedMethod( 2 );
+
+            A.resize( 5, 5 );
+            A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
+            A( 0, 0 ) = 0.0;
+            A( 1, 0 ) = 2.777777777777778e-01;
+            A( 1, 1 ) = 2.777777777777778e-01;
+            A( 2, 0 ) = 3.456552483519272e-01;
+            A( 2, 1 ) = 1.681740315717733e-01;
+            A( 2, 2 ) = 2.777777777777778e-01;
+            A( 3, 0 ) = 3.965643047257401e-01;
+            A( 3, 1 ) = 1.001154404932533e-01;
+            A( 3, 2 ) = 1.255424770032288e-01;
+            A( 3, 3 ) = 2.777777777777778e-01;
+            A( 4, 0 ) = 2.481479828780141e-01;
+            A( 4, 1 ) = 2.139473588935955e-01;
+            A( 4, 2 ) = 1.206274239267400e+00;
+            A( 4, 3 ) = -9.461473588167871e-01;
+            A( 4, 4 ) = 2.777777777777778e-01;
+            Bhat( 0 ) = 4.445537532713554e-01;
+            Bhat( 1 ) = -1.065203443758999e-01;
+            Bhat( 2 ) = 2.533129069755295e-01;
+            Bhat( 3 ) = 5.000000000000000e-01;
+            Bhat( 4 ) = -9.134631587098500e-02;
+        }
+
+        // source: http://www.sciencedirect.com/science/article/pii/S0168927415000501
+        if ( method == "ESDIRK63PR" )
+        {
+            if ( adaptiveTimeStepper )
+                adaptiveTimeStepper->setOrderEmbeddedMethod( 2 );
+
+            A.resize( 6, 6 );
+            A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
+            A( 0, 0 ) = 0.0;
+            A( 1, 0 ) = 4.166666666666667e-01;
+            A( 1, 1 ) = 4.166666666666667e-01;
+            A( 2, 0 ) = 3.640473915723038e-01;
+            A( 2, 1 ) = -4.189886135331312e-02;
+            A( 2, 2 ) = 4.166666666666667e-01;
+            A( 3, 0 ) = -2.894969214392781e+00;
+            A( 3, 1 ) = -2.256341718064659e+01;
+            A( 3, 2 ) = 2.534171972837271e+01;
+            A( 3, 3 ) = 4.166666666666667e-01;
+            A( 4, 0 ) = 2.309551022782098e-01;
+            A( 4, 1 ) = -1.849667242832423e+00;
+            A( 4, 2 ) = 2.197073089164931e+00;
+            A( 4, 3 ) = 4.972384722615363e-03;
+            A( 4, 4 ) = 4.166666666666667e-01;
+            A( 5, 0 ) = 3.054968378466108e-01;
+            A( 5, 1 ) = 4.057983152922798e+00;
+            A( 5, 2 ) = -2.202162095667910e+00;
+            A( 5, 3 ) = 1.333484429273537e-01;
+            A( 5, 4 ) = -1.711333004695519e+00;
+            A( 5, 5 ) = 4.166666666666667e-01;
+            Bhat( 0 ) = 2.309551022782098e-01;
+            Bhat( 1 ) = -1.849667242832423e+00;
+            Bhat( 2 ) = 2.197073089164931e+00;
+            Bhat( 3 ) = 4.972384722615363e-03;
+            Bhat( 4 ) = 4.166666666666667e-01;
+            Bhat( 5 ) = 0.0;
+        }
+
+        // source: http://www.sciencedirect.com/science/article/pii/S0168927415000501
+        if ( method == "ESDIRK74PR" )
+        {
+            if ( adaptiveTimeStepper )
+                adaptiveTimeStepper->setOrderEmbeddedMethod( 3 );
+
+            A.resize( 7, 7 );
+            A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
+            A( 0, 0 ) = 0.0;
+            A( 1, 0 ) = 1.666666666666667e-01;
+            A( 1, 1 ) = 1.666666666666667e-01;
+            A( 2, 0 ) = 4.166666666666666e-02;
+            A( 2, 1 ) = -4.166666666666666e-02;
+            A( 2, 2 ) = 1.666666666666667e-01;
+            A( 3, 0 ) = -1.500000000000000e+00;
+            A( 3, 1 ) = -1.333333333333333e+00;
+            A( 3, 2 ) = 3.333333333333333e+00;
+            A( 3, 3 ) = 1.666666666666667e-01;
+            A( 4, 0 ) = -1.580729166666667e+00;
+            A( 4, 1 ) = -1.349609375000000e+00;
+            A( 4, 2 ) = 3.472656250000000e+00;
+            A( 4, 3 ) = 4.101562500000000e-02;
+            A( 4, 4 ) = 1.666666666666667e-01;
+            A( 5, 0 ) = -2.005366150605651e+00;
+            A( 5, 1 ) = -1.768688648609954e+00;
+            A( 5, 2 ) = 4.341269295345690e+00;
+            A( 5, 3 ) = 2.326169434610579e-02;
+            A( 5, 4 ) = 1.000000000000000e-01;
+            A( 5, 5 ) = 1.666666666666667e-01;
+            A( 6, 0 ) = 1.684854267805816e-01;
+            A( 6, 1 ) = 7.501080898831836e-01;
+            A( 6, 2 ) = -2.255843889686931e-01;
+            A( 6, 3 ) = -9.134421504267402e-01;
+            A( 6, 4 ) = 1.618140253772232e+00;
+            A( 6, 5 ) = -5.643738977072310e-01;
+            A( 6, 6 ) = 1.666666666666667e-01;
+            Bhat( 0 ) = -3.930182461751728e-01;
+            Bhat( 1 ) = 1.000000000000000e-01;
+            Bhat( 2 ) = 9.916346405575472e-01;
+            Bhat( 3 ) = 0.0;
+            Bhat( 4 ) = -2.511232158528943e-01;
+            Bhat( 5 ) = 4.393912810497486e-01;
+            Bhat( 6 ) = 1.131155404207712e-01;
+        }
+
         nbStages = A.cols();
 
         C.resize( nbStages );
@@ -223,106 +574,13 @@ namespace sdc
 
         for ( int i = 0; i < nbStages; i++ )
             B( i ) = A( nbStages - 1, i );
-
-        solver->setNumberOfStages( nbStages );
-
-        adaptiveTimeStepper->setEndTime( solver->getEndTime() );
     }
 
-    ESDIRK::~ESDIRK()
+    void ESDIRK::outputResidual( std::string name )
     {}
 
-    bool ESDIRK::isStageImplicit( double Akk )
+    bool ESDIRK::isConverged()
     {
-        return Akk > 0;
-    }
-
-    void ESDIRK::run()
-    {
-        double t = solver->getStartTime();
-
-        while ( std::abs( t - solver->getEndTime() ) > 1.0e-13 && t < solver->getEndTime() )
-        {
-            double computedTimeStep = dt;
-
-            solveTimeStep( t );
-
-            if ( adaptiveTimeStepper->isAccepted() )
-                t += computedTimeStep;
-        }
-    }
-
-    void ESDIRK::solveTimeStep( const double t0 )
-    {
-        if ( adaptiveTimeStepper->isPreviousStepAccepted() )
-            solver->nextTimeStep();
-
-        Eigen::MatrixXd solStages( nbStages, N ), F( nbStages, N );
-        F.setZero();
-
-        Eigen::VectorXd sol( N ), f( N ), qold( N ), result( N ), rhs( N );
-        solver->getSolution( sol );
-        solStages.row( 0 ) = sol;
-
-        qold = sol;
-
-        double t = t0;
-
-        solver->evaluateFunction( 0, sol, t, f );
-        F.row( 0 ) = f;
-
-        // Keep the solution of the first stage and function evaluate
-        // in memory in case the time step is rejected
-        Eigen::VectorXd solOld = sol;
-        Eigen::VectorXd fOld = f;
-
-        // Loop over the stages
-
-        solver->initTimeStep();
-
-        for ( int j = 0; j < nbStages; j++ )
-        {
-            if ( !isStageImplicit( A( j, j ) ) )
-                continue;
-
-            t = t0 + C( j ) * dt;
-
-            Info << "\nTime = " << t << ", ESDIRK stage = " << j + 1 << "/" << nbStages << nl << endl;
-
-            rhs.setZero();
-
-            // Calculate sum of the stage residuals
-            for ( int iStage = 0; iStage < j; iStage++ )
-                rhs += A( j, iStage ) * F.row( iStage ).transpose();
-
-            rhs.array() *= dt;
-
-            solver->implicitSolve( false, j, t, A( j, j ) * dt, qold, rhs, f, result );
-
-            solStages.row( j ) = result;
-            F.row( j ) = f;
-        }
-
-        if ( adaptiveTimeStepper->isEnabled() )
-        {
-            double newTimeStep = 0;
-            Eigen::VectorXd errorEstimate( N );
-            errorEstimate.setZero();
-
-            for ( int iStage = 0; iStage < nbStages; iStage++ )
-                errorEstimate += ( B( iStage ) - Bhat( iStage ) ) * F.row( iStage );
-
-            errorEstimate *= dt;
-
-            bool accepted = adaptiveTimeStepper->determineNewTimeStep( errorEstimate, result, dt, newTimeStep );
-
-            dt = newTimeStep;
-
-            if ( not accepted )
-                solver->setSolution( solOld, fOld );
-        }
-
-        if ( adaptiveTimeStepper->isAccepted() )
-            solver->finalizeTimeStep();
+        return true;
     }
 }

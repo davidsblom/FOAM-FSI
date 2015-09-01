@@ -19,6 +19,8 @@ MultiLevelFsiSolver::MultiLevelFsiSolver(
     FsiSolver( fluidSolver->solver, solidSolver->solver, convergenceMeasures, parallel, extrapolationOrder ),
     fluidSolver( fluidSolver ),
     solidSolver( solidSolver ),
+    xf(),
+    J(),
     useJacobian( false ),
     iterCurrentTimeStep( 0 )
 {

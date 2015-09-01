@@ -20,38 +20,38 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class MLIQNILSSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int> >
+class MLIQNILSSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int, bool> >
 {
 protected:
 
     virtual void SetUp()
     {
         // Physical settings
-        double r0 = 0.2;
-        double a0 = M_PI * r0 * r0;
-        double u0 = 0.1;
-        double p0 = 0;
-        double dt = 0.1;
+        scalar r0 = 0.2;
+        scalar a0 = M_PI * r0 * r0;
+        scalar u0 = 0.1;
+        scalar p0 = 0;
+        scalar dt = 0.1;
         int N = 10;
-        double L = 1;
-        double T = 10;
-        double dx = L / N;
-        double rho = 1.225;
-        double E = 490;
-        double h = 1.0e-3;
-        double cmk = std::sqrt( E * h / (2 * rho * r0) );
-        double c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
-        double kappa = c0 / u0;
-        double tau = u0 * dt / L;
+        scalar L = 1;
+        scalar T = 10;
+        scalar dx = L / N;
+        scalar rho = 1.225;
+        scalar E = 490;
+        scalar h = 1.0e-3;
+        scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
+        scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
+        scalar kappa = c0 / u0;
+        scalar tau = u0 * dt / L;
 
         // Computational settings
-        double tol = 1.0e-5;
+        scalar tol = 1.0e-5;
         int maxIter = 500;
-        double initialRelaxation = 1.0e-3;
-        double singularityLimit = 1.0e-11;
+        scalar initialRelaxation = 1.0e-3;
+        scalar singularityLimit = 1.0e-11;
         int reuseInformationStartingFromTimeIndex = 0;
         bool scaling = false;
-        double beta = 1;
+        scalar beta = 1;
         bool updateJacobian = false;
 
         // Parametrized settings
@@ -60,6 +60,7 @@ protected:
         int extrapolation = std::tr1::get<2>( GetParam() );
         int minIter = std::tr1::get<3>( GetParam() );
         int couplingGridSize = std::tr1::get<4>( GetParam() );
+        bool synchronization = std::tr1::get<5>( GetParam() );
 
         ASSERT_NEAR( tau, 0.01, 1.0e-13 );
         ASSERT_NEAR( kappa, 10, 1.0e-13 );
@@ -193,7 +194,7 @@ protected:
         models->push_back( fineModel );
 
         // Create manifold mapping solver
-        solver = new MLIQNILSSolver( models, true );
+        solver = new MLIQNILSSolver( models, synchronization );
 
         // Monolithic solver
         monolithicSolver = new MonolithicFsiSolver( a0, u0, p0, dt, cmk, couplingGridSize, L, T, rho );
@@ -215,7 +216,7 @@ protected:
     MLIQNILSSolver * solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, MLIQNILSSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 2 ), Values( 0 ), Values( 3 ), Values( 10, 20 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, MLIQNILSSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 2 ), Values( 0 ), Values( 3 ), Values( 10, 20 ), Bool() ) );
 
 TEST_P( MLIQNILSSolverParametrizedTest, object )
 {
@@ -238,19 +239,22 @@ TEST_P( MLIQNILSSolverParametrizedTest, run )
     ASSERT_FALSE( solver->fineModel->fsi->fluid->isRunning() );
 
     int couplingGridSize = std::tr1::get<4>( GetParam() );
+    bool synchronization = std::tr1::get<5>( GetParam() );
 
-    if ( couplingGridSize == 10 )
+    if ( couplingGridSize == 10 && synchronization )
         ASSERT_EQ( solver->fineModel->fsi->nbIter, 100 );
 }
 
 TEST_P( MLIQNILSSolverParametrizedTest, monolithic )
 {
+    bool synchronization = std::tr1::get<5>( GetParam() );
+
     for ( int i = 0; i < 100; i++ )
     {
         solver->solveTimeStep();
         monolithicSolver->solveTimeStep();
 
-        double tol = 1.0e-5;
+        scalar tol = 1.0e-5;
 
         if ( i < 99 )
             ASSERT_TRUE( solver->fineModel->fsi->fluid->isRunning() );
@@ -265,11 +269,12 @@ TEST_P( MLIQNILSSolverParametrizedTest, monolithic )
         ASSERT_TRUE( monolithicSolver->pn.norm() > 0 );
 
         // Verify that the coarse models are synchronized with the fine model
-        for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = solver->models->begin(); it != solver->models->end(); ++it )
-        {
-            shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
-            ASSERT_NEAR( model->fsi->x.norm(), solver->fineModel->fsi->x.norm(), 1.0e-13 );
-        }
+        if ( synchronization )
+            for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = solver->models->begin(); it != solver->models->end(); ++it )
+            {
+                shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
+                ASSERT_NEAR( model->fsi->x.norm(), solver->fineModel->fsi->x.norm(), 1.0e-13 );
+            }
     }
 }
 
@@ -280,29 +285,29 @@ protected:
     virtual void SetUp()
     {
         // Physical settings
-        double r0 = 0.2;
-        double a0 = M_PI * r0 * r0;
-        double u0 = 0.1;
-        double p0 = 0;
-        double dt = 0.1;
+        scalar r0 = 0.2;
+        scalar a0 = M_PI * r0 * r0;
+        scalar u0 = 0.1;
+        scalar p0 = 0;
+        scalar dt = 0.1;
         int N = 10;
-        double L = 1;
-        double T = 10;
-        double dx = L / N;
-        double rho = 1.225;
-        double E = 490;
-        double h = 1.0e-3;
-        double cmk = std::sqrt( E * h / (2 * rho * r0) );
-        double c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
-        double kappa = c0 / u0;
-        double tau = u0 * dt / L;
+        scalar L = 1;
+        scalar T = 10;
+        scalar dx = L / N;
+        scalar rho = 1.225;
+        scalar E = 490;
+        scalar h = 1.0e-3;
+        scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
+        scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
+        scalar kappa = c0 / u0;
+        scalar tau = u0 * dt / L;
 
         // Computational settings
-        double tol = 1.0e-5;
+        scalar tol = 1.0e-5;
         int maxIter = 500;
-        double initialRelaxation = 1.0e-3;
-        double singularityLimit = 1.0e-11;
-        double beta = 1;
+        scalar initialRelaxation = 1.0e-3;
+        scalar singularityLimit = 1.0e-11;
+        scalar beta = 1;
         bool updateJacobian = false;
 
         // Parametrized settings

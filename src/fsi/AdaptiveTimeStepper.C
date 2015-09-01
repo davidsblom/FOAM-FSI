@@ -27,8 +27,8 @@ AdaptiveTimeStepper::AdaptiveTimeStepper( bool enabled )
 AdaptiveTimeStepper::AdaptiveTimeStepper(
     bool enabled,
     std::string filter,
-    double tol,
-    double safetyFactor
+    scalar tol,
+    scalar safetyFactor
     )
     :
     enabled( enabled ),
@@ -55,10 +55,10 @@ AdaptiveTimeStepper::~AdaptiveTimeStepper()
 {}
 
 bool AdaptiveTimeStepper::determineNewTimeStep(
-    const Eigen::VectorXd & errorEstimate,
-    const Eigen::VectorXd & solution,
-    const double computedTimeStep,
-    double & newTimeStep
+    const fsi::vector & errorEstimate,
+    const fsi::vector & solution,
+    const scalar computedTimeStep,
+    scalar & newTimeStep
     )
 {
     assert( endTime > 0 );
@@ -66,7 +66,7 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
     scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
     squaredNorm[Pstream::myProcNo()] = errorEstimate.squaredNorm();
     reduce( squaredNorm, sumOp<scalarList>() );
-    double error = std::sqrt( sum( squaredNorm ) );
+    scalar error = std::sqrt( sum( squaredNorm ) );
 
     squaredNorm = 0;
     squaredNorm[Pstream::myProcNo()] = solution.squaredNorm();
@@ -77,39 +77,35 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
 }
 
 bool AdaptiveTimeStepper::determineNewTimeStep(
-    const double errorEstimate,
-    const double computedTimeStep,
-    double & newTimeStep
+    const scalar errorEstimate,
+    const scalar computedTimeStep,
+    scalar & newTimeStep
     )
 {
     assert( endTime > 0 );
     assert( k > 0 );
+    assert( errorEstimate > 0 );
+    assert( enabled );
 
-    if ( not enabled )
-    {
-        newTimeStep = computedTimeStep;
-        return true;
-    }
-
-    double cerr = safetyFactor * tol / errorEstimate;
+    scalar cerr = safetyFactor * tol / errorEstimate;
     accepted = false;
-    double rho = 0;
+    scalar rho = 0;
 
     if ( tol / errorEstimate > 1 )
         accepted = true;
 
     if ( timeStepIndex == 0 || previousTimeStepRejected )
-        rho = elementary( cerr, cerrold, rhoold );
+        rho = elementary( cerr );
     else
     {
         if ( filter == "h211b" )
             rho = h211b( cerr, cerrold, rhoold );
 
         if ( filter == "pi42" )
-            rho = pi42( cerr, cerrold, rhoold );
+            rho = pi42( cerr, cerrold );
     }
 
-    double ratio = limit( rho );
+    scalar ratio = limit( rho );
 
     newTimeStep = ratio * computedTimeStep;
 
@@ -142,29 +138,25 @@ bool AdaptiveTimeStepper::determineNewTimeStep(
     return accepted;
 }
 
-double AdaptiveTimeStepper::elementary(
-    const double c1,
-    const double c0,
-    const double rho
-    )
+scalar AdaptiveTimeStepper::elementary( const scalar c1 )
 {
     // Elementary integrating controller for startup
     return std::pow( c1, 1.0 / k );
 }
 
-double AdaptiveTimeStepper::h211b(
-    const double c1,
-    const double c0,
-    const double rho
+scalar AdaptiveTimeStepper::h211b(
+    const scalar c1,
+    const scalar c0,
+    const scalar rho
     )
 {
     // H211b digital filter, with standard parameter setting b = 4
-    double b = 4;
+    scalar b = 4;
 
     return std::pow( c1, 1.0 / b / k ) * std::pow( c0, 1.0 / b / k ) * std::pow( rho, -1.0 / b );
 }
 
-bool AdaptiveTimeStepper::isAccepted()
+bool AdaptiveTimeStepper::isAccepted() const
 {
     if ( not enabled )
         return true;
@@ -172,34 +164,33 @@ bool AdaptiveTimeStepper::isAccepted()
     return accepted;
 }
 
-bool AdaptiveTimeStepper::isEnabled()
+bool AdaptiveTimeStepper::isEnabled() const
 {
     return enabled;
 }
 
-bool AdaptiveTimeStepper::isPreviousStepAccepted()
+bool AdaptiveTimeStepper::isPreviousStepAccepted() const
 {
     return not previousTimeStepRejected;
 }
 
-double AdaptiveTimeStepper::limit( const double u )
+scalar AdaptiveTimeStepper::limit( const scalar u )
 {
-    double kappa = 1;
+    scalar kappa = 1;
 
     return 1.0 + kappa * std::atan( (u - 1) / kappa );
 }
 
-double AdaptiveTimeStepper::pi42(
-    const double c1,
-    const double c0,
-    const double rho
+scalar AdaptiveTimeStepper::pi42(
+    const scalar c1,
+    const scalar c0
     )
 {
     // PI.4.2 controller
     return std::pow( c1, 3.0 / 5.0 / k ) * std::pow( c0, -1.0 / 5.0 / k );
 }
 
-void AdaptiveTimeStepper::setEndTime( double endTime )
+void AdaptiveTimeStepper::setEndTime( scalar endTime )
 {
     assert( endTime > 0 );
     this->endTime = endTime;

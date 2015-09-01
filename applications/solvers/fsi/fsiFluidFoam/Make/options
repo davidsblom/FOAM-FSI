@@ -1,11 +1,10 @@
-c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs
+c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs -Werror -Wredundant-decls -Wcast-align -Wmissing-declarations  -Wswitch-enum -Wswitch-default -Winvalid-pch -Wredundant-decls -Wformat=2 -Wmissing-format-attribute -Wformat-nonliteral
 
 EXE_INC = -std=c++11 \
     -I../../../../src/fsi/lnInclude \
     -I../../../../src/thirdParty/eigen \
-    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -isystem $(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/transportModels \
@@ -17,17 +16,15 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/solidModels/lnInclude \
     -I../../../../src/thirdParty/boost \
     -I../../../../src/thirdParty/precice/src \
-    -I../../../../src/thirdParty/boost \
+    -isystem ../../../../src/thirdParty/boost \
     -I../../../../src/thirdParty \
     -I../../../../src/RBFMeshMotionSolver/lnInclude/ \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
-    -I../../../../src/thirdParty/yaml-cpp/include
+    -isystem ../../../../src/thirdParty/yaml-cpp/include
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -L../../../../src/thirdParty/yaml-cpp/build/ \
-    -L../../../../src/thirdParty/precice/build/last \
     -lfsi \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \

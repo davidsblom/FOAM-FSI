@@ -15,7 +15,7 @@ SpaceMapping::SpaceMapping(
     int maxUsedIterations,
     int nbReuse,
     int reuseInformationStartingFromTimeIndex,
-    double singularityLimit
+    scalar singularityLimit
     )
     :
     fineModel( fineModel ),

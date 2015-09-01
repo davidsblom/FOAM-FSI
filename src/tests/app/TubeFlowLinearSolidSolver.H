@@ -19,14 +19,14 @@ public:
 
         TubeFlowLinearSolidSolver(
             int N,
-            double nu,
-            double rho,
-            double h,
-            double L,
-            double dt,
-            double G,
-            double E0,
-            double r0
+            scalar nu,
+            scalar rho,
+            scalar h,
+            scalar L,
+            scalar dt,
+            scalar G,
+            scalar E0,
+            scalar r0
             );
 
         virtual ~TubeFlowLinearSolidSolver();
@@ -36,9 +36,9 @@ public:
             fsi::vector & a
             );
 
-        double h;
-        double E0;
-        double nu;
+        scalar h;
+        scalar E0;
+        scalar nu;
     };
 }
 

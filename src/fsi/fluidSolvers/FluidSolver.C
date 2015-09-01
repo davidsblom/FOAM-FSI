@@ -116,11 +116,16 @@ FluidSolver::FluidSolver(
     sumLocalContErr( 0 ),
     globalContErr( 0 ),
     cumulativeContErr( 0 ),
+    pRefCell( 0 ),
+    pRefValue( 0.0 ),
     laminarTransport( U, phi ),
     turbulence( autoPtr<incompressible::turbulenceModel>
     (
         incompressible::turbulenceModel::New( U, phi, laminarTransport )
     ) ),
+    CoNum( 0 ),
+    meanCoNum( 0 ),
+    velMag( 0 ),
     turbulenceSwitch( true )
 {
     assert( absoluteTolerance < 1 );
@@ -157,8 +162,6 @@ FluidSolver::FluidSolver(
         Uf = Utang + Unor;
     }
 
-    pRefCell = 0;
-    pRefValue = 0.0;
     setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
 
     {
@@ -249,10 +252,6 @@ void FluidSolver::continuityErrs()
 
 void FluidSolver::courantNo()
 {
-    CoNum = 0.0;
-    meanCoNum = 0.0;
-    velMag = 0.0;
-
     if ( mesh.nInternalFaces() )
     {
         surfaceScalarField magPhi = mag( phi );
@@ -275,7 +274,7 @@ void FluidSolver::courantNo()
          << endl;
 }
 
-double FluidSolver::evaluateMomentumResidual()
+scalar FluidSolver::evaluateMomentumResidual()
 {
     volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p );
 
@@ -352,7 +351,7 @@ void FluidSolver::initTimeStep()
     assert( !init );
 
     timeIndex++;
-    t = timeIndex * runTime->deltaT().value();
+    t = runTime->time().value();
 
     Info << "\nTime = " << runTime->value() << endl;
 
@@ -441,10 +440,10 @@ void FluidSolver::solve()
         // If the relative residual with respect to the initial
         // residual is decreased by factor tol: assume convergence.
 
-        double initResidual = 1;
-        double currResidual = 1;
-        double pressureResidual = 1;
-        double tol = 1.0e-2;
+        scalar initResidual = 1;
+        scalar currResidual = 1;
+        scalar pressureResidual = 1;
+        scalar tol = 1.0e-2;
 
         // --- PISO loop
         for ( int corr = 0; corr < nCorr; corr++ )
@@ -504,7 +503,7 @@ void FluidSolver::solve()
             U -= (1.0 / AU) * fvc::grad( p );
             U.correctBoundaryConditions();
 
-            if ( currResidual < std::max( tol * initResidual, 1.0e-15 ) )
+            if ( currResidual < std::max( tol * initResidual, scalar( 1.0e-15 ) ) )
                 break;
         }
 

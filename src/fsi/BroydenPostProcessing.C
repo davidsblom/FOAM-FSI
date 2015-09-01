@@ -11,14 +11,15 @@ using namespace fsi;
 BroydenPostProcessing::BroydenPostProcessing(
     shared_ptr<MultiLevelFsiSolver> fsi,
     int maxIter,
-    double initialRelaxation,
+    scalar initialRelaxation,
     int maxUsedIterations,
     int nbReuse,
-    double singularityLimit,
+    scalar singularityLimit,
     int reuseInformationStartingFromTimeIndex
     )
     :
     PostProcessing( fsi, initialRelaxation, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex ),
+    J(),
     singularityLimit( singularityLimit )
 {
     assert( singularityLimit > 0 );
@@ -30,7 +31,12 @@ BroydenPostProcessing::~BroydenPostProcessing()
 
 void BroydenPostProcessing::finalizeTimeStep()
 {
+    assert( sols.size() == 0 );
+
     PostProcessing::finalizeTimeStep();
+
+    assert( residualsList.size() == 0 );
+    assert( solsList.size() == 0 );
 
     Info << "Broyden post processing: rebuild Jacobian with information from " << nbReuse << " previous time steps" << endl;
 
@@ -40,20 +46,12 @@ void BroydenPostProcessing::finalizeTimeStep()
     int nbCols = residuals.size() - 1;
     nbCols = std::max( nbCols, 0 );
 
-    // Include information from previous optimization solves
-    for ( unsigned i = 0; i < solsList.size(); i++ )
-        nbCols += solsList.at( i ).size() - 1;
-
     // Include information from previous time steps
     for ( unsigned i = 0; i < solsTimeList.size(); i++ )
         for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
             nbCols += solsTimeList.at( i ).at( j ).size() - 1;
 
-    J = -Eigen::MatrixXd::Identity( J.rows(), J.cols() );
-
-    int nbColsCurrentTimeStep = std::max( static_cast<int>(sols.size() - 1), 0 );
-
-    assert( nbColsCurrentTimeStep == 0 );
+    J = -fsi::matrix::Identity( J.rows(), J.cols() );
 
     int colIndex = 0;
 
@@ -80,46 +78,6 @@ void BroydenPostProcessing::finalizeTimeStep()
                 J += (dx - J * dR) / (dx.transpose() * J * dR) * (dx.transpose() * J);
             }
         }
-    }
-
-    // Include information from previous optimization solves
-
-    for ( unsigned i = residualsList.size(); i-- > 0; )
-    {
-        for ( unsigned j = residualsList.at( i ).size() - 1; j-- > 0; )
-        {
-            assert( residualsList.at( i ).size() >= 2 );
-            assert( residualsList.at( i ).size() == solsList.at( i ).size() );
-
-            colIndex++;
-
-            fsi::vector dx = solsList.at( i ).at( j + 1 ) - solsList.at( i ).at( j );
-            fsi::vector dR = residualsList.at( i ).at( j + 1 ) - residualsList.at( i ).at( j );
-
-            if ( dx.norm() < singularityLimit )
-                continue;
-
-            // Sherman–Morrison formula
-            J += (dx - J * dR) / (dx.transpose() * J * dR) * (dx.transpose() * J);
-        }
-    }
-
-    // Include information from previous iterations
-
-    for ( int i = 0; i < nbColsCurrentTimeStep; i++ )
-    {
-        assert( sols.size() >= 2 );
-
-        colIndex++;
-
-        fsi::vector dx = sols.at( i + 1 ) - sols.at( i );
-        fsi::vector dR = residuals.at( i + 1 ) - residuals.at( i );
-
-        if ( dx.norm() < singularityLimit )
-            continue;
-
-        // Sherman–Morrison formula
-        J += (dx - J * dR) / (dx.transpose() * J * dR) * (dx.transpose() * J);
     }
 
     assert( colIndex == nbCols );
@@ -187,7 +145,7 @@ void BroydenPostProcessing::performPostProcessing(
     }
 
     if ( J.cols() != R.rows() || J.rows() != R.rows() )
-        J = -Eigen::MatrixXd::Identity( R.rows(), R.rows() );
+        J = -fsi::matrix::Identity( R.rows(), R.rows() );
 
     for ( int iter = 0; iter < maxIter - 1; iter++ )
     {
@@ -259,4 +217,10 @@ void BroydenPostProcessing::performPostProcessing(
         assert( sols.at( 0 ).rows() == residuals.at( 0 ).rows() );
         assert( fsi->iter <= maxIter );
     }
+
+    // Do not save the iteration vectors since the scheme did not converge
+    // A large number of those vectors do not contain any information which
+    // can speedup subsequent optimizations
+    bool keepIterations = false;
+    iterationsConverged( keepIterations );
 }

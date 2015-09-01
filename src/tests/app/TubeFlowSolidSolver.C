@@ -9,11 +9,11 @@
 namespace tubeflow
 {
     TubeFlowSolidSolver::TubeFlowSolidSolver(
-        double a0,
-        double cmk,
-        double p0,
-        double rho,
-        double L,
+        scalar a0,
+        scalar cmk,
+        scalar p0,
+        scalar rho,
+        scalar L,
         int N
         )
         :

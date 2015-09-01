@@ -45,7 +45,7 @@ public:
   Eigen::VectorXi idsWritePositions;
   Eigen::VectorXi idsWritePositionsAcoustics;
 
-  float totalRunTime;
+  scalar totalRunTime;
   int totalNbIterations;
 };
 

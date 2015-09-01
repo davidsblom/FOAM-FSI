@@ -15,7 +15,7 @@ ASMILS::ASMILS(
     int maxUsedIterations,
     int nbReuse,
     int reuseInformationStartingFromTimeIndex,
-    double singularityLimit
+    scalar singularityLimit
     )
     :
     SpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit )
@@ -197,7 +197,7 @@ void ASMILS::performPostProcessing(
 
                 Eigen::HouseholderQR<matrix> qr = V.householderQr();
                 matrix QR_R = qr.matrixQR().triangularView <Eigen::Upper> ();
-                Eigen::VectorXd diagonals = QR_R.diagonal();
+                fsi::vector diagonals = QR_R.diagonal();
 
                 for ( int i = 0; i < diagonals.rows(); i++ )
                 {

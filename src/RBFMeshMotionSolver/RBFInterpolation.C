@@ -20,6 +20,10 @@ namespace rbf
         n_B( 0 ),
         dimGrid( 0 ),
         Hhat(),
+        Phi(),
+        lu(),
+        fullPivLu(),
+        llt(),
         positions(),
         positionsInterpolation()
     {
@@ -40,6 +44,10 @@ namespace rbf
         n_B( 0 ),
         dimGrid( 0 ),
         Hhat(),
+        Phi(),
+        lu(),
+        fullPivLu(),
+        llt(),
         positions(),
         positionsInterpolation()
     {
@@ -53,7 +61,7 @@ namespace rbf
     {
         // RBF function evaluation
 
-        double r = 0;
+        scalar r = 0;
 
         for ( int i = 0; i < n_A; i++ )
         {
@@ -73,7 +81,7 @@ namespace rbf
     {
         // Evaluate Phi which contains the evaluation of the radial basis function
 
-        double r = 0;
+        scalar r = 0;
 
         for ( int i = 0; i < n_A; i++ )
         {
@@ -91,11 +99,12 @@ namespace rbf
         )
     {
         // Evaluate Phi which contains the evaluation of the radial basis function
-        assert(positionsInterpolation.rows() == dimGrid);
+        assert( positionsInterpolation.rows() == dimGrid );
 
         double r = 0;
 
-        matrix rowPhi(1,positions.rows());
+        matrix rowPhi( 1, positions.rows() );
+
         for ( int i = 0; i < n_A; i++ )
         {
             r = ( positions.row( i ) - positionsInterpolation.transpose() ).norm();
@@ -158,7 +167,7 @@ namespace rbf
         if ( debug )
         {
             t = std::clock() - t;
-            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+            scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
             Info << "RBFInterpolation::debug 1. evaluate H = " << runTime << " s" << endl;
             t = std::clock();
         }
@@ -177,14 +186,14 @@ namespace rbf
             std::shared_ptr<TPSFunction> function;
             function = std::dynamic_pointer_cast<TPSFunction>( rbfFunction );
 
-            //THIJS: tmp switch off other solves to prevent crashing
+            // THIJS: tmp switch off other solves to prevent crashing
             // if ( polynomialTerm )
-            //     fullPivLu.compute( H.selfadjointView<Eigen::Lower>() );
+            // fullPivLu.compute( H.selfadjointView<Eigen::Lower>() );
             // else
             // if ( function )
-            //     lu.compute( H.selfadjointView<Eigen::Lower>() );
+            // lu.compute( H.selfadjointView<Eigen::Lower>() );
             // else
-            //     llt.compute( H.selfadjointView<Eigen::Lower>() );
+            // llt.compute( H.selfadjointView<Eigen::Lower>() );
             fullPivLu.compute( H.selfadjointView<Eigen::Lower>() );
         }
 
@@ -209,7 +218,7 @@ namespace rbf
             if ( debug )
             {
                 t = std::clock() - t;
-                double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+                scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
                 Info << "RBFInterpolation::debug 2. evaluate Phi = " << runTime << " s" << endl;
                 t = std::clock();
             }
@@ -226,7 +235,7 @@ namespace rbf
             if ( debug )
             {
                 t = std::clock() - t;
-                double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+                scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
                 Info << "RBFInterpolation::debug 3. compute Hhat = " << runTime << " s" << endl;
             }
         }
@@ -268,46 +277,48 @@ namespace rbf
             valuesLU.setZero();
             valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
 
-            //THIJS: tmp switched off other solvers to prevent crashing
+            // THIJS: tmp switched off other solvers to prevent crashing
             // if ( polynomialTerm )
-            //     B = fullPivLu.solve( valuesLU );
+            // B = fullPivLu.solve( valuesLU );
             // else
             // if ( function )
-            //     B = lu.solve( valuesLU );
+            // B = lu.solve( valuesLU );
             // else
-            //     B = llt.solve( valuesLU );
+            // B = llt.solve( valuesLU );
             B = fullPivLu.solve( valuesLU );
 
             // === Building complete matrix === //
+
             /*evaluatePhi( positions, positionsInterpolation, Phi );
-
-            if ( polynomialTerm )
-            {
-                // Include polynomial contributions in matrix Phi
-
-                for ( int i = 0; i < Phi.rows(); i++ )
-                    Phi( i, n_A ) = 1;
-
-                Phi.topRightCorner( n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
-            }
-
-            valuesInterpolation.noalias() = Phi * B;*/
+             *
+             * if ( polynomialTerm )
+             * {
+             *  // Include polynomial contributions in matrix Phi
+             *
+             *  for ( int i = 0; i < Phi.rows(); i++ )
+             *      Phi( i, n_A ) = 1;
+             *
+             *  Phi.topRightCorner( n_B, dimGrid ) = positionsInterpolation.block( 0, 0, n_B, dimGrid );
+             * }
+             *
+             * valuesInterpolation.noalias() = Phi * B;*/
 
             // === Evaluating row by row ==== //
-            if (valuesInterpolation.rows() != n_B)
+            if ( valuesInterpolation.rows() != n_B )
             {
                 valuesInterpolation = matrix( n_B, values.cols() );
             }
 
             if ( polynomialTerm )
             {
-                matrix rowPhi( 1, n_A + 1 + dimGrid);
+                matrix rowPhi( 1, n_A + 1 + dimGrid );
+
                 for ( int i = 0; i < n_B; i++ )
                 {
                     rowPhi.topLeftCorner( 1, n_A ) = evaluatePhi( positions, positionsInterpolation.row( i ) );
                     rowPhi( 0, n_A ) = 1.0;
                     rowPhi.topRightCorner( 1, dimGrid ) = positionsInterpolation.row( i );
-                    valuesInterpolation.row(i) = rowPhi * B;
+                    valuesInterpolation.row( i ) = rowPhi * B;
                 }
             }
             else
@@ -315,41 +326,41 @@ namespace rbf
                 for ( int i = 0; i < n_B; i++ )
                 {
                     matrix rowPhi = evaluatePhi( positions, positionsInterpolation.row( i ) );
-                    valuesInterpolation.row(i) = rowPhi * B;
+                    valuesInterpolation.row( i ) = rowPhi * B;
                 }
             }
         }
 
         if ( not cpu )
         {
-
             double ttmp = 0;
-            if(debug == 3)
+
+            if ( debug == 3 )
             {
                 valuesInterpolation.setZero();
 
-                boolList bla(Pstream::nProcs(),true);
-                reduce(bla, sumOp<boolList>());
+                boolList bla( Pstream::nProcs(), true );
+                reduce( bla, sumOp<boolList>() );
 
                 ttmp = std::clock();
                 Pout << "Debug Interpolation of CPU " << Pstream::myProcNo() << " valuesInterpolation: " << valuesInterpolation.rows() << ", " << valuesInterpolation.cols() << nl;
             }
 
             valuesInterpolation = Hhat * values;
-            //valuesInterpolation.noalias() = Hhat * values;
 
-            if(debug == 3)
+            // valuesInterpolation.noalias() = Hhat * values;
+
+            if ( debug == 3 )
             {
                 ttmp = std::clock() - ttmp;
-                Pout << "Debug Interpolation of CPU " << Pstream::myProcNo() << " of [" << Hhat.rows() << ", " << Hhat.cols() << "]x[" << values.rows() << ", " << values.cols() << "]: " << static_cast<float>(ttmp)/CLOCKS_PER_SEC << " s" << endl;
+                Pout << "Debug Interpolation of CPU " << Pstream::myProcNo() << " of [" << Hhat.rows() << ", " << Hhat.cols() << "]x[" << values.rows() << ", " << values.cols() << "]: " << static_cast<float>(ttmp) / CLOCKS_PER_SEC << " s" << endl;
             }
-
         }
 
         if ( debug )
         {
             t = std::clock() - t;
-            double runTime = static_cast<float>(t) / CLOCKS_PER_SEC;
+            scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
             Info << "RBFInterpolation::debug 4. interpolation = " << runTime << " s" << endl;
         }
 
@@ -427,23 +438,24 @@ namespace rbf
         valuesLU.setZero();
         valuesLU.topLeftCorner( values.rows(), values.cols() ) = values;
 
-        //THIJS: tmp change in solver to be used. When taking lots of point with compact supported function it fails.
+        // THIJS: tmp change in solver to be used. When taking lots of point with compact supported function it fails.
+
         /*if ( polynomialTerm )
-        {
-            fullPivLu.compute( H.selfadjointView<Eigen::Lower>() );
-            B = fullPivLu.solve( valuesLU );
-        }
-        else
-        if ( function )
-        {
-            lu.compute( H.selfadjointView<Eigen::Lower>() );
-            B = lu.solve( valuesLU );
-        }
-        else
-        {
-            llt.compute( H.selfadjointView<Eigen::Lower>() );
-            B = llt.solve( valuesLU );
-        }*/
+         * {
+         *  fullPivLu.compute( H.selfadjointView<Eigen::Lower>() );
+         *  B = fullPivLu.solve( valuesLU );
+         * }
+         * else
+         * if ( function )
+         * {
+         *  lu.compute( H.selfadjointView<Eigen::Lower>() );
+         *  B = lu.solve( valuesLU );
+         * }
+         * else
+         * {
+         *  llt.compute( H.selfadjointView<Eigen::Lower>() );
+         *  B = llt.solve( valuesLU );
+         * }*/
 
         fullPivLu.compute( H.selfadjointView<Eigen::Lower>() );
         B = fullPivLu.solve( valuesLU );
@@ -488,7 +500,7 @@ namespace rbf
         if ( nNewPoints == Phi.cols() )
             nNewPoints = n_A;
 
-        double r = 0;
+        scalar r = 0;
 
         for ( int i = 0; i < nNewPoints; i++ )
         {
@@ -549,20 +561,21 @@ namespace rbf
 
         matrix B;
 
-        //THIJS: tmp change in solver to be used. When taking lots of point with compact supported function it fails.
+        // THIJS: tmp change in solver to be used. When taking lots of point with compact supported function it fails.
+
         /*if ( polynomialTerm )
-        {
-            B = fullPivLu.solve( valuesLU );
-        }
-        else
-        if ( function )
-        {
-            B = lu.solve( valuesLU );
-        }
-        else
-        {
-            B = llt.solve( valuesLU );
-        }*/
+         * {
+         *  B = fullPivLu.solve( valuesLU );
+         * }
+         * else
+         * if ( function )
+         * {
+         *  B = lu.solve( valuesLU );
+         * }
+         * else
+         * {
+         *  B = llt.solve( valuesLU );
+         * }*/
         B = fullPivLu.solve( valuesLU );
 
         valuesInterpolation.noalias() = Phi * B;

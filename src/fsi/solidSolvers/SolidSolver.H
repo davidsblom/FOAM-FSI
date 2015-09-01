@@ -74,9 +74,6 @@ protected:
     scalar absoluteTolerance;
     scalar relativeTolerance;
 
-    // Dictionaries
-    IOdictionary couplingProperties;
-
     std::shared_ptr<rbf::RBFCoarsening> interpolator;
 };
 

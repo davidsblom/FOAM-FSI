@@ -39,7 +39,7 @@ public:
     shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models;
     shared_ptr<ImplicitMultiLevelFsiSolver> fineModel;
     bool init;
-    bool synchronization;
+    const bool synchronization;
 };
 
 #endif

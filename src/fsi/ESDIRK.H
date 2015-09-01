@@ -11,10 +11,11 @@
 #include "SDCSolver.H"
 #include "AdaptiveTimeStepper.H"
 #include "fvCFD.H"
+#include "TimeIntegrationScheme.H"
 
 namespace sdc
 {
-    class ESDIRK
+    class ESDIRK : public TimeIntegrationScheme
     {
 public:
 
@@ -24,25 +25,63 @@ public:
             std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper
             );
 
+        ESDIRK( std::string method );
+
         ~ESDIRK();
 
         void run();
 
-        void solveTimeStep( const double t0 );
+        void solveTimeStep( const scalar t0 );
 
-private:
+        virtual void getSourceTerm(
+            const bool corrector,
+            const int k,
+            const scalar deltaT,
+            fsi::vector & rhs,
+            fsi::vector & qold
+            );
 
-        bool isStageImplicit( double Akk );
+        virtual void setFunction(
+            const int k,
+            const fsi::vector & f,
+            const fsi::vector & result
+            );
+
+        virtual int getNbImplicitStages();
+
+        virtual void setOldSolution(
+            int timeIndex,
+            const fsi::vector & result
+            );
+
+        virtual void outputResidual( std::string name );
+
+        virtual bool isConverged();
+
+        static bool isStageImplicit( scalar Akk );
 
         std::shared_ptr<SDCSolver> solver;
         std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
-        double dt;
+        scalar dt;
         int nbStages;
-        Eigen::MatrixXd A;
-        Eigen::VectorXd B;
-        Eigen::VectorXd C;
-        Eigen::VectorXd Bhat;
+        fsi::matrix A;
+        fsi::vector B;
+        fsi::vector C;
+        fsi::vector Bhat;
         int N;
+
+private:
+
+        void initializeButcherTableau( std::string method );
+
+        // Store function in memory in case the source term is requested
+        // by the solver. This functionality is used by the moving wall
+        // velocity boundary condition.
+        int stageIndex;
+        fsi::matrix F;
+        fsi::matrix solStages;
+        fsi::vector qold;
+        int timeIndex;
     };
 }
 

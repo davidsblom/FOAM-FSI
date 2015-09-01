@@ -28,6 +28,9 @@ ESDIRK.C
 Piston.C
 AdaptiveTimeStepper.C
 QuadratureRules.C
+Cos.C
+Oscillator.C
+PIES.C
 
 tests.C
 test_fluidsolver.C
@@ -66,5 +69,6 @@ test_multilevelmliqnilssolver.C
 test_sdc.C
 test_esdirk.C
 test_adaptivetime.C
+test_pies.C
 
 EXE = $(FOAM_USER_APPBIN)/tests

@@ -57,7 +57,7 @@ public:
 
         // Destructor
 
-        ~twoDPointCorrectorRBF();
+        virtual ~twoDPointCorrectorRBF();
 
 
         // Member Functions

@@ -89,8 +89,7 @@ void MultiLevelSpaceMappingSolver::finalizeTimeStep()
 
                 matrix output( fineModel->fsi->solid->data.rows(), fineModel->fsi->solid->data.cols() );
 
-                if ( std::abs( model->fsi->x.norm() - fineModel->fsi->x.norm() ) > 1.0e-14 )
-                    model->fsi->fluidSolver->solve( input, output );
+                model->fsi->fluidSolver->solve( input, output );
 
                 if ( model->fsi->parallel )
                     input = Eigen::Map<const matrix> ( fineModel->fsi->x.tail( model->fsi->fluidSolver->couplingGridSize * model->fsi->fluid->dim ).data(), model->fsi->fluidSolver->couplingGridSize, model->fsi->fluid->dim );
@@ -103,8 +102,7 @@ void MultiLevelSpaceMappingSolver::finalizeTimeStep()
                 bool interpolated = model->fsi->solid->interpolateVolField( fineModel->fsi->solid );
 
                 if ( !interpolated )
-                    if ( std::abs( model->fsi->x.norm() - fineModel->fsi->x.norm() ) > 1.0e-14 || !model->fsi->parallel )
-                        model->fsi->solidSolver->solve( input, output );
+                    model->fsi->solidSolver->solve( input, output );
 
                 model->fsi->x = fineModel->fsi->x;
             }
