@@ -34,7 +34,15 @@ void SDCFsiSolver::evaluateFunction(
     const scalar t,
     fsi::vector & f
     )
-{}
+{
+    fsi::vector qFluid( dofFluid ), qSolid( dofSolid ), fFluid( dofFluid ), fSolid( dofSolid );
+    qFluid = q.head( dofFluid );
+    qSolid = q.tail( dofSolid );
+    fluid->evaluateFunction( k, qFluid, t, fFluid );
+    solid->evaluateFunction( k, qSolid, t, fSolid );
+    f.head( dofFluid ) = fFluid;
+    f.tail( dofSolid ) = fSolid;
+}
 
 void SDCFsiSolver::finalizeTimeStep()
 {
