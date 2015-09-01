@@ -2,6 +2,10 @@
 
 set -e
 
+# Ensure the script is executed in this directory
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR
+
 # Assume that preCICE has been built before, and boost is already downloaded.
 
 VERSION=0.5.2
