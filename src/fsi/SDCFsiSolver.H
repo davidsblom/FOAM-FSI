@@ -7,8 +7,10 @@
 #ifndef SDCFsiSolver_H
 #define SDCFsiSolver_H
 
-#include ""
 #include "SDCSolver.H"
+#include "PostProcessing.H"
+
+using namespace sdc;
 
 namespace fsi
 {
