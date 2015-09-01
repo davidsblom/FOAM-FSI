@@ -7,8 +7,8 @@
 #include "SDCFsiSolver.H"
 
 SDCFsiSolver::SDCFsiSolver(
-    std::shared_ptr<SDCSolver> fluid,
-    std::shared_ptr<SDCSolver> solid,
+    std::shared_ptr<SDCFsiSolverInterface> fluid,
+    std::shared_ptr<SDCFsiSolverInterface> solid,
     std::shared_ptr<PostProcessing> postProcessing
     )
     :
@@ -60,13 +60,18 @@ scalar SDCFsiSolver::getScalingFactor()
     return 1;
 }
 
-void SDCFsiSolver::getSolution( fsi::vector & solution )
+void SDCFsiSolver::getSolution(
+    fsi::vector & solution,
+    fsi::vector & f
+    )
 {
-    fsi::vector solFluid( dofFluid ), solSolid( dofSolid );
-    fluid->getSolution( solFluid );
-    solid->getSolution( solSolid );
+    fsi::vector solFluid( dofFluid ), solSolid( dofSolid ), fFluid( dofFluid ), fSolid( fSolid );
+    fluid->getSolution( solFluid, fFluid );
+    solid->getSolution( solSolid, fSolid );
     solution.head( dofFluid ) = solFluid;
     solution.tail( dofSolid ) = solSolid;
+    f.head( dofFluid ) = fFluid;
+    f.tail( dofSolid ) = fSolid;
 }
 
 void SDCFsiSolver::setSolution(

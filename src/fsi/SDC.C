@@ -183,7 +183,7 @@ namespace sdc
         fsi::vector errorEstimate( N );
 
         fsi::vector sol( N ), f( N );
-        solver->getSolution( sol );
+        solver->getSolution( sol, f );
         solStages.row( 0 ) = sol;
 
         scalar t = t0;

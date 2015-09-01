@@ -16,6 +16,16 @@ namespace sdc
 public:
 
         virtual ~SDCFsiSolverInterface(){}
+
+        virtual void prepareImplicitSolve(
+            bool corrector,
+            const int k,
+            const int kold,
+            const scalar t,
+            const scalar dt,
+            const fsi::vector & qold,
+            const fsi::vector & rhs
+            ) = 0;
     };
 }
 

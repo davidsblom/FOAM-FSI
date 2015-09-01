@@ -247,7 +247,7 @@ int SDCDynamicMeshFluidSolver::getDOF()
     return index;
 }
 
-void SDCDynamicMeshFluidSolver::getSolution( fsi::vector & solution )
+void SDCDynamicMeshFluidSolver::getSolution( fsi::vector & solution, fsi::vector & f )
 {
     volScalarField V
     (
@@ -332,6 +332,70 @@ void SDCDynamicMeshFluidSolver::getSolution( fsi::vector & solution )
     }
 
     assert( index == solution.rows() );
+
+    index = 0;
+
+    forAll( UF.internalField(), i )
+    {
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
+        {
+            f( index ) = UF.internalField()[i][j];
+            index++;
+        }
+    }
+
+    forAll( UF.boundaryField(), patchI )
+    {
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
+        {
+            forAll( UF.boundaryField()[patchI], i )
+            {
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
+                {
+                    f( index ) = UF.boundaryField()[patchI][i][j];
+                    index++;
+                }
+            }
+        }
+    }
+
+    forAll( UfF.internalField(), i )
+    {
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
+        {
+            f( index ) = UfF.internalField()[i][j];
+            index++;
+        }
+    }
+
+    forAll( UfF.boundaryField(), patchI )
+    {
+        forAll( UfF.boundaryField()[patchI], i )
+        {
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            {
+                f( index ) = UfF.boundaryField()[patchI][i][j];
+                index++;
+            }
+        }
+    }
+
+    forAll( meshPhiF.internalField(), i )
+    {
+        f( index ) = meshPhiF.internalField()[i];
+        index++;
+    }
+
+    forAll( meshPhiF.boundaryField(), patchI )
+    {
+        forAll( meshPhiF.boundaryField()[patchI], i )
+        {
+            f( index ) = meshPhiF.boundaryField()[patchI][i];
+            index++;
+        }
+    }
+
+    assert( index == f.rows() );
 }
 
 void SDCDynamicMeshFluidSolver::setSolution(
@@ -521,24 +585,20 @@ void SDCDynamicMeshFluidSolver::evaluateFunction(
     assert( index == f.rows() );
 }
 
-void SDCDynamicMeshFluidSolver::implicitSolve(
+void SDCDynamicMeshFluidSolver::prepareImplicitSolve(
     bool corrector,
     const int k,
     const int kold,
     const scalar t,
     const scalar dt,
     const fsi::vector & qold,
-    const fsi::vector & rhs,
-    fsi::vector & f,
-    fsi::vector & result
+    const fsi::vector & rhs
     )
 {
     assert( k < this->k );
     assert( kold < this->k );
     assert( kold <= k );
     assert( qold.rows() == rhs.rows() );
-    assert( qold.rows() == f.rows() );
-    assert( qold.rows() == result.rows() );
 
     runTime->setDeltaT( dt );
     runTime->setTime( t, runTime->timeIndex() );
@@ -694,6 +754,42 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 
     rhsU /= V;
     rhsUf /= fvc::interpolate( V );
+}
+
+void SDCDynamicMeshFluidSolver::implicitSolve(
+    bool corrector,
+    const int k,
+    const int kold,
+    const scalar t,
+    const scalar dt,
+    const fsi::vector & qold,
+    const fsi::vector & rhs,
+    fsi::vector & f,
+    fsi::vector & result
+    )
+{
+    prepareImplicitSolve( corrector, k, kold, t, dt, qold, rhs );
+
+    volScalarField V
+    (
+        IOobject
+        (
+            "V",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimless,
+        zeroGradientFvPatchScalarField::typeName
+    );
+
+    V.internalField() = mesh.V();
+    V.correctBoundaryConditions();
+    volScalarField V0 = V;
+    V0.internalField() = mesh.V0();
+    V0.correctBoundaryConditions();
 
     // -------------------------------------------------------------------------
 
@@ -870,8 +966,7 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     UfF = rDeltaT * ( Uf * fvc::interpolate( V ) - Uf.oldTime() * interpolateVolumeStages.at( kold ) - rhsUf * fvc::interpolate( V ) );
     meshPhiF = mesh.phi();
 
-    getSolution( result );
-    evaluateFunction( k + 1, qold, t, f );
+    getSolution( result, f );
 }
 
 scalar SDCDynamicMeshFluidSolver::getScalingFactor()

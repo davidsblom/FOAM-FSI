@@ -7,7 +7,7 @@
 #ifndef SDCFsiSolver_H
 #define SDCFsiSolver_H
 
-#include "SDCSolver.H"
+#include "SDCFsiSolverInterface.H"
 #include "PostProcessing.H"
 
 using namespace sdc;
@@ -19,8 +19,8 @@ namespace fsi
 public:
 
         SDCFsiSolver(
-            std::shared_ptr<SDCSolver> fluid,
-            std::shared_ptr<SDCSolver> solid,
+            std::shared_ptr<SDCFsiSolverInterface> fluid,
+            std::shared_ptr<SDCFsiSolverInterface> solid,
             std::shared_ptr<PostProcessing> postProcessing
             );
 
@@ -39,7 +39,10 @@ public:
 
         virtual scalar getScalingFactor();
 
-        virtual void getSolution( fsi::vector & solution );
+        virtual void getSolution(
+            fsi::vector & solution,
+            fsi::vector & f
+            );
 
         virtual void setSolution(
             const fsi::vector & solution,
@@ -80,8 +83,8 @@ public:
 
 private:
 
-        std::shared_ptr<SDCSolver> fluid;
-        std::shared_ptr<SDCSolver> solid;
+        std::shared_ptr<SDCFsiSolverInterface> fluid;
+        std::shared_ptr<SDCFsiSolverInterface> solid;
         std::shared_ptr<PostProcessing> postProcessing;
         int dofFluid;
         int dofSolid;

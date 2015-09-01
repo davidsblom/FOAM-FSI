@@ -449,7 +449,7 @@ int SDCFluidSolver::getDOF()
     return index;
 }
 
-void SDCFluidSolver::getSolution( fsi::vector & solution )
+void SDCFluidSolver::getSolution( fsi::vector & solution, fsi::vector & f )
 {
     int index = 0;
 
@@ -490,6 +490,46 @@ void SDCFluidSolver::getSolution( fsi::vector & solution )
     }
 
     assert( index == solution.rows() );
+
+    index = 0;
+
+    forAll( UF.internalField(), i )
+    {
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
+        {
+            f( index ) = UF.internalField()[i][j];
+            index++;
+        }
+    }
+
+    forAll( UF.boundaryField(), patchI )
+    {
+        forAll( UF.boundaryField()[patchI], i )
+        {
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            {
+                f( index ) = UF.boundaryField()[patchI][i][j];
+                index++;
+            }
+        }
+    }
+
+    forAll( phiF.internalField(), i )
+    {
+        f( index ) = phiF.internalField()[i];
+        index++;
+    }
+
+    forAll( phiF.boundaryField(), patchI )
+    {
+        forAll( phiF.boundaryField()[patchI], i )
+        {
+            f( index ) = phiF.boundaryField()[patchI][i];
+            index++;
+        }
+    }
+
+    assert( index == f.rows() );
 }
 
 void SDCFluidSolver::setSolution(
@@ -904,8 +944,7 @@ void SDCFluidSolver::implicitSolve(
     UF = rDeltaT * (U - U.oldTime() - rhsU);
     phiF = rDeltaT * (phi - phi.oldTime() - rhsPhi);
 
-    getSolution( result );
-    evaluateFunction( k + 1, qold, t, f );
+    getSolution( result, f );
 }
 
 scalar SDCFluidSolver::getScalingFactor()

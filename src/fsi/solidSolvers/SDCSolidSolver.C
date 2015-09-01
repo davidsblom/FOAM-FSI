@@ -523,7 +523,10 @@ scalar SDCSolidSolver::getScalingFactor()
     return std::sqrt( gSumMag( V ) + gSumMag( U ) );
 }
 
-void SDCSolidSolver::getSolution( fsi::vector & solution )
+void SDCSolidSolver::getSolution(
+    fsi::vector & solution,
+    fsi::vector & f
+    )
 {
     int index = 0;
 
@@ -570,6 +573,52 @@ void SDCSolidSolver::getSolution( fsi::vector & solution )
     }
 
     assert( index == solution.rows() );
+
+    index = 0;
+
+    forAll( UF.internalField(), i )
+    {
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
+        {
+            f( index ) = UF.internalField()[i][j];
+            index++;
+        }
+    }
+
+    forAll( UF.boundaryField(), patchI )
+    {
+        forAll( UF.boundaryField()[patchI], i )
+        {
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            {
+                f( index ) = UF.boundaryField()[patchI][i][j];
+                index++;
+            }
+        }
+    }
+
+    forAll( VF.internalField(), i )
+    {
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
+        {
+            f( index ) = VF.internalField()[i][j];
+            index++;
+        }
+    }
+
+    forAll( VF.boundaryField(), patchI )
+    {
+        forAll( VF.boundaryField()[patchI], i )
+        {
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            {
+                f( index ) = VF.boundaryField()[patchI][i][j];
+                index++;
+            }
+        }
+    }
+
+    assert( index == f.rows() );
 }
 
 void SDCSolidSolver::setSolution(
@@ -660,16 +709,14 @@ void SDCSolidSolver::setNumberOfImplicitStages( int k )
     }
 }
 
-void SDCSolidSolver::implicitSolve(
+void SDCSolidSolver::prepareImplicitSolve(
     bool corrector,
     const int k,
     const int kold,
     const scalar t,
     const scalar dt,
     const fsi::vector & qold,
-    const fsi::vector & rhs,
-    fsi::vector & f,
-    fsi::vector & result
+    const fsi::vector & rhs
     )
 {
     runTime->setDeltaT( dt );
@@ -772,6 +819,21 @@ void SDCSolidSolver::implicitSolve(
     }
 
     assert( index == rhs.rows() );
+}
+
+void SDCSolidSolver::implicitSolve(
+    bool corrector,
+    const int k,
+    const int kold,
+    const scalar t,
+    const scalar dt,
+    const fsi::vector & qold,
+    const fsi::vector & rhs,
+    fsi::vector & f,
+    fsi::vector & result
+    )
+{
+    prepareImplicitSolve( corrector, k, kold, t, dt, qold, rhs );
 
     // -------------------------------------------------------------------------
 
@@ -874,8 +936,7 @@ void SDCSolidSolver::implicitSolve(
     UF = rDeltaT * (U - U.oldTime() - rhsU);
     VF = rDeltaT * (V - V.oldTime() - rhsV);
 
-    getSolution( result );
-    evaluateFunction( k + 1, qold, t, f );
+    getSolution( result, f );
 }
 
 scalar SDCSolidSolver::getStartTime()

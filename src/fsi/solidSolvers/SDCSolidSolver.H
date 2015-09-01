@@ -60,7 +60,10 @@ public:
 
     virtual scalar getScalingFactor();
 
-    virtual void getSolution( fsi::vector & solution );
+    virtual void getSolution(
+        fsi::vector & solution,
+        fsi::vector & f
+        );
 
     virtual void setSolution(
         const fsi::vector & solution,
@@ -85,6 +88,16 @@ public:
         const fsi::vector & rhs,
         fsi::vector & f,
         fsi::vector & result
+        );
+
+    virtual void prepareImplicitSolve(
+        bool corrector,
+        const int k,
+        const int kold,
+        const scalar t,
+        const scalar dt,
+        const fsi::vector & qold,
+        const fsi::vector & rhs
         );
 
     virtual scalar getStartTime();
