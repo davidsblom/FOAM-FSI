@@ -132,8 +132,8 @@ TEST_P( SDCTest, solve )
 {
     piston->run();
 
-    fsi::vector solution( 2 );
-    piston->getSolution( solution );
+    fsi::vector solution( 2 ), f;
+    piston->getSolution( solution, f );
 
     scalar result = solution( 1 );
 
@@ -168,8 +168,8 @@ TEST_P( SDCTest, run )
 {
     sdc->run();
 
-    fsi::vector solution( 2 );
-    piston->getSolution( solution );
+    fsi::vector solution( 2 ), f;
+    piston->getSolution( solution, f );
 
     scalar result = solution( 1 );
     scalar ref = piston->referenceSolution( 100 );
@@ -220,9 +220,9 @@ TEST_P( SDCTest, runCompareSDC )
     piston_sdc->run();
     sdc->run();
 
-    fsi::vector solution_piston_sdc( 2 ), solution_piston( 2 );
-    piston->getSolution( solution_piston );
-    piston_sdc->getSolution( solution_piston_sdc );
+    fsi::vector solution_piston_sdc( 2 ), solution_piston( 2 ), f;
+    piston->getSolution( solution_piston, f );
+    piston_sdc->getSolution( solution_piston_sdc, f );
 
     ASSERT_NEAR( solution_piston_sdc( 0 ), solution_piston( 0 ), 1.0e-10 );
     ASSERT_NEAR( solution_piston_sdc( 1 ), solution_piston( 1 ), 1.0e-10 );
@@ -233,9 +233,9 @@ TEST_P( SDCEstimateOrderTest, order )
     sdc1->run();
     sdc2->run();
 
-    fsi::vector solution1( 2 ), solution2( 2 );
-    piston1->getSolution( solution1 );
-    piston2->getSolution( solution2 );
+    fsi::vector solution1( 2 ), solution2( 2 ), f;
+    piston1->getSolution( solution1, f );
+    piston2->getSolution( solution2, f );
 
     scalar result1 = solution1( 1 );
     scalar result2 = solution2( 1 );

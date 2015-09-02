@@ -124,7 +124,10 @@ scalar Piston::getEndTime()
     return endTime;
 }
 
-void Piston::getSolution( fsi::vector & solution )
+void Piston::getSolution(
+    fsi::vector & solution,
+    fsi::vector & f
+    )
 {
     assert( solution.rows() == 2 );
     solution( 0 ) = qdot;

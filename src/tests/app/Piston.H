@@ -60,7 +60,10 @@ public:
 
     virtual void finalizeTimeStep(){}
 
-    virtual void getSolution( fsi::vector & solution );
+    virtual void getSolution(
+        fsi::vector & solution,
+        fsi::vector & f
+        );
 
     virtual void setSolution(
         const fsi::vector & solution,

@@ -86,8 +86,8 @@ TEST_P( AdaptiveTimeSteppingESDIRKTest, run )
 {
     esdirk->run();
 
-    fsi::vector solution( 2 );
-    piston->getSolution( solution );
+    fsi::vector solution( 2 ), f;
+    piston->getSolution( solution, f );
 
     scalar result = solution( 1 );
     scalar ref = piston->referenceSolution( 100 );
@@ -160,8 +160,8 @@ TEST_P( AdaptiveTimeSteppingSDCTest, run )
 
     ASSERT_NEAR( piston->t, 100, 1.0e-5 );
 
-    fsi::vector solution( 2 );
-    piston->getSolution( solution );
+    fsi::vector solution( 2 ), f;
+    piston->getSolution( solution, f );
 
     scalar result = solution( 1 );
     scalar ref = piston->referenceSolution( 100 );

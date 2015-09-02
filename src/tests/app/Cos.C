@@ -60,7 +60,10 @@ scalar Cos::getScalingFactor()
     return 1.0;
 }
 
-void Cos::getSolution( fsi::vector & solution )
+void Cos::getSolution(
+    fsi::vector & solution,
+    fsi::vector & f
+    )
 {
     solution( 0 ) = sol;
 }

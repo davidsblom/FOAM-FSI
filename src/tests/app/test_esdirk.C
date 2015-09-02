@@ -89,8 +89,8 @@ TEST_P( ESDIRKTest, run )
 {
     esdirk->run();
 
-    fsi::vector solution( 2 );
-    piston->getSolution( solution );
+    fsi::vector solution( 2 ), f;
+    piston->getSolution( solution, f );
 
     scalar result = solution( 1 );
     scalar ref = piston->referenceSolution( 100 );
@@ -195,9 +195,9 @@ TEST_P( ESDIRKTest, runCompareESDIRK )
     piston_esdirk->run();
     esdirk->run();
 
-    fsi::vector solution_piston_esdirk( 2 ), solution_piston( 2 );
-    piston->getSolution( solution_piston );
-    piston_esdirk->getSolution( solution_piston_esdirk );
+    fsi::vector solution_piston_esdirk( 2 ), solution_piston( 2 ), f;
+    piston->getSolution( solution_piston, f );
+    piston_esdirk->getSolution( solution_piston_esdirk, f );
 
     ASSERT_NEAR( solution_piston_esdirk( 0 ), solution_piston( 0 ), 1.0e-10 );
     ASSERT_NEAR( solution_piston_esdirk( 1 ), solution_piston( 1 ), 1.0e-10 );
