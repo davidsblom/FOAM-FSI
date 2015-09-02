@@ -95,6 +95,16 @@ public:
         fsi::vector & result
         );
 
+    void prepareImplicitSolve(
+        bool corrector,
+        const int k,
+        const int kold,
+        const scalar t,
+        const scalar dt,
+        const fsi::vector & qold,
+        const fsi::vector & rhs
+        );
+
     virtual void setDeltaT( scalar dt );
 
     virtual void setNumberOfImplicitStages( int k );

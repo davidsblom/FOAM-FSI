@@ -1000,3 +1000,16 @@ void SDCFluidSolver::getVariablesInfo(
         }
     }
 }
+
+void SDCFluidSolver::prepareImplicitSolve(
+    bool corrector,
+    const int k,
+    const int kold,
+    const scalar t,
+    const scalar dt,
+    const fsi::vector & qold,
+    const fsi::vector & rhs
+    )
+{
+    assert( false );
+}
