@@ -37,6 +37,12 @@
 #include "WendlandC2Function.H"
 #include "WendlandC4Function.H"
 #include "WendlandC6Function.H"
+#include "AdaptiveTimeStepper.H"
+#include "SDCFsiSolverInterface.H"
+#include "SDCDynamicMeshFluidSolver.H"
+#include "SDCSolidSolver.H"
+#include "SDCFsiSolver.H"
+#include "PIES.H"
 
 using std::list;
 
@@ -485,6 +491,8 @@ int main(
         assert( config["parallel-coupling"] );
         assert( config["coupling-scheme-implicit"]["extrapolation-order"] );
         assert( config["coupling-scheme-implicit"]["max-iterations"] );
+        assert( config["time-integration-scheme"] );
+        assert( config["adaptive-time-stepping"] );
         assert( configPostProcessing["initial-relaxation"] );
         assert( configPostProcessing["timesteps-reused"] );
         assert( configPostProcessing["singularity-limit"] );
@@ -505,6 +513,7 @@ int main(
         scalar beta = 1;
         bool updateJacobian = false;
         std::string firstParticipant = "fluid-solver";
+        std::string timeIntegrationScheme = config["time-integration-scheme"].as<std::string>();
 
         if ( not parallel )
         {
@@ -514,6 +523,29 @@ int main(
         }
 
         assert( algorithm == "QN" or algorithm == "Aitken" or algorithm == "Anderson" );
+        assert( timeIntegrationScheme == "bdf" || timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" );
+
+        std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
+
+        YAML::Node adaptiveTimeConfig( config["adaptive-time-stepping"] );
+        assert( adaptiveTimeConfig["enabled"] );
+        bool adaptiveTimeStepping = adaptiveTimeConfig["enabled"].as<bool>();
+
+        std::string filter = "elementary";
+        scalar adaptiveTolerance = 1.0e-3;
+        scalar safetyFactor = 0.5;
+
+        if ( adaptiveTimeStepping )
+        {
+            assert( adaptiveTimeConfig["filter"] );
+            assert( adaptiveTimeConfig["tolerance"] );
+            assert( adaptiveTimeConfig["safety-factor"] );
+            filter = adaptiveTimeConfig["filter"].as<std::string>();
+            adaptiveTolerance = adaptiveTimeConfig["tolerance"].as<scalar>();
+            safetyFactor = adaptiveTimeConfig["safety-factor"].as<scalar>();
+        }
+
+        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( adaptiveTimeStepping, filter, adaptiveTolerance, safetyFactor ) );
 
         if ( algorithm == "Anderson" )
         {
@@ -546,23 +578,69 @@ int main(
         std::shared_ptr<PostProcessing> postProcessing;
         std::shared_ptr<ImplicitMultiLevelFsiSolver> implicitMultiLevelFsiSolver;
 
+        std::shared_ptr<sdc::SDCFsiSolverInterface> sdcFluidSolver;
+        std::shared_ptr<sdc::SDCFsiSolverInterface> sdcSolidSolver;
+
         if ( fluidSolver == "coupled-pressure-velocity-solver" )
+        {
+            assert( timeIntegrationScheme == "bdf" );
+            assert( not adaptiveTimeStepping );
+
             fluid = std::shared_ptr<foamFluidSolver> ( new CoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+        }
 
         if ( fluidSolver == "pimple-solver" )
-            fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+        {
+            if ( timeIntegrationScheme == "bdf" )
+            {
+                assert( not adaptiveTimeStepping );
+
+                fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+            }
+
+            if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
+                sdcFluidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new SDCDynamicMeshFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+        }
 
         if ( fluidSolver == "compressible-solver" )
+        {
+            assert( timeIntegrationScheme == "bdf" );
+            assert( not adaptiveTimeStepping );
+
             fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+        }
 
         if ( solidSolver == "segregated-solver" )
         {
+            assert( timeIntegrationScheme == "bdf" );
+
             std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
 
             std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false ) );
 
-            solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid", args, runTime, interpolator ) );
+            if ( timeIntegrationScheme == "bdf" )
+            {
+                assert( not adaptiveTimeStepping );
+
+                solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid", args, runTime, interpolator ) );
+            }
+
+            if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
+                sdcSolidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new SDCSolidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
         }
+
+        if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
+        {
+            assert( sdcFluidSolver );
+            assert( sdcSolidSolver );
+            assert( not fluid );
+            assert( not solid );
+            fluid = std::dynamic_pointer_cast<foamFluidSolver>( sdcFluidSolver );
+            solid = std::dynamic_pointer_cast<foamSolidSolver>( sdcSolidSolver );
+        }
+
+        assert( fluid );
+        assert( solid );
 
         // Convergence measures
         convergenceMeasures = std::shared_ptr<list<std::shared_ptr<ConvergenceMeasure> > >( new list<std::shared_ptr<ConvergenceMeasure> > );
@@ -612,9 +690,72 @@ int main(
         if ( algorithm == "QN" )
             postProcessing = std::shared_ptr<PostProcessing> ( new BroydenPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex ) );
 
-        implicitMultiLevelFsiSolver = std::shared_ptr<ImplicitMultiLevelFsiSolver> ( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
+        if ( timeIntegrationScheme == "bdf" )
+        {
+            implicitMultiLevelFsiSolver = std::shared_ptr<ImplicitMultiLevelFsiSolver> ( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
+            implicitMultiLevelFsiSolver->run();
+        }
 
-        implicitMultiLevelFsiSolver->run();
+        if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
+        {
+            std::shared_ptr<SDCFsiSolver> sdcFsiSolver( new SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing ) );
+            std::shared_ptr<sdc::TimeIntegrationScheme> timeSolver;
+
+            if ( timeIntegrationScheme == "esdirk" )
+            {
+                YAML::Node esdirkConfig( config["esdirk"] );
+
+                assert( esdirkConfig["method"] );
+                assert( adaptiveTimeStepper );
+
+                std::string method = esdirkConfig["method"].as<std::string>();
+
+                timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme>( new sdc::ESDIRK( sdcFsiSolver, method, adaptiveTimeStepper ) );
+            }
+
+            if ( timeIntegrationScheme == "sdc" )
+            {
+                assert( config["sdc"] );
+                YAML::Node sdcConfig( config["sdc"] );
+                assert( sdcConfig["convergence-tolerance"] );
+                assert( sdcConfig["number-of-points"] );
+                assert( sdcConfig["quadrature-rule"] );
+                assert( sdcConfig["min-sweeps"] );
+                assert( sdcConfig["max-sweeps"] );
+                assert( adaptiveTimeStepper );
+
+                int n = sdcConfig["number-of-points"].as<int>();
+                scalar tol = sdcConfig["convergence-tolerance"].as<scalar>();
+                std::string quadratureRule = sdcConfig["quadrature-rule"].as<std::string>();
+                int minSweeps = sdcConfig["min-sweeps"].as<int>();
+                int maxSweeps = sdcConfig["max-sweeps"].as<int>();
+
+                timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( sdcFsiSolver, adaptiveTimeStepper, quadratureRule, n, tol, minSweeps, maxSweeps ) );
+            }
+
+            if ( timeIntegrationScheme == "picard-integral-exponential-solver" )
+            {
+                assert( config["picard-integral-exponential-solver"] );
+                YAML::Node piesConfig( config["picard-integral-exponential-solver"] );
+                assert( piesConfig["delta"] );
+                assert( piesConfig["convergence-tolerance"] );
+                assert( piesConfig["min-sweeps"] );
+                assert( piesConfig["max-sweeps"] );
+                assert( piesConfig["rho"] );
+
+                scalar delta = piesConfig["delta"].as<scalar>();
+                scalar tol = piesConfig["convergence-tolerance"].as<scalar>();
+                scalar rho = piesConfig["rho"].as<scalar>();
+                int minSweeps = piesConfig["min-sweeps"].as<int>();
+                int maxSweeps = piesConfig["max-sweeps"].as<int>();
+
+                timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::PIES( sdcFsiSolver, adaptiveTimeStepper, rho, delta, tol, minSweeps, maxSweeps ) );
+            }
+
+            assert( timeSolver );
+
+            timeSolver->run();
+        }
     }
 
     Info << "End\n" << endl;

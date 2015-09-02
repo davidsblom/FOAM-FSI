@@ -10,17 +10,15 @@
 #include "SDCFsiSolverInterface.H"
 #include "PostProcessing.H"
 
-using namespace sdc;
-
 namespace fsi
 {
-    class SDCFsiSolver : public SDCSolver
+    class SDCFsiSolver : public sdc::SDCSolver
     {
 public:
 
         SDCFsiSolver(
-            std::shared_ptr<SDCFsiSolverInterface> fluid,
-            std::shared_ptr<SDCFsiSolverInterface> solid,
+            std::shared_ptr<sdc::SDCFsiSolverInterface> fluid,
+            std::shared_ptr<sdc::SDCFsiSolverInterface> solid,
             std::shared_ptr<PostProcessing> postProcessing
             );
 
@@ -83,8 +81,8 @@ public:
 
 private:
 
-        std::shared_ptr<SDCFsiSolverInterface> fluid;
-        std::shared_ptr<SDCFsiSolverInterface> solid;
+        std::shared_ptr<sdc::SDCFsiSolverInterface> fluid;
+        std::shared_ptr<sdc::SDCFsiSolverInterface> solid;
         std::shared_ptr<PostProcessing> postProcessing;
         int dofFluid;
         int dofSolid;

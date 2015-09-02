@@ -7,8 +7,8 @@
 #include "SDCFsiSolver.H"
 
 SDCFsiSolver::SDCFsiSolver(
-    std::shared_ptr<SDCFsiSolverInterface> fluid,
-    std::shared_ptr<SDCFsiSolverInterface> solid,
+    std::shared_ptr<sdc::SDCFsiSolverInterface> fluid,
+    std::shared_ptr<sdc::SDCFsiSolverInterface> solid,
     std::shared_ptr<PostProcessing> postProcessing
     )
     :
