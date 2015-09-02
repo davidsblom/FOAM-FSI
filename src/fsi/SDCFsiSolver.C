@@ -66,6 +66,8 @@ void SDCFsiSolver::getSolution(
 {
     assert( dofFluid > 0 );
     assert( dofSolid > 0 );
+    assert( dofFluid + dofSolid == solution.rows() );
+    assert( solution.rows() == f.rows() );
 
     fsi::vector solFluid( dofFluid ), solSolid( dofSolid ), fFluid( dofFluid ), fSolid( dofSolid );
     fluid->getSolution( solFluid, fFluid );
@@ -134,6 +136,11 @@ void SDCFsiSolver::implicitSolve(
     fsi::vector rhsFluid( dofFluid ), rhsSolid( dofSolid );
     fsi::vector fFluid( dofFluid ), fSolid( dofSolid );
     fsi::vector resultFluid( dofFluid ), resultSolid( dofSolid );
+
+    qoldFluid = qold.head( dofFluid );
+    qoldSolid = qold.tail( dofSolid );
+    rhsFluid = rhs.head( dofFluid );
+    rhsSolid = rhs.tail( dofSolid );
 
     fluid->prepareImplicitSolve( corrector, k, kold, t, dt, qoldFluid, rhsFluid );
     solid->prepareImplicitSolve( corrector, k, kold, t, dt, qoldSolid, rhsSolid );
