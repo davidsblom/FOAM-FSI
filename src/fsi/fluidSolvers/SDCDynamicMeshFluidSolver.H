@@ -17,7 +17,7 @@
 using namespace fsi;
 using std::shared_ptr;
 
-class SDCDynamicMeshFluidSolver : public SDCFluidSolver, public sdc::SDCFsiSolverInterface
+class SDCDynamicMeshFluidSolver : public SDCFluidSolver
 {
 public:
 
@@ -40,7 +40,10 @@ public:
 
     virtual int getDOF();
 
-    virtual void getSolution( fsi::vector & solution, fsi::vector & f );
+    virtual void getSolution(
+        fsi::vector & solution,
+        fsi::vector & f
+        );
 
     virtual void setSolution(
         const fsi::vector & solution,

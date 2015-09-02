@@ -449,7 +449,10 @@ int SDCFluidSolver::getDOF()
     return index;
 }
 
-void SDCFluidSolver::getSolution( fsi::vector & solution, fsi::vector & f )
+void SDCFluidSolver::getSolution(
+    fsi::vector & solution,
+    fsi::vector & f
+    )
 {
     int index = 0;
 

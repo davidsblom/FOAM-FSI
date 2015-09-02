@@ -247,7 +247,10 @@ int SDCDynamicMeshFluidSolver::getDOF()
     return index;
 }
 
-void SDCDynamicMeshFluidSolver::getSolution( fsi::vector & solution, fsi::vector & f )
+void SDCDynamicMeshFluidSolver::getSolution(
+    fsi::vector & solution,
+    fsi::vector & f
+    )
 {
     volScalarField V
     (
