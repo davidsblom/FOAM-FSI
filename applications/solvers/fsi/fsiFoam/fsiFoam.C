@@ -612,8 +612,6 @@ int main(
 
         if ( solidSolver == "segregated-solver" )
         {
-            assert( timeIntegrationScheme == "bdf" );
-
             std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
 
             std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false ) );
