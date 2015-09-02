@@ -147,8 +147,7 @@ void SDCFsiSolver::implicitSolve(
 
     postProcessing->performPostProcessing( x0, postProcessing->fsi->x );
 
-    fluid->getSolution( resultFluid, fFluid );
-    solid->getSolution( resultSolid, fSolid );
+    getSolution( result, f );
 }
 
 scalar SDCFsiSolver::getStartTime()
