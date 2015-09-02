@@ -2,6 +2,10 @@
 
 set -e
 
+# Ensure the script is executed in this directory
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR
+
 VERSION=1.7.0
 
 if [ ! -d "gtest-${VERSION}" ]; then
