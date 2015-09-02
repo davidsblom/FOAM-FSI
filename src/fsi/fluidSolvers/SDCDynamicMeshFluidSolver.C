@@ -708,33 +708,6 @@ void SDCDynamicMeshFluidSolver::prepareImplicitSolve(
             );
         motionSolver.corrector = corrector;
         motionSolver.k = k;
-
-        mesh.update();
-
-        scalar rDeltaT = 1.0 / runTime->deltaT().value();
-
-        // Create swept volumes
-        const faceList & f = mesh.faces();
-
-        scalarField sweptVols( f.size() );
-
-        forAll( f, faceI )
-        {
-            sweptVols[faceI] = f[faceI].sweptVol( pointsStages.at( kold ), mesh.points() );
-        }
-
-        mesh.setPhi().internalField() = scalarField::subField( sweptVols, mesh.nInternalFaces() );
-        mesh.setPhi().internalField() *= rDeltaT;
-
-        const fvPatchList & patches = mesh.boundary();
-
-        forAll( patches, patchI )
-        {
-            mesh.setPhi().boundaryField()[patchI] = patches[patchI].patchSlice( sweptVols );
-            mesh.setPhi().boundaryField()[patchI] *= rDeltaT;
-        }
-
-        mesh.setPhi() -= rDeltaT * rhsMeshPhi;
     }
 
     volScalarField V
@@ -892,6 +865,36 @@ bool SDCDynamicMeshFluidSolver::isConverged()
 void SDCDynamicMeshFluidSolver::solve()
 {
     Info << "Solve fluid domain" << endl;
+
+    // Update mesh.phi()
+    {
+        mesh.update();
+
+        scalar rDeltaT = 1.0 / runTime->deltaT().value();
+
+        // Create swept volumes
+        const faceList & f = mesh.faces();
+
+        scalarField sweptVols( f.size() );
+
+        forAll( f, faceI )
+        {
+            sweptVols[faceI] = f[faceI].sweptVol( pointsStages.at( kold ), mesh.points() );
+        }
+
+        mesh.setPhi().internalField() = scalarField::subField( sweptVols, mesh.nInternalFaces() );
+        mesh.setPhi().internalField() *= rDeltaT;
+
+        const fvPatchList & patches = mesh.boundary();
+
+        forAll( patches, patchI )
+        {
+            mesh.setPhi().boundaryField()[patchI] = patches[patchI].patchSlice( sweptVols );
+            mesh.setPhi().boundaryField()[patchI] *= rDeltaT;
+        }
+
+        mesh.setPhi() -= rDeltaT * rhsMeshPhi;
+    }
 
     volScalarField V
     (
