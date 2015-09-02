@@ -88,6 +88,8 @@ public:
 
     virtual void solve();
 
+    virtual void getTractionLocal( matrix & traction );
+
 private:
 
     void createFields();
@@ -108,6 +110,7 @@ private:
     surfaceScalarField meshPhiF;
 
     int kold;
+    int indexk;
 };
 
 #endif

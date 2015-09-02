@@ -173,6 +173,8 @@ namespace sdc
         assert( qmat.rows() == k - 1 );
         assert( qmat.cols() == k );
         assert( solver );
+        assert( N > 0 );
+        assert( k > 0 );
 
         if ( adaptiveTimeStepper->isPreviousStepAccepted() )
             solver->nextTimeStep();

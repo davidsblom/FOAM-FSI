@@ -46,8 +46,7 @@ void SDCFsiSolver::evaluateFunction(
 
 void SDCFsiSolver::finalizeTimeStep()
 {
-    fluid->finalizeTimeStep();
-    solid->finalizeTimeStep();
+    postProcessing->fsi->finalizeTimeStep();
 }
 
 int SDCFsiSolver::getDOF()
@@ -65,9 +64,13 @@ void SDCFsiSolver::getSolution(
     fsi::vector & f
     )
 {
-    fsi::vector solFluid( dofFluid ), solSolid( dofSolid ), fFluid( dofFluid ), fSolid( fSolid );
+    assert( dofFluid > 0 );
+    assert( dofSolid > 0 );
+
+    fsi::vector solFluid( dofFluid ), solSolid( dofSolid ), fFluid( dofFluid ), fSolid( dofSolid );
     fluid->getSolution( solFluid, fFluid );
     solid->getSolution( solSolid, fSolid );
+
     solution.head( dofFluid ) = solFluid;
     solution.tail( dofSolid ) = solSolid;
     f.head( dofFluid ) = fFluid;
@@ -106,8 +109,7 @@ void SDCFsiSolver::nextTimeStep()
 
 void SDCFsiSolver::initTimeStep()
 {
-    fluid->initTimeStep();
-    solid->initTimeStep();
+    postProcessing->fsi->initTimeStep();
 }
 
 void SDCFsiSolver::setNumberOfImplicitStages( int k )

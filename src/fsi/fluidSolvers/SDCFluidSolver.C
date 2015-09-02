@@ -351,7 +351,14 @@ void SDCFluidSolver::initialize()
 }
 
 void SDCFluidSolver::initTimeStep()
-{}
+{
+    assert( !init );
+
+    timeIndex++;
+    t = runTime->time().value();
+
+    init = true;
+}
 
 bool SDCFluidSolver::isRunning()
 {
@@ -404,11 +411,15 @@ void SDCFluidSolver::solve()
 
 void SDCFluidSolver::finalizeTimeStep()
 {
+    assert( init );
+
     runTime->writeNow();
 
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
          << "  ClockTime = " << runTime->elapsedClockTime() << " s"
          << endl << endl;
+
+    init = false;
 }
 
 int SDCFluidSolver::getDOF()

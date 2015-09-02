@@ -65,6 +65,7 @@ SDCSolidSolver::SDCSolidSolver (
     relativeTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "relTol" ) ) ),
     interpolator( false ),
     k( 0 ),
+    indexk( 0 ),
     UStages(),
     VStages(),
     rhsU
@@ -192,6 +193,7 @@ SDCSolidSolver::SDCSolidSolver (
     relativeTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "relTol" ) ) ),
     interpolator( interpolator ),
     k( 0 ),
+    indexk( 0 ),
     UStages(),
     VStages(),
     rhsU
@@ -406,7 +408,104 @@ void SDCSolidSolver::resetSolution()
 
 void SDCSolidSolver::solve()
 {
-    assert( false );
+    Info << "Solve solid domain" << endl;
+
+    scalar iCorr = 0;
+    scalar displacementResidual = 1;
+    scalar velocityResidual = 1;
+    scalar residual = 1;
+    scalar initialResidual = 1;
+    lduMatrix::solverPerformance solverPerf;
+    lduMatrix::debug = 0;
+    scalar convergenceTolerance = absoluteTolerance;
+
+    gradU = fvc::grad( U );
+
+    calculateEpsilonSigma();
+
+    dimensionedVector gravity( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "gravity" ) );
+
+    dimensionedScalar deltaT = runTime->deltaT();
+
+    for ( iCorr = 0; iCorr < maxIter; iCorr++ )
+    {
+        U.storePrevIter();
+        V.storePrevIter();
+
+        surfaceTensorField shearGradU =
+            ( (I - n * n) & fvc::interpolate( gradU ) );
+
+        fvVectorMatrix UEqn
+        (
+            fvm::ddt( U )
+            ==
+            deltaT / rho * (
+                fvm::laplacian( 2 * muf + lambdaf, U, "laplacian(DU,U)" )
+                + fvc::div(
+                    mesh.magSf()
+                    * (
+                        -(muf + lambdaf) * ( fvc::snGrad( U ) & (I - n * n) )
+                        + lambdaf * tr( shearGradU & (I - n * n) ) * n
+                        + muf * (shearGradU & n)
+                        + muf * ( n & fvc::interpolate( gradU & gradU.T() ) )
+                        + 0.5 * lambdaf
+                        * ( n * tr( fvc::interpolate( gradU & gradU.T() ) ) )
+                        + ( n & fvc::interpolate( sigma & gradU ) )
+                        )
+                    )
+                )
+            + V.oldTime()
+            + rhsV
+            + rhsU / deltaT
+        );
+
+        // Add gravity
+
+        UEqn -= deltaT * gravity;
+
+        solverPerf = UEqn.solve();
+
+        V = fvc::ddt( U ) - rhsU / deltaT;
+
+        gradU = fvc::grad( U );
+
+        calculateEpsilonSigma();
+
+        displacementResidual = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
+        velocityResidual = gSumMag( V.internalField() - V.prevIter().internalField() ) / (gSumMag( V.internalField() ) + SMALL);
+        residual = max( displacementResidual, solverPerf.initialResidual() );
+        residual = max( residual, velocityResidual );
+
+        if ( iCorr == 0 )
+        {
+            initialResidual = residual;
+            convergenceTolerance = std::max( relativeTolerance * residual, absoluteTolerance );
+            assert( convergenceTolerance > 0 );
+            assert( convergenceTolerance < 1 );
+        }
+
+        bool convergence = residual <= convergenceTolerance && iCorr >= minIter - 1;
+
+        if ( convergence )
+            break;
+    }
+
+    lduMatrix::debug = 1;
+
+    Info << "Solving for " << U.name();
+    Info << ", Initial residual = " << initialResidual;
+    Info << ", Final residual velocity = " << velocityResidual;
+    Info << ", Final residual displacement = " << displacementResidual;
+    Info << ", No outer iterations " << iCorr << endl;
+
+    // -------------------------------------------------------------------------
+
+    UStages.at( indexk + 1 ) = U;
+    VStages.at( indexk + 1 ) = V;
+
+    dimensionedScalar rDeltaT = 1.0 / mesh.time().deltaT();
+    UF = rDeltaT * (U - U.oldTime() - rhsU);
+    VF = rDeltaT * (V - V.oldTime() - rhsV);
 }
 
 void SDCSolidSolver::evaluateFunction(
@@ -721,6 +820,7 @@ void SDCSolidSolver::prepareImplicitSolve(
 {
     runTime->setDeltaT( dt );
     runTime->setTime( t, runTime->timeIndex() );
+    indexk = k;
 
     if ( corrector )
     {
@@ -835,106 +935,7 @@ void SDCSolidSolver::implicitSolve(
 {
     prepareImplicitSolve( corrector, k, kold, t, dt, qold, rhs );
 
-    // -------------------------------------------------------------------------
-
-    Info << "Solve solid domain" << endl;
-
-    scalar iCorr = 0;
-    scalar displacementResidual = 1;
-    scalar velocityResidual = 1;
-    scalar residual = 1;
-    scalar initialResidual = 1;
-    lduMatrix::solverPerformance solverPerf;
-    lduMatrix::debug = 0;
-    scalar convergenceTolerance = absoluteTolerance;
-
-    gradU = fvc::grad( U );
-
-    calculateEpsilonSigma();
-
-    dimensionedVector gravity( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "gravity" ) );
-
-    dimensionedScalar deltaT = runTime->deltaT();
-
-    for ( iCorr = 0; iCorr < maxIter; iCorr++ )
-    {
-        U.storePrevIter();
-        V.storePrevIter();
-
-        surfaceTensorField shearGradU =
-            ( (I - n * n) & fvc::interpolate( gradU ) );
-
-        fvVectorMatrix UEqn
-        (
-            fvm::ddt( U )
-            ==
-            deltaT / rho * (
-                fvm::laplacian( 2 * muf + lambdaf, U, "laplacian(DU,U)" )
-                + fvc::div(
-                    mesh.magSf()
-                    * (
-                        -(muf + lambdaf) * ( fvc::snGrad( U ) & (I - n * n) )
-                        + lambdaf * tr( shearGradU & (I - n * n) ) * n
-                        + muf * (shearGradU & n)
-                        + muf * ( n & fvc::interpolate( gradU & gradU.T() ) )
-                        + 0.5 * lambdaf
-                        * ( n * tr( fvc::interpolate( gradU & gradU.T() ) ) )
-                        + ( n & fvc::interpolate( sigma & gradU ) )
-                        )
-                    )
-                )
-            + V.oldTime()
-            + rhsV
-            + rhsU / deltaT
-        );
-
-        // Add gravity
-
-        UEqn -= deltaT * gravity;
-
-        solverPerf = UEqn.solve();
-
-        V = fvc::ddt( U ) - rhsU / deltaT;
-
-        gradU = fvc::grad( U );
-
-        calculateEpsilonSigma();
-
-        displacementResidual = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
-        velocityResidual = gSumMag( V.internalField() - V.prevIter().internalField() ) / (gSumMag( V.internalField() ) + SMALL);
-        residual = max( displacementResidual, solverPerf.initialResidual() );
-        residual = max( residual, velocityResidual );
-
-        if ( iCorr == 0 )
-        {
-            initialResidual = residual;
-            convergenceTolerance = std::max( relativeTolerance * residual, absoluteTolerance );
-            assert( convergenceTolerance > 0 );
-            assert( convergenceTolerance < 1 );
-        }
-
-        bool convergence = residual <= convergenceTolerance && iCorr >= minIter - 1;
-
-        if ( convergence )
-            break;
-    }
-
-    lduMatrix::debug = 1;
-
-    Info << "Solving for " << U.name();
-    Info << ", Initial residual = " << initialResidual;
-    Info << ", Final residual velocity = " << velocityResidual;
-    Info << ", Final residual displacement = " << displacementResidual;
-    Info << ", No outer iterations " << iCorr << endl;
-
-    // -------------------------------------------------------------------------
-
-    UStages.at( k + 1 ) = U;
-    VStages.at( k + 1 ) = V;
-
-    dimensionedScalar rDeltaT = 1.0 / mesh.time().deltaT();
-    UF = rDeltaT * (U - U.oldTime() - rhsU);
-    VF = rDeltaT * (V - V.oldTime() - rhsV);
+    solve();
 
     getSolution( result, f );
 }

@@ -141,6 +141,7 @@ protected:
     const std::shared_ptr<rbf::RBFCoarsening> interpolator;
 
     int k;
+    int indexk;
     std::deque<volVectorField> UStages;
     std::deque<volVectorField> VStages;
     volVectorField rhsU;
