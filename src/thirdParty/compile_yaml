@@ -15,7 +15,7 @@ if [ "$(uname)" == "Darwin" ]; then
     SHARED_LIBRARY=${FOAM_USER_LIBBIN}/libyaml-cpp.${VERSION}.dylib
 fi
 
-if [ ! -e ${SHARED_LIBRARY} ]; then
+if [ ! -e ${SHARED_LIBRARY} ] || [ ! -e "yaml-cpp-release-${VERSION}" ]; then
 
     # Define which versions of the different packages are used
 
