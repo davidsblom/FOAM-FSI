@@ -229,6 +229,8 @@ void CompressibleFluidSolver::solve()
 {
     Info << "Solve fluid domain" << endl;
 
+    mesh.update();
+
     int oCorr;
 
     // Outer correction loop to solve the non-linear system

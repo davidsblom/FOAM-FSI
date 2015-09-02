@@ -86,6 +86,8 @@ public:
 
     virtual bool isConverged();
 
+    virtual void solve();
+
 private:
 
     void createFields();
@@ -104,6 +106,8 @@ private:
     IOobject UfFHeader;
     surfaceVectorField UfF;
     surfaceScalarField meshPhiF;
+
+    int kold;
 };
 
 #endif

@@ -382,6 +382,8 @@ void FluidSolver::solve()
 {
     Info << "Solve fluid domain" << endl;
 
+    mesh.update();
+
     scalar convergenceTolerance = absoluteTolerance;
 
     // --- PIMPLE loop

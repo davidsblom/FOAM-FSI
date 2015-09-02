@@ -127,7 +127,27 @@ void SDCFsiSolver::implicitSolve(
     fsi::vector & f,
     fsi::vector & result
     )
-{}
+{
+    fsi::vector qoldFluid( dofFluid ), qoldSolid( dofSolid );
+    fsi::vector rhsFluid( dofFluid ), rhsSolid( dofSolid );
+    fsi::vector fFluid( dofFluid ), fSolid( dofSolid );
+    fsi::vector resultFluid( dofFluid ), resultSolid( dofSolid );
+
+    fluid->prepareImplicitSolve( corrector, k, kold, t, dt, qoldFluid, rhsFluid );
+    solid->prepareImplicitSolve( corrector, k, kold, t, dt, qoldSolid, rhsSolid );
+
+    // Perform FSI iterations to solve the coupled problem
+
+    postProcessing->fsi->newMeasurementSeries();
+
+    // Initial solution
+    fsi::vector x0 = postProcessing->fsi->x;
+
+    postProcessing->performPostProcessing( x0, postProcessing->fsi->x );
+
+    fluid->getSolution( resultFluid, fFluid );
+    solid->getSolution( resultSolid, fSolid );
+}
 
 scalar SDCFsiSolver::getStartTime()
 {

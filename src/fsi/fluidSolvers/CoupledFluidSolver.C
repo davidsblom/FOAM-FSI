@@ -254,6 +254,8 @@ void CoupledFluidSolver::solve()
 {
     Info << "Solve fluid domain" << endl;
 
+    mesh.update();
+
     int oCorr;
     bool underrelaxation = true;
 

@@ -82,7 +82,8 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     ),
     mesh,
     dimensionedScalar( "0", dimVolume / dimTime, 0.0 )
-    )
+    ),
+    kold( 0 )
 {
     initialize();
 }
@@ -602,6 +603,8 @@ void SDCDynamicMeshFluidSolver::prepareImplicitSolve(
     assert( kold < this->k );
     assert( kold <= k );
     assert( qold.rows() == rhs.rows() );
+    this->kold = kold;
+    this->k = k;
 
     runTime->setDeltaT( dt );
     runTime->setTime( t, runTime->timeIndex() );
@@ -773,6 +776,120 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
 {
     prepareImplicitSolve( corrector, k, kold, t, dt, qold, rhs );
 
+    solve();
+
+    getSolution( result, f );
+}
+
+scalar SDCDynamicMeshFluidSolver::getScalingFactor()
+{
+    return 1;
+}
+
+void SDCDynamicMeshFluidSolver::getVariablesInfo(
+    std::deque<int> & dof,
+    std::deque<bool> & enabled,
+    std::deque<std::string> & names
+    )
+{
+    dof.push_back( 0 );
+    dof.push_back( 0 );
+    dof.push_back( 0 );
+    enabled.push_back( true );
+    enabled.push_back( true );
+    enabled.push_back( false );
+    names.push_back( "U" );
+    names.push_back( "Uf" );
+    names.push_back( "meshPhi" );
+
+    forAll( U.internalField(), i )
+    {
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
+        {
+            dof.at( 0 ) += 1;
+        }
+    }
+
+    forAll( U.boundaryField(), patchI )
+    {
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
+        {
+            forAll( U.boundaryField()[patchI], i )
+            {
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
+                {
+                    dof.at( 0 ) += 1;
+                }
+            }
+        }
+    }
+
+    forAll( Uf.internalField(), i )
+    {
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            dof.at( 1 ) += 1;
+    }
+
+    forAll( Uf.boundaryField(), patchI )
+    {
+        forAll( Uf.boundaryField()[patchI], i )
+        {
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+                dof.at( 1 ) += 1;
+        }
+    }
+
+    forAll( mesh.phi().internalField(), i )
+    {
+        dof.at( 2 ) += 1;
+    }
+
+    forAll( mesh.phi().boundaryField(), patchI )
+    {
+        forAll( mesh.phi().boundaryField()[patchI], i )
+        {
+            dof.at( 2 ) += 1;
+        }
+    }
+}
+
+bool SDCDynamicMeshFluidSolver::isConverged()
+{
+    bool convergence = true;
+
+    forAll( U.boundaryField().types(), i )
+    {
+        assert( U.boundaryField().types()[i] != "movingWallVelocity" );
+
+        if ( U.boundaryField().types()[i] == "SDCMovingWallVelocity" )
+        {
+            SDCMovingWallVelocityFvPatchVectorField & bc = static_cast<SDCMovingWallVelocityFvPatchVectorField &>(U.boundaryField()[i]);
+            bc.timeIntegrationScheme->outputResidual( "moving wall velocity" );
+
+            if ( not bc.timeIntegrationScheme->isConverged() )
+                convergence = false;
+        }
+    }
+
+    RBFMeshMotionSolver & motionSolver =
+        const_cast<RBFMeshMotionSolver &>
+        (
+        mesh.lookupObject<RBFMeshMotionSolver>( "dynamicMeshDict" )
+        );
+
+    if ( motionSolver.timeIntegrationScheme )
+    {
+        motionSolver.timeIntegrationScheme->outputResidual( "mesh motion" );
+
+        if ( not motionSolver.timeIntegrationScheme->isConverged() )
+            convergence = false;
+    }
+
+    return convergence;
+}
+
+void SDCDynamicMeshFluidSolver::solve()
+{
     volScalarField V
     (
         IOobject
@@ -968,113 +1085,4 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     UF = rDeltaT * (U * V - U.oldTime() * V0 - rhsU * V);
     UfF = rDeltaT * ( Uf * fvc::interpolate( V ) - Uf.oldTime() * interpolateVolumeStages.at( kold ) - rhsUf * fvc::interpolate( V ) );
     meshPhiF = mesh.phi();
-
-    getSolution( result, f );
-}
-
-scalar SDCDynamicMeshFluidSolver::getScalingFactor()
-{
-    return 1;
-}
-
-void SDCDynamicMeshFluidSolver::getVariablesInfo(
-    std::deque<int> & dof,
-    std::deque<bool> & enabled,
-    std::deque<std::string> & names
-    )
-{
-    dof.push_back( 0 );
-    dof.push_back( 0 );
-    dof.push_back( 0 );
-    enabled.push_back( true );
-    enabled.push_back( true );
-    enabled.push_back( false );
-    names.push_back( "U" );
-    names.push_back( "Uf" );
-    names.push_back( "meshPhi" );
-
-    forAll( U.internalField(), i )
-    {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            dof.at( 0 ) += 1;
-        }
-    }
-
-    forAll( U.boundaryField(), patchI )
-    {
-        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
-        {
-            forAll( U.boundaryField()[patchI], i )
-            {
-                for ( int j = 0; j < mesh.nGeometricD(); j++ )
-                {
-                    dof.at( 0 ) += 1;
-                }
-            }
-        }
-    }
-
-    forAll( Uf.internalField(), i )
-    {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            dof.at( 1 ) += 1;
-    }
-
-    forAll( Uf.boundaryField(), patchI )
-    {
-        forAll( Uf.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-                dof.at( 1 ) += 1;
-        }
-    }
-
-    forAll( mesh.phi().internalField(), i )
-    {
-        dof.at( 2 ) += 1;
-    }
-
-    forAll( mesh.phi().boundaryField(), patchI )
-    {
-        forAll( mesh.phi().boundaryField()[patchI], i )
-        {
-            dof.at( 2 ) += 1;
-        }
-    }
-}
-
-bool SDCDynamicMeshFluidSolver::isConverged()
-{
-    bool convergence = true;
-
-    forAll( U.boundaryField().types(), i )
-    {
-        assert( U.boundaryField().types()[i] != "movingWallVelocity" );
-
-        if ( U.boundaryField().types()[i] == "SDCMovingWallVelocity" )
-        {
-            SDCMovingWallVelocityFvPatchVectorField & bc = static_cast<SDCMovingWallVelocityFvPatchVectorField &>(U.boundaryField()[i]);
-            bc.timeIntegrationScheme->outputResidual( "moving wall velocity" );
-
-            if ( not bc.timeIntegrationScheme->isConverged() )
-                convergence = false;
-        }
-    }
-
-    RBFMeshMotionSolver & motionSolver =
-        const_cast<RBFMeshMotionSolver &>
-        (
-        mesh.lookupObject<RBFMeshMotionSolver>( "dynamicMeshDict" )
-        );
-
-    if ( motionSolver.timeIntegrationScheme )
-    {
-        motionSolver.timeIntegrationScheme->outputResidual( "mesh motion" );
-
-        if ( not motionSolver.timeIntegrationScheme->isConverged() )
-            convergence = false;
-    }
-
-    return convergence;
 }
