@@ -37,11 +37,14 @@ void SDCFsiSolver::evaluateFunction(
     fsi::vector & f
     )
 {
-    fsi::vector qFluid( dofFluid ), qSolid( dofSolid ), fFluid( dofFluid ), fSolid( dofSolid );
-    qFluid = q.head( dofFluid );
-    qSolid = q.tail( dofSolid );
+    fsi::vector fFluid( dofFluid ), fSolid( dofSolid );
+
+    Eigen::Map<const fsi::vector> qFluid( q.data(), dofFluid );
+    Eigen::Map<const fsi::vector> qSolid( q.data() + dofFluid, dofSolid );
+
     fluid->evaluateFunction( k, qFluid, t, fFluid );
     solid->evaluateFunction( k, qSolid, t, fSolid );
+
     f.head( dofFluid ) = fFluid;
     f.tail( dofSolid ) = fSolid;
 }
@@ -86,11 +89,12 @@ void SDCFsiSolver::setSolution(
     const fsi::vector & f
     )
 {
-    fsi::vector solFluid( dofFluid ), solSolid( dofSolid ), fFluid( dofFluid ), fSolid( fSolid );
-    solFluid = solution.head( dofFluid );
-    solSolid = solution.tail( dofSolid );
-    fFluid = f.head( dofFluid );
-    fSolid = f.tail( dofSolid );
+    Eigen::Map<const fsi::vector> solFluid( solution.data(), dofFluid );
+    Eigen::Map<const fsi::vector> solSolid( solution.data() + dofFluid, dofSolid );
+
+    Eigen::Map<const fsi::vector> fFluid( f.data(), dofFluid );
+    Eigen::Map<const fsi::vector> fSolid( f.data() + dofFluid, dofSolid );
+
     fluid->setSolution( solFluid, fFluid );
     solid->setSolution( solSolid, fSolid );
 }
@@ -144,15 +148,11 @@ void SDCFsiSolver::implicitSolve(
     fsi::vector & result
     )
 {
-    fsi::vector qoldFluid( dofFluid ), qoldSolid( dofSolid );
-    fsi::vector rhsFluid( dofFluid ), rhsSolid( dofSolid );
-    fsi::vector fFluid( dofFluid ), fSolid( dofSolid );
-    fsi::vector resultFluid( dofFluid ), resultSolid( dofSolid );
+    Eigen::Map<const fsi::vector> qoldFluid( qold.data(), dofFluid );
+    Eigen::Map<const fsi::vector> qoldSolid( qold.data() + dofFluid, dofSolid );
 
-    qoldFluid = qold.head( dofFluid );
-    qoldSolid = qold.tail( dofSolid );
-    rhsFluid = rhs.head( dofFluid );
-    rhsSolid = rhs.tail( dofSolid );
+    Eigen::Map<const fsi::vector> rhsFluid( rhs.data(), dofFluid );
+    Eigen::Map<const fsi::vector> rhsSolid( rhs.data() + dofFluid, dofSolid );
 
     fluid->prepareImplicitSolve( corrector, k, kold, t, dt, qoldFluid, rhsFluid );
     solid->prepareImplicitSolve( corrector, k, kold, t, dt, qoldSolid, rhsSolid );
