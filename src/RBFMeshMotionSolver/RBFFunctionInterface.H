@@ -24,6 +24,8 @@ public:
 
         virtual double correctionPower() = 0;
 
+        virtual double correctionPowerCoeff() = 0;
+
         virtual void setRadius( double value ) = 0;
     };
 }

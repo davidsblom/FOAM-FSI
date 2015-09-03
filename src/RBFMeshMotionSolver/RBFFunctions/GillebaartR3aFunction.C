@@ -33,6 +33,11 @@ namespace rbf
         return 3;
     }
 
+    double GillebaartR3aFunction::correctionPowerCoeff()
+    {
+        return 10;
+    }
+
     void GillebaartR3aFunction::setRadius( double value )
     {
         assert( value > 0 );
