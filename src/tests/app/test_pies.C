@@ -75,7 +75,7 @@ protected:
     {
         scalar dt, q0, qdot0, As, Ac, omega, endTime, tol, delta, rho;
 
-        int nbTimeSteps = 100, nbNodes;
+        int nbTimeSteps = 100;
 
         endTime = 100;
         dt = endTime / nbTimeSteps;
@@ -86,7 +86,6 @@ protected:
         qdot0 = -As;
         tol = 1.0e-8;
         delta = 1.0e-9;
-        nbNodes = 10;
         rho = 3.15;
 
         pies = std::shared_ptr<sdc::PIES> ( new sdc::PIES( rho, delta, tol ) );
