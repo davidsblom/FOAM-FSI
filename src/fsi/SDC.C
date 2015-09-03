@@ -205,7 +205,7 @@ namespace sdc
 
             qold = solStages.row( j );
 
-            Info << "\nTime = " << t << ", SDC sweep = 0, SDC substep = " << j + 1 << nl << endl;
+            Info << "\nTime = " << t << ", SDC sweep = 1, SDC substep = " << j + 1 << nl << endl;
 
             solver->implicitSolve( false, j, j, t, dt, qold, rhs, f, result );
 
@@ -215,7 +215,7 @@ namespace sdc
 
         // Compute successive corrections
 
-        for ( int j = 0; j < maxSweeps; j++ )
+        for ( int j = 0; j < maxSweeps - 1; j++ )
         {
             t = t0;
 
@@ -227,7 +227,7 @@ namespace sdc
                 scalar dt = dtsdc( p );
                 t += dt;
 
-                Info << "\nTime = " << t << ", SDC sweep = " << j + 1 << ", SDC substep = " << p + 1 << nl << endl;
+                Info << "\nTime = " << t << ", SDC sweep = " << j + 2 << ", SDC substep = " << p + 1 << nl << endl;
 
                 qold = solStages.row( p );
 
@@ -252,7 +252,7 @@ namespace sdc
             reduce( squaredNorm, sumOp<scalarList>() );
             scalar error = std::sqrt( sum( squaredNorm ) / N );
             error /= solver->getScalingFactor();
-            bool convergence = error < tol && j >= minSweeps - 1;
+            bool convergence = error < tol && j >= minSweeps - 2;
 
             std::deque<int> dofVariables;
             std::deque<bool> enabledVariables;
@@ -316,7 +316,7 @@ namespace sdc
                         reduce( squaredNorm, sumOp<scalarList>() );
                         scalar error = std::sqrt( sum( squaredNorm ) / sum( dofVariablesGlobal ) );
 
-                        if ( error > tol || j < minSweeps - 1 )
+                        if ( error > tol || j < minSweeps - 2 )
                             convergence = false;
 
                         if ( enabledVariables.at( i ) )
@@ -328,7 +328,7 @@ namespace sdc
                             Info << ", sweep = " << j + 1;
                             Info << ", convergence = ";
 
-                            if ( error < tol && j >= minSweeps - 1 )
+                            if ( error < tol && j >= minSweeps - 2 )
                                 Info << "true";
                             else
                                 Info << "false";
