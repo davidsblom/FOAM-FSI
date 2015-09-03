@@ -625,6 +625,7 @@ void SDCDynamicMeshFluidSolver::prepareImplicitSolve(
     forAll( U.boundaryField().types(), i )
     {
         assert( U.boundaryField().types()[i] != "movingWallVelocity" );
+        assert( U.boundaryField().types()[i] != "myMovingWallVelocity" );
 
         if ( U.boundaryField().types()[i] == "SDCMovingWallVelocity" )
         {

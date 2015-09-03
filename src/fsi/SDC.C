@@ -412,7 +412,6 @@ namespace sdc
     {
         assert( k <= this->k - 1 );
         assert( solStages.rows() > 0 );
-        assert( solStages.cols() > 0 );
 
         qold = solStages.row( k );
 
@@ -443,7 +442,6 @@ namespace sdc
         this->corrector = corrector;
 
         assert( rhs.rows() == qold.rows() );
-        assert( rhs.rows() > 0 );
     }
 
     void SDC::setFunction(
