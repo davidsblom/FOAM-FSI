@@ -86,6 +86,9 @@ private:
         std::shared_ptr<PostProcessing> postProcessing;
         int dofFluid;
         int dofSolid;
+
+        int k;
+        std::deque<fsi::vector> xStages;
     };
 }
 

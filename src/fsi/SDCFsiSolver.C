@@ -16,7 +16,9 @@ SDCFsiSolver::SDCFsiSolver(
     solid( solid ),
     postProcessing( postProcessing ),
     dofFluid( fluid->getDOF() ),
-    dofSolid( solid->getDOF() )
+    dofSolid( solid->getDOF() ),
+    k( 0 ),
+    xStages()
 {
     assert( fluid );
     assert( solid );
@@ -107,6 +109,9 @@ void SDCFsiSolver::nextTimeStep()
 {
     fluid->nextTimeStep();
     solid->nextTimeStep();
+
+    for ( int i = 0; i < k; i++ )
+        xStages.at( i ) = postProcessing->fsi->x;
 }
 
 void SDCFsiSolver::initTimeStep()
@@ -116,8 +121,15 @@ void SDCFsiSolver::initTimeStep()
 
 void SDCFsiSolver::setNumberOfImplicitStages( int k )
 {
+    this->k = k + 1;
+
     fluid->setNumberOfImplicitStages( k );
     solid->setNumberOfImplicitStages( k );
+
+    xStages.clear();
+
+    for ( int i = 0; i < k + 1; i++ )
+        xStages.push_back( postProcessing->fsi->x );
 }
 
 void SDCFsiSolver::implicitSolve(
@@ -150,11 +162,18 @@ void SDCFsiSolver::implicitSolve(
     postProcessing->fsi->newMeasurementSeries();
 
     // Initial solution
-    fsi::vector x0 = postProcessing->fsi->x;
+    fsi::vector x0;
+
+    if ( corrector )
+        x0 = xStages.at( k + 1 );
+    else
+        x0 = xStages.at( k );
 
     postProcessing->performPostProcessing( x0, postProcessing->fsi->x );
 
     getSolution( result, f );
+
+    xStages.at( k + 1 ) = postProcessing->fsi->x;
 }
 
 scalar SDCFsiSolver::getStartTime()
