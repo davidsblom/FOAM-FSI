@@ -65,4 +65,31 @@ functions
         rhoInf              1000;
         CofR                (0 0 0);
     }
+
+    probesSolid
+    {
+        // Where to load it from
+        functionObjectLibs ( "libsampling.so" );
+
+        type            probes;
+
+        // Name of the directory for probe data
+        name            probes;
+
+        // Write at same frequency as fields
+        outputControl   timeStep;
+        outputInterval  1;
+        region solid;
+
+        // Fields to be probed
+        fields
+        (
+            U
+        );
+
+        probeLocations
+        (
+            (0.599999999 0.199999999 0.499999999)
+        );
+    }
 }
