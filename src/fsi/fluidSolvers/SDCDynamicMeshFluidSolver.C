@@ -158,36 +158,35 @@ void SDCDynamicMeshFluidSolver::nextTimeStep()
     timeIndex++;
     (*runTime)++;
 
-    if ( pStages.size() == static_cast<unsigned>(k) )
-    {
-        volScalarField V
+    assert( timeIndex == runTime->timeIndex() );
+
+    volScalarField V
+    (
+        IOobject
         (
-            IOobject
-            (
-                "V",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "V",
+            mesh.time().timeName(),
             mesh,
-            dimless,
-            zeroGradientFvPatchScalarField::typeName
-        );
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimless,
+        zeroGradientFvPatchScalarField::typeName
+    );
 
-        V.internalField() = mesh.V();
-        V.correctBoundaryConditions();
+    V.internalField() = mesh.V();
+    V.correctBoundaryConditions();
 
-        for ( int i = 0; i < k; i++ )
-        {
-            pStages.at( i ) = p;
-            phiStages.at( i ) = phi;
-            UStages.at( i ) = U;
-            UfStages.at( i ) = Uf;
-            pointsStages.at( i ) = mesh.points();
-            volumeStages.at( i ) = mesh.V();
-            interpolateVolumeStages.at( i ) = fvc::interpolate( V );
-        }
+    for ( int i = 0; i < k; i++ )
+    {
+        pStages.at( i ) = p;
+        phiStages.at( i ) = phi;
+        UStages.at( i ) = U;
+        UfStages.at( i ) = Uf;
+        pointsStages.at( i ) = mesh.points();
+        volumeStages.at( i ) = mesh.V();
+        interpolateVolumeStages.at( i ) = fvc::interpolate( V );
     }
 }
 
