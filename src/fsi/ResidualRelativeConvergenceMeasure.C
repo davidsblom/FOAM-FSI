@@ -28,12 +28,14 @@ namespace fsi
         vector & newValues
         )
     {
-        normDiff = ( newValues - oldValues ).norm();
+        normDiff = (newValues - oldValues).norm();
+
         if ( isFirstIteration )
         {
             normFirstResidual = normDiff;
             isFirstIteration = false;
         }
+
         isConvergence_ = normDiff < normFirstResidual * convergenceLimit;
     }
 
@@ -55,11 +57,12 @@ namespace fsi
         Info << "two-norm diff = " << normDiff;
         Info << ", limit = " << normFirstResidual * convergenceLimit;
         Info << ", conv = ";
+
         if ( isConvergence_ )
             Info << "true";
         else
             Info << "false";
+
         Info << endl;
     }
-
 }
