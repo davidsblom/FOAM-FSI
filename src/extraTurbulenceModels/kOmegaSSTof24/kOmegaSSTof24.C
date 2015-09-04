@@ -1,29 +1,29 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
-  \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     | Version:     3.2
-    \\  /    A nd           | Web:         http://www.foam-extend.org
-     \\/     M anipulation  | For copyright notice see file Copyright
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
-    This file is part of foam-extend.
+    This file is part of OpenFOAM.
 
-    foam-extend is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation, either version 3 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-    foam-extend is distributed in the hope that it will be useful, but
-    WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
     You should have received a copy of the GNU General Public License
-    along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
 
-#include "kOmegaSSTunbound.H"
+#include "kOmegaSSTof24.H"
 #include "addToRunTimeSelectionTable.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
@@ -39,20 +39,20 @@ namespace RASModels
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(kOmegaSSTunbound, 0);
-addToRunTimeSelectionTable(RASModel, kOmegaSSTunbound, dictionary);
+defineTypeNameAndDebug(kOmegaSSTof24, 0);
+addToRunTimeSelectionTable(RASModel, kOmegaSSTof24, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-tmp<volScalarField> kOmegaSSTunbound::F1(const volScalarField& CDkOmega) const
+tmp<volScalarField> kOmegaSSTof24::F1(const volScalarField& CDkOmega) const
 {
-    volScalarField CDkOmegaPlus = max
+    tmp<volScalarField> CDkOmegaPlus = max
     (
         CDkOmega,
         dimensionedScalar("1.0e-10", dimless/sqr(dimTime), 1.0e-10)
     );
 
-    volScalarField arg1 = min
+    tmp<volScalarField> arg1 = min
     (
         min
         (
@@ -70,9 +70,9 @@ tmp<volScalarField> kOmegaSSTunbound::F1(const volScalarField& CDkOmega) const
 }
 
 
-tmp<volScalarField> kOmegaSSTunbound::F2() const
+tmp<volScalarField> kOmegaSSTof24::F2() const
 {
-    volScalarField arg2 = min
+    tmp<volScalarField> arg2 = min
     (
         max
         (
@@ -86,7 +86,7 @@ tmp<volScalarField> kOmegaSSTunbound::F2() const
 }
 
 
-tmp<volScalarField> kOmegaSSTunbound::F3() const
+tmp<volScalarField> kOmegaSSTof24::F3() const
 {
     tmp<volScalarField> arg3 = min
     (
@@ -98,7 +98,7 @@ tmp<volScalarField> kOmegaSSTunbound::F3() const
 }
 
 
-tmp<volScalarField> kOmegaSSTunbound::F23() const
+tmp<volScalarField> kOmegaSSTof24::F23() const
 {
     tmp<volScalarField> f23(F2());
 
@@ -113,7 +113,7 @@ tmp<volScalarField> kOmegaSSTunbound::F23() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-kOmegaSSTunbound::kOmegaSSTunbound
+kOmegaSSTof24::kOmegaSSTof24
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
@@ -248,11 +248,11 @@ kOmegaSSTunbound::kOmegaSSTunbound
         (
             "k",
             runTime_.timeName(),
-            U_.db(),
+            mesh_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        autoCreateK("k", mesh_, U_.db())
+        autoCreateK("k", mesh_)
     ),
     omega_
     (
@@ -260,11 +260,11 @@ kOmegaSSTunbound::kOmegaSSTunbound
         (
             "omega",
             runTime_.timeName(),
-            U_.db(),
+            mesh_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        autoCreateOmega("omega", mesh_, U_.db())
+        autoCreateOmega("omega", mesh_)
     ),
     nut_
     (
@@ -272,20 +272,20 @@ kOmegaSSTunbound::kOmegaSSTunbound
         (
             "nut",
             runTime_.timeName(),
-            U_.db(),
+            mesh_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        autoCreateNut("nut", mesh_, U_.db())
+        autoCreateNut("nut", mesh_)
     )
 {
-    //bound(k_, k0_);
-    //bound(omega_, omega0_);
+    bound(k_, k0_);
+    bound(omega_, omega0_);
 
     nut_ =
     (
-        a1_*k_/
-        max
+        a1_*k_
+      / max
         (
             a1_*omega_,
             b1_*F23()*sqrt(2.0)*mag(symm(fvc::grad(U_)))
@@ -299,7 +299,7 @@ kOmegaSSTunbound::kOmegaSSTunbound
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<volSymmTensorField> kOmegaSSTunbound::R() const
+tmp<volSymmTensorField> kOmegaSSTof24::R() const
 {
     return tmp<volSymmTensorField>
     (
@@ -309,7 +309,7 @@ tmp<volSymmTensorField> kOmegaSSTunbound::R() const
             (
                 "R",
                 runTime_.timeName(),
-                U_.db(),
+                mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
@@ -320,7 +320,7 @@ tmp<volSymmTensorField> kOmegaSSTunbound::R() const
 }
 
 
-tmp<volSymmTensorField> kOmegaSSTunbound::devReff() const
+tmp<volSymmTensorField> kOmegaSSTof24::devReff() const
 {
     return tmp<volSymmTensorField>
     (
@@ -330,7 +330,7 @@ tmp<volSymmTensorField> kOmegaSSTunbound::devReff() const
             (
                 "devRhoReff",
                 runTime_.timeName(),
-                U_.db(),
+                mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
@@ -340,17 +340,17 @@ tmp<volSymmTensorField> kOmegaSSTunbound::devReff() const
 }
 
 
-tmp<fvVectorMatrix> kOmegaSSTunbound::divDevReff(volVectorField& U) const
+tmp<fvVectorMatrix> kOmegaSSTof24::divDevReff(volVectorField& U) const
 {
     return
     (
       - fvm::laplacian(nuEff(), U)
+      //- fvc::div(nuEff()*dev(T(fvc::grad(U))))
       - fvc::div(nuEff()*dev(fvc::grad(U)().T()))
     );
 }
 
-
-bool kOmegaSSTunbound::read()
+bool kOmegaSSTof24::read()
 {
     if (RASModel::read())
     {
@@ -377,16 +377,8 @@ bool kOmegaSSTunbound::read()
 }
 
 
-void kOmegaSSTunbound::correct()
+void kOmegaSSTof24::correct()
 {
-    // Bound in case of topological change
-    // HJ, 22/Aug/2007
-    if (mesh_.changing())
-    {
-        //bound(k_, k0_);
-        //bound(omega_, omega0_);
-    }
-
     RASModel::correct();
 
     if (!turbulence_)
@@ -400,7 +392,7 @@ void kOmegaSSTunbound::correct()
     }
 
     const volScalarField S2(2*magSqr(symm(fvc::grad(U_))));
-    volScalarField G("RASModel::G", nut_*2*S2);
+    volScalarField G("RASModel::G", nut_*S2);
 
     // Update omega and G at the wall
     omega_.boundaryField().updateCoeffs();
@@ -417,7 +409,6 @@ void kOmegaSSTunbound::correct()
     (
         fvm::ddt(omega_)
       + fvm::div(phi_, omega_)
-      + fvm::SuSp(-fvc::div(phi_), omega_)
       - fvm::laplacian(DomegaEff(F1), omega_)
      ==
         gamma(F1)
@@ -432,6 +423,8 @@ void kOmegaSSTunbound::correct()
 
     omegaEqn().relax();
 
+    //omegaEqn().boundaryManipulate(omega_.boundaryField());
+
     solve(omegaEqn);
     bound(omega_, omega0_);
 
@@ -440,7 +433,6 @@ void kOmegaSSTunbound::correct()
     (
         fvm::ddt(k_)
       + fvm::div(phi_, k_)
-      + fvm::SuSp(-fvc::div(phi_), k_)
       - fvm::laplacian(DkEff(F1), k_)
      ==
         min(G, c1_*betaStar_*k_*omega_)
@@ -453,15 +445,7 @@ void kOmegaSSTunbound::correct()
 
 
     // Re-calculate viscosity
-    // Fixed sqrt(2) error.  HJ, 10/Jun/2015
-    /*Info << "bla" << endl;
-    Info << "k0 = " << k0_ << endl;
-    Info << "omega0 = " << omega0_ << endl;
-    Info << "min|max(a1_*omega_) = " << min(a1_*omega_) << "|" << max(a1_*omega_) << endl;
-    Info << "min|max(F23()) = " << min(F23()) << "|" << max(F23()) << endl;
-    Info << "min|max(S2) = " << min(S2) << "|" << max(S2) << endl;*/
-    nut_ = a1_*k_/(max(a1_*omega_, b1_*F23()*sqrt(S2))+dimensionedScalar("SMALL",dimless/dimTime,SMALL));
-    nut_ = min(nut_, nuRatio()*nu());
+    nut_ = a1_*k_/max(a1_*omega_, b1_*F23()*sqrt(S2));
     nut_.correctBoundaryConditions();
 }
 
