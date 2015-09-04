@@ -43,6 +43,8 @@
 #include "SDCSolidSolver.H"
 #include "SDCFsiSolver.H"
 #include "PIES.H"
+#include "ResidualRelativeConvergenceMeasure.H"
+#include "AbsoluteConvergenceMeasure.H"
 
 using std::list;
 
@@ -82,6 +84,26 @@ void setConvergenceMeasures(
 
             int minIter = measure["min-iteration-convergence-measure"]["min-iterations"].as<int>();
             convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
+        }
+
+        if ( measure["absolute-convergence-measure"] )
+        {
+            assert( measure["absolute-convergence-measure"]["limit"] );
+            assert( measure["absolute-convergence-measure"]["data-id"] );
+
+            scalar tol = measure["absolute-convergence-measure"]["limit"].as<scalar>();
+            int dataId = measure["absolute-convergence-measure"]["data-id"].as<int>();
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new AbsoluteConvergenceMeasure( dataId, tol ) ) );
+        }
+
+        if ( measure["relative-residual-convergence-measure"] )
+        {
+            assert( measure["relative-residual-convergence-measure"]["limit"] );
+            assert( measure["relative-residual-convergence-measure"]["data-id"] );
+
+            scalar tol = measure["relative-residual-convergence-measure"]["limit"].as<scalar>();
+            int dataId = measure["relative-residual-convergence-measure"]["data-id"].as<int>();
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeResidualConvergenceMeasure( dataId, tol ) ) );
         }
     }
 
