@@ -96,13 +96,13 @@ void setConvergenceMeasures(
             convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new AbsoluteConvergenceMeasure( dataId, tol ) ) );
         }
 
-        if ( measure["relative-residual-convergence-measure"] )
+        if ( measure["residual-relative--convergence-measure"] )
         {
-            assert( measure["relative-residual-convergence-measure"]["limit"] );
-            assert( measure["relative-residual-convergence-measure"]["data-id"] );
+            assert( measure["residual-relative-convergence-measure"]["limit"] );
+            assert( measure["residual-relative-convergence-measure"]["data-id"] );
 
-            scalar tol = measure["relative-residual-convergence-measure"]["limit"].as<scalar>();
-            int dataId = measure["relative-residual-convergence-measure"]["data-id"].as<int>();
+            scalar tol = measure["residual-relative-convergence-measure"]["limit"].as<scalar>();
+            int dataId = measure["residual-relative-convergence-measure"]["data-id"].as<int>();
             convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new ResidualRelativeConvergenceMeasure( dataId, tol ) ) );
         }
     }
