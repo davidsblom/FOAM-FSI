@@ -46,7 +46,7 @@ namespace fsi
 
     bool ResidualRelativeConvergenceMeasure::isConvergence()
     {
-        return isConvergence;
+        return isConvergence_;
     }
 
     void ResidualRelativeConvergenceMeasure::printState()
