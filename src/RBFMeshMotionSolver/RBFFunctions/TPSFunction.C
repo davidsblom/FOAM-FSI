@@ -28,6 +28,12 @@ namespace rbf
         return 0;
     }
 
+    double TPSFunction::correctionPowerCoeff()
+    {
+        return 1;
+    }
+
+
     void TPSFunction::setRadius( double value )
     {}
 }

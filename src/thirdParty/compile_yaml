@@ -2,6 +2,10 @@
 
 set -e
 
+# Ensure the script is executed in this directory
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR
+
 # Assume that preCICE has been built before, and boost is already downloaded.
 
 VERSION=0.5.2
@@ -11,7 +15,7 @@ if [ "$(uname)" == "Darwin" ]; then
     SHARED_LIBRARY=${FOAM_USER_LIBBIN}/libyaml-cpp.${VERSION}.dylib
 fi
 
-if [ ! -e ${SHARED_LIBRARY} ]; then
+if [ ! -e ${SHARED_LIBRARY} ] || [ ! -e "yaml-cpp-release-${VERSION}" ]; then
 
     # Define which versions of the different packages are used
 

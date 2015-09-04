@@ -34,6 +34,11 @@ namespace rbf
         return 2;
     }
 
+    double WendlandC6Function::correctionPowerCoeff()
+    {
+        return 11.0;
+    }
+
     void WendlandC6Function::setRadius( double value )
     {
         assert( value > 0 );

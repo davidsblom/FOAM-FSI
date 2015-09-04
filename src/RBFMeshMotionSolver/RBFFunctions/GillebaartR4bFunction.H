@@ -4,20 +4,20 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#ifndef GillebaartR3Function_H
-#define GillebaartR3Function_H
+#ifndef GillebaartR4bFunction_H
+#define GillebaartR4bFunction_H
 
 #include "RBFFunctionInterface.H"
 
 namespace rbf
 {
-    class GillebaartR3Function : public RBFFunctionInterface
+    class GillebaartR4bFunction : public RBFFunctionInterface
     {
 public:
 
-        GillebaartR3Function( double radius );
+        GillebaartR4bFunction( double radius );
 
-        virtual ~GillebaartR3Function();
+        virtual ~GillebaartR4bFunction();
 
         virtual double evaluate( double value );
 
