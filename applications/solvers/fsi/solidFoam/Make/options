@@ -7,7 +7,8 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/solidModels/lnInclude \
     -isystem ../../../../src/thirdParty/yaml-cpp/include \
-    -I../../../../src/RBFMeshMotionSolver/lnInclude
+    -I../../../../src/RBFMeshMotionSolver/lnInclude \
+    -isystem ../../../../src/thirdParty/boost
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
