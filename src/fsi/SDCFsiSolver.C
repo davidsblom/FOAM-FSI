@@ -169,7 +169,9 @@ void SDCFsiSolver::implicitSolve(
     else
         x0 = xStages.at( k );
 
+    postProcessing->initStage( k );
     postProcessing->performPostProcessing( x0, postProcessing->fsi->x );
+    postProcessing->finalizeStage();
 
     getSolution( result, f );
 

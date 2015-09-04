@@ -145,6 +145,9 @@ namespace fsi
         assert( fsi->solid->init );
         assert( y.rows() == x0.rows() );
         assert( y.rows() == xk.rows() );
+        assert( initStage_ );
+        assert( stageIndex < k );
+        assert( k > 0 );
 
         // Initialize variables
         vector xkprev = x0;
@@ -197,10 +200,23 @@ namespace fsi
             for ( unsigned i = 0; i < solsList.size(); i++ )
                 nbCols += solsList.at( i ).size() - 1;
 
+            // Include information from previous stages
+            for ( unsigned i = 0; i < solsStageList.size(); i++ )
+            {
+                for ( unsigned j = 0; j < solsStageList.at(i).size(); j++ )
+                {
+                    if ( j > stageIndex )
+                        continue;
+
+                    nbCols += solsStageList.at(i).at(j).size() - 1;
+                }
+            }
+
             // Include information from previous time steps
             for ( unsigned i = 0; i < solsTimeList.size(); i++ )
                 for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
-                    nbCols += solsTimeList.at( i ).at( j ).size() - 1;
+                    for ( unsigned k = 0; k < solsTimeList.at(i).at(j).size(); k++ )
+                        nbCols += solsTimeList.at( i ).at( j ).at(k).size() - 1;
 
             nbCols = std::min( static_cast<int>( xk.rows() ), nbCols );
             nbCols = std::min( nbCols, maxUsedIterations );
@@ -254,22 +270,48 @@ namespace fsi
                     }
                 }
 
+                // Include information from previous stages
+
+                for ( unsigned i = 0; i < residualsStageList.size(); i++ )
+                {
+                    for ( unsigned j = 0; j < residualsStageList.at(i).size(); j++ )
+                    {
+                        if ( j > stageIndex )
+                            continue;
+
+                        assert( residualsStageList.at(i).at(j).size() >= 2);
+
+                        for ( unsigned k = 0; k < residualsStageList.at(i).at(j).size() - 1; k++ )
+                        {
+                            if ( colIndex >= V.cols() )
+                                continue;
+
+                            V.col( colIndex ) = residualsStageList.at( i ).at( j ).at( k ) - residualsStageList.at( i ).at( j ).at( k + 1 );
+                            W.col( colIndex ) = solsStageList.at( i ).at( j ).at( k ) - solsStageList.at( i ).at( j ).at( k + 1 );
+                            colIndex++;
+                        }
+                    }
+                }
+
                 // Include information from previous time steps
 
                 for ( unsigned i = 0; i < residualsTimeList.size(); i++ )
                 {
                     for ( unsigned j = 0; j < residualsTimeList.at( i ).size(); j++ )
                     {
-                        assert( residualsTimeList.at( i ).at( j ).size() >= 2 );
-
-                        for ( unsigned k = 0; k < residualsTimeList.at( i ).at( j ).size() - 1; k++ )
+                        for ( unsigned k = 0; k < residualsTimeList.at(i).at(j).size(); k++ )
                         {
-                            if ( colIndex >= V.cols() )
-                                continue;
+                            assert( residualsTimeList.at( i ).at( j ).at(k).size() >= 2 );
 
-                            V.col( colIndex ) = residualsTimeList.at( i ).at( j ).at( k ) - residualsTimeList.at( i ).at( j ).at( k + 1 );
-                            W.col( colIndex ) = solsTimeList.at( i ).at( j ).at( k ) - solsTimeList.at( i ).at( j ).at( k + 1 );
-                            colIndex++;
+                            for ( unsigned l = 0; l < residualsTimeList.at( i ).at( j ).at(k).size() - 1; l++ )
+                            {
+                                if ( colIndex >= V.cols() )
+                                    continue;
+
+                                V.col( colIndex ) = residualsTimeList.at( i ).at( j ).at( k ).at( l ) - residualsTimeList.at( i ).at( j ).at(k).at( l + 1 );
+                                W.col( colIndex ) = solsTimeList.at( i ).at( j ).at( k ).at( l ) - solsTimeList.at( i ).at( j ).at( k ).at( l + 1 );
+                                colIndex++;
+                            }
                         }
                     }
                 }
