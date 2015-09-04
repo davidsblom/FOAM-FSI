@@ -393,7 +393,6 @@ void SDCFluidSolver::setNumberOfImplicitStages( int k )
 
 void SDCFluidSolver::nextTimeStep()
 {
-    timeIndex++;
     (*runTime)++;
 
     for ( int i = 0; i < k; i++ )
