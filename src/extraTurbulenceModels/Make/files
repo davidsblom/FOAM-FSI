@@ -1,0 +1,4 @@
+kOmegaSSTunbound/kOmegaSSTunbound.C
+kOmegaSSTsust/kOmegaSSTsust.C
+
+LIB = $(FOAM_USER_LIBBIN)/libextraTurbulenceModels
