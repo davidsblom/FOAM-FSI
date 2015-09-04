@@ -96,7 +96,7 @@ void setConvergenceMeasures(
             convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new AbsoluteConvergenceMeasure( dataId, tol ) ) );
         }
 
-        if ( measure["residual-relative--convergence-measure"] )
+        if ( measure["residual-relative-convergence-measure"] )
         {
             assert( measure["residual-relative-convergence-measure"]["limit"] );
             assert( measure["residual-relative-convergence-measure"]["data-id"] );
