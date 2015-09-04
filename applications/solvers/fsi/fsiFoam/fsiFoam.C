@@ -103,7 +103,7 @@ void setConvergenceMeasures(
 
             scalar tol = measure["relative-residual-convergence-measure"]["limit"].as<scalar>();
             int dataId = measure["relative-residual-convergence-measure"]["data-id"].as<int>();
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeResidualConvergenceMeasure( dataId, tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new ResidualRelativeConvergenceMeasure( dataId, tol ) ) );
         }
     }
 
