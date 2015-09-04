@@ -2,6 +2,7 @@ FsiSolver.C
 RelativeConvergenceMeasure.C
 MinIterationConvergenceMeasure.C
 AbsoluteConvergenceMeasure.C
+ResidualRelativeConvergenceMeasure.C
 ManifoldMapping.C
 MultiLevelSolver.C
 SpaceMappingSolver.C
