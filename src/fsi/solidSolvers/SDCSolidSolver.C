@@ -955,8 +955,8 @@ void SDCSolidSolver::getVariablesInfo(
     dof.push_back( 0 );
     enabled.push_back( true );
     enabled.push_back( true );
-    names.push_back( "U" );
-    names.push_back( "V" );
+    names.push_back( "solid U" );
+    names.push_back( "solid V" );
 
     forAll( U.internalField(), i )
     {

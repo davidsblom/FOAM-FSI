@@ -771,9 +771,9 @@ void SDCDynamicMeshFluidSolver::getVariablesInfo(
     enabled.push_back( true );
     enabled.push_back( true );
     enabled.push_back( false );
-    names.push_back( "U" );
-    names.push_back( "Uf" );
-    names.push_back( "meshPhi" );
+    names.push_back( "fluid U" );
+    names.push_back( "fluid Uf" );
+    names.push_back( "fluid meshPhi" );
 
     forAll( U.internalField(), i )
     {
