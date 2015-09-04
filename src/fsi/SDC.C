@@ -322,8 +322,8 @@ namespace sdc
                         if ( enabledVariables.at( i ) )
                         {
                             Info << "SDC " << namesVariables.at( i ).c_str();
-                            Info << " residual = " << error;
                             Info << " substep = " << substep + 1;
+                            Info << ", residual = " << error;
                             Info << ", time = " << t;
                             Info << ", sweep = " << j + 1;
                             Info << ", convergence = ";
