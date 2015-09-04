@@ -55,7 +55,7 @@ namespace fsi
         Info << "two-norm diff = " << normDiff;
         Info << ", limit = " << normFirstResidual * convergenceLimit;
         Info << ", conv = ";
-        if ( isConvergence )
+        if ( isConvergence_ )
             Info << "true";
         else
             Info << "false";
