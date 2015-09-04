@@ -155,6 +155,7 @@ void SDCDynamicMeshFluidSolver::setNumberOfImplicitStages( int k )
 
 void SDCDynamicMeshFluidSolver::nextTimeStep()
 {
+    timeIndex++;
     (*runTime)++;
 
     assert( timeIndex == runTime->timeIndex() );
