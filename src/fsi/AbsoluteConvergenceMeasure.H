@@ -32,6 +32,7 @@ public:
 
         virtual void printState();
 
+        scalar convergenceLimit;
         scalar normDiff;
     };
 }

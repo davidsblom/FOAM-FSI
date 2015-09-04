@@ -14,6 +14,7 @@ namespace fsi
         )
         :
         ConvergenceMeasure( dataId ),
+        convergenceLimit( convergenceLimit ),
         normDiff( 0 )
     {
         assert( convergenceLimit > 0 );
@@ -26,17 +27,17 @@ namespace fsi
         )
     {
         normDiff = (newValues - oldValues).norm();
-        isConvergence = normDiff < convergenceLimit;
+        isConvergence_ = normDiff < convergenceLimit;
     }
 
     void AbsoluteConvergenceMeasure::newMeasurementSeries()
     {
-        isConvergence = false;
+        isConvergence_ = false;
     }
 
     bool AbsoluteConvergenceMeasure::isConvergence()
     {
-        return isConvergence;
+        return isConvergence_;
     }
 
     void AbsoluteConvergenceMeasure::printState()
@@ -45,7 +46,7 @@ namespace fsi
         Info << "two-norm diff = " << normDiff;
         Info << ", limit = " << convergenceLimit;
         Info << ", conv = ";
-        if ( isConvergence )
+        if ( isConvergence_ )
             Info << "true";
         else
             Info << "false";
