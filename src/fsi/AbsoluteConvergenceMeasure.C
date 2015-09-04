@@ -46,11 +46,12 @@ namespace fsi
         Info << "two-norm diff = " << normDiff;
         Info << ", limit = " << convergenceLimit;
         Info << ", conv = ";
+
         if ( isConvergence_ )
             Info << "true";
         else
             Info << "false";
+
         Info << endl;
     }
-
 }
