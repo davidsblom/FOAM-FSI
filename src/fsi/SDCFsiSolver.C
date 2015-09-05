@@ -129,6 +129,7 @@ void SDCFsiSolver::setNumberOfImplicitStages( int k )
 
     fluid->setNumberOfImplicitStages( k );
     solid->setNumberOfImplicitStages( k );
+    postProcessing->setNumberOfImplicitStages( k );
 
     xStages.clear();
 

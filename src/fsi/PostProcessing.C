@@ -51,6 +51,8 @@ void PostProcessing::finalizeStage()
 {
     assert( initStage_ );
     assert( residualsStageList.size() == k - 1 );
+    assert( residualsList.size() == solsList.size() );
+    assert( residualsStageList.size() == solsStageList.size() );
 
     // Save input/output information for next stage
     if ( residualsList.size() >= 1 && timeIndex >= reuseInformationStartingFromTimeIndex )
@@ -109,7 +111,7 @@ void PostProcessing::initStage( int stageIndex )
 {
     assert( not initStage_ );
 
-    this->stageIndex = stageIndex - 1;
+    this->stageIndex = stageIndex;
 
     initStage_ = true;
 }
@@ -150,5 +152,8 @@ void PostProcessing::setNumberOfImplicitStages( int k )
     deque<deque<vector> > residualsList;
 
     for ( int i = 0; i < k; i++ )
+    {
         residualsStageList.push_front( residualsList );
+        solsStageList.push_front( residualsList );
+    }
 }
