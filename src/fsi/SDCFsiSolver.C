@@ -52,6 +52,7 @@ void SDCFsiSolver::evaluateFunction(
 void SDCFsiSolver::finalizeTimeStep()
 {
     postProcessing->fsi->finalizeTimeStep();
+    postProcessing->finalizeTimeStep();
 }
 
 int SDCFsiSolver::getDOF()

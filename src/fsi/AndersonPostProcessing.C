@@ -201,11 +201,11 @@ namespace fsi
                 nbCols += solsList.at( i ).size() - 1;
 
             // Include information from previous stages
-            for ( unsigned i = 0; i < solsStageList.size(); i++ )
+            for ( unsigned i = solsStageList.size(); i-- > 0; )
             {
                 for ( unsigned j = 0; j < solsStageList.at(i).size(); j++ )
                 {
-                    if ( j > stageIndex )
+                    if ( i > stageIndex )
                         continue;
 
                     nbCols += solsStageList.at(i).at(j).size() - 1;
@@ -272,11 +272,11 @@ namespace fsi
 
                 // Include information from previous stages
 
-                for ( unsigned i = 0; i < residualsStageList.size(); i++ )
+                for ( unsigned i = residualsStageList.size(); i-- > 0; )
                 {
                     for ( unsigned j = 0; j < residualsStageList.at(i).size(); j++ )
                     {
-                        if ( j > stageIndex )
+                        if ( i > stageIndex )
                             continue;
 
                         assert( residualsStageList.at(i).at(j).size() >= 2);
