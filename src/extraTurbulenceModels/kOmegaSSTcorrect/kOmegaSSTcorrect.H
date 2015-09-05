@@ -22,7 +22,7 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::incompressible::RASModels::kOmegaSSTorig
+    Foam::incompressible::RASModels::kOmegaSSTcorrect
 
 Description
     Implementation of the k-omega-SST turbulence model for incompressible
@@ -70,7 +70,7 @@ Description
 
     The default model coefficients correspond to the following:
     @verbatim
-        kOmegaSSTorigCoeffs
+        kOmegaSSTcorrectCoeffs
         {
             alphaK1     0.85;
             alphaK2     1.0;
@@ -89,12 +89,12 @@ Description
     @endverbatim
 
 SourceFiles
-    kOmegaSSTorig.C
+    kOmegaSSTcorrect.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kOmegaSSTorig_H
-#define kOmegaSSTorig_H
+#ifndef kOmegaSSTcorrect_H
+#define kOmegaSSTcorrect_H
 
 #include "RASModel.H"
 #include "wallDist.H"
@@ -112,7 +112,7 @@ namespace RASModels
                            Class kOmega Declaration
 \*---------------------------------------------------------------------------*/
 
-class kOmegaSSTorig
+class kOmegaSSTcorrect
 :
     public RASModel
 {
@@ -204,13 +204,13 @@ class kOmegaSSTorig
 public:
 
     //- Runtime type information
-    TypeName("kOmegaSSTorig");
+    TypeName("kOmegaSSTcorrect");
 
 
     // Constructors
 
         //- Construct from components
-        kOmegaSSTorig
+        kOmegaSSTcorrect
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
@@ -219,7 +219,7 @@ public:
 
 
     //- Destructor
-    virtual ~kOmegaSSTorig()
+    virtual ~kOmegaSSTcorrect()
     {}
 
 

@@ -18,6 +18,7 @@ wmake libso src/fsi
 wmake libso src/RBFMeshMotionSolver
 wmake libso src/SRFModelAbs
 wmake libso src/extraSolidBodyMotion
+wmake libso src/extraTurbulenceModels
 wmake libso src/bodyMotions
 wmake libso src/bodyFsi
 wmake all applications/solvers/bodyFsi

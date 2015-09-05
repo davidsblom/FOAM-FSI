@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kOmegaSSTorig.H"
+#include "kOmegaSSTcorrect.H"
 #include "addToRunTimeSelectionTable.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
@@ -39,12 +39,12 @@ namespace RASModels
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(kOmegaSSTorig, 0);
-addToRunTimeSelectionTable(RASModel, kOmegaSSTorig, dictionary);
+defineTypeNameAndDebug(kOmegaSSTcorrect, 0);
+addToRunTimeSelectionTable(RASModel, kOmegaSSTcorrect, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-tmp<volScalarField> kOmegaSSTorig::F1(const volScalarField& CDkOmega) const
+tmp<volScalarField> kOmegaSSTcorrect::F1(const volScalarField& CDkOmega) const
 {
     volScalarField CDkOmegaPlus = max
     (
@@ -70,7 +70,7 @@ tmp<volScalarField> kOmegaSSTorig::F1(const volScalarField& CDkOmega) const
 }
 
 
-tmp<volScalarField> kOmegaSSTorig::F2() const
+tmp<volScalarField> kOmegaSSTcorrect::F2() const
 {
     volScalarField arg2 = min
     (
@@ -86,7 +86,7 @@ tmp<volScalarField> kOmegaSSTorig::F2() const
 }
 
 
-tmp<volScalarField> kOmegaSSTorig::F3() const
+tmp<volScalarField> kOmegaSSTcorrect::F3() const
 {
     tmp<volScalarField> arg3 = min
     (
@@ -98,7 +98,7 @@ tmp<volScalarField> kOmegaSSTorig::F3() const
 }
 
 
-tmp<volScalarField> kOmegaSSTorig::F23() const
+tmp<volScalarField> kOmegaSSTcorrect::F23() const
 {
     tmp<volScalarField> f23(F2());
 
@@ -113,7 +113,7 @@ tmp<volScalarField> kOmegaSSTorig::F23() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-kOmegaSSTorig::kOmegaSSTorig
+kOmegaSSTcorrect::kOmegaSSTcorrect
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
@@ -299,7 +299,7 @@ kOmegaSSTorig::kOmegaSSTorig
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<volSymmTensorField> kOmegaSSTorig::R() const
+tmp<volSymmTensorField> kOmegaSSTcorrect::R() const
 {
     return tmp<volSymmTensorField>
     (
@@ -320,7 +320,7 @@ tmp<volSymmTensorField> kOmegaSSTorig::R() const
 }
 
 
-tmp<volSymmTensorField> kOmegaSSTorig::devReff() const
+tmp<volSymmTensorField> kOmegaSSTcorrect::devReff() const
 {
     return tmp<volSymmTensorField>
     (
@@ -340,7 +340,7 @@ tmp<volSymmTensorField> kOmegaSSTorig::devReff() const
 }
 
 
-tmp<fvVectorMatrix> kOmegaSSTorig::divDevReff(volVectorField& U) const
+tmp<fvVectorMatrix> kOmegaSSTcorrect::divDevReff(volVectorField& U) const
 {
     return
     (
@@ -350,7 +350,7 @@ tmp<fvVectorMatrix> kOmegaSSTorig::divDevReff(volVectorField& U) const
 }
 
 
-bool kOmegaSSTorig::read()
+bool kOmegaSSTcorrect::read()
 {
     if (RASModel::read())
     {
@@ -377,7 +377,7 @@ bool kOmegaSSTorig::read()
 }
 
 
-void kOmegaSSTorig::correct()
+void kOmegaSSTcorrect::correct()
 {
     // Bound in case of topological change
     // HJ, 22/Aug/2007
@@ -400,7 +400,7 @@ void kOmegaSSTorig::correct()
     }
 
     const volScalarField S2(2*magSqr(symm(fvc::grad(U_))));
-    volScalarField G("RASModel::G", nut_*2*S2);
+    volScalarField G("RASModel::G", nut_*S2);
 
     // Update omega and G at the wall
     omega_.boundaryField().updateCoeffs();
@@ -417,6 +417,7 @@ void kOmegaSSTorig::correct()
     (
         fvm::ddt(omega_)
       + fvm::div(phi_, omega_)
+      + fvm::SuSp(-fvc::div(phi_), omega_)
       - fvm::laplacian(DomegaEff(F1), omega_)
      ==
         gamma(F1)
@@ -443,6 +444,7 @@ void kOmegaSSTorig::correct()
     (
         fvm::ddt(k_)
       + fvm::div(phi_, k_)
+      + fvm::SuSp(-fvc::div(phi_), k_)
       - fvm::laplacian(DkEff(F1), k_)
      ==
         min(G, c1_*betaStar_*k_*omega_)
