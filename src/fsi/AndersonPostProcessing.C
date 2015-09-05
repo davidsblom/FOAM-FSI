@@ -297,7 +297,7 @@ namespace fsi
 
                 for ( unsigned i = 0; i < residualsTimeList.size(); i++ )
                 {
-                    for ( unsigned j = 0; j < residualsTimeList.at( i ).size(); j++ )
+                    for ( unsigned j = residualsTimeList.at( i ).size(); j-- > 0; )
                     {
                         for ( unsigned k = 0; k < residualsTimeList.at(i).at(j).size(); k++ )
                         {
