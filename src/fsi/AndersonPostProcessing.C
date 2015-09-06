@@ -205,7 +205,7 @@ namespace fsi
             {
                 for ( unsigned j = 0; j < solsStageList.at(i).size(); j++ )
                 {
-                    if ( i > stageIndex )
+                    if ( i != stageIndex )
                         continue;
 
                     nbCols += solsStageList.at(i).at(j).size() - 1;
@@ -215,8 +215,12 @@ namespace fsi
             // Include information from previous time steps
             for ( unsigned i = 0; i < solsTimeList.size(); i++ )
                 for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
+                {
+                    if ( j != stageIndex )
+                        continue;
                     for ( unsigned k = 0; k < solsTimeList.at(i).at(j).size(); k++ )
                         nbCols += solsTimeList.at( i ).at( j ).at(k).size() - 1;
+                }
 
             nbCols = std::min( static_cast<int>( xk.rows() ), nbCols );
             nbCols = std::min( nbCols, maxUsedIterations );
@@ -276,7 +280,7 @@ namespace fsi
                 {
                     for ( unsigned j = 0; j < residualsStageList.at(i).size(); j++ )
                     {
-                        if ( i > stageIndex )
+                        if ( i != stageIndex )
                             continue;
 
                         assert( residualsStageList.at(i).at(j).size() >= 2);
@@ -299,6 +303,9 @@ namespace fsi
                 {
                     for ( unsigned j = residualsTimeList.at( i ).size(); j-- > 0; )
                     {
+                        if ( j != stageIndex )
+                            continue;
+
                         for ( unsigned k = 0; k < residualsTimeList.at(i).at(j).size(); k++ )
                         {
                             assert( residualsTimeList.at( i ).at( j ).at(k).size() >= 2 );
