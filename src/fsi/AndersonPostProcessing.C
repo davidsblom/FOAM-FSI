@@ -203,12 +203,12 @@ namespace fsi
             // Include information from previous stages
             for ( unsigned i = solsStageList.size(); i-- > 0; )
             {
-                for ( unsigned j = 0; j < solsStageList.at(i).size(); j++ )
+                for ( unsigned j = 0; j < solsStageList.at( i ).size(); j++ )
                 {
                     if ( i != stageIndex )
                         continue;
 
-                    nbCols += solsStageList.at(i).at(j).size() - 1;
+                    nbCols += solsStageList.at( i ).at( j ).size() - 1;
                 }
             }
 
@@ -218,8 +218,9 @@ namespace fsi
                 {
                     if ( j != stageIndex )
                         continue;
-                    for ( unsigned k = 0; k < solsTimeList.at(i).at(j).size(); k++ )
-                        nbCols += solsTimeList.at( i ).at( j ).at(k).size() - 1;
+
+                    for ( unsigned k = 0; k < solsTimeList.at( i ).at( j ).size(); k++ )
+                        nbCols += solsTimeList.at( i ).at( j ).at( k ).size() - 1;
                 }
 
             nbCols = std::min( static_cast<int>( xk.rows() ), nbCols );
@@ -278,14 +279,14 @@ namespace fsi
 
                 for ( unsigned i = residualsStageList.size(); i-- > 0; )
                 {
-                    for ( unsigned j = 0; j < residualsStageList.at(i).size(); j++ )
+                    for ( unsigned j = 0; j < residualsStageList.at( i ).size(); j++ )
                     {
                         if ( i != stageIndex )
                             continue;
 
-                        assert( residualsStageList.at(i).at(j).size() >= 2);
+                        assert( residualsStageList.at( i ).at( j ).size() >= 2 );
 
-                        for ( unsigned k = 0; k < residualsStageList.at(i).at(j).size() - 1; k++ )
+                        for ( unsigned k = 0; k < residualsStageList.at( i ).at( j ).size() - 1; k++ )
                         {
                             if ( colIndex >= V.cols() )
                                 continue;
@@ -306,16 +307,16 @@ namespace fsi
                         if ( j != stageIndex )
                             continue;
 
-                        for ( unsigned k = 0; k < residualsTimeList.at(i).at(j).size(); k++ )
+                        for ( unsigned k = 0; k < residualsTimeList.at( i ).at( j ).size(); k++ )
                         {
-                            assert( residualsTimeList.at( i ).at( j ).at(k).size() >= 2 );
+                            assert( residualsTimeList.at( i ).at( j ).at( k ).size() >= 2 );
 
-                            for ( unsigned l = 0; l < residualsTimeList.at( i ).at( j ).at(k).size() - 1; l++ )
+                            for ( unsigned l = 0; l < residualsTimeList.at( i ).at( j ).at( k ).size() - 1; l++ )
                             {
                                 if ( colIndex >= V.cols() )
                                     continue;
 
-                                V.col( colIndex ) = residualsTimeList.at( i ).at( j ).at( k ).at( l ) - residualsTimeList.at( i ).at( j ).at(k).at( l + 1 );
+                                V.col( colIndex ) = residualsTimeList.at( i ).at( j ).at( k ).at( l ) - residualsTimeList.at( i ).at( j ).at( k ).at( l + 1 );
                                 W.col( colIndex ) = solsTimeList.at( i ).at( j ).at( k ).at( l ) - solsTimeList.at( i ).at( j ).at( k ).at( l + 1 );
                                 colIndex++;
                             }
@@ -332,78 +333,55 @@ namespace fsi
                     applyScaling( W );
                 }
 
-                // Remove dependent columns of V and W
+                // Truncated singular value decomposition to solve for the
+                // coefficients
 
-                int nbRemoveCols = 1;
+                Eigen::JacobiSVD<matrix> svd( V, Eigen::ComputeThinU | Eigen::ComputeThinV );
 
-                while ( nbRemoveCols > 0 )
+                vector singularValues_inv = svd.singularValues();
+
+                for ( unsigned int i = 0; i < singularValues_inv.rows(); ++i )
                 {
-                    nbRemoveCols = 0;
-
-                    Eigen::HouseholderQR<matrix> qr = V.householderQr();
-                    matrix R = qr.matrixQR().triangularView <Eigen::Upper> ();
-                    fsi::vector diagonals = R.diagonal();
-
-                    for ( int i = 0; i < diagonals.rows(); i++ )
-                    {
-                        if ( std::abs( diagonals[i] ) < singularityLimit && V.cols() > 5 )
-                        {
-                            // Remove the column from V and W
-                            removeColumnFromMatrix( V, i - nbRemoveCols );
-                            removeColumnFromMatrix( W, i - nbRemoveCols );
-
-                            nbRemoveCols++;
-                        }
-                    }
-
-                    if ( nbRemoveCols )
-                        Info << "Anderson mixing method: remove " << nbRemoveCols << " columns from the Jacobian matrices" << endl;
+                    if ( svd.singularValues() ( i ) > singularityLimit )
+                        singularValues_inv( i ) = 1.0 / svd.singularValues() ( i );
+                    else
+                        singularValues_inv( i ) = 0;
                 }
 
-                assert( V.cols() == W.cols() );
+                vector dx;
 
-                if ( V.cols() == 0 )
-                    fixedUnderRelaxation( xk, R, yk );
-
-                else
+                if ( updateJacobian )
                 {
-                    vector dx;
+                    matrix Vinverse = svd.matrixV() * singularValues_inv * svd.matrixU().transpose();
 
-                    if ( updateJacobian )
+                    matrix I = fsi::matrix::Identity( V.rows(), V.rows() );
+
+                    if ( Jprev.cols() == R.rows() )
                     {
-                        Eigen::JacobiSVD<matrix> svd( V, Eigen::ComputeThinU | Eigen::ComputeThinV );
-
-                        matrix Vinverse = svd.matrixV() * svd.singularValues().asDiagonal().inverse() * svd.matrixU().transpose();
-
-                        matrix I = fsi::matrix::Identity( V.rows(), V.rows() );
-
-                        if ( Jprev.cols() == R.rows() )
-                        {
-                            Info << "Anderson mixing method: reuse Jacobian of previous time step or optimization" << endl;
-                            J = Jprev + (W - Jprev * V) * Vinverse;
-                        }
-                        else
-                            J = (V + W) * Vinverse - I;
-
-                        dx = J * (yk - R);
+                        Info << "Anderson mixing method: reuse Jacobian of previous time step or optimization" << endl;
+                        J = Jprev + (W - Jprev * V) * Vinverse;
                     }
+                    else
+                        J = (V + W) * Vinverse - I;
 
-                    if ( !updateJacobian )
-                    {
-                        vector c = V.fullPivHouseholderQr().solve( yk - R );
-                        dx = beta * (R - yk) + W * c + beta * V * c;
-                    }
-
-                    // Update solution x
-
-                    if ( scaling )
-                    {
-                        dx.head( sizeVar0 ).array() *= scalingFactors( 0 );
-                        dx.tail( sizeVar1 ).array() *= scalingFactors( 1 );
-                    }
-
-                    xk += dx;
+                    dx = J * (yk - R);
                 }
+
+                if ( !updateJacobian )
+                {
+                    vector c = svd.matrixV() * ( singularValues_inv.asDiagonal() * ( svd.matrixU().transpose() * (yk - R) ) );
+                    dx = beta * (R - yk) + W * c + beta * V * c;
+                }
+
+                // Update solution x
+
+                if ( scaling )
+                {
+                    dx.head( sizeVar0 ).array() *= scalingFactors( 0 );
+                    dx.tail( sizeVar1 ).array() *= scalingFactors( 1 );
+                }
+
+                xk += dx;
             }
 
             // Fsi evaluation
@@ -442,15 +420,4 @@ namespace fsi
             assert( fsi->iter <= maxIter );
         }
     }
-}
-
-void AndersonPostProcessing::removeColumnFromMatrix(
-    matrix & A,
-    int col
-    )
-{
-    for ( int j = col; j < A.cols() - 1; j++ )
-        A.col( j ) = A.col( j + 1 );
-
-    A.conservativeResize( A.rows(), A.cols() - 1 );
 }
