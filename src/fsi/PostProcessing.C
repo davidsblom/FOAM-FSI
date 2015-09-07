@@ -151,9 +151,14 @@ void PostProcessing::setNumberOfImplicitStages( int k )
 
     deque<deque<vector> > residualsList;
 
+    residualsStageList.clear();
+    solsStageList.clear();
+
     for ( int i = 0; i < k; i++ )
     {
         residualsStageList.push_front( residualsList );
         solsStageList.push_front( residualsList );
     }
+
+    assert( static_cast<int>( residualsStageList.size() ) == k );
 }
