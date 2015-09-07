@@ -58,8 +58,8 @@ void BroydenPostProcessing::finalizeTimeStep()
     // Include information from previous time steps
     for ( unsigned i = 0; i < solsTimeList.size(); i++ )
         for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
-            for ( unsigned k = 0; k < solsTimeList.at(i).at(j).size(); k++ )
-                nbCols += solsTimeList.at( i ).at( j ).at(k).size() - 1;
+            for ( unsigned k = 0; k < solsTimeList.at( i ).at( j ).size(); k++ )
+                nbCols += solsTimeList.at( i ).at( j ).at( k ).size() - 1;
 
     J = -fsi::matrix::Identity( J.rows(), J.cols() );
 
@@ -176,20 +176,20 @@ void BroydenPostProcessing::performPostProcessing(
         // Include information from previous stages
         for ( unsigned i = 0; i < solsStageList.size(); i++ )
         {
-            for ( unsigned j = 0; j < solsStageList.at(i).size(); j++ )
+            for ( unsigned j = 0; j < solsStageList.at( i ).size(); j++ )
             {
                 if ( j > stageIndex )
                     continue;
 
-                nbCols += solsStageList.at(i).at(j).size() - 1;
+                nbCols += solsStageList.at( i ).at( j ).size() - 1;
             }
         }
 
         // Include information from previous time steps
         for ( unsigned i = 0; i < solsTimeList.size(); i++ )
             for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
-                for ( unsigned k = 0; k < solsTimeList.at(i).at(j).size(); k++ )
-                    nbCols += solsTimeList.at( i ).at( j ).at(k).size() - 1;
+                for ( unsigned k = 0; k < solsTimeList.at( i ).at( j ).size(); k++ )
+                    nbCols += solsTimeList.at( i ).at( j ).at( k ).size() - 1;
 
         int nbColsCurrentTimeStep = std::max( static_cast<int>(sols.size() - 1), 0 );
 
