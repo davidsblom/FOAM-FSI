@@ -187,34 +187,6 @@ void ASMILS::performPostProcessing(
 
             assert( colIndex == nbCols );
 
-            // Remove dependent columns of V and W
-
-            int nbRemoveCols = 1;
-
-            while ( nbRemoveCols > 0 )
-            {
-                nbRemoveCols = 0;
-
-                Eigen::HouseholderQR<matrix> qr = V.householderQr();
-                matrix QR_R = qr.matrixQR().triangularView <Eigen::Upper> ();
-                fsi::vector diagonals = QR_R.diagonal();
-
-                for ( int i = 0; i < diagonals.rows(); i++ )
-                {
-                    if ( std::abs( diagonals[i] ) < singularityLimit )
-                    {
-                        // Remove the column from V and W
-                        removeColumnFromMatrix( V, i - nbRemoveCols );
-                        removeColumnFromMatrix( W, i - nbRemoveCols );
-
-                        nbRemoveCols++;
-                    }
-                }
-
-                if ( nbRemoveCols )
-                    Info << "ASM-ILS: remove " << nbRemoveCols << " columns from the Jacobian matrices" << endl;
-            }
-
             assert( V.cols() == W.cols() );
 
             if ( V.cols() == 0 )
@@ -222,9 +194,22 @@ void ASMILS::performPostProcessing(
 
             if ( V.cols() > 0 )
             {
-                // SVD decomposition
-                Eigen::JacobiSVD<matrix, Eigen::FullPivHouseholderQRPreconditioner> svd( V, Eigen::ComputeFullU | Eigen::ComputeFullV );
-                vector c = svd.solve( zstar - zk );
+                // Truncated singular value decomposition to solve for the
+                // coefficients
+
+                Eigen::JacobiSVD<matrix> svd( V, Eigen::ComputeThinU | Eigen::ComputeThinV );
+
+                vector singularValues_inv = svd.singularValues();
+
+                for ( unsigned int i = 0; i < singularValues_inv.rows(); ++i )
+                {
+                    if ( svd.singularValues() ( i ) > singularityLimit )
+                        singularValues_inv( i ) = 1.0 / svd.singularValues() ( i );
+                    else
+                        singularValues_inv( i ) = 0;
+                }
+
+                vector c = svd.matrixV() * ( singularValues_inv.asDiagonal() * ( svd.matrixU().transpose() * (zstar - zk) ) );
 
                 // Update solution x
                 xk += W * c + V * c + zk - zstar;

@@ -305,91 +305,48 @@ void ManifoldMapping::performPostProcessing(
             // Initialize variables for singular value decomposition
 
             vector S_F, S_C;
-            matrix V_F, U_F, V_C, U_C, Sigma_F, pseudoSigma_F;
-
-            // Remove dependent columns of DeltaC and DeltaF
-
-            int nbRemoveCols = 1;
-
-            while ( nbRemoveCols > 0 )
-            {
-                nbRemoveCols = 0;
-
-                if ( DeltaF.cols() == 0 )
-                    break;
-
-                // Calculate singular value decomposition with Eigen
-
-                Eigen::JacobiSVD<matrix> svd( DeltaF, Eigen::ComputeThinU | Eigen::ComputeThinV );
-
-                vector singularValues = svd.singularValues();
-
-                for ( int i = 0; i < singularValues.rows(); i++ )
-                {
-                    if ( std::abs( singularValues( i ) ) <= singularityLimit )
-                    {
-                        // Remove the column from DeltaC and DeltaF
-                        removeColumnFromMatrix( DeltaC, i - nbRemoveCols );
-                        removeColumnFromMatrix( DeltaF, i - nbRemoveCols );
-
-                        nbRemoveCols++;
-                    }
-                }
-
-                if ( nbRemoveCols )
-                    Info << "Manifold mapping: remove " << nbRemoveCols << " columns from the Jacobian matrices" << endl;
-            }
+            matrix V_F, U_F, V_C, U_C, Sigma_F;
 
             assert( DeltaC.cols() == DeltaF.cols() );
 
-            if ( DeltaF.cols() > 0 )
-            {
-                // Calculate singular value decomposition with Eigen
+            // Calculate singular value decomposition with Eigen
 
-                Eigen::JacobiSVD<matrix> svd_C( DeltaC, Eigen::ComputeThinU | Eigen::ComputeThinV );
-                Eigen::JacobiSVD<matrix> svd_F( DeltaF, Eigen::ComputeThinU | Eigen::ComputeThinV );
+            Eigen::JacobiSVD<matrix> svd_C( DeltaC, Eigen::ComputeThinU | Eigen::ComputeThinV );
+            Eigen::JacobiSVD<matrix> svd_F( DeltaF, Eigen::ComputeThinU | Eigen::ComputeThinV );
 
-                matrix pseudoSigma_F = svd_F.singularValues().asDiagonal();
+            matrix pseudoSigma_F = svd_F.singularValues().asDiagonal();
 
-                for ( int i = 0; i < pseudoSigma_F.cols(); i++ )
+            for ( int i = 0; i < pseudoSigma_F.cols(); i++ )
+                if ( pseudoSigma_F( i, i ) > singularityLimit )
                     pseudoSigma_F( i, i ) = 1.0 / pseudoSigma_F( i, i );
+                else
+                    pseudoSigma_F( i, i ) = 0;
 
-                matrix pseudoDeltaF = svd_F.matrixV() * pseudoSigma_F * svd_F.matrixU().transpose();
+            matrix pseudoDeltaF = svd_F.matrixV() * pseudoSigma_F * svd_F.matrixU().transpose();
 
-                U_F = svd_F.matrixU();
-                U_C = svd_C.matrixU();
+            U_F = svd_F.matrixU();
+            U_C = svd_C.matrixU();
 
-                if ( !updateJacobian )
-                {
-                    vector beta = U_F * (U_F.transpose() * alpha);
+            if ( !updateJacobian )
+            {
+                vector beta = U_F * (U_F.transpose() * alpha);
 
-                    yk -= alpha;
-                    yk -= DeltaC * (pseudoDeltaF * alpha);
-                    yk += U_C * ( U_C.transpose() * (alpha - beta) );
-                    yk += beta;
-                }
-
-                if ( updateJacobian )
-                {
-                    matrix I = fsi::matrix::Identity( DeltaF.rows(), DeltaF.rows() );
-
-                    if ( Tkprev.rows() == DeltaF.rows() )
-                        Tk = Tkprev + (DeltaC - Tkprev * DeltaF) * pseudoDeltaF;
-                    else
-                        Tk = DeltaC * pseudoDeltaF + ( I - U_C * U_C.transpose() ) * ( I - U_F * U_F.transpose() );
-
-                    yk -= Tk * alpha;
-                }
+                yk -= alpha;
+                yk -= DeltaC * (pseudoDeltaF * alpha);
+                yk += U_C * ( U_C.transpose() * (alpha - beta) );
+                yk += beta;
             }
 
-            if ( DeltaF.cols() == 0 )
+            if ( updateJacobian )
             {
-                // Update the design specification yk
+                matrix I = fsi::matrix::Identity( DeltaF.rows(), DeltaF.rows() );
 
-                if ( updateJacobian && Tkprev.rows() == m )
-                    yk -= Tkprev * alpha;
+                if ( Tkprev.rows() == DeltaF.rows() )
+                    Tk = Tkprev + (DeltaC - Tkprev * DeltaF) * pseudoDeltaF;
                 else
-                    yk -= alpha;
+                    Tk = DeltaC * pseudoDeltaF + ( I - U_C * U_C.transpose() ) * ( I - U_F * U_F.transpose() );
+
+                yk -= Tk * alpha;
             }
         }
 

@@ -326,44 +326,24 @@ void OutputSpaceMapping::performPostProcessing(
 
             assert( colIndex == nbCols );
 
-            // Remove dependent columns of DeltaC and DeltaF
+            // Truncated singular value decomposition to solve for the
+            // coefficients
 
-            int nbRemoveCols = 1;
+            Eigen::JacobiSVD<matrix> svd( DeltaX, Eigen::ComputeThinU | Eigen::ComputeThinV );
 
-            while ( nbRemoveCols > 0 )
+            vector singularValues_inv = svd.singularValues();
+
+            for ( unsigned int i = 0; i < singularValues_inv.rows(); ++i )
             {
-                nbRemoveCols = 0;
-
-                if ( DeltaX.cols() == 1 )
-                    break;
-
-                // Calculate singular value decomposition with Eigen
-
-                Eigen::JacobiSVD<matrix> svd( DeltaX, Eigen::ComputeThinU | Eigen::ComputeThinV );
-
-                vector singularValues = svd.singularValues();
-
-                for ( int i = 0; i < singularValues.rows(); i++ )
-                {
-                    if ( std::abs( singularValues( i ) ) <= singularityLimit && DeltaX.cols() > 1 )
-                    {
-                        // Remove the column from DeltaC and DeltaF
-                        removeColumnFromMatrix( DeltaX, i - nbRemoveCols );
-                        removeColumnFromMatrix( DeltaF, i - nbRemoveCols );
-
-                        nbRemoveCols++;
-                    }
-                }
-
-                if ( nbRemoveCols )
-                    Info << "Output space mapping: remove " << nbRemoveCols << " columns from the Jacobian matrices" << endl;
+                if ( svd.singularValues() ( i ) > singularityLimit )
+                    singularValues_inv( i ) = 1.0 / svd.singularValues() ( i );
+                else
+                    singularValues_inv( i ) = 0;
             }
 
             matrix I = fsi::matrix::Identity( m, m );
 
-            Eigen::JacobiSVD<matrix> svd( DeltaX, Eigen::ComputeThinU | Eigen::ComputeThinV );
-
-            matrix pseudoDeltaX = svd.matrixV() * svd.singularValues().asDiagonal().inverse() * svd.matrixU().transpose();
+            matrix pseudoDeltaX = svd.matrixV() * singularValues_inv.asDiagonal() * svd.matrixU().transpose();
 
             matrix J = -I + (DeltaF + DeltaX) * pseudoDeltaX;
 
