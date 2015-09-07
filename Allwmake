@@ -24,17 +24,19 @@ wmake libso src/bodyFsi
 wmake all applications/solvers/bodyFsi
 wmake all applications/solvers/consistentSolvers
 wmake all applications/solvers/rbfDevelopment
+
+wmake applications/utilities/writeNonOrthogonality
+wmake applications/utilities/addInitialRandomVelocity
+wmake applications/utilities/writeSets
+wmake applications/utilities/mapFields
+wmake applications/utilities/yPlus
+
+# yaml dependend
+wmake applications/utilities/mapMesh
 wmake applications/solvers/unsteadyPUCoupledFoam
 wmake applications/solvers/fsi/fsiFoam
 wmake applications/solvers/fsi/solidFoam
 wmake applications/solvers/fsi/fluidFoam
-
-wmake applications/utilities/writeNonOrthogonality
-wmake applications/utilities/addInitialRandomVelocity
-wmake applications/utilities/mapMesh
-wmake applications/utilities/writeSets
-wmake applications/utilities/mapFields
-wmake applications/utilities/yPlus
 
 wmake src/tests/app
 wmake src/tests/tubeflow
