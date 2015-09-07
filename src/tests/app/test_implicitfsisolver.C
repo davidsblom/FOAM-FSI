@@ -246,13 +246,19 @@ TEST_P( ImplicitFsiSolverParametrizedTest, numberOfColumnsVIQN )
         int nbResiduals = solver->postProcessing->residuals.size();
 
         // Include information from previous optimization solves
-        for ( std::deque<deque<fsi::vector> >::iterator it = solver->postProcessing->solsList.begin(); it != solver->postProcessing->solsList.end(); ++it )
-            nbResiduals += it->size();
+        for ( auto sols : solver->postProcessing->solsList )
+            nbResiduals += sols.size();
+
+        // Include information from previous stages
+        for ( auto solsList : solver->postProcessing->solsStageList )
+            for ( auto sols : solsList )
+                nbResiduals += sols.size();
 
         // Include information from previous time steps
-        for ( std::deque< std::deque<deque<fsi::vector> > >::iterator solsIterator = solver->postProcessing->solsTimeList.begin(); solsIterator != solver->postProcessing->solsTimeList.end(); ++solsIterator )
-            for ( std::deque<deque<fsi::vector> >::iterator it = solsIterator->begin(); it != solsIterator->end(); ++it )
-                nbResiduals += it->size();
+        for ( auto solsStageList : solver->postProcessing->solsTimeList )
+            for ( auto solsList : solsStageList )
+                for ( auto sols : solsList )
+                    nbResiduals += sols.size();
 
         if ( i == 0 )
             nbIterFirstTimeStep = solver->fsi->iter;
