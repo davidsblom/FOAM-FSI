@@ -31,8 +31,8 @@ BroydenPostProcessing::~BroydenPostProcessing()
 
 void BroydenPostProcessing::finalizeStage()
 {
+    PostProcessing::finalizeStage();
     // not implemented yet;
-    assert( false );
 
     // The Jacobian is rebuilt with information from previous time steps
     // and information from previous stages

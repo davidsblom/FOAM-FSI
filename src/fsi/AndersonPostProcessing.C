@@ -352,7 +352,7 @@ namespace fsi
 
                 if ( updateJacobian )
                 {
-                    matrix Vinverse = svd.matrixV() * singularValues_inv * svd.matrixU().transpose();
+                    matrix Vinverse = svd.matrixV() * singularValues_inv.asDiagonal() * svd.matrixU().transpose();
 
                     matrix I = fsi::matrix::Identity( V.rows(), V.rows() );
 
