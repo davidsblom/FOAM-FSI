@@ -186,34 +186,27 @@ void ASMILS::performPostProcessing(
             }
 
             assert( colIndex == nbCols );
-
             assert( V.cols() == W.cols() );
 
-            if ( V.cols() == 0 )
-                fixedUnderRelaxation( xk, zstar, zk );
+            // Truncated singular value decomposition to solve for the
+            // coefficients
 
-            if ( V.cols() > 0 )
+            Eigen::JacobiSVD<matrix> svd( V, Eigen::ComputeThinU | Eigen::ComputeThinV );
+
+            vector singularValues_inv = svd.singularValues();
+
+            for ( unsigned int i = 0; i < singularValues_inv.rows(); ++i )
             {
-                // Truncated singular value decomposition to solve for the
-                // coefficients
-
-                Eigen::JacobiSVD<matrix> svd( V, Eigen::ComputeThinU | Eigen::ComputeThinV );
-
-                vector singularValues_inv = svd.singularValues();
-
-                for ( unsigned int i = 0; i < singularValues_inv.rows(); ++i )
-                {
-                    if ( svd.singularValues() ( i ) > singularityLimit )
-                        singularValues_inv( i ) = 1.0 / svd.singularValues() ( i );
-                    else
-                        singularValues_inv( i ) = 0;
-                }
-
-                vector c = svd.matrixV() * ( singularValues_inv.asDiagonal() * ( svd.matrixU().transpose() * (zstar - zk) ) );
-
-                // Update solution x
-                xk += W * c + V * c + zk - zstar;
+                if ( svd.singularValues() ( i ) > singularityLimit )
+                    singularValues_inv( i ) = 1.0 / svd.singularValues() ( i );
+                else
+                    singularValues_inv( i ) = 0;
             }
+
+            vector c = svd.matrixV() * ( singularValues_inv.asDiagonal() * ( svd.matrixU().transpose() * (zstar - zk) ) );
+
+            // Update solution x
+            xk += W * c + V * c + zk - zstar;
         }
 
         // Fine model evaluation
@@ -238,15 +231,4 @@ void ASMILS::performPostProcessing(
 
         coarseResiduals.push_back( zk );
     }
-}
-
-void ASMILS::removeColumnFromMatrix(
-    matrix & A,
-    int col
-    )
-{
-    for ( int j = col; j < A.cols() - 1; j++ )
-        A.col( j ) = A.col( j + 1 );
-
-    A.conservativeResize( A.rows(), A.cols() - 1 );
 }

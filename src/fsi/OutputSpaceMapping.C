@@ -394,14 +394,3 @@ void OutputSpaceMapping::performPostProcessing(
         }
     }
 }
-
-void OutputSpaceMapping::removeColumnFromMatrix(
-    matrix & A,
-    int col
-    )
-{
-    for ( int j = col; j < A.cols() - 1; j++ )
-        A.col( j ) = A.col( j + 1 );
-
-    A.conservativeResize( A.rows(), A.cols() - 1 );
-}

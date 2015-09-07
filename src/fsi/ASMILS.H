@@ -41,11 +41,6 @@ public:
             vector & zstar,
             vector & zk
             );
-
-        void removeColumnFromMatrix(
-            matrix & A,
-            int col
-            );
     };
 }
 
