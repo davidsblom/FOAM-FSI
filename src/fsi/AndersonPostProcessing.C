@@ -197,30 +197,30 @@ namespace fsi
             nbCols = std::max( nbCols, 0 );
 
             // Include information from previous optimization solves
-            for ( unsigned i = 0; i < solsList.size(); i++ )
-                nbCols += solsList.at( i ).size() - 1;
+            for ( auto && sols : solsList )
+                nbCols += sols.size() - 1;
 
             // Include information from previous stages
             for ( unsigned i = solsStageList.size(); i-- > 0; )
             {
-                for ( unsigned j = 0; j < solsStageList.at( i ).size(); j++ )
+                for ( auto && sols : solsStageList.at( i ) )
                 {
                     if ( i != stageIndex )
                         continue;
 
-                    nbCols += solsStageList.at( i ).at( j ).size() - 1;
+                    nbCols += sols.size() - 1;
                 }
             }
 
             // Include information from previous time steps
-            for ( unsigned i = 0; i < solsTimeList.size(); i++ )
-                for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
+            for ( auto && solsStageList : solsTimeList )
+                for ( unsigned j = 0; j < solsStageList.size(); j++ )
                 {
                     if ( j != stageIndex )
                         continue;
 
-                    for ( unsigned k = 0; k < solsTimeList.at( i ).at( j ).size(); k++ )
-                        nbCols += solsTimeList.at( i ).at( j ).at( k ).size() - 1;
+                    for ( auto && sols : solsStageList.at( j ) )
+                        nbCols += sols.size() - 1;
                 }
 
             nbCols = std::min( static_cast<int>( xk.rows() ), nbCols );

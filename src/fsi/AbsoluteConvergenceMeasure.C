@@ -10,10 +10,11 @@ namespace fsi
 {
     AbsoluteConvergenceMeasure::AbsoluteConvergenceMeasure(
         int dataId,
+        bool suffices,
         scalar convergenceLimit
         )
         :
-        ConvergenceMeasure( dataId ),
+        ConvergenceMeasure( dataId, suffices ),
         convergenceLimit( convergenceLimit ),
         normDiff( 0 )
     {

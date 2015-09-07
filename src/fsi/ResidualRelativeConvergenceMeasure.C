@@ -10,10 +10,11 @@ namespace fsi
 {
     ResidualRelativeConvergenceMeasure::ResidualRelativeConvergenceMeasure(
         int dataId,
+        bool suffices,
         scalar convergenceLimit
         )
         :
-        ConvergenceMeasure( dataId ),
+        ConvergenceMeasure( dataId, suffices ),
         isFirstIteration( true ),
         convergenceLimit( convergenceLimit ),
         normFirstResidual( std::numeric_limits<double>::max() ),

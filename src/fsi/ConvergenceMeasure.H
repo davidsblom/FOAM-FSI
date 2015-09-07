@@ -16,10 +16,14 @@ namespace fsi
     {
 public:
 
-        ConvergenceMeasure( int dataId )
+        ConvergenceMeasure(
+            int dataId,
+            bool suffices
+            )
             :
             dataId( dataId ),
-            isConvergence_( false )
+            isConvergence_( false ),
+            suffices_( suffices )
         {}
 
         virtual ~ConvergenceMeasure(){}
@@ -35,9 +39,15 @@ public:
 
         virtual void printState() = 0;
 
+        virtual bool suffices()
+        {
+            return suffices_;
+        }
+
         const int dataId;
 
         bool isConvergence_;
+        bool suffices_;
     };
 }
 

@@ -18,6 +18,7 @@ public:
 
         ResidualRelativeConvergenceMeasure(
             int dataId,
+            bool suffices,
             scalar convergenceLimit
             );
 
