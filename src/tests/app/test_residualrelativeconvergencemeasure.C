@@ -25,8 +25,12 @@ TEST( ResidualRelativeConvergenceMeasure, measure )
     measure.measure( oldValues0, newValues );
     ASSERT_FALSE( measure.isConvergence() );
 
+    measure.printState();
+
     measure.measure( oldValues1, newValues );
     ASSERT_FALSE( measure.isConvergence() );
+
+    measure.printState();
 
     measure.measure( oldValues2, newValues );
     ASSERT_TRUE( measure.isConvergence() );
