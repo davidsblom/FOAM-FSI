@@ -72,5 +72,6 @@ test_sdc.C
 test_esdirk.C
 test_adaptivetime.C
 test_pies.C
+test_absoluteconvergencemeasure.C
 
 EXE = $(FOAM_USER_APPBIN)/tests

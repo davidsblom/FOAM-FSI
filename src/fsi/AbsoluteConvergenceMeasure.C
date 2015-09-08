@@ -19,7 +19,6 @@ namespace fsi
         normDiff( 0 )
     {
         assert( convergenceLimit > 0 );
-        assert( convergenceLimit < 1 );
     }
 
     void AbsoluteConvergenceMeasure::measure(
