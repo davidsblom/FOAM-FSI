@@ -5,6 +5,7 @@ $(bm)/bodyMotionFunction/bodyMotionFunction/bodyMotionFunction.C
 $(bm)/bodyMotionFunction/bodyMotionFunction/newbodyMotionFunction.C
 $(bm)/bodyMotionFunction/twodRigidBody/twodRigidBody.C
 $(bm)/bodyMotionFunction/fourierTranslationalBody/fourierTranslationalBody.C
+$(bm)/bodyMotionFunction/fourierRotatingBody/fourierRotatingBody.C
 $(bm)/bodyMotionFunction/fileTranslationalBody/fileTranslationalBody.C
 $(bm)/bodyMotionFunction/twodTwoHingeFlap/twodTwoHingeFlap.C
 $(bm)/bodyMotionFunction/turekForced/turekForced.C
