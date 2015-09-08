@@ -200,14 +200,14 @@ void ManifoldMapping::performPostProcessing(
 
         // Include information from previous optimization cycles
 
-        for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
-            nbCols += fineResidualsList.at( i ).size() - 1;
+        for ( auto && fineResiduals : fineResidualsList )
+            nbCols += fineResiduals.size() - 1;
 
         // Include information from previous time steps
 
-        for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
-            for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
-                nbCols += fineResidualsTimeList.at( i ).at( j ).size() - 1;
+        for ( auto && fineResidualsList : fineResidualsTimeList )
+            for ( auto && fineResiduals : fineResidualsList )
+                nbCols += fineResiduals.size() - 1;
 
         nbCols = std::min( nbCols, n );
         nbCols = std::min( nbCols, maxUsedIterations );
@@ -333,7 +333,8 @@ void ManifoldMapping::performPostProcessing(
 
                 yk -= alpha;
                 yk -= DeltaC * (pseudoDeltaF * alpha);
-                yk += U_C * ( U_C.transpose() * (alpha - beta) );
+
+                // yk += U_C * ( U_C.transpose() * (alpha - beta) );
                 yk += beta;
             }
 

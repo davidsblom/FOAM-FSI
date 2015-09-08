@@ -100,11 +100,11 @@ protected:
         std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
         convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, minIter ) ) );
-        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, tol ) ) );
+        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, false, tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 1, tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 1, false, tol ) ) );
 
         shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
         shared_ptr<AndersonPostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
@@ -162,32 +162,32 @@ TEST_P( parallelCouplingParametrizedTest, timeSteps )
 
     if ( N == 100 )
     {
-        ASSERT_EQ( fluid->nbRes, 220 );
-        ASSERT_EQ( fluid->nbJac, 132 );
+        ASSERT_EQ( fluid->nbRes, 215 );
+        ASSERT_EQ( fluid->nbJac, 129 );
     }
 
     solver->solveTimeStep();
 
     if ( N == 100 )
     {
-        ASSERT_EQ( fluid->nbRes, 330 );
-        ASSERT_EQ( fluid->nbJac, 198 );
+        ASSERT_EQ( fluid->nbRes, 335 );
+        ASSERT_EQ( fluid->nbJac, 201 );
     }
 
     solver->solveTimeStep();
 
     if ( N == 100 )
     {
-        ASSERT_EQ( fluid->nbRes, 469 );
-        ASSERT_EQ( fluid->nbJac, 282 );
+        ASSERT_EQ( fluid->nbRes, 474 );
+        ASSERT_EQ( fluid->nbJac, 285 );
     }
 
     solver->solveTimeStep();
 
     if ( N == 100 )
     {
-        ASSERT_EQ( fluid->nbRes, 588 );
-        ASSERT_EQ( fluid->nbJac, 354 );
+        ASSERT_EQ( fluid->nbRes, 593 );
+        ASSERT_EQ( fluid->nbJac, 357 );
     }
 
     solver->solveTimeStep();

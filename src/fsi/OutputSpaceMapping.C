@@ -153,13 +153,14 @@ void OutputSpaceMapping::performPostProcessing(
 
         // Include information from previous optimization cycles
 
-        for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
-            nbCols += fineResidualsList.at( i ).size() - 1;
+        for ( auto && fineResiduals : fineResidualsList )
+            nbCols += fineResiduals.size() - 1;
 
         // Include information from previous time steps
-        for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
-            for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
-                nbCols += fineResidualsTimeList.at( i ).at( j ).size() - 1;
+
+        for ( auto && fineResidualsList : fineResidualsTimeList )
+            for ( auto && fineResiduals : fineResidualsList )
+                nbCols += fineResiduals.size() - 1;
 
         // Update the design specification yk
         yk = coarseResiduals.at( k ) - (fineResiduals.at( k ) - y);

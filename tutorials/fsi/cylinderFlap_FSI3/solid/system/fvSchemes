@@ -13,6 +13,11 @@ FoamFile
  object fvSchemes;
 }
 
+ddtSchemes
+{
+  default bdf1;
+}
+
 d2dt2Schemes
 {
   default backward2;

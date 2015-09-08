@@ -1,3 +1,4 @@
+AbsoluteConvergenceMeasure.C
 TubeFlowFluidSolver.C
 TubeFlowSolidSolver.C
 TubeFlowLinearizedSolidSolver.C
@@ -6,6 +7,7 @@ TubeFlowLinearizedFluidSolver.C
 MonolithicFsiSolver.C
 FsiSolver.C
 RelativeConvergenceMeasure.C
+ResidualRelativeConvergenceMeasure.C
 MinIterationConvergenceMeasure.C
 ManifoldMapping.C
 MultiLevelSolver.C

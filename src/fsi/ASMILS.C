@@ -15,11 +15,16 @@ ASMILS::ASMILS(
     int maxUsedIterations,
     int nbReuse,
     int reuseInformationStartingFromTimeIndex,
-    scalar singularityLimit
+    scalar singularityLimit,
+    scalar beta
     )
     :
-    SpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit )
-{}
+    SpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
+    beta( beta )
+{
+    assert( beta > 0 );
+    assert( beta <= 1 );
+}
 
 ASMILS::~ASMILS()
 {}
@@ -47,7 +52,7 @@ void ASMILS::performPostProcessing(
     // Initialize variables
 
     int m = y.rows();
-    vector yk( m ), output( m ), R( m ), zstar( m ), zk( m ), xkprev( m );
+    vector output( m ), R( m ), zstar( m ), zk( m ), xkprev( m );
     xk = x0;
     xkprev = x0;
     coarseResiduals.clear();
@@ -66,8 +71,7 @@ void ASMILS::performPostProcessing(
     if ( !coarseModel->allConverged() )
         Warning << "ASMILS: surrogate model optimization process is not converged." << endl;
 
-    if ( timeIndex == 0 )
-        xk = zstar;
+    xk = zstar;
 
     // Fine model evaluation
 
@@ -84,7 +88,7 @@ void ASMILS::performPostProcessing(
 
     // Parameter extraction
 
-    coarseModel->optimize( R, zstar, zk );
+    coarseModel->optimize( R - y, zstar, zk );
 
     if ( !coarseModel->allConverged() )
         Warning << "Surrogate model optimization process is not converged." << endl;
@@ -102,14 +106,14 @@ void ASMILS::performPostProcessing(
 
         // Include information from previous optimization cycles
 
-        for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
-            nbCols += fineResidualsList.at( i ).size() - 1;
+        for ( auto && fineResiduals : fineResidualsList )
+            nbCols += fineResiduals.size() - 1;
 
         // Include information from previous time steps
 
-        for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
-            for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
-                nbCols += fineResidualsTimeList.at( i ).at( j ).size() - 1;
+        for ( auto && fineResidualsList : fineResidualsTimeList )
+            for ( auto && fineResiduals : fineResidualsList )
+                nbCols += fineResiduals.size() - 1;
 
         nbCols = std::min( static_cast<int>( xk.rows() ), nbCols );
         nbCols = std::min( nbCols, maxUsedIterations );
@@ -206,7 +210,7 @@ void ASMILS::performPostProcessing(
             vector c = svd.matrixV() * ( singularValues_inv.asDiagonal() * ( svd.matrixU().transpose() * (zstar - zk) ) );
 
             // Update solution x
-            xk += W * c + V * c + zk - zstar;
+            xk += beta * (zk - zstar) + W * c + beta * V * c;
         }
 
         // Fine model evaluation
@@ -224,7 +228,7 @@ void ASMILS::performPostProcessing(
 
         // Parameter extraction
 
-        coarseModel->optimize( R, zstar, zk );
+        coarseModel->optimize( R - y, zstar, zk );
 
         if ( !coarseModel->allConverged() )
             Warning << "ASMILS: surrogate model optimization process is not converged." << endl;
