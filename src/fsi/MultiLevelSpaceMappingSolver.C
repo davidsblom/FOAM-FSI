@@ -25,10 +25,8 @@ MultiLevelSpaceMappingSolver::MultiLevelSpaceMappingSolver(
 
     int level = 0;
 
-    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
+    for ( auto && model : *models )
     {
-        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
-
         assert( model->fsi->fluidSolver->level == model->fsi->solidSolver->level );
         assert( model->fsi->fluidSolver->level == level );
 
@@ -37,10 +35,8 @@ MultiLevelSpaceMappingSolver::MultiLevelSpaceMappingSolver(
 
     level = 0;
 
-    for ( std::deque<shared_ptr<SpaceMappingSolver> >::iterator it = solvers->begin(); it != solvers->end(); ++it )
+    for ( auto && solver : *solvers )
     {
-        shared_ptr<SpaceMappingSolver> solver = *it;
-
         assert( solver->fineModel->fsi->fluidSolver->level == level + 1 );
         assert( solver->coarseModel->fsi->fluidSolver->level == level );
 
@@ -52,17 +48,11 @@ void MultiLevelSpaceMappingSolver::initTimeStep()
 {
     assert( !init );
 
-    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
-    {
-        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
+    for ( auto && model : *models )
         model->initTimeStep();
-    }
 
-    for ( std::deque<shared_ptr<SpaceMappingSolver> >::iterator it = solvers->begin(); it != solvers->end(); ++it )
-    {
-        shared_ptr<SpaceMappingSolver> solver = *it;
+    for ( auto && solver : *solvers )
         solver->init = true;
-    }
 
     init = true;
 }
@@ -75,10 +65,8 @@ void MultiLevelSpaceMappingSolver::finalizeTimeStep()
 
     int level = 1;
 
-    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
+    for ( auto && model : *models )
     {
-        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
-
         if ( level < static_cast<int>( models->size() ) )
         {
             assert( model->fsi->x.rows() == fineModel->fsi->x.rows() );
@@ -118,12 +106,8 @@ void MultiLevelSpaceMappingSolver::finalizeTimeStep()
         level++;
     }
 
-    for ( std::deque<shared_ptr<SpaceMappingSolver> >::iterator it = solvers->begin(); it != solvers->end(); ++it )
-    {
-        shared_ptr<SpaceMappingSolver> solver = *it;
-
+    for ( auto && solver : *solvers )
         solver->spaceMapping->finalizeTimeStep();
-    }
 
     init = false;
 }

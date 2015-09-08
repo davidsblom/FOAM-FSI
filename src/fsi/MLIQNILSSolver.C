@@ -23,10 +23,8 @@ MLIQNILSSolver::MLIQNILSSolver(
 
     int level = 0;
 
-    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
+    for ( auto && model : *models )
     {
-        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
-
         assert( model->fsi->fluidSolver->level == model->fsi->solidSolver->level );
         assert( model->fsi->fluidSolver->level == level );
 
@@ -42,10 +40,8 @@ void MLIQNILSSolver::finalizeTimeStep()
 
     int level = 1;
 
-    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
+    for ( auto && model : *models )
     {
-        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
-
         if ( synchronization )
         {
             if ( level < static_cast<int>( models->size() ) )
@@ -91,12 +87,8 @@ void MLIQNILSSolver::initTimeStep()
 {
     assert( !init );
 
-    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
-    {
-        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
-
+    for ( auto && model : *models )
         model->initTimeStep();
-    }
 
     init = true;
 }
@@ -126,11 +118,9 @@ void MLIQNILSSolver::solve()
     fsi::vector xk = x0;
     int level = 1;
 
-    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
+    for ( auto && model : *models )
     {
         // Initialize variables
-
-        shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
 
         x0 = xk;
 
@@ -146,17 +136,11 @@ void MLIQNILSSolver::solve()
         {
             // Copy residuals of current time step
 
-            for ( deque<deque<fsi::vector> >::iterator it = model->postProcessing->residualsList.begin(); it != model->postProcessing->residualsList.end(); ++it )
-            {
-                deque<fsi::vector> residuals = *it;
+            for ( auto && residuals : model->postProcessing->residualsList )
                 models->at( level )->postProcessing->residualsList.push_back( residuals );
-            }
 
-            for ( deque<deque<fsi::vector> >::iterator it = model->postProcessing->solsList.begin(); it != model->postProcessing->solsList.end(); ++it )
-            {
-                deque<fsi::vector> sols = *it;
+            for ( auto && sols : model->postProcessing->solsList )
                 models->at( level )->postProcessing->solsList.push_back( sols );
-            }
         }
 
         level++;
