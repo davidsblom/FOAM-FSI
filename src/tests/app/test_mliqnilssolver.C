@@ -270,11 +270,8 @@ TEST_P( MLIQNILSSolverParametrizedTest, monolithic )
 
         // Verify that the coarse models are synchronized with the fine model
         if ( synchronization )
-            for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = solver->models->begin(); it != solver->models->end(); ++it )
-            {
-                shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
+            for ( auto && model : *(solver->models) )
                 ASSERT_NEAR( model->fsi->x.norm(), solver->fineModel->fsi->x.norm(), 1.0e-13 );
-            }
     }
 }
 
