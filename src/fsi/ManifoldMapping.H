@@ -62,11 +62,6 @@ public:
 
         void determineScalingFactors( const vector & output );
 
-        void removeColumnFromMatrix(
-            matrix & A,
-            int col
-            );
-
         const bool updateJacobian;
         const bool initialSolutionCoarseModel;
         bool scaling;
