@@ -785,7 +785,11 @@ scalar SDCSolidSolver::getTimeStep()
 void SDCSolidSolver::nextTimeStep()
 {
     timeIndex++;
-    (*runTime)++;
+
+    if ( runTime->timeIndex() != timeIndex )
+        (*runTime)++;
+
+    assert( runTime->timeIndex() == timeIndex );
 
     for ( int i = 0; i < k; i++ )
     {
