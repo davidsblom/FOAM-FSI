@@ -45,6 +45,13 @@ namespace fsi
         Info << "absolute convergence measure: ";
         Info << "two-norm diff = " << normDiff;
         Info << ", limit = " << convergenceLimit;
+        Info << ", suffices = ";
+
+        if ( suffices() )
+            Info << "true";
+        else
+            Info << "false";
+
         Info << ", conv = ";
 
         if ( isConvergence_ )

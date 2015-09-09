@@ -54,8 +54,15 @@ namespace fsi
         Info << "relative convergence measure: two-norm diff = "
              << normDiff
              << ", limit = "
-             << (epsilon + norm) * convergenceLimit
-             << ", conv = ";
+             << (epsilon + norm) * convergenceLimit;
+        Info << ", suffices = ";
+
+        if ( suffices() )
+            Info << "true";
+        else
+            Info << "false";
+
+        Info << ", conv = ";
 
         if ( isConvergence_ )
             Info << "true";

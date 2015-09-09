@@ -33,6 +33,7 @@ QuadratureRules.C
 Cos.C
 Oscillator.C
 PIES.C
+SDCFsiSolver.C
 
 tests.C
 test_fluidsolver.C

@@ -14,6 +14,8 @@
 #include "TubeFlowFluidSolver.H"
 #include "TubeFlowSolidSolver.H"
 #include "gtest/gtest.h"
+#include "AbsoluteConvergenceMeasure.H"
+#include "ResidualRelativeConvergenceMeasure.H"
 #include <unsupported/Eigen/NumericalDiff>
 
 using namespace tubeflow;
@@ -107,10 +109,12 @@ protected:
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
         convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, false, tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, true, tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new ResidualRelativeConvergenceMeasure( 0, false, 0.1 ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new AbsoluteConvergenceMeasure( 0, false, 0.1 ) ) );
 
         if ( parallel || convergenceMeasureTraction )
-            convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 1, false, tol ) ) );
+            convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 1, true, tol ) ) );
 
         shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
         shared_ptr<AndersonPostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
