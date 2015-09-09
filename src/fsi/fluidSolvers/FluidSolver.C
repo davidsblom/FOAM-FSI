@@ -230,6 +230,12 @@ void FluidSolver::checkTimeDiscretisationScheme()
         << ". This solver only works with ddt(U) scheme = bdf1, bdf2 or bdf3."
         << abort( FatalError );
     }
+
+    forAll( U.boundaryField().types(), i )
+    {
+        assert( U.boundaryField().types()[i] != "movingWallVelocity" );
+        assert( U.boundaryField().types()[i] != "SDCMovingWallVelocity" );
+    }
 }
 
 void FluidSolver::continuityErrs()
