@@ -50,15 +50,12 @@ protected:
 
         // Computational settings
         scalar tol = 1.0e-5;
-        scalar tolLiveSelection = 1.0e-4;
         int maxIter = 500;
         scalar initialRelaxation = 1.0e-3;
         scalar singularityLimit = 1.0e-12;
         bool scaling = false;
         bool updateJacobian = false;
         scalar beta = 1;
-        int coarseningMinPoints = 5;
-        int coarseningMaxPoints = 2000;
         bool parallel = false;
 
         // Parametrized settings
@@ -69,8 +66,6 @@ protected:
         bool convergenceMeasureTraction = std::tr1::get<4>( GetParam() );
         int spaceMappingAlgorithm = std::tr1::get<5>( GetParam() );
         int reuseInformationStartingFromTimeIndex = std::tr1::get<6>( GetParam() );
-        bool coarsening = false;
-        bool liveSelection = false;
 
         assert( spaceMappingAlgorithm > -1 && spaceMappingAlgorithm < 3 );
 
