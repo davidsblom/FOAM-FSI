@@ -70,7 +70,7 @@ class fourierRotatingBody
     labelList patchIDs_;
 
     //Kinematic variables
-    string fileName_;
+    word fileName_;
 	scalar scaleFactor_;
 	scalar frequency_;
 	vector origin_;

@@ -446,8 +446,8 @@ namespace rbf
                 error = (errorList).norm() / (values.norm() + epsilon);
                 errorMax = largestError / ( ( values.rowwise().norm() ).maxCoeff() + epsilon );
 
-                // bool convergence = (error < tol && counter >= minPoints) || counter >= maxNbPoints;
-                bool convergence = (error < tol && errorMax < tol && counter >= minPoints) || counter >= maxNbPoints;
+                // bool convergence = (error < tol && counter >= minPoints) || counter >= maxNbPoints;//only take 2-norm
+                bool convergence = (error < tol && errorMax < tol && counter >= minPoints) || counter >= maxNbPoints;//take both 2-norm and Inf-norm
 
                 if ( convergence )
                 {
@@ -589,8 +589,8 @@ namespace rbf
                     double error = (errorInterpolationCoarse).matrix().norm() / (this->values.norm() + epsilon);
                     double errorMax = ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() + epsilon );
 
-                    // bool convergence = error < tolLivePointSelection;
-                    bool convergence = (error < tolLivePointSelection && errorMax < tolLivePointSelection);
+                    // bool convergence = error < tolLivePointSelection;//only take the 2-norm error
+                    bool convergence = (error < tolLivePointSelection && errorMax < tolLivePointSelection);//take both 2-norm and Inf-norm error as convergence
 
                     if ( convergence )
                         reselection = false;
@@ -607,6 +607,8 @@ namespace rbf
                     // If debug is 2: Print out surface error to file
                     if ( debug == 2 )
                     {
+                        Info << "Debug 2: 2-norm(error|disp) = " << (errorInterpolationCoarse).matrix().norm() << "|" << this->values.norm() << ", Inf-norm(error|disp) = " << (errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << "|" << (this->values.rowwise().norm() ).maxCoeff() << endl;
+
                         std::string filename = "liveSelection-rbf-surfaceError.txt";
 
                         std::ofstream surfaceErrorFile( filename, std::ofstream::app );
@@ -617,7 +619,7 @@ namespace rbf
 
                             if ( !reselection )
                             {
-                                surfaceErrorFile << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << "\n";
+                                surfaceErrorFile << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << ", " << (errorInterpolationCoarse).matrix().norm() << ", " << this->values.norm() << ", " << (errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << ", " << (this->values.rowwise().norm() ).maxCoeff() << "\n";
                             }
                         }
 
@@ -666,9 +668,10 @@ namespace rbf
                         {
                             std::ofstream surfaceErrorFile( filename, std::ofstream::app );
 
+                            surfaceErrorFile << "eps_2, eps_max, Nc, Nb, eps_2, eps_max, reselected, error_2, dx_2, error_max, dx_max" << "\n";
                             if ( surfaceErrorFile.is_open() )
                             {
-                                surfaceErrorFile << error << ", " << errorMax << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << "\n";
+                                surfaceErrorFile << error << ", " << errorMax << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << ", " << (errorInterpolationCoarse).matrix().norm() << ", " << this->values.norm() << ", " << (errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << ", " << (this->values.rowwise().norm() ).maxCoeff() << "\n";
                             }
 
                             surfaceErrorFile.close();
@@ -679,7 +682,7 @@ namespace rbf
 
                             if ( surfaceErrorFile.is_open() )
                             {
-                                surfaceErrorFile << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << "\n";
+                                surfaceErrorFile << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << ", " << (errorInterpolationCoarse).matrix().norm() << ", " << this->values.norm() << ", " << (errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << ", " << (this->values.rowwise().norm() ).maxCoeff() << "\n";
                             }
                         }
                     }
