@@ -605,7 +605,7 @@ namespace rbf
                     Info << endl;
 
                     // If debug is 2: Print out surface error to file
-                    if ( debug == 2 )
+                    if ( debug >= 2 )
                     {
                         Info << "Debug 2: 2-norm(error|disp) = " << (errorInterpolationCoarse).matrix().norm() << "|" << this->values.norm() << ", Inf-norm(error|disp) = " << (errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << "|" << (this->values.rowwise().norm() ).maxCoeff() << endl;
 
@@ -641,7 +641,7 @@ namespace rbf
                     rbf->Hhat.conservativeResize( rbf->Hhat.rows(), rbf->Hhat.cols() - nbStaticFaceCentersRemove );
 
                     // If debug is 2: Print out surface error to file
-                    if ( debug == 2 )
+                    if ( debug >= 2 )
                     {
                         std::string filename = "liveSelection-rbf-surfaceError.txt";
                         struct stat buffer;
