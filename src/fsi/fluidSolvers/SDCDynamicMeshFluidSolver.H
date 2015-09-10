@@ -50,8 +50,6 @@ public:
         const fsi::vector & f
         );
 
-    virtual scalar getScalingFactor();
-
     virtual void implicitSolve(
         bool corrector,
         const int k,

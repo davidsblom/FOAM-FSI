@@ -55,11 +55,6 @@ int Cos::getDOF()
     return 1;
 }
 
-scalar Cos::getScalingFactor()
-{
-    return 1.0;
-}
-
 void Cos::getSolution(
     fsi::vector & solution,
     fsi::vector & f

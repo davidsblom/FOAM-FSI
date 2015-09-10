@@ -40,8 +40,6 @@ public:
 
     virtual int getDOF();
 
-    virtual scalar getScalingFactor();
-
     virtual void getSolution( fsi::vector & solution );
 
     virtual void setSolution(

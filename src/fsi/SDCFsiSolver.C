@@ -60,11 +60,6 @@ int SDCFsiSolver::getDOF()
     return dofFluid + dofSolid;
 }
 
-scalar SDCFsiSolver::getScalingFactor()
-{
-    return 1;
-}
-
 void SDCFsiSolver::getSolution(
     fsi::vector & solution,
     fsi::vector & f

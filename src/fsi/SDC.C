@@ -251,7 +251,6 @@ namespace sdc
             squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
             reduce( squaredNorm, sumOp<scalarList>() );
             scalar error = std::sqrt( sum( squaredNorm ) / N );
-            error /= solver->getScalingFactor();
             bool convergence = error < tol && j >= minSweeps - 2;
 
             std::deque<int> dofVariables;
