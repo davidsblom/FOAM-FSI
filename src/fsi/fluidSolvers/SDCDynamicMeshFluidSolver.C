@@ -754,11 +754,6 @@ void SDCDynamicMeshFluidSolver::implicitSolve(
     getSolution( result, f );
 }
 
-scalar SDCDynamicMeshFluidSolver::getScalingFactor()
-{
-    return 1;
-}
-
 void SDCDynamicMeshFluidSolver::getVariablesInfo(
     std::deque<int> & dof,
     std::deque<bool> & enabled,

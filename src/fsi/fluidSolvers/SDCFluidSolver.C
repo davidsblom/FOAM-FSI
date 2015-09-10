@@ -960,11 +960,6 @@ void SDCFluidSolver::implicitSolve(
     getSolution( result, f );
 }
 
-scalar SDCFluidSolver::getScalingFactor()
-{
-    return 1;
-}
-
 void SDCFluidSolver::getVariablesInfo(
     std::deque<int> & dof,
     std::deque<bool> & enabled,

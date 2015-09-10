@@ -77,8 +77,6 @@ public:
 
     virtual scalar getEndTime();
 
-    virtual scalar getScalingFactor();
-
     virtual scalar getTimeStep();
 
     virtual scalar getStartTime();

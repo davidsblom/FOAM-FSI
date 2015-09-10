@@ -617,11 +617,6 @@ int SDCSolidSolver::getDOF()
     return index;
 }
 
-scalar SDCSolidSolver::getScalingFactor()
-{
-    return std::sqrt( gSumMag( V ) + gSumMag( U ) );
-}
-
 void SDCSolidSolver::getSolution(
     fsi::vector & solution,
     fsi::vector & f

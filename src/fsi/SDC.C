@@ -180,7 +180,7 @@ namespace sdc
             solver->nextTimeStep();
 
         fsi::vector dtsdc = this->dt * dsdc;
-        fsi::matrix solStages( k, N ), F( k, N ), Fembedded( nodesEmbedded.rows(), N ), residual;
+        fsi::matrix solStages( k, N ), F( k, N ), Fembedded( nodesEmbedded.rows(), N ), residual, diff;
         fsi::matrix qj( 1, solStages.cols() ), qjEmbedded( 1, solStages.cols() );
         fsi::vector errorEstimate( N );
 
@@ -243,15 +243,17 @@ namespace sdc
             // Compute the SDC residual
 
             residual = dt * (qmat * F);
+            diff = residual;
 
             for ( int i = 0; i < residual.rows(); i++ )
                 residual.row( i ) += solStages.row( 0 ) - solStages.row( i + 1 );
 
-            scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
-            squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
-            reduce( squaredNorm, sumOp<scalarList>() );
-            scalar error = std::sqrt( sum( squaredNorm ) / N );
-            error /= solver->getScalingFactor();
+            scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) ), squaredNormDiff( Pstream::nProcs(), scalar( 0 ) );
+            squaredNormResidual[Pstream::myProcNo()] = residual.squaredNorm();
+            squaredNormDiff[Pstream::myProcNo()] = diff.squaredNorm();
+            reduce( squaredNormResidual, sumOp<scalarList>() );
+            reduce( squaredNormDiff, sumOp<scalarList>() );
+            scalar error = std::sqrt( sum( squaredNormResidual ) / sum( squaredNormDiff ) );
             bool convergence = error < tol && j >= minSweeps - 2;
 
             std::deque<int> dofVariables;
@@ -302,19 +304,18 @@ namespace sdc
                     {
                         assert( dofVariables.at( i ) > 0 );
 
-                        scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
-                        labelList dofVariablesGlobal( Pstream::nProcs(), 0 );
-                        dofVariablesGlobal[Pstream::myProcNo()] = dofVariables.at( i );
-                        reduce( dofVariablesGlobal, sumOp<labelList>() );
+                        scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) ), squaredNormDiff( Pstream::nProcs(), scalar( 0 ) );
 
                         for ( int j = 0; j < dofVariables.at( i ); j++ )
                         {
-                            squaredNorm[Pstream::myProcNo()] += residual( substep, index ) * residual( substep, index );
+                            squaredNormResidual[Pstream::myProcNo()] += residual( substep, index ) * residual( substep, index );
+                            squaredNormDiff[Pstream::myProcNo()] += diff( substep, index ) * diff( substep, index );
                             index++;
                         }
 
-                        reduce( squaredNorm, sumOp<scalarList>() );
-                        scalar error = std::sqrt( sum( squaredNorm ) / sum( dofVariablesGlobal ) );
+                        reduce( squaredNormResidual, sumOp<scalarList>() );
+                        reduce( squaredNormDiff, sumOp<scalarList>() );
+                        scalar error = std::sqrt( sum( squaredNormResidual ) / sum( squaredNormDiff ) );
 
                         if ( error > tol || j < minSweeps - 2 )
                             convergence = false;

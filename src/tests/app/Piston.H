@@ -101,11 +101,6 @@ public:
 
     virtual void nextTimeStep();
 
-    virtual scalar getScalingFactor()
-    {
-        return 1;
-    }
-
     virtual void getVariablesInfo(
         std::deque<int> & dof,
         std::deque<bool> & enabled,
