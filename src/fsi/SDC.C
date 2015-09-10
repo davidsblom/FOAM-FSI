@@ -494,14 +494,14 @@ namespace sdc
     {
         fsi::matrix Qj = dt * (qmat * F);
         fsi::matrix residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
+        fsi::matrix diff = Qj.row( k - 2 );
 
-        scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
-        labelList dofs( Pstream::nProcs(), label( 0 ) );
-        squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
-        dofs[Pstream::myProcNo()] = F.cols();
-        reduce( squaredNorm, sumOp<scalarList>() );
-        reduce( dofs, sumOp<labelList>() );
-        scalar error = std::sqrt( sum( squaredNorm ) / sum( dofs ) );
+        scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) ), squaredNormDiff( Pstream::nProcs(), scalar( 0 ) );
+        squaredNormResidual[Pstream::myProcNo()] = residual.squaredNorm();
+        squaredNormDiff[Pstream::myProcNo()] = diff.squaredNorm();
+        reduce( squaredNormResidual, sumOp<scalarList>() );
+        reduce( squaredNormDiff, sumOp<scalarList>() );
+        scalar error = std::sqrt( sum( squaredNormResidual ) / sum( squaredNormDiff ) );
         convergence = error < tol;
 
         Info << "SDC " << name.c_str();
