@@ -35,8 +35,10 @@ if [ ! -e ${SHARED_LIBRARY} ] || [ ! -e "yaml-cpp-release-${VERSION}" ]; then
     ln -s boost_${BOOST_VERSION} boost
 
     export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
+    echo $BOOST_ROOT
+    cd $BOOST_ROOT
 
-    cd yaml-cpp
+    cd ../yaml-cpp
 
     mkdir build
 
@@ -45,7 +47,7 @@ if [ ! -e ${SHARED_LIBRARY} ] || [ ! -e "yaml-cpp-release-${VERSION}" ]; then
     if [ "$(uname)" == "Darwin" ]; then
         CC=gcc-mp-4.9 CXX=g++-mp-4.9 cmake -DBUILD_SHARED_LIBS=ON ..
     else
-        cmake -DBUILD_SHARED_LIBS=ON ..
+        CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
     fi
 
     make -j 4
