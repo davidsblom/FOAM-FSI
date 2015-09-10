@@ -276,7 +276,7 @@ namespace sdc
                 Info << "SDC residual = " << error;
                 Info << ", tol = " << tol;
                 Info << ", time = " << t;
-                Info << ", sweep = " << j + 1;
+                Info << ", sweep = " << j + 2;
                 Info << ", convergence = ";
 
                 if ( convergence )
@@ -317,6 +317,8 @@ namespace sdc
                         reduce( squaredNormDiff, sumOp<scalarList>() );
                         scalar error = std::sqrt( sum( squaredNormResidual ) / sum( squaredNormDiff ) );
 
+                        convergence = true;
+
                         if ( error > tol || j < minSweeps - 2 )
                             convergence = false;
 
@@ -326,7 +328,7 @@ namespace sdc
                             Info << " substep = " << substep + 1;
                             Info << ", residual = " << error;
                             Info << ", time = " << t;
-                            Info << ", sweep = " << j + 1;
+                            Info << ", sweep = " << j + 2;
                             Info << ", convergence = ";
 
                             if ( error < tol && j >= minSweeps - 2 )
