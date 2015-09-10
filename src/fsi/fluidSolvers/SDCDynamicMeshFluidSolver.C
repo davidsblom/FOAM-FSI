@@ -203,7 +203,8 @@ int SDCDynamicMeshFluidSolver::getDOF()
 
     forAll( U.boundaryField(), patchI )
     {
-        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
+            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity" )
         {
             forAll( U.boundaryField()[patchI], i )
             {
@@ -283,7 +284,8 @@ void SDCDynamicMeshFluidSolver::getSolution(
 
     forAll( U.boundaryField(), patchI )
     {
-        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
+            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity" )
         {
             forAll( U.boundaryField()[patchI], i )
             {
@@ -348,7 +350,8 @@ void SDCDynamicMeshFluidSolver::getSolution(
 
     forAll( UF.boundaryField(), patchI )
     {
-        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
+            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity" )
         {
             forAll( UF.boundaryField()[patchI], i )
             {
@@ -535,7 +538,8 @@ void SDCDynamicMeshFluidSolver::evaluateFunction(
 
     forAll( UF.boundaryField(), patchI )
     {
-        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
+            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity" )
         {
             forAll( UF.boundaryField()[patchI], i )
             {
@@ -646,7 +650,8 @@ void SDCDynamicMeshFluidSolver::prepareImplicitSolve(
 
     forAll( rhsU.boundaryField(), patchI )
     {
-        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
+            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity" )
         {
             forAll( rhsU.boundaryField()[patchI], i )
             {
@@ -780,7 +785,8 @@ void SDCDynamicMeshFluidSolver::getVariablesInfo(
 
     forAll( U.boundaryField(), patchI )
     {
-        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity" )
+        if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
+            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity" )
         {
             forAll( U.boundaryField()[patchI], i )
             {
