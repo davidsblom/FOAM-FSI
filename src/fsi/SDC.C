@@ -267,7 +267,7 @@ namespace sdc
             std::deque<bool> convergenceVariables;
 
             for ( unsigned int i = 0; i < enabledVariables.size(); i++ )
-                convergenceVariables.push_back( not enabledVariables.at( i ) );
+                convergenceVariables.push_back( true );
 
             bool solverConverged = solver->isConverged();
 
@@ -294,8 +294,6 @@ namespace sdc
             {
                 assert( std::accumulate( dofVariables.begin(), dofVariables.end(), 0 ) == N );
 
-                bool convergence = solverConverged;
-
                 for ( unsigned int substep = 0; substep < residual.rows(); substep++ )
                 {
                     int index = 0;
@@ -317,7 +315,7 @@ namespace sdc
                         reduce( squaredNormDiff, sumOp<scalarList>() );
                         scalar error = std::sqrt( sum( squaredNormResidual ) / sum( squaredNormDiff ) );
 
-                        convergence = true;
+                        bool convergence = convergenceVariables.at( i );
 
                         if ( error > tol || j < minSweeps - 2 )
                             convergence = false;
