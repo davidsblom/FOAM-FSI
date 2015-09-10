@@ -432,8 +432,7 @@ void SDCSolidSolver::solve()
         U.storePrevIter();
         V.storePrevIter();
 
-        surfaceTensorField shearGradU =
-            ( (I - n * n) & fvc::interpolate( gradU ) );
+        surfaceTensorField shearGradU = ( (I - n * n) & fvc::interpolate( gradU ) );
 
         fvVectorMatrix UEqn
         (
@@ -465,14 +464,32 @@ void SDCSolidSolver::solve()
 
         solverPerf = UEqn.solve();
 
-        V = fvc::ddt( U ) - rhsU / deltaT;
-
         gradU = fvc::grad( U );
-
+        shearGradU = ( (I - n * n) & fvc::interpolate( gradU ) );
         calculateEpsilonSigma();
 
-        displacementResidual = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
-        velocityResidual = gSumMag( V.internalField() - V.prevIter().internalField() ) / (gSumMag( V.internalField() ) + SMALL);
+        V = deltaT / rho * (
+            fvc::laplacian( 2 * muf + lambdaf, U, "laplacian(DU,U)" )
+            + fvc::div(
+                mesh.magSf()
+                * (
+                    -(muf + lambdaf) * ( fvc::snGrad( U ) & (I - n * n) )
+                    + lambdaf * tr( shearGradU & (I - n * n) ) * n
+                    + muf * (shearGradU & n)
+                    + muf * ( n & fvc::interpolate( gradU & gradU.T() ) )
+                    + 0.5 * lambdaf
+                    * ( n * tr( fvc::interpolate( gradU & gradU.T() ) ) )
+                    + ( n & fvc::interpolate( sigma & gradU ) )
+                    )
+                )
+            )
+            + V.oldTime()
+            + rhsV
+            + deltaT * gravity
+        ;
+
+        displacementResidual = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() - U.oldTime().internalField() ) + SMALL);
+        velocityResidual = gSumMag( V.internalField() - V.prevIter().internalField() ) / (gSumMag( V.internalField() - V.oldTime().internalField() ) + SMALL);
         residual = max( displacementResidual, solverPerf.initialResidual() );
         residual = max( residual, velocityResidual );
 
