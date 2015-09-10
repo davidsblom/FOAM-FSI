@@ -246,11 +246,8 @@ namespace fsi
     {
         iter = 0;
 
-        for ( std::list<std::shared_ptr<ConvergenceMeasure> >::const_iterator iterator = convergenceMeasures->begin(), end = convergenceMeasures->end(); iterator != end; ++iterator )
-        {
-            std::shared_ptr<ConvergenceMeasure> measure = *iterator;
+        for ( auto && measure : *convergenceMeasures )
             measure->newMeasurementSeries();
-        }
 
         fluid->couplingData.dataprev.setZero();
         solid->couplingData.dataprev.setZero();

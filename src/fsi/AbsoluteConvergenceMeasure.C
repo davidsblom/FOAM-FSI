@@ -10,15 +10,15 @@ namespace fsi
 {
     AbsoluteConvergenceMeasure::AbsoluteConvergenceMeasure(
         int dataId,
+        bool suffices,
         scalar convergenceLimit
         )
         :
-        ConvergenceMeasure( dataId ),
+        ConvergenceMeasure( dataId, suffices ),
         convergenceLimit( convergenceLimit ),
         normDiff( 0 )
     {
         assert( convergenceLimit > 0 );
-        assert( convergenceLimit < 1 );
     }
 
     void AbsoluteConvergenceMeasure::measure(
@@ -45,6 +45,13 @@ namespace fsi
         Info << "absolute convergence measure: ";
         Info << "two-norm diff = " << normDiff;
         Info << ", limit = " << convergenceLimit;
+        Info << ", suffices = ";
+
+        if ( suffices() )
+            Info << "true";
+        else
+            Info << "false";
+
         Info << ", conv = ";
 
         if ( isConvergence_ )

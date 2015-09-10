@@ -36,7 +36,7 @@ void AggressiveSpaceMapping::performPostProcessing(
     // Initialize variables
 
     int m = y.rows();
-    vector yk( m ), output( m ), R( m ), zstar( m ), zk( m ), xkprev( m );
+    vector output( m ), R( m ), zstar( m ), zk( m ), xkprev( m );
     xk = x0;
     xkprev = x0;
     coarseResiduals.clear();
@@ -55,8 +55,7 @@ void AggressiveSpaceMapping::performPostProcessing(
     if ( !coarseModel->allConverged() )
         Warning << "Surrogate model optimization process is not converged." << endl;
 
-    if ( timeIndex == 0 )
-        xk = zstar;
+    xk = zstar;
 
     // Fine model evaluation
 
@@ -71,7 +70,7 @@ void AggressiveSpaceMapping::performPostProcessing(
 
     // Parameter extraction
 
-    coarseModel->optimize( R, zstar, zk );
+    coarseModel->optimize( R - y, zstar, zk );
 
     if ( !coarseModel->allConverged() )
         Warning << "Surrogate model optimization process is not converged." << endl;
@@ -90,14 +89,14 @@ void AggressiveSpaceMapping::performPostProcessing(
 
         // Include information from previous optimization cycles
 
-        for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
-            nbCols += fineResidualsList.at( i ).size() - 1;
+        for ( auto && fineResiduals : fineResidualsList )
+            nbCols += fineResiduals.size() - 1;
 
         // Include information from previous time steps
 
-        for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
-            for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
-                nbCols += fineResidualsTimeList.at( i ).at( j ).size() - 1;
+        for ( auto && fineResidualsList : fineResidualsTimeList )
+            for ( auto && fineResiduals : fineResidualsList )
+                nbCols += fineResiduals.size() - 1;
 
         if ( nbCols > 0 )
         {
@@ -196,7 +195,7 @@ void AggressiveSpaceMapping::performPostProcessing(
 
         // Parameter extraction
 
-        coarseModel->optimize( R, zstar, zk );
+        coarseModel->optimize( R - y, zstar, zk );
 
         if ( !coarseModel->allConverged() )
             Warning << "Surrogate model optimization process is not converged." << endl;

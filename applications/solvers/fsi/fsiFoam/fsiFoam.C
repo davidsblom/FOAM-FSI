@@ -72,38 +72,46 @@ void setConvergenceMeasures(
         {
             assert( measure["relative-convergence-measure"]["limit"] );
             assert( measure["relative-convergence-measure"]["data-id"] );
+            assert( measure["relative-convergence-measure"]["suffices"] );
 
             scalar tol = measure["relative-convergence-measure"]["limit"].as<scalar>();
             int dataId = measure["relative-convergence-measure"]["data-id"].as<int>();
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( dataId, tol ) ) );
+            bool suffices = measure["relative-convergence-measure"]["suffices"].as<bool>();
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( dataId, suffices, tol ) ) );
         }
 
         if ( measure["min-iteration-convergence-measure"] )
         {
             assert( measure["min-iteration-convergence-measure"]["min-iterations"] );
+            assert( measure["min-iteration-convergence-measure"]["suffices"] );
 
             int minIter = measure["min-iteration-convergence-measure"]["min-iterations"].as<int>();
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
+            bool suffices = measure["min-iteration-convergence-measure"]["suffices"].as<bool>();
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, suffices, minIter ) ) );
         }
 
         if ( measure["absolute-convergence-measure"] )
         {
             assert( measure["absolute-convergence-measure"]["limit"] );
             assert( measure["absolute-convergence-measure"]["data-id"] );
+            assert( measure["absolute-convergence-measure"]["suffices"] );
 
             scalar tol = measure["absolute-convergence-measure"]["limit"].as<scalar>();
             int dataId = measure["absolute-convergence-measure"]["data-id"].as<int>();
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new AbsoluteConvergenceMeasure( dataId, tol ) ) );
+            bool suffices = measure["absolute-convergence-measure"]["suffices"].as<bool>();
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new AbsoluteConvergenceMeasure( dataId, suffices, tol ) ) );
         }
 
         if ( measure["residual-relative-convergence-measure"] )
         {
             assert( measure["residual-relative-convergence-measure"]["limit"] );
             assert( measure["residual-relative-convergence-measure"]["data-id"] );
+            assert( measure["residual-relative-convergence-measure"]["suffices"] );
 
             scalar tol = measure["residual-relative-convergence-measure"]["limit"].as<scalar>();
             int dataId = measure["residual-relative-convergence-measure"]["data-id"].as<int>();
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new ResidualRelativeConvergenceMeasure( dataId, tol ) ) );
+            bool suffices = measure["residual-relative-convergence-measure"]["suffices"].as<bool>();
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new ResidualRelativeConvergenceMeasure( dataId, suffices, tol ) ) );
         }
     }
 
@@ -164,6 +172,9 @@ int main(
     string filename = static_cast<std::string>( args->rootPath() ) + "/" + static_cast<std::string>( args->globalCaseName() ) + "/constant/fsi.yaml";
 
     YAML::Node config = YAML::LoadFile( filename );
+
+    assert( config["interpolation"] );
+
     YAML::Node configInterpolation( config["interpolation"] );
 
     assert( config["fluid-solver"] );
@@ -453,12 +464,14 @@ int main(
                 YAML::Node configPostProcessing( configLevel["post-processing"] );
 
                 assert( config["multi-level-acceleration"]["initial-solution-coarse-model"] );
+                assert( configPostProcessing["beta"] );
 
                 int maxIter = configLevel["max-iterations"].as<int>();
                 int nbReuse = configPostProcessing["timesteps-reused"].as<int>();
                 scalar singularityLimit = configPostProcessing["singularity-limit"].as<scalar>();
                 int reuseInformationStartingFromTimeIndex = configPostProcessing["reuse-information-starting-from-time-index"].as<int>();
                 bool updateJacobian = configPostProcessing["update-jacobian"].as<bool>();
+                scalar beta = configPostProcessing["beta"].as<scalar>();
                 bool initialSolutionCoarseModel = config["multi-level-acceleration"]["initial-solution-coarse-model"].as<bool>();
 
                 shared_ptr<ImplicitMultiLevelFsiSolver> fineModel;
@@ -484,7 +497,7 @@ int main(
                     spaceMapping = shared_ptr<SpaceMapping> ( new AggressiveSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
 
                 if ( algorithm == "ASM-ILS" )
-                    spaceMapping = shared_ptr<SpaceMapping> ( new ASMILS( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+                    spaceMapping = shared_ptr<SpaceMapping> ( new ASMILS( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, beta ) );
 
                 shared_ptr<SpaceMappingSolver > spaceMappingSolver( new SpaceMappingSolver( fineModel, coarseModel, spaceMapping ) );
 

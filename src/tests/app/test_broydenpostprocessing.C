@@ -100,11 +100,11 @@ protected:
         std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
         convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, minIter ) ) );
-        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, tol ) ) );
+        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, false, tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 1, tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 1, false, tol ) ) );
 
         shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
 
@@ -249,13 +249,19 @@ TEST_P( BroydenPostProcessingParametrizedTest, numberOfColumnsVIQN )
         int nbResiduals = solver->postProcessing->residuals.size();
 
         // Include information from previous optimization solves
-        for ( std::deque<deque<fsi::vector> >::iterator it = solver->postProcessing->solsList.begin(); it != solver->postProcessing->solsList.end(); ++it )
-            nbResiduals += it->size();
+        for ( auto sols : solver->postProcessing->solsList )
+            nbResiduals += sols.size();
+
+        // Include information from previous stages
+        for ( auto solsList : solver->postProcessing->solsStageList )
+            for ( auto sols : solsList )
+                nbResiduals += sols.size();
 
         // Include information from previous time steps
-        for ( std::deque< std::deque<deque<fsi::vector> > >::iterator solsIterator = solver->postProcessing->solsTimeList.begin(); solsIterator != solver->postProcessing->solsTimeList.end(); ++solsIterator )
-            for ( std::deque<deque<fsi::vector> >::iterator it = solsIterator->begin(); it != solsIterator->end(); ++it )
-                nbResiduals += it->size();
+        for ( auto solsStageList : solver->postProcessing->solsTimeList )
+            for ( auto solsList : solsStageList )
+                for ( auto sols : solsList )
+                    nbResiduals += sols.size();
 
         if ( i == 0 )
             nbIterFirstTimeStep = solver->fsi->iter;

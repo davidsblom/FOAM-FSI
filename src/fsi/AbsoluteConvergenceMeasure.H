@@ -18,6 +18,7 @@ public:
 
         AbsoluteConvergenceMeasure(
             int dataId,
+            bool suffices,
             scalar convergenceLimit
             );
 

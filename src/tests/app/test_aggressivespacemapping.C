@@ -47,9 +47,9 @@ protected:
 
         // Computational settings
         scalar tol = 1.0e-5;
-        int maxIter = 500;
+        int maxIter = 50;
         scalar initialRelaxation = 1.0e-3;
-        scalar singularityLimit = 1.0e-11;
+        scalar singularityLimit = 1.0e-10;
         int reuseInformationStartingFromTimeIndex = 0;
         bool scaling = false;
         scalar beta = 1;
@@ -114,11 +114,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, 1 ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, 1 ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
         postProcessing = shared_ptr<AndersonPostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
@@ -158,11 +158,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, 1.0e-2 * tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, 1.0e-2 * tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, 1.0e-2 * tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, 1.0e-2 * tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
@@ -237,20 +237,20 @@ TEST_P( AggressiveSpaceMappingSolverParametrizedTest, reuse )
 
     if ( !parallel && couplingGridSize == 20 && nbReuse == 0 && extrapolation == 0 && minIter == 3 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 729 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 4514 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 704 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 4878 );
     }
 
     if ( !parallel && couplingGridSize == 20 && nbReuse == 1 && extrapolation == 0 && minIter == 3 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 627 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3273 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 591 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3812 );
     }
 
     if ( !parallel && couplingGridSize == 20 && nbReuse == 4 && extrapolation == 0 && minIter == 3 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 538 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 2960 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 484 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3268 );
     }
 }
 
@@ -280,9 +280,9 @@ protected:
 
         // Computational settings
         scalar tol = 1.0e-5;
-        int maxIter = 500;
+        int maxIter = 50;
         scalar initialRelaxation = 1.0e-3;
-        scalar singularityLimit = 1.0e-11;
+        scalar singularityLimit = 1.0e-12;
         int reuseInformationStartingFromTimeIndex = 0;
         bool updateJacobian = false;
 
@@ -321,9 +321,6 @@ protected:
         shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
         shared_ptr<RBFCoarsening> rbfInterpToMesh;
 
-
-
-
         rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
         rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
         rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
@@ -347,11 +344,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, 1 ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, 1 ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
         postProcessing = shared_ptr<AndersonPostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
@@ -388,11 +385,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
@@ -445,26 +442,26 @@ TEST_F( AggressiveSpaceMappingSolverTest, solveTimeStep )
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 17 );
-    ASSERT_EQ( fineModelFluid->nbRes, 85 );
-    ASSERT_EQ( fineModelFluid->nbJac, 51 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 18 );
+    ASSERT_EQ( fineModelFluid->nbRes, 90 );
+    ASSERT_EQ( fineModelFluid->nbJac, 54 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 26 );
-    ASSERT_EQ( fineModelFluid->nbRes, 130 );
-    ASSERT_EQ( fineModelFluid->nbJac, 78 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 27 );
+    ASSERT_EQ( fineModelFluid->nbRes, 135 );
+    ASSERT_EQ( fineModelFluid->nbJac, 81 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 35 );
-    ASSERT_EQ( fineModelFluid->nbRes, 175 );
-    ASSERT_EQ( fineModelFluid->nbJac, 105 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 36 );
+    ASSERT_EQ( fineModelFluid->nbRes, 180 );
+    ASSERT_EQ( fineModelFluid->nbJac, 108 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 44 );
-    ASSERT_EQ( solver->coarseModel->fsi->nbIter, 231 );
-    ASSERT_EQ( fineModelFluid->nbRes, 220 );
-    ASSERT_EQ( fineModelFluid->nbJac, 132 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 45 );
+    ASSERT_EQ( solver->coarseModel->fsi->nbIter, 208 );
+    ASSERT_EQ( fineModelFluid->nbRes, 225 );
+    ASSERT_EQ( fineModelFluid->nbJac, 135 );
 }

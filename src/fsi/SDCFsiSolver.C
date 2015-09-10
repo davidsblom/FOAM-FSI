@@ -52,6 +52,7 @@ void SDCFsiSolver::evaluateFunction(
 void SDCFsiSolver::finalizeTimeStep()
 {
     postProcessing->fsi->finalizeTimeStep();
+    postProcessing->finalizeTimeStep();
 }
 
 int SDCFsiSolver::getDOF()
@@ -129,6 +130,7 @@ void SDCFsiSolver::setNumberOfImplicitStages( int k )
 
     fluid->setNumberOfImplicitStages( k );
     solid->setNumberOfImplicitStages( k );
+    postProcessing->setNumberOfImplicitStages( k );
 
     xStages.clear();
 
@@ -169,7 +171,9 @@ void SDCFsiSolver::implicitSolve(
     else
         x0 = xStages.at( k );
 
+    postProcessing->initStage( k );
     postProcessing->performPostProcessing( x0, postProcessing->fsi->x );
+    postProcessing->finalizeStage();
 
     getSolution( result, f );
 

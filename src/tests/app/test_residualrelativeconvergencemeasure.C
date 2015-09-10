@@ -4,16 +4,16 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#include "RelativeConvergenceMeasure.H"
+#include "ResidualRelativeConvergenceMeasure.H"
 #include "gtest/gtest.h"
 
 using namespace fsi;
 
-TEST( RelativeConvergenceMeasure, measure )
+TEST( ResidualRelativeConvergenceMeasure, measure )
 {
     scalar convergenceLimit = 0.1;
 
-    RelativeConvergenceMeasure measure( 0, false, convergenceLimit );
+    ResidualRelativeConvergenceMeasure measure( 0, false, convergenceLimit );
 
     // Create data sets for old state of data and new state of data
     fsi::vector oldValues0( 3 ), oldValues1( 3 ), oldValues2( 3 ), newValues( 3 );
@@ -25,8 +25,12 @@ TEST( RelativeConvergenceMeasure, measure )
     measure.measure( oldValues0, newValues );
     ASSERT_FALSE( measure.isConvergence() );
 
+    measure.printState();
+
     measure.measure( oldValues1, newValues );
     ASSERT_FALSE( measure.isConvergence() );
+
+    measure.printState();
 
     measure.measure( oldValues2, newValues );
     ASSERT_TRUE( measure.isConvergence() );

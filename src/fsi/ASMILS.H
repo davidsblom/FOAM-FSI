@@ -24,7 +24,8 @@ public:
             int maxUsedIterations,
             int nbReuse,
             int reuseInformationStartingFromTimeIndex,
-            scalar singularityLimit
+            scalar singularityLimit,
+            scalar beta
             );
 
         virtual ~ASMILS();
@@ -42,10 +43,9 @@ public:
             vector & zk
             );
 
-        void removeColumnFromMatrix(
-            matrix & A,
-            int col
-            );
+private:
+
+        scalar beta;
     };
 }
 

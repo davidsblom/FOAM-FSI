@@ -15,14 +15,14 @@ solvers
   {
     solver           PCG;
     preconditioner   DIC;
-    tolerance        1e-9;
+    tolerance        1e-14;
     relTol           1e-2;
   }
 }
 
 solidMechanics
 {
-  tolerance 1e-8;
+  tolerance 1e-13;
   relTol 1.0e-5;
   minIter 5;
   maxIter 500;

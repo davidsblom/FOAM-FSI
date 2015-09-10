@@ -18,6 +18,7 @@ public:
 
         RelativeConvergenceMeasure(
             int dataId,
+            bool suffices,
             scalar convergenceLimit
             );
 

@@ -4,8 +4,8 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+#include "AbsoluteConvergenceMeasure.H"
 #include "AndersonPostProcessing.H"
-#include "BroydenPostProcessing.H"
 #include "ManifoldMapping.H"
 #include "OutputSpaceMapping.H"
 #include "AggressiveSpaceMapping.H"
@@ -13,6 +13,7 @@
 #include "MultiLevelFsiSolver.H"
 #include "MultiLevelSpaceMappingSolver.H"
 #include "RelativeConvergenceMeasure.H"
+#include "ResidualRelativeConvergenceMeasure.H"
 #include "SpaceMappingSolver.H"
 #include "TubeFlowFluidSolver.H"
 #include "TubeFlowSolidSolver.H"
@@ -24,7 +25,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class MultiLevelSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<int, int, int, int, bool, int, int> >
+class MultiLevelSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<int, int, int, int, int> >
 {
 protected:
 
@@ -51,24 +52,24 @@ protected:
         // Computational settings
         scalar tol = 1.0e-5;
         scalar tolLiveSelection = 1.0e-4;
-        int maxIter = 500;
+        int maxIter = 50;
         scalar initialRelaxation = 1.0e-3;
-        scalar singularityLimit = 1.0e-12;
+        scalar singularityLimit = 1.0e-14;
         bool scaling = false;
         bool updateJacobian = false;
-        scalar beta = 1;
+        scalar beta = 0.5;
         int coarseningMinPoints = 5;
         int coarseningMaxPoints = 2000;
         bool parallel = false;
+        int order = 0;
+        int minIter = 3;
 
         // Parametrized settings
         int nbReuse = std::tr1::get<0>( GetParam() );
         int extrapolation = std::tr1::get<1>( GetParam() );
-        int minIter = std::tr1::get<2>( GetParam() );
-        int couplingGridSize = std::tr1::get<3>( GetParam() );
-        bool convergenceMeasureTraction = std::tr1::get<4>( GetParam() );
-        int spaceMappingAlgorithm = std::tr1::get<5>( GetParam() );
-        int reuseInformationStartingFromTimeIndex = std::tr1::get<6>( GetParam() );
+        int couplingGridSize = std::tr1::get<2>( GetParam() );
+        int spaceMappingAlgorithm = std::tr1::get<3>( GetParam() );
+        int reuseInformationStartingFromTimeIndex = std::tr1::get<4>( GetParam() );
         bool coarsening = false;
         bool liveSelection = false;
 
@@ -135,11 +136,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, 5 ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, 1.0e-3 * tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, 5 ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, 1.0e-3 * tol ) ) );
 
-        if ( parallel || convergenceMeasureTraction )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, 1.0e-3 * tol ) ) );
+        if ( parallel )
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, 1.0e-3 * tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
@@ -188,11 +189,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, 1.0e-2 * tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, 1.0e-2 * tol ) ) );
 
-        if ( parallel || convergenceMeasureTraction )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, 1.0e-2 * tol ) ) );
+        if ( parallel )
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, 1.0e-2 * tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
         postProcessing = shared_ptr<AndersonPostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
@@ -204,11 +205,10 @@ protected:
         shared_ptr<SpaceMapping> spaceMapping;
 
         if ( spaceMappingAlgorithm == 0 )
-            spaceMapping = shared_ptr<SpaceMapping>( new ManifoldMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+            spaceMapping = shared_ptr<SpaceMapping>( new ManifoldMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian, true ) );
 
         if ( spaceMappingAlgorithm == 1 )
         {
-            int order = 2;
             spaceMapping = shared_ptr<SpaceMapping>( new OutputSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
         }
 
@@ -264,11 +264,10 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, 1 ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, tol ) ) );
 
-        if ( parallel || convergenceMeasureTraction )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
+        if ( parallel )
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
         postProcessing = shared_ptr<AndersonPostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
@@ -278,10 +277,10 @@ protected:
         // Create space mapping object
 
         if ( spaceMappingAlgorithm == 0 )
-            spaceMapping = shared_ptr<SpaceMapping>( new ManifoldMapping( fineModel, coarseModelSolver, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+            spaceMapping = shared_ptr<SpaceMapping>( new ManifoldMapping( fineModel, coarseModelSolver, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian, true ) );
 
         if ( spaceMappingAlgorithm == 1 )
-            spaceMapping = shared_ptr<SpaceMapping>( new OutputSpaceMapping( fineModel, coarseModelSolver, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+            spaceMapping = shared_ptr<SpaceMapping>( new OutputSpaceMapping( fineModel, coarseModelSolver, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, order ) );
 
         if ( spaceMappingAlgorithm == 2 )
             spaceMapping = shared_ptr<SpaceMapping>( new AggressiveSpaceMapping( fineModel, coarseModelSolver, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
@@ -305,7 +304,7 @@ protected:
     shared_ptr<MultiLevelSpaceMappingSolver> solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelSpaceMappingSolverParametrizedTest, ::testing::Combine( Values( 0, 2 ), Values( 0, 2 ), Values( 3 ), Values( 20, 40 ), Bool(), Values( 0, 1, 2 ), Values( 0, 5 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelSpaceMappingSolverParametrizedTest, ::testing::Combine( Values( 0, 2 ), Values( 0, 2 ), Values( 20, 40 ), Values( 0, 1, 2 ), Values( 0, 5 ) ) );
 
 TEST_P( MultiLevelSpaceMappingSolverParametrizedTest, run )
 {

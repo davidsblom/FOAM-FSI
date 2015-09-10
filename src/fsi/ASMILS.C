@@ -15,11 +15,16 @@ ASMILS::ASMILS(
     int maxUsedIterations,
     int nbReuse,
     int reuseInformationStartingFromTimeIndex,
-    scalar singularityLimit
+    scalar singularityLimit,
+    scalar beta
     )
     :
-    SpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit )
-{}
+    SpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ),
+    beta( beta )
+{
+    assert( beta > 0 );
+    assert( beta <= 1 );
+}
 
 ASMILS::~ASMILS()
 {}
@@ -47,7 +52,7 @@ void ASMILS::performPostProcessing(
     // Initialize variables
 
     int m = y.rows();
-    vector yk( m ), output( m ), R( m ), zstar( m ), zk( m ), xkprev( m );
+    vector output( m ), R( m ), zstar( m ), zk( m ), xkprev( m );
     xk = x0;
     xkprev = x0;
     coarseResiduals.clear();
@@ -66,8 +71,7 @@ void ASMILS::performPostProcessing(
     if ( !coarseModel->allConverged() )
         Warning << "ASMILS: surrogate model optimization process is not converged." << endl;
 
-    if ( timeIndex == 0 )
-        xk = zstar;
+    xk = zstar;
 
     // Fine model evaluation
 
@@ -84,7 +88,7 @@ void ASMILS::performPostProcessing(
 
     // Parameter extraction
 
-    coarseModel->optimize( R, zstar, zk );
+    coarseModel->optimize( R - y, zstar, zk );
 
     if ( !coarseModel->allConverged() )
         Warning << "Surrogate model optimization process is not converged." << endl;
@@ -102,14 +106,14 @@ void ASMILS::performPostProcessing(
 
         // Include information from previous optimization cycles
 
-        for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
-            nbCols += fineResidualsList.at( i ).size() - 1;
+        for ( auto && fineResiduals : fineResidualsList )
+            nbCols += fineResiduals.size() - 1;
 
         // Include information from previous time steps
 
-        for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
-            for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
-                nbCols += fineResidualsTimeList.at( i ).at( j ).size() - 1;
+        for ( auto && fineResidualsList : fineResidualsTimeList )
+            for ( auto && fineResiduals : fineResidualsList )
+                nbCols += fineResiduals.size() - 1;
 
         nbCols = std::min( static_cast<int>( xk.rows() ), nbCols );
         nbCols = std::min( nbCols, maxUsedIterations );
@@ -186,49 +190,27 @@ void ASMILS::performPostProcessing(
             }
 
             assert( colIndex == nbCols );
-
-            // Remove dependent columns of V and W
-
-            int nbRemoveCols = 1;
-
-            while ( nbRemoveCols > 0 )
-            {
-                nbRemoveCols = 0;
-
-                Eigen::HouseholderQR<matrix> qr = V.householderQr();
-                matrix QR_R = qr.matrixQR().triangularView <Eigen::Upper> ();
-                fsi::vector diagonals = QR_R.diagonal();
-
-                for ( int i = 0; i < diagonals.rows(); i++ )
-                {
-                    if ( std::abs( diagonals[i] ) < singularityLimit )
-                    {
-                        // Remove the column from V and W
-                        removeColumnFromMatrix( V, i - nbRemoveCols );
-                        removeColumnFromMatrix( W, i - nbRemoveCols );
-
-                        nbRemoveCols++;
-                    }
-                }
-
-                if ( nbRemoveCols )
-                    Info << "ASM-ILS: remove " << nbRemoveCols << " columns from the Jacobian matrices" << endl;
-            }
-
             assert( V.cols() == W.cols() );
 
-            if ( V.cols() == 0 )
-                fixedUnderRelaxation( xk, zstar, zk );
+            // Truncated singular value decomposition to solve for the
+            // coefficients
 
-            if ( V.cols() > 0 )
+            Eigen::JacobiSVD<matrix> svd( V, Eigen::ComputeThinU | Eigen::ComputeThinV );
+
+            vector singularValues_inv = svd.singularValues();
+
+            for ( unsigned int i = 0; i < singularValues_inv.rows(); ++i )
             {
-                // SVD decomposition
-                Eigen::JacobiSVD<matrix, Eigen::FullPivHouseholderQRPreconditioner> svd( V, Eigen::ComputeFullU | Eigen::ComputeFullV );
-                vector c = svd.solve( zstar - zk );
-
-                // Update solution x
-                xk += W * c + V * c + zk - zstar;
+                if ( svd.singularValues() ( i ) > singularityLimit )
+                    singularValues_inv( i ) = 1.0 / svd.singularValues() ( i );
+                else
+                    singularValues_inv( i ) = 0;
             }
+
+            vector c = svd.matrixV() * ( singularValues_inv.asDiagonal() * ( svd.matrixU().transpose() * (zstar - zk) ) );
+
+            // Update solution x
+            xk += beta * (zk - zstar) + W * c + beta * V * c;
         }
 
         // Fine model evaluation
@@ -246,22 +228,11 @@ void ASMILS::performPostProcessing(
 
         // Parameter extraction
 
-        coarseModel->optimize( R, zstar, zk );
+        coarseModel->optimize( R - y, zstar, zk );
 
         if ( !coarseModel->allConverged() )
             Warning << "ASMILS: surrogate model optimization process is not converged." << endl;
 
         coarseResiduals.push_back( zk );
     }
-}
-
-void ASMILS::removeColumnFromMatrix(
-    matrix & A,
-    int col
-    )
-{
-    for ( int j = col; j < A.cols() - 1; j++ )
-        A.col( j ) = A.col( j + 1 );
-
-    A.conservativeResize( A.rows(), A.cols() - 1 );
 }

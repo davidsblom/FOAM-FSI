@@ -17,6 +17,7 @@ public:
 
         MinIterationConvergenceMeasure(
             int dataId,
+            bool suffices,
             int minimumIterationCount
             );
 
