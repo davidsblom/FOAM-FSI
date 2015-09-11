@@ -29,9 +29,10 @@ public:
 
         virtual int getDOF() = 0;
 
-        virtual scalar getScalingFactor() = 0;
-
-        virtual void getSolution( fsi::vector & solution ) = 0;
+        virtual void getSolution(
+            fsi::vector & solution,
+            fsi::vector & f
+            ) = 0;
 
         virtual void setSolution(
             const fsi::vector & solution,

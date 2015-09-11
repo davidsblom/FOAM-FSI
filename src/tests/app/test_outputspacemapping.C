@@ -23,7 +23,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class OutputSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int, int> >
+class OutputSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<int, int, int, int, int> >
 {
 protected:
 
@@ -49,7 +49,7 @@ protected:
 
         // Computational settings
         scalar tol = 1.0e-5;
-        int maxIter = 500;
+        int maxIter = 50;
         scalar initialRelaxation = 1.0e-3;
         int reuseInformationStartingFromTimeIndex = 0;
         scalar singularityLimit = 1.0e-13;
@@ -58,12 +58,12 @@ protected:
         bool updateJacobian = false;
 
         // Parametrized settings
-        bool parallel = std::tr1::get<0>( GetParam() );
-        int nbReuse = std::tr1::get<1>( GetParam() );
-        int extrapolation = std::tr1::get<2>( GetParam() );
-        int minIter = std::tr1::get<3>( GetParam() );
-        int couplingGridSize = std::tr1::get<4>( GetParam() );
-        int order = std::tr1::get<5>( GetParam() );
+        bool parallel = false;
+        int nbReuse = std::tr1::get<0>( GetParam() );
+        int extrapolation = std::tr1::get<1>( GetParam() );
+        int minIter = std::tr1::get<2>( GetParam() );
+        int couplingGridSize = std::tr1::get<3>( GetParam() );
+        int order = std::tr1::get<4>( GetParam() );
 
         ASSERT_NEAR( tau, 0.01, 1.0e-13 );
         ASSERT_NEAR( kappa, 10, 1.0e-13 );
@@ -117,11 +117,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, 1 ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, 1 ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
         postProcessing = shared_ptr<AndersonPostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
@@ -161,11 +161,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, 0.1 * tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, 0.1 * tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, 0.1 * tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, 0.1 * tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
@@ -202,7 +202,7 @@ protected:
     SpaceMappingSolver * solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, OutputSpaceMappingSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 1, 4 ), Values( 2 ), Values( 3 ), Values( 10, 20 ), Values( 0, 1, 2 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, OutputSpaceMappingSolverParametrizedTest, ::testing::Combine( Values( 0, 1, 4 ), Values( 2 ), Values( 3 ), Values( 10, 20 ), Values( 0, 1, 2 ) ) );
 
 TEST_P( OutputSpaceMappingSolverParametrizedTest, object )
 {
@@ -227,47 +227,46 @@ TEST_P( OutputSpaceMappingSolverParametrizedTest, iterations )
 {
     solver->run();
 
-    bool parallel = std::tr1::get<0>( GetParam() );
-    int nbReuse = std::tr1::get<1>( GetParam() );
-    int extrapolation = std::tr1::get<2>( GetParam() );
-    int minIter = std::tr1::get<3>( GetParam() );
-    int couplingGridSize = std::tr1::get<4>( GetParam() );
-    int order = std::tr1::get<5>( GetParam() );
+    int nbReuse = std::tr1::get<0>( GetParam() );
+    int extrapolation = std::tr1::get<1>( GetParam() );
+    int minIter = std::tr1::get<2>( GetParam() );
+    int couplingGridSize = std::tr1::get<3>( GetParam() );
+    int order = std::tr1::get<4>( GetParam() );
 
-    if ( !parallel && couplingGridSize == 20 && nbReuse == 0 && extrapolation == 2 && minIter == 3 && order == 0 )
+    if ( couplingGridSize == 20 && nbReuse == 0 && extrapolation == 2 && minIter == 3 && order == 0 )
     {
         ASSERT_EQ( solver->fineModel->fsi->nbIter, 874 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 4076 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 4038 );
     }
 
-    if ( !parallel && couplingGridSize == 20 && nbReuse == 1 && extrapolation == 2 && minIter == 3 && order == 0 )
+    if ( couplingGridSize == 20 && nbReuse == 1 && extrapolation == 2 && minIter == 3 && order == 0 )
     {
         ASSERT_EQ( solver->fineModel->fsi->nbIter, 874 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3842 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3694 );
     }
 
-    if ( !parallel && couplingGridSize == 20 && nbReuse == 4 && extrapolation == 2 && minIter == 3 && order == 0 )
+    if ( couplingGridSize == 20 && nbReuse == 4 && extrapolation == 2 && minIter == 3 && order == 0 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 877 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3892 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 874 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3694 );
     }
 
-    if ( !parallel && couplingGridSize == 20 && nbReuse == 0 && extrapolation == 2 && minIter == 3 && order == 1 )
+    if ( couplingGridSize == 20 && nbReuse == 0 && extrapolation == 2 && minIter == 3 && order == 1 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 709 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 4746 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 708 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 5187 );
     }
 
-    if ( !parallel && couplingGridSize == 20 && nbReuse == 1 && extrapolation == 2 && minIter == 3 && order == 1 )
+    if ( couplingGridSize == 20 && nbReuse == 1 && extrapolation == 2 && minIter == 3 && order == 1 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 654 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 5184 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 663 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 5270 );
     }
 
-    if ( !parallel && couplingGridSize == 20 && nbReuse == 4 && extrapolation == 2 && minIter == 3 && order == 1 )
+    if ( couplingGridSize == 20 && nbReuse == 4 && extrapolation == 2 && minIter == 3 && order == 1 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 556 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 4002 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 550 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 4082 );
     }
 }
 
@@ -297,7 +296,7 @@ protected:
 
         // Computational settings
         scalar tol = 1.0e-5;
-        int maxIter = 500;
+        int maxIter = 50;
         scalar initialRelaxation = 1.0e-3;
         int reuseInformationStartingFromTimeIndex = 0;
         scalar singularityLimit = 1.0e-11;
@@ -362,11 +361,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, 1 ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, 1 ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
         postProcessing = shared_ptr<AndersonPostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
@@ -403,11 +402,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, 0.01 * tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, 0.01 * tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, 0.01 * tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, 0.01 * tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 

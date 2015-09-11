@@ -1,6 +1,8 @@
 FsiSolver.C
 RelativeConvergenceMeasure.C
 MinIterationConvergenceMeasure.C
+AbsoluteConvergenceMeasure.C
+ResidualRelativeConvergenceMeasure.C
 ManifoldMapping.C
 MultiLevelSolver.C
 SpaceMappingSolver.C
@@ -22,6 +24,7 @@ ESDIRK.C
 AdaptiveTimeStepper.C
 QuadratureRules.C
 PIES.C
+SDCFsiSolver.C
 
 fluidSolvers/CoupledFluidSolver.C
 fluidSolvers/FluidSolver.C

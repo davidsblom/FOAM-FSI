@@ -26,6 +26,7 @@ ImplicitMultiLevelFsiSolver::ImplicitMultiLevelFsiSolver(
     assert( fsi->solid->data.cols() > 0 );
     assert( fsi->fluid->data.rows() > 0 );
     assert( fsi->fluid->data.cols() > 0 );
+    postProcessing->setNumberOfImplicitStages( 1 );
 }
 
 ImplicitMultiLevelFsiSolver::~ImplicitMultiLevelFsiSolver()
@@ -120,21 +121,10 @@ void ImplicitMultiLevelFsiSolver::optimize(
     fsi::vector & xk
     )
 {
-    assert( init );
+    fsi::vector y( xk.rows() );
+    y.setZero();
 
-    assert( x0.rows() == fsi->solidSolver->couplingGridSize * fsi->solid->dim
-        || x0.rows() == fsi->solidSolver->couplingGridSize * fsi->solid->dim
-        + fsi->fluidSolver->couplingGridSize * fsi->fluid->dim );
-
-    assert( xk.rows() == fsi->solidSolver->couplingGridSize * fsi->solid->dim
-        || xk.rows() == fsi->solidSolver->couplingGridSize * fsi->solid->dim
-        + fsi->fluidSolver->couplingGridSize * fsi->fluid->dim );
-
-    assert( x0.rows() == xk.rows() );
-
-    fsi->newMeasurementSeries();
-
-    postProcessing->performPostProcessing( x0, xk );
+    optimize( y, x0, xk );
 }
 
 void ImplicitMultiLevelFsiSolver::optimize(
@@ -162,7 +152,9 @@ void ImplicitMultiLevelFsiSolver::optimize(
 
     fsi->newMeasurementSeries();
 
+    postProcessing->initStage( 0 );
     postProcessing->performPostProcessing( y, x0, xk );
+    postProcessing->finalizeStage();
 }
 
 void ImplicitMultiLevelFsiSolver::run()
@@ -201,7 +193,9 @@ void ImplicitMultiLevelFsiSolver::solve()
     // Initial solution
     fsi::vector x0 = fsi->x;
 
+    postProcessing->initStage( 0 );
     postProcessing->performPostProcessing( x0, fsi->x );
+    postProcessing->finalizeStage();
 }
 
 void ImplicitMultiLevelFsiSolver::solveTimeStep()

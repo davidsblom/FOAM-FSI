@@ -101,9 +101,6 @@ protected:
         shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
         shared_ptr<RBFCoarsening> rbfInterpToMesh;
 
-
-
-
         rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
         rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
         rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
@@ -127,11 +124,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, 1.0e-3 * tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, 1.0e-3 * tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, 1.0e-3 * tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, 1.0e-3 * tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
@@ -180,11 +177,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, 1.0e-2 * tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, 1.0e-2 * tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, 1.0e-2 * tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, 1.0e-2 * tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
         postProcessing = shared_ptr<AndersonPostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
@@ -242,11 +239,11 @@ protected:
         // Convergence measures
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, 1 ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, 1 ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, tol ) ) );
 
         if ( parallel )
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, tol ) ) );
 
         multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
         postProcessing = shared_ptr<AndersonPostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
@@ -322,11 +319,8 @@ TEST_P( MultiLevelAggressiveSpaceMappingSolverParametrizedTest, monolithic )
         ASSERT_TRUE( monolithicSolver->pn.norm() > 0 );
 
         // Verify that the coarse models are synchronized with the fine model
-        for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = solver->models->begin(); it != solver->models->end(); ++it )
-        {
-            shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
+        for ( auto && model : *(solver->models) )
             ASSERT_NEAR( model->fsi->x.norm(), solver->solvers->at( solver->solvers->size() - 1 )->fsi->x.norm(), 1.0e-13 );
-        }
     }
 }
 
@@ -339,29 +333,29 @@ TEST_P( MultiLevelAggressiveSpaceMappingSolverParametrizedTest, timeStep )
 
     if ( couplingGridSize == 40 && parallel )
     {
-        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 88 );
-        ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 9 );
+        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 89 );
+        ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 10 );
         ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 1 );
     }
 
     if ( couplingGridSize == 40 && !parallel )
     {
-        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 48 );
-        ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 7 );
+        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 65 );
+        ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 8 );
         ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 1 );
     }
 
     if ( couplingGridSize == 50 && parallel )
     {
-        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 448 );
-        ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 53 );
-        ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 6 );
+        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 758 );
+        ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 80 );
+        ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 9 );
     }
 
     if ( couplingGridSize == 50 && !parallel )
     {
-        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 135 );
-        ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 25 );
-        ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 4 );
+        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 469 );
+        ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 43 );
+        ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 7 );
     }
 }

@@ -15,7 +15,7 @@ FoamFile
 
 ddtSchemes
 {
-  default bdf2;
+  default bdf1;
 }
 
 gradSchemes

@@ -20,6 +20,11 @@ parallel-coupling: false
 # traction acting on the FSI interface.
 first-participant: fluid-solver
 
+time-integration-scheme: bdf
+
+adaptive-time-stepping:
+  enabled: false
+
 # Settings for interpolation between fluid and solid interfaces. A
 # consistent approach is applied always.
 interpolation:
@@ -57,6 +62,8 @@ coupling-scheme-implicit:
         # applicable in case the fluid and solid solvers are coupling in
         # parallel (parallel-coupling equals false).
         data-id: 0
+
+        suffices: false
 
   # Maximum number of iterations per time step. When the maximum iterations
   # is reached, the FSI solver moves on to the next time step.

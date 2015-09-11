@@ -29,6 +29,16 @@ BroydenPostProcessing::BroydenPostProcessing(
 BroydenPostProcessing::~BroydenPostProcessing()
 {}
 
+void BroydenPostProcessing::finalizeStage()
+{
+    PostProcessing::finalizeStage();
+
+    // not implemented yet;
+
+    // The Jacobian is rebuilt with information from previous time steps
+    // and information from previous stages
+}
+
 void BroydenPostProcessing::finalizeTimeStep()
 {
     assert( sols.size() == 0 );
@@ -49,7 +59,8 @@ void BroydenPostProcessing::finalizeTimeStep()
     // Include information from previous time steps
     for ( unsigned i = 0; i < solsTimeList.size(); i++ )
         for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
-            nbCols += solsTimeList.at( i ).at( j ).size() - 1;
+            for ( unsigned k = 0; k < solsTimeList.at( i ).at( j ).size(); k++ )
+                nbCols += solsTimeList.at( i ).at( j ).at( k ).size() - 1;
 
     J = -fsi::matrix::Identity( J.rows(), J.cols() );
 
@@ -60,22 +71,26 @@ void BroydenPostProcessing::finalizeTimeStep()
     {
         for ( unsigned j = residualsTimeList.at( i ).size(); j-- > 0; )
         {
-            for ( unsigned k = residualsTimeList.at( i ).at( j ).size() - 1; k-- > 0; )
+            for ( unsigned k = residualsTimeList.at( i ).at( j ).size(); k-- > 0; )
             {
-                assert( residualsTimeList.at( i ).at( j ).size() >= 2 );
-                assert( residualsTimeList.at( i ).size() == solsTimeList.at( i ).size() );
-                assert( residualsTimeList.at( i ).at( j ).size() == solsTimeList.at( i ).at( j ).size() );
+                for ( unsigned l = residualsTimeList.at( i ).at( j ).at( k ).size() - 1; l-- > 0; )
+                {
+                    assert( residualsTimeList.at( i ).at( j ).at( k ).size() >= 2 );
+                    assert( residualsTimeList.at( i ).size() == solsTimeList.at( i ).size() );
+                    assert( residualsTimeList.at( i ).at( j ).size() == solsTimeList.at( i ).at( j ).size() );
+                    assert( residualsTimeList.at( i ).at( j ).at( k ).size() == solsTimeList.at( i ).at( j ).at( k ).size() );
 
-                colIndex++;
+                    colIndex++;
 
-                fsi::vector dx = solsTimeList.at( i ).at( j ).at( k + 1 ) - solsTimeList.at( i ).at( j ).at( k );
-                fsi::vector dR = residualsTimeList.at( i ).at( j ).at( k + 1 ) - residualsTimeList.at( i ).at( j ).at( k );
+                    fsi::vector dx = solsTimeList.at( i ).at( j ).at( k ).at( l + 1 ) - solsTimeList.at( i ).at( j ).at( k ).at( l );
+                    fsi::vector dR = residualsTimeList.at( i ).at( j ).at( k ).at( l + 1 ) - residualsTimeList.at( i ).at( j ).at( k ).at( l );
 
-                if ( dx.norm() < singularityLimit )
-                    continue;
+                    if ( dx.norm() < singularityLimit )
+                        continue;
 
-                // Sherman–Morrison formula
-                J += (dx - J * dR) / (dx.transpose() * J * dR) * (dx.transpose() * J);
+                    // Sherman–Morrison formula
+                    J += (dx - J * dR) / (dx.transpose() * J * dR) * (dx.transpose() * J);
+                }
             }
         }
     }
@@ -159,10 +174,23 @@ void BroydenPostProcessing::performPostProcessing(
         for ( unsigned i = 0; i < solsList.size(); i++ )
             nbCols += solsList.at( i ).size() - 1;
 
+        // Include information from previous stages
+        for ( unsigned i = 0; i < solsStageList.size(); i++ )
+        {
+            for ( unsigned j = 0; j < solsStageList.at( i ).size(); j++ )
+            {
+                if ( j > stageIndex )
+                    continue;
+
+                nbCols += solsStageList.at( i ).at( j ).size() - 1;
+            }
+        }
+
         // Include information from previous time steps
         for ( unsigned i = 0; i < solsTimeList.size(); i++ )
             for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
-                nbCols += solsTimeList.at( i ).at( j ).size() - 1;
+                for ( unsigned k = 0; k < solsTimeList.at( i ).at( j ).size(); k++ )
+                    nbCols += solsTimeList.at( i ).at( j ).at( k ).size() - 1;
 
         int nbColsCurrentTimeStep = std::max( static_cast<int>(sols.size() - 1), 0 );
 

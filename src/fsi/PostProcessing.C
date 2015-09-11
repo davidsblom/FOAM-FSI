@@ -28,8 +28,13 @@ PostProcessing::PostProcessing(
     sols(),
     residualsList(),
     solsList(),
+    residualsStageList(),
+    solsStageList(),
     residualsTimeList(),
-    solsTimeList()
+    solsTimeList(),
+    k( 0 ),
+    stageIndex( 0 ),
+    initStage_( false )
 {
     assert( fsi );
     assert( maxIter > 0 );
@@ -42,14 +47,43 @@ PostProcessing::PostProcessing(
     assert( maxUsedIterations > 0 );
 }
 
+void PostProcessing::finalizeStage()
+{
+    assert( initStage_ );
+    assert( residualsStageList.size() == k - 1 );
+    assert( residualsList.size() == solsList.size() );
+    assert( residualsStageList.size() == solsStageList.size() );
+
+    // Save input/output information for next stage
+    if ( residualsList.size() >= 1 && timeIndex >= reuseInformationStartingFromTimeIndex )
+    {
+        // Push all the residuals into the residualsStageList at stageIndex
+        assert( residualsList.size() == solsList.size() );
+
+        for ( unsigned int i = 0; i < residualsList.size(); i++ )
+        {
+            residualsStageList.at( stageIndex ).push_front( residualsList.at( i ) );
+            solsStageList.at( stageIndex ).push_front( solsList.at( i ) );
+        }
+    }
+
+    residualsList.clear();
+    solsList.clear();
+
+    assert( residualsStageList.size() == solsStageList.size() );
+
+    stageIndex++;
+    initStage_ = false;
+}
+
 void PostProcessing::finalizeTimeStep()
 {
     // Save input/output information for next time step
-    if ( nbReuse > 0 && residualsList.size() >= 1 && timeIndex >= reuseInformationStartingFromTimeIndex )
+    if ( nbReuse > 0 && residualsStageList.size() >= 1 && timeIndex >= reuseInformationStartingFromTimeIndex )
     {
         assert( residualsTimeList.size() == solsTimeList.size() );
-        residualsTimeList.push_front( residualsList );
-        solsTimeList.push_front( solsList );
+        residualsTimeList.push_front( residualsStageList );
+        solsTimeList.push_front( solsStageList );
     }
 
     // Remove the last items from the residual list and solutions list
@@ -61,13 +95,25 @@ void PostProcessing::finalizeTimeStep()
         solsTimeList.pop_back();
     }
 
-    residualsList.clear();
-    solsList.clear();
+    for ( unsigned int i = 0; i < residualsStageList.size(); i++ )
+    {
+        residualsStageList.at( i ).clear();
+        solsStageList.at( i ).clear();
+    }
 
     assert( residualsTimeList.size() == solsTimeList.size() );
     assert( static_cast<int>( residualsTimeList.size() ) <= nbReuse );
 
     timeIndex++;
+}
+
+void PostProcessing::initStage( int stageIndex )
+{
+    assert( not initStage_ );
+
+    this->stageIndex = stageIndex;
+
+    initStage_ = true;
 }
 
 bool PostProcessing::isConvergence(
@@ -97,4 +143,22 @@ void PostProcessing::iterationsConverged( bool keepIterations )
     sols.clear();
 
     assert( residualsList.size() == solsList.size() );
+}
+
+void PostProcessing::setNumberOfImplicitStages( int k )
+{
+    this->k = k + 1;
+
+    deque<deque<vector> > residualsList;
+
+    residualsStageList.clear();
+    solsStageList.clear();
+
+    for ( int i = 0; i < k; i++ )
+    {
+        residualsStageList.push_front( residualsList );
+        solsStageList.push_front( residualsList );
+    }
+
+    assert( static_cast<int>( residualsStageList.size() ) == k );
 }

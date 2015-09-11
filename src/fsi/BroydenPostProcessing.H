@@ -27,6 +27,8 @@ public:
 
         virtual ~BroydenPostProcessing();
 
+        virtual void finalizeStage();
+
         virtual void finalizeTimeStep();
 
         void performPostProcessing(

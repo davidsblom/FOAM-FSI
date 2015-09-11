@@ -12,6 +12,7 @@
 
 #include "SDCMovingWallVelocityFvPatchVectorField.H"
 #include "SDCFluidSolver.H"
+#include "SDCFsiSolverInterface.H"
 
 using namespace fsi;
 using std::shared_ptr;
@@ -39,14 +40,15 @@ public:
 
     virtual int getDOF();
 
-    virtual void getSolution( fsi::vector & solution );
+    virtual void getSolution(
+        fsi::vector & solution,
+        fsi::vector & f
+        );
 
     virtual void setSolution(
         const fsi::vector & solution,
         const fsi::vector & f
         );
-
-    virtual scalar getScalingFactor();
 
     virtual void implicitSolve(
         bool corrector,
@@ -60,6 +62,16 @@ public:
         fsi::vector & result
         );
 
+    virtual void prepareImplicitSolve(
+        bool corrector,
+        const int k,
+        const int kold,
+        const scalar t,
+        const scalar dt,
+        const fsi::vector & qold,
+        const fsi::vector & rhs
+        );
+
     virtual void setNumberOfImplicitStages( int k );
 
     virtual void nextTimeStep();
@@ -71,6 +83,10 @@ public:
         );
 
     virtual bool isConverged();
+
+    virtual void solve();
+
+    virtual void getTractionLocal( matrix & traction );
 
 private:
 
@@ -90,6 +106,9 @@ private:
     IOobject UfFHeader;
     surfaceVectorField UfF;
     surfaceScalarField meshPhiF;
+
+    int kold;
+    int indexk;
 };
 
 #endif

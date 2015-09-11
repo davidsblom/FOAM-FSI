@@ -173,12 +173,9 @@ bool MultiLevelFsiSolver::isConvergence()
     assert( convergenceMeasures->size() > 0 );
     assert( fluid->t > 0 );
 
-    allConverged = true;
-
-    for ( std::list<std::shared_ptr<ConvergenceMeasure> >::const_iterator iterator = convergenceMeasures->begin(), end = convergenceMeasures->end(); iterator != end; ++iterator )
+    for ( auto && measure : *convergenceMeasures )
     {
         // Initialize variables
-        std::shared_ptr<ConvergenceMeasure> measure = *iterator;
         fsi::vector oldValues, newValues, valuesPreviousTimeStep;
 
         assert( measure->dataId == 0 || measure->dataId == 1 );
@@ -216,22 +213,9 @@ bool MultiLevelFsiSolver::isConvergence()
 
         // Measure convergence
         measure->measure( oldValues, newValues );
-
-        // Print state
-        measure->printState();
-
-        if ( !measure->isConvergence() )
-            allConverged = false;
     }
 
-    if ( allConverged )
-    {
-        Info << "All converged" << endl;
-        fluid->couplingData.dataprev.setZero();
-        solid->couplingData.dataprev.setZero();
-    }
-
-    return allConverged;
+    return isConvergence( convergenceMeasures );
 }
 
 bool MultiLevelFsiSolver::isConvergence(
@@ -245,12 +229,9 @@ bool MultiLevelFsiSolver::isConvergence(
     assert( x.rows() == solidSolver->couplingGridSize * solid->dim || x.rows() == solidSolver->couplingGridSize * solid->dim + fluidSolver->couplingGridSize * fluid->dim );
     assert( fluid->t > 0 );
 
-    allConverged = true;
-
-    for ( std::list<std::shared_ptr<ConvergenceMeasure> >::const_iterator iterator = convergenceMeasures->begin(), end = convergenceMeasures->end(); iterator != end; ++iterator )
+    for ( auto && measure : *convergenceMeasures )
     {
         // Initialize variables
-        std::shared_ptr<ConvergenceMeasure> measure = *iterator;
         fsi::vector oldValues, newValues, valuesPreviousTimeStep;
 
         // Subtract initial values
@@ -297,17 +278,57 @@ bool MultiLevelFsiSolver::isConvergence(
 
         // Measure convergence
         measure->measure( oldValues, newValues );
+    }
 
+    return isConvergence( convergenceMeasures );
+}
+
+bool MultiLevelFsiSolver::isConvergence( shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures )
+{
+    allConverged = true;
+    bool oneSufficesData0 = false;
+    bool oneSufficesData1 = false;
+    bool hasData0 = false;
+    bool hasData1 = false;
+
+    for ( auto && measure : *convergenceMeasures )
+    {
         // Print state
         measure->printState();
 
-        if ( !measure->isConvergence() )
+        if ( not measure->isConvergence() )
             allConverged = false;
+
+        if ( measure->dataId == 0 )
+            hasData0 = true;
+
+        if ( measure->dataId == 1 )
+            hasData1 = true;
+
+        if ( measure->dataId == 0 && measure->isConvergence() && measure->suffices() )
+            oneSufficesData0 = true;
+
+        if ( measure->dataId == 1 && measure->isConvergence() && measure->suffices() )
+            oneSufficesData1 = true;
+    }
+
+    if ( not hasData0 )
+        oneSufficesData0 = true;
+
+    if ( not hasData1 )
+        oneSufficesData1 = true;
+
+    if ( allConverged )
+        Info << "All converged" << endl;
+    else
+    if ( oneSufficesData0 && oneSufficesData1 )
+    {
+        Info << "Sufficient measure converged" << endl;
+        allConverged = true;
     }
 
     if ( allConverged )
     {
-        Info << "All converged" << endl;
         fluid->couplingData.dataprev.setZero();
         solid->couplingData.dataprev.setZero();
     }

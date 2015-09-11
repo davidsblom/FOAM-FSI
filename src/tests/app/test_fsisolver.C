@@ -56,7 +56,7 @@ protected:
         convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
 
         // Add convergence measure
-        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
+        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, tol ) ) );
 
         // Create the fsi solver
         fsi = new FsiSolver( fluid, solid, convergenceMeasures, parallel, extrapolationOrder );

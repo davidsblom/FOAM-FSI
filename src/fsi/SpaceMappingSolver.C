@@ -120,20 +120,10 @@ void SpaceMappingSolver::optimize(
     fsi::vector & xk
     )
 {
-    assert( init );
-    assert( x0.rows() == fineModel->fsi->solidSolver->couplingGridSize * fineModel->fsi->solid->dim
-        || x0.rows() == fineModel->fsi->solidSolver->couplingGridSize * fineModel->fsi->solid->dim
-        + fineModel->fsi->fluidSolver->couplingGridSize * fineModel->fsi->fluid->dim );
+    fsi::vector y( xk.rows() );
+    y.setZero();
 
-    assert( xk.rows() == fineModel->fsi->solidSolver->couplingGridSize * fineModel->fsi->solid->dim
-        || xk.rows() == fineModel->fsi->solidSolver->couplingGridSize * fineModel->fsi->solid->dim
-        + fineModel->fsi->fluidSolver->couplingGridSize * fineModel->fsi->fluid->dim );
-
-    assert( x0.rows() == xk.rows() );
-
-    fineModel->fsi->newMeasurementSeries();
-
-    spaceMapping->performPostProcessing( x0, xk );
+    optimize( y, x0, xk );
 }
 
 void SpaceMappingSolver::optimize(

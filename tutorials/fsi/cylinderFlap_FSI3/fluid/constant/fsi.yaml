@@ -1,3 +1,6 @@
+time-integration-scheme: bdf
+adaptive-time-stepping:
+  enabled: false
 fluid-solver: pimple-solver
 solid-solver: segregated-solver
 parallel-coupling: false
@@ -13,13 +16,14 @@ coupling-scheme-implicit:
     - relative-convergence-measure:
         limit: 1e-5
         data-id: 0
+        suffices: false
   max-iterations: 50
   post-processing:
     algorithm: Anderson
     beta: 0.5
     initial-relaxation: 1.0e-3
-    timesteps-reused: 0
-    singularity-limit: 1.0e-10
-    reuse-information-starting-from-time-index: 10
+    timesteps-reused: 2
+    singularity-limit: 1.0e-12
+    reuse-information-starting-from-time-index: 0
     max-used-iterations: 50
-    update-jacobian: true
+    update-jacobian: false

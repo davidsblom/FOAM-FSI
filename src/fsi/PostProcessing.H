@@ -46,6 +46,10 @@ public:
             bool residualCriterium
             ) = 0;
 
+        virtual void initStage( int stageIndex );
+
+        virtual void finalizeStage();
+
         virtual void finalizeTimeStep();
 
         bool isConvergence(
@@ -55,6 +59,8 @@ public:
             );
 
         void iterationsConverged( bool keepIterations );
+
+        void setNumberOfImplicitStages( int k );
 
         shared_ptr<MultiLevelFsiSolver> fsi;
 
@@ -70,8 +76,13 @@ public:
         deque<vector> sols;
         deque<deque<vector> > residualsList;
         deque<deque<vector> > solsList;
-        deque<deque<deque<vector> > > residualsTimeList;
-        deque<deque<deque<vector> > > solsTimeList;
+        deque<deque<deque<vector> > > residualsStageList;
+        deque<deque<deque<vector> > > solsStageList;
+        deque<deque<deque<deque<vector> > > > residualsTimeList;
+        deque<deque<deque<deque<vector> > > > solsTimeList;
+        unsigned int k;
+        unsigned int stageIndex;
+        bool initStage_;
     };
 }
 

@@ -58,8 +58,8 @@ TEST_F( PIESTest, run )
 {
     pies->run();
 
-    fsi::vector solution( 2 );
-    piston->getSolution( solution );
+    fsi::vector solution( 2 ), f;
+    piston->getSolution( solution, f );
 
     scalar ref = piston->referenceSolution( 100 );
     scalar error = std::abs( solution( 1 ) - ref ) / std::abs( ref );
@@ -107,8 +107,8 @@ TEST_F( PIESRunTest, run )
 {
     piston->run();
 
-    fsi::vector solution( 2 );
-    piston->getSolution( solution );
+    fsi::vector solution( 2 ), f;
+    piston->getSolution( solution, f );
 
     scalar ref = piston->referenceSolution( 100 );
     scalar error = std::abs( solution( 1 ) - ref ) / std::abs( ref );

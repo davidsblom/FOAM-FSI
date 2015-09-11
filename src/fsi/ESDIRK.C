@@ -97,7 +97,7 @@ namespace sdc
         F.setZero();
 
         fsi::vector sol( N ), f( N ), qold( N ), result( N ), rhs( N );
-        solver->getSolution( sol );
+        solver->getSolution( sol, f );
         solStages.row( 0 ) = sol;
 
         qold = sol;

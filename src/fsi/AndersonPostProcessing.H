@@ -60,11 +60,6 @@ public:
 
         void applyScaling( matrix & mat );
 
-        static void removeColumnFromMatrix(
-            matrix & A,
-            int col
-            );
-
         void determineScalingFactors( const vector & output );
 
         const bool scaling;

@@ -46,11 +46,6 @@ public:
             bool residualCriterium
             );
 
-        void removeColumnFromMatrix(
-            matrix & A,
-            int col
-            );
-
         shared_ptr<SurrogateModel> surrogateModel;
         deque<vector> sols;
         deque<deque<vector> > solsList;
