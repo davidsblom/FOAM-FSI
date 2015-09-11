@@ -253,7 +253,7 @@ namespace sdc
             squaredNormDiff[Pstream::myProcNo()] = diff.squaredNorm();
             reduce( squaredNormResidual, sumOp<scalarList>() );
             reduce( squaredNormDiff, sumOp<scalarList>() );
-            scalar error = std::sqrt( sum( squaredNormResidual ) / sum( squaredNormDiff ) );
+            scalar error = std::sqrt( sum( squaredNormResidual ) / (sum( squaredNormDiff ) + SMALL) );
             bool convergence = error < tol && j >= minSweeps - 2;
 
             std::deque<int> dofVariables;
@@ -313,7 +313,7 @@ namespace sdc
 
                         reduce( squaredNormResidual, sumOp<scalarList>() );
                         reduce( squaredNormDiff, sumOp<scalarList>() );
-                        scalar error = std::sqrt( sum( squaredNormResidual ) / sum( squaredNormDiff ) );
+                        scalar error = std::sqrt( sum( squaredNormResidual ) / (sum( squaredNormDiff ) + SMALL) );
 
                         bool convergence = convergenceVariables.at( i );
 
