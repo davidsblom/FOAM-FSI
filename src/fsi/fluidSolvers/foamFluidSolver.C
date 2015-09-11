@@ -77,6 +77,8 @@ foamFluidSolver::foamFluidSolver(
     dim = mesh.nGeometricD();
     data.resize( N, dim );
     data.setZero();
+
+    assert( readLabel( runTime->controlDict().lookup( "writePrecision" ) ) >= 12 );
 }
 
 foamFluidSolver::~foamFluidSolver()
