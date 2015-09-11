@@ -18,7 +18,4 @@ LIB_LIBS = \
     -lincompressibleLESModels \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
-    -lbasicThermophysicalModels \
-    -lz \
-    -llapack \
-    -lblas
+    -lbasicThermophysicalModels

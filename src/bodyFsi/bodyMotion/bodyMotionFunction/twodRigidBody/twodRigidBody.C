@@ -136,7 +136,6 @@ prevPosition_(patchIDs_.size()),
 initialPoints_(patchIDs_.size()),
 ofBody_("body-"+name+"-state.dat")
 {
-
 	translationDirection_ /= mag(translationDirection_) + SMALL;
 	rotationAmplitude_ = rotationAmplitude_/180.0*mathematicalConstant::pi;
 	if(dict.found("translationPhaseShift"))

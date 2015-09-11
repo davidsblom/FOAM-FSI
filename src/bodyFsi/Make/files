@@ -3,6 +3,7 @@ $(bm)/bodyCollector/bodyCollector.C
 
 $(bm)/bodyMotionFunction/bodyMotionFunction/bodyMotionFunction.C
 $(bm)/bodyMotionFunction/bodyMotionFunction/newbodyMotionFunction.C
+$(bm)/bodyMotionFunction/airfoilDoubleHingeFlap/airfoilDoubleHingeFlap.C
 $(bm)/bodyMotionFunction/twodRigidBody/twodRigidBody.C
 $(bm)/bodyMotionFunction/fourierTranslationalBody/fourierTranslationalBody.C
 $(bm)/bodyMotionFunction/fourierRotatingBody/fourierRotatingBody.C
