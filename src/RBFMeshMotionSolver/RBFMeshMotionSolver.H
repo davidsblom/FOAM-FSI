@@ -22,6 +22,7 @@
 #include "GillebaartR3Function.H"
 #include "GillebaartR3aFunction.H"
 #include "GillebaartR3cFunction.H"
+#include "GillebaartR3dFunction.H"
 #include "GillebaartR4bFunction.H"
 #include "twoDPointCorrectorRBF.H"
 #include <memory>

@@ -87,11 +87,24 @@ tmp<Field<vectorField> > twodTwoHingeFlap::calculatePosition(const scalar time)
     }
 
     //Ensure that position of the rotation point remains the same
-    forAll(topRotationPointIDs_,ipoint){
-        position[0][topRotationPointIDs_[ipoint]] = initialPoints_[0][topRotationPointIDs_[ipoint]];
+    if(rotAngle<-eps_alpha)
+    {
+        forAll(topRotationPointIDs_,ipoint)
+        {
+            position[0][topRotationPointIDs_[ipoint]] = initialPoints_[0][topRotationPointIDs_[ipoint]];
+        }
     }
-    forAll(bottomRotationPointIDs_,ipoint){
-        position[1][bottomRotationPointIDs_[ipoint]] = initialPoints_[1][bottomRotationPointIDs_[ipoint]];
+    else if(rotAngle>eps_alpha)
+    {
+        Info << "rotAngle = " << rotAngle << " >? " << eps_alpha << endl;
+        Info << "position[0][topRotationPointIDs_[ipoint]] = " << position[0][topRotationPointIDs_[0]] << endl;
+        Info << "initialPoints_[0][topRotationPointIDs_[ipoint]] = " << initialPoints_[0][topRotationPointIDs_[0]] << endl;
+        //Info << "position[1][bottomRotationPointIDs_[0]] = " << position[1][bottomRotationPointIDs_[0]] << endl;
+        //Info << "initialPoints_[1][bottomRotationPointIDs_[ipoint]] = " << initialPoints_[1][bottomRotationPointIDs_[0]] << endl;
+        forAll(bottomRotationPointIDs_,ipoint)
+        {
+            position[1][bottomRotationPointIDs_[ipoint]] = initialPoints_[1][bottomRotationPointIDs_[ipoint]];
+        }
     }
 
     return tPosition;

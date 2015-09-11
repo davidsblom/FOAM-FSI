@@ -66,6 +66,34 @@ int main(int argc, char *argv[])
         dimless
     );
 
+    volScalarField maxNonOrtho
+    (
+        IOobject
+        (
+            "maxNonOrtho",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimless
+    );
+
+    volScalarField averageNonOrtho
+    (
+        IOobject
+        (
+            "averageNonOrtho",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimless
+    );
+
     forAll(timeDirs, timeI)
     {
         runTime.setTime(timeDirs[timeI], timeI);
@@ -98,7 +126,23 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("writeField"))
         {
+            //Calculate max for each cell
+            forAll(mesh.cells(),icell)
+            {
+                const cell& cfaces = mesh.cells()[icell];
+                scalar nonOrtho = -1.0;
+                forAll(cfaces,iface)
+                {
+                    if(nonOrthoFaces[cfaces[iface]] > nonOrtho)
+                    {
+                        nonOrtho = nonOrthoFaces[cfaces[iface]];
+                    }
+                }
+                maxNonOrtho.internalField()[icell] = nonOrtho;
+            }
+
             nonOrthoFaces.write();
+            maxNonOrtho.write();
         }
 
 

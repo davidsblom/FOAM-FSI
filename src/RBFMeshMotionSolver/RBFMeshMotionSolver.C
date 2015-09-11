@@ -128,7 +128,7 @@ void RBFMeshMotionSolver::setSurfaceCorrectionFunction(
     word surfaceCorrectionFunctionName
     )
 {
-    assert( surfaceCorrectionFunctionName == "WendlandC0" || surfaceCorrectionFunctionName == "WendlandC2" || surfaceCorrectionFunctionName == "WendlandC4" || surfaceCorrectionFunctionName == "WendlandC6" || surfaceCorrectionFunctionName == "GillebaartR3" || surfaceCorrectionFunctionName == "GillebaartR3a" || surfaceCorrectionFunctionName == "GillebaartR3c" || surfaceCorrectionFunctionName == "GillebaartR4b");
+    assert( surfaceCorrectionFunctionName == "WendlandC0" || surfaceCorrectionFunctionName == "WendlandC2" || surfaceCorrectionFunctionName == "WendlandC4" || surfaceCorrectionFunctionName == "WendlandC6" || surfaceCorrectionFunctionName == "GillebaartR3" || surfaceCorrectionFunctionName == "GillebaartR3a" || surfaceCorrectionFunctionName == "GillebaartR3c" || surfaceCorrectionFunctionName == "GillebaartR3d" || surfaceCorrectionFunctionName == "GillebaartR4b");
 
     Info << "Radial Basis Function coarsening: Selecting surface correction RBF function: " << surfaceCorrectionFunctionName << endl;
 
@@ -165,6 +165,11 @@ void RBFMeshMotionSolver::setSurfaceCorrectionFunction(
     if ( surfaceCorrectionFunctionName == "GillebaartR3c" )
     {
         surfaceCorrectionFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::GillebaartR3cFunction( 1.0 ) );
+    }
+
+    if ( surfaceCorrectionFunctionName == "GillebaartR3d" )
+    {
+        surfaceCorrectionFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::GillebaartR3dFunction( 1.0 ) );
     }
 
     if ( surfaceCorrectionFunctionName == "GillebaartR4b" )

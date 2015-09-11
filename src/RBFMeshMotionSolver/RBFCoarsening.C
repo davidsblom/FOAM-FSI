@@ -6,8 +6,6 @@
 #include <sys/stat.h>
 #include <iomanip>
 #include "RBFCoarsening.H"
-#include "WendlandC0Function.H"
-#include "WendlandC2Function.H"
 
 namespace rbf
 {
@@ -985,9 +983,6 @@ namespace rbf
         std::clock_t t = std::clock();
         double runTimeCorr = 0;
         surfaceCorrectionRbfFunction->setRadius( R );
-
-        // std::shared_ptr<rbf::RBFFunctionInterface> surfaceCorrectionRbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( R ) );
-        // std::shared_ptr<rbf::RBFFunctionInterface> surfaceCorrectionRbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC0Function( R ) );
 
         for ( int i = 0; i < positionsInterpolation.rows(); i++ )
         {

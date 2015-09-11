@@ -24,20 +24,6 @@ $(bm)/$(fsiBodies)/dummyFsiBody/dummyFsiBody.C
 controlledBodies=bodyMotionFunction/controlledBodies
 $(bm)/$(controlledBodies)/twodTwoHingeFlapControlled/twodTwoHingeFlapControlled.C
 
-rbf=RBFmeshInterpolation
-$(rbf)/RBFFunctionsTG/RBFFunctionTG/RBFFunctionTG.C
-$(rbf)/RBFFunctionsTG/RBFFunctionTG/newRBFFunctionTG.C
-$(rbf)/RBFFunctionsTG/W2/W2.C
-$(rbf)/RBFFunctionsTG/Gauss/Gauss.C
-$(rbf)/RBFFunctionsTG/TPS/TPS.C
-$(rbf)/RBFFunctionsTG/IMQB/IMQB.C
-$(rbf)/RBFFunctionsTG/CPC2/CPC2.C
-
-$(rbf)/RBFInterpolationReduced/RBFInterpolationReduced.C
-
-$(rbf)/RBFMotionSolverExt/twoDPointCorrectorRBF.C
-$(rbf)/RBFMotionSolverExt/RBFMotionSolverExt.C
-
 fsiInterface/fsiInterface.C
 aeroForces/aeroForces.C
 
