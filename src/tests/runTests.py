@@ -17,6 +17,6 @@ for run in runs:
         returnCode = code
 
 for i in range( nbCores ):
-    subprocess.call("tail -n 2 tests_" + str(i) + ".log 2>&1", shell=True)
+    subprocess.call("tail -n 4 tests_" + str(i) + ".log 2>&1", shell=True)
 
 exit( returnCode )

@@ -351,7 +351,13 @@ void SDCFluidSolver::initialize()
 }
 
 void SDCFluidSolver::initTimeStep()
-{}
+{
+    assert( !init );
+
+    t = runTime->time().value();
+
+    init = true;
+}
 
 bool SDCFluidSolver::isRunning()
 {
@@ -404,11 +410,15 @@ void SDCFluidSolver::solve()
 
 void SDCFluidSolver::finalizeTimeStep()
 {
+    assert( init );
+
     runTime->writeNow();
 
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
          << "  ClockTime = " << runTime->elapsedClockTime() << " s"
          << endl << endl;
+
+    init = false;
 }
 
 int SDCFluidSolver::getDOF()
@@ -449,7 +459,10 @@ int SDCFluidSolver::getDOF()
     return index;
 }
 
-void SDCFluidSolver::getSolution( fsi::vector & solution )
+void SDCFluidSolver::getSolution(
+    fsi::vector & solution,
+    fsi::vector & f
+    )
 {
     int index = 0;
 
@@ -490,6 +503,46 @@ void SDCFluidSolver::getSolution( fsi::vector & solution )
     }
 
     assert( index == solution.rows() );
+
+    index = 0;
+
+    forAll( UF.internalField(), i )
+    {
+        for ( int j = 0; j < mesh.nGeometricD(); j++ )
+        {
+            f( index ) = UF.internalField()[i][j];
+            index++;
+        }
+    }
+
+    forAll( UF.boundaryField(), patchI )
+    {
+        forAll( UF.boundaryField()[patchI], i )
+        {
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            {
+                f( index ) = UF.boundaryField()[patchI][i][j];
+                index++;
+            }
+        }
+    }
+
+    forAll( phiF.internalField(), i )
+    {
+        f( index ) = phiF.internalField()[i];
+        index++;
+    }
+
+    forAll( phiF.boundaryField(), patchI )
+    {
+        forAll( phiF.boundaryField()[patchI], i )
+        {
+            f( index ) = phiF.boundaryField()[patchI][i];
+            index++;
+        }
+    }
+
+    assert( index == f.rows() );
 }
 
 void SDCFluidSolver::setSolution(
@@ -904,13 +957,7 @@ void SDCFluidSolver::implicitSolve(
     UF = rDeltaT * (U - U.oldTime() - rhsU);
     phiF = rDeltaT * (phi - phi.oldTime() - rhsPhi);
 
-    getSolution( result );
-    evaluateFunction( k + 1, qold, t, f );
-}
-
-scalar SDCFluidSolver::getScalingFactor()
-{
-    return 1;
+    getSolution( result, f );
 }
 
 void SDCFluidSolver::getVariablesInfo(
@@ -957,4 +1004,17 @@ void SDCFluidSolver::getVariablesInfo(
             dof.at( 1 ) += 1;
         }
     }
+}
+
+void SDCFluidSolver::prepareImplicitSolve(
+    bool corrector,
+    const int k,
+    const int kold,
+    const scalar t,
+    const scalar dt,
+    const fsi::vector & qold,
+    const fsi::vector & rhs
+    )
+{
+    assert( false );
 }

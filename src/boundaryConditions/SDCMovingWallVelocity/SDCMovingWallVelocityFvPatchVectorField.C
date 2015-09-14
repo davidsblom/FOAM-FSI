@@ -157,6 +157,9 @@ namespace Foam
     {
         string filename = static_cast<std::string>( this->db().time().rootPath() ) + "/" + static_cast<std::string>( this->db().time().caseName() ) + "/constant/fsi.yaml";
 
+        if ( Pstream::nProcs() > 1 )
+            filename = static_cast<std::string>( this->db().time().rootPath() ) + "/" + static_cast<std::string>( this->db().time().caseName() ) + "/../constant/fsi.yaml";
+
         YAML::Node config = YAML::LoadFile( filename );
 
         assert( config["sdc"] || config["esdirk"] );

@@ -108,11 +108,6 @@ int SDCLaplacianSolver::getDOF()
     return T.size();
 }
 
-scalar SDCLaplacianSolver::getScalingFactor()
-{
-    return 1;
-}
-
 void SDCLaplacianSolver::getSolution( fsi::vector & solution )
 {
     for ( int i = 0; i < T.size(); i++ )

@@ -153,13 +153,14 @@ void OutputSpaceMapping::performPostProcessing(
 
         // Include information from previous optimization cycles
 
-        for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
-            nbCols += fineResidualsList.at( i ).size() - 1;
+        for ( auto && fineResiduals : fineResidualsList )
+            nbCols += fineResiduals.size() - 1;
 
         // Include information from previous time steps
-        for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
-            for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
-                nbCols += fineResidualsTimeList.at( i ).at( j ).size() - 1;
+
+        for ( auto && fineResidualsList : fineResidualsTimeList )
+            for ( auto && fineResiduals : fineResidualsList )
+                nbCols += fineResiduals.size() - 1;
 
         // Update the design specification yk
         yk = coarseResiduals.at( k ) - (fineResiduals.at( k ) - y);
@@ -326,44 +327,24 @@ void OutputSpaceMapping::performPostProcessing(
 
             assert( colIndex == nbCols );
 
-            // Remove dependent columns of DeltaC and DeltaF
+            // Truncated singular value decomposition to solve for the
+            // coefficients
 
-            int nbRemoveCols = 1;
+            Eigen::JacobiSVD<matrix> svd( DeltaX, Eigen::ComputeThinU | Eigen::ComputeThinV );
 
-            while ( nbRemoveCols > 0 )
+            vector singularValues_inv = svd.singularValues();
+
+            for ( unsigned int i = 0; i < singularValues_inv.rows(); ++i )
             {
-                nbRemoveCols = 0;
-
-                if ( DeltaX.cols() == 1 )
-                    break;
-
-                // Calculate singular value decomposition with Eigen
-
-                Eigen::JacobiSVD<matrix> svd( DeltaX, Eigen::ComputeThinU | Eigen::ComputeThinV );
-
-                vector singularValues = svd.singularValues();
-
-                for ( int i = 0; i < singularValues.rows(); i++ )
-                {
-                    if ( std::abs( singularValues( i ) ) <= singularityLimit && DeltaX.cols() > 1 )
-                    {
-                        // Remove the column from DeltaC and DeltaF
-                        removeColumnFromMatrix( DeltaX, i - nbRemoveCols );
-                        removeColumnFromMatrix( DeltaF, i - nbRemoveCols );
-
-                        nbRemoveCols++;
-                    }
-                }
-
-                if ( nbRemoveCols )
-                    Info << "Output space mapping: remove " << nbRemoveCols << " columns from the Jacobian matrices" << endl;
+                if ( svd.singularValues() ( i ) > singularityLimit )
+                    singularValues_inv( i ) = 1.0 / svd.singularValues() ( i );
+                else
+                    singularValues_inv( i ) = 0;
             }
 
             matrix I = fsi::matrix::Identity( m, m );
 
-            Eigen::JacobiSVD<matrix> svd( DeltaX, Eigen::ComputeThinU | Eigen::ComputeThinV );
-
-            matrix pseudoDeltaX = svd.matrixV() * svd.singularValues().asDiagonal().inverse() * svd.matrixU().transpose();
+            matrix pseudoDeltaX = svd.matrixV() * singularValues_inv.asDiagonal() * svd.matrixU().transpose();
 
             matrix J = -I + (DeltaF + DeltaX) * pseudoDeltaX;
 
@@ -413,15 +394,4 @@ void OutputSpaceMapping::performPostProcessing(
             break;
         }
     }
-}
-
-void OutputSpaceMapping::removeColumnFromMatrix(
-    matrix & A,
-    int col
-    )
-{
-    for ( int j = col; j < A.cols() - 1; j++ )
-        A.col( j ) = A.col( j + 1 );
-
-    A.conservativeResize( A.rows(), A.cols() - 1 );
 }

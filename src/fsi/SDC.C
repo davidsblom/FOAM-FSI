@@ -173,17 +173,19 @@ namespace sdc
         assert( qmat.rows() == k - 1 );
         assert( qmat.cols() == k );
         assert( solver );
+        assert( N > 0 );
+        assert( k > 0 );
 
         if ( adaptiveTimeStepper->isPreviousStepAccepted() )
             solver->nextTimeStep();
 
         fsi::vector dtsdc = this->dt * dsdc;
-        fsi::matrix solStages( k, N ), F( k, N ), Fembedded( nodesEmbedded.rows(), N ), residual;
+        fsi::matrix solStages( k, N ), F( k, N ), Fembedded( nodesEmbedded.rows(), N ), residual, diff;
         fsi::matrix qj( 1, solStages.cols() ), qjEmbedded( 1, solStages.cols() );
         fsi::vector errorEstimate( N );
 
         fsi::vector sol( N ), f( N );
-        solver->getSolution( sol );
+        solver->getSolution( sol, f );
         solStages.row( 0 ) = sol;
 
         scalar t = t0;
@@ -203,7 +205,7 @@ namespace sdc
 
             qold = solStages.row( j );
 
-            Info << "\nTime = " << t << ", SDC sweep = 0, SDC substep = " << j + 1 << nl << endl;
+            Info << "\nTime = " << t << ", SDC sweep = 1, SDC substep = " << j + 1 << nl << endl;
 
             solver->implicitSolve( false, j, j, t, dt, qold, rhs, f, result );
 
@@ -213,7 +215,7 @@ namespace sdc
 
         // Compute successive corrections
 
-        for ( int j = 0; j < maxSweeps; j++ )
+        for ( int j = 0; j < maxSweeps - 1; j++ )
         {
             t = t0;
 
@@ -225,7 +227,7 @@ namespace sdc
                 scalar dt = dtsdc( p );
                 t += dt;
 
-                Info << "\nTime = " << t << ", SDC sweep = " << j + 1 << ", SDC substep = " << p + 1 << nl << endl;
+                Info << "\nTime = " << t << ", SDC sweep = " << j + 2 << ", SDC substep = " << p + 1 << nl << endl;
 
                 qold = solStages.row( p );
 
@@ -241,16 +243,18 @@ namespace sdc
             // Compute the SDC residual
 
             residual = dt * (qmat * F);
+            diff = residual;
 
             for ( int i = 0; i < residual.rows(); i++ )
                 residual.row( i ) += solStages.row( 0 ) - solStages.row( i + 1 );
 
-            scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
-            squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
-            reduce( squaredNorm, sumOp<scalarList>() );
-            scalar error = std::sqrt( sum( squaredNorm ) / N );
-            error /= solver->getScalingFactor();
-            bool convergence = error < tol && j >= minSweeps - 1;
+            scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) ), squaredNormDiff( Pstream::nProcs(), scalar( 0 ) );
+            squaredNormResidual[Pstream::myProcNo()] = residual.squaredNorm();
+            squaredNormDiff[Pstream::myProcNo()] = diff.squaredNorm();
+            reduce( squaredNormResidual, sumOp<scalarList>() );
+            reduce( squaredNormDiff, sumOp<scalarList>() );
+            scalar error = std::sqrt( sum( squaredNormResidual ) / (sum( squaredNormDiff ) + SMALL) );
+            bool convergence = error < tol && j >= minSweeps - 2;
 
             std::deque<int> dofVariables;
             std::deque<bool> enabledVariables;
@@ -263,7 +267,7 @@ namespace sdc
             std::deque<bool> convergenceVariables;
 
             for ( unsigned int i = 0; i < enabledVariables.size(); i++ )
-                convergenceVariables.push_back( not enabledVariables.at( i ) );
+                convergenceVariables.push_back( true );
 
             bool solverConverged = solver->isConverged();
 
@@ -272,7 +276,7 @@ namespace sdc
                 Info << "SDC residual = " << error;
                 Info << ", tol = " << tol;
                 Info << ", time = " << t;
-                Info << ", sweep = " << j + 1;
+                Info << ", sweep = " << j + 2;
                 Info << ", convergence = ";
 
                 if ( convergence )
@@ -290,8 +294,6 @@ namespace sdc
             {
                 assert( std::accumulate( dofVariables.begin(), dofVariables.end(), 0 ) == N );
 
-                bool convergence = solverConverged;
-
                 for ( unsigned int substep = 0; substep < residual.rows(); substep++ )
                 {
                     int index = 0;
@@ -300,33 +302,34 @@ namespace sdc
                     {
                         assert( dofVariables.at( i ) > 0 );
 
-                        scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
-                        labelList dofVariablesGlobal( Pstream::nProcs(), 0 );
-                        dofVariablesGlobal[Pstream::myProcNo()] = dofVariables.at( i );
-                        reduce( dofVariablesGlobal, sumOp<labelList>() );
+                        scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) ), squaredNormDiff( Pstream::nProcs(), scalar( 0 ) );
 
                         for ( int j = 0; j < dofVariables.at( i ); j++ )
                         {
-                            squaredNorm[Pstream::myProcNo()] += residual( substep, index ) * residual( substep, index );
+                            squaredNormResidual[Pstream::myProcNo()] += residual( substep, index ) * residual( substep, index );
+                            squaredNormDiff[Pstream::myProcNo()] += diff( substep, index ) * diff( substep, index );
                             index++;
                         }
 
-                        reduce( squaredNorm, sumOp<scalarList>() );
-                        scalar error = std::sqrt( sum( squaredNorm ) / sum( dofVariablesGlobal ) );
+                        reduce( squaredNormResidual, sumOp<scalarList>() );
+                        reduce( squaredNormDiff, sumOp<scalarList>() );
+                        scalar error = std::sqrt( sum( squaredNormResidual ) / (sum( squaredNormDiff ) + SMALL) );
 
-                        if ( error > tol || j < minSweeps - 1 )
+                        bool convergence = convergenceVariables.at( i );
+
+                        if ( error > tol || j < minSweeps - 2 )
                             convergence = false;
 
                         if ( enabledVariables.at( i ) )
                         {
                             Info << "SDC " << namesVariables.at( i ).c_str();
-                            Info << " residual = " << error;
                             Info << " substep = " << substep + 1;
+                            Info << ", residual = " << error;
                             Info << ", time = " << t;
-                            Info << ", sweep = " << j + 1;
+                            Info << ", sweep = " << j + 2;
                             Info << ", convergence = ";
 
-                            if ( error < tol && j >= minSweeps - 1 )
+                            if ( error < tol && j >= minSweeps - 2 )
                                 Info << "true";
                             else
                                 Info << "false";
@@ -410,7 +413,6 @@ namespace sdc
     {
         assert( k <= this->k - 1 );
         assert( solStages.rows() > 0 );
-        assert( solStages.cols() > 0 );
 
         qold = solStages.row( k );
 
@@ -441,7 +443,6 @@ namespace sdc
         this->corrector = corrector;
 
         assert( rhs.rows() == qold.rows() );
-        assert( rhs.rows() > 0 );
     }
 
     void SDC::setFunction(
@@ -493,11 +494,14 @@ namespace sdc
     {
         fsi::matrix Qj = dt * (qmat * F);
         fsi::matrix residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
+        fsi::matrix diff = Qj.row( k - 2 );
 
-        scalarList squaredNorm( Pstream::nProcs(), scalar( 0 ) );
-        squaredNorm[Pstream::myProcNo()] = residual.squaredNorm();
-        reduce( squaredNorm, sumOp<scalarList>() );
-        scalar error = std::sqrt( sum( squaredNorm ) / F.cols() );
+        scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) ), squaredNormDiff( Pstream::nProcs(), scalar( 0 ) );
+        squaredNormResidual[Pstream::myProcNo()] = residual.squaredNorm();
+        squaredNormDiff[Pstream::myProcNo()] = diff.squaredNorm();
+        reduce( squaredNormResidual, sumOp<scalarList>() );
+        reduce( squaredNormDiff, sumOp<scalarList>() );
+        scalar error = std::sqrt( sum( squaredNormResidual ) / sum( squaredNormDiff ) );
         convergence = error < tol;
 
         Info << "SDC " << name.c_str();

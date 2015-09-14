@@ -1,3 +1,6 @@
+time-integration-scheme: bdf
+adaptive-time-stepping:
+  enabled: false
 fluid-solver: pimple-solver
 interpolation:
   radial-basis-function:
@@ -11,9 +14,11 @@ multi-level-acceleration:
   - convergence-measures:
     - min-iteration-convergence-measure:
         min-iterations: 3
+        suffices: false
     - relative-convergence-measure:
         data-id: 0
         limit: 1.0e-06
+        suffices: false
     extrapolation-order: 2
     level: 0
     max-iterations: 200
@@ -28,9 +33,11 @@ multi-level-acceleration:
   - convergence-measures:
     - min-iteration-convergence-measure:
         min-iterations: 1
+        suffices: false
     - relative-convergence-measure:
         data-id: 0
         limit: 1.0e-05
+        suffices: false
     extrapolation-order: 2
     level: 1
     max-iterations: 200

@@ -20,3 +20,5 @@ rm -f fluid/constant/polyMesh/boundary
 rm -f solid/constant/polyMesh/boundary
 rm -f fluid/iterations-*.txt solid/iterations-*.txt
 rm -f solid/constant/preCICE.xml system/decomposeParDict
+rm -f *.pdf
+rm -f PlyParser_FoamFileParser_parsetab.py*

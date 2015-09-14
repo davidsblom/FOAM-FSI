@@ -13,7 +13,7 @@ TEST( MinIterationConvergenceMeasure, measure )
 {
     int minimumIterationCount = 3;
 
-    MinIterationConvergenceMeasure measure( 0, minimumIterationCount );
+    MinIterationConvergenceMeasure measure( 0, false, minimumIterationCount );
 
     // Create data sets for old state of data and new state of data
     fsi::vector oldValues0( 3 ), oldValues1( 3 ), oldValues2( 3 ), newValues( 3 );
@@ -41,7 +41,7 @@ TEST( MinIterationConvergenceMeasure, newMeasurementSeries )
 {
     int minimumIterationCount = 3;
 
-    MinIterationConvergenceMeasure measure( 0, minimumIterationCount );
+    MinIterationConvergenceMeasure measure( 0, false, minimumIterationCount );
 
     // Create data sets for old state of data and new state of data
     fsi::vector oldValues0( 3 ), oldValues1( 3 ), oldValues2( 3 ), newValues( 3 );

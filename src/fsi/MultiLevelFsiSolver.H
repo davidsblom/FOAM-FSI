@@ -42,6 +42,8 @@ public:
         const fsi::vector & xprev
         );
 
+    bool isConvergence( shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures );
+
     void setSurrogateData(
         fsi::vector & xf,
         matrix & J

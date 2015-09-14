@@ -34,7 +34,7 @@ fixedPatches ( cylinder outlet inlet top bottom );
 
 coarsening
 {
-  enabled true;
+  enabled false;
   tol 1.0e-3;
   minPoints 10;
   maxPoints 2000;

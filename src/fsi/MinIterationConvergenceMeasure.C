@@ -11,10 +11,11 @@ namespace fsi
 {
     MinIterationConvergenceMeasure::MinIterationConvergenceMeasure(
         int dataId,
+        bool suffices,
         int minimumIterationCount
         )
         :
-        ConvergenceMeasure( dataId ),
+        ConvergenceMeasure( dataId, suffices ),
         minimumIterationCount( minimumIterationCount ),
         currentIteration( 0 )
     {

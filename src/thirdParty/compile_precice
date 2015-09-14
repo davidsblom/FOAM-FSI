@@ -14,7 +14,7 @@ export BOOST_VERSION_DOT=1.55.0
 # Download Boost
 if [ ! -d "boost_${BOOST_VERSION}" ]; then
     wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
-    tar jxfv boost_${BOOST_VERSION}.tar.bz2
+    tar jxf boost_${BOOST_VERSION}.tar.bz2
     rm -f boost_${BOOST_VERSION}.tar.bz2
 fi
 

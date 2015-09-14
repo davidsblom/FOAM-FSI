@@ -54,12 +54,10 @@ int Oscillator::getDOF()
     return 2;
 }
 
-scalar Oscillator::getScalingFactor()
-{
-    return 1.0;
-}
-
-void Oscillator::getSolution( fsi::vector & solution )
+void Oscillator::getSolution(
+    fsi::vector & solution,
+    fsi::vector & f
+    )
 {
     assert( sol.rows() == 2 );
 

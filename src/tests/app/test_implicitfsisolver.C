@@ -14,6 +14,8 @@
 #include "TubeFlowFluidSolver.H"
 #include "TubeFlowSolidSolver.H"
 #include "gtest/gtest.h"
+#include "AbsoluteConvergenceMeasure.H"
+#include "ResidualRelativeConvergenceMeasure.H"
 #include <unsupported/Eigen/NumericalDiff>
 
 using namespace tubeflow;
@@ -106,11 +108,13 @@ protected:
         shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, minIter ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, true, tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new ResidualRelativeConvergenceMeasure( 0, false, 0.1 ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new AbsoluteConvergenceMeasure( 0, false, 0.1 ) ) );
 
         if ( parallel || convergenceMeasureTraction )
-            convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 1, tol ) ) );
+            convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 1, true, tol ) ) );
 
         shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
         shared_ptr<AndersonPostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
@@ -246,13 +250,19 @@ TEST_P( ImplicitFsiSolverParametrizedTest, numberOfColumnsVIQN )
         int nbResiduals = solver->postProcessing->residuals.size();
 
         // Include information from previous optimization solves
-        for ( std::deque<deque<fsi::vector> >::iterator it = solver->postProcessing->solsList.begin(); it != solver->postProcessing->solsList.end(); ++it )
-            nbResiduals += it->size();
+        for ( auto sols : solver->postProcessing->solsList )
+            nbResiduals += sols.size();
+
+        // Include information from previous stages
+        for ( auto solsList : solver->postProcessing->solsStageList )
+            for ( auto sols : solsList )
+                nbResiduals += sols.size();
 
         // Include information from previous time steps
-        for ( std::deque< std::deque<deque<fsi::vector> > >::iterator solsIterator = solver->postProcessing->solsTimeList.begin(); solsIterator != solver->postProcessing->solsTimeList.end(); ++solsIterator )
-            for ( std::deque<deque<fsi::vector> >::iterator it = solsIterator->begin(); it != solsIterator->end(); ++it )
-                nbResiduals += it->size();
+        for ( auto solsStageList : solver->postProcessing->solsTimeList )
+            for ( auto solsList : solsStageList )
+                for ( auto sols : solsList )
+                    nbResiduals += sols.size();
 
         if ( i == 0 )
             nbIterFirstTimeStep = solver->fsi->iter;
@@ -317,9 +327,6 @@ protected:
         shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
         shared_ptr<RBFCoarsening> rbfInterpToMesh;
 
-
-
-
         rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
         rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
         rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
@@ -344,8 +351,8 @@ protected:
         shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
         convergenceMeasures = shared_ptr<std::list<shared_ptr<ConvergenceMeasure> > >( new std::list<shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, tol ) ) );
-        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, minIter ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, tol ) ) );
+        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
 
         shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
         shared_ptr<AndersonPostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );

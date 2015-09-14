@@ -60,7 +60,10 @@ public:
 
     virtual void finalizeTimeStep(){}
 
-    virtual void getSolution( fsi::vector & solution );
+    virtual void getSolution(
+        fsi::vector & solution,
+        fsi::vector & f
+        );
 
     virtual void setSolution(
         const fsi::vector & solution,
@@ -97,11 +100,6 @@ public:
     virtual void setNumberOfImplicitStages( int k );
 
     virtual void nextTimeStep();
-
-    virtual scalar getScalingFactor()
-    {
-        return 1;
-    }
 
     virtual void getVariablesInfo(
         std::deque<int> & dof,
