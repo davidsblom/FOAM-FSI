@@ -2,5 +2,6 @@ kOmegaSSTcorrect/kOmegaSSTcorrect.C
 kOmegaSSTsust/kOmegaSSTsust.C
 kOmegaSSTof24/kOmegaSSTof24.C
 kkLOmegaof24/kkLOmegaof24.C
+kkLOmegaof21/kkLOmegaof21.C
 
 LIB = $(FOAM_USER_LIBBIN)/libextraTurbulenceModels
