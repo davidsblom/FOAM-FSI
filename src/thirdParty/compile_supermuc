@@ -68,7 +68,7 @@ export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
 echo $BOOST_ROOT
 cd $BOOST_ROOT
 
-cd ../yaml-cpp-${YAML_VERSION}
+cd ../yaml-cpp
 
 mkdir build
 
