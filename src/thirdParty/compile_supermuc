@@ -60,7 +60,7 @@ rm -rf yaml-cpp-${YAML_VERSION}
 
 tar -zxvf yaml-cpp-${YAML_VERSION}.tar.gz
 
-ln -s yaml-cpp-${YAML_VERSION} yaml-cpp
+ln -s yaml-cpp-release-${YAML_VERSION} yaml-cpp
 
 ln -s boost_${BOOST_VERSION} boost
 
@@ -68,13 +68,13 @@ export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
 echo $BOOST_ROOT
 cd $BOOST_ROOT
 
-cd ../yaml-cpp-${YAML_VERSION}
+cd ../yaml-cpp
 
 mkdir build
 
 cd build
 
-cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
+CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
 
 make -j 32
 
