@@ -60,7 +60,7 @@ rm -rf yaml-cpp-${YAML_VERSION}
 
 tar -zxvf yaml-cpp-${YAML_VERSION}.tar.gz
 
-ln -s yaml-cpp-${YAML_VERSION} yaml-cpp
+ln -s yaml-cpp-release-${YAML_VERSION} yaml-cpp
 
 ln -s boost_${BOOST_VERSION} boost
 
