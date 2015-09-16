@@ -15,7 +15,7 @@ FoamFile
 
 application fsiFoam;
 
-startFrom latestTime;
+startFrom startTime;
 
 startTime 0;
 
@@ -33,13 +33,13 @@ purgeWrite 0;
 
 writeFormat ascii;
 
-writePrecision 6;
+writePrecision 14;
 
 writeCompression uncompressed;
 
 timeFormat general;
 
-timePrecision 6;
+timePrecision 8;
 
 runTimeModifiable no;
 
@@ -47,22 +47,32 @@ adjustTimeStep no;
 
 maxCo 0.2;
 
-libs ( "libforces.so" );
-
 functions
 {
-    forces
+
+    probesSolid
     {
-        type                forces;
-        functionObjectLibs  ( "libforces.so" );
-        outputControl       timeStep;
-        outputInterval      1;
-        patches             (plate cylinder);
-        pName               p;
-        UName               U;
-        rhoName             rhoInf;
-        log                 true;
-        rhoInf              1000;
-        CofR                (0 0 0);
+        // Where to load it from
+        functionObjectLibs ( "libsampling.so" );
+
+        type            probes;
+
+        // Name of the directory for probe data
+        name            probes;
+
+        // Write at same frequency as fields
+        outputControl   timeStep;
+        outputInterval  1;
+
+        // Fields to be probed
+        fields
+        (
+            U
+        );
+
+        probeLocations
+        (
+            (0.599999999 0.199999999 0.499999999)
+        );
     }
 }
