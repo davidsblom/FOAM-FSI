@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application fsiFoam;
+application     fsiFoam;
 
 startFrom       latestTime;
 
@@ -35,18 +35,16 @@ purgeWrite      2;
 
 writeFormat     ascii;
 
-writePrecision  6;
+writePrecision  14;
 
-writeCompression compressed;
+writeCompression uncompressed;
 
 timeFormat      general;
 
-timePrecision   6;
+timePrecision   8;
 
 runTimeModifiable no;
 
 adjustTimeStep  no;
 
 maxCo           0.2;
-
-// ************************************************************************* //
