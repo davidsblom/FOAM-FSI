@@ -37,7 +37,7 @@ Author
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
 #include "bodyCollector.H"
-#include "RBFMotionSolverExt.H"
+#include "RBFMeshMotionSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
