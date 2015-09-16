@@ -143,10 +143,11 @@ struct fineModelParabolaFunctor : Functor<scalar>
         const fsi::vector * y
         )
         :
-        Functor<scalar>( 2, 3 ),
-        model( model ),
-        y( y )
-    {}
+        Functor<scalar>( 2, 3 )
+    {
+        this->model = model;
+        this->y = y;
+    }
 
     int operator()(
         const fsi::vector & x,
@@ -285,10 +286,11 @@ struct fineModelSimpleFunctor : Functor<scalar>
         const fsi::vector * y
         )
         :
-        Functor<scalar>( 2, 3 ),
-        model( model ),
-        y( y )
-    {}
+        Functor<scalar>( 2, 3 )
+    {
+        this->model = model;
+        this->y = y;
+    }
 
     int operator()(
         const fsi::vector & x,
