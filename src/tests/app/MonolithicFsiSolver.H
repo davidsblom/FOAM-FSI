@@ -20,30 +20,30 @@ namespace tubeflow
 public:
 
         MonolithicFsiSolver(
-            scalar a0,
-            scalar u0,
-            scalar p0,
-            scalar dt,
-            scalar cmk,
-            int N,
-            scalar L,
-            scalar T,
-            scalar rho
+            const scalar a0,
+            const scalar u0,
+            const scalar p0,
+            const scalar dt,
+            const scalar cmk,
+            const int N,
+            const scalar L,
+            const scalar T,
+            const scalar rho
             );
 
         scalar evaluateInletVelocityBoundaryCondition();
 
         scalar evaluateOutputPressureBoundaryCondition(
-            scalar pout_n,
-            scalar uout_n,
-            scalar uout
+            const scalar pout_n,
+            const scalar uout_n,
+            const scalar uout
             );
 
         void evaluateResidual(
-            fsi::vector & x,
-            fsi::vector & un,
-            fsi::vector & pn,
-            fsi::vector & an,
+            const fsi::vector & x,
+            const fsi::vector & un,
+            const fsi::vector & pn,
+            const fsi::vector & an,
             fsi::vector & R
             );
 
@@ -59,15 +59,15 @@ public:
 
         void solveTimeStep();
 
-        scalar a0;
-        scalar u0;
-        scalar p0;
-        scalar dt;
-        scalar cmk;
-        int N;
-        scalar L;
-        scalar T;
-        scalar rho;
+        const scalar a0;
+        const scalar u0;
+        const scalar p0;
+        const scalar dt;
+        const scalar cmk;
+        const int N;
+        const scalar L;
+        const scalar T;
+        const scalar rho;
 
         fsi::vector un;
         fsi::vector pn;
@@ -78,9 +78,9 @@ public:
 
         bool init;
 
-        scalar dx;
-        scalar alpha;
-        scalar tau;
+        const scalar dx;
+        const scalar alpha;
+        const scalar tau;
 
         int timeIndex;
         scalar t;

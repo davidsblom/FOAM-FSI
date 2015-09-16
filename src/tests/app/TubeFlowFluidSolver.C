@@ -429,13 +429,14 @@ namespace tubeflow
             const fsi::vector * an
             )
             :
-            Functor<scalar>( 2 * fluid->N, 2 * fluid->N ),
-            fluid( fluid ),
-            a( a ),
-            un( un ),
-            pn( pn ),
-            an( an )
-        {}
+            Functor<scalar>( 2 * fluid->N, 2 * fluid->N )
+        {
+            this->fluid = fluid;
+            this->a = a;
+            this->un = un;
+            this->pn = pn;
+            this->an = an;
+        }
 
         virtual ~lmderFunctor()
         {}
