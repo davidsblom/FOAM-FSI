@@ -543,6 +543,12 @@ namespace rbf
         double runTimeInterpolate = 0.0;
         double runTimeCorrect = 0.0;
 
+        if ( valuesInterpolation.rows() > 0 && values.array().abs().maxCoeff() <= SMALL )
+        {
+            valuesInterpolation.setZero();
+            return;
+        }
+
         matrix usedValues = values;
 
         if ( enabled )
