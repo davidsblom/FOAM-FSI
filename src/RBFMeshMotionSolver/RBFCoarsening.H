@@ -127,6 +127,7 @@ public:
         matrix valuesCorrection;
         int nbMovingFaceCenters;
         int fileExportIndex;
+        bool computed;
 
         static debug::debugSwitch debug;
     };

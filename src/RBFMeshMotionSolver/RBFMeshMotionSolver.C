@@ -895,7 +895,7 @@ void RBFMeshMotionSolver::solve()
     for ( int i = 0; i < Pstream::myProcNo(); i++ )
         globalFixedOffset += nbGlobalFixedFaceCenters[i];
 
-    if ( !rbf->rbf->computed )
+    if ( !rbf->computed )
     {
         rbf::matrix positions( nbFaceCenters, mesh().nGeometricD() );
         positions.setZero();
@@ -1070,7 +1070,8 @@ void RBFMeshMotionSolver::solve()
     if ( cpu )
         rbf->rbf->computed = false;
 
-    rbf->interpolate( values, valuesInterpolation );
+    if ( values.array().abs().maxCoeff() > SMALL )
+        rbf->interpolate( values, valuesInterpolation );
 
     // Apply the 2d correction
 

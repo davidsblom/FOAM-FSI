@@ -39,7 +39,8 @@ namespace rbf
         closestBoundaryIndexCorrection(),
         valuesCorrection(),
         nbMovingFaceCenters( 0 ),
-        fileExportIndex( 0 )
+        fileExportIndex( 0 ),
+        computed( false )
     {
         assert( rbf );
     }
@@ -81,7 +82,8 @@ namespace rbf
         closestBoundaryIndexCorrection(),
         valuesCorrection(),
         nbMovingFaceCenters( 0 ),
-        fileExportIndex( 0 )
+        fileExportIndex( 0 ),
+        computed( false )
     {
         assert( rbf );
         assert( coarseningMinPoints <= coarseningMaxPoints );
@@ -139,7 +141,8 @@ namespace rbf
         closestBoundaryIndexCorrection(),
         valuesCorrection(),
         nbMovingFaceCenters( 0 ),
-        fileExportIndex( 0 )
+        fileExportIndex( 0 ),
+        computed( false )
     {
         assert( rbf );
         assert( coarseningMinPoints <= coarseningMaxPoints );
@@ -201,7 +204,8 @@ namespace rbf
         closestBoundaryIndexCorrection(),
         valuesCorrection(),
         nbMovingFaceCenters( 0 ),
-        fileExportIndex( 0 )
+        fileExportIndex( 0 ),
+        computed( false )
     {
         assert( rbf );
         assert( coarseningMinPoints <= coarseningMaxPoints );
@@ -265,7 +269,8 @@ namespace rbf
         closestBoundaryIndexCorrection(),
         valuesCorrection(),
         nbMovingFaceCenters( 0 ),
-        fileExportIndex( 0 )
+        fileExportIndex( 0 ),
+        computed( false )
     {
         assert( rbf );
         assert( coarseningMinPoints <= coarseningMaxPoints );
@@ -309,8 +314,12 @@ namespace rbf
         const matrix & positionsInterpolation
         )
     {
+        assert( !computed );
+
         this->positions = positions;
         this->positionsInterpolation = positionsInterpolation;
+
+        computed = true;
     }
 
     void RBFCoarsening::greedySelection( const matrix & values )
@@ -542,12 +551,6 @@ namespace rbf
         double runTimeReselect = 0.0;
         double runTimeInterpolate = 0.0;
         double runTimeCorrect = 0.0;
-
-        if ( valuesInterpolation.rows() > 0 && values.array().abs().maxCoeff() <= SMALL )
-        {
-            valuesInterpolation.setZero();
-            return;
-        }
 
         matrix usedValues = values;
 
