@@ -33,13 +33,13 @@ purgeWrite 2;
 
 writeFormat ascii;
 
-writePrecision 8;
+writePrecision 14;
 
 writeCompression uncompressed;
 
 timeFormat general;
 
-timePrecision 6;
+timePrecision 8;
 
 runTimeModifiable no;
 adjustTimeStep no;
