@@ -60,9 +60,9 @@ namespace tubeflow
     }
 
     scalar MonolithicFsiSolver::evaluateOutputPressureBoundaryCondition(
-        scalar pout_n,
-        scalar uout_n,
-        scalar uout
+        const scalar pout_n,
+        const scalar uout_n,
+        const scalar uout
         )
     {
         assert( init );
@@ -75,10 +75,10 @@ namespace tubeflow
     }
 
     void MonolithicFsiSolver::evaluateResidual(
-        fsi::vector & x,
-        fsi::vector & un,
-        fsi::vector & pn,
-        fsi::vector & an,
+        const fsi::vector & x,
+        const fsi::vector & un,
+        const fsi::vector & pn,
+        const fsi::vector & an,
         fsi::vector & R
         )
     {
