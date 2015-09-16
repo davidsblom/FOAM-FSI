@@ -35,7 +35,7 @@ Description
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
 #include "dynamicFvMesh.H"
-#include "RBFMotionSolverExt.H"
+#include "RBFMeshMotionSolver.H"
 #include "fsiInterface.H"
 #include "bodyCollector.H"
 
