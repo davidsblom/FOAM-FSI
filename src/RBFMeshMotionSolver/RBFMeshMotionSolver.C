@@ -335,7 +335,6 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     int coarseningMinPoints = 1;
     int coarseningMaxPoints = 2;
     bool twoPointSelection = false;
-    bool surfaceCorrection = false;
 
     if ( coarsening )
     {
@@ -347,48 +346,50 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         twoPointSelection = subDict( "coarsening" ).lookupOrDefault( "twoPointSelection", false );
     }
 
+    //settings for live point selection
+    bool cleanReselection = true;
+    if ( livePointSelection )
+    {
+        tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
+        cleanReselection = subDict( "coarsening" ).lookupOrDefault( "cleanReselection", true );
+    }
+
+    //surface correction settings
+    bool surfaceCorrection = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrection", false );
     std::shared_ptr<rbf::RBFFunctionInterface> surfaceCorrectionFunction;
     word surfaceCorrectionFunctionName = "";
     double ratioRadiusError = 10.0;
     double minCorrectionRadius = -1.0;
     double surfaceCorrectionRadius = -1.0;
-    double firstCellHeight = -1.0;
-    double maxAspectRatio = -1.0;
-    bool cleanReselection = true;
 
-    if ( livePointSelection )
+    //set values for surface correction if enabled
+    if ( surfaceCorrection )
     {
-        tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
-        surfaceCorrection = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrection", false );
-        cleanReselection = subDict( "coarsening" ).lookupOrDefault( "cleanReselection", true );
+        surfaceCorrectionFunctionName = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionFunction", word( "WendlandC2" ) );
+        setSurfaceCorrectionFunction( surfaceCorrectionFunction, surfaceCorrectionFunctionName );
+        ratioRadiusError = subDict( "coarsening" ).lookupOrDefault( "ratioRadiusError", 10.0 );
 
-        if ( surfaceCorrection )
+        double firstCellHeight = subDict( "coarsening" ).lookupOrDefault( "firstCellHeight", -1.0 );
+        double maxAspectRatio = subDict( "coarsening" ).lookupOrDefault( "maxAspectRatio", -1.0 );
+
+        if ( firstCellHeight < SMALL )
         {
-            surfaceCorrectionFunctionName = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionFunction", word( "WendlandC2" ) );
-            setSurfaceCorrectionFunction( surfaceCorrectionFunction, surfaceCorrectionFunctionName );
-            ratioRadiusError = subDict( "coarsening" ).lookupOrDefault( "ratioRadiusError", 10.0 );
-
-            firstCellHeight = subDict( "coarsening" ).lookupOrDefault( "firstCellHeight", -1.0 );
-            maxAspectRatio = subDict( "coarsening" ).lookupOrDefault( "maxAspectRatio", -1.0 );
-
-            if ( firstCellHeight < SMALL )
-            {
-                firstCellHeight = getMaxWallDistance();
-            }
-
-            if ( maxAspectRatio < SMALL )
-            {
-                maxAspectRatio = getMaxAspectRatio();
-            }
-
-            minCorrectionRadius = pow( maxAspectRatio, 1.0 / surfaceCorrectionFunction->correctionPower() ) * firstCellHeight;
-
-            surfaceCorrectionRadius = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionRadius", -1.0 );
+            firstCellHeight = getMaxWallDistance();
         }
+
+        if ( maxAspectRatio < SMALL )
+        {
+            maxAspectRatio = getMaxAspectRatio();
+        }
+
+        minCorrectionRadius = pow( maxAspectRatio, 1.0 / surfaceCorrectionFunction->correctionPower() ) * firstCellHeight;
+        surfaceCorrectionRadius = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionRadius", -1.0 );
     }
 
+    //Create rbf coarsening object
     rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, surfaceCorrectionFunction, ratioRadiusError, minCorrectionRadius, surfaceCorrectionRadius, cleanReselection, exportSelectedPoints ) );
 
+    //Check which points to collect: faceCentres or mesh points
     faceCellCenters = lookupOrDefault( "faceCellCenters", true );
 
     // Print out options for user
@@ -427,7 +428,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
             else
             {
                 Info << "           surface correction ratioRadiusError = " << ratioRadiusError << endl;
-                Info << "           surface correction minCorrectionRadius = " << minCorrectionRadius << " ( = {" << maxAspectRatio << " ^ " << 1.0 / surfaceCorrectionFunction->correctionPower() << "} * " << firstCellHeight << " ) " << endl;
+                Info << "           surface correction minCorrectionRadius = " << minCorrectionRadius << endl;
             }
         }
     }
