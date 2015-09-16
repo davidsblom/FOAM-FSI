@@ -39,8 +39,7 @@ namespace rbf
         closestBoundaryIndexCorrection(),
         valuesCorrection(),
         nbMovingFaceCenters( 0 ),
-        fileExportIndex( 0 ),
-        computed( false )
+        fileExportIndex( 0 )
     {
         assert( rbf );
     }
@@ -82,8 +81,7 @@ namespace rbf
         closestBoundaryIndexCorrection(),
         valuesCorrection(),
         nbMovingFaceCenters( 0 ),
-        fileExportIndex( 0 ),
-        computed( false )
+        fileExportIndex( 0 )
     {
         assert( rbf );
         assert( coarseningMinPoints <= coarseningMaxPoints );
@@ -141,8 +139,7 @@ namespace rbf
         closestBoundaryIndexCorrection(),
         valuesCorrection(),
         nbMovingFaceCenters( 0 ),
-        fileExportIndex( 0 ),
-        computed( false )
+        fileExportIndex( 0 )
     {
         assert( rbf );
         assert( coarseningMinPoints <= coarseningMaxPoints );
@@ -204,8 +201,7 @@ namespace rbf
         closestBoundaryIndexCorrection(),
         valuesCorrection(),
         nbMovingFaceCenters( 0 ),
-        fileExportIndex( 0 ),
-        computed( false )
+        fileExportIndex( 0 )
     {
         assert( rbf );
         assert( coarseningMinPoints <= coarseningMaxPoints );
@@ -269,8 +265,7 @@ namespace rbf
         closestBoundaryIndexCorrection(),
         valuesCorrection(),
         nbMovingFaceCenters( 0 ),
-        fileExportIndex( 0 ),
-        computed( false )
+        fileExportIndex( 0 )
     {
         assert( rbf );
         assert( coarseningMinPoints <= coarseningMaxPoints );
@@ -314,12 +309,8 @@ namespace rbf
         const matrix & positionsInterpolation
         )
     {
-        assert( !computed );
-
         this->positions = positions;
         this->positionsInterpolation = positionsInterpolation;
-
-        computed = true;
     }
 
     void RBFCoarsening::greedySelection( const matrix & values )
@@ -351,7 +342,7 @@ namespace rbf
 
                 // Select the point with the largest displacment
                 int maxDisplacementIndex = -1;
-                double maxDisp = ( valuesMINmean ).maxCoeff( &maxDisplacementIndex );
+                ( valuesMINmean ).maxCoeff( &maxDisplacementIndex );
                 //Add first point
                 selectedPositions( 0 ) = maxDisplacementIndex;
 
