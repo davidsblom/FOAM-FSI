@@ -344,19 +344,35 @@ namespace rbf
             // Clean selected points if requested
             if ( cleanReselection || selectedPositions.rows() == maxNbPoints || selectedPositions.rows() == 0 )
             {
-                double valuesMean = (values.rowwise().norm()).mean();
-                vector valuesMINmean = values.rowwise().norm() - vector::Constant(values.rows(),valuesMean);
-
                 selectedPositions.resize( 2 );
+                if( livePointSelection )
+                {
+                    // Select the point with the largest displacment
+                    int maxDisplacementIndex = -1;
+                    ( values.rowwise().norm() ).maxCoeff( &maxDisplacementIndex );
+                    //Add first point
+                    selectedPositions( 0 ) = maxDisplacementIndex;
+                }
+                else
+                {
+                    //With unit displacement, first point is point with largest radius from origin and displacement > 0
+                    vector rad = positions.rowwise().norm();
 
-                // Select the point with the largest displacment
-                int maxDisplacementIndex = -1;
-                double maxDisp = ( valuesMINmean ).maxCoeff( &maxDisplacementIndex );
-                //Add first point
-                selectedPositions( 0 ) = maxDisplacementIndex;
+                    int maxRadiusFromOriginIndex = -1;
+                    double maxRadius = -1;
+                    for(int i=0;i<rad.rows();i++)
+                    {
+                        if(rad(i) > maxRadius &&  values.row(i).norm() > SMALL )
+                        {
+                            maxRadius = rad(i);
+                            maxRadiusFromOriginIndex = i;
+                        }
+                    }
+                    selectedPositions( 0 ) = maxRadiusFromOriginIndex;
+                }
 
                 //Find point with largest distance from first point
-                vector rad = (positions - (matrix::Constant(positions.rows(),1,1.0)*positions.row(maxDisplacementIndex))).rowwise().norm();
+                vector rad = ( positions - ( matrix::Constant( positions.rows(), 1, 1.0 )*positions.row( selectedPositions(0) ) ) ).rowwise().norm();
                 int maxRadiusIndex = -1;
                 double maxRadius = -1;
                 for(int i=0;i<rad.rows();i++)
@@ -370,32 +386,6 @@ namespace rbf
                 //Add second point
                 selectedPositions( 1 ) = maxRadiusIndex;
 
-                // check what the radius is. For TPS the radius should not be 1. If so, select next point
-                /*bool radius1 = false;
-
-                do
-                {
-                    double radius0 = ( positions.row( selectedPositions( 0 ) ) - positions.row( selectedPositions( 1 ) ) ).norm();
-
-                    if ( radius0 > 1.0 - SMALL && radius0 < 1.0 + SMALL )
-                    {
-                        Info << "BLABLABLABLABL" << endl;
-                        radius1 = true;
-                        if ( selectedPositions( 1 ) + 1 < values.rows())
-                        {
-                            selectedPositions( 1 ) = selectedPositions( 1 ) + 1;
-                        }else
-                        {
-                            selectedPositions( 1 ) = selectedPositions( 1 ) - 1;
-                        }
-
-                    }
-                    else
-                    {
-                        radius1 = false;
-                    }
-                }
-                while ( radius1 );*/
             }
 
             assert( positions.rows() >= selectedPositions.rows() );
