@@ -50,3 +50,12 @@ export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
 cd precice
 scons -j 4 build=release python=off petsc=off
+scons -j 4 build=release python=off petsc=off solib
+
+mkdir -p ${FOAM_USER_LIBBIN}
+mkdir -p ${FOAM_USER_APPBIN}
+
+SHARED_LIBRARY=libprecice.so
+
+cp build/last/${SHARED_LIBRARY} ${FOAM_USER_LIBBIN}/
+cp build/last/binprecice ${FOAM_USER_APPBIN}/
