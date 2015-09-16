@@ -95,9 +95,8 @@ tmp<Field<vectorField> > airfoilDoubleHingeFlap::calculatePosition(const scalar 
     tensor RzCurFlap(cos(-flapRotAngle), -sin(-flapRotAngle), 0, sin(-flapRotAngle), cos(-flapRotAngle), 0, 0, 0, 1);
 
     //Extra transition between rotation point location
-    scalar eps=0.01;
-    scalar eps_alpha=flapRotationAmplitude_*sin(2*pi*eps);
-    scalar Ttrans=2.0*eps*1.0/flapRotationFrequency_;
+    scalar eps_alpha=flapRotationAmplitude_*sin(2*pi*transitionFraction_);
+    scalar Ttrans=2.0*transitionFraction_*1.0/flapRotationFrequency_;
 
     //If rotation is postive rotate around top, otherwise around bottom. In the middle do something else
     vector flapRotationOrigin = vector::zero;
@@ -405,6 +404,7 @@ bottomRotationOrigin_(vector::zero),
 topRotationPointIDs_(2,-1),
 bottomRotationPointIDs_(2,-1),
 flapPhaseShift_(0),
+transitionFraction_(dict.lookupOrDefault("transitionFraction",0.01)),
 smoothStart_(false),
 currentPosition_(patchIDs_.size()),
 prevPosition_(patchIDs_.size()),

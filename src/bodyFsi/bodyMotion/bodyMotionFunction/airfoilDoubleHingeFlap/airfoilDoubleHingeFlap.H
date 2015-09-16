@@ -93,6 +93,7 @@ class airfoilDoubleHingeFlap
         labelList topRotationPointIDs_;
         labelList bottomRotationPointIDs_;
         scalar flapPhaseShift_;
+        scalar transitionFraction_;
 
         //General kinematic settings
         bool smoothStart_;

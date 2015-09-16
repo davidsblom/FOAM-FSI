@@ -266,7 +266,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
     word function = dict.lookup( "function" );
 
-    assert( function == "TPS" || function == "WendlandC0" || function == "WendlandC2" || function == "WendlandC4" || function == "WendlandC6" || function == "GillebaartR3" || function == "GillebaartR3a" );
+    assert( function == "TPS" || function == "WendlandC0" || function == "WendlandC2" || function == "WendlandC4" || function == "WendlandC6" || function == "GillebaartR3" || function == "GillebaartR3a" || function == "GillebaartR3d" );
 
     std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
 
@@ -309,6 +309,12 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     {
         scalar radius = readScalar( dict.lookup( "radius" ) );
         rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::GillebaartR3aFunction( radius ) );
+    }
+
+    if ( function == "GillebaartR3d" )
+    {
+        scalar radius = readScalar( dict.lookup( "radius" ) );
+        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::GillebaartR3dFunction( radius ) );
     }
 
     assert( rbfFunction );
@@ -385,6 +391,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
     faceCellCenters = lookupOrDefault( "faceCellCenters", true );
 
+    // Print out options for user
     Info << "RBF mesh deformation settings:" << endl;
     Info << "    interpolation function = " << function << endl;
     Info << "    interpolation polynomial term = " << polynomialTerm << endl;
@@ -395,24 +402,33 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         Info << "    interpolation from face cell centers = " << faceCellCenters << endl;
     }
 
-    Info << "    coarsening = " << coarsening << endl;
-    Info << "        coarsening tolerance = " << tol << endl;
-    Info << "        coarsening reselection tolerance = " << tolLivePointSelection << endl;
-    Info << "        coarsening two-point selection = " << twoPointSelection << endl;
-    Info << "        coarsening surface correction = " << surfaceCorrection << endl;
-
-    if ( debug > 0 && surfaceCorrection )
+    if( coarsening )
     {
-        Info << "           surface correction function = " << surfaceCorrectionFunctionName << endl;
-
-        if ( surfaceCorrectionRadius > 0 )
+        Info << "    coarsening = " << coarsening << endl;
+        Info << "        livePointSelection = " << livePointSelection << endl;
+        Info << "        coarsening tolerance = " << tol << endl;
+        Info << "        coarsening two-point selection = " << twoPointSelection << endl;
+        if ( livePointSelection )
         {
-            Info << "           surface correction surfaceCorrectionRadius = " << surfaceCorrectionRadius << endl;
+            Info << "        coarsening reselection tolerance = " << tolLivePointSelection << endl;
+            Info << "        cleanReselection = " << cleanReselection << endl;
         }
-        else
+        Info << "        coarsening surface correction = " << surfaceCorrection << endl;
+
+
+        if ( debug > 0 && surfaceCorrection )
         {
-            Info << "           surface correction ratioRadiusError = " << ratioRadiusError << endl;
-            Info << "           surface correction minCorrectionRadius = " << minCorrectionRadius << " ( = {" << maxAspectRatio << " ^ " << 1.0 / surfaceCorrectionFunction->correctionPower() << "} * " << firstCellHeight << " ) " << endl;
+            Info << "           surface correction function = " << surfaceCorrectionFunctionName << endl;
+
+            if ( surfaceCorrectionRadius > 0 )
+            {
+                Info << "           surface correction surfaceCorrectionRadius = " << surfaceCorrectionRadius << endl;
+            }
+            else
+            {
+                Info << "           surface correction ratioRadiusError = " << ratioRadiusError << endl;
+                Info << "           surface correction minCorrectionRadius = " << minCorrectionRadius << " ( = {" << maxAspectRatio << " ^ " << 1.0 / surfaceCorrectionFunction->correctionPower() << "} * " << firstCellHeight << " ) " << endl;
+            }
         }
     }
 }
