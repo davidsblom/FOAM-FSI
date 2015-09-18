@@ -34,7 +34,7 @@ tar -zxf scons-${SCONS_VERSION}.tar.gz
 # Install scons
 
 cd scons-${SCONS_VERSION}
-python setup.py install
+python setup.py install --user
 cd ..
 
 # Set environment variables necessary for building preCICE
