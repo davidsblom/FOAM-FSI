@@ -43,7 +43,7 @@ export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
 cd precice
 scons -j 4 build=release python=off petsc=off
-scons -j 4 build=release python=off petsc=off solibll
+scons -j 4 build=release python=off petsc=off solib
 
 
 mkdir -p ${FOAM_USER_LIBBIN}
