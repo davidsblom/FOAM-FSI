@@ -2,39 +2,32 @@
 
 set -e
 
-find . -name '*~' -exec rm -rf {} \;
+# Ensure the script is executed in this directory
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR
 
 # Define which versions of the different packages are used
-
 export SCONS_VERSION=2.3.4
 export BOOST_VERSION=1_55_0
 export BOOST_VERSION_DOT=1.55.0
 
 # Download SCons
-
-rm -rf scons-${SCONS_VERSION}.tar.gz
-wget -O scons-${SCONS_VERSION}.tar.gz http://downloads.sourceforge.net/project/scons/scons/${SCONS_VERSION}/scons-${SCONS_VERSION}.tar.gz
+if [ ! -d "scons-${SCONS_VERSION}" ]; then
+	wget -O scons-${SCONS_VERSION}.tar.gz http://downloads.sourceforge.net/project/scons/scons/${SCONS_VERSION}/scons-${SCONS_VERSION}.tar.gz
+	tar -zxf scons-${SCONS_VERSION}.tar.gz
+	rm -f scons-${SCONS_VERSION}.tar.gz
+fi
 
 # Download Boost
-
-rm -rf boost_${BOOST_VERSION}.tar.bz2
-wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
-
-# Remove old build files
-
-rm -rf boost_${BOOST_VERSION}
-rm -rf precice/build
-rm -rf scons-${SCONS_VERSION}
-
-# Unpack third party packages
-
-tar jxf boost_${BOOST_VERSION}.tar.bz2
-tar -zxf scons-${SCONS_VERSION}.tar.gz
+if [ ! -d "boost_${BOOST_VERSION}" ]; then
+    wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
+    tar jxf boost_${BOOST_VERSION}.tar.bz2
+    rm -f boost_${BOOST_VERSION}.tar.bz2
+fi
 
 # Install scons
-
 cd scons-${SCONS_VERSION}
-python setup.py install
+python setup.py install --home=~
 cd ..
 
 # Set environment variables necessary for building preCICE
@@ -50,7 +43,8 @@ export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
 cd precice
 scons -j 4 build=release python=off petsc=off
-scons -j 4 build=release python=off petsc=off solib
+scons -j 4 build=release python=off petsc=off solibll
+
 
 mkdir -p ${FOAM_USER_LIBBIN}
 mkdir -p ${FOAM_USER_APPBIN}
