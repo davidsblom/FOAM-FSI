@@ -794,6 +794,9 @@ namespace rbf
                             std::string filename = "unitSelection-rbf-surfaceError.txt";
                             std::ofstream surfaceErrorFile( filename, std::ofstream::app );
 
+                            //Should only happen first time
+                            surfaceErrorFile << "eps_2, eps_max, Nc, Nb" << "\n";
+
                             if ( surfaceErrorFile.is_open() )
                             {
                                 surfaceErrorFile << error << ", " << errorMax << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << "\n";

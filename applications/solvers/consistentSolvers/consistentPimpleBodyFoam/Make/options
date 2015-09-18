@@ -1,6 +1,6 @@
 c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs
 
-EXE_INC = -std=c++0x \
+EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \

@@ -8,11 +8,24 @@ wclean libso src/boundaryConditions
 wclean libso src/fvSchemes
 wclean libso src/fsi
 wclean libso src/RBFMeshMotionSolver
-wclean libso applications/utilities/mapMesh
 wclean libso src/SRFModelAbs
 wclean libso src/extraSolidBodyMotion
-wclean applications/utilities/addInitialRandomVelocity
+wclean libso src/extraTurbulenceModels
+wclean libso src/bodyMotions
+wclean libso src/bodyFsi
+
+wclean all applications/solvers/bodyFsi
 wclean all applications/solvers/consistentSolvers
+wclean all applications/solvers/rbfDevelopment
+
+wclean applications/utilities/writeNonOrthogonality
+wclean applications/utilities/addInitialRandomVelocity
+wclean applications/utilities/writeSets
+wclean applications/utilities/mapFields
+wclean applications/utilities/yPlus
+
+# yaml dependend
+wclean libso applications/utilities/mapMesh
 wclean applications/solvers/unsteadyPUCoupledFoam
 wclean applications/solvers/fsi/fsiFoam
 wclean applications/solvers/fsi/fluidFoam

@@ -5,4 +5,5 @@ wmake matrixMatrixTesting
 wmake serialScalingMatrixTesting
 wmake moveBodyFoamDavid
 wmake moveBodyFoamPoints
+wmake moveBodyFoamPoints_prescribed
 wmake rbfFunctionFLOPStesting

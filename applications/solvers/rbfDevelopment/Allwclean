@@ -1,0 +1,9 @@
+#!/bin/bash
+
+wclean inverseMatrixTesting
+wclean matrixMatrixTesting
+wclean serialScalingMatrixTesting
+wclean moveBodyFoamDavid
+wclean moveBodyFoamPoints
+wclean moveBodyFoamPoints_prescribed
+wclean rbfFunctionFLOPStesting
