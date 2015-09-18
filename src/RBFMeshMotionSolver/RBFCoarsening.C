@@ -216,6 +216,8 @@ namespace rbf
         assert( tolLivePointSelection > 0 );
         assert( tolLivePointSelection < 1 );
 
+        if ( not enabled ) assert( not surfaceCorrection );
+
         // If unit displacement do not use polynomial for selection
         if ( enabled && !livePointSelection && rbf->polynomialTerm )
         {
@@ -280,6 +282,8 @@ namespace rbf
         assert( tol < 1 );
         assert( tolLivePointSelection > 0 );
         assert( tolLivePointSelection < 1 );
+
+        if ( not enabled ) assert( not surfaceCorrection );
 
         // If unit displacement do not use polynomial for selection
         if ( enabled && !livePointSelection && rbf->polynomialTerm )
