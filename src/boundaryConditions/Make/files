@@ -6,6 +6,5 @@ movingWallPressureGradient/movingWallPressureGradientFvPatchScalarField.C
 movingWallPressureGradient3/movingWallPressureGradient3FvPatchScalarField.C
 increasingFixedValue/increasingFixedValueFvPatchFields.C
 staticWallPressureGradient/staticWallPressureGradientFvPatchScalarField.C
-SDCMovingWallVelocity/SDCMovingWallVelocityFvPatchVectorField.C
 
 LIB = $(FOAM_USER_LIBBIN)/libboundaryConditions
