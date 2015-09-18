@@ -909,8 +909,8 @@ namespace rbf
             tp = std::clock();
         }
 
-        // start doing correction of surface is requested
-        if ( surfaceCorrection )
+        // start doing correction of surface is requested (and possible)
+        if ( enabled && surfaceCorrection )
         {
             correctSurface( valuesInterpolation, errorInterpolationCoarse );
         }
