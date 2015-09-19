@@ -1,5 +1,8 @@
 #! /bin/bash
 
+set -e
+set -x
+
 # Ensure the script is executed in this directory
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $DIR
@@ -12,7 +15,12 @@ wclean libso applications/utilities/mapMesh
 wclean libso src/SRFModelAbs
 wclean libso src/extraSolidBodyMotion
 wclean applications/utilities/addInitialRandomVelocity
-wclean all applications/solvers/consistentSolvers
+wclean applications/solvers/consistentSolvers/consistentIcoFoam
+wclean applications/solvers/consistentSolvers/consistentPimpleBodyFoam
+wclean applications/solvers/consistentSolvers/consistentPimpleDyMFoam
+wclean applications/solvers/consistentSolvers/consistentPimpleFoam
+wclean applications/solvers/consistentSolvers/consistentSimpleFoam
+wclean applications/solvers/consistentSolvers/consistentSimpleSRFAbsFoam
 wclean applications/solvers/unsteadyPUCoupledFoam
 wclean applications/solvers/fsi/fsiFoam
 wclean applications/solvers/fsi/fluidFoam
