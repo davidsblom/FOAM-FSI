@@ -1,9 +1,9 @@
-c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs
+c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs -Wredundant-decls -Wcast-align -Wmissing-declarations  -Wswitch-enum -Wswitch-default -Winvalid-pch -Wredundant-decls -Wformat=2 -Wmissing-format-attribute -Wformat-nonliteral
 
 EXE_INC = -std=c++11 \
     -I../../../src/fsi/lnInclude \
     -I../../../src/thirdParty/eigen \
-    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -isystem $(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
@@ -17,11 +17,12 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/solidModels/lnInclude \
-    -I../../../src/thirdParty/yaml-cpp/include \
+    -isystem ../../../src/thirdParty/yaml-cpp/include \
     -I../../../src/RBFMeshMotionSolver/lnInclude/ \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
-    -I../../../src/thirdParty/boost
+    -I../../../src/thirdParty/boost \
+    -I../../../../src/boundaryConditions/lnInclude
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
@@ -37,6 +38,7 @@ EXE_LIBS = \
     -lincompressibleLESModels \
     -llduSolvers \
     -lfvSchemes \
+    -lboundaryConditions \
     -lboundaryConditions \
     -lsolidModels \
     -lsampling \
