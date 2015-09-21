@@ -26,7 +26,7 @@ BOOST_VERSION=1_55_0
 BOOST_VERSION_DOT=1.55.0
 
 rm -rf boost_${BOOST_VERSION}
-tar jxfv boost_${BOOST_VERSION}.tar.bz2
+tar jxf boost_${BOOST_VERSION}.tar.bz2
 
 # Set environment variables necessary for building preCICE
 
