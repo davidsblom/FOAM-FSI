@@ -25,8 +25,9 @@ cd ../
 BOOST_VERSION=1_55_0
 BOOST_VERSION_DOT=1.55.0
 
-rm -rf boost_${BOOST_VERSION}
-tar jxfv boost_${BOOST_VERSION}.tar.bz2
+if [ ! -d "boost_${BOOST_VERSION}" ]; then
+    tar jxf boost_${BOOST_VERSION}.tar.bz2
+fi
 
 # Set environment variables necessary for building preCICE
 
@@ -39,12 +40,20 @@ export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
 cd precice
 python tools/python_scripts/insert_mpi_header.py
-scons -j 32 build=release python=off petsc=off compiler=mpicxx > >(tee make_precice.log) 2> >(tee make_precice_error.log >&2)
+scons -j 32 build=release python=off petsc=off compiler=mpicxx
+scons -j 32 build=release python=off petsc=off compiler=mpicxx solib
+
+mkdir -p ${FOAM_USER_LIBBIN}
+mkdir -p ${FOAM_USER_APPBIN}
+
+cp build/last/libprecice.so ${FOAM_USER_LIBBIN}/
+cp build/last/binprecice ${FOAM_USER_APPBIN}/
+
 cd ..
 
 # YAML
 
-YAML_VERSION=0.5.1
+YAML_VERSION=0.5.2
 
 rm -rf yaml-cpp
 
@@ -52,18 +61,27 @@ rm -rf yaml-cpp-${YAML_VERSION}
 
 tar -zxvf yaml-cpp-${YAML_VERSION}.tar.gz
 
-ln -s yaml-cpp-${YAML_VERSION} yaml-cpp
+ln -s yaml-cpp-release-${YAML_VERSION} yaml-cpp
 
 ln -s boost_${BOOST_VERSION} boost
 
 export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
+echo $BOOST_ROOT
+cd $BOOST_ROOT
 
-cd yaml-cpp-${YAML_VERSION}
+cd ../yaml-cpp
 
 mkdir build
 
 cd build
 
-cmake ..
+CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
 
 make -j 32
+
+# Copy the shared library to $FOAM_USER_LIBBIN
+mkdir -p ${FOAM_USER_LIBBIN}
+
+cp libyaml-cpp.so.0.5.2 ${FOAM_USER_LIBBIN}/
+cp libyaml-cpp.so.0.5 ${FOAM_USER_LIBBIN}/
+cp libyaml-cpp.so ${FOAM_USER_LIBBIN}/

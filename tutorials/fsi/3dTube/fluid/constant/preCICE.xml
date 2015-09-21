@@ -33,9 +33,9 @@
             <use-mesh name="Structure_CellCenters" from="Structure_Solver" />
             <write-data mesh="Fluid_CellCenters" name="Stresses" />
             <read-data mesh="Fluid_Nodes" name="Displacements" />
-            <mapping:rbf-thin-plate-splines direction="write" from="Fluid_CellCenters" to="Structure_CellCenters" constraint="consistent" timing="initial"/>
-            <mapping:rbf-thin-plate-splines direction="read" from="Structure_Nodes" to="Fluid_Nodes" constraint="consistent" timing="initial"/>
-            <server:sockets exchange-directory="./" />
+            <mapping:nearest-neighbor direction="write" from="Fluid_CellCenters" to="Structure_CellCenters" constraint="conservative" timing="initial"/>
+            <mapping:nearest-neighbor direction="read" from="Structure_Nodes" to="Fluid_Nodes" constraint="consistent" timing="initial"/>
+            <master:mpi-single />
         </participant>
 
         <participant name="Structure_Solver">
@@ -43,11 +43,12 @@
             <use-mesh name="Structure_CellCenters" provide="yes"/>
             <write-data mesh="Structure_Nodes" name="Displacements" />
             <read-data mesh="Structure_CellCenters" name="Stresses" />
-            <server:sockets exchange-directory="./" />
+            <master:mpi-single />
         </participant>
 
         <m2n:sockets exchange-directory="../" from="Fluid_Solver" to="Structure_Solver" />
         <!-- OSX: <m2n:sockets network="lo0" exchange-directory="../" from="Fluid_Solver" to="Structure_Solver" />-->
+        <!-- supermuc: <m2n:sockets network="ib0" exchange-directory="../" from="Fluid_Solver" to="Structure_Solver" />-->
 
         <coupling-scheme:serial-implicit>
             <timestep-length value="1.0e-4" />
