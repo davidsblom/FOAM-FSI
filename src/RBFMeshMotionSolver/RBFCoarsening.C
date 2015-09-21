@@ -298,7 +298,7 @@ namespace rbf
             << "Using surfaceCorrection and radius is manually set by surfaceCorrectionRadius: " << surfaceCorrectionRadius << ". This could lead to bad/invalid meshes." << endl;
         }
 
-        if ( debug == 3 )
+        if ( debug > 2 )
         {
             std::string filename = "totalInterpolationTimings.txt";
             std::ofstream timingFile( filename, std::ofstream::app );
@@ -440,10 +440,10 @@ namespace rbf
                 double largestError = errorList.maxCoeff( &index );
 
                 // Additional function to check whether the largestError = 0 (<SMALL) and do select next consecutive point
-                if ( largestError < SMALL )
+                /*if ( largestError < SMALL )
                 {
                     index = selectedPositions.rows();
-                }
+                }*/
 
                 int index2 = -1;
                 double largestError2 = -1;
@@ -478,6 +478,45 @@ namespace rbf
 
                 // bool convergence = (error < tol && counter >= minPoints) || counter >= maxNbPoints;//only take 2-norm
                 bool convergence = (error < tol && errorMax < tol && counter >= minPoints) || counter >= maxNbPoints;//take both 2-norm and Inf-norm
+
+                //check actual error if unit disp is used and print this out
+                if ( !livePointSelection && debug > 3 )
+                {
+                    // Construct values to interpolate based on unit displacement selected points
+                    rbf::matrix valuesCoarseActual( selectedPositions.rows(), values.cols() );
+                    rbf::matrix valuesInterpolationCoarseActual( positions.rows(), values.cols() );
+
+                    for ( int j = 0; j < selectedPositions.rows(); j++ )
+                        valuesCoarseActual.row( j ) = this->values.row( selectedPositions( j ) );
+
+                    // This will return the displaced surface in valuesInterpolationCoarseActual
+                    rbfCoarse->interpolate2( valuesCoarseActual, valuesInterpolationCoarseActual );
+
+                    // Evaluate the error
+                    rbf::vector errorListActual( positions.rows() );
+                    for ( int j = 0; j < valuesInterpolationCoarseActual.rows(); j++ )
+                        errorListActual( j ) = ( valuesInterpolationCoarseActual.row( j ) - this->values.row( j ) ).norm();
+
+                    double errorA = (errorListActual).norm() / ( ( this->values.rowwise().norm() ).norm());
+                    double errorMaxA = errorListActual.maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() );
+
+                    Info << "RBFCoarsening::UnitDisplacement::debug 4: Nc = " << selectedPositions.rows() << ", 2-norm error = " << errorA << ", max error = " << errorMaxA << endl;
+
+                    if(valuesInterpolationCoarseActual.rows() == valuesCoarseActual.rows())
+                    {
+                        Info << ( ( valuesInterpolationCoarseActual - valuesCoarseActual).rowwise().norm() ).norm() << endl;
+                        for(int j = 0; j < positions.rows(); j++ )
+                        {
+                            for(int k=0; k < selectedPositions.rows(); k++)
+                            {
+                                if(selectedPositions.row(j) == selectedPositions.row(k) && j!=k)
+                                {
+                                    std::cout << "HAAAAAAAAAAA->dubbel puntje: " << selectedPositions.row(j) << "==" << selectedPositions.row(k) <<" at index " << j << " and " << k << std::endl;
+                                }
+                            }
+                        }
+                    }
+                }
 
                 if ( convergence )
                 {
@@ -582,7 +621,7 @@ namespace rbf
         {
             if ( livePointSelection )
             {
-                if ( debug == 3 )
+                if ( debug > 2 )
                 {
                     tp = std::clock();
                 }
@@ -657,7 +696,7 @@ namespace rbf
                     }
                 }
 
-                if ( debug == 3 )
+                if ( debug > 2 )
                 {
                     tp = std::clock() - tp;
                     runTimeError = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -718,7 +757,7 @@ namespace rbf
                     }
                 }
 
-                if ( debug == 3 )
+                if ( debug > 2 )
                 {
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -728,7 +767,19 @@ namespace rbf
             else
             if ( !rbf->computed )//unit displacement
             {
-                if ( debug == 3 )
+                //set values for calculation of real error during greedy
+                if ( debug > 3)
+                {
+                    if ( livePointSelectionSumValues )
+                    {
+                        if ( this->values.cols() != values.cols() )
+                            this->values = values;
+                        else
+                            this->values.array() += values.array();
+                    }
+                }
+
+                if ( debug > 2 )
                 {
                     tp = std::clock();
                 }
@@ -748,7 +799,7 @@ namespace rbf
 
                 greedySelection( unitDisplacement );
 
-                if ( debug == 3 )
+                if ( debug > 2 )
                 {
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -813,7 +864,7 @@ namespace rbf
 
                 rbf->Hhat.conservativeResize( rbf->Hhat.rows(), rbf->Hhat.cols() - nbStaticFaceCentersRemove );
 
-                if ( debug == 3 )
+                if ( debug > 2 )
                 {
                     tp = std::clock() - tp;
                     runTimeError = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -822,7 +873,7 @@ namespace rbf
             }
             else // This means there is unit displacement used, but rbf is already computed. Only used for debug things to track error.
             {
-                if ( debug == 3 )
+                if ( debug > 2 )
                 {
                     tp = std::clock();
                 }
@@ -879,7 +930,7 @@ namespace rbf
                     }
                 }
 
-                if ( debug == 3 )
+                if ( debug > 2 )
                 {
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -906,7 +957,7 @@ namespace rbf
         usedValues.conservativeResize( usedValues.rows() - nbStaticFaceCentersRemove, usedValues.cols() );
         rbf->interpolate( usedValues, valuesInterpolation );
 
-        if ( debug == 3 )
+        if ( debug > 2 )
         {
             tp = std::clock() - tp;
             runTimeInterpolate = static_cast<float>(tp) / CLOCKS_PER_SEC;
@@ -920,14 +971,14 @@ namespace rbf
         }
 
         //DEBUG STATEMENT
-        if ( debug == 3 )
+        if ( debug > 2 )
         {
             tp = std::clock() - tp;
             runTimeCorrect = static_cast<float>(tp) / CLOCKS_PER_SEC;
             tp = std::clock();
         }
         //DEBUG STATEMENT
-        if ( debug == 3 )
+        if ( debug > 2 )
         {
             t = std::clock() - t;
             double runTimeINTP = static_cast<float>(t) / CLOCKS_PER_SEC;
