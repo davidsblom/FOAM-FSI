@@ -480,7 +480,8 @@ namespace rbf
                 bool convergence = (error < tol && errorMax < tol && counter >= minPoints) || counter >= maxNbPoints;//take both 2-norm and Inf-norm
 
                 //check actual error if unit disp is used and print this out
-                if ( !livePointSelection && debug > 3 )
+                //if ( !livePointSelection && debug > 3 )
+                if ( debug > 3 )
                 {
                     // Construct values to interpolate based on unit displacement selected points
                     rbf::matrix valuesCoarseActual( selectedPositions.rows(), values.cols() );
@@ -501,6 +502,15 @@ namespace rbf
                     double errorMaxA = errorListActual.maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() );
 
                     Info << "RBFCoarsening::UnitDisplacement::debug 4: Nc = " << selectedPositions.rows() << ", 2-norm error = " << errorA << ", max error = " << errorMaxA << endl;
+
+                    if ( exportTxt )
+                    {
+                        std::string fileNameTXT = "rbf-coarsening-greedy-selection-error" + std::to_string( fileExportIndex ) + ".txt";
+                        std::ofstream fileTXT( fileNameTXT, std::ofstream::app );
+
+                        if ( fileTXT.is_open() )
+                            fileTXT << selectedPositions.rows() << " " << errorA << " "  << errorMaxA << " " << error << " " << errorMax << std::endl;
+                    }
 
                     if(valuesInterpolationCoarseActual.rows() == valuesCoarseActual.rows())
                     {
