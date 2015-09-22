@@ -4,7 +4,9 @@ EXE_INC = -std=c++11 \
 	-I$(LIB_SRC)/finiteVolume/lnInclude \
 	-I../fsi/lnInclude \
 	-I../thirdParty/eigen \	
-	-I../thirdParty/boost
+	-I../thirdParty/boost \
+        -I../thirdParty/yaml-cpp/include \
 
 LIB_LIBS = \
-	-L$(FOAM_USER_LIBBIN)
+	-L$(FOAM_USER_LIBBIN) \
+        -lyaml-cpp
