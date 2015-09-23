@@ -397,6 +397,8 @@ namespace rbf
 
                 // Add second point
                 selectedPositions( 1 ) = maxRadiusIndex;
+
+                assert( selectedPositions( 0 ) != selectedPositions( 1 ) );
             }
 
             assert( positions.rows() >= selectedPositions.rows() );
