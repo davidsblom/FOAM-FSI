@@ -57,7 +57,11 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        if(runTime.timeIndex()==4)
+        if(runTime.timeIndex()==1)
+        {
+            runTime.setDeltaT(0.75+oldDeltaT);
+        }
+        else if(runTime.timeIndex()==2)
         {
             runTime.setDeltaT(oldDeltaT);
         }
@@ -69,7 +73,7 @@ int main(int argc, char *argv[])
         //Get motion of bodies and update mesh accordingly
         bodyCol.update();
 		ms.setMotion(bodyCol.getPatchMotion());
-        bool meshChanged = mesh.update();
+        mesh.update();
 
         runTime.write();
 		bodyCol.write();
