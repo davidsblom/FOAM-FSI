@@ -479,6 +479,7 @@ namespace rbf
                 // bool convergence = (error < tol && counter >= minPoints) || counter >= maxNbPoints;//only take 2-norm
                 bool convergence = (error < tol && errorMax < tol && counter >= minPoints) || counter >= maxNbPoints;//take both 2-norm and Inf-norm
 
+                //================== DEBUG == 4 ===============//
                 //check actual error if unit disp is used and print this out
                 //if ( !livePointSelection && debug > 3 )
                 if ( debug > 3 )
@@ -512,7 +513,36 @@ namespace rbf
                             fileTXT << selectedPositions.rows() << " " << errorA << " "  << errorMaxA << " " << error << " " << errorMax << std::endl;
                     }
 
-                    if(valuesInterpolationCoarseActual.rows() == valuesCoarseActual.rows())
+                    //Check for double points
+                    for(int j=0; j < selectedPositions.rows(); j++)
+                    {
+                        if( index == selectedPositions(j) )
+                        {
+                            //Find second largest error
+                            double secondLargestError = -1.0;
+                            int indexSecondLargestError = -1;
+                            for(int k=0; k< errorList.rows() ; k++ )
+                            {
+                                if(errorList(k) > secondLargestError && k != index )
+                                {
+                                    secondLargestError = errorList(k);
+                                    indexSecondLargestError = k;
+                                }
+                            }
+                            std::cout << "second largest error found = " << secondLargestError << " at index " << indexSecondLargestError << std::endl;
+
+                            //print out stuff
+                            for(int j=0; j < selectedPositions.rows(); j++)
+                            {
+                                std::cout << j << ": " << selectedPositions(j) << " -> " << errorList(selectedPositions(j)) << " <? " << largestError << "::::: (x,y,z) = " << positions.row(selectedPositions(j)) << ", (dx,dy,z) = " << values.row(selectedPositions(j)) << std::endl;
+                            }
+                            std::cout << "new point: " << index << " -> " << errorList(index) << " <? " << largestError << "::::: (x,y,z) = " << positions.row(selectedPositions(j)) << ", (dx,dy,z) = " << values.row(selectedPositions(j)) << std::endl;
+                        }
+                        assert(index != selectedPositions(j));
+                    }
+
+                    //Check for double points at the end
+                    /*if(valuesInterpolationCoarseActual.rows() == valuesCoarseActual.rows())
                     {
                         Info << ( ( valuesInterpolationCoarseActual - valuesCoarseActual).rowwise().norm() ).norm() << endl;
                         for(int j = 0; j < positions.rows(); j++ )
@@ -525,8 +555,9 @@ namespace rbf
                                 }
                             }
                         }
-                    }
+                    }*/
                 }
+                //================== END DEBUG == 4 ===============//
 
                 if ( convergence )
                 {
