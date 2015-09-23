@@ -399,6 +399,10 @@ namespace rbf
                 selectedPositions( 1 ) = maxRadiusIndex;
 
                 assert( selectedPositions( 0 ) != selectedPositions( 1 ) );
+                
+                // Reset interpolation object
+                rbfCoarse.reset();
+                rbfCoarse = std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction, rbf->polynomialTerm, rbf->cpu ) );
             }
 
             assert( positions.rows() >= selectedPositions.rows() );
