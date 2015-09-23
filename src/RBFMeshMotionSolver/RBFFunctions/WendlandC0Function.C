@@ -39,7 +39,6 @@ namespace rbf
         return 2;
     }
 
-
     void WendlandC0Function::setRadius( double value )
     {
         assert( value > 0 );

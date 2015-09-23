@@ -97,7 +97,10 @@ public:
             int nbStaticFaceCenters
             );
 
-        void correctSurface( matrix & valuesInterpolation, const matrix & surfaceError );
+        void correctSurface(
+            matrix & valuesInterpolation,
+            const matrix & surfaceError
+            );
 
         std::shared_ptr<RBFInterpolation> rbf;
         std::shared_ptr<RBFInterpolation> rbfCoarse;

@@ -343,7 +343,8 @@ namespace rbf
                 reduce( bla, sumOp<boolList>() );
 
                 ttmp = std::clock();
-                //Pout << "Debug Interpolation of CPU " << Pstream::myProcNo() << " valuesInterpolation: " << valuesInterpolation.rows() << ", " << valuesInterpolation.cols() << nl;
+
+                // Pout << "Debug Interpolation of CPU " << Pstream::myProcNo() << " valuesInterpolation: " << valuesInterpolation.rows() << ", " << valuesInterpolation.cols() << nl;
             }
 
             valuesInterpolation = Hhat * values;
@@ -353,7 +354,8 @@ namespace rbf
             if ( debug == 3 )
             {
                 ttmp = std::clock() - ttmp;
-                //Pout << "Debug Interpolation of CPU " << Pstream::myProcNo() << " of [" << Hhat.rows() << ", " << Hhat.cols() << "]x[" << values.rows() << ", " << values.cols() << "]: " << static_cast<float>(ttmp) / CLOCKS_PER_SEC << " s" << endl;
+
+                // Pout << "Debug Interpolation of CPU " << Pstream::myProcNo() << " of [" << Hhat.rows() << ", " << Hhat.cols() << "]x[" << values.rows() << ", " << values.cols() << "]: " << static_cast<float>(ttmp) / CLOCKS_PER_SEC << " s" << endl;
             }
         }
 

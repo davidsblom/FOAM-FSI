@@ -25,7 +25,7 @@ namespace rbf
         if ( 1 - value < 0 )
             return 0;
 
-        //return 1 - 10 * value * value * value + 15 * value * value * value * value - 6 * value * value * value * value * value;
+        // return 1 - 10 * value * value * value + 15 * value * value * value * value - 6 * value * value * value * value * value;
         return 1 - 35 * value * value * value * value + 84 * value * value * value * value * value - 70 * value * value * value * value * value * value + 20 * value * value * value * value * value * value * value;
     }
 
@@ -38,7 +38,6 @@ namespace rbf
     {
         return 35;
     }
-
 
     void GillebaartR4bFunction::setRadius( double value )
     {

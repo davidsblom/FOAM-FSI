@@ -36,9 +36,8 @@ namespace rbf
 
     double WendlandC4Function::correctionPowerCoeff()
     {
-        return 28.0/3.0;
+        return 28.0 / 3.0;
     }
-
 
     void WendlandC4Function::setRadius( double value )
     {

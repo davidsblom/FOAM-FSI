@@ -128,7 +128,7 @@ void RBFMeshMotionSolver::setSurfaceCorrectionFunction(
     word surfaceCorrectionFunctionName
     )
 {
-    assert( surfaceCorrectionFunctionName == "WendlandC0" || surfaceCorrectionFunctionName == "WendlandC2" || surfaceCorrectionFunctionName == "WendlandC4" || surfaceCorrectionFunctionName == "WendlandC6" || surfaceCorrectionFunctionName == "GillebaartR3" || surfaceCorrectionFunctionName == "GillebaartR3a" || surfaceCorrectionFunctionName == "GillebaartR3c" || surfaceCorrectionFunctionName == "GillebaartR3d" || surfaceCorrectionFunctionName == "GillebaartR4b");
+    assert( surfaceCorrectionFunctionName == "WendlandC0" || surfaceCorrectionFunctionName == "WendlandC2" || surfaceCorrectionFunctionName == "WendlandC4" || surfaceCorrectionFunctionName == "WendlandC6" || surfaceCorrectionFunctionName == "GillebaartR3" || surfaceCorrectionFunctionName == "GillebaartR3a" || surfaceCorrectionFunctionName == "GillebaartR3c" || surfaceCorrectionFunctionName == "GillebaartR3d" || surfaceCorrectionFunctionName == "GillebaartR4b" );
 
     Info << "Radial Basis Function coarsening: Selecting surface correction RBF function: " << surfaceCorrectionFunctionName << endl;
 
@@ -346,15 +346,16 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         twoPointSelection = subDict( "coarsening" ).lookupOrDefault( "twoPointSelection", false );
     }
 
-    //settings for live point selection
+    // settings for live point selection
     bool cleanReselection = true;
+
     if ( livePointSelection )
     {
         tolLivePointSelection = readScalar( subDict( "coarsening" ).lookup( "tolLivePointSelection" ) );
         cleanReselection = subDict( "coarsening" ).lookupOrDefault( "cleanReselection", true );
     }
 
-    //surface correction settings
+    // surface correction settings
     bool surfaceCorrection = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrection", false );
     std::shared_ptr<rbf::RBFFunctionInterface> surfaceCorrectionFunction;
     word surfaceCorrectionFunctionName = "";
@@ -362,7 +363,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     double minCorrectionRadius = -1.0;
     double surfaceCorrectionRadius = -1.0;
 
-    //set values for surface correction if enabled
+    // set values for surface correction if enabled
     if ( surfaceCorrection )
     {
         surfaceCorrectionFunctionName = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionFunction", word( "WendlandC2" ) );
@@ -386,10 +387,10 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         surfaceCorrectionRadius = subDict( "coarsening" ).lookupOrDefault( "surfaceCorrectionRadius", -1.0 );
     }
 
-    //Create rbf coarsening object
+    // Create rbf coarsening object
     rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, surfaceCorrectionFunction, ratioRadiusError, minCorrectionRadius, surfaceCorrectionRadius, cleanReselection, exportSelectedPoints ) );
 
-    //Check which points to collect: faceCentres or mesh points
+    // Check which points to collect: faceCentres or mesh points
     faceCellCenters = lookupOrDefault( "faceCellCenters", true );
 
     // Print out options for user
@@ -403,19 +404,20 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
         Info << "    interpolation from face cell centers = " << faceCellCenters << endl;
     }
 
-    if( coarsening )
+    if ( coarsening )
     {
         Info << "    coarsening = " << coarsening << endl;
         Info << "        livePointSelection = " << livePointSelection << endl;
         Info << "        coarsening tolerance = " << tol << endl;
         Info << "        coarsening two-point selection = " << twoPointSelection << endl;
+
         if ( livePointSelection )
         {
             Info << "        coarsening reselection tolerance = " << tolLivePointSelection << endl;
             Info << "        cleanReselection = " << cleanReselection << endl;
         }
-        Info << "        coarsening surface correction = " << surfaceCorrection << endl;
 
+        Info << "        coarsening surface correction = " << surfaceCorrection << endl;
 
         if ( debug > 0 && surfaceCorrection )
         {

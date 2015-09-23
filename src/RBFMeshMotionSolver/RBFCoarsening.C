@@ -216,7 +216,8 @@ namespace rbf
         assert( tolLivePointSelection > 0 );
         assert( tolLivePointSelection < 1 );
 
-        if ( not enabled ) assert( not surfaceCorrection );
+        if ( not enabled )
+            assert( not surfaceCorrection );
 
         // If unit displacement do not use polynomial for selection
         if ( enabled && !livePointSelection && rbf->polynomialTerm )
@@ -283,7 +284,8 @@ namespace rbf
         assert( tolLivePointSelection > 0 );
         assert( tolLivePointSelection < 1 );
 
-        if ( not enabled ) assert( not surfaceCorrection );
+        if ( not enabled )
+            assert( not surfaceCorrection );
 
         // If unit displacement do not use polynomial for selection
         if ( enabled && !livePointSelection && rbf->polynomialTerm )
@@ -349,47 +351,52 @@ namespace rbf
             if ( cleanReselection || selectedPositions.rows() == maxNbPoints || selectedPositions.rows() == 0 )
             {
                 selectedPositions.resize( 2 );
-                if( livePointSelection )
+
+                if ( livePointSelection )
                 {
                     // Select the point with the largest displacment
                     int maxDisplacementIndex = -1;
                     ( values.rowwise().norm() ).maxCoeff( &maxDisplacementIndex );
-                    //Add first point
+
+                    // Add first point
                     selectedPositions( 0 ) = maxDisplacementIndex;
                 }
                 else
                 {
-                    //With unit displacement, first point is point with largest radius from origin and displacement > 0
+                    // With unit displacement, first point is point with largest radius from origin and displacement > 0
                     vector rad = positions.rowwise().norm();
 
                     int maxRadiusFromOriginIndex = -1;
                     double maxRadius = -1;
-                    for(int i=0;i<rad.rows();i++)
+
+                    for ( int i = 0; i < rad.rows(); i++ )
                     {
-                        if(rad(i) > maxRadius &&  values.row(i).norm() > SMALL )
+                        if ( rad( i ) > maxRadius && values.row( i ).norm() > SMALL )
                         {
-                            maxRadius = rad(i);
+                            maxRadius = rad( i );
                             maxRadiusFromOriginIndex = i;
                         }
                     }
+
                     selectedPositions( 0 ) = maxRadiusFromOriginIndex;
                 }
 
-                //Find point with largest distance from first point
-                vector rad = ( positions - ( matrix::Constant( positions.rows(), 1, 1.0 )*positions.row( selectedPositions(0) ) ) ).rowwise().norm();
+                // Find point with largest distance from first point
+                vector rad = ( positions - ( matrix::Constant( positions.rows(), 1, 1.0 ) * positions.row( selectedPositions( 0 ) ) ) ).rowwise().norm();
                 int maxRadiusIndex = -1;
                 double maxRadius = -1;
-                for(int i=0;i<rad.rows();i++)
+
+                for ( int i = 0; i < rad.rows(); i++ )
                 {
-                    if(rad(i) > maxRadius && (rad(i) < 1.0 - SMALL || rad(i) > 1.0 + SMALL))
+                    if ( rad( i ) > maxRadius && (rad( i ) < 1.0 - SMALL || rad( i ) > 1.0 + SMALL) )
                     {
-                        maxRadius = rad(i);
+                        maxRadius = rad( i );
                         maxRadiusIndex = i;
                     }
                 }
-                //Add second point
-                selectedPositions( 1 ) = maxRadiusIndex;
 
+                // Add second point
+                selectedPositions( 1 ) = maxRadiusIndex;
             }
 
             assert( positions.rows() >= selectedPositions.rows() );
@@ -440,10 +447,11 @@ namespace rbf
                 double largestError = errorList.maxCoeff( &index );
 
                 // Additional function to check whether the largestError = 0 (<SMALL) and do select next consecutive point
+
                 /*if ( largestError < SMALL )
-                {
-                    index = selectedPositions.rows();
-                }*/
+                 * {
+                 *  index = selectedPositions.rows();
+                 * }*/
 
                 int index2 = -1;
                 double largestError2 = -1;
@@ -477,11 +485,11 @@ namespace rbf
                 errorMax = largestError / ( ( values.rowwise().norm() ).maxCoeff() + epsilon );
 
                 // bool convergence = (error < tol && counter >= minPoints) || counter >= maxNbPoints;//only take 2-norm
-                bool convergence = (error < tol && errorMax < tol && counter >= minPoints) || counter >= maxNbPoints;//take both 2-norm and Inf-norm
+                bool convergence = (error < tol && errorMax < tol && counter >= minPoints) || counter >= maxNbPoints; // take both 2-norm and Inf-norm
 
-                //================== DEBUG == 4 ===============//
-                //check actual error if unit disp is used and print this out
-                //if ( !livePointSelection && debug > 3 )
+                // ================== DEBUG == 4 ===============//
+                // check actual error if unit disp is used and print this out
+                // if ( !livePointSelection && debug > 3 )
                 if ( debug > 3 )
                 {
                     // Construct values to interpolate based on unit displacement selected points
@@ -496,10 +504,11 @@ namespace rbf
 
                     // Evaluate the error
                     rbf::vector errorListActual( positions.rows() );
+
                     for ( int j = 0; j < valuesInterpolationCoarseActual.rows(); j++ )
                         errorListActual( j ) = ( valuesInterpolationCoarseActual.row( j ) - this->values.row( j ) ).norm();
 
-                    double errorA = (errorListActual).norm() / ( ( this->values.rowwise().norm() ).norm());
+                    double errorA = (errorListActual).norm() / ( ( this->values.rowwise().norm() ).norm() );
                     double errorMaxA = errorListActual.maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() );
 
                     Info << "RBFCoarsening::UnitDisplacement::debug 4: Nc = " << selectedPositions.rows() << ", 2-norm error = " << errorA << ", max error = " << errorMaxA << endl;
@@ -510,54 +519,60 @@ namespace rbf
                         std::ofstream fileTXT( fileNameTXT, std::ofstream::app );
 
                         if ( fileTXT.is_open() )
-                            fileTXT << selectedPositions.rows() << " " << errorA << " "  << errorMaxA << " " << error << " " << errorMax << std::endl;
+                            fileTXT << selectedPositions.rows() << " " << errorA << " " << errorMaxA << " " << error << " " << errorMax << std::endl;
                     }
 
-                    //Check for double points
-                    for(int j=0; j < selectedPositions.rows(); j++)
+                    // Check for double points
+                    for ( int j = 0; j < selectedPositions.rows(); j++ )
                     {
-                        if( index == selectedPositions(j) )
+                        if ( index == selectedPositions( j ) )
                         {
-                            //Find second largest error
+                            // Find second largest error
                             double secondLargestError = -1.0;
                             int indexSecondLargestError = -1;
-                            for(int k=0; k< errorList.rows() ; k++ )
+
+                            for ( int k = 0; k < errorList.rows(); k++ )
                             {
-                                if(errorList(k) > secondLargestError && k != index )
+                                if ( errorList( k ) > secondLargestError && k != index )
                                 {
-                                    secondLargestError = errorList(k);
+                                    secondLargestError = errorList( k );
                                     indexSecondLargestError = k;
                                 }
                             }
+
                             std::cout << "second largest error found = " << secondLargestError << " at index " << indexSecondLargestError << std::endl;
 
-                            //print out stuff
-                            for(int j=0; j < selectedPositions.rows(); j++)
+                            // print out stuff
+                            for ( int j = 0; j < selectedPositions.rows(); j++ )
                             {
-                                std::cout << j << ": " << selectedPositions(j) << " -> " << errorList(selectedPositions(j)) << " <? " << largestError << "::::: (x,y,z) = " << positions.row(selectedPositions(j)) << ", (dx,dy,z) = " << values.row(selectedPositions(j)) << std::endl;
+                                std::cout << j << ": " << selectedPositions( j ) << " -> " << errorList( selectedPositions( j ) ) << " <? " << largestError << "::::: (x,y,z) = " << positions.row( selectedPositions( j ) ) << ", (dx,dy,z) = " << values.row( selectedPositions( j ) ) << std::endl;
                             }
-                            std::cout << "new point: " << index << " -> " << errorList(index) << " <? " << largestError << "::::: (x,y,z) = " << positions.row(selectedPositions(j)) << ", (dx,dy,z) = " << values.row(selectedPositions(j)) << std::endl;
+
+                            std::cout << "new point: " << index << " -> " << errorList( index ) << " <? " << largestError << "::::: (x,y,z) = " << positions.row( selectedPositions( j ) ) << ", (dx,dy,z) = " << values.row( selectedPositions( j ) ) << std::endl;
                         }
-                        assert(index != selectedPositions(j));
+
+                        assert( index != selectedPositions( j ) );
                     }
 
-                    //Check for double points at the end
+                    // Check for double points at the end
+
                     /*if(valuesInterpolationCoarseActual.rows() == valuesCoarseActual.rows())
-                    {
-                        Info << ( ( valuesInterpolationCoarseActual - valuesCoarseActual).rowwise().norm() ).norm() << endl;
-                        for(int j = 0; j < positions.rows(); j++ )
-                        {
-                            for(int k=0; k < selectedPositions.rows(); k++)
-                            {
-                                if(selectedPositions.row(j) == selectedPositions.row(k) && j!=k)
-                                {
-                                    std::cout << "HAAAAAAAAAAA->dubbel puntje: " << selectedPositions.row(j) << "==" << selectedPositions.row(k) <<" at index " << j << " and " << k << std::endl;
-                                }
-                            }
-                        }
-                    }*/
+                     * {
+                     *  Info << ( ( valuesInterpolationCoarseActual - valuesCoarseActual).rowwise().norm() ).norm() << endl;
+                     *  for(int j = 0; j < positions.rows(); j++ )
+                     *  {
+                     *      for(int k=0; k < selectedPositions.rows(); k++)
+                     *      {
+                     *          if(selectedPositions.row(j) == selectedPositions.row(k) && j!=k)
+                     *          {
+                     *              std::cout << "HAAAAAAAAAAA->dubbel puntje: " << selectedPositions.row(j) << "==" << selectedPositions.row(k) <<" at index " << j << " and " << k << std::endl;
+                     *          }
+                     *      }
+                     *  }
+                     * }*/
                 }
-                //================== END DEBUG == 4 ===============//
+
+                // ================== END DEBUG == 4 ===============//
 
                 if ( convergence )
                 {
@@ -700,7 +715,7 @@ namespace rbf
                     double errorMax = ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() / ( ( this->values.rowwise().norm() ).maxCoeff() + epsilon );
 
                     // bool convergence = error < tolLivePointSelection;//only take the 2-norm error
-                    bool convergence = (error < tolLivePointSelection && errorMax < tolLivePointSelection);//take both 2-norm and Inf-norm error as convergence
+                    bool convergence = (error < tolLivePointSelection && errorMax < tolLivePointSelection); // take both 2-norm and Inf-norm error as convergence
 
                     if ( convergence )
                         reselection = false;
@@ -717,7 +732,7 @@ namespace rbf
                     // If debug is 2: Print out surface error to file
                     if ( debug >= 2 && Pstream::myProcNo() == 0 && not rbf->polynomialTerm )
                     {
-                        Info << "Debug 2: 2-norm(error|disp) = " << (errorInterpolationCoarse).matrix().norm() << "|" << this->values.norm() << ", Inf-norm(error|disp) = " << (errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << "|" << (this->values.rowwise().norm() ).maxCoeff() << endl;
+                        Info << "Debug 2: 2-norm(error|disp) = " << (errorInterpolationCoarse).matrix().norm() << "|" << this->values.norm() << ", Inf-norm(error|disp) = " << ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << "|" << ( this->values.rowwise().norm() ).maxCoeff() << endl;
 
                         std::string filename = "liveSelection-rbf-surfaceError.txt";
 
@@ -729,7 +744,7 @@ namespace rbf
 
                             if ( !reselection )
                             {
-                                surfaceErrorFile << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << ", " << (errorInterpolationCoarse).matrix().norm() << ", " << this->values.norm() << ", " << (errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << ", " << (this->values.rowwise().norm() ).maxCoeff() << "\n";
+                                surfaceErrorFile << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << ", " << (errorInterpolationCoarse).matrix().norm() << ", " << this->values.norm() << ", " << ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << ", " << ( this->values.rowwise().norm() ).maxCoeff() << "\n";
                             }
                         }
 
@@ -779,9 +794,10 @@ namespace rbf
                             std::ofstream surfaceErrorFile( filename, std::ofstream::app );
 
                             surfaceErrorFile << "eps_2, eps_max, Nc, Nb, eps_2, eps_max, reselected, error_2, dx_2, error_max, dx_max" << "\n";
+
                             if ( surfaceErrorFile.is_open() )
                             {
-                                surfaceErrorFile << error << ", " << errorMax << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << ", " << (errorInterpolationCoarse).matrix().norm() << ", " << this->values.norm() << ", " << (errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << ", " << (this->values.rowwise().norm() ).maxCoeff() << "\n";
+                                surfaceErrorFile << error << ", " << errorMax << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << ", " << (errorInterpolationCoarse).matrix().norm() << ", " << this->values.norm() << ", " << ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << ", " << ( this->values.rowwise().norm() ).maxCoeff() << "\n";
                             }
 
                             surfaceErrorFile.close();
@@ -792,7 +808,7 @@ namespace rbf
 
                             if ( surfaceErrorFile.is_open() )
                             {
-                                surfaceErrorFile << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << ", " << (errorInterpolationCoarse).matrix().norm() << ", " << this->values.norm() << ", " << (errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << ", " << (this->values.rowwise().norm() ).maxCoeff() << "\n";
+                                surfaceErrorFile << ", " << valuesCoarse.rows() << ", " << valuesInterpolationCoarse.rows() << ", " << error << ", " << errorMax << ", " << reselection << ", " << (errorInterpolationCoarse).matrix().norm() << ", " << this->values.norm() << ", " << ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff() << ", " << ( this->values.rowwise().norm() ).maxCoeff() << "\n";
                             }
                         }
                     }
@@ -806,10 +822,10 @@ namespace rbf
                 }
             }
             else
-            if ( !rbf->computed )//unit displacement
+            if ( !rbf->computed ) // unit displacement
             {
-                //set values for calculation of real error during greedy
-                if ( debug > 3)
+                // set values for calculation of real error during greedy
+                if ( debug > 3 )
                 {
                     if ( livePointSelectionSumValues )
                     {
@@ -847,7 +863,7 @@ namespace rbf
                     tp = std::clock();
                 }
 
-                if( surfaceCorrection )
+                if ( surfaceCorrection )
                 {
                     if ( livePointSelectionSumValues )
                     {
@@ -867,7 +883,7 @@ namespace rbf
                     // This will return the displaced surface in valuesInterpolationCoarse
                     rbfCoarse->interpolate2( valuesCoarse, valuesInterpolationCoarse );
 
-                    //Calculate error for surfaceCorrection
+                    // Calculate error for surfaceCorrection
                     errorInterpolationCoarse = valuesInterpolationCoarse - this->values;
 
                     if ( debug > 0 )
@@ -890,7 +906,7 @@ namespace rbf
                             std::string filename = "unitSelection-rbf-surfaceError.txt";
                             std::ofstream surfaceErrorFile( filename, std::ofstream::app );
 
-                            //Should only happen first time
+                            // Should only happen first time
                             surfaceErrorFile << "eps_2, eps_max, Nc, Nb" << "\n";
 
                             if ( surfaceErrorFile.is_open() )
@@ -939,13 +955,14 @@ namespace rbf
                     // This will return the displaced surface in valuesInterpolationCoarse
                     rbfCoarse->interpolate2( valuesCoarse, valuesInterpolationCoarse );
 
-                    //Calculate error for surfaceCorrection
+                    // Calculate error for surfaceCorrection
                     errorInterpolationCoarse = valuesInterpolationCoarse - this->values;
 
                     if ( debug > 0 )
                     {
                         // Evaluate the error
                         rbf::vector errorList( positions.rows() );
+
                         for ( int j = 0; j < errorInterpolationCoarse.rows(); j++ )
                             errorList( j ) = ( errorInterpolationCoarse.row( j ) ).norm();
 
@@ -1011,14 +1028,15 @@ namespace rbf
             correctSurface( valuesInterpolation, errorInterpolationCoarse );
         }
 
-        //DEBUG STATEMENT
+        // DEBUG STATEMENT
         if ( debug > 2 )
         {
             tp = std::clock() - tp;
             runTimeCorrect = static_cast<float>(tp) / CLOCKS_PER_SEC;
             tp = std::clock();
         }
-        //DEBUG STATEMENT
+
+        // DEBUG STATEMENT
         if ( debug > 2 )
         {
             t = std::clock() - t;
@@ -1042,11 +1060,15 @@ namespace rbf
         }
     }
 
-    void RBFCoarsening::correctSurface( matrix & valuesInterpolation, const matrix & surfaceError )
+    void RBFCoarsening::correctSurface(
+        matrix & valuesInterpolation,
+        const matrix & surfaceError
+        )
     {
         double maxError = ( surfaceError.rowwise().norm() ).maxCoeff();
-        //ensure that only performed when there is an error bigger than 0
-        if( maxError > SMALL )
+
+        // ensure that only performed when there is an error bigger than 0
+        if ( maxError > SMALL )
         {
             if ( valuesCorrection.rows() == 0 )
             {

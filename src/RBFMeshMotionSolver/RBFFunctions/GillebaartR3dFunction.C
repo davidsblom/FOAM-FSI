@@ -38,7 +38,6 @@ namespace rbf
         return 56;
     }
 
-
     void GillebaartR3dFunction::setRadius( double value )
     {
         assert( value > 0 );
