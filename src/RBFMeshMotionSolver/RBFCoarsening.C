@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <iomanip>
 #include "RBFCoarsening.H"
+#include <sys/time.h>
 
 namespace rbf
 {
@@ -399,7 +400,7 @@ namespace rbf
                 selectedPositions( 1 ) = maxRadiusIndex;
 
                 assert( selectedPositions( 0 ) != selectedPositions( 1 ) );
-                
+
                 // Reset interpolation object
                 rbfCoarse.reset();
                 rbfCoarse = std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction, rbf->polynomialTerm, rbf->cpu ) );
@@ -433,6 +434,7 @@ namespace rbf
                 }
 
                 std::clock_t t = std::clock();
+
 
                 // Perform the RBF interpolation.
                 rbfCoarse->interpolate( positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
@@ -670,6 +672,15 @@ namespace rbf
         matrix & valuesInterpolation
         )
     {
+        timeval t_day;
+        timeval tp_day;
+        gettimeofday(&t_day, 0);
+        gettimeofday(&tp_day, 0);
+        double runTimeError_day = 0.0;
+        double runTimeReselect_day = 0.0;
+        double runTimeInterpolate_day = 0.0;
+        double runTimeCorrect_day = 0.0;
+
         std::clock_t t = std::clock();
         std::clock_t tp = std::clock();
         double runTimeError = 0.0;
@@ -686,6 +697,7 @@ namespace rbf
                 if ( debug > 2 )
                 {
                     tp = std::clock();
+                    gettimeofday(&tp_day, 0);
                 }
 
                 // For RBF mesh interpolation, the values to be interpolated need to be
@@ -760,9 +772,15 @@ namespace rbf
 
                 if ( debug > 2 )
                 {
+                    timeval t_tmp;
+                    gettimeofday(&t_tmp, 0);
+                    runTimeError_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
+                    gettimeofday(&tp_day, 0);
+
                     tp = std::clock() - tp;
                     runTimeError = static_cast<float>(tp) / CLOCKS_PER_SEC;
                     tp = std::clock();
+
                 }
 
                 if ( reselection )
@@ -822,6 +840,11 @@ namespace rbf
 
                 if ( debug > 2 )
                 {
+                    timeval t_tmp;
+                    gettimeofday(&t_tmp, 0);
+                    runTimeReselect_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
+                    gettimeofday(&tp_day, 0);
+
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
                     tp = std::clock();
@@ -845,6 +868,7 @@ namespace rbf
                 if ( debug > 2 )
                 {
                     tp = std::clock();
+                    gettimeofday(&tp_day, 0);
                 }
 
                 // Unit displacement of control points
@@ -864,6 +888,11 @@ namespace rbf
 
                 if ( debug > 2 )
                 {
+                    timeval t_tmp;
+                    gettimeofday(&t_tmp, 0);
+                    runTimeReselect_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
+                    gettimeofday(&tp_day, 0);
+
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
                     tp = std::clock();
@@ -929,6 +958,11 @@ namespace rbf
 
                 if ( debug > 2 )
                 {
+                    timeval t_tmp;
+                    gettimeofday(&t_tmp, 0);
+                    runTimeError_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
+                    gettimeofday(&tp_day, 0);
+
                     tp = std::clock() - tp;
                     runTimeError = static_cast<float>(tp) / CLOCKS_PER_SEC;
                     tp = std::clock();
@@ -939,6 +973,7 @@ namespace rbf
                 if ( debug > 2 )
                 {
                     tp = std::clock();
+                    gettimeofday(&tp_day, 0);
                 }
 
                 if ( surfaceCorrection )
@@ -996,6 +1031,11 @@ namespace rbf
 
                 if ( debug > 2 )
                 {
+                    timeval t_tmp;
+                    gettimeofday(&t_tmp, 0);
+                    runTimeReselect_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
+                    gettimeofday(&tp_day, 0);
+
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
                     tp = std::clock();
@@ -1023,6 +1063,11 @@ namespace rbf
 
         if ( debug > 2 )
         {
+            timeval t_tmp;
+            gettimeofday(&t_tmp, 0);
+            runTimeInterpolate_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
+            gettimeofday(&tp_day, 0);
+
             tp = std::clock() - tp;
             runTimeInterpolate = static_cast<float>(tp) / CLOCKS_PER_SEC;
             tp = std::clock();
@@ -1037,6 +1082,11 @@ namespace rbf
         // DEBUG STATEMENT
         if ( debug > 2 )
         {
+            timeval t_tmp;
+            gettimeofday(&t_tmp, 0);
+            runTimeCorrect_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
+            gettimeofday(&tp_day, 0);
+
             tp = std::clock() - tp;
             runTimeCorrect = static_cast<float>(tp) / CLOCKS_PER_SEC;
             tp = std::clock();
@@ -1058,7 +1108,7 @@ namespace rbf
 
                 if ( timingFile.is_open() )
                 {
-                    timingFile << std::setprecision( 9 ) << runTimeINTP << ", " << runTimeError << ", " << runTimeReselect << ", " << runTimeInterpolate << ", " << runTimeCorrect << "\n";
+                    timingFile << std::setprecision( 9 ) << runTimeINTP << ", " << runTimeError << ", " << runTimeReselect << ", " << runTimeInterpolate << ", " << runTimeCorrect << ", " << runTimeError_day << ", " << runTimeReselect_day << ", " << runTimeInterpolate_day << ", " << runTimeCorrect_day << "\n";
                 }
 
                 timingFile.close();
