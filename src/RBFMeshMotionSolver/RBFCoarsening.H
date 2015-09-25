@@ -15,7 +15,7 @@ namespace rbf
 {
     class RBFCoarsening
     {
-public:
+    public:
 
         RBFCoarsening( std::shared_ptr<RBFInterpolation> rbf );
 
@@ -133,6 +133,12 @@ public:
         bool computed;
 
         static debug::debugSwitch debug;
+
+    private:
+
+        double getwalltime() const;
+
+
     };
 }
 

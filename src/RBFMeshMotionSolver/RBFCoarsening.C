@@ -7,6 +7,8 @@
 #include <iomanip>
 #include "RBFCoarsening.H"
 #include <sys/time.h>
+#include <time.h>
+#include <chrono>
 
 namespace rbf
 {
@@ -307,7 +309,7 @@ namespace rbf
             std::ofstream timingFile( filename, std::ofstream::app );
 
             if ( Pstream::myProcNo() == 0 && not rbf->polynomialTerm )
-                timingFile << std::setprecision( 9 ) << "t_total, t_error, t_reselect, t_interpolate, t_correct" << "\n";
+                timingFile << std::setprecision( 9 ) << "t_total, t_error, t_reselect, t_interpolate, t_correct, tw_total, tw_error, tw_reselect, tw_interpolate, tw_correct" << "\n";
         }
     }
 
@@ -672,14 +674,12 @@ namespace rbf
         matrix & valuesInterpolation
         )
     {
-        timeval t_day;
-        timeval tp_day;
-        gettimeofday(&t_day, 0);
-        gettimeofday(&tp_day, 0);
-        double runTimeError_day = 0.0;
-        double runTimeReselect_day = 0.0;
-        double runTimeInterpolate_day = 0.0;
-        double runTimeCorrect_day = 0.0;
+        double tp_wall = getwalltime();
+        double t_wall = getwalltime();
+        double runTimeError_wall = 0.0;
+        double runTimeReselect_wall = 0.0;
+        double runTimeInterpolate_wall = 0.0;
+        double runTimeCorrect_wall = 0.0;
 
         std::clock_t t = std::clock();
         std::clock_t tp = std::clock();
@@ -697,7 +697,7 @@ namespace rbf
                 if ( debug > 2 )
                 {
                     tp = std::clock();
-                    gettimeofday(&tp_day, 0);
+                    tp_wall = getwalltime();
                 }
 
                 // For RBF mesh interpolation, the values to be interpolated need to be
@@ -772,15 +772,13 @@ namespace rbf
 
                 if ( debug > 2 )
                 {
-                    timeval t_tmp;
-                    gettimeofday(&t_tmp, 0);
-                    runTimeError_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
-                    gettimeofday(&tp_day, 0);
-
                     tp = std::clock() - tp;
                     runTimeError = static_cast<float>(tp) / CLOCKS_PER_SEC;
                     tp = std::clock();
 
+                    tp_wall = getwalltime() - tp_wall;
+                    runTimeError_wall = tp_wall;
+                    tp_wall = getwalltime();
                 }
 
                 if ( reselection )
@@ -840,14 +838,13 @@ namespace rbf
 
                 if ( debug > 2 )
                 {
-                    timeval t_tmp;
-                    gettimeofday(&t_tmp, 0);
-                    runTimeReselect_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
-                    gettimeofday(&tp_day, 0);
-
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
                     tp = std::clock();
+
+                    tp_wall = getwalltime() - tp_wall;
+                    runTimeReselect_wall = tp_wall;
+                    tp_wall = getwalltime();
                 }
             }
             else
@@ -868,7 +865,7 @@ namespace rbf
                 if ( debug > 2 )
                 {
                     tp = std::clock();
-                    gettimeofday(&tp_day, 0);
+                    tp_wall = getwalltime();
                 }
 
                 // Unit displacement of control points
@@ -888,14 +885,13 @@ namespace rbf
 
                 if ( debug > 2 )
                 {
-                    timeval t_tmp;
-                    gettimeofday(&t_tmp, 0);
-                    runTimeReselect_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
-                    gettimeofday(&tp_day, 0);
-
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
                     tp = std::clock();
+
+                    tp_wall = getwalltime() - tp_wall;
+                    runTimeReselect_wall = tp_wall;
+                    tp_wall = getwalltime();
                 }
 
                 if ( surfaceCorrection )
@@ -958,14 +954,13 @@ namespace rbf
 
                 if ( debug > 2 )
                 {
-                    timeval t_tmp;
-                    gettimeofday(&t_tmp, 0);
-                    runTimeError_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
-                    gettimeofday(&tp_day, 0);
-
                     tp = std::clock() - tp;
                     runTimeError = static_cast<float>(tp) / CLOCKS_PER_SEC;
                     tp = std::clock();
+
+                    tp_wall = getwalltime() - tp_wall;
+                    runTimeError_wall = tp_wall;
+                    tp_wall = getwalltime();
                 }
             }
             else // This means there is unit displacement used, but rbf is already computed. Only used for debug things to track error.
@@ -973,7 +968,7 @@ namespace rbf
                 if ( debug > 2 )
                 {
                     tp = std::clock();
-                    gettimeofday(&tp_day, 0);
+                    tp_wall = getwalltime();
                 }
 
                 if ( surfaceCorrection )
@@ -1031,14 +1026,13 @@ namespace rbf
 
                 if ( debug > 2 )
                 {
-                    timeval t_tmp;
-                    gettimeofday(&t_tmp, 0);
-                    runTimeReselect_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
-                    gettimeofday(&tp_day, 0);
-
                     tp = std::clock() - tp;
                     runTimeReselect = static_cast<float>(tp) / CLOCKS_PER_SEC;
                     tp = std::clock();
+
+                    tp_wall = getwalltime() - tp_wall;
+                    runTimeReselect_wall = tp_wall;
+                    tp_wall = getwalltime();
                 }
             }
 
@@ -1063,14 +1057,13 @@ namespace rbf
 
         if ( debug > 2 )
         {
-            timeval t_tmp;
-            gettimeofday(&t_tmp, 0);
-            runTimeInterpolate_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
-            gettimeofday(&tp_day, 0);
-
             tp = std::clock() - tp;
             runTimeInterpolate = static_cast<float>(tp) / CLOCKS_PER_SEC;
             tp = std::clock();
+
+            tp_wall = getwalltime() - tp_wall;
+            runTimeInterpolate_wall = tp_wall;
+            tp_wall = getwalltime();
         }
 
         // start doing correction of surface is requested (and possible)
@@ -1082,14 +1075,13 @@ namespace rbf
         // DEBUG STATEMENT
         if ( debug > 2 )
         {
-            timeval t_tmp;
-            gettimeofday(&t_tmp, 0);
-            runTimeCorrect_day = (t_tmp.tv_sec - tp_day.tv_sec) + (t_tmp.tv_usec - tp_day.tv_usec)/1e6;
-            gettimeofday(&tp_day, 0);
-
             tp = std::clock() - tp;
             runTimeCorrect = static_cast<float>(tp) / CLOCKS_PER_SEC;
             tp = std::clock();
+
+            tp_wall = getwalltime() - tp_wall;
+            runTimeCorrect_wall = tp_wall;
+            tp_wall = getwalltime();
         }
 
         // DEBUG STATEMENT
@@ -1098,6 +1090,10 @@ namespace rbf
             t = std::clock() - t;
             double runTimeINTP = static_cast<float>(t) / CLOCKS_PER_SEC;
             t = std::clock();
+
+            t_wall = getwalltime() - t_wall;
+            double runTimeINTP_wall = t_wall;
+            t_wall = getwalltime();
             Info << "RBFCoarsening::interpolate::debug 1. total time = " << runTimeINTP << " s" << endl;
 
             // write to file
@@ -1108,7 +1104,7 @@ namespace rbf
 
                 if ( timingFile.is_open() )
                 {
-                    timingFile << std::setprecision( 9 ) << runTimeINTP << ", " << runTimeError << ", " << runTimeReselect << ", " << runTimeInterpolate << ", " << runTimeCorrect << ", " << runTimeError_day << ", " << runTimeReselect_day << ", " << runTimeInterpolate_day << ", " << runTimeCorrect_day << "\n";
+                    timingFile << std::setprecision( 9 ) << runTimeINTP << ", " << runTimeError << ", " << runTimeReselect << ", " << runTimeInterpolate << ", " << runTimeCorrect << ", " << runTimeINTP_wall << ", " << runTimeError_wall << ", " << runTimeReselect_wall << ", " << runTimeInterpolate_wall << ", " << runTimeCorrect_wall << ", " << "\n";
                 }
 
                 timingFile.close();
@@ -1245,5 +1241,13 @@ namespace rbf
                 if ( selectedPositions( i ) >= nbMovingFaceCenters )
                     nbStaticFaceCentersRemove++;
         }
+    }
+
+    double RBFCoarsening::getwalltime() const
+    {
+        //chrono
+        std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::system_clock::now();
+        double walltime = ((double)start.time_since_epoch().count()) / std::chrono::system_clock::period::den * std::chrono::system_clock::period::num;
+    	return walltime;
     }
 }
