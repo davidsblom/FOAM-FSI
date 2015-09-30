@@ -11,7 +11,7 @@
     scalar residualMomentum = UEqnPerformance.initialResidual();
 
     // == Check convergence & display residual
-    if ( (oCorr > 1 && residualMomentum < momentumTolerance && initInnerResidualPressure < pressureTolerance) || oCorr + 1 == nOuterCorr )
+    if ( (oCorr >= 1 && residualMomentum < momentumTolerance && initInnerResidualPressure < pressureTolerance) || oCorr + 1 == nOuterCorr )
     {
         outerLoopConverged = true;
     }
