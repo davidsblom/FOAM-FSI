@@ -15,11 +15,11 @@ Features
 Installation
 -----------
 
-First, compile `foam-extend-3.1`, the `nextRelease` branch. A detailed description for the compilation of `foam-extend-3.1` can be found here: https://openfoamwiki.net/index.php/Installation/Linux/foam-extend-3.1. Note that FOAM-FSI uses the `nextRelease` branch as shown below:
+First, compile `foam-extend-3.2`. A detailed description for the compilation of `foam-extend-3.1` can be found here: https://openfoamwiki.net/index.php/Installation/Linux/foam-extend-3.1 which also applies to `foam-extend-3.2`. Note that `foam-extend-3.2` is using the git repository of `foam-extend-3.1`, so use the `v3.2` tag to compile `foam-extend-3.2`:
 
 ``` bash
-git clone --branch nextRelease git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1
-cd foam-extend-3.1
+git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2
+cd foam-extend-3.2
 ./Allwmake.firstInstall
 ```
 
@@ -31,7 +31,7 @@ cd FOAM-FSI
 ./Allwmake.firstInstall
 ```
 
-The first time the library is compiled, use the `Allwmake_firstInstall` script which installs the necessary settings in `foam-extend-3.1/etc/prefs.sh`, and compiles several third party packages. Thereafter, you can use the `Allwmake` script.
+The first time the library is compiled, use the `Allwmake_firstInstall` script which installs the necessary settings in `foam-extend-3.2/etc/prefs.sh`, and compiles several third party packages. Thereafter, you can use the `Allwmake` script.
 
 Prerequisites
 -----------
