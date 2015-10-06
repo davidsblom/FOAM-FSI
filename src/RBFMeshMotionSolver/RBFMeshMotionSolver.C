@@ -5,6 +5,7 @@
  */
 
 #include "RBFMeshMotionSolver.H"
+#include <unordered_map>
 
 using namespace Foam;
 
@@ -530,14 +531,16 @@ void RBFMeshMotionSolver::solve()
     int nbStaticFaceCenters = 0;
     int nbFixedFaceCenters = 0;
 
-    std::vector<int> staticControlPointLabels;
-    std::vector<int> staticControlGlobalPointLabels;
-    std::vector<int> fixedControlPointLabels;
-    std::vector<int> fixedControlGlobalPointLabels;
-    std::vector<int> movingControlPointLabels;
+    std::unordered_map<int, int> staticControlPointLabels;
+    std::unordered_map<int, int> fixedControlPointLabels;
+    std::unordered_map<int, int> movingControlPointLabels;
+
     std::vector<int> movingControlPointPatchIds;
     std::vector<int> movingControlPointIndices;
-    std::vector<int> movingControlGlobalPointLabels;
+
+    std::unordered_map<int, int> staticControlGlobalPointLabels;
+    std::unordered_map<int, int> fixedControlGlobalPointLabels;
+    std::unordered_map<int, int> movingControlGlobalPointLabels;
 
     labelList globalStaticPointsListEnabled( nbStaticFaceCenters, 0 );
     labelList globalFixedPointsListEnabled( nbFixedFaceCenters, 0 );
@@ -565,15 +568,8 @@ void RBFMeshMotionSolver::solve()
                 if ( twoDCorrector.marker()[meshPoints[j]] != 0 )
                     continue;
 
-                // Only add the static vertex point if it's not already added to the list
-                std::vector<int>::iterator it;
-
-                it = std::find( staticControlPointLabels.begin(), staticControlPointLabels.end(), meshPoints[j] );
-
-                if ( it == staticControlPointLabels.end() || staticControlPointLabels.size() == 0 )
-                {
-                    staticControlPointLabels.push_back( meshPoints[j] );
-                }
+                if ( staticControlPointLabels.find( meshPoints[j] ) == staticControlPointLabels.end() )
+                    staticControlPointLabels[meshPoints[j]] = staticControlPointLabels.size() - 1;
             }
         }
 
@@ -588,21 +584,9 @@ void RBFMeshMotionSolver::solve()
                 if ( twoDCorrector.marker()[meshPoints[j]] != 0 )
                     continue;
 
-                // Only add the static vertex point if it's not already added to the list
-                // and if it's not a static point
-                std::vector<int>::iterator it;
-
-                it = std::find( staticControlPointLabels.begin(), staticControlPointLabels.end(), meshPoints[j] );
-
-                if ( it == staticControlPointLabels.end() || staticControlPointLabels.size() == 0 )
-                {
-                    it = std::find( fixedControlPointLabels.begin(), fixedControlPointLabels.end(), meshPoints[j] );
-
-                    if ( it == fixedControlPointLabels.end() || fixedControlPointLabels.size() == 0 )
-                    {
-                        fixedControlPointLabels.push_back( meshPoints[j] );
-                    }
-                }
+                if ( staticControlPointLabels.find( meshPoints[j] ) == staticControlPointLabels.end()
+                    && fixedControlPointLabels.find( meshPoints[j] ) == fixedControlPointLabels.end() )
+                    fixedControlPointLabels[meshPoints[j]] = fixedControlPointLabels.size() - 1;
             }
         }
 
@@ -628,28 +612,14 @@ void RBFMeshMotionSolver::solve()
                     if ( twoDCorrector.marker()[meshPoints[j]] != 0 )
                         continue;
 
-                    // Only add the static vertex point if it's not already added to the list
-                    // and if it's not a static point
-                    std::vector<int>::iterator it;
-
-                    it = std::find( staticControlPointLabels.begin(), staticControlPointLabels.end(), meshPoints[j] );
-
-                    if ( it == staticControlPointLabels.end() || staticControlPointLabels.size() == 0 )
+                    if ( staticControlPointLabels.find( meshPoints[j] ) == staticControlPointLabels.end()
+                        && fixedControlPointLabels.find( meshPoints[j] ) == fixedControlPointLabels.end()
+                        && movingControlPointLabels.find( meshPoints[j] ) == movingControlPointLabels.end() )
                     {
-                        it = std::find( fixedControlPointLabels.begin(), fixedControlPointLabels.end(), meshPoints[j] );
-
-                        if ( it == fixedControlPointLabels.end() || fixedControlPointLabels.size() == 0 )
-                        {
-                            it = std::find( movingControlPointLabels.begin(), movingControlPointLabels.end(), meshPoints[j] );
-
-                            if ( it == movingControlPointLabels.end() || movingControlPointLabels.size() == 0 )
-                            {
-                                movingControlPointLabels.push_back( meshPoints[j] );
-                                movingControlPointPatchIds.push_back( movingPatchIDs[patchI] );
-                                movingControlPointIndices.push_back( j );
-                                globalMovingPointsLabelList[movingPatchIDs[patchI]][j] = 1;
-                            }
-                        }
+                        movingControlPointLabels[meshPoints[j]] = movingControlPointLabels.size() - 1;
+                        movingControlPointPatchIds.push_back( movingPatchIDs[patchI] );
+                        movingControlPointIndices.push_back( j );
+                        globalMovingPointsLabelList[movingPatchIDs[patchI]][j] = 1;
                     }
                 }
             }
@@ -721,21 +691,21 @@ void RBFMeshMotionSolver::solve()
             for ( int i = 0; i < Pstream::myProcNo(); i++ )
                 globalMovingOffsetNonUnique += nbGlobalMovingFaceCenters[i];
 
-            for ( unsigned int i = 0; i < staticControlPointLabels.size(); i++ )
+            for ( auto label : staticControlPointLabels )
             {
-                globalStaticPointsList[i + globalStaticOffsetNonUnique] = pointProcAddressing[staticControlPointLabels[i]];
+                globalStaticPointsList[label.second + globalStaticOffsetNonUnique] = pointProcAddressing[label.first];
             }
 
-            for ( unsigned int i = 0; i < fixedControlPointLabels.size(); i++ )
+            for ( auto label : fixedControlPointLabels )
             {
-                globalFixedPointsList[i + globalFixedOffsetNonUnique] = pointProcAddressing[fixedControlPointLabels[i]];
+                globalFixedPointsList[label.second + globalFixedOffsetNonUnique] = pointProcAddressing[label.first];
             }
 
-            for ( unsigned int i = 0; i < movingControlPointLabels.size(); i++ )
+            for ( auto label : movingControlPointLabels )
             {
-                globalMovingPointsList[i + globalMovingOffsetNonUnique] = pointProcAddressing[movingControlPointLabels[i]];
-                globalMovingPointsPatchIds[i + globalMovingOffsetNonUnique] = movingControlPointPatchIds[i];
-                globalMovingPointsIndices[i + globalMovingOffsetNonUnique] = movingControlPointIndices[i];
+                globalMovingPointsList[label.second + globalMovingOffsetNonUnique] = pointProcAddressing[label.first];
+                globalMovingPointsPatchIds[label.second + globalMovingOffsetNonUnique] = movingControlPointPatchIds[label.second];
+                globalMovingPointsIndices[label.second + globalMovingOffsetNonUnique] = movingControlPointIndices[label.second];
             }
 
             reduce( globalStaticPointsList, sumOp<labelList>() );
@@ -759,34 +729,20 @@ void RBFMeshMotionSolver::solve()
             globalMovingPointsListEnabled = 0;
             forAll( globalStaticPointsList, i )
             {
-                // Only add the static vertex point if it's not already added to the list
-                std::vector<int>::iterator it;
-
-                it = std::find( staticControlGlobalPointLabels.begin(), staticControlGlobalPointLabels.end(), globalStaticPointsList[i] );
-
-                if ( it == staticControlGlobalPointLabels.end() || staticControlGlobalPointLabels.size() == 0 )
+                if ( staticControlGlobalPointLabels.find( globalStaticPointsList[i] ) == staticControlGlobalPointLabels.end() )
                 {
-                    staticControlGlobalPointLabels.push_back( globalStaticPointsList[i] );
+                    staticControlGlobalPointLabels[globalStaticPointsList[i]] = staticControlGlobalPointLabels.size() - 1;
                     globalStaticPointsListEnabled[i] = 1;
                 }
             }
 
             forAll( globalFixedPointsList, i )
             {
-                // Only add the static vertex point if it's not already added to the list
-                std::vector<int>::iterator it;
-
-                it = std::find( staticControlGlobalPointLabels.begin(), staticControlGlobalPointLabels.end(), globalFixedPointsList[i] );
-
-                if ( it == staticControlGlobalPointLabels.end() || staticControlGlobalPointLabels.size() == 0 )
+                if ( staticControlGlobalPointLabels.find( globalFixedPointsList[i] ) == staticControlGlobalPointLabels.end()
+                    && fixedControlGlobalPointLabels.find( globalFixedPointsList[i] ) == fixedControlGlobalPointLabels.end() )
                 {
-                    it = std::find( fixedControlGlobalPointLabels.begin(), fixedControlGlobalPointLabels.end(), globalFixedPointsList[i] );
-
-                    if ( it == fixedControlGlobalPointLabels.end() || fixedControlGlobalPointLabels.size() == 0 )
-                    {
-                        fixedControlGlobalPointLabels.push_back( globalFixedPointsList[i] );
-                        globalFixedPointsListEnabled[i] = 1;
-                    }
+                    fixedControlGlobalPointLabels[globalFixedPointsList[i]] = fixedControlGlobalPointLabels.size() - 1;
+                    globalFixedPointsListEnabled[i] = 1;
                 }
             }
 
@@ -800,32 +756,19 @@ void RBFMeshMotionSolver::solve()
 
                 forAll( globalMovingPointsList, i )
                 {
-                    // Only add the static vertex point if it's not already added to the list
-                    std::vector<int>::iterator it;
-
-                    it = std::find( staticControlGlobalPointLabels.begin(), staticControlGlobalPointLabels.end(), globalMovingPointsList[i] );
-
-                    if ( it == staticControlGlobalPointLabels.end() || staticControlGlobalPointLabels.size() == 0 )
+                    if ( staticControlGlobalPointLabels.find( globalMovingPointsList[i] ) == staticControlGlobalPointLabels.end()
+                        && fixedControlGlobalPointLabels.find( globalMovingPointsList[i] ) == fixedControlGlobalPointLabels.end()
+                        && movingControlGlobalPointLabels.find( globalMovingPointsList[i] ) == movingControlGlobalPointLabels.end() )
                     {
-                        it = std::find( fixedControlGlobalPointLabels.begin(), fixedControlGlobalPointLabels.end(), globalMovingPointsList[i] );
+                        movingControlGlobalPointLabels[globalMovingPointsList[i]] = movingControlGlobalPointLabels.size() - 1;
+                        globalMovingPointsListEnabled[i] = 1;
 
-                        if ( it == fixedControlGlobalPointLabels.end() || fixedControlGlobalPointLabels.size() == 0 )
+                        if ( i < static_cast<int>( movingControlPointLabels.size() ) + globalMovingOffsetNonUnique
+                            && i >= globalMovingOffsetNonUnique )
                         {
-                            it = std::find( movingControlGlobalPointLabels.begin(), movingControlGlobalPointLabels.end(), globalMovingPointsList[i] );
-
-                            if ( it == movingControlGlobalPointLabels.end() || movingControlGlobalPointLabels.size() == 0 )
-                            {
-                                movingControlGlobalPointLabels.push_back( globalMovingPointsList[i] );
-                                globalMovingPointsListEnabled[i] = 1;
-
-                                if ( i < static_cast<int>( movingControlPointLabels.size() ) + globalMovingOffsetNonUnique
-                                    && i >= globalMovingOffsetNonUnique )
-                                {
-                                    label patchId = globalMovingPointsPatchIds[i];
-                                    label index = globalMovingPointsIndices[i];
-                                    globalMovingPointsLabelList[patchId][index] = 1;
-                                }
-                            }
+                            label patchId = globalMovingPointsPatchIds[i];
+                            label index = globalMovingPointsIndices[i];
+                            globalMovingPointsLabelList[patchId][index] = 1;
                         }
                     }
                 }
@@ -834,17 +777,17 @@ void RBFMeshMotionSolver::solve()
             // Count the number of local unique static points
             nbStaticFaceCenters = 0;
 
-            for ( unsigned int i = 0; i < staticControlPointLabels.size(); i++ )
+            for ( auto label : staticControlPointLabels )
             {
-                if ( globalStaticPointsListEnabled[i + globalStaticOffsetNonUnique] == 1 )
+                if ( globalStaticPointsListEnabled[label.second + globalStaticOffsetNonUnique] == 1 )
                     nbStaticFaceCenters++;
             }
 
             nbFixedFaceCenters = 0;
 
-            for ( unsigned int i = 0; i < fixedControlPointLabels.size(); i++ )
+            for ( auto label : fixedControlPointLabels )
             {
-                if ( globalFixedPointsListEnabled[i + globalFixedOffsetNonUnique] == 1 )
+                if ( globalFixedPointsListEnabled[label.second + globalFixedOffsetNonUnique] == 1 )
                     nbFixedFaceCenters++;
             }
 
@@ -852,9 +795,9 @@ void RBFMeshMotionSolver::solve()
             {
                 nbMovingFaceCenters = 0;
 
-                for ( unsigned int i = 0; i < movingControlPointLabels.size(); i++ )
+                for ( auto label : movingControlPointLabels )
                 {
-                    if ( globalMovingPointsListEnabled[i + globalMovingOffsetNonUnique] == 1 )
+                    if ( globalMovingPointsListEnabled[label.second + globalMovingOffsetNonUnique] == 1 )
                         nbMovingFaceCenters++;
                 }
             }
@@ -901,7 +844,6 @@ void RBFMeshMotionSolver::solve()
     {
         rbf::matrix positions( nbFaceCenters, mesh().nGeometricD() );
         positions.setZero();
-        int index = 0;
 
         const Foam::pointField & points = mesh().points();
 
@@ -925,6 +867,8 @@ void RBFMeshMotionSolver::solve()
             }
         }
 
+        int index = 0;
+
         if ( not faceCellCenters )
         {
             for ( unsigned int i = 0; i < movingControlPointLabels.size(); i++ )
@@ -941,11 +885,11 @@ void RBFMeshMotionSolver::solve()
 
         index = 0;
 
-        for ( unsigned int i = 0; i < staticControlPointLabels.size(); i++ )
+        for ( auto label : staticControlPointLabels )
         {
-            if ( globalStaticPointsListEnabled[i + globalStaticOffsetNonUnique] == 1 )
+            if ( globalStaticPointsListEnabled[label.second + globalStaticOffsetNonUnique] == 1 )
             {
-                positionsField[index + globalStaticOffset] = points[staticControlPointLabels[i]];
+                positionsField[index + globalStaticOffset] = points[label.first];
                 index++;
             }
         }
@@ -954,11 +898,11 @@ void RBFMeshMotionSolver::solve()
 
         index = 0;
 
-        for ( unsigned int i = 0; i < fixedControlPointLabels.size(); i++ )
+        for ( auto label : fixedControlPointLabels )
         {
-            if ( globalFixedPointsListEnabled[i + globalFixedOffsetNonUnique] == 1 )
+            if ( globalFixedPointsListEnabled[label.second + globalFixedOffsetNonUnique] == 1 )
             {
-                positionsField[index + globalFixedOffset] = points[fixedControlPointLabels[i]];
+                positionsField[index + globalFixedOffset] = points[label.first];
                 index++;
             }
         }
