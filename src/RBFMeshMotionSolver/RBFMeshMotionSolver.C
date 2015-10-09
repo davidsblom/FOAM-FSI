@@ -526,28 +526,29 @@ void RBFMeshMotionSolver::solve()
      * thereafter the static patches.
      */
 
-    int nbFaceCenters = 0;
-    int nbMovingFaceCenters = 0;
-    int nbStaticFaceCenters = 0;
-    int nbFixedFaceCenters = 0;
+    unsigned int nbFaceCenters = 0;
+    unsigned int nbMovingFaceCenters = 0;
+    unsigned int nbStaticFaceCenters = 0;
+    unsigned int nbFixedFaceCenters = 0;
 
-    std::unordered_map<int, int> staticControlPointLabels;
-    std::unordered_map<int, int> fixedControlPointLabels;
-    std::unordered_map<int, int> movingControlPointLabels;
+    std::unordered_map<unsigned int, unsigned int> staticControlPointLabels;
+    std::unordered_map<unsigned int, unsigned int> fixedControlPointLabels;
+    std::vector<unsigned int> movingControlPointLabelsVector;
+    std::unordered_map<unsigned int, unsigned int> movingControlPointLabelsMap;
 
-    std::vector<int> movingControlPointPatchIds;
-    std::vector<int> movingControlPointIndices;
+    std::vector<unsigned int> movingControlPointPatchIds;
+    std::vector<unsigned int> movingControlPointIndices;
 
-    std::unordered_map<int, int> staticControlGlobalPointLabels;
-    std::unordered_map<int, int> fixedControlGlobalPointLabels;
-    std::unordered_map<int, int> movingControlGlobalPointLabels;
+    std::unordered_map<unsigned int, unsigned int> staticControlGlobalPointLabels;
+    std::unordered_map<unsigned int, unsigned int> fixedControlGlobalPointLabels;
+    std::unordered_map<unsigned int, unsigned int> movingControlGlobalPointLabelsMap;
 
     labelList globalStaticPointsListEnabled( nbStaticFaceCenters, 0 );
     labelList globalFixedPointsListEnabled( nbFixedFaceCenters, 0 );
     labelList globalMovingPointsListEnabled( nbMovingFaceCenters, 0 );
-    int globalStaticOffsetNonUnique = 0;
-    int globalFixedOffsetNonUnique = 0;
-    int globalMovingOffsetNonUnique = 0;
+    unsigned int globalStaticOffsetNonUnique = 0;
+    unsigned int globalFixedOffsetNonUnique = 0;
+    unsigned int globalMovingOffsetNonUnique = 0;
 
     if ( sum( nbGlobalFaceCenters ) == 0 )
     {
@@ -614,9 +615,10 @@ void RBFMeshMotionSolver::solve()
 
                     if ( staticControlPointLabels.find( meshPoints[j] ) == staticControlPointLabels.end()
                         && fixedControlPointLabels.find( meshPoints[j] ) == fixedControlPointLabels.end()
-                        && movingControlPointLabels.find( meshPoints[j] ) == movingControlPointLabels.end() )
+                        && movingControlPointLabelsMap.find( meshPoints[j] ) == movingControlPointLabelsMap.end() )
                     {
-                        movingControlPointLabels[meshPoints[j]] = movingControlPointLabels.size() - 1;
+                        movingControlPointLabelsMap[meshPoints[j]] = movingControlPointLabelsMap.size() - 1;
+                        movingControlPointLabelsVector.push_back( meshPoints[j] );
                         movingControlPointPatchIds.push_back( movingPatchIDs[patchI] );
                         movingControlPointIndices.push_back( j );
                         globalMovingPointsLabelList[movingPatchIDs[patchI]][j] = 1;
@@ -624,7 +626,7 @@ void RBFMeshMotionSolver::solve()
                 }
             }
 
-            nbMovingFaceCenters = movingControlPointLabels.size();
+            nbMovingFaceCenters = movingControlPointLabelsVector.size();
         }
 
         if ( Pstream::nProcs() == 1 )
@@ -701,11 +703,11 @@ void RBFMeshMotionSolver::solve()
                 globalFixedPointsList[label.second + globalFixedOffsetNonUnique] = pointProcAddressing[label.first];
             }
 
-            for ( auto label : movingControlPointLabels )
+            for ( unsigned int i = 0; i < movingControlPointLabelsVector.size(); ++i )
             {
-                globalMovingPointsList[label.second + globalMovingOffsetNonUnique] = pointProcAddressing[label.first];
-                globalMovingPointsPatchIds[label.second + globalMovingOffsetNonUnique] = movingControlPointPatchIds[label.second];
-                globalMovingPointsIndices[label.second + globalMovingOffsetNonUnique] = movingControlPointIndices[label.second];
+                globalMovingPointsList[i + globalMovingOffsetNonUnique] = pointProcAddressing[movingControlPointLabelsVector[i]];
+                globalMovingPointsPatchIds[i + globalMovingOffsetNonUnique] = movingControlPointPatchIds[i];
+                globalMovingPointsIndices[i + globalMovingOffsetNonUnique] = movingControlPointIndices[i];
             }
 
             reduce( globalStaticPointsList, sumOp<labelList>() );
@@ -758,13 +760,13 @@ void RBFMeshMotionSolver::solve()
                 {
                     if ( staticControlGlobalPointLabels.find( globalMovingPointsList[i] ) == staticControlGlobalPointLabels.end()
                         && fixedControlGlobalPointLabels.find( globalMovingPointsList[i] ) == fixedControlGlobalPointLabels.end()
-                        && movingControlGlobalPointLabels.find( globalMovingPointsList[i] ) == movingControlGlobalPointLabels.end() )
+                        && movingControlGlobalPointLabelsMap.find( globalMovingPointsList[i] ) == movingControlGlobalPointLabelsMap.end() )
                     {
-                        movingControlGlobalPointLabels[globalMovingPointsList[i]] = movingControlGlobalPointLabels.size() - 1;
+                        movingControlGlobalPointLabelsMap[globalMovingPointsList[i]] = movingControlGlobalPointLabelsMap.size() - 1;
                         globalMovingPointsListEnabled[i] = 1;
 
-                        if ( i < static_cast<int>( movingControlPointLabels.size() ) + globalMovingOffsetNonUnique
-                            && i >= globalMovingOffsetNonUnique )
+                        if ( static_cast<unsigned int>(i) < movingControlPointLabelsVector.size() + globalMovingOffsetNonUnique
+                            && static_cast<unsigned int>(i) >= globalMovingOffsetNonUnique )
                         {
                             label patchId = globalMovingPointsPatchIds[i];
                             label index = globalMovingPointsIndices[i];
@@ -795,9 +797,9 @@ void RBFMeshMotionSolver::solve()
             {
                 nbMovingFaceCenters = 0;
 
-                for ( auto label : movingControlPointLabels )
+                for ( unsigned int i = 0; i < movingControlPointLabelsVector.size(); ++i )
                 {
-                    if ( globalMovingPointsListEnabled[label.second + globalMovingOffsetNonUnique] == 1 )
+                    if ( globalMovingPointsListEnabled[i + globalMovingOffsetNonUnique] == 1 )
                         nbMovingFaceCenters++;
                 }
             }
@@ -871,11 +873,12 @@ void RBFMeshMotionSolver::solve()
 
         if ( not faceCellCenters )
         {
-            for ( unsigned int i = 0; i < movingControlPointLabels.size(); i++ )
+            for ( unsigned int i = 0; i < movingControlPointLabelsVector.size(); ++i )
             {
                 if ( globalMovingPointsListEnabled[i + globalMovingOffsetNonUnique] == 1 )
                 {
-                    positionsField[index + globalMovingOffset] = points[movingControlPointLabels[i]];
+                    assert( index + globalMovingOffset < positionsField.size() );
+                    positionsField[index + globalMovingOffset] = points[movingControlPointLabelsVector[i]];
                     index++;
                 }
             }
@@ -902,6 +905,7 @@ void RBFMeshMotionSolver::solve()
         {
             if ( globalFixedPointsListEnabled[label.second + globalFixedOffsetNonUnique] == 1 )
             {
+                assert( index + globalFixedOffset < positionsField.size() );
                 positionsField[index + globalFixedOffset] = points[label.first];
                 index++;
             }
@@ -931,7 +935,6 @@ void RBFMeshMotionSolver::solve()
         }
 
         rbf::matrix positionsInterpolation( nbPoints, positions.cols() );
-
 
         index = 0;
         forAll( points, i )
@@ -984,13 +987,13 @@ void RBFMeshMotionSolver::solve()
     {
         int index = 0;
 
-        forAll( movingPatchIDs, i )
+        forAll( movingPatchIDs, patchI )
         {
-            forAll( globalMovingPointsLabelList[movingPatchIDs[i]], j )
+            forAll( globalMovingPointsLabelList[movingPatchIDs[patchI]], j )
             {
-                if ( globalMovingPointsLabelList[movingPatchIDs[i]][j] == 1 )
+                if ( globalMovingPointsLabelList[movingPatchIDs[patchI]][j] == 1 )
                 {
-                    valuesField[index + globalMovingOffset] = motionCenters[movingPatchIDs[i]][j];
+                    valuesField[index + globalMovingOffset] = motionCenters[movingPatchIDs[patchI]][j];
                     index++;
                 }
             }
