@@ -7,5 +7,6 @@ EXE_INC = \
 
 LIB_LIBS = \
     -lincompressibleTurbulenceModel \
+	-lincompressibleRASModels \
     -lfiniteVolume \
     -lmeshTools
