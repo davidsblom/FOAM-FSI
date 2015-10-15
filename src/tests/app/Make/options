@@ -1,4 +1,4 @@
-c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs -Werror
+c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs -Werror 
 
 EXE_INC = --coverage -fprofile-arcs -ftest-coverage -g -std=c++11 -fsanitize=address \
     -I../../RBFmeshInterpolation/lnInclude/ \
@@ -24,6 +24,7 @@ EXE_INC = --coverage -fprofile-arcs -ftest-coverage -g -std=c++11 -fsanitize=add
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
     -L../../thirdParty/gtest \
+	-L/lib64 \
     -lgtest \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
@@ -43,4 +44,5 @@ EXE_LIBS = \
     -ltetFiniteElement \
     -lbasicThermophysicalModels \
     -lspecie \
-    -lcompressibleRASModels
+    -lcompressibleRASModels \
+	-lpthread
