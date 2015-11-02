@@ -69,13 +69,9 @@ public:
         int dimGrid;
         matrix Hhat;
         matrix Phi;
-        Eigen::PartialPivLU<matrix> lu;
-        Eigen::FullPivLU<matrix> fullPivLu;
-        Eigen::LLT<matrix> llt;
+        Eigen::FullPivLU<matrix> lu;
         matrix positions;
         matrix positionsInterpolation;
-
-        static debug::debugSwitch debug;
 
 private:
 

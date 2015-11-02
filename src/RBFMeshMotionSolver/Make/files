@@ -7,5 +7,6 @@ RBFFunctions/WendlandC0Function.C
 RBFFunctions/WendlandC2Function.C
 RBFFunctions/WendlandC4Function.C
 RBFFunctions/WendlandC6Function.C
+RBFFunctions/LinearFunction.C
 
 LIB = $(FOAM_USER_LIBBIN)/libRBFMeshMotionSolver

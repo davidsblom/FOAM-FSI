@@ -10,6 +10,7 @@
 #include "WendlandC4Function.H"
 #include "WendlandC6Function.H"
 #include "TPSFunction.H"
+#include "LinearFunction.H"
 #include "DataValues.H"
 #include "gtest/gtest.h"
 
@@ -48,6 +49,10 @@ protected:
         if ( rbfFunctionId == 4 )
             rbfFunction = std::shared_ptr<RBFFunctionInterface>( new TPSFunction() );
 
+        else
+        if ( rbfFunctionId == 5 )
+            rbfFunction = std::shared_ptr<RBFFunctionInterface>( new LinearFunction() );
+
         bool polynomialTerm = std::tr1::get<1>( GetParam() );
         bool cpu = false;
         rbf = std::shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
@@ -66,7 +71,7 @@ protected:
     std::shared_ptr<RBFInterpolation> rbfCPU;
 };
 
-INSTANTIATE_TEST_CASE_P( RBFTest, RBFInterpolationParametrizedTest, ::testing::Combine( Values( 0, 1, 2, 3, 4 ), Bool() ) );
+INSTANTIATE_TEST_CASE_P( RBFTest, RBFInterpolationParametrizedTest, ::testing::Combine( Values( 0, 1, 2, 3, 4, 5 ), Bool() ) );
 
 TEST_P( RBFInterpolationParametrizedTest, rbf3d_directly_interpolate )
 {
