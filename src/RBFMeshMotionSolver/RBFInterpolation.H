@@ -7,14 +7,10 @@
 #ifndef RBFInterpolation_H
 #define RBFInterpolation_H
 
-#include <string>
 #include <memory>
-#include <ctime>
 #include <Eigen/Dense>
 #include "RBFFunctionInterface.H"
-#include "TPSFunction.H"
 #include "fvCFD.H"
-#include "debugSwitch.H"
 
 namespace rbf
 {
