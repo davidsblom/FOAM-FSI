@@ -1,0 +1,4 @@
+
+#include "version.H"
+
+const char* const FOAMFSIbuild = "BUILD_STRING";

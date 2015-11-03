@@ -9,6 +9,7 @@
 #include <memory>
 #include <yaml-cpp/yaml.h>
 
+#include "version.H"
 #include "ASMILS.H"
 #include "AggressiveSpaceMapping.H"
 #include "AitkenPostProcessing.H"
@@ -159,6 +160,8 @@ int main(
     {
         FatalError.exit();
     }
+
+    Info << nl << "FOAM-FSI build: " << word( FOAMFSIbuild ) << nl << endl;
 
     std::shared_ptr<Time> runTime( new Time
         (
