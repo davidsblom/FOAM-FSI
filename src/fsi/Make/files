@@ -25,6 +25,7 @@ AdaptiveTimeStepper.C
 QuadratureRules.C
 PIES.C
 SDCFsiSolver.C
+version.Cver
 
 fluidSolvers/CoupledFluidSolver.C
 fluidSolvers/FluidSolver.C
