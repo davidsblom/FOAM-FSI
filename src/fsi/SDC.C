@@ -15,8 +15,8 @@ namespace sdc
         scalar tol
         )
         :
-        solver( false ),
-        adaptiveTimeStepper( false ),
+        solver( nullptr ),
+        adaptiveTimeStepper( nullptr ),
         nbNodes( nbNodes ),
         N( 0 ),
         k( 0 ),

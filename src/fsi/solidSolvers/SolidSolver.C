@@ -51,7 +51,7 @@ SolidSolver::SolidSolver (
     maxIter( 0 ),
     absoluteTolerance( 0 ),
     relativeTolerance( 0 ),
-    interpolator( false )
+    interpolator( nullptr )
 {}
 
 SolidSolver::SolidSolver (
