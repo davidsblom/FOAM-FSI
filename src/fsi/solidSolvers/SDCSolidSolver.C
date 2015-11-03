@@ -63,7 +63,7 @@ SDCSolidSolver::SDCSolidSolver (
     maxIter( readInt( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "maxIter" ) ) ),
     absoluteTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "tolerance" ) ) ),
     relativeTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "relTol" ) ) ),
-    interpolator( false ),
+    interpolator( nullptr ),
     k( 0 ),
     indexk( 0 ),
     UStages(),

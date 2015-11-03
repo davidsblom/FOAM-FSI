@@ -3,21 +3,21 @@ c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-lo
 EXE_INC = -std=c++11 \
     -isystem ../thirdParty/eigen \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
-    -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
-    -I$(LIB_SRC)/transportModels \
-    -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
-    -I$(LIB_SRC)/turbulenceModels \
-    -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
-    -I$(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
-    -I$(LIB_SRC)/turbulenceModels/compressible/RAS/RASModel \
+    -isystem $(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
+    -isystem $(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
+    -isystem $(LIB_SRC)/transportModels \
+    -isystem $(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
+    -isystem $(LIB_SRC)/turbulenceModels \
+    -isystem $(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
+    -isystem $(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
+    -isystem $(LIB_SRC)/turbulenceModels/compressible/RAS/RASModel \
     -isystem $(LIB_SRC)/meshTools/lnInclude \
     -isystem $(LIB_SRC)/solidModels/lnInclude \
     -isystem ../RBFMeshMotionSolver/lnInclude/ \
     $(WM_DECOMP_INC) \
     -isystem $(LIB_SRC)/tetFiniteElement/lnInclude \
     -isystem $(LIB_SRC)/sampling/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
+    -isystem $(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I../boundaryConditions/lnInclude \
     -isystem ../thirdParty/yaml-cpp/include \
     -isystem ../thirdParty/boost

@@ -47,8 +47,8 @@ namespace sdc
 
     ESDIRK::ESDIRK( std::string method )
         :
-        solver( false ),
-        adaptiveTimeStepper( false ),
+        solver( nullptr ),
+        adaptiveTimeStepper( nullptr ),
         dt( -1 ),
         nbStages( 0 ),
         A(),

@@ -92,7 +92,6 @@ namespace rbf
         const matrix & positionsInterpolation
         )
     {
-
         // Verify input
 
         assert( positions.cols() == positionsInterpolation.cols() );
@@ -181,7 +180,6 @@ namespace rbf
 
         if ( cpu )
         {
-
             matrix B, valuesLU( n_A, values.cols() ), Phi( n_B, n_A );
 
             if ( polynomialTerm )
