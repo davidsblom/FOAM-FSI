@@ -6,7 +6,7 @@ find . -name '*~' -exec rm -rf {} \;
 
 # Define which versions of the different packages are used
 
-export SCONS_VERSION=2.3.4
+export SCONS_VERSION=2.4.0
 export BOOST_VERSION=1_55_0
 export BOOST_VERSION_DOT=1.55.0
 
@@ -49,4 +49,13 @@ export CPLUS_INCLUDE_PATH=`pwd`/eigen
 # Build preCICE
 
 cd precice
-scons -j 4 build=release python=off petsc=off
+scons -j 4 build=release python=off petsc=off compiler=mpicxx
+scons -j 4 build=release python=off petsc=off compiler=mpicxx solib
+
+mkdir -p ${FOAM_USER_LIBBIN}
+mkdir -p ${FOAM_USER_APPBIN}
+
+SHARED_LIBRARY=libprecice.so
+
+cp build/last/${SHARED_LIBRARY} ${FOAM_USER_LIBBIN}/
+cp build/last/binprecice ${FOAM_USER_APPBIN}/
