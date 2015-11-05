@@ -4,6 +4,7 @@
 
     <log-filter component="" target="debug" switch="off" />
     <log-filter component="" target="info" switch="on" />
+    <log-output column-separator=" | " log-time-stamp="no" log-time-stamp-human-readable="yes" log-machine-name="no" log-message-type="no" log-trace="yes" />
 
     <solver-interface dimensions="3">
 
@@ -63,7 +64,7 @@
                 <initial-relaxation value="0.001" />
                 <max-used-iterations value="200" />
                 <timesteps-reused value="2" />
-                <singularity-limit value="1.0e-10" />
+                <filter type="QR1" limit="1e-8" />
             </post-processing:IQN-ILS>
 
         </coupling-scheme:serial-implicit>
