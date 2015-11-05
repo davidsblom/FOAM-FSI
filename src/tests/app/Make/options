@@ -1,6 +1,6 @@
 c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs -Werror
 
-EXE_INC = --coverage -fprofile-arcs -ftest-coverage -g -std=c++11 -fsanitize=address \
+EXE_INC = --coverage -fprofile-arcs -ftest-coverage -g -std=c++11 \
     -I../../RBFmeshInterpolation/lnInclude/ \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
