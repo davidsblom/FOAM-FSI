@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "version.H"
 #include "PreciceSolidSolver.H"
 #include "SolidSolver.H"
 
@@ -20,6 +21,8 @@ int main(
     {
         FatalError.exit();
     }
+
+    Info << nl << "FOAM-FSI build: " << word( FOAMFSIbuild ) << nl << endl;
 
     std::shared_ptr<Time> runTime( new Time
         (
