@@ -219,14 +219,14 @@ TEST_P( ManifoldMappingLinearizedFsiSolverParametrizedTest, object )
 
 TEST_P( ManifoldMappingLinearizedFsiSolverParametrizedTest, run )
 {
-    solver->run();
+    solver->solveTimeStep();
 
     ASSERT_TRUE( solver->fineModel->fsi->allConverged );
-    ASSERT_FALSE( solver->fineModel->fsi->fluid->isRunning() );
+    ASSERT_TRUE( solver->fineModel->fsi->fluid->isRunning() );
     ASSERT_GT( solver->coarseModel->fsi->nbIter, solver->fineModel->fsi->nbIter );
 
     ASSERT_GT( solver->timeElapsed(), 0 );
-    ASSERT_EQ( solver->spaceMapping->timeIndex, 100 );
-    ASSERT_EQ( solver->fineModel->postProcessing->timeIndex, 100 );
-    ASSERT_EQ( solver->coarseModel->postProcessing->timeIndex, 100 );
+    ASSERT_EQ( solver->spaceMapping->timeIndex, 1 );
+    ASSERT_EQ( solver->fineModel->postProcessing->timeIndex, 1 );
+    ASSERT_EQ( solver->coarseModel->postProcessing->timeIndex, 1 );
 }
