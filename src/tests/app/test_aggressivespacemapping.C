@@ -238,19 +238,19 @@ TEST_P( AggressiveSpaceMappingSolverParametrizedTest, reuse )
     if ( !parallel && couplingGridSize == 20 && nbReuse == 0 && extrapolation == 0 && minIter == 3 )
     {
         ASSERT_EQ( solver->fineModel->fsi->nbIter, 704 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 4878 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 4865 );
     }
 
     if ( !parallel && couplingGridSize == 20 && nbReuse == 1 && extrapolation == 0 && minIter == 3 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 591 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3812 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 580 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3748 );
     }
 
     if ( !parallel && couplingGridSize == 20 && nbReuse == 4 && extrapolation == 0 && minIter == 3 )
     {
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 484 );
-        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3268 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 486 );
+        ASSERT_EQ( solver->coarseModel->fsi->nbIter, 3253 );
     }
 }
 
@@ -460,8 +460,8 @@ TEST_F( AggressiveSpaceMappingSolverTest, solveTimeStep )
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 45 );
-    ASSERT_EQ( solver->coarseModel->fsi->nbIter, 208 );
-    ASSERT_EQ( fineModelFluid->nbRes, 225 );
-    ASSERT_EQ( fineModelFluid->nbJac, 135 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 44 );
+    ASSERT_EQ( solver->coarseModel->fsi->nbIter, 209 );
+    ASSERT_EQ( fineModelFluid->nbRes, 220 );
+    ASSERT_EQ( fineModelFluid->nbJac, 132 );
 }

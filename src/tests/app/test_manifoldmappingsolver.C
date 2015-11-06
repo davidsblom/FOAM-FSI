@@ -241,7 +241,7 @@ TEST_P( ManifoldMappingSolverParametrizedTest, run )
 
 TEST_P( ManifoldMappingSolverParametrizedTest, monolithic )
 {
-    for ( int i = 0; i < 100; i++ )
+    for ( int i = 0; i < 4; i++ )
     {
         solver->solveTimeStep();
         monolithicSolver->solveTimeStep();
@@ -444,21 +444,21 @@ TEST_F( ManifoldMappingSolverTest, solveTimeStep )
 {
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 8 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 9 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 17 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 18 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 26 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 27 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 34 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 35 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 41 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 42 );
 }
