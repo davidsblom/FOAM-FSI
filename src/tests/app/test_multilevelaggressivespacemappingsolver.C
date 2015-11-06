@@ -333,7 +333,7 @@ TEST_P( MultiLevelAggressiveSpaceMappingSolverParametrizedTest, timeStep )
 
     if ( couplingGridSize == 40 && parallel )
     {
-        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 89 );
+        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 90 );
         ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 10 );
         ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 1 );
     }
@@ -347,14 +347,14 @@ TEST_P( MultiLevelAggressiveSpaceMappingSolverParametrizedTest, timeStep )
 
     if ( couplingGridSize == 50 && parallel )
     {
-        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 758 );
-        ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 80 );
+        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 764 );
+        ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 79 );
         ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 9 );
     }
 
     if ( couplingGridSize == 50 && !parallel )
     {
-        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 469 );
+        ASSERT_EQ( solver->models->at( 0 )->fsi->nbIter, 518 );
         ASSERT_EQ( solver->models->at( 1 )->fsi->nbIter, 43 );
         ASSERT_EQ( solver->models->at( 2 )->fsi->nbIter, 7 );
     }

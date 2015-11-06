@@ -123,7 +123,7 @@ TEST_P( RBFInterpolationParametrizedTest, rbf1d_regularity )
 
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
-            ASSERT_NEAR( ynew( i, j ), ynew2( i, j ), 1.0e-11 );
+            ASSERT_NEAR( ynew( i, j ), ynew2( i, j ), 1.0e-10 );
 }
 
 TEST( RBFInterpolationTest, oneD_small )
