@@ -25,7 +25,7 @@ public:
             std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper
             );
 
-        ESDIRK( std::string method );
+        explicit ESDIRK( std::string method );
 
         ~ESDIRK();
 

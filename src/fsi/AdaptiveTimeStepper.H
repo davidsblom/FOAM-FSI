@@ -23,7 +23,7 @@ namespace sdc
     {
 public:
 
-        AdaptiveTimeStepper( bool enabled );
+        explicit AdaptiveTimeStepper( bool enabled );
 
         AdaptiveTimeStepper(
             bool enabled,
