@@ -16,7 +16,7 @@ class FineModelParabola : public SurrogateModel
 {
 public:
 
-    FineModelParabola ( scalar tol )
+    explicit FineModelParabola ( scalar tol )
         :
         tol( tol ),
         iter( 0 ),
@@ -190,7 +190,7 @@ class FineModelSimple : public SurrogateModel
 {
 public:
 
-    FineModelSimple( scalar tol )
+    explicit FineModelSimple( scalar tol )
         :
         tol( tol ),
         iter( 0 ),
