@@ -16,7 +16,6 @@ wclean libso src/SRFModelAbs
 wclean libso src/extraSolidBodyMotion
 wclean applications/utilities/addInitialRandomVelocity
 wclean applications/solvers/consistentSolvers/consistentIcoFoam
-wclean applications/solvers/consistentSolvers/consistentPimpleBodyFoam
 wclean applications/solvers/consistentSolvers/consistentPimpleDyMFoam
 wclean applications/solvers/consistentSolvers/consistentPimpleFoam
 wclean applications/solvers/consistentSolvers/consistentSimpleFoam
