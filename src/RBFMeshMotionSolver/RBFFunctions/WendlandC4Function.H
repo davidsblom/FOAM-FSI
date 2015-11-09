@@ -15,7 +15,7 @@ namespace rbf
     {
 public:
 
-        WendlandC4Function( scalar radius );
+        explicit WendlandC4Function( scalar radius );
 
         virtual ~WendlandC4Function();
 
