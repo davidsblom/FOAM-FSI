@@ -17,7 +17,7 @@ namespace rbf
     {
 public:
 
-        RBFCoarsening( std::shared_ptr<RBFInterpolation> rbf );
+        explicit RBFCoarsening( std::shared_ptr<RBFInterpolation> rbf );
 
         RBFCoarsening(
             std::shared_ptr<RBFInterpolation> rbf,

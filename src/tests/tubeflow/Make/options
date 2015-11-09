@@ -1,7 +1,7 @@
 c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs -Werror -Wredundant-decls -Wcast-align -Wmissing-declarations  -Wswitch-enum -Winvalid-pch -Wredundant-decls -Wformat=2 -Wmissing-format-attribute -Wformat-nonliteral
 
 EXE_INC = -std=c++11 -fopenmp \
-    -I../../thirdParty/eigen \
+    -isystem ../../thirdParty/eigen \
     -I../../fsi/lnInclude \
     -I../../tests/app \
     $(WM_DECOMP_INC) \

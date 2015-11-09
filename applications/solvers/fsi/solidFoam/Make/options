@@ -2,7 +2,7 @@ c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-lo
 
 EXE_INC = -std=c++11 \
     -I../../../../src/fsi/lnInclude \
-    -I../../../../src/thirdParty/eigen \
+    -isystem ../../../../src/thirdParty/eigen \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/solidModels/lnInclude \

@@ -427,19 +427,19 @@ TEST_F( ASMILSSolverTest, solveTimeStep )
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 29 );
-    ASSERT_EQ( fineModelFluid->nbRes, 145 );
-    ASSERT_EQ( fineModelFluid->nbJac, 87 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 27 );
+    ASSERT_EQ( fineModelFluid->nbRes, 135 );
+    ASSERT_EQ( fineModelFluid->nbJac, 81 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 39 );
-    ASSERT_EQ( fineModelFluid->nbRes, 195 );
-    ASSERT_EQ( fineModelFluid->nbJac, 117 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 38 );
+    ASSERT_EQ( fineModelFluid->nbRes, 190 );
+    ASSERT_EQ( fineModelFluid->nbJac, 114 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 49 );
-    ASSERT_EQ( fineModelFluid->nbRes, 245 );
-    ASSERT_EQ( fineModelFluid->nbJac, 147 );
+    ASSERT_EQ( solver->fineModel->fsi->nbIter, 48 );
+    ASSERT_EQ( fineModelFluid->nbRes, 240 );
+    ASSERT_EQ( fineModelFluid->nbJac, 144 );
 }
