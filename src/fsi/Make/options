@@ -22,7 +22,6 @@ EXE_INC = -std=c++11 \
     -isystem ../thirdParty/yaml-cpp/include \
     -isystem ../thirdParty/boost \
     -I ../thirdParty/deal-fsi/include \
-    -I ../thirdParty/deal-fsi \
     -isystem ../thirdParty/dealii/dealii-8.3.0/bin/include \
     -isystem ../thirdParty/dealii/dealii-8.3.0/bin/include/deal.II/bundled \
     -isystem ../thirdParty/dealii/dealii-8.3.0/bundled/umfpack/UMFPACK/Include \

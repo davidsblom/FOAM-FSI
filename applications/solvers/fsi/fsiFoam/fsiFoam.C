@@ -9,6 +9,7 @@
 #include <memory>
 #include <yaml-cpp/yaml.h>
 
+#include "dealiiSolidSolver.H"
 #include "version.H"
 #include "ASMILS.H"
 #include "AggressiveSpaceMapping.H"
