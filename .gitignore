@@ -37,3 +37,7 @@ src/thirdParty/boost*
 src/thirdParty/gtest*
 src/thirdParty/yaml-cpp*
 src/thirdParty/scons*
+src/thirdParty/dealii*
+src/thirdParty/petsc*
+src/thirdParty/metis*
+src/thirdParty/parmetis*

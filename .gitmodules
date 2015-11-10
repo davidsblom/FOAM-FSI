@@ -2,3 +2,6 @@
 	path = src/thirdParty/precice
 	url = https://github.com/precice/precice.git
 	branch = develop
+[submodule "src/thirdParty/deal-fsi"]
+	path = src/thirdParty/deal-fsi
+	url = https://github.com/davidsblom/deal-fsi.git
