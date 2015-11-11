@@ -115,7 +115,11 @@ if [ ! -d "dealii" ]; then
 
   make -j 4 test
 
-  cd ../../
+  cd ..
+
+  cp bin/lib/libdeal* ${FOAM_USER_LIBBIN}/
+
+  cd ..
 
 fi
 
