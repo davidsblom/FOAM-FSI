@@ -13,10 +13,12 @@ dealiiSolidSolver<dimension>::dealiiSolidSolver(
     double gravity,
     double distributed_load,
     double rho,
+    double E,
+    double nu,
     unsigned int n_global_refines
     )
     :
-    Step23::LinearElasticity<dimension>( time_step, final_time, theta, degree, gravity, distributed_load, rho, n_global_refines ),
+    Step23::LinearElasticity<dimension>( time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ),
     BaseMultiLevelSolver( 5, dimension, 0 )
 {
     matrix tmp;

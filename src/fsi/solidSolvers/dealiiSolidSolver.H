@@ -24,6 +24,8 @@ public:
             double gravity,
             double distributed_load,
             double rho,
+            double E,
+            double nu,
             unsigned int n_global_refines
             );
 
