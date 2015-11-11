@@ -126,6 +126,6 @@ rm -f boost eigen
 ln -s ../boost boost
 ln -s ../eigen eigen
 
-cmake -DDEAL_II_DIR=../dealii/dealii-${DEALII_VERSION}/bin/ .
+cmake -DDEAL_II_DIR=../dealii/bin/ .
 
 make release
