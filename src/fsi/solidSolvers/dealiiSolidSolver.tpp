@@ -18,7 +18,7 @@ dealiiSolidSolver<dimension>::dealiiSolidSolver(
     unsigned int n_global_refines
     )
     :
-    Step23::LinearElasticity<dimension>( time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ),
+    dealiifsi::LinearElasticity<dimension>( time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ),
     BaseMultiLevelSolver( 5, dimension, 0 )
 {
     matrix tmp;
@@ -38,7 +38,7 @@ void dealiiSolidSolver<dimension>::finalizeTimeStep()
 {
     assert( BaseMultiLevelSolver::init );
 
-    Step23::LinearElasticity<dimension>::finalizeTimeStep();
+    dealiifsi::LinearElasticity<dimension>::finalizeTimeStep();
 
     BaseMultiLevelSolver::init = false;
 }
@@ -46,13 +46,13 @@ void dealiiSolidSolver<dimension>::finalizeTimeStep()
 template <int dimension>
 void dealiiSolidSolver<dimension>::getReadPositions( matrix & readPositions )
 {
-    Step23::LinearElasticity<dimension>::getReadPositions( readPositions );
+    dealiifsi::LinearElasticity<dimension>::getReadPositions( readPositions );
 }
 
 template <int dimension>
 void dealiiSolidSolver<dimension>::getWritePositions( matrix & writePositions )
 {
-    Step23::LinearElasticity<dimension>::getWritePositions( writePositions );
+    dealiifsi::LinearElasticity<dimension>::getWritePositions( writePositions );
 }
 
 template <int dimension>
@@ -60,7 +60,7 @@ void dealiiSolidSolver<dimension>::initTimeStep()
 {
     assert( !BaseMultiLevelSolver::init );
 
-    Step23::LinearElasticity<dimension>::initTimeStep();
+    dealiifsi::LinearElasticity<dimension>::initTimeStep();
 
     BaseMultiLevelSolver::init = true;
 }
@@ -68,7 +68,7 @@ void dealiiSolidSolver<dimension>::initTimeStep()
 template <int dimension>
 bool dealiiSolidSolver<dimension>::isRunning()
 {
-    return Step23::LinearElasticity<dimension>::isRunning();
+    return dealiifsi::LinearElasticity<dimension>::isRunning();
 }
 
 template <int dimension>
@@ -83,11 +83,11 @@ void dealiiSolidSolver<dimension>::solve(
 {
     Info << "Solve solid domain with deal.II" << endl;
 
-    Step23::LinearElasticity<dimension>::setTraction( input );
+    dealiifsi::LinearElasticity<dimension>::setTraction( input );
 
-    Step23::LinearElasticity<dimension>::solve();
+    dealiifsi::LinearElasticity<dimension>::solve();
 
-    Step23::LinearElasticity<dimension>::getDisplacement( output );
+    dealiifsi::LinearElasticity<dimension>::getDisplacement( output );
 
     BaseMultiLevelSolver::data = output;
 }

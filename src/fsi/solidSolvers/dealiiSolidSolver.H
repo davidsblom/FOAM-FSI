@@ -12,7 +12,7 @@
 namespace fsi
 {
     template <int dimension>
-    class dealiiSolidSolver : public Step23::LinearElasticity<dimension>, public BaseMultiLevelSolver
+    class dealiiSolidSolver : public dealiifsi::LinearElasticity<dimension>, public BaseMultiLevelSolver
     {
 public:
 
