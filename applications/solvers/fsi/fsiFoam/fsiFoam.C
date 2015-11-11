@@ -188,7 +188,7 @@ int main(
     std::string solidSolver = config["solid-solver"].as<std::string>();
 
     assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" );
-    assert( solidSolver == "segregated-solver" );
+    assert( solidSolver == "segregated-solver" || solidSolver == "dealii-solver" );
 
     assert( configInterpolation["coarsening"] );
     assert( configInterpolation["coarsening"]["enabled"] );
@@ -241,6 +241,7 @@ int main(
         std::string algorithm = config["multi-level-acceleration"]["algorithm"].as<std::string>();
 
         assert( !config["coupling-scheme-implicit"] );
+        assert( solidSolver == "segregated-solver" );
         assert( algorithm == "manifold-mapping" || algorithm == "output-space-mapping" || algorithm == "ML-IQN-ILS" || algorithm == "aggressive-space-mapping" || algorithm == "ASM-ILS" );
 
         int nbLevels = config["multi-level-acceleration"]["levels"].size();
@@ -608,7 +609,7 @@ int main(
 
         // Create shared pointers to solvers
         std::shared_ptr<foamFluidSolver> fluid;
-        std::shared_ptr<foamSolidSolver> solid;
+        std::shared_ptr<BaseMultiLevelSolver> solid;
         std::shared_ptr<MultiLevelSolver> multiLevelFluidSolver;
         std::shared_ptr<MultiLevelSolver> multiLevelSolidSolver;
         std::shared_ptr<FsiSolver> fsi;
@@ -660,6 +661,25 @@ int main(
 
             if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
                 sdcSolidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new SDCSolidSolver( "solid", args, runTime ) );
+        }
+
+        if ( solidSolver == "dealii-solver" )
+        {
+            assert( timeIntegrationScheme == "bdf" );
+            assert( not adaptiveTimeStepping );
+
+            double time_step = runTime->deltaT().value();
+            double theta = 1;
+            unsigned int degree = 1;
+            unsigned int n_global_refines = 1;
+            double gravity = 0;
+            double distributed_load = 0;
+            double rho = 1000;
+            double final_time = runTime->endTime().value();
+            double nu = 0.4;
+            double E = 5600000.0;
+
+            solid = std::shared_ptr<BaseMultiLevelSolver>( new dealiiSolidSolver<2> ( time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ) );
         }
 
         if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
