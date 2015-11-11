@@ -22,11 +22,11 @@ EXE_INC = -std=c++11 \
     -isystem ../thirdParty/yaml-cpp/include \
     -isystem ../thirdParty/boost \
     -I ../thirdParty/deal-fsi/include \
-    -isystem ../thirdParty/dealii/dealii-8.3.0/bin/include \
-    -isystem ../thirdParty/dealii/dealii-8.3.0/bin/include/deal.II/bundled \
-    -isystem ../thirdParty/dealii/dealii-8.3.0/bundled/umfpack/UMFPACK/Include \
-    -isystem ../thirdParty/dealii/dealii-8.3.0/bundled/umfpack/AMD/Include \
-    -isystem ../thirdParty/petsc/petsc-3.6.2/x86_64/include \
-    -isystem ../thirdParty/petsc/petsc-3.6.2/include
+    -isystem ../thirdParty/dealii/bin/include \
+    -isystem ../thirdParty/dealii/bin/include/deal.II/bundled \
+    -isystem ../thirdParty/dealii/bundled/umfpack/UMFPACK/Include \
+    -isystem ../thirdParty/dealii/bundled/umfpack/AMD/Include \
+    -isystem ../thirdParty/petsc/x86_64/include \
+    -isystem ../thirdParty/petsc/include
 
 EXE_LIBS =
