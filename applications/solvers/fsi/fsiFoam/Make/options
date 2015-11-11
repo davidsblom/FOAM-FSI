@@ -24,12 +24,12 @@ EXE_INC = -std=c++11 \
     -isystem ../../../../src/thirdParty/boost \
     -isystem ../../../../src/boundaryConditions/lnInclude \
     -isystem ../../../../src/thirdParty/deal-fsi/include \
-    -isystem ../../../../src/thirdParty/dealii/dealii-8.3.0/bin/include \
-    -isystem ../../../../src/thirdParty/dealii/dealii-8.3.0/bin/include/deal.II/bundled \
-    -isystem ../../../../src/thirdParty/dealii/dealii-8.3.0/bundled/umfpack/UMFPACK/Include \
-    -isystem ../../../../src/thirdParty/dealii/dealii-8.3.0/bundled/umfpack/AMD/Include \
-    -isystem ../../../../src/thirdParty/petsc/petsc-3.6.2/include \
-    -isystem ../../../../src/thirdParty/petsc/petsc-3.6.2/x86_64/include
+    -isystem ../../../../src/thirdParty/dealii/bin/include \
+    -isystem ../../../../src/thirdParty/dealii/bin/include/deal.II/bundled \
+    -isystem ../../../../src/thirdParty/dealii/bundled/umfpack/UMFPACK/Include \
+    -isystem ../../../../src/thirdParty/dealii/bundled/umfpack/AMD/Include \
+    -isystem ../../../../src/thirdParty/petsc/include \
+    -isystem ../../../../src/thirdParty/petsc/x86_64/include
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \

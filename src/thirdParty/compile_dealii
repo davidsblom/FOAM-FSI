@@ -10,15 +10,14 @@ DEALII_VERSION=8.3.0
 
 if [ ! -d "metis" ]; then
 
-  mkdir metis
-  cd metis
-
-  rm -rf metis-${METIS_VERSION}*
+  rm -rf metis*
 
   wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz
 
   tar -zxf metis-${METIS_VERSION}.tar.gz
   rm metis-${METIS_VERSION}.tar.gz
+
+  ln -s metis-${METIS_VERSION} metis
 
   cd metis-${METIS_VERSION}
 
@@ -29,21 +28,19 @@ if [ ! -d "metis" ]; then
 
   make install
 
-  cd ../../
+  cd ../
 
 fi
 
 if [ ! -d "parmetis" ]; then
 
-  mkdir parmetis
-  cd parmetis
-
-  rm -rf parmetis-${PARMETIS_VERSION}*
+  rm -rf parmetis*
 
   wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-${PARMETIS_VERSION}.tar.gz
 
   tar -zxf parmetis-${PARMETIS_VERSION}.tar.gz
   rm parmetis-${PARMETIS_VERSION}.tar.gz
+  ln -s parmetis-${PARMETIS_VERSION} parmetis
 
   cd parmetis-${PARMETIS_VERSION}
 
@@ -54,22 +51,21 @@ if [ ! -d "parmetis" ]; then
 
   make install
 
-  cd ../../
+  cd ../
 
 fi
 
 if [ ! -d "petsc" ]; then
 
-  mkdir petsc
-  cd petsc
-
-  rm -rf petsc-${PETSC_VERSION}*
+  rm -rf petsc*
 
   wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-${PETSC_VERSION}.tar.gz
 
   tar -zxf petsc-${PETSC_VERSION}.tar.gz
 
   rm petsc-${PETSC_VERSION}.tar.gz
+
+  ln -s petsc-${PETSC_VERSION} petsc
 
   cd petsc-${PETSC_VERSION}
 
@@ -82,31 +78,30 @@ if [ ! -d "petsc" ]; then
 
   make test
 
-  cd ../../
+  cd ../
 
 fi
 
 if [ ! -d "dealii" ]; then
 
-  mkdir dealii
-  cd dealii
+  rm -rf dealii*
 
   wget https://github.com/dealii/dealii/releases/download/v${DEALII_VERSION}/dealii-${DEALII_VERSION}.tar.gz
 
   tar -zxf dealii-${DEALII_VERSION}.tar.gz
 
+  ln -s dealii-${DEALII_VERSION} dealii
+
   rm dealii-${DEALII_VERSION}.tar.gz
 
-  export PETSC_DIR=`pwd`/../petsc/petsc-${PETSC_VERSION}
+  export PETSC_DIR=`pwd`/../petsc
   export PETSC_ARCH=x86_64
   export CC=mpicc
   export CXX=mpicxx
   export F77=mpif77
   export F90=mpif90
-  export METIS_DIR=`pwd`/../metis/metis-${METIS_VERSION}
-  export PARMETIS_DIR=`pwd`/../parmetis/parmetis-${PARMETIS_VERSION}
-
-  echo $PETSC_DIR
+  export METIS_DIR=`pwd`/../metis
+  export PARMETIS_DIR=`pwd`/../parmetis
 
   cd dealii-${DEALII_VERSION}
 
@@ -120,7 +115,7 @@ if [ ! -d "dealii" ]; then
 
   make -j 4 test
 
-  cd ../../../
+  cd ../../
 
 fi
 
