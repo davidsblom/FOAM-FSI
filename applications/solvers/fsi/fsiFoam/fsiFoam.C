@@ -670,6 +670,8 @@ int main(
 
             dealiifsi::DataStorage data;
             data.read_data( "deal-fsi.prm" );
+            data.time_step = runTime->deltaT().value();
+            data.final_time = runTime->endTime().value();
             solid = std::shared_ptr<BaseMultiLevelSolver>( new dealiiSolidSolver<2> ( data ) );
         }
 
