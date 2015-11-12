@@ -5,20 +5,9 @@
  */
 
 template <int dimension>
-dealiiSolidSolver<dimension>::dealiiSolidSolver(
-    double time_step,
-    double final_time,
-    double theta,
-    double degree,
-    double gravity,
-    double distributed_load,
-    double rho,
-    double E,
-    double nu,
-    unsigned int n_global_refines
-    )
+dealiiSolidSolver<dimension>::dealiiSolidSolver( dealiifsi::DataStorage & data )
     :
-    dealiifsi::LinearElasticity<dimension>( time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ),
+    dealiifsi::LinearElasticity<dimension>( data ),
     BaseMultiLevelSolver( 5, dimension, 0 )
 {
     matrix tmp;

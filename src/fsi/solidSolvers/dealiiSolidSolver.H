@@ -16,18 +16,7 @@ namespace fsi
     {
 public:
 
-        dealiiSolidSolver(
-            double time_step,
-            double final_time,
-            double theta,
-            double degree,
-            double gravity,
-            double distributed_load,
-            double rho,
-            double E,
-            double nu,
-            unsigned int n_global_refines
-            );
+        dealiiSolidSolver( dealiifsi::DataStorage & data );
 
         virtual ~dealiiSolidSolver();
 

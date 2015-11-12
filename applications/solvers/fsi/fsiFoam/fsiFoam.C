@@ -668,18 +668,9 @@ int main(
             assert( timeIntegrationScheme == "bdf" );
             assert( not adaptiveTimeStepping );
 
-            double time_step = runTime->deltaT().value();
-            double theta = 1;
-            unsigned int degree = 1;
-            unsigned int n_global_refines = 1;
-            double gravity = 0;
-            double distributed_load = 0;
-            double rho = 1000;
-            double final_time = runTime->endTime().value();
-            double nu = 0.4;
-            double E = 5600000.0;
-
-            solid = std::shared_ptr<BaseMultiLevelSolver>( new dealiiSolidSolver<2> ( time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ) );
+            dealiifsi::DataStorage data;
+            data.read_data( "deal-fsi.prm" );
+            solid = std::shared_ptr<BaseMultiLevelSolver>( new dealiiSolidSolver<2> ( data ) );
         }
 
         if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
