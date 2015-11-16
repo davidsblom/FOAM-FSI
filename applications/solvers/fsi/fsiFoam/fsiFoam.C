@@ -32,6 +32,7 @@
 #include "RBFInterpolation.H"
 #include "RelativeConvergenceMeasure.H"
 #include "SolidSolver.H"
+#include "ElasticSolidSolver.H"
 #include "SpaceMappingSolver.H"
 #include "CompressibleFluidSolver.H"
 #include "TPSFunction.H"
@@ -188,7 +189,7 @@ int main(
     std::string solidSolver = config["solid-solver"].as<std::string>();
 
     assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" );
-    assert( solidSolver == "segregated-solver" || solidSolver == "dealii-solver" );
+    assert( solidSolver == "segregated-solver" || solidSolver == "dealii-solver" || solidSolver == "linear-elastic-solver" );
 
     assert( configInterpolation["coarsening"] );
     assert( configInterpolation["coarsening"]["enabled"] );
@@ -661,6 +662,14 @@ int main(
 
             if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
                 sdcSolidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new SDCSolidSolver( "solid", args, runTime ) );
+        }
+
+        if ( solidSolver == "linear-elastic-solver" )
+        {
+            assert( not adaptiveTimeStepping );
+            assert( timeIntegrationScheme == "bdf" );
+
+            solid = std::shared_ptr<foamSolidSolver> ( new ElasticSolidSolver( "solid", args, runTime ) );
         }
 
         if ( solidSolver == "dealii-solver" )
