@@ -11,6 +11,8 @@ BOOST_VERSION=1_55_0
 BOOST_VERSION_DOT=1.55.0
 PETSC_ARCH=x86_64
 
+mkdir -p ${FOAM_USER_LIBBIN}
+
 if [ ! -d "boost" ]; then
     rm -rf boost*
     wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
