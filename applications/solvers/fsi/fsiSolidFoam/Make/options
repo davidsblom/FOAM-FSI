@@ -17,7 +17,8 @@ EXE_INC = -std=c++11 \
     -I../../../../src/thirdParty \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
-    -I../../../../src/RBFMeshMotionSolver/lnInclude/
+    -I../../../../src/RBFMeshMotionSolver/lnInclude/ \
+    -isystem ../../../../src/thirdParty/yaml-cpp/include
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
@@ -44,4 +45,5 @@ EXE_LIBS = \
     -lbasicThermophysicalModels \
     -lspecie \
     -lcompressibleRASModels \
+    -lyaml-cpp \
     -ldeal_II
