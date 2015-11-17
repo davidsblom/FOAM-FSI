@@ -47,4 +47,5 @@ EXE_LIBS = \
     -lbasicThermophysicalModels \
     -lspecie \
     -lcompressibleRASModels \
-    -lyaml-cpp
+    -lyaml-cpp \
+    -ldeal_II
