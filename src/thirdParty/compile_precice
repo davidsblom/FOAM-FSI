@@ -25,25 +25,16 @@ export PRECICE_MPI_LIB=mpi
 export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
 export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
 export CPLUS_INCLUDE_PATH=`pwd`/eigen
+export PETSC_DIR=`pwd`/petsc
+export PETSC_ARCH=x86_64
 
 # Build preCICE
 cd precice
-if [ "$(uname)" == "Darwin" ]; then
-    scons -j 4 build=release python=off petsc=off mpi=off compiler=g++-mp-4.9 solib
-    scons -j 4 build=release python=off petsc=off mpi=off compiler=g++-mp-4.9
-else
-    scons -j 4 build=release python=off petsc=off compiler=mpicxx
-    scons -j 4 build=release python=off petsc=off compiler=mpicxx solib
-fi
+scons -j 4 build=release python=off petsc=on compiler=mpicxx
+scons -j 4 build=release python=off petsc=on compiler=mpicxx solib
 
 mkdir -p ${FOAM_USER_LIBBIN}
 mkdir -p ${FOAM_USER_APPBIN}
 
-SHARED_LIBRARY=libprecice.so
-
-if [ "$(uname)" == "Darwin" ]; then
-    SHARED_LIBRARY=libprecice.dylib
-fi
-
-cp build/last/${SHARED_LIBRARY} ${FOAM_USER_LIBBIN}/
+cp build/last/libprecice.* ${FOAM_USER_LIBBIN}/
 cp build/last/binprecice ${FOAM_USER_APPBIN}/

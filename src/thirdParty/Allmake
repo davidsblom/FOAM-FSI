@@ -2,7 +2,7 @@
 
 set -e
 
+./compile_dealii
 ./compile_gtest
 ./compile_precice
 ./compile_yaml
-./compile_dealii

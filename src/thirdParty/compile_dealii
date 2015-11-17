@@ -7,6 +7,16 @@ METIS_VERSION=5.1.0
 PARMETIS_VERSION=4.0.3
 PETSC_VERSION=3.6.2
 DEALII_VERSION=8.3.0
+BOOST_VERSION=1_55_0
+BOOST_VERSION_DOT=1.55.0
+
+if [ ! -d "boost" ]; then
+    rm -rf boost*
+    wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
+    tar jxf boost_${BOOST_VERSION}.tar.bz2
+    rm -f boost_${BOOST_VERSION}.tar.bz2
+    ln -s boost_${BOOST_VERSION} boost
+fi
 
 if [ ! -d "metis" ]; then
 
