@@ -189,7 +189,7 @@ int main(
     std::string solidSolver = config["solid-solver"].as<std::string>();
 
     assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" );
-    assert( solidSolver == "segregated-solver" || solidSolver == "dealii-solver" || solidSolver == "linear-elastic-solver" );
+    assert( solidSolver == "nonlinear-elastic-solver" || solidSolver == "dealii-solver" || solidSolver == "linear-elastic-solver" );
 
     assert( configInterpolation["coarsening"] );
     assert( configInterpolation["coarsening"]["enabled"] );
@@ -242,7 +242,7 @@ int main(
         std::string algorithm = config["multi-level-acceleration"]["algorithm"].as<std::string>();
 
         assert( !config["coupling-scheme-implicit"] );
-        assert( solidSolver == "segregated-solver" );
+        assert( solidSolver == "nonlinear-elastic-solver" );
         assert( algorithm == "manifold-mapping" || algorithm == "output-space-mapping" || algorithm == "ML-IQN-ILS" || algorithm == "aggressive-space-mapping" || algorithm == "ASM-ILS" );
 
         int nbLevels = config["multi-level-acceleration"]["levels"].size();
@@ -327,7 +327,7 @@ int main(
         if ( fluidSolver == "compressible-solver" )
             fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
 
-        if ( solidSolver == "segregated-solver" )
+        if ( solidSolver == "nonlinear-elastic-solver" )
         {
             std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
 
@@ -417,7 +417,7 @@ int main(
             if ( fluidSolver == "compressible-solver" )
                 fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
 
-            if ( solidSolver == "segregated-solver" )
+            if ( solidSolver == "nonlinear-elastic-solver" )
             {
                 std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
 
@@ -651,7 +651,7 @@ int main(
             fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
         }
 
-        if ( solidSolver == "segregated-solver" )
+        if ( solidSolver == "nonlinear-elastic-solver" )
         {
             if ( timeIntegrationScheme == "bdf" )
             {

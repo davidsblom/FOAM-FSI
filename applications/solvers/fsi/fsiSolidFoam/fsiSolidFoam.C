@@ -41,14 +41,14 @@ int main(
 
     std::string solidSolver = config["solid-solver"].as<std::string>();
 
-    assert( solidSolver == "segregated-solver" || solidSolver == "linear-elastic-solver" );
+    assert( solidSolver == "nonlinear-elastic-solver" || solidSolver == "linear-elastic-solver" );
 
     std::shared_ptr<foamSolidSolver> solid;
 
     if ( solidSolver == "linear-elastic-solver" )
         solid = std::shared_ptr<foamSolidSolver> ( new ElasticSolidSolver( fvMesh::defaultRegion, args, runTime ) );
 
-    if ( solidSolver == "segregated-solver" )
+    if ( solidSolver == "nonlinear-elastic-solver" )
         solid = std::shared_ptr<foamSolidSolver>( new SolidSolver( fvMesh::defaultRegion, args, runTime ) );
 
     assert( solid );
