@@ -115,13 +115,10 @@ if [ ! -d "dealii" ]; then
 
   make -j 4 test
 
-  cd ..
-
-  cp bin/lib/libdeal* ${FOAM_USER_LIBBIN}/
-
-  cd ..
+  cd ../..
 
 fi
+cp dealii/bin/lib/libdeal* ${FOAM_USER_LIBBIN}/
 
 cd deal-fsi
 
