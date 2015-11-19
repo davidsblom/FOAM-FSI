@@ -255,7 +255,7 @@ int main(
 
         // Create shared pointers to solvers
         std::shared_ptr<foamFluidSolver> fluid;
-        std::shared_ptr<foamSolidSolver> solid;
+        std::shared_ptr<BaseMultiLevelSolver> solid;
         std::shared_ptr<MultiLevelSolver> multiLevelFluidSolver;
         std::shared_ptr<MultiLevelSolver> multiLevelSolidSolver;
         std::shared_ptr<FsiSolver> fsi;
@@ -674,14 +674,22 @@ int main(
 
         if ( solidSolver == "dealii-solver" )
         {
-            assert( timeIntegrationScheme == "bdf" );
             assert( not adaptiveTimeStepping );
 
             dealiifsi::DataStorage data;
             data.read_data( "deal-fsi.prm" );
             data.time_step = runTime->deltaT().value();
             data.final_time = runTime->endTime().value();
-            solid = std::shared_ptr<BaseMultiLevelSolver>( new dealiiSolidSolver<2> ( data ) );
+
+            if ( timeIntegrationScheme == "bdf" )
+            {
+                assert( not adaptiveTimeStepping );
+
+                solid = std::shared_ptr<BaseMultiLevelSolver>( new dealiiSolidSolver<2> ( data ) );
+            }
+
+            if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
+                sdcSolidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new dealiiSolidSolver<2> ( data ) );
         }
 
         if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
@@ -691,7 +699,7 @@ int main(
             assert( not fluid );
             assert( not solid );
             fluid = std::dynamic_pointer_cast<foamFluidSolver>( sdcFluidSolver );
-            solid = std::dynamic_pointer_cast<foamSolidSolver>( sdcSolidSolver );
+            solid = std::dynamic_pointer_cast<BaseMultiLevelSolver>( sdcSolidSolver );
         }
 
         assert( fluid );

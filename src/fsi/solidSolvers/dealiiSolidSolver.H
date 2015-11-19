@@ -8,7 +8,7 @@
 
 #include <LinearElasticity.h>
 #include "BaseMultiLevelSolver.H"
-#include "SDCSolver.H"
+#include "SDCFsiSolverInterface.H"
 
 namespace fsi
 {
@@ -25,7 +25,7 @@ namespace fsi
         );
 
     template <int dimension>
-    class dealiiSolidSolver : public dealiifsi::LinearElasticity<dimension>, public BaseMultiLevelSolver, public sdc::SDCSolver
+    class dealiiSolidSolver : public dealiifsi::LinearElasticity<dimension>, public BaseMultiLevelSolver, public sdc::SDCFsiSolverInterface
     {
 public:
 
@@ -90,6 +90,16 @@ public:
 
         virtual void setNumberOfImplicitStages( int k );
 
+        virtual void prepareImplicitSolve(
+            bool corrector,
+            const int k,
+            const int kold,
+            const scalar t,
+            const scalar dt,
+            const fsi::vector & qold,
+            const fsi::vector & rhs
+            );
+
         virtual void implicitSolve(
             bool corrector,
             const int k,
@@ -110,7 +120,7 @@ public:
 
 private:
 
-        int k;
+        int k, kindex;
         std::deque<dealii::Vector<double> > UStages;
         std::deque<dealii::Vector<double> > VStages;
     };

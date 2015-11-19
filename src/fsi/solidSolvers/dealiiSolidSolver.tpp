@@ -110,6 +110,12 @@ void dealiiSolidSolver<dimension>::solve(
     dealiifsi::LinearElasticity<dimension>::getDisplacement( output );
 
     BaseMultiLevelSolver::data = output;
+
+    if ( UStages.size() > 0 )
+    {
+        UStages.at( kindex + 1 )  = dealiifsi::LinearElasticity<dimension>::solution_u;
+        VStages.at( kindex + 1 ) = dealiifsi::LinearElasticity<dimension>::solution_v;
+    }
 }
 
 template <int dimension>
@@ -189,16 +195,14 @@ void dealiiSolidSolver<dimension>::setNumberOfImplicitStages( int k )
 }
 
 template <int dimension>
-void dealiiSolidSolver<dimension>::implicitSolve(
+void dealiiSolidSolver<dimension>::prepareImplicitSolve(
     bool corrector,
     const int k,
     const int kold,
     const scalar t,
     const scalar dt,
     const fsi::vector & qold,
-    const fsi::vector & rhs,
-    fsi::vector & f,
-    fsi::vector & result
+    const fsi::vector & rhs
     )
 {
     dealiifsi::LinearElasticity<dimension>::time_step = dt;
@@ -214,6 +218,23 @@ void dealiiSolidSolver<dimension>::implicitSolve(
     copy( qold, dealiifsi::LinearElasticity<dimension>::old_solution_v, dealiifsi::LinearElasticity<dimension>::old_solution_u.size() );
     copy( rhs, dealiifsi::LinearElasticity<dimension>::u_rhs, 0 );
     copy( rhs, dealiifsi::LinearElasticity<dimension>::v_rhs, dealiifsi::LinearElasticity<dimension>::u_rhs.size() );
+}
+
+template <int dimension>
+void dealiiSolidSolver<dimension>::implicitSolve(
+    bool corrector,
+    const int k,
+    const int kold,
+    const scalar t,
+    const scalar dt,
+    const fsi::vector & qold,
+    const fsi::vector & rhs,
+    fsi::vector & f,
+    fsi::vector & result
+    )
+{
+    kindex = k;
+    prepareImplicitSolve( corrector, k, kold, t, dt, qold, rhs );
 
     dealiifsi::LinearElasticity<dimension>::solve();
 
@@ -234,8 +255,8 @@ void dealiiSolidSolver<dimension>::getVariablesInfo(
     dof.push_back( dealiifsi::LinearElasticity<dimension>::solution_v.size() );
     enabled.push_back( true );
     enabled.push_back( true );
-    names.push_back( "U" );
-    names.push_back( "V" );
+    names.push_back( "solid U" );
+    names.push_back( "solid V" );
 }
 
 void copy(
