@@ -86,7 +86,6 @@ TEST( dealiiSolidSolver, sdc_order )
 
     unsigned int nbComputations = 4;
 
-    std::vector<unsigned int> nbTimeSteps( nbComputations );
     std::vector<double> solution_l2_norm( nbComputations );
 
     for ( unsigned int i = 0; i < nbComputations; ++i )
@@ -111,7 +110,6 @@ TEST( dealiiSolidSolver, sdc_order )
         elasticSolver->getSolution( solution, f );
 
         solution_l2_norm[i] = solution.norm();
-        nbTimeSteps[i] = elasticSolver->timestep_number;
     }
 
     std::vector<double> error( nbComputations - 1 );

@@ -29,7 +29,7 @@ namespace fsi
     {
 public:
 
-        dealiiSolidSolver( dealiifsi::DataStorage & data );
+        explicit dealiiSolidSolver( dealiifsi::DataStorage & data );
 
         dealiiSolidSolver(
             double time_step,
