@@ -236,7 +236,7 @@ void CompressibleFluidSolver::solve()
     end = std::chrono::system_clock::now();
 
     std::chrono::duration<double> elapsed_seconds = end-start;
-    Info << "timing mesh deformation = " << elapsed_seconds.count() << endl;
+    Info << "timing mesh deformation = " << elapsed_seconds.count() << "s" << endl;
 
     int oCorr;
 
