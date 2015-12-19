@@ -113,7 +113,7 @@ void dealiiSolidSolver<dimension>::solve(
 
     if ( UStages.size() > 0 )
     {
-        UStages.at( kindex + 1 )  = dealiifsi::LinearElasticity<dimension>::solution_u;
+        UStages.at( kindex + 1 ) = dealiifsi::LinearElasticity<dimension>::solution_u;
         VStages.at( kindex + 1 ) = dealiifsi::LinearElasticity<dimension>::solution_v;
     }
 }
