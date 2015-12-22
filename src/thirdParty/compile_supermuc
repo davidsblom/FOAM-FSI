@@ -92,9 +92,9 @@ cd build
 
 cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin ..
 
-make -j 4 install
+make -j 32 install
 
-make -j 4 test
+make -j 32 test
 
 cd ../..
 
