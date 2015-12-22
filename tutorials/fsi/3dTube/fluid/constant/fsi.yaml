@@ -4,7 +4,7 @@ fluid-solver: pimple-solver
 
 # Choose the solid solver: Currently, only the segregated-solver is
 # available.
-solid-solver: segregated-solver
+solid-solver: nonlinear-elastic-solver
 
 # Solve the fluid and solid solver in a staggered/serial or parallel manner.
 parallel-coupling: false

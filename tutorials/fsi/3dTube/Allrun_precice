@@ -10,6 +10,7 @@ NB_SOLID_CORES=3
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 cp fluid/constant/preCICE.xml solid/constant/
+cp fluid/constant/fsi.yaml solid/constant/
 cp fluid/system/decomposeParDict solid/system/
 
 cd fluid

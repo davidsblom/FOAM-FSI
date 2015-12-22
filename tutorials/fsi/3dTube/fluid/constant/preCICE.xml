@@ -3,7 +3,7 @@
 <precice-configuration>
 
     <log-filter component="" target="debug" switch="off" />
-    <log-filter component="" target="info" switch="on" />
+    <log-filter component="" target="info" switch="off" />
     <log-output column-separator=" | " log-time-stamp="no" log-time-stamp-human-readable="yes" log-machine-name="no" log-message-type="no" log-trace="yes" />
 
     <solver-interface dimensions="3">
