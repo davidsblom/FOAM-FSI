@@ -13,9 +13,7 @@ PreciceFluidSolver::PreciceFluidSolver( shared_ptr<foamFluidSolver> solver )
     solver( solver ),
     precice( shared_ptr<precice::SolverInterface> ( new precice::SolverInterface( "Fluid_Solver", Pstream::myProcNo(), Pstream::nProcs() ) ) ),
     idsReadPositions(),
-    idsWritePositions(),
-    totalRunTime( 0 ),
-    totalNbIterations( 0 )
+    idsWritePositions()
 {
     assert( solver );
 
@@ -82,8 +80,6 @@ void PreciceFluidSolver::run()
 
         while ( precice->isCouplingOngoing() )
         {
-            std::clock_t t = std::clock();
-
             Info << endl << "Time = " << solver->runTime->timeName() << ", iteration = " << iter + 1 << endl;
 
             readData( input );
@@ -101,14 +97,6 @@ void PreciceFluidSolver::run()
 
             if ( precice->isActionRequired( precice::constants::actionWriteIterationCheckpoint() ) )
                 precice->fulfilledAction( precice::constants::actionWriteIterationCheckpoint() );
-
-            t = std::clock() - t;
-            scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
-            totalRunTime += runTime;
-            totalNbIterations++;
-            Info << "runtime = " << runTime << " s" << endl;
-            Info << "average runtime = " << totalRunTime / totalNbIterations << " s" << endl;
-            Info << "total runtime = " << totalRunTime << " s" << endl;
 
             precice->advance( solver->runTime->deltaT().value() );
 
