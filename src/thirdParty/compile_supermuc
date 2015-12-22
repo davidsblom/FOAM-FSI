@@ -76,13 +76,13 @@ tar -zxf dealii-${DEALII_VERSION}.tar.gz
 
 ln -s dealii-${DEALII_VERSION} dealii
 
-export PETSC_DIR=`pwd`/../petsc
+export PETSC_DIR=`pwd`/petsc
 export CC=mpicc
 export CXX=mpicxx
 export F77=mpif77
 export F90=mpif90
-export METIS_DIR=`pwd`/../metis
-export PARMETIS_DIR=`pwd`/../parmetis
+export METIS_DIR=`pwd`/metis
+export PARMETIS_DIR=`pwd`/parmetis
 
 cd dealii-${DEALII_VERSION}
 

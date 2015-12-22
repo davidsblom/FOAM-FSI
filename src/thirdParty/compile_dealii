@@ -108,7 +108,9 @@ if [ ! -d "dealii" ]; then
 
   rm dealii-${DEALII_VERSION}.tar.gz
 
-  export PETSC_DIR=`pwd`/../petsc
+  export PETSC_DIR=`pwd`/petsc
+  cd $PETSC_DIR
+  cd ..
   export CC=mpicc
   export CXX=mpicxx
   export F77=mpif77
