@@ -11,6 +11,7 @@ NB_SOLID_CORES=3
 
 cp fluid/constant/preCICE.xml solid/constant/
 cp fluid/system/decomposeParDict solid/system/
+cp fluid/constant/fsi.yaml solid/constant/
 
 cd fluid
 runApplication blockMesh
