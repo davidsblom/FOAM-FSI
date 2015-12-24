@@ -15,45 +15,28 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+dimensions      [0 1 0 0 0 0 0];
 
-internalField   uniform (0.0001 0 0);
+internalField   uniform (0 0 0);
 
 boundaryField
 {
-    inlet
+    interface
     {
-        type            setInletVelocity;
-        maxValue        0.2;
-        value           uniform (0 0 0);
-    }
-    outlet
-    {
-        type            zeroGradient;
-    }
-    top
-    {
-        type            fixedValue;
-        value           uniform (0 0 0);
-    }
-    bottom
-    {
-        type            fixedValue;
-        value           uniform (0 0 0);
-    }
-    left
-    {
-        type            fixedValue;
+        type            solidTraction;
+        nonLinear       totalLagrangian;
+        traction        uniform ( 0 0 0 );
+        pressure        uniform 0;
         value           uniform (0 0 0);
     }
     symmetry
     {
         type            symmetryPlane;
-        value           uniform (0.0001 0 0);
+        value           uniform (0 0 0);
     }
-    interface
+    bottom
     {
-        type            myMovingWallVelocity;
+        type            fixedDisplacement;
         value           uniform (0 0 0);
     }
 }
