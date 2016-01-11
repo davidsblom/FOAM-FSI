@@ -15,7 +15,7 @@ Features
 Installation
 -----------
 
-First, compile `foam-extend-3.2`. A detailed description for the compilation of `foam-extend-3.1` can be found here: https://openfoamwiki.net/index.php/Installation/Linux/foam-extend-3.1 which also applies to `foam-extend-3.2`. Note that `foam-extend-3.2` is using the git repository of `foam-extend-3.1`, so use the `v3.2` tag to compile `foam-extend-3.2`:
+First, compile `foam-extend-3.2`. A detailed description for the compilation of `foam-extend-3.2` can be found here: https://openfoamwiki.net/index.php/Installation/Linux/foam-extend-3.1 which also applies to `foam-extend-3.2`. Note that `foam-extend-3.2` is using the git repository of `foam-extend-3.1`, so use the `v3.2` tag to compile `foam-extend-3.2`:
 
 ``` bash
 git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2
