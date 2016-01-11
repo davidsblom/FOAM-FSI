@@ -19,11 +19,36 @@ First, compile `foam-extend-3.2`. A detailed description for the compilation of 
 
 ``` bash
 git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2
+```
+
+It is highly advised to the use the system installed gcc (>= 4.8) and OpenMPI library for foam-extend and FOAM-FSI. This is due to the fact that the bundled OpenMPI version of foam-extend disables the fortran compiler, and a set of MPI routines which are needed when running a fluid-structure-acoustics simulation with preCICE.
+
+On Ubuntu, the following environment variables should be set before compiling `foam-extend-3.2`:
+
+``` bash
+# Use the system installed libraries
+export PARAVIEW_SYSTEM=1
+export CUDA_IGNORE=1
+export SWAK4FOAM_SYSTEM=1
+export WM_MPLIB=SYSTEMOPENMPI
+export OPENMPI_DIR=/usr
+export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+```
+
+With this grep command, you can ensure that the `mpicxx` compiler is used during compilation:
+
+``` bash
+sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
+```
+
+Finally, the compilation process of `foam-extend` is started with
+
+``` bash
 cd foam-extend-3.2
 ./Allwmake.firstInstall
 ```
 
-To compile the FSI library:
+To compile the `FOAM-FSI` library:
 
 ``` bash
 git clone --recursive https://github.com/davidsblom/FOAM-FSI.git
