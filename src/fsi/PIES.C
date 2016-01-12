@@ -223,6 +223,9 @@ namespace sdc
             A.resize( gamma_k.rows() + 1, M );
             A.setZero();
 
+            // Ensure that the system is never over-determined
+            assert( A.rows() <= A.cols() );
+
             for ( int i = 0; i < gamma_k.rows(); i++ )
                 for ( int j = 0; j < M; j++ )
                     A( i, j ) = sdc::exp( gamma_k( i ) * t( j ) );
