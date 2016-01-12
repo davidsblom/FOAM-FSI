@@ -48,6 +48,8 @@
 #include "PIES.H"
 #include "ResidualRelativeConvergenceMeasure.H"
 #include "AbsoluteConvergenceMeasure.H"
+#include "SteadyStateFluidSolver.H"
+#include "SteadyStateSolidSolver.H"
 
 using std::list;
 
@@ -188,8 +190,8 @@ int main(
     std::string fluidSolver = config["fluid-solver"].as<std::string>();
     std::string solidSolver = config["solid-solver"].as<std::string>();
 
-    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" );
-    assert( solidSolver == "nonlinear-elastic-solver" || solidSolver == "dealii-solver" || solidSolver == "linear-elastic-solver" );
+    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "steady-state-pimple-solver" );
+    assert( solidSolver == "nonlinear-elastic-solver" || solidSolver == "dealii-solver" || solidSolver == "linear-elastic-solver" || solidSolver == "steady-state-nonlinear-elastic-solver" );
 
     assert( configInterpolation["coarsening"] );
     assert( configInterpolation["coarsening"]["enabled"] );
@@ -643,6 +645,13 @@ int main(
                 sdcFluidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new SDCDynamicMeshFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
         }
 
+        if ( fluidSolver == "steady-state-pimple-solver" )
+        {
+            assert( not adaptiveTimeStepping );
+
+            fluid = std::shared_ptr<foamFluidSolver> ( new SteadyStateFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+        }
+
         if ( fluidSolver == "compressible-solver" )
         {
             assert( timeIntegrationScheme == "bdf" );
@@ -662,6 +671,13 @@ int main(
 
             if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
                 sdcSolidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new SDCSolidSolver( "solid", args, runTime ) );
+        }
+
+        if ( solidSolver == "steady-state-nonlinear-elastic-solver" )
+        {
+            assert( not adaptiveTimeStepping );
+
+            solid = std::shared_ptr<foamSolidSolver> ( new SteadyStateSolidSolver( "solid", args, runTime ) );
         }
 
         if ( solidSolver == "linear-elastic-solver" )
