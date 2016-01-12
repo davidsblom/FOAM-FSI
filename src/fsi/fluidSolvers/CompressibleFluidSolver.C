@@ -86,6 +86,30 @@ CompressibleFluidSolver::CompressibleFluidSolver(
     ),
     DpDt(
     fvc::DDt( surfaceScalarField( "phiU", phi / fvc::interpolate( rho ) ), p ) ),
+    ddtp(
+    IOobject
+    (
+        "ddtp",
+        runTime->timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedScalar( "zero", dimPressure / dimTime, 0.0 )
+    ),
+    ddtrho(
+    IOobject
+    (
+        "ddtrho",
+        runTime->timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedScalar( "zero", dimDensity / dimTime, 0.0 )
+    ),
     cumulativeContErr( 0 ),
     convergenceTolerance( readScalar( mesh.solutionDict().subDict( "blockSolver" ).lookup( "convergenceTolerance" ) ) ),
     nOuterCorr( readLabel( mesh.solutionDict().subDict( "blockSolver" ).lookup( "nOuterCorrectors" ) ) ),
@@ -382,4 +406,17 @@ void CompressibleFluidSolver::solve()
     }
 
     continuityErrs();
+}
+
+void CompressibleFluidSolver::finalizeTimeStep()
+{
+    assert( init );
+
+    // volScalarField ddtp = fvc::ddt( p );
+    // ddtp.rename( "ddtp" );
+    // ddtp.write();
+    ddtp = fvc::ddt( p );
+    ddtrho = fvc::ddt( rho );
+
+    init = false;
 }
