@@ -168,7 +168,8 @@ SDCFluidSolver::SDCFluidSolver(
     fvc::interpolate( UF ) & mesh.Sf()
     ),
     turbulenceSwitch( true ),
-    explicitFirstStage( true )
+    explicitFirstStage( true ),
+    writeInterval( readLabel( runTime->controlDict().lookup( "writeInterval" ) ) )
 {
     if ( UFHeader.headerOk() && phiFHeader.headerOk() )
         explicitFirstStage = false;
@@ -235,6 +236,7 @@ SDCFluidSolver::SDCFluidSolver(
         ddtScheme = word( ddtSchemes.lookup( "default" ) );
 
     assert( ddtScheme == "bdf1" );
+    assert( word( runTime->controlDict().lookup( "writeControl" ) ) == word( "timeStep" ) );
 
     initialize();
 }
@@ -412,7 +414,8 @@ void SDCFluidSolver::finalizeTimeStep()
 {
     assert( init );
 
-    runTime->writeNow();
+    if ( runTime->timeIndex() % writeInterval == 0 )
+        runTime->writeNow();
 
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
          << "  ClockTime = " << runTime->elapsedClockTime() << " s"
@@ -840,10 +843,10 @@ void SDCFluidSolver::implicitSolve(
             // BoundaryCoeffs needs to be saved to generate the correct UEqn after
             // solving. Explicit terms (depending on U(n)) need to remain depending
             // on U(n) and not on new solution)
-            vectorField S0 = UEqn.source();
-            FieldField<Field, Foam::vector> B0 = UEqn.boundaryCoeffs();
+            vectorField S0 = UEqnt.source();
+            FieldField<Field, Foam::vector> B0 = UEqnt.boundaryCoeffs();
 
-            UEqn.relax();
+            UEqnt.relax();
 
             Foam::solve( UEqnt == -fvc::grad( p ) + rDeltaT * rhsU );
 
@@ -855,8 +858,8 @@ void SDCFluidSolver::implicitSolve(
                 - fvm::laplacian( nu, U )
                 );
 
-            UEqn.source() = S0;
-            UEqn.boundaryCoeffs() = B0;
+            UEqnt.source() = S0;
+            UEqnt.boundaryCoeffs() = B0;
         }
 
         // Relative convergence measure for the PISO loop:
