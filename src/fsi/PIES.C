@@ -180,6 +180,8 @@ namespace sdc
                 nbNodes += 2;
         }
 
+        assert( nbNodes == k * 2 - 4 );
+
         vector50c gamma_k( nbNodes );
 
         int index = 0;
