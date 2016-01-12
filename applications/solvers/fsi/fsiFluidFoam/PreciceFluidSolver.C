@@ -154,7 +154,7 @@ void PreciceFluidSolver::setWritePositionsAcoustics()
 
     // Store the positions in row-major order for preCICE. Eigen uses column major by default
     writePositions = writePositionsColumnMajor;
-    
+
     labelList interfaceSize( Pstream::nProcs(), 0 );
     interfaceSize[Pstream::myProcNo()] = writePositions.rows();
     reduce( interfaceSize, sumOp<labelList>() );

@@ -213,7 +213,7 @@ int main(
     fluid->setDisplacementLocal( valuesInterpolation );
     fluid->moveMesh();
     fluid->mesh.update();
-    
+
     runTime->loop();
     runTime->write();
 }

@@ -253,13 +253,13 @@ void CompressibleFluidSolver::resetSolution()
 void CompressibleFluidSolver::solve()
 {
     Info << "Solve fluid domain" << endl;
-    
+
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     mesh.update();
     end = std::chrono::system_clock::now();
 
-    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::chrono::duration<double> elapsed_seconds = end - start;
     Info << "timing mesh deformation = " << elapsed_seconds.count() << "s" << endl;
 
     int oCorr;
