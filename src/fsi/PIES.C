@@ -207,6 +207,9 @@ namespace sdc
 
         // Compute the coefficients omega
 
+        // One extra node due to adding of constraint
+        nbNodes += 1;
+
         for ( int iter = 0; iter < 20; iter++ )
         {
             M = nbNodes;
