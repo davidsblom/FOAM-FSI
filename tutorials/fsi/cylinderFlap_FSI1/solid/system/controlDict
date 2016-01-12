@@ -21,9 +21,9 @@ startTime 0;
 
 stopAt endTime;
 
-endTime 20;
+endTime 1;
 
-deltaT 0.001;
+deltaT 1;
 
 writeControl runTime;
 
@@ -46,33 +46,3 @@ runTimeModifiable no;
 adjustTimeStep no;
 
 maxCo 0.2;
-
-functions
-{
-
-    probesSolid
-    {
-        // Where to load it from
-        functionObjectLibs ( "libsampling.so" );
-
-        type            probes;
-
-        // Name of the directory for probe data
-        name            probes;
-
-        // Write at same frequency as fields
-        outputControl   timeStep;
-        outputInterval  1;
-
-        // Fields to be probed
-        fields
-        (
-            U
-        );
-
-        probeLocations
-        (
-            (0.599999999 0.199999999 0.499999999)
-        );
-    }
-}

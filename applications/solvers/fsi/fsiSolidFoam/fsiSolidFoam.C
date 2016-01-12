@@ -11,6 +11,7 @@
 #include "PreciceSolidSolver.H"
 #include "SolidSolver.H"
 #include "ElasticSolidSolver.H"
+#include "SteadyStateSolidSolver.H"
 
 int main(
     int argc,
@@ -41,7 +42,7 @@ int main(
 
     std::string solidSolver = config["solid-solver"].as<std::string>();
 
-    assert( solidSolver == "nonlinear-elastic-solver" || solidSolver == "linear-elastic-solver" );
+    assert( solidSolver == "nonlinear-elastic-solver" || solidSolver == "linear-elastic-solver" || solidSolver == "steady-state-nonlinear-elastic-solver" );
 
     std::shared_ptr<foamSolidSolver> solid;
 
@@ -50,6 +51,9 @@ int main(
 
     if ( solidSolver == "nonlinear-elastic-solver" )
         solid = std::shared_ptr<foamSolidSolver>( new SolidSolver( fvMesh::defaultRegion, args, runTime ) );
+
+    if ( solidSolver == "steady-state-nonlinear-elastic-solver" )
+        solid = std::shared_ptr<foamSolidSolver>( new SteadyStateSolidSolver( fvMesh::defaultRegion, args, runTime ) );
 
     assert( solid );
 

@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+
+<precice-configuration>
+
+    <log-filter component="" target="debug" switch="off" />
+    <log-filter component="" target="info" switch="on" />
+    <log-output column-separator=" | " log-time-stamp="no" log-time-stamp-human-readable="yes" log-machine-name="no" log-message-type="no" log-trace="yes" />
+
+    <solver-interface dimensions="2">
+
+        <data:vector name="Stresses" />
+        <data:vector name="Displacements" />
+
+        <mesh name="Fluid_Nodes">
+            <use-data name="Displacements" />
+        </mesh>
+
+        <mesh name="Fluid_CellCenters">
+            <use-data name="Stresses" />
+        </mesh>
+
+        <mesh name="Structure_Nodes">
+            <use-data name="Displacements" />
+        </mesh>
+
+        <mesh name="Structure_CellCenters">
+            <use-data name="Stresses" />
+        </mesh>
+
+        <participant name="Fluid_Solver">
+            <use-mesh name="Fluid_Nodes" provide="yes" />
+            <use-mesh name="Fluid_CellCenters" provide="yes" />
+            <use-mesh name="Structure_Nodes" from="Structure_Solver" />
+            <use-mesh name="Structure_CellCenters" from="Structure_Solver" />
+            <write-data mesh="Fluid_CellCenters" name="Stresses" />
+            <read-data mesh="Fluid_Nodes" name="Displacements" />
+            <mapping:nearest-neighbor direction="write" from="Fluid_CellCenters" to="Structure_CellCenters" constraint="conservative" timing="initial"/>
+            <mapping:nearest-neighbor direction="read" from="Structure_Nodes" to="Fluid_Nodes" constraint="consistent" timing="initial"/>
+            <master:mpi-single />
+        </participant>
+
+        <participant name="Structure_Solver">
+            <use-mesh name="Structure_Nodes" provide="yes"/>
+            <use-mesh name="Structure_CellCenters" provide="yes"/>
+            <write-data mesh="Structure_Nodes" name="Displacements" />
+            <read-data mesh="Structure_CellCenters" name="Stresses" />
+            <master:mpi-single />
+        </participant>
+
+        <m2n:sockets exchange-directory="../" from="Fluid_Solver" to="Structure_Solver" />
+
+        <coupling-scheme:serial-implicit>
+            <timestep-length value="1" />
+            <max-timesteps value="1" />
+            <participants first="Fluid_Solver" second="Structure_Solver" />
+            <exchange data="Stresses" from="Fluid_Solver" mesh="Structure_CellCenters" to="Structure_Solver" />
+            <exchange data="Displacements" from="Structure_Solver" mesh="Structure_Nodes" to="Fluid_Solver" />
+            <relative-convergence-measure limit="1.0e-5" data="Displacements" mesh="Structure_Nodes" suffices="0" />
+            <max-iterations value="200" />
+            <extrapolation-order value="2" />
+
+            <post-processing:IQN-ILS>
+                <data mesh="Structure_Nodes" name="Displacements" />
+                <initial-relaxation value="0.001" />
+                <max-used-iterations value="3" />
+                <timesteps-reused value="0" />
+                <filter type="QR1" limit="1e-8" />
+            </post-processing:IQN-ILS>
+
+        </coupling-scheme:serial-implicit>
+
+    </solver-interface>
+
+</precice-configuration>
