@@ -30,7 +30,6 @@ namespace sdc
         delta( delta )
     {
         assert( not adaptiveTimeStepper->isEnabled() );
-        assert( tol >= delta );
         assert( rho > 0 );
 
         std::clock_t start;
@@ -64,7 +63,6 @@ namespace sdc
         rho( rho ),
         delta( delta )
     {
-        assert( tol >= delta );
         assert( rho > 0 );
 
         computeCoefficients();
