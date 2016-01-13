@@ -4,6 +4,8 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> EigenMatrix;
+
 template <int dimension>
 dealiiSolidSolver<dimension>::dealiiSolidSolver( dealiifsi::DataStorage & data )
     :
@@ -66,13 +68,17 @@ void dealiiSolidSolver<dimension>::finalizeTimeStep()
 template <int dimension>
 void dealiiSolidSolver<dimension>::getReadPositions( matrix & readPositions )
 {
-    dealiifsi::LinearElasticity<dimension>::getReadPositions( readPositions );
+    EigenMatrix readPositionsEigen;
+    dealiifsi::LinearElasticity<dimension>::getReadPositions( readPositionsEigen );
+    readPositions = readPositionsEigen.cast<scalar>();
 }
 
 template <int dimension>
 void dealiiSolidSolver<dimension>::getWritePositions( matrix & writePositions )
 {
-    dealiifsi::LinearElasticity<dimension>::getWritePositions( writePositions );
+    EigenMatrix writePositionsEigen;
+    dealiifsi::LinearElasticity<dimension>::getWritePositions( writePositionsEigen );
+    writePositions = writePositionsEigen.cast<scalar>();
 }
 
 template <int dimension>
@@ -103,13 +109,16 @@ void dealiiSolidSolver<dimension>::solve(
 {
     Info << "Solve solid domain with deal.II" << endl;
 
-    dealiifsi::LinearElasticity<dimension>::setTraction( input );
+    EigenMatrix inputEigen = input.cast<double>();
+    dealiifsi::LinearElasticity<dimension>::setTraction( inputEigen );
 
     dealiifsi::LinearElasticity<dimension>::solve();
 
-    dealiifsi::LinearElasticity<dimension>::getDisplacement( output );
+    EigenMatrix outputEigen;
+    dealiifsi::LinearElasticity<dimension>::getDisplacement( outputEigen );
 
-    BaseMultiLevelSolver::data = output;
+    BaseMultiLevelSolver::data = outputEigen.cast<scalar>();
+    output = BaseMultiLevelSolver::data;
 
     if ( UStages.size() > 0 )
     {
@@ -260,7 +269,7 @@ void dealiiSolidSolver<dimension>::getVariablesInfo(
 }
 
 void copy(
-    const dealii::Vector<scalar> & source,
+    const dealii::Vector<double> & source,
     fsi::vector & target,
     unsigned int targetOffset
     )
@@ -271,7 +280,7 @@ void copy(
 
 void copy(
     const fsi::vector & source,
-    dealii::Vector<scalar> & target,
+    dealii::Vector<double> & target,
     unsigned int sourceOffset
     )
 {

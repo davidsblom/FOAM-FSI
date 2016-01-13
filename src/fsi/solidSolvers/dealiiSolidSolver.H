@@ -13,14 +13,14 @@
 namespace fsi
 {
     void copy(
-        const dealii::Vector<scalar> & source,
+        const dealii::Vector<double> & source,
         fsi::vector & target,
         unsigned int targetOffset
         );
 
     void copy(
         const fsi::vector & source,
-        dealii::Vector<scalar> & target,
+        dealii::Vector<double> & target,
         unsigned int sourceOffset
         );
 

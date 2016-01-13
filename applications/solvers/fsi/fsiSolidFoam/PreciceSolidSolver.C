@@ -6,7 +6,7 @@
 
 #include "PreciceSolidSolver.H"
 
-typedef Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> matrixRowMajor;
+typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> matrixRowMajor;
 
 PreciceSolidSolver::PreciceSolidSolver( shared_ptr<foamSolidSolver> solver )
     :
@@ -54,7 +54,7 @@ void PreciceSolidSolver::readData( matrix & data )
     if ( data.rows() > 0 )
         precice->readBlockVectorData( dataId, idsReadPositions.rows(), idsReadPositions.data(), dataRowMajor.data() );
 
-    data = dataRowMajor;
+    data = dataRowMajor.cast<scalar>();
 }
 
 void PreciceSolidSolver::run()
@@ -112,7 +112,7 @@ void PreciceSolidSolver::setReadPositions()
     solver->getReadPositionsLocal( readPositionsColumnMajor );
 
     // Store the positions in row-major for preCICE. Eigen uses column major by default.
-    readPositions = readPositionsColumnMajor;
+    readPositions = readPositionsColumnMajor.cast<double>();
 
     assert( readPositions.cols() == precice->getDimensions() );
 
@@ -138,7 +138,7 @@ void PreciceSolidSolver::setWritePositions()
     solver->getWritePositionsLocal( writePositionsColumnMajor );
 
     // Store the positions in row-major for preCICE. Eigen uses column major by default.
-    writePositions = writePositionsColumnMajor;
+    writePositions = writePositionsColumnMajor.cast<double>();
 
     assert( writePositions.cols() == precice->getDimensions() );
 
@@ -157,7 +157,7 @@ void PreciceSolidSolver::setWritePositions()
 void PreciceSolidSolver::writeData( const matrix & data )
 {
     // Send forces to preCICE
-    matrixRowMajor dataRowMajor = data;
+    matrixRowMajor dataRowMajor = data.cast<double>();
 
     int meshId = precice->getMeshID( "Structure_Nodes" );
     int dataId = precice->getDataID( "Displacements", meshId );
