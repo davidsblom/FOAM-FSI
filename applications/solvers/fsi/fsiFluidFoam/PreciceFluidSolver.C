@@ -51,6 +51,9 @@ void PreciceFluidSolver::init()
 
 void PreciceFluidSolver::readData( matrix & data )
 {
+    if ( !precice->hasMesh( "Fluid_Nodes" ) )
+        return;
+
     // Read displacements from preCICE
 
     int meshId = precice->getMeshID( "Fluid_Nodes" );
@@ -87,10 +90,16 @@ void PreciceFluidSolver::run()
             if ( precice->isActionRequired( precice::constants::actionReadIterationCheckpoint() ) )
                 precice->fulfilledAction( precice::constants::actionReadIterationCheckpoint() );
 
-            solver->setDisplacementLocal( input + inputOld );
-            solver->moveMesh();
+            if ( precice->hasMesh( "Fluid_Nodes" ) )
+            {
+                solver->setDisplacementLocal( input + inputOld );
+                solver->moveMesh();
+            }
+
             solver->solve();
-            solver->getTractionLocal( output );
+
+            if ( precice->hasMesh( "Fluid_CellCenters" ) )
+                solver->getTractionLocal( output );
 
             writeData( output );
             writeDataAcoustics();
@@ -114,6 +123,9 @@ void PreciceFluidSolver::run()
 
 void PreciceFluidSolver::setReadPositions()
 {
+    if ( !precice->hasMesh( "Fluid_Nodes" ) )
+        return;
+
     // Initialize matrices
     matrix readPositionsColumnMajor;
     matrixRowMajor readPositions;
@@ -173,6 +185,9 @@ void PreciceFluidSolver::setWritePositionsAcoustics()
 
 void PreciceFluidSolver::setWritePositions()
 {
+    if ( !precice->hasMesh( "Fluid_CellCenters" ) )
+        return;
+
     // Initialize matrices
     matrix writePositionsColumnMajor;
     matrixRowMajor writePositions;
@@ -199,6 +214,9 @@ void PreciceFluidSolver::setWritePositions()
 
 void PreciceFluidSolver::writeData( const matrix & data )
 {
+    if ( !precice->hasMesh( "Fluid_CellCenters" ) )
+        return;
+
     // Send forces to preCICE
     matrixRowMajor dataRowMajor = data.cast<double>();
 
