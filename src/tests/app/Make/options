@@ -1,4 +1,4 @@
-c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs -Werror
+c++WARN     = -Wall -Werror
 
 EXE_INC = --coverage -fprofile-arcs -ftest-coverage -g -std=c++11 \
     -I ../../RBFmeshInterpolation/lnInclude/ \
