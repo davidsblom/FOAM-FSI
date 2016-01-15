@@ -155,9 +155,9 @@ FluidSolver::FluidSolver(
     {
         Uf.oldTime();
 
-        surfaceVectorField nf = mesh.Sf() / mesh.magSf();
-        surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
-        surfaceVectorField Unor = phi / mesh.magSf() * nf;
+        tmp<surfaceVectorField> nf = mesh.Sf() / mesh.magSf();
+        tmp<surfaceVectorField> Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
+        tmp<surfaceVectorField> Unor = phi / mesh.magSf() * nf;
 
         Uf = Utang + Unor;
     }
@@ -240,13 +240,13 @@ void FluidSolver::checkTimeDiscretisationScheme()
 
 void FluidSolver::continuityErrs()
 {
-    volScalarField contErr = fvc::div( phi );
+    tmp<volScalarField> contErr = fvc::div( phi );
 
     sumLocalContErr = runTime->deltaT().value() *
         mag( contErr ) ().weightedAverage( mesh.V() ).value();
 
     globalContErr = runTime->deltaT().value() *
-        contErr.weightedAverage( mesh.V() ).value();
+        contErr->weightedAverage( mesh.V() ).value();
 
     cumulativeContErr += globalContErr;
 
@@ -260,9 +260,9 @@ void FluidSolver::courantNo()
 {
     if ( mesh.nInternalFaces() )
     {
-        surfaceScalarField magPhi = mag( phi );
+        tmp<surfaceScalarField> magPhi = mag( phi );
 
-        surfaceScalarField SfUfbyDelta =
+        tmp<surfaceScalarField> SfUfbyDelta =
             mesh.surfaceInterpolation::deltaCoeffs() * magPhi;
 
         CoNum = max( SfUfbyDelta / mesh.magSf() )
@@ -282,14 +282,14 @@ void FluidSolver::courantNo()
 
 scalar FluidSolver::evaluateMomentumResidual()
 {
-    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p );
+    tmp<volVectorField> residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p );
 
     if ( turbulenceSwitch )
-        residual += turbulence->divDevReff( U ) & U;
+        residual() += turbulence->divDevReff( U ) & U;
     else
-        residual += -fvc::laplacian( nu, U );
+        residual() += -fvc::laplacian( nu, U );
 
-    scalarField magResU = mag( residual.internalField() );
+    tmp<scalarField> magResU = mag( residual->internalField() );
     scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
     scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
     rmsU /= runTime->deltaT().value();
@@ -325,14 +325,14 @@ void FluidSolver::getTractionLocal( matrix & traction )
     {
         int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
 
-        vectorField tractionFieldPatchI = -rho.value() * nu.value()
+        tmp<vectorField> tractionFieldPatchI = -rho.value() * nu.value()
             * U.boundaryField()[movingPatchIDs[patchI]].snGrad()
             + rho.value() * p.boundaryField()[movingPatchIDs[patchI]]
             * mesh.boundary()[movingPatchIDs[patchI]].nf();
 
-        forAll( tractionFieldPatchI, i )
+        forAll( tractionFieldPatchI(), i )
         {
-            tractionField[i + offset] = tractionFieldPatchI[i];
+            tractionField[i + offset] = tractionFieldPatchI()[i];
         }
 
         offset += size;
@@ -523,9 +523,9 @@ void FluidSolver::solve()
         {
             Uf.oldTime();
 
-            surfaceVectorField nf = mesh.Sf() / mesh.magSf();
-            surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
-            surfaceVectorField Unor = phi / mesh.magSf() * nf;
+            tmp<surfaceVectorField> nf = mesh.Sf() / mesh.magSf();
+            tmp<surfaceVectorField> Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
+            tmp<surfaceVectorField> Unor = phi / mesh.magSf() * nf;
 
             Uf = Utang + Unor;
         }

@@ -61,7 +61,7 @@ scalar backward2D2dt2Scheme<Type>::deltaT0_(GeometricField<Type, fvPatchField, v
     // Bug fix, Zeljko Tukovic: solver with outer iterations over a time-step
     // HJ, 12/Feb/2010
 //     if (vf.oldTime().timeIndex() == vf.oldTime().oldTime().timeIndex())
-    if 
+    if
     (
         vf.oldTime().oldTime().timeIndex()
      == vf.oldTime().oldTime().oldTime().timeIndex()
@@ -184,8 +184,8 @@ backward2D2dt2Scheme<Type>::fvcD2dt2
 
         dimensionedScalar halfRdeltaT2 = 0.5*rDeltaT2;
 
-        volScalarField rhoRho0 = rho + rho.oldTime();
-        volScalarField rho0Rho00 = rho.oldTime() +rho.oldTime().oldTime();
+        tmp<volScalarField> rhoRho0 = rho + rho.oldTime();
+        tmp<volScalarField> rho0Rho00 = rho.oldTime() +rho.oldTime().oldTime();
 
         return tmp<GeometricField<Type, fvPatchField, volMesh> >
         (
@@ -205,8 +205,8 @@ backward2D2dt2Scheme<Type>::fvcD2dt2
     {
         dimensionedScalar halfRdeltaT2 = 0.5*rDeltaT2;
 
-        volScalarField rhoRho0 = rho + rho.oldTime();
-        volScalarField rho0Rho00 = rho.oldTime() + rho.oldTime().oldTime();
+        tmp<volScalarField> rhoRho0 = rho + rho.oldTime();
+        tmp<volScalarField> rho0Rho00 = rho.oldTime() + rho.oldTime().oldTime();
 
         return tmp<GeometricField<Type, fvPatchField, volMesh> >
         (
@@ -240,25 +240,25 @@ backward2D2dt2Scheme<Type>::fvmD2dt2
             vf.dimensions()*dimVol/dimTime/dimTime
         )
     );
-    
+
     assert(  mesh().moving() == false );
 
     fvMatrix<Type>& fvm = tfvm();
 
     scalar deltaT = mesh().time().deltaT().value();
-    
+
     scalar rDeltaT2 = 1.0/sqr(deltaT);
-    
+
     vf.oldTime().oldTime().oldTime();
-    
+
     if ( mesh().time().timeIndex() == 1 )
     {
         scalar coefft   = 1;
         scalar coefft0  = -2;
         scalar coefft00 = 1;
-        
+
         coefft += coefft00;
-        
+
         fvm.diag() = (coefft*rDeltaT2)*mesh().V();
 
         fvm.source() = rDeltaT2*mesh().V()*
@@ -267,14 +267,14 @@ backward2D2dt2Scheme<Type>::fvmD2dt2
         );
     }
     else if ( mesh().time().timeIndex() == 2 )
-    {        
+    {
         scalar coefft   = 2;
         scalar coefft0  = -5;
         scalar coefft00 = 4;
         scalar coefft000 = -1;
-        
+
         coefft0 += coefft000;
-        
+
         fvm.diag() = (coefft*rDeltaT2)*mesh().V();
 
         fvm.source() = rDeltaT2*mesh().V()*
@@ -289,7 +289,7 @@ backward2D2dt2Scheme<Type>::fvmD2dt2
         scalar coefft0  = -5;
         scalar coefft00 = 4;
         scalar coefft000 = -1;
-        
+
         fvm.diag() = (coefft*rDeltaT2)*mesh().V();
 
         fvm.source() = rDeltaT2*mesh().V()*
@@ -403,10 +403,10 @@ backward2D2dt2Scheme<Type>::fvmD2dt2
     {
         scalar halfRdeltaT2 = 0.5*rDeltaT2;
 
-        scalarField rhoRho0 =
+        tmp<scalarField> rhoRho0 =
             (rho.internalField() + rho.oldTime().internalField());
 
-        scalarField rho0Rho00 =
+        tmp<scalarField> rho0Rho00 =
         (
             rho.oldTime().internalField()
           + rho.oldTime().oldTime().internalField()

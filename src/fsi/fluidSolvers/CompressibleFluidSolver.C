@@ -185,14 +185,14 @@ void CompressibleFluidSolver::getTractionLocal( matrix & traction )
     {
         int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
 
-        vectorField tractionFieldPatchI = -thermo.mu()
+        tmp<vectorField> tractionFieldPatchI = -thermo.mu()
             * U.boundaryField()[movingPatchIDs[patchI]].snGrad()
             + p.boundaryField()[movingPatchIDs[patchI]]
             * mesh.boundary()[movingPatchIDs[patchI]].nf();
 
-        forAll( tractionFieldPatchI, i )
+        forAll( tractionFieldPatchI(), i )
         {
-            tractionField[i + offset] = tractionFieldPatchI[i];
+            tractionField[i + offset] = tractionFieldPatchI()[i];
         }
 
         offset += size;
@@ -308,7 +308,7 @@ void CompressibleFluidSolver::solve()
             residual = hEqn.solve().initialResidual();
 
             // Bound the enthalpy using TMin and TMax
-            volScalarField Cp = thermo.Cp();
+            tmp<volScalarField> Cp = thermo.Cp();
 
             // h = Foam::min(h, TMax*Cp);
             // h = Foam::max(h, TMin*Cp);

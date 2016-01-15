@@ -1,4 +1,4 @@
-c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs -Wredundant-decls -Wcast-align -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Winvalid-pch -Wredundant-decls -Wformat=2 -Wmissing-format-attribute -Wformat-nonliteral -Weffc++ -Werror
+c++WARN     = -Wall -Werror
 
 EXE_INC = \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude
