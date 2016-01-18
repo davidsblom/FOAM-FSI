@@ -1,6 +1,7 @@
 c++WARN     = -Wall -Wextra -Werror
 
 EXE_INC = --coverage -fprofile-arcs -ftest-coverage -g -std=c++11 \
+    -DEIGEN_INITIALIZE_MATRICES_BY_NAN \
     -I ../../RBFmeshInterpolation/lnInclude/ \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
     -isystem $(LIB_SRC)/dynamicMesh/lnInclude \
