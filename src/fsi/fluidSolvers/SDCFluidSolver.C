@@ -320,27 +320,27 @@ scalar SDCFluidSolver::evaluateMomentumResidual()
     return momentumResidual;
 }
 
-void SDCFluidSolver::getAcousticsDensityLocal( matrix & data )
+void SDCFluidSolver::getAcousticsDensityLocal( matrix & )
 {
     assert( false );
 }
 
-void SDCFluidSolver::getAcousticsVelocityLocal( matrix & data )
+void SDCFluidSolver::getAcousticsVelocityLocal( matrix & )
 {
     assert( false );
 }
 
-void SDCFluidSolver::getAcousticsPressureLocal( matrix & data )
+void SDCFluidSolver::getAcousticsPressureLocal( matrix & )
 {
     assert( false );
 }
 
-void SDCFluidSolver::getTractionLocal( matrix & traction )
+void SDCFluidSolver::getTractionLocal( matrix & )
 {
     assert( false );
 }
 
-void SDCFluidSolver::getWritePositionsLocalAcoustics( matrix & writePositions )
+void SDCFluidSolver::getWritePositionsLocalAcoustics( matrix & )
 {
     assert( false );
 }
@@ -652,9 +652,9 @@ scalar SDCFluidSolver::getTimeStep()
 }
 
 void SDCFluidSolver::evaluateFunction(
-    const int k,
-    const fsi::vector & q,
-    const scalar t,
+    const int,
+    const fsi::vector &,
+    const scalar,
     fsi::vector & f
     )
 {
@@ -709,7 +709,7 @@ void SDCFluidSolver::evaluateFunction(
 void SDCFluidSolver::implicitSolve(
     bool corrector,
     const int k,
-    const int kold,
+    const int,
     const scalar t,
     const scalar dt,
     const fsi::vector & qold,
@@ -1010,13 +1010,13 @@ void SDCFluidSolver::getVariablesInfo(
 }
 
 void SDCFluidSolver::prepareImplicitSolve(
-    bool corrector,
-    const int k,
-    const int kold,
-    const scalar t,
-    const scalar dt,
-    const fsi::vector & qold,
-    const fsi::vector & rhs
+    bool,
+    const int,
+    const int,
+    const scalar,
+    const scalar,
+    const fsi::vector &,
+    const fsi::vector &
     )
 {
     assert( false );

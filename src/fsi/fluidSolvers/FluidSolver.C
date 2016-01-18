@@ -300,17 +300,17 @@ scalar FluidSolver::evaluateMomentumResidual()
     return momentumResidual;
 }
 
-void FluidSolver::getAcousticsDensityLocal( matrix & data )
+void FluidSolver::getAcousticsDensityLocal( matrix & )
 {
     assert( false );
 }
 
-void FluidSolver::getAcousticsVelocityLocal( matrix & data )
+void FluidSolver::getAcousticsVelocityLocal( matrix & )
 {
     assert( false );
 }
 
-void FluidSolver::getAcousticsPressureLocal( matrix & data )
+void FluidSolver::getAcousticsPressureLocal( matrix & )
 {
     assert( false );
 }
@@ -347,7 +347,7 @@ void FluidSolver::getTractionLocal( matrix & traction )
             traction( i, j ) = tractionField[i][j];
 }
 
-void FluidSolver::getWritePositionsLocalAcoustics( matrix & writePositions )
+void FluidSolver::getWritePositionsLocalAcoustics( matrix & )
 {
     assert( false );
 }

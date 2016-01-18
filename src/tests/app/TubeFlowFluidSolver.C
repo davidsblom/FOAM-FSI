@@ -108,8 +108,8 @@ namespace tubeflow
         const fsi::vector & x,
         const fsi::vector & a,
         const fsi::vector & un,
-        const fsi::vector & pn,
-        const fsi::vector & an,
+        const fsi::vector &,
+        const fsi::vector &,
         matrix & J
         )
     {

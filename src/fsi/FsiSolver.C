@@ -227,8 +227,8 @@ namespace fsi
     }
 
     bool FsiSolver::isConvergence(
-        const vector & x,
-        const vector & xprev
+        const vector &,
+        const vector &
         )
     {
         assert( false );

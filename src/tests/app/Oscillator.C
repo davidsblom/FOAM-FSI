@@ -32,7 +32,7 @@ Oscillator::Oscillator(
 }
 
 void Oscillator::evaluateFunction(
-    const int k,
+    const int,
     const fsi::vector & q,
     const scalar t,
     fsi::vector & f
@@ -56,7 +56,7 @@ int Oscillator::getDOF()
 
 void Oscillator::getSolution(
     fsi::vector & solution,
-    fsi::vector & f
+    fsi::vector &
     )
 {
     assert( sol.rows() == 2 );
@@ -65,8 +65,8 @@ void Oscillator::getSolution(
 }
 
 void Oscillator::setSolution(
-    const fsi::vector & solution,
-    const fsi::vector & f
+    const fsi::vector &,
+    const fsi::vector &
     )
 {
     assert( false );
@@ -88,13 +88,13 @@ void Oscillator::nextTimeStep()
 void Oscillator::initTimeStep()
 {}
 
-void Oscillator::setNumberOfImplicitStages( int k )
+void Oscillator::setNumberOfImplicitStages( int )
 {}
 
 void Oscillator::implicitSolve(
-    bool corrector,
-    const int k,
-    const int kold,
+    bool,
+    const int,
+    const int,
     const scalar t,
     const scalar dt,
     const fsi::vector & qold,

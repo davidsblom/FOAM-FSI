@@ -271,17 +271,17 @@ scalar SteadyStateFluidSolver::evaluateMomentumResidual()
     return momentumResidual;
 }
 
-void SteadyStateFluidSolver::getAcousticsDensityLocal( matrix & data )
+void SteadyStateFluidSolver::getAcousticsDensityLocal( matrix & )
 {
     assert( false );
 }
 
-void SteadyStateFluidSolver::getAcousticsVelocityLocal( matrix & data )
+void SteadyStateFluidSolver::getAcousticsVelocityLocal( matrix & )
 {
     assert( false );
 }
 
-void SteadyStateFluidSolver::getAcousticsPressureLocal( matrix & data )
+void SteadyStateFluidSolver::getAcousticsPressureLocal( matrix & )
 {
     assert( false );
 }
@@ -318,7 +318,7 @@ void SteadyStateFluidSolver::getTractionLocal( matrix & traction )
             traction( i, j ) = tractionField[i][j];
 }
 
-void SteadyStateFluidSolver::getWritePositionsLocalAcoustics( matrix & writePositions )
+void SteadyStateFluidSolver::getWritePositionsLocalAcoustics( matrix & )
 {
     assert( false );
 }

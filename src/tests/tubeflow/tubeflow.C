@@ -26,10 +26,7 @@ using namespace std;
 using namespace fsi;
 using namespace tubeflow;
 
-int main(
-    int argc,
-    char ** argv
-    )
+int main()
 {
     // List of solvers
     deque<std::string> fsiSolvers;

@@ -519,9 +519,9 @@ void SDCDynamicMeshFluidSolver::setSolution(
 }
 
 void SDCDynamicMeshFluidSolver::evaluateFunction(
-    const int k,
-    const fsi::vector & q,
-    const scalar t,
+    const int,
+    const fsi::vector &,
+    const scalar,
     fsi::vector & f
     )
 {

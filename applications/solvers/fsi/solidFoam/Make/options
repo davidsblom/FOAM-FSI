@@ -1,11 +1,11 @@
-c++WARN     = -Wall -Werror
+c++WARN     = -Wall -Wextra -Werror
 
 EXE_INC = -std=c++11 \
     -I../../../../src/fsi/lnInclude \
     -isystem ../../../../src/thirdParty/eigen \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/sampling/lnInclude \
-    -I$(LIB_SRC)/solidModels/lnInclude \
+    -isystem $(LIB_SRC)/sampling/lnInclude \
+    -isystem $(LIB_SRC)/solidModels/lnInclude \
     -isystem ../../../../src/thirdParty/yaml-cpp/include \
     -I../../../../src/RBFMeshMotionSolver/lnInclude \
     -isystem ../../../../src/thirdParty/boost

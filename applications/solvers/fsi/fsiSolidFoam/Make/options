@@ -1,22 +1,22 @@
-c++WARN     = -Wall -Werror
+c++WARN     = -Wall -Wextra -Werror
 
 EXE_INC = -std=c++11 \
     -I../../../../src/fsi/lnInclude \
     -isystem ../../../../src/thirdParty/eigen \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
-    -I$(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
-    -I$(LIB_SRC)/transportModels \
-    -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
-    -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
-    -I$(LIB_SRC)/meshTools/lnInclude \
-    -I$(LIB_SRC)/sampling/lnInclude \
-    -I$(LIB_SRC)/solidModels/lnInclude \
-    -I../../../../src/thirdParty/precice/src \
+    -isystem $(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
+    -isystem $(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
+    -isystem $(LIB_SRC)/transportModels \
+    -isystem $(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
+    -isystem $(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
+    -isystem $(LIB_SRC)/meshTools/lnInclude \
+    -isystem $(LIB_SRC)/sampling/lnInclude \
+    -isystem $(LIB_SRC)/solidModels/lnInclude \
+    -isystem ../../../../src/thirdParty/precice/src \
     -isystem ../../../../src/thirdParty/boost \
-    -I../../../../src/thirdParty \
+    -isystem../../../../src/thirdParty \
     $(WM_DECOMP_INC) \
-    -I$(LIB_SRC)/tetFiniteElement/lnInclude \
+    -isystem $(LIB_SRC)/tetFiniteElement/lnInclude \
     -I../../../../src/RBFMeshMotionSolver/lnInclude/ \
     -isystem ../../../../src/thirdParty/yaml-cpp/include
 

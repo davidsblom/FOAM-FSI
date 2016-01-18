@@ -1,4 +1,4 @@
-c++WARN     = -Wall -Werror
+c++WARN     = -Wall -Wextra -Werror
 
 EXE_INC = -std=c++11 \
     -isystem ../../../../src/fsi/lnInclude \

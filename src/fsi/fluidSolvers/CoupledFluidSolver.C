@@ -160,17 +160,17 @@ void CoupledFluidSolver::courantNo()
          << endl;
 }
 
-void CoupledFluidSolver::getAcousticsDensityLocal( matrix & data )
+void CoupledFluidSolver::getAcousticsDensityLocal( matrix & )
 {
     assert( false );
 }
 
-void CoupledFluidSolver::getAcousticsVelocityLocal( matrix & data )
+void CoupledFluidSolver::getAcousticsVelocityLocal( matrix & )
 {
     assert( false );
 }
 
-void CoupledFluidSolver::getAcousticsPressureLocal( matrix & data )
+void CoupledFluidSolver::getAcousticsPressureLocal( matrix & )
 {
     assert( false );
 }
@@ -207,7 +207,7 @@ void CoupledFluidSolver::getTractionLocal( matrix & traction )
             traction( i, j ) = tractionField[i][j];
 }
 
-void CoupledFluidSolver::getWritePositionsLocalAcoustics( matrix & writePositions )
+void CoupledFluidSolver::getWritePositionsLocalAcoustics( matrix & )
 {
     assert( false );
 }

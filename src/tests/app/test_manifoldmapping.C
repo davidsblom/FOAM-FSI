@@ -74,28 +74,28 @@ public:
         );
 
     virtual void optimize(
-        const fsi::vector & x0,
-        fsi::vector & xk
+        const fsi::vector &,
+        fsi::vector &
         )
     {}
 
     virtual void optimize(
-        const fsi::vector & y,
-        const fsi::vector & x0,
-        fsi::vector & xk,
-        const matrix & B,
-        const fsi::vector & xktilde,
-        const fsi::vector & xkp
+        const fsi::vector &,
+        const fsi::vector &,
+        fsi::vector &,
+        const matrix &,
+        const fsi::vector &,
+        const fsi::vector &
         )
     {}
 
     virtual void setSurrogateData(
-        fsi::vector & xf,
-        matrix & J
+        fsi::vector &,
+        matrix &
         )
     {}
 
-    virtual void setUseJacobian( bool useJacobian )
+    virtual void setUseJacobian( bool )
     {}
 
     scalar tol;
@@ -250,28 +250,28 @@ public:
         );
 
     virtual void optimize(
-        const fsi::vector & x0,
-        fsi::vector & xk
+        const fsi::vector &,
+        fsi::vector &
         )
     {}
 
     virtual void optimize(
-        const fsi::vector & y,
-        const fsi::vector & x0,
-        fsi::vector & xk,
-        const matrix & B,
-        const fsi::vector & xktilde,
-        const fsi::vector & xkp
+        const fsi::vector &,
+        const fsi::vector &,
+        fsi::vector &,
+        const matrix &,
+        const fsi::vector &,
+        const fsi::vector &
         )
     {}
 
     virtual void setSurrogateData(
-        fsi::vector & xf,
-        matrix & J
+        fsi::vector &,
+        matrix &
         )
     {}
 
-    virtual void setUseJacobian( bool useJacobian )
+    virtual void setUseJacobian( bool )
     {}
 
     scalar tol;
@@ -385,30 +385,30 @@ public:
     }
 
     virtual bool isConvergence(
-        const fsi::vector & x,
-        const fsi::vector & xprev
+        const fsi::vector &,
+        const fsi::vector &
         )
     {
         return true;
     }
 
     virtual void optimize(
-        const fsi::vector & y,
-        const fsi::vector & x0,
-        fsi::vector & xk,
-        const matrix & B,
-        const fsi::vector & xktilde,
-        const fsi::vector & xkp
+        const fsi::vector &,
+        const fsi::vector &,
+        fsi::vector &,
+        const matrix &,
+        const fsi::vector &,
+        const fsi::vector &
         )
     {}
 
     virtual void setSurrogateData(
-        fsi::vector & xf,
-        matrix & J
+        fsi::vector &,
+        matrix &
         )
     {}
 
-    virtual void setUseJacobian( bool useJacobian )
+    virtual void setUseJacobian( bool )
     {}
 };
 
