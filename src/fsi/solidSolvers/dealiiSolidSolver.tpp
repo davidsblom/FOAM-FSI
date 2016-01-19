@@ -12,6 +12,7 @@ dealiiSolidSolver<dimension>::dealiiSolidSolver( dealiifsi::DataStorage & data )
     dealiifsi::LinearElasticity<dimension>( data ),
     BaseMultiLevelSolver( 5, dimension, 0 ),
     k( 0 ),
+    kindex( 0 ),
     UStages(),
     VStages()
 {
@@ -40,6 +41,7 @@ dealiiSolidSolver<dimension>::dealiiSolidSolver(
     dealiifsi::LinearElasticity<dimension>( time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ),
     BaseMultiLevelSolver( 5, dimension, 0 ),
     k( 0 ),
+    kindex( 0 ),
     UStages(),
     VStages()
 {
