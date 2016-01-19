@@ -1,4 +1,4 @@
-c++WARN     = -Wall -Werror
+c++WARN     = -Wall -Wextra -Werror
 
 EXE_INC = \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude
