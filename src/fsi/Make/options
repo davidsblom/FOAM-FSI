@@ -1,4 +1,4 @@
-c++WARN     = -Wall -Wextra -Werror
+c++WARN     = -Wall -Wextra -Werror -Wno-literal-suffix
 
 EXE_INC = -std=c++11 \
     -isystem ../thirdParty/eigen \

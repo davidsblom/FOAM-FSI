@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <mpi.h>
 #include <LinearElasticity.h>
 #include "BaseMultiLevelSolver.H"
 #include "SDCFsiSolverInterface.H"

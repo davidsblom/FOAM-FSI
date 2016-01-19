@@ -48,8 +48,6 @@ int main()
     if ( parallelCoupling )
         nbParallel = 2;
 
-    #pragma omp parallel for collapse(7), schedule(dynamic,1)
-
     for ( int iCoarse = 0; iCoarse < 3; iCoarse++ )
     {
         for ( int iParallel = 0; iParallel < nbParallel; iParallel++ )

@@ -4,6 +4,7 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+#include <mpi.h>
 #include <iostream>
 #include <list>
 #include <memory>
