@@ -249,7 +249,7 @@ TEST_P( AggressiveSpaceMappingSolverParametrizedTest, reuse )
 
     if ( !parallel && couplingGridSize == 20 && nbReuse == 4 && extrapolation == 0 && minIter == 3 )
     {
-        ASSERT_LE( solver->fineModel->fsi->nbIter, 486 );
+        ASSERT_LE( solver->fineModel->fsi->nbIter, 490 );
         ASSERT_LE( solver->coarseModel->fsi->nbIter, 3326 );
     }
 }
