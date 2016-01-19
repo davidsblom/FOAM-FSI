@@ -129,10 +129,10 @@ void dealiiSolidSolver<dimension>::solve(
 
 template <int dimension>
 void dealiiSolidSolver<dimension>::evaluateFunction(
-    const int k,
-    const fsi::vector & q,
-    const scalar t,
-    fsi::vector & f
+    const int,
+    const fsi::vector &,
+    const scalar,
+    fsi::vector &
     )
 {}
 
@@ -207,7 +207,7 @@ template <int dimension>
 void dealiiSolidSolver<dimension>::prepareImplicitSolve(
     bool corrector,
     const int k,
-    const int kold,
+    const int,
     const scalar t,
     const scalar dt,
     const fsi::vector & qold,
