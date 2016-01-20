@@ -43,4 +43,4 @@ solidSolvers/dealiiSolidSolver.C
 solidSolvers/ElasticSolidSolver.C
 solidSolvers/SteadyStateSolidSolver.C
 
-LIB = $(FOAM_USER_LIBBIN)/libfsi
+LIB = $(FOAM_LIBBIN)/libfsi

@@ -77,4 +77,4 @@ test_absoluteconvergencemeasure.C
 test_residualrelativeconvergencemeasure.C
 test_dealiisolidsolver.C
 
-EXE = $(FOAM_USER_APPBIN)/tests
+EXE = $(FOAM_APPBIN)/tests
