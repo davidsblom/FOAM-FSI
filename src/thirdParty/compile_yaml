@@ -51,5 +51,5 @@ if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
 
 fi
 
-mkdir -p ${FOAM_USER_LIBBIN}
-cp yaml-cpp-release-${VERSION}/build/libyaml-cpp* ${FOAM_USER_LIBBIN}/
+mkdir -p ${FOAM_LIBBIN}
+cp yaml-cpp-release-${VERSION}/build/libyaml-cpp* ${FOAM_LIBBIN}/

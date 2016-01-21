@@ -33,8 +33,8 @@ cd precice
 scons -j 4 build=release python=off petsc=on compiler=mpicxx
 scons -j 4 build=release python=off petsc=on compiler=mpicxx solib
 
-mkdir -p ${FOAM_USER_LIBBIN}
-mkdir -p ${FOAM_USER_APPBIN}
+mkdir -p ${FOAM_LIBBIN}
+mkdir -p ${FOAM_APPBIN}
 
-cp build/last/libprecice.* ${FOAM_USER_LIBBIN}/
-cp build/last/binprecice ${FOAM_USER_APPBIN}/
+cp build/last/libprecice.* ${FOAM_LIBBIN}/
+cp build/last/binprecice ${FOAM_APPBIN}/
