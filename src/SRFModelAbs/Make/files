@@ -2,4 +2,4 @@ SRFModelAbs/SRFModelAbs.C
 SRFModelAbs/newSRFModelAbs.C
 rpmAbs/rpmAbs.C
 
-LIB = $(FOAM_USER_LIBBIN)/libSRFModelAbs
+LIB = $(FOAM_LIBBIN)/libSRFModelAbs
