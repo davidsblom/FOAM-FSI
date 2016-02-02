@@ -8,7 +8,7 @@ cd $DIR
 
 # Assume that preCICE has been built before, and boost is already downloaded.
 
-VERSION=0.5.2
+VERSION=0.5.3
 
 if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
 
@@ -39,11 +39,7 @@ if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
 
     cd build
 
-    if [ "$(uname)" == "Darwin" ]; then
-        CC=gcc-mp-4.9 CXX=g++-mp-4.9 cmake -DBUILD_SHARED_LIBS=ON ..
-    else
-        CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
-    fi
+    CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
 
     make -j 4
 
