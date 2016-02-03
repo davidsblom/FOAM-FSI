@@ -153,13 +153,11 @@ FluidSolver::FluidSolver(
 
     if ( !UfHeader.headerOk() )
     {
-        Uf.oldTime();
+        tmp<surfaceVectorField> nf( mesh.Sf() / mesh.magSf() );
+        tmp<surfaceVectorField> Unor( phi / mesh.magSf() * nf() );
+        tmp<surfaceVectorField> Utang( fvc::interpolate( U ) - nf * ( fvc::interpolate( U ) & nf() ) );
 
-        tmp<surfaceVectorField> nf = mesh.Sf() / mesh.magSf();
-        tmp<surfaceVectorField> Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
-        tmp<surfaceVectorField> Unor = phi / mesh.magSf() * nf;
-
-        Uf = Utang + Unor;
+        Uf = Utang() + Unor();
     }
 
     setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
@@ -243,7 +241,7 @@ void FluidSolver::continuityErrs()
     tmp<volScalarField> contErr = fvc::div( phi );
 
     sumLocalContErr = runTime->deltaT().value() *
-        mag( contErr ) ().weightedAverage( mesh.V() ).value();
+        mag( contErr() ) ().weightedAverage( mesh.V() ).value();
 
     globalContErr = runTime->deltaT().value() *
         contErr->weightedAverage( mesh.V() ).value();
@@ -263,15 +261,15 @@ void FluidSolver::courantNo()
         tmp<surfaceScalarField> magPhi = mag( phi );
 
         tmp<surfaceScalarField> SfUfbyDelta =
-            mesh.surfaceInterpolation::deltaCoeffs() * magPhi;
+            mesh.surfaceInterpolation::deltaCoeffs() * magPhi();
 
-        CoNum = max( SfUfbyDelta / mesh.magSf() )
+        CoNum = max( SfUfbyDelta() / mesh.magSf() )
             .value() * runTime->deltaT().value();
 
-        meanCoNum = ( sum( SfUfbyDelta ) / sum( mesh.magSf() ) )
+        meanCoNum = ( sum( SfUfbyDelta() ) / sum( mesh.magSf() ) )
             .value() * runTime->deltaT().value();
 
-        velMag = max( magPhi / mesh.magSf() ).value();
+        velMag = max( magPhi() / mesh.magSf() ).value();
     }
 
     Info << "Courant Number mean: " << meanCoNum
@@ -521,13 +519,11 @@ void FluidSolver::solve()
         // Update the face velocities
         fvc::makeAbsolute( phi, U );
         {
-            Uf.oldTime();
+            tmp<surfaceVectorField> nf( mesh.Sf() / mesh.magSf() );
+            tmp<surfaceVectorField> Unor( phi / mesh.magSf() * nf() );
+            tmp<surfaceVectorField> Utang( fvc::interpolate( U ) - nf * ( fvc::interpolate( U ) & nf() ) );
 
-            tmp<surfaceVectorField> nf = mesh.Sf() / mesh.magSf();
-            tmp<surfaceVectorField> Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
-            tmp<surfaceVectorField> Unor = phi / mesh.magSf() * nf;
-
-            Uf = Utang + Unor;
+            Uf = Utang() + Unor();
         }
         fvc::makeRelative( phi, U );
 
