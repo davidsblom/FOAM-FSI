@@ -127,7 +127,7 @@ namespace Foam
         const scalarField & magSf = p.magSf();
         tmp<scalarField> Un = phip / (magSf + VSMALL);
 
-        vectorField::operator=( Up + n *( Un - (n & Up) ) );
+        vectorField::operator=( Up() + n() *( Un() - ( n() & Up() ) ) );
 
         fixedValueFvPatchVectorField::updateCoeffs();
     }
