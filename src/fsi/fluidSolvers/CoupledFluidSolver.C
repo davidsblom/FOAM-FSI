@@ -119,7 +119,7 @@ void CoupledFluidSolver::continuityErrs()
     tmp<volScalarField> contErr = fvc::div( phi );
 
     sumLocalContErr = runTime->deltaT().value() *
-        mag( contErr ) ().weightedAverage( mesh.V() ).value();
+        mag( contErr() ) ().weightedAverage( mesh.V() ).value();
 
     globalContErr = runTime->deltaT().value() *
         contErr->weightedAverage( mesh.V() ).value();
@@ -143,15 +143,15 @@ void CoupledFluidSolver::courantNo()
         tmp<surfaceScalarField> magPhi = mag( phi );
 
         tmp<surfaceScalarField> SfUfbyDelta =
-            mesh.surfaceInterpolation::deltaCoeffs() * magPhi;
+            mesh.surfaceInterpolation::deltaCoeffs() * magPhi();
 
-        CoNum = max( SfUfbyDelta / mesh.magSf() )
+        CoNum = max( SfUfbyDelta() / mesh.magSf() )
             .value() * runTime->deltaT().value();
 
-        meanCoNum = ( sum( SfUfbyDelta ) / sum( mesh.magSf() ) )
+        meanCoNum = ( sum( SfUfbyDelta() ) / sum( mesh.magSf() ) )
             .value() * runTime->deltaT().value();
 
-        velMag = max( magPhi / mesh.magSf() ).value();
+        velMag = max( magPhi() / mesh.magSf() ).value();
     }
 
     Info << "Courant Number mean: " << meanCoNum
