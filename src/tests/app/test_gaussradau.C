@@ -26,3 +26,15 @@ TEST( GaussRadauTest, nodes )
     ASSERT_NEAR( nodes[3], 0.8602401356562194478479129188751197667383780225872255049242335941839742579301655644134901549264276107, tol );
     ASSERT_NEAR( nodes[4], 1.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, tol );
 }
+
+TEST( GaussRadauTest, api )
+{
+    const size_t num_nodes = 5;
+    fsi::quadrature::GaussRadau<double> gaussRadau( num_nodes );
+    gaussRadau.get_nodes();
+    gaussRadau.get_q_mat();
+    gaussRadau.get_s_mat();
+    gaussRadau.get_b_mat();
+    gaussRadau.get_q_vec();
+    ASSERT_EQ( gaussRadau.get_num_nodes(), num_nodes );
+}
