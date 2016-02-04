@@ -33,7 +33,7 @@ protected:
              * The coefficient for the highest degree of \\( x \\) has index `0`.
              * The last coefficient is for \\( x^0 \\).
              */
-            vector<CoeffT> c;
+            std::vector<CoeffT> c;
 
 public:
 
@@ -121,7 +121,7 @@ public:
              *
              * @returns roots sorted with respect to their value
              */
-            vector<CoeffT> roots(
+            std::vector<CoeffT> roots(
                 size_t num_iterations = 100,
                 CoeffT ztol = 1.0e-20
                 ) const;

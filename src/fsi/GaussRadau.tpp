@@ -39,7 +39,7 @@ namespace fsi
         template<typename precision>
         void GaussRadau<precision>::compute_nodes()
         {
-            this->nodes = vector<precision>( this->num_nodes, precision( 0.0 ) );
+            this->nodes = std::vector<precision>( this->num_nodes, precision( 0.0 ) );
             auto l = Polynomial<precision>::legendre( this->num_nodes );
             auto lm1 = Polynomial<precision>::legendre( this->num_nodes - 1 );
 

@@ -36,7 +36,7 @@ namespace fsi
         template<typename scalar>
         static Polynomial<scalar> build_polynomial(
             const size_t node,
-            const vector<scalar> & nodes
+            const std::vector<scalar> & nodes
             )
         {
             const size_t num_nodes = nodes.size();
@@ -90,8 +90,8 @@ namespace fsi
          */
         template<typename scalar>
         static Matrix<scalar> compute_q_matrix(
-            const vector<scalar> & from,
-            const vector<scalar> & to
+            const std::vector<scalar> & from,
+            const std::vector<scalar> & to
             )
         {
             const size_t to_size = to.size();
@@ -128,7 +128,7 @@ namespace fsi
          * @overload
          */
         template<typename scalar>
-        static Matrix<scalar> compute_q_matrix( const vector<scalar> & nodes )
+        static Matrix<scalar> compute_q_matrix( const std::vector<scalar> & nodes )
         {
             return compute_q_matrix<scalar>( nodes, nodes );
         }
@@ -200,8 +200,8 @@ namespace fsi
          */
         template<typename scalar>
         static Matrix<scalar> compute_s_matrix(
-            const vector<scalar> & from,
-            const vector<scalar> & to
+            const std::vector<scalar> & from,
+            const std::vector<scalar> & to
             )
         {
             return compute_s_matrix( compute_q_matrix( from, to ) );
@@ -220,12 +220,12 @@ namespace fsi
          * @since v0.3.0
          */
         template<typename scalar>
-        static vector<scalar> compute_q_vec( const vector<scalar> & nodes )
+        static std::vector<scalar> compute_q_vec( const std::vector<scalar> & nodes )
         {
             const size_t num_nodes = nodes.size();
             assert( num_nodes >= 1 );
 
-            vector<scalar> q_vec = vector<scalar>( num_nodes, scalar( 0.0 ) );
+            std::vector<scalar> q_vec = std::vector<scalar>( num_nodes, scalar( 0.0 ) );
 
             for ( size_t m = 0; m < num_nodes; ++m )
             {
@@ -265,9 +265,9 @@ protected:
             size_t num_nodes;
             Matrix<precision> q_mat;
             Matrix<precision> s_mat;
-            vector<precision> q_vec; // XXX: black spot
+            std::vector<precision> q_vec; // XXX: black spot
             Matrix<precision> b_mat;
-            vector<precision> nodes;
+            std::vector<precision> nodes;
 
             // ! @}
 
@@ -295,9 +295,9 @@ public:
 
             virtual const Matrix<precision> & get_b_mat() const;
 
-            virtual const vector<precision> & get_q_vec() const;
+            virtual const std::vector<precision> & get_q_vec() const;
 
-            virtual const vector<precision> & get_nodes() const;
+            virtual const std::vector<precision> & get_nodes() const;
 
             virtual size_t get_num_nodes() const;
 

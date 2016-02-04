@@ -77,7 +77,7 @@ namespace fsi
          * @endinternals
          */
         template<typename CoeffT>
-        vector<CoeffT> Polynomial<CoeffT>::roots(
+        std::vector<CoeffT> Polynomial<CoeffT>::roots(
             size_t num_iterations,
             CoeffT ztol
             ) const
@@ -86,7 +86,7 @@ namespace fsi
             size_t n = c.size() - 1;
 
             // initial guess
-            vector<complex<CoeffT> > z0( n );
+            std::vector<complex<CoeffT> > z0( n );
 
             for ( size_t j = 0; j < n; j++ )
             {
@@ -119,7 +119,7 @@ namespace fsi
                 }
             }
 
-            vector<CoeffT> roots( n );
+            std::vector<CoeffT> roots( n );
 
             for ( size_t j = 0; j < n; j++ )
             {

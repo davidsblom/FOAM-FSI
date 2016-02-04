@@ -36,13 +36,13 @@ namespace fsi
         }
 
         template<typename precision>
-        const vector<precision> & IQuadrature<precision>::get_q_vec() const
+        const std::vector<precision> & IQuadrature<precision>::get_q_vec() const
         {
             return this->q_vec;
         }
 
         template<typename precision>
-        const vector<precision> & IQuadrature<precision>::get_nodes() const
+        const std::vector<precision> & IQuadrature<precision>::get_nodes() const
         {
             return this->nodes;
         }
