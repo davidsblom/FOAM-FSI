@@ -41,7 +41,7 @@ TEST( GaussRadauTest, api )
 
 TEST( GaussRadauTest, expectedError )
 {
-    const size_t num_nodes = 7s;
+    const size_t num_nodes = 7;
     fsi::quadrature::GaussRadau<double> gaussRadau( num_nodes );
 
     double error = gaussRadau.expected_error();
