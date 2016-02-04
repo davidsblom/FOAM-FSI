@@ -38,3 +38,12 @@ TEST( GaussRadauTest, api )
     gaussRadau.get_q_vec();
     ASSERT_EQ( gaussRadau.get_num_nodes(), num_nodes );
 }
+
+TEST( GaussRadauTest, expectedError )
+{
+    const size_t num_nodes = 7s;
+    fsi::quadrature::GaussRadau<double> gaussRadau( num_nodes );
+
+    double error = gaussRadau.expected_error();
+    std::cout << "expected error = " << error << std::endl;
+}
