@@ -76,5 +76,6 @@ test_pies.C
 test_absoluteconvergencemeasure.C
 test_residualrelativeconvergencemeasure.C
 test_dealiisolidsolver.C
+test_gaussradau.C
 
 EXE = $(FOAM_APPBIN)/tests
