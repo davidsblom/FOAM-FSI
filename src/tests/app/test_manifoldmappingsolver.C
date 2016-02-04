@@ -444,21 +444,21 @@ TEST_F( ManifoldMappingSolverTest, solveTimeStep )
 {
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 9 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 9 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 18 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 18 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 27 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 27 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 35 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 35 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 42 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 42 );
 }

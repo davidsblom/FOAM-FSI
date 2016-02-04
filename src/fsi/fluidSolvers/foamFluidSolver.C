@@ -214,8 +214,6 @@ void foamFluidSolver::solve(
     matrix & output
     )
 {
-    std::clock_t t = std::clock();
-
     movingPatchesDisplOld = movingPatchesDispl;
 
     int globalOffset = 0;
@@ -268,15 +266,4 @@ void foamFluidSolver::solve(
     assert( output.cols() == data.cols() );
 
     data = output;
-
-    if ( debug > 0 )
-    {
-        t = std::clock() - t;
-        scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
-        totalRunTime += runTime;
-        totalNbIterations++;
-        Info << "runtime = " << runTime << " s" << endl;
-        Info << "average runtime = " << totalRunTime / totalNbIterations << " s" << endl;
-        Info << "total runtime = " << totalRunTime << " s" << endl;
-    }
 }

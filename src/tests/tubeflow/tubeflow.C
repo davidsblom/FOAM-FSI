@@ -26,10 +26,7 @@ using namespace std;
 using namespace fsi;
 using namespace tubeflow;
 
-int main(
-    int argc,
-    char ** argv
-    )
+int main()
 {
     // List of solvers
     deque<std::string> fsiSolvers;
@@ -50,8 +47,6 @@ int main(
 
     if ( parallelCoupling )
         nbParallel = 2;
-
-    #pragma omp parallel for collapse(7), schedule(dynamic,1)
 
     for ( int iCoarse = 0; iCoarse < 3; iCoarse++ )
     {

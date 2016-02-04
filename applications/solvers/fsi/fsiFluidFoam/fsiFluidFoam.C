@@ -12,6 +12,7 @@
 #include "PreciceFluidSolver.H"
 #include "FluidSolver.H"
 #include "CompressibleFluidSolver.H"
+#include "SteadyStateFluidSolver.H"
 
 int main(
     int argc,
@@ -42,7 +43,7 @@ int main(
 
     std::string fluidSolver = config["fluid-solver"].as<std::string>();
 
-    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" );
+    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "steady-state-pimple-solver" );
 
     std::shared_ptr<foamFluidSolver> fluid;
 
@@ -51,6 +52,9 @@ int main(
 
     if ( fluidSolver == "pimple-solver" )
         fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+
+    if ( fluidSolver == "steady-state-pimple-solver" )
+        fluid = std::shared_ptr<foamFluidSolver> ( new SteadyStateFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
     if ( fluidSolver == "compressible-solver" )
         fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );

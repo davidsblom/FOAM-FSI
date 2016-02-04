@@ -89,7 +89,6 @@ namespace tubeflow
         assert( un.rows() == N );
         assert( pn.rows() == N );
         assert( an.rows() == N );
-        assert( t <= T );
 
         // Determine the velocity and pressure fsi::vectors from the
         // input fsi::vector x

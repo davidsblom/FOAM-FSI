@@ -1,7 +1,8 @@
-c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs -Werror -Wredundant-decls -Wcast-align -Wmissing-declarations  -Wswitch-enum -Wswitch-default -Winvalid-pch -Wredundant-decls -Wformat=2 -Wmissing-format-attribute -Wformat-nonliteral
+c++WARN     = -Wall -Wextra -Werror -Wno-literal-suffix
 
 EXE_INC = -std=c++11 \
     -isystem ../../../../src/fsi/lnInclude \
+    -I ../../../../src/fsi \
     -isystem ../../../../src/thirdParty/eigen \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
     -isystem $(LIB_SRC)/thermophysicalModels/basic/lnInclude \
@@ -21,7 +22,14 @@ EXE_INC = -std=c++11 \
     $(WM_DECOMP_INC) \
     -isystem $(LIB_SRC)/tetFiniteElement/lnInclude \
     -isystem ../../../../src/thirdParty/boost \
-    -isystem ../../../../src/boundaryConditions/lnInclude
+    -isystem ../../../../src/boundaryConditions/lnInclude \
+    -isystem ../../../../src/thirdParty/deal-fsi/include \
+    -isystem ../../../../src/thirdParty/dealii/bin/include \
+    -isystem ../../../../src/thirdParty/dealii/bin/include/deal.II/bundled \
+    -isystem ../../../../src/thirdParty/dealii/bundled/umfpack/UMFPACK/Include \
+    -isystem ../../../../src/thirdParty/dealii/bundled/umfpack/AMD/Include \
+    -isystem ../../../../src/thirdParty/petsc/include \
+    -isystem ../../../../src/thirdParty/petsc/x86_64/include
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
@@ -46,4 +54,5 @@ EXE_LIBS = \
     -ltetFiniteElement \
     -lbasicThermophysicalModels \
     -lspecie \
-    -lcompressibleRASModels
+    -lcompressibleRASModels \
+    -ldeal_II

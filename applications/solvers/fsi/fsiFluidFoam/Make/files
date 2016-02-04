@@ -1,4 +1,4 @@
 PreciceFluidSolver.C
 fsiFluidFoam.C
 
-EXE = $(FOAM_USER_APPBIN)/fsiFluidFoam
+EXE = $(FOAM_APPBIN)/fsiFluidFoam

@@ -8,14 +8,9 @@ cd $DIR
 
 # Assume that preCICE has been built before, and boost is already downloaded.
 
-VERSION=0.5.2
-SHARED_LIBRARY=${FOAM_USER_LIBBIN}/libyaml-cpp.so.${VERSION}
+VERSION=0.5.3
 
-if [ "$(uname)" == "Darwin" ]; then
-    SHARED_LIBRARY=${FOAM_USER_LIBBIN}/libyaml-cpp.${VERSION}.dylib
-fi
-
-if [ ! -e ${SHARED_LIBRARY} ] || [ ! -e "yaml-cpp-release-${VERSION}" ]; then
+if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
 
     # Define which versions of the different packages are used
 
@@ -44,25 +39,13 @@ if [ ! -e ${SHARED_LIBRARY} ] || [ ! -e "yaml-cpp-release-${VERSION}" ]; then
 
     cd build
 
-    if [ "$(uname)" == "Darwin" ]; then
-        CC=gcc-mp-4.9 CXX=g++-mp-4.9 cmake -DBUILD_SHARED_LIBS=ON ..
-    else
-        CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
-    fi
+    CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
 
     make -j 4
 
-    # Copy the shared library to $FOAM_USER_LIBBIN
-    mkdir -p ${FOAM_USER_LIBBIN}
-
-    if [ "$(uname)" == "Darwin" ]; then
-        cp libyaml-cpp.0.5.2.dylib ${FOAM_USER_LIBBIN}/
-        cp libyaml-cpp.0.5.dylib ${FOAM_USER_LIBBIN}/
-        cp libyaml-cpp.dylib ${FOAM_USER_LIBBIN}/
-    else
-        cp libyaml-cpp.so.0.5.2 ${FOAM_USER_LIBBIN}/
-        cp libyaml-cpp.so.0.5 ${FOAM_USER_LIBBIN}/
-        cp libyaml-cpp.so ${FOAM_USER_LIBBIN}/
-    fi
+    cd ../..
 
 fi
+
+mkdir -p ${FOAM_LIBBIN}
+cp yaml-cpp-release-${VERSION}/build/libyaml-cpp* ${FOAM_LIBBIN}/

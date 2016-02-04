@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+NB_CORES=3
+
+./Allclean
+
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+cd fluid
+touch fluid.foam
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication decomposePar
+runParallel fsiFoam $NB_CORES

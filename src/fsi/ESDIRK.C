@@ -576,7 +576,7 @@ namespace sdc
             B( i ) = A( nbStages - 1, i );
     }
 
-    void ESDIRK::outputResidual( std::string name )
+    void ESDIRK::outputResidual( std::string )
     {}
 
     bool ESDIRK::isConverged()

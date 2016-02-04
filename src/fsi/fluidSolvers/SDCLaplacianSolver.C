@@ -81,9 +81,9 @@ SDCLaplacianSolver::~SDCLaplacianSolver()
 {}
 
 void SDCLaplacianSolver::evaluateFunction(
-    const int k,
+    const int,
     const fsi::vector & q,
-    const scalar t,
+    const scalar,
     fsi::vector & f
     )
 {
@@ -116,7 +116,7 @@ void SDCLaplacianSolver::getSolution( fsi::vector & solution )
 
 void SDCLaplacianSolver::setSolution(
     const fsi::vector & solution,
-    const fsi::vector & f
+    const fsi::vector &
     )
 {
     for ( int i = 0; i < T.size(); i++ )
@@ -174,8 +174,8 @@ void SDCLaplacianSolver::setNumberOfImplicitStages( int k )
 void SDCLaplacianSolver::implicitSolve(
     bool corrector,
     const int k,
-    const int kold,
-    const scalar t,
+    const int,
+    const scalar,
     const scalar dt,
     const fsi::vector & qold,
     const fsi::vector & rhs,

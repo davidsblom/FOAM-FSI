@@ -34,9 +34,13 @@ fluidSolvers/CompressibleFluidSolver.C
 fluidSolvers/SDCFluidSolver.C
 fluidSolvers/SDCDynamicMeshFluidSolver.C
 fluidSolvers/SDCLaplacianSolver.C
+fluidSolvers/SteadyStateFluidSolver.C
 
 solidSolvers/foamSolidSolver.C
 solidSolvers/SolidSolver.C
 solidSolvers/SDCSolidSolver.C
+solidSolvers/dealiiSolidSolver.C
+solidSolvers/ElasticSolidSolver.C
+solidSolvers/SteadyStateSolidSolver.C
 
-LIB = $(FOAM_USER_LIBBIN)/libfsi
+LIB = $(FOAM_LIBBIN)/libfsi

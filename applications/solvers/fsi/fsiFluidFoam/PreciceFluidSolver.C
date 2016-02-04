@@ -6,16 +6,14 @@
 
 #include "PreciceFluidSolver.H"
 
-typedef Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> matrixRowMajor;
+typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> matrixRowMajor;
 
 PreciceFluidSolver::PreciceFluidSolver( shared_ptr<foamFluidSolver> solver )
     :
     solver( solver ),
     precice( shared_ptr<precice::SolverInterface> ( new precice::SolverInterface( "Fluid_Solver", Pstream::myProcNo(), Pstream::nProcs() ) ) ),
     idsReadPositions(),
-    idsWritePositions(),
-    totalRunTime( 0 ),
-    totalNbIterations( 0 )
+    idsWritePositions()
 {
     assert( solver );
 
@@ -53,6 +51,9 @@ void PreciceFluidSolver::init()
 
 void PreciceFluidSolver::readData( matrix & data )
 {
+    if ( !precice->hasMesh( "Fluid_Nodes" ) )
+        return;
+
     // Read displacements from preCICE
 
     int meshId = precice->getMeshID( "Fluid_Nodes" );
@@ -64,7 +65,7 @@ void PreciceFluidSolver::readData( matrix & data )
     if ( data.rows() > 0 )
         precice->readBlockVectorData( dataId, idsReadPositions.rows(), idsReadPositions.data(), dataRowMajor.data() );
 
-    data = dataRowMajor;
+    data = dataRowMajor.cast<scalar>();
 }
 
 void PreciceFluidSolver::run()
@@ -82,8 +83,6 @@ void PreciceFluidSolver::run()
 
         while ( precice->isCouplingOngoing() )
         {
-            std::clock_t t = std::clock();
-
             Info << endl << "Time = " << solver->runTime->timeName() << ", iteration = " << iter + 1 << endl;
 
             readData( input );
@@ -91,24 +90,22 @@ void PreciceFluidSolver::run()
             if ( precice->isActionRequired( precice::constants::actionReadIterationCheckpoint() ) )
                 precice->fulfilledAction( precice::constants::actionReadIterationCheckpoint() );
 
-            solver->setDisplacementLocal( input + inputOld );
-            solver->moveMesh();
+            if ( precice->hasMesh( "Fluid_Nodes" ) )
+            {
+                solver->setDisplacementLocal( input + inputOld );
+                solver->moveMesh();
+            }
+
             solver->solve();
-            solver->getTractionLocal( output );
+
+            if ( precice->hasMesh( "Fluid_CellCenters" ) )
+                solver->getTractionLocal( output );
 
             writeData( output );
             writeDataAcoustics();
 
             if ( precice->isActionRequired( precice::constants::actionWriteIterationCheckpoint() ) )
                 precice->fulfilledAction( precice::constants::actionWriteIterationCheckpoint() );
-
-            t = std::clock() - t;
-            scalar runTime = static_cast<scalar>(t) / CLOCKS_PER_SEC;
-            totalRunTime += runTime;
-            totalNbIterations++;
-            Info << "runtime = " << runTime << " s" << endl;
-            Info << "average runtime = " << totalRunTime / totalNbIterations << " s" << endl;
-            Info << "total runtime = " << totalRunTime << " s" << endl;
 
             precice->advance( solver->runTime->deltaT().value() );
 
@@ -126,6 +123,9 @@ void PreciceFluidSolver::run()
 
 void PreciceFluidSolver::setReadPositions()
 {
+    if ( !precice->hasMesh( "Fluid_Nodes" ) )
+        return;
+
     // Initialize matrices
     matrix readPositionsColumnMajor;
     matrixRowMajor readPositions;
@@ -136,7 +136,7 @@ void PreciceFluidSolver::setReadPositions()
     assert( readPositionsColumnMajor.cols() == precice->getDimensions() );
 
     // Store the positions in row-major for preCICE. Eigen uses column major by default.
-    readPositions = readPositionsColumnMajor;
+    readPositions = readPositionsColumnMajor.cast<double>();
 
     // Get the mesh id
     int meshId = precice->getMeshID( "Fluid_Nodes" );
@@ -165,8 +165,8 @@ void PreciceFluidSolver::setWritePositionsAcoustics()
     assert( writePositionsColumnMajor.cols() == precice->getDimensions() );
 
     // Store the positions in row-major order for preCICE. Eigen uses column major by default
-    writePositions = writePositionsColumnMajor;
-    
+    writePositions = writePositionsColumnMajor.cast<double>();
+
     labelList interfaceSize( Pstream::nProcs(), 0 );
     interfaceSize[Pstream::myProcNo()] = writePositions.rows();
     reduce( interfaceSize, sumOp<labelList>() );
@@ -185,6 +185,9 @@ void PreciceFluidSolver::setWritePositionsAcoustics()
 
 void PreciceFluidSolver::setWritePositions()
 {
+    if ( !precice->hasMesh( "Fluid_CellCenters" ) )
+        return;
+
     // Initialize matrices
     matrix writePositionsColumnMajor;
     matrixRowMajor writePositions;
@@ -195,7 +198,7 @@ void PreciceFluidSolver::setWritePositions()
     assert( writePositionsColumnMajor.cols() == precice->getDimensions() );
 
     // Store the positions in row-major for preCICE. Eigen uses column major by default
-    writePositions = writePositionsColumnMajor;
+    writePositions = writePositionsColumnMajor.cast<double>();
 
     // Get the mesh id
     int meshId = precice->getMeshID( "Fluid_CellCenters" );
@@ -211,8 +214,11 @@ void PreciceFluidSolver::setWritePositions()
 
 void PreciceFluidSolver::writeData( const matrix & data )
 {
+    if ( !precice->hasMesh( "Fluid_CellCenters" ) )
+        return;
+
     // Send forces to preCICE
-    matrixRowMajor dataRowMajor = data;
+    matrixRowMajor dataRowMajor = data.cast<double>();
 
     int meshId = precice->getMeshID( "Fluid_CellCenters" );
     int dataId = precice->getDataID( "Stresses", meshId );
@@ -260,17 +266,23 @@ void PreciceFluidSolver::writeDataAcoustics()
     assert( dataVelocity.cols() == precice->getDimensions() );
 
     if ( dataDensity.rows() > 0 )
-        precice->writeBlockScalarData( dataIdDensity, dataDensity.rows(), idsWritePositionsAcoustics.data(), dataDensity.data() );
+    {
+        matrixRowMajor dataDensityRowMajor = dataDensity.cast<double>();
+        precice->writeBlockScalarData( dataIdDensity, dataDensity.rows(), idsWritePositionsAcoustics.data(), dataDensityRowMajor.data() );
+    }
 
     if ( dataPressure.rows() > 0 )
-        precice->writeBlockScalarData( dataIdPressure, dataPressure.rows(), idsWritePositionsAcoustics.data(), dataPressure.data() );
+    {
+        matrixRowMajor dataPressureRowMajor = dataPressure.cast<double>();
+        precice->writeBlockScalarData( dataIdPressure, dataPressure.rows(), idsWritePositionsAcoustics.data(), dataPressureRowMajor.data() );
+    }
 
     if ( dataVelocity.rows() > 0 )
     {
-        matrix dataVelocityX, dataVelocityY, dataVelocityZ;
-        dataVelocityX = dataVelocity.col( 0 );
-        dataVelocityY = dataVelocity.col( 1 );
-        dataVelocityZ = dataVelocity.col( 2 );
+        matrixRowMajor dataVelocityX, dataVelocityY, dataVelocityZ;
+        matrixRowMajor dataVelocityRowMajor = dataVelocity.cast<double>();
+        dataVelocityX = dataVelocityRowMajor.col( 0 );
+        dataVelocityY = dataVelocityRowMajor.col( 1 );
 
         precice->writeBlockScalarData( dataIdVelocityX, dataVelocityX.rows(), idsWritePositionsAcoustics.data(), dataVelocityX.data() );
         precice->writeBlockScalarData( dataIdVelocityY, dataVelocityY.rows(), idsWritePositionsAcoustics.data(), dataVelocityY.data() );
@@ -279,6 +291,7 @@ void PreciceFluidSolver::writeDataAcoustics()
         {
             assert( dataVelocity.cols() == 3 );
             assert( precice->getDimensions() == 3 );
+            dataVelocityZ = dataVelocityRowMajor.col( 2 );
             precice->writeBlockScalarData( dataIdVelocityZ, dataVelocityZ.rows(), idsWritePositionsAcoustics.data(), dataVelocityZ.data() );
         }
     }

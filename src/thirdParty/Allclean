@@ -2,8 +2,6 @@
 
 set -e
 
-rm -rf gtest*
-rm -rf yaml-cpp*
-rm -rf boost*
+rm -rf gtest* yaml-cpp* boost* dealii* metis* parmetis* petsc*
 rm -rf $FOAM_USER_LIBBIN/libprecice* $FOAM_USER_LIBBIN/libyaml-cpp*
 rm -rf precice/build

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -e
+
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+
+cd fluid
+cleanCase
+cd -
+
+rm -rf fluid/*.foam solid/*.foam fluid/*.txt fluid/*.csv solid/*.txt
+rm -rf fluid/0/solid
+rm -rf fluid/system/solid
+rm -rf fluid/constant/solid
+rm -f fluid/constant/polyMesh/boundary
+rm -f solid/constant/polyMesh/boundary
+rm -f fluid/iterations-*.txt
+rm -f *.pdf
+rm -f PlyParser_FoamFileParser_parsetab.py*
+rm -rf fluid/*.pvtu fluid/*.vtu fluid/*.pvd

@@ -3,4 +3,4 @@ smoothTranslation/smoothTranslation.C
 twodRigidBody/twodRigidBody.C
 linearRotation/linearRotation.C
 
-LIB = $(FOAM_USER_LIBBIN)/libextraSolidBodyMotion
+LIB = $(FOAM_LIBBIN)/libextraSolidBodyMotion

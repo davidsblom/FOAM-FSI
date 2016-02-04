@@ -175,6 +175,7 @@ protected:
 
     bool turbulenceSwitch;
     bool explicitFirstStage;
+    label writeInterval;
 };
 
 #endif

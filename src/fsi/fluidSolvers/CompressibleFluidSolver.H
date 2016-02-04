@@ -45,6 +45,8 @@ public:
 
     virtual void solve();
 
+    virtual void finalizeTimeStep();
+
 protected:
 
     void continuityErrs();
@@ -63,6 +65,8 @@ protected:
     autoPtr<compressible::RASModel> turbulence;
     volVector4Field Up;
     volScalarField DpDt;
+    volScalarField ddtp;
+    volScalarField ddtrho;
 
     // Continuity errors
     scalar cumulativeContErr;

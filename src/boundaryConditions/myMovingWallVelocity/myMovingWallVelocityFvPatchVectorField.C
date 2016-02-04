@@ -119,15 +119,15 @@ namespace Foam
         scalar coefft00 = deltaT * deltaT / ( deltaT0 * (deltaT + deltaT0) );
         scalar coefft0 = coefft + coefft00;
 
-        vectorField Up = (coefft * Fc_ - coefft0 * oldFc_ + coefft00 * oldoldFc_) / mesh.time().deltaT().value();
+        tmp<vectorField> Up = (coefft * Fc_ - coefft0 * oldFc_ + coefft00 * oldoldFc_) / mesh.time().deltaT().value();
 
         scalarField phip = p.patchField<surfaceScalarField, scalar>( fvc::meshPhi( U ) );
 
-        vectorField n = p.nf();
+        tmp<vectorField> n = p.nf();
         const scalarField & magSf = p.magSf();
-        scalarField Un = phip / (magSf + VSMALL);
+        tmp<scalarField> Un = phip / (magSf + VSMALL);
 
-        vectorField::operator=( Up + n *( Un - (n & Up) ) );
+        vectorField::operator=( Up() + n() *( Un() - ( n() & Up() ) ) );
 
         fixedValueFvPatchVectorField::updateCoeffs();
     }

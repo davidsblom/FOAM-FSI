@@ -15,11 +15,6 @@
 #include "foamFluidSolver.H"
 #include "RASModel.H"
 #include "singlePhaseTransportModel.H"
-#include "VectorNFieldTypes.H"
-#include "blockLduSolvers.H"
-#include "blockVectorNMatrices.H"
-#include "volVectorNFields.H"
-#include "blockMatrixTools.H"
 #include "fvBlockMatrix.H"
 
 using namespace fsi;

@@ -87,6 +87,30 @@ CompressibleFluidSolver::CompressibleFluidSolver(
     ),
     DpDt(
     fvc::DDt( surfaceScalarField( "phiU", phi / fvc::interpolate( rho ) ), p ) ),
+    ddtp(
+    IOobject
+    (
+        "ddtp",
+        runTime->timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedScalar( "zero", dimPressure / dimTime, 0.0 )
+    ),
+    ddtrho(
+    IOobject
+    (
+        "ddtrho",
+        runTime->timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedScalar( "zero", dimDensity / dimTime, 0.0 )
+    ),
     cumulativeContErr( 0 ),
     convergenceTolerance( readScalar( mesh.solutionDict().subDict( "blockSolver" ).lookup( "convergenceTolerance" ) ) ),
     nOuterCorr( readLabel( mesh.solutionDict().subDict( "blockSolver" ).lookup( "nOuterCorrectors" ) ) ),
@@ -161,14 +185,14 @@ void CompressibleFluidSolver::getTractionLocal( matrix & traction )
     {
         int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
 
-        vectorField tractionFieldPatchI = -thermo.mu()
+        tmp<vectorField> tractionFieldPatchI = -thermo.mu()
             * U.boundaryField()[movingPatchIDs[patchI]].snGrad()
             + p.boundaryField()[movingPatchIDs[patchI]]
             * mesh.boundary()[movingPatchIDs[patchI]].nf();
 
-        forAll( tractionFieldPatchI, i )
+        forAll( tractionFieldPatchI(), i )
         {
-            tractionField[i + offset] = tractionFieldPatchI[i];
+            tractionField[i + offset] = tractionFieldPatchI()[i];
         }
 
         offset += size;
@@ -229,13 +253,13 @@ void CompressibleFluidSolver::resetSolution()
 void CompressibleFluidSolver::solve()
 {
     Info << "Solve fluid domain" << endl;
-    
+
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     mesh.update();
     end = std::chrono::system_clock::now();
 
-    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::chrono::duration<double> elapsed_seconds = end - start;
     Info << "timing mesh deformation = " << elapsed_seconds.count() << "s" << endl;
 
     int oCorr;
@@ -284,7 +308,7 @@ void CompressibleFluidSolver::solve()
             residual = hEqn.solve().initialResidual();
 
             // Bound the enthalpy using TMin and TMax
-            volScalarField Cp = thermo.Cp();
+            tmp<volScalarField> Cp = thermo.Cp();
 
             // h = Foam::min(h, TMax*Cp);
             // h = Foam::max(h, TMin*Cp);
@@ -389,4 +413,17 @@ void CompressibleFluidSolver::solve()
     }
 
     continuityErrs();
+}
+
+void CompressibleFluidSolver::finalizeTimeStep()
+{
+    assert( init );
+
+    // volScalarField ddtp = fvc::ddt( p );
+    // ddtp.rename( "ddtp" );
+    // ddtp.write();
+    ddtp = fvc::ddt( p );
+    ddtrho = fvc::ddt( rho );
+
+    init = false;
 }

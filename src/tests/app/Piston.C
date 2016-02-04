@@ -89,7 +89,7 @@ scalar Piston::referenceSolution( scalar t )
 }
 
 void Piston::evaluateFunction(
-    const int k,
+    const int,
     const fsi::vector & q,
     const scalar t,
     fsi::vector & f
@@ -126,7 +126,7 @@ scalar Piston::getEndTime()
 
 void Piston::getSolution(
     fsi::vector & solution,
-    fsi::vector & f
+    fsi::vector &
     )
 {
     assert( solution.rows() == 2 );
@@ -136,7 +136,7 @@ void Piston::getSolution(
 
 void Piston::setSolution(
     const fsi::vector & solution,
-    const fsi::vector & f
+    const fsi::vector &
     )
 {
     assert( solution.rows() == 2 );
@@ -277,7 +277,7 @@ void Piston::run()
 }
 
 void Piston::implicitSolve(
-    bool corrector,
+    bool,
     const int k,
     const int kold,
     const scalar t,

@@ -526,9 +526,9 @@ void SDCSolidSolver::solve()
 }
 
 void SDCSolidSolver::evaluateFunction(
-    const int k,
-    const fsi::vector & q,
-    const scalar t,
+    const int,
+    const fsi::vector &,
+    const scalar,
     fsi::vector & f
     )
 {
@@ -734,7 +734,7 @@ void SDCSolidSolver::getSolution(
 
 void SDCSolidSolver::setSolution(
     const fsi::vector & solution,
-    const fsi::vector & f
+    const fsi::vector &
     )
 {
     int index = 0;
@@ -827,7 +827,7 @@ void SDCSolidSolver::setNumberOfImplicitStages( int k )
 void SDCSolidSolver::prepareImplicitSolve(
     bool corrector,
     const int k,
-    const int kold,
+    const int,
     const scalar t,
     const scalar dt,
     const fsi::vector & qold,

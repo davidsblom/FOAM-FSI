@@ -108,8 +108,8 @@ namespace tubeflow
         const fsi::vector & x,
         const fsi::vector & a,
         const fsi::vector & un,
-        const fsi::vector & pn,
-        const fsi::vector & an,
+        const fsi::vector &,
+        const fsi::vector &,
         matrix & J
         )
     {
@@ -119,7 +119,6 @@ namespace tubeflow
         assert( x.rows() == a.rows() * 2 );
         assert( p.rows() == u.rows() );
         assert( u.rows() == N );
-        assert( t <= T );
         assert( x.rows() == 2 * N );
         assert( J.rows() == J.cols() );
         assert( J.rows() == 2 * N );
@@ -224,7 +223,6 @@ namespace tubeflow
         assert( un.rows() == N );
         assert( pn.rows() == N );
         assert( an.rows() == N );
-        assert( t <= T );
         R.setZero();
         nbRes++;
 

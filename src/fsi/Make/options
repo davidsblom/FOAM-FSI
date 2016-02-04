@@ -1,4 +1,4 @@
-c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs -Wredundant-decls -Wcast-align -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Winvalid-pch -Wredundant-decls -Wformat=2 -Wmissing-format-attribute -Wformat-nonliteral -Weffc++ -Werror
+c++WARN     = -Wall -Wextra -Werror -Wno-literal-suffix
 
 EXE_INC = -std=c++11 \
     -isystem ../thirdParty/eigen \
@@ -20,6 +20,13 @@ EXE_INC = -std=c++11 \
     -isystem $(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I../boundaryConditions/lnInclude \
     -isystem ../thirdParty/yaml-cpp/include \
-    -isystem ../thirdParty/boost
+    -isystem ../thirdParty/boost \
+    -I ../thirdParty/deal-fsi/include \
+    -isystem ../thirdParty/dealii/bin/include \
+    -isystem ../thirdParty/dealii/bin/include/deal.II/bundled \
+    -isystem ../thirdParty/dealii/bundled/umfpack/UMFPACK/Include \
+    -isystem ../thirdParty/dealii/bundled/umfpack/AMD/Include \
+    -isystem ../thirdParty/petsc/x86_64/include \
+    -isystem ../thirdParty/petsc/include
 
 EXE_LIBS =

@@ -168,7 +168,8 @@ SDCFluidSolver::SDCFluidSolver(
     fvc::interpolate( UF ) & mesh.Sf()
     ),
     turbulenceSwitch( true ),
-    explicitFirstStage( true )
+    explicitFirstStage( true ),
+    writeInterval( readLabel( runTime->controlDict().lookup( "writeInterval" ) ) )
 {
     if ( UFHeader.headerOk() && phiFHeader.headerOk() )
         explicitFirstStage = false;
@@ -235,6 +236,7 @@ SDCFluidSolver::SDCFluidSolver(
         ddtScheme = word( ddtSchemes.lookup( "default" ) );
 
     assert( ddtScheme == "bdf1" );
+    assert( word( runTime->controlDict().lookup( "writeControl" ) ) == word( "timeStep" ) );
 
     initialize();
 }
@@ -318,27 +320,27 @@ scalar SDCFluidSolver::evaluateMomentumResidual()
     return momentumResidual;
 }
 
-void SDCFluidSolver::getAcousticsDensityLocal( matrix & data )
+void SDCFluidSolver::getAcousticsDensityLocal( matrix & )
 {
     assert( false );
 }
 
-void SDCFluidSolver::getAcousticsVelocityLocal( matrix & data )
+void SDCFluidSolver::getAcousticsVelocityLocal( matrix & )
 {
     assert( false );
 }
 
-void SDCFluidSolver::getAcousticsPressureLocal( matrix & data )
+void SDCFluidSolver::getAcousticsPressureLocal( matrix & )
 {
     assert( false );
 }
 
-void SDCFluidSolver::getTractionLocal( matrix & traction )
+void SDCFluidSolver::getTractionLocal( matrix & )
 {
     assert( false );
 }
 
-void SDCFluidSolver::getWritePositionsLocalAcoustics( matrix & writePositions )
+void SDCFluidSolver::getWritePositionsLocalAcoustics( matrix & )
 {
     assert( false );
 }
@@ -412,7 +414,8 @@ void SDCFluidSolver::finalizeTimeStep()
 {
     assert( init );
 
-    runTime->writeNow();
+    if ( runTime->timeIndex() % writeInterval == 0 )
+        runTime->writeNow();
 
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
          << "  ClockTime = " << runTime->elapsedClockTime() << " s"
@@ -649,9 +652,9 @@ scalar SDCFluidSolver::getTimeStep()
 }
 
 void SDCFluidSolver::evaluateFunction(
-    const int k,
-    const fsi::vector & q,
-    const scalar t,
+    const int,
+    const fsi::vector &,
+    const scalar,
     fsi::vector & f
     )
 {
@@ -706,7 +709,7 @@ void SDCFluidSolver::evaluateFunction(
 void SDCFluidSolver::implicitSolve(
     bool corrector,
     const int k,
-    const int kold,
+    const int,
     const scalar t,
     const scalar dt,
     const fsi::vector & qold,
@@ -840,10 +843,10 @@ void SDCFluidSolver::implicitSolve(
             // BoundaryCoeffs needs to be saved to generate the correct UEqn after
             // solving. Explicit terms (depending on U(n)) need to remain depending
             // on U(n) and not on new solution)
-            vectorField S0 = UEqn.source();
-            FieldField<Field, Foam::vector> B0 = UEqn.boundaryCoeffs();
+            vectorField S0 = UEqnt.source();
+            FieldField<Field, Foam::vector> B0 = UEqnt.boundaryCoeffs();
 
-            UEqn.relax();
+            UEqnt.relax();
 
             Foam::solve( UEqnt == -fvc::grad( p ) + rDeltaT * rhsU );
 
@@ -855,8 +858,8 @@ void SDCFluidSolver::implicitSolve(
                 - fvm::laplacian( nu, U )
                 );
 
-            UEqn.source() = S0;
-            UEqn.boundaryCoeffs() = B0;
+            UEqnt.source() = S0;
+            UEqnt.boundaryCoeffs() = B0;
         }
 
         // Relative convergence measure for the PISO loop:
@@ -1007,13 +1010,13 @@ void SDCFluidSolver::getVariablesInfo(
 }
 
 void SDCFluidSolver::prepareImplicitSolve(
-    bool corrector,
-    const int k,
-    const int kold,
-    const scalar t,
-    const scalar dt,
-    const fsi::vector & qold,
-    const fsi::vector & rhs
+    bool,
+    const int,
+    const int,
+    const scalar,
+    const scalar,
+    const fsi::vector &,
+    const fsi::vector &
     )
 {
     assert( false );

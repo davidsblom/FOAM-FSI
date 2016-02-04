@@ -663,8 +663,8 @@ namespace Foam
                     const surfaceVectorField & Uf = mesh().objectRegistry::lookupObject<surfaceVectorField>( "Uf" );
 
                     // Construct parts of H which need to be subtracted
-                    surfaceVectorField UV0oV = -fvc::interpolate( V0oV * U.oldTime() ); // term coming from H/A
-                    surfaceVectorField UV00oV = -fvc::interpolate( V00oV * U.oldTime().oldTime() ); // term coming from H/A
+                    tmp<surfaceVectorField> UV0oV = -fvc::interpolate( V0oV * U.oldTime() ); // term coming from H/A
+                    tmp<surfaceVectorField> UV00oV = -fvc::interpolate( V00oV * U.oldTime().oldTime() ); // term coming from H/A
 
                     // Create return variable
                     tmp<surfaceScalarField> ddtPhiCorr
@@ -702,8 +702,8 @@ namespace Foam
                     && phi.dimensions() == dimVelocity * dimArea
                 )
                 {
-                    surfaceScalarField phi0 = phi.oldTime() - ( fvc::interpolate( U.oldTime() ) & mesh().Sf() );
-                    surfaceScalarField phi00 = phi.oldTime().oldTime() - ( fvc::interpolate( U.oldTime().oldTime() ) & mesh().Sf() );
+                    tmp<surfaceScalarField> phi0 = phi.oldTime() - ( fvc::interpolate( U.oldTime() ) & mesh().Sf() );
+                    tmp<surfaceScalarField> phi00 = phi.oldTime().oldTime() - ( fvc::interpolate( U.oldTime().oldTime() ) & mesh().Sf() );
 
                     // Create return variable
                     return tmp<fluxFieldType>

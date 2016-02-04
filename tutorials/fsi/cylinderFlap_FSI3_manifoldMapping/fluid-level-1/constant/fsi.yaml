@@ -51,4 +51,4 @@ multi-level-acceleration:
       update-jacobian: false
   synchronization: true
 parallel-coupling: false
-solid-solver: segregated-solver
+solid-solver: nonlinear-elastic-solver

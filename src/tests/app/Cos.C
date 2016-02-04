@@ -35,8 +35,8 @@ Cos::Cos(
 }
 
 void Cos::evaluateFunction(
-    const int k,
-    const fsi::vector & q,
+    const int,
+    const fsi::vector &,
     const scalar t,
     fsi::vector & f
     )
@@ -57,15 +57,15 @@ int Cos::getDOF()
 
 void Cos::getSolution(
     fsi::vector & solution,
-    fsi::vector & f
+    fsi::vector &
     )
 {
     solution( 0 ) = sol;
 }
 
 void Cos::setSolution(
-    const fsi::vector & solution,
-    const fsi::vector & f
+    const fsi::vector &,
+    const fsi::vector &
     )
 {
     assert( false );
@@ -87,13 +87,13 @@ void Cos::nextTimeStep()
 void Cos::initTimeStep()
 {}
 
-void Cos::setNumberOfImplicitStages( int k )
+void Cos::setNumberOfImplicitStages( int )
 {}
 
 void Cos::implicitSolve(
-    bool corrector,
-    const int k,
-    const int kold,
+    bool,
+    const int,
+    const int,
     const scalar t,
     const scalar dt,
     const fsi::vector & qold,

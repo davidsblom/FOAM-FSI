@@ -4,11 +4,13 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+#include <mpi.h>
 #include <iostream>
 #include <list>
 #include <memory>
 #include <yaml-cpp/yaml.h>
 
+#include "dealiiSolidSolver.H"
 #include "version.H"
 #include "ASMILS.H"
 #include "AggressiveSpaceMapping.H"
@@ -31,6 +33,7 @@
 #include "RBFInterpolation.H"
 #include "RelativeConvergenceMeasure.H"
 #include "SolidSolver.H"
+#include "ElasticSolidSolver.H"
 #include "SpaceMappingSolver.H"
 #include "CompressibleFluidSolver.H"
 #include "TPSFunction.H"
@@ -46,6 +49,8 @@
 #include "PIES.H"
 #include "ResidualRelativeConvergenceMeasure.H"
 #include "AbsoluteConvergenceMeasure.H"
+#include "SteadyStateFluidSolver.H"
+#include "SteadyStateSolidSolver.H"
 
 using std::list;
 
@@ -186,8 +191,8 @@ int main(
     std::string fluidSolver = config["fluid-solver"].as<std::string>();
     std::string solidSolver = config["solid-solver"].as<std::string>();
 
-    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" );
-    assert( solidSolver == "segregated-solver" );
+    assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "steady-state-pimple-solver" );
+    assert( solidSolver == "nonlinear-elastic-solver" || solidSolver == "dealii-solver" || solidSolver == "linear-elastic-solver" || solidSolver == "steady-state-nonlinear-elastic-solver" );
 
     assert( configInterpolation["coarsening"] );
     assert( configInterpolation["coarsening"]["enabled"] );
@@ -240,6 +245,7 @@ int main(
         std::string algorithm = config["multi-level-acceleration"]["algorithm"].as<std::string>();
 
         assert( !config["coupling-scheme-implicit"] );
+        assert( solidSolver == "nonlinear-elastic-solver" );
         assert( algorithm == "manifold-mapping" || algorithm == "output-space-mapping" || algorithm == "ML-IQN-ILS" || algorithm == "aggressive-space-mapping" || algorithm == "ASM-ILS" );
 
         int nbLevels = config["multi-level-acceleration"]["levels"].size();
@@ -252,7 +258,7 @@ int main(
 
         // Create shared pointers to solvers
         std::shared_ptr<foamFluidSolver> fluid;
-        std::shared_ptr<foamSolidSolver> solid;
+        std::shared_ptr<BaseMultiLevelSolver> solid;
         std::shared_ptr<MultiLevelSolver> multiLevelFluidSolver;
         std::shared_ptr<MultiLevelSolver> multiLevelSolidSolver;
         std::shared_ptr<FsiSolver> fsi;
@@ -324,7 +330,7 @@ int main(
         if ( fluidSolver == "compressible-solver" )
             fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
 
-        if ( solidSolver == "segregated-solver" )
+        if ( solidSolver == "nonlinear-elastic-solver" )
         {
             std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
 
@@ -414,7 +420,7 @@ int main(
             if ( fluidSolver == "compressible-solver" )
                 fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
 
-            if ( solidSolver == "segregated-solver" )
+            if ( solidSolver == "nonlinear-elastic-solver" )
             {
                 std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu );
 
@@ -607,7 +613,7 @@ int main(
 
         // Create shared pointers to solvers
         std::shared_ptr<foamFluidSolver> fluid;
-        std::shared_ptr<foamSolidSolver> solid;
+        std::shared_ptr<BaseMultiLevelSolver> solid;
         std::shared_ptr<MultiLevelSolver> multiLevelFluidSolver;
         std::shared_ptr<MultiLevelSolver> multiLevelSolidSolver;
         std::shared_ptr<FsiSolver> fsi;
@@ -640,6 +646,13 @@ int main(
                 sdcFluidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new SDCDynamicMeshFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
         }
 
+        if ( fluidSolver == "steady-state-pimple-solver" )
+        {
+            assert( not adaptiveTimeStepping );
+
+            fluid = std::shared_ptr<foamFluidSolver> ( new SteadyStateFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+        }
+
         if ( fluidSolver == "compressible-solver" )
         {
             assert( timeIntegrationScheme == "bdf" );
@@ -648,7 +661,7 @@ int main(
             fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
         }
 
-        if ( solidSolver == "segregated-solver" )
+        if ( solidSolver == "nonlinear-elastic-solver" )
         {
             if ( timeIntegrationScheme == "bdf" )
             {
@@ -661,6 +674,41 @@ int main(
                 sdcSolidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new SDCSolidSolver( "solid", args, runTime ) );
         }
 
+        if ( solidSolver == "steady-state-nonlinear-elastic-solver" )
+        {
+            assert( not adaptiveTimeStepping );
+
+            solid = std::shared_ptr<foamSolidSolver> ( new SteadyStateSolidSolver( "solid", args, runTime ) );
+        }
+
+        if ( solidSolver == "linear-elastic-solver" )
+        {
+            assert( not adaptiveTimeStepping );
+            assert( timeIntegrationScheme == "bdf" );
+
+            solid = std::shared_ptr<foamSolidSolver> ( new ElasticSolidSolver( "solid", args, runTime ) );
+        }
+
+        if ( solidSolver == "dealii-solver" )
+        {
+            assert( not adaptiveTimeStepping );
+
+            dealiifsi::DataStorage data;
+            data.read_data( "deal-fsi.prm" );
+            data.time_step = runTime->deltaT().value();
+            data.final_time = runTime->endTime().value();
+
+            if ( timeIntegrationScheme == "bdf" )
+            {
+                assert( not adaptiveTimeStepping );
+
+                solid = std::shared_ptr<BaseMultiLevelSolver>( new dealiiSolidSolver<2> ( data ) );
+            }
+
+            if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
+                sdcSolidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new dealiiSolidSolver<2> ( data ) );
+        }
+
         if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
         {
             assert( sdcFluidSolver );
@@ -668,7 +716,7 @@ int main(
             assert( not fluid );
             assert( not solid );
             fluid = std::dynamic_pointer_cast<foamFluidSolver>( sdcFluidSolver );
-            solid = std::dynamic_pointer_cast<foamSolidSolver>( sdcSolidSolver );
+            solid = std::dynamic_pointer_cast<BaseMultiLevelSolver>( sdcSolidSolver );
         }
 
         assert( fluid );

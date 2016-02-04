@@ -1,0 +1,29 @@
+time-integration-scheme: bdf
+adaptive-time-stepping:
+  enabled: false
+fluid-solver: steady-state-pimple-solver
+solid-solver: steady-state-nonlinear-elastic-solver
+parallel-coupling: false
+first-participant: fluid-solver
+interpolation:
+  radial-basis-function:
+    function: thin-plate-spline
+  coarsening:
+    enabled: false
+coupling-scheme-implicit:
+  extrapolation-order: 2
+  convergence-measures:
+    - relative-convergence-measure:
+        limit: 1e-5
+        data-id: 0
+        suffices: false
+  max-iterations: 100
+  post-processing:
+    algorithm: Anderson
+    beta: 0.5
+    initial-relaxation: 1.0e-3
+    timesteps-reused: 0
+    singularity-limit: 1.0e-12
+    reuse-information-starting-from-time-index: 0
+    max-used-iterations: 3
+    update-jacobian: false

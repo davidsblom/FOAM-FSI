@@ -224,8 +224,8 @@ TEST_P( SDCTest, runCompareSDC )
     piston->getSolution( solution_piston, f );
     piston_sdc->getSolution( solution_piston_sdc, f );
 
-    ASSERT_NEAR( solution_piston_sdc( 0 ), solution_piston( 0 ), 1.0e-10 );
-    ASSERT_NEAR( solution_piston_sdc( 1 ), solution_piston( 1 ), 1.0e-10 );
+    ASSERT_NEAR( solution_piston_sdc( 0 ), solution_piston( 0 ), 1.0e-8 );
+    ASSERT_NEAR( solution_piston_sdc( 1 ), solution_piston( 1 ), 1.0e-7 );
 }
 
 TEST_P( SDCEstimateOrderTest, order )

@@ -90,12 +90,12 @@ namespace Foam
         const polyPatch & pp = p.patch();
 
         // Get wall-parallel mesh motion velocity from geometry
-        vectorField Up =
+        tmp<vectorField> Up =
             pp.faceCentres() / mesh.time().deltaT().value();
 
         int dim = mesh.nGeometricD();
 
-        fsi::vector rhs( Up.size() * dim ), f( Up.size() * dim ), result( Up.size() * dim ), qold;
+        fsi::vector rhs( Up->size() * dim ), f( Up->size() * dim ), result( Up->size() * dim ), qold;
 
         if ( not corrector && k == 0 )
         {
@@ -114,17 +114,17 @@ namespace Foam
         }
 
         timeIntegrationScheme->getSourceTerm( corrector, k, mesh.time().deltaT().value(), rhs, qold );
-        forAll( Up, i )
+        forAll( Up(), i )
         {
             for ( int j = 0; j < dim; j++ )
             {
-                Up[i][j] -= ( qold( i * dim + j ) + rhs( i * dim + j ) ) / mesh.time().deltaT().value();
-                f( i * dim + j ) = Up[i][j];
+                Up()[i][j] -= ( qold( i * dim + j ) + rhs( i * dim + j ) ) / mesh.time().deltaT().value();
+                f( i * dim + j ) = Up()[i][j];
                 result( i * dim + j ) = pp.faceCentres()[i][j];
             }
 
             if ( dim == 2 )
-                Up[i][2] = 0;
+                Up()[i][2] = 0;
         }
         timeIntegrationScheme->setFunction( k, f, result );
 
@@ -137,9 +137,9 @@ namespace Foam
         scalarField phip =
             p.patchField<surfaceScalarField, scalar>( fvc::meshPhi( U ) );
 
-        vectorField n = p.nf();
+        tmp<vectorField> n = p.nf();
         const scalarField & magSf = p.magSf();
-        scalarField Un = phip / (magSf + VSMALL);
+        tmp<scalarField> Un = phip / (magSf + VSMALL);
 
         // Adjust for surface-normal mesh motion flux
         vectorField::operator=( Up + n *( Un - (n & Up) ) );

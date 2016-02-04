@@ -5,4 +5,4 @@ TubeFlowLinearizedSolidSolver.C
 TubeFlowLinearizedFluidSolver.C
 tubeflow.C
 
-EXE = $(FOAM_USER_APPBIN)/tubeflow
+EXE = $(FOAM_APPBIN)/tubeflow
