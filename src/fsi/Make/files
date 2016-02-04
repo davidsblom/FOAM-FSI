@@ -29,6 +29,7 @@ version.Cver
 Polynomial.C
 QuadratureInterface.C
 GaussRadau.C
+Uniform.C
 
 fluidSolvers/CoupledFluidSolver.C
 fluidSolvers/FluidSolver.C
