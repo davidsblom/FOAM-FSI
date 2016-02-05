@@ -30,18 +30,6 @@ namespace fsi
         }
 
         template<typename precision>
-        const Matrix<precision> & IQuadrature<precision>::get_b_mat() const
-        {
-            return this->b_mat;
-        }
-
-        template<typename precision>
-        const std::vector<precision> & IQuadrature<precision>::get_q_vec() const
-        {
-            return this->q_vec;
-        }
-
-        template<typename precision>
         const std::vector<precision> & IQuadrature<precision>::get_nodes() const
         {
             return this->nodes;
@@ -73,15 +61,6 @@ namespace fsi
             assert( false );
         }
 
-        template<typename precision>
-        precision IQuadrature<precision>::expected_error() const
-        {
-            using cvec = Eigen::Array<precision, Eigen::Dynamic, 1>;
-            const cvec row_sums = this->get_q_mat().rowwise().sum();
-            Eigen::Map<const cvec> nodes( this->get_nodes().data(), this->get_nodes().size() );
-            return (row_sums - nodes).maxCoeff();
-        }
-
         /**
          * @internals
          * Computing weights means computing \\( Q \\) and \\( S \\) matrices as well as the \\( q \\)
@@ -103,6 +82,21 @@ namespace fsi
             for ( size_t i = 0; i < this->num_nodes; i++ )
             {
                 this->b_mat( 0, i ) = this->q_vec[i];
+            }
+
+            if ( not left_is_node() )
+            {
+                this->nodes.insert( this->nodes.begin(), 0 );
+
+                Matrix<precision> q_mat2( this->q_mat.rows(), this->q_mat.cols() + 1 );
+                q_mat2.setZero();
+                q_mat2.rightCols( this->q_mat.cols() ) = this->q_mat;
+                this->q_mat = q_mat2;
+
+                Matrix<precision> s_mat2( this->s_mat.rows(), this->s_mat.cols() + 1 );
+                s_mat2.setZero();
+                s_mat2.rightCols( this->s_mat.cols() ) = this->s_mat;
+                this->s_mat = s_mat2;
             }
         }
     } // ::pfasst::quadrature

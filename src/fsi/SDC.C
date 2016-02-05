@@ -6,6 +6,7 @@
 
 #include "SDC.H"
 #include "QuadratureRules.H"
+#include "GaussRadau.H"
 
 namespace sdc
 {
@@ -38,14 +39,29 @@ namespace sdc
         convergence( false ),
         timeIndex( 0 ),
         minSweeps( 0 ),
-        maxSweeps( 0 )
+        maxSweeps( 0 ),
+        quadrature( nullptr )
     {
         assert( tol > 0 );
         assert( tol < 1 );
         assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" || rule == "uniform-right-sided" );
 
-        int refine = 1;
-        quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
+        if ( rule == "gauss-radau" )
+        {
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> ( new fsi::quadrature::GaussRadau<scalar> ( nbNodes ) );
+            smat = quadrature->get_s_mat();
+            qmat = quadrature->get_q_mat();
+            const std::vector<scalar> nodes = quadrature->get_nodes();
+
+            this->nodes.resize( nodes.size() );
+            for( unsigned int i = 0; i < nodes.size(); i++ )
+                this->nodes(i) = nodes[i];
+        }
+        else
+        {
+            int refine = 1;
+            quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
+        }
 
         k = nodes.rows();
 
@@ -88,7 +104,8 @@ namespace sdc
         convergence( false ),
         timeIndex( 0 ),
         minSweeps( minSweeps ),
-        maxSweeps( maxSweeps )
+        maxSweeps( maxSweeps ),
+        quadrature( nullptr )
     {
         assert( adaptiveTimeStepper );
         assert( solver );
@@ -103,8 +120,22 @@ namespace sdc
         assert( minSweeps > 0 );
         assert( N > 0 );
 
-        int refine = 1;
-        quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
+        if ( rule == "gauss-radau" )
+        {
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> ( new fsi::quadrature::GaussRadau<scalar> ( nbNodes ) );
+            smat = quadrature->get_s_mat();
+            qmat = quadrature->get_q_mat();
+            const std::vector<scalar> nodes = quadrature->get_nodes();
+
+            this->nodes.resize( nodes.size() );
+            for( unsigned int i = 0; i < nodes.size(); i++ )
+                this->nodes(i) = nodes[i];
+        }
+        else
+        {
+            int refine = 1;
+            quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
+        }
 
         k = nodes.rows();
 
@@ -119,7 +150,7 @@ namespace sdc
 
         if ( adaptiveTimeStepper->isEnabled() )
         {
-            refine = 2;
+            int refine = 2;
             quadrature::rules( rule, nbNodes, refine, nodesEmbedded, smatEmbedded, qmatEmbedded );
 
             int orderEmbedded = 0;

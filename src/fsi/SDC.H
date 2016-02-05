@@ -12,6 +12,7 @@
 #include "fvCFD.H"
 #include "AdaptiveTimeStepper.H"
 #include "TimeIntegrationScheme.H"
+#include "QuadratureInterface.H"
 
 namespace sdc
 {
@@ -105,6 +106,8 @@ private:
         int timeIndex;
         const int minSweeps;
         const int maxSweeps;
+
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> quadrature;
     };
 }
 

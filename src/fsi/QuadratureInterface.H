@@ -20,7 +20,6 @@ namespace fsi
     {
         /**
          * Quadrature type descriptors.
-         * @since v0.3.0
          */
         enum class QuadratureType : int
         {
@@ -122,8 +121,6 @@ namespace fsi
          *
          * @tparam scalar precision of quadrature (i.e. `double`)
          * @param[in] nodes quadrature nodes to compute \\( Q \\) matrix for
-         *
-         * @since v0.3.0
          *
          * @overload
          */
@@ -293,10 +290,6 @@ public:
 
             virtual const Matrix<precision> & get_s_mat() const;
 
-            virtual const Matrix<precision> & get_b_mat() const;
-
-            virtual const std::vector<precision> & get_q_vec() const;
-
             virtual const std::vector<precision> & get_nodes() const;
 
             virtual size_t get_num_nodes() const;
@@ -312,13 +305,6 @@ public:
              *   required for quadrature of any kind
              */
             virtual bool right_is_node() const;
-
-            // ! @}
-
-            /**
-             * Compute a rough estimate of the numerical error... XXX
-             */
-            precision expected_error() const;
 
 protected:
 
