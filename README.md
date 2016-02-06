@@ -45,6 +45,7 @@ Finally, the compilation process of `foam-extend` is started with
 
 ``` bash
 cd foam-extend-3.2
+source etc/bashrc
 ./Allwmake.firstInstall
 ```
 
