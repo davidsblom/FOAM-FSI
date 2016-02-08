@@ -42,16 +42,19 @@ protected:
 
         std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper1;
         std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper2;
-        std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> quadrature;
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
 
         if ( rule == "uniform" )
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar>>( new fsi::quadrature::Uniform<scalar>(nbNodes));
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+
         if ( rule == "gauss-radau" )
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar>>( new fsi::quadrature::GaussRadau<scalar>(nbNodes));
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+
         if ( rule == "clenshaw-curtis" )
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar>>( new fsi::quadrature::ClenshawCurtis<scalar>(nbNodes));
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( nbNodes ) );
+
         if ( rule == "gauss-lobatto" )
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar>>( new fsi::quadrature::GaussLobatto<scalar>(nbNodes));
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
 
         adaptiveTimeStepper1 = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
         adaptiveTimeStepper2 = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );

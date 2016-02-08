@@ -11,7 +11,7 @@ namespace fsi
     namespace quadrature
     {
         using namespace std;
-        
+
         template<typename scalar>
         using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 

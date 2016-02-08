@@ -23,7 +23,7 @@ public:
         SDC(
             std::shared_ptr<SDCSolver> solver,
             std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
-            std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> quadrature,
+            std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
             scalar tol,
             int minSweeps,
             int maxSweeps
@@ -116,7 +116,7 @@ private:
         const int minSweeps;
         const int maxSweeps;
 
-        std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> quadrature;
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
     };
 }
 

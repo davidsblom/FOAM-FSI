@@ -81,7 +81,7 @@ TEST( UniformTest, smat )
 
     for ( int i = 0; i < smat.rows(); i++ )
         for ( int j = 0; j < smat.cols(); j++ )
-            ASSERT_NEAR( smat(i,j), smat2(i,j), 1.0e-13 );
+            ASSERT_NEAR( smat( i, j ), smat2( i, j ), 1.0e-13 );
 }
 
 TEST( UniformTest, qmat )
@@ -111,7 +111,7 @@ TEST( UniformTest, qmat )
 
     for ( int i = 0; i < qmat.rows(); i++ )
         for ( int j = 0; j < qmat.cols(); j++ )
-            ASSERT_NEAR( qmat(i,j), qmat2(i,j), 1.0e-13 );
+            ASSERT_NEAR( qmat( i, j ), qmat2( i, j ), 1.0e-13 );
 }
 
 TEST( UniformTest, qmat2 )
@@ -135,7 +135,7 @@ TEST( UniformTest, qmat2 )
 
     for ( int i = 0; i < qmat.rows(); i++ )
         for ( int j = 0; j < qmat.cols(); j++ )
-            ASSERT_NEAR( qmat(i,j), qmat2(i,j), 1.0e-13 );
+            ASSERT_NEAR( qmat( i, j ), qmat2( i, j ), 1.0e-13 );
 }
 
 TEST( UniformTest, smat2 )
@@ -159,5 +159,5 @@ TEST( UniformTest, smat2 )
 
     for ( int i = 0; i < smat.rows(); i++ )
         for ( int j = 0; j < smat.cols(); j++ )
-            ASSERT_NEAR( smat(i,j), smat2(i,j), 1.0e-13 );
+            ASSERT_NEAR( smat( i, j ), smat2( i, j ), 1.0e-13 );
 }

@@ -13,7 +13,7 @@ namespace sdc
     SDC::SDC(
         std::shared_ptr<SDCSolver> solver,
         std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
-        std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> quadrature,
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
         scalar tol,
         int minSweeps,
         int maxSweeps
@@ -61,8 +61,9 @@ namespace sdc
         const std::vector<scalar> nodes = quadrature->get_nodes();
 
         this->nodes.resize( nodes.size() );
-        for( unsigned int i = 0; i < nodes.size(); i++ )
-            this->nodes(i) = nodes[i];
+
+        for ( unsigned int i = 0; i < nodes.size(); i++ )
+            this->nodes( i ) = nodes[i];
 
         dsdc.resize( this->nodes.rows() - 1 );
 
@@ -154,14 +155,15 @@ namespace sdc
 
         if ( rule == "gauss-radau" )
         {
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> ( new fsi::quadrature::GaussRadau<scalar> ( nbNodes ) );
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > ( new fsi::quadrature::GaussRadau<scalar> ( nbNodes ) );
             smat = quadrature->get_s_mat();
             qmat = quadrature->get_q_mat();
             const std::vector<scalar> nodes = quadrature->get_nodes();
 
             this->nodes.resize( nodes.size() );
-            for( unsigned int i = 0; i < nodes.size(); i++ )
-                this->nodes(i) = nodes[i];
+
+            for ( unsigned int i = 0; i < nodes.size(); i++ )
+                this->nodes( i ) = nodes[i];
         }
         else
         {
@@ -247,14 +249,15 @@ namespace sdc
 
         if ( rule == "gauss-radau" )
         {
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> ( new fsi::quadrature::GaussRadau<scalar> ( nbNodes ) );
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > ( new fsi::quadrature::GaussRadau<scalar> ( nbNodes ) );
             smat = quadrature->get_s_mat();
             qmat = quadrature->get_q_mat();
             const std::vector<scalar> nodes = quadrature->get_nodes();
 
             this->nodes.resize( nodes.size() );
-            for( unsigned int i = 0; i < nodes.size(); i++ )
-                this->nodes(i) = nodes[i];
+
+            for ( unsigned int i = 0; i < nodes.size(); i++ )
+                this->nodes( i ) = nodes[i];
         }
         else
         {
