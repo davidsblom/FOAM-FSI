@@ -22,6 +22,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                unset WM_THIRD_PARTY_USE_CMAKE_322
 
                 sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
 
@@ -44,6 +45,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                unset WM_THIRD_PARTY_USE_CMAKE_322
 
                 cd foam-extend-3.2
                 source etc/bashrc
