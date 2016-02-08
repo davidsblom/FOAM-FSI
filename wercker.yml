@@ -1,0 +1,21 @@
+box: debian
+# Build definition
+build:
+    - script:
+        name: foam-extend
+        code: |
+            git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2
+            export PARAVIEW_SYSTEM=1
+            export CUDA_IGNORE=1
+            export SWAK4FOAM_SYSTEM=1
+            export WM_MPLIB=SYSTEMOPENMPI
+            export OPENMPI_DIR=/usr
+            export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+            export FOAM_INST_DIR=`pwd`
+
+            sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
+
+            cd foam-extend-3.2
+            source etc/bashrc
+            ./Allwmake.firstInstall
+            cd -
