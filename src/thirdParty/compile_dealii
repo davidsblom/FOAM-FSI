@@ -139,6 +139,9 @@ rm -rf Makefile CMakeFiles cmake_install.cmake CMakeCache.txt
 rm -f boost eigen
 ln -s ../boost
 ln -s ../eigen
+ls -la
+ls -la ../
+pwd
 cd eigen
 pwd
 cd ../boost
