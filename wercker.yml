@@ -1,5 +1,7 @@
 box: debian
 
+- install-packages:
+    packages: git build-essential flex bison zlib1g-dev qt4-dev-tools libqt4-dev gnuplot libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin
 
 build:
     steps:
