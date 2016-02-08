@@ -38,7 +38,7 @@ namespace fsi
         template<typename precision>
         size_t IQuadrature<precision>::get_num_nodes() const
         {
-            return this->num_nodes;
+            return this->nodes.size();
         }
 
         template<typename precision>
@@ -96,6 +96,17 @@ namespace fsi
                 Matrix<precision> s_mat2( this->s_mat.rows(), this->s_mat.cols() + 1 );
                 s_mat2.setZero();
                 s_mat2.rightCols( this->s_mat.cols() ) = this->s_mat;
+                this->s_mat = s_mat2;
+            }
+
+            if ( left_is_node() )
+            {
+                Matrix<precision> q_mat2( this->q_mat.rows() - 1, this->q_mat.cols() );
+                q_mat2 = this->q_mat.bottomRows( q_mat2.rows() );
+                this->q_mat = q_mat2;
+
+                Matrix<precision> s_mat2( this->s_mat.rows() - 1, this->s_mat.cols() );
+                s_mat2 = this->s_mat.bottomRows( s_mat2.rows() );
                 this->s_mat = s_mat2;
             }
         }

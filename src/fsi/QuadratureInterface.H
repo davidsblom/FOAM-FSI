@@ -3,21 +3,21 @@
 
 #include <cassert>
 #include <vector>
-using namespace std;
-
 #include <Eigen/Dense>
-template<typename scalar>
-using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
-template<typename scalar>
-using Index = typename Matrix<scalar>::Index;
-
 #include "Polynomial.H"
 
 namespace fsi
 {
     namespace quadrature
     {
+        using namespace std;
+        
+        template<typename scalar>
+        using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
+        template<typename scalar>
+        using Index = typename Matrix<scalar>::Index;
+
         /**
          * Quadrature type descriptors.
          */

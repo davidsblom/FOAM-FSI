@@ -59,7 +59,7 @@ TEST( UniformTest, smat )
     const size_t num_nodes = 3;
     fsi::quadrature::Uniform<double> Uniform( num_nodes );
 
-    const Matrix<double> smat2 = Uniform.get_s_mat();
+    const fsi::quadrature::Matrix<double> smat2 = Uniform.get_s_mat();
 
     Eigen::MatrixXd smat( 3, 4 );
 
@@ -89,7 +89,7 @@ TEST( UniformTest, qmat )
     const size_t num_nodes = 3;
     fsi::quadrature::Uniform<double> Uniform( num_nodes );
 
-    const Matrix<double> qmat2 = Uniform.get_q_mat();
+    const fsi::quadrature::Matrix<double> qmat2 = Uniform.get_q_mat();
 
     Eigen::MatrixXd qmat( 3, 4 );
 
@@ -112,4 +112,52 @@ TEST( UniformTest, qmat )
     for ( int i = 0; i < qmat.rows(); i++ )
         for ( int j = 0; j < qmat.cols(); j++ )
             ASSERT_NEAR( qmat(i,j), qmat2(i,j), 1.0e-13 );
+}
+
+TEST( UniformTest, qmat2 )
+{
+    const size_t num_nodes = 2;
+    fsi::quadrature::Uniform<double> Uniform( num_nodes );
+
+    const fsi::quadrature::Matrix<double> qmat2 = Uniform.get_q_mat();
+
+    Eigen::MatrixXd qmat( 2, 3 );
+
+    ASSERT_EQ( qmat.rows(), qmat2.rows() );
+    ASSERT_EQ( qmat.cols(), qmat2.cols() );
+
+    qmat( 0, 0 ) = 0;
+    qmat( 0, 1 ) = 0.7500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+    qmat( 0, 2 ) = -0.2500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+    qmat( 1, 0 ) = 0;
+    qmat( 1, 1 ) = 1.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+    qmat( 1, 2 ) = 0;
+
+    for ( int i = 0; i < qmat.rows(); i++ )
+        for ( int j = 0; j < qmat.cols(); j++ )
+            ASSERT_NEAR( qmat(i,j), qmat2(i,j), 1.0e-13 );
+}
+
+TEST( UniformTest, smat2 )
+{
+    const size_t num_nodes = 2;
+    fsi::quadrature::Uniform<double> Uniform( num_nodes );
+
+    const fsi::quadrature::Matrix<double> smat2 = Uniform.get_s_mat();
+
+    Eigen::MatrixXd smat( 2, 3 );
+
+    smat( 0, 0 ) = 0;
+    smat( 0, 1 ) = 0.7500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+    smat( 0, 2 ) = -0.2500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+    smat( 1, 0 ) = 0;
+    smat( 1, 1 ) = 0.2500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+    smat( 1, 2 ) = 0.2500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+
+    ASSERT_EQ( smat.rows(), smat2.rows() );
+    ASSERT_EQ( smat.cols(), smat2.cols() );
+
+    for ( int i = 0; i < smat.rows(); i++ )
+        for ( int j = 0; j < smat.cols(); j++ )
+            ASSERT_NEAR( smat(i,j), smat2(i,j), 1.0e-13 );
 }

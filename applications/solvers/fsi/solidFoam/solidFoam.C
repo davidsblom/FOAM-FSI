@@ -35,7 +35,7 @@ int main(
             args->caseName()
         ) );
 
-    string filename = static_cast<std::string>( args->rootPath() ) + "/" + static_cast<std::string>( args->globalCaseName() ) + "/constant/fsi.yaml";
+    std::string filename = static_cast<std::string>( args->rootPath() ) + "/" + static_cast<std::string>( args->globalCaseName() ) + "/constant/fsi.yaml";
 
     YAML::Node config = YAML::LoadFile( filename );
 

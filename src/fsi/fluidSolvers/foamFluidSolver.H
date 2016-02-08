@@ -24,7 +24,7 @@ class foamFluidSolver : public BaseMultiLevelSolver
 public:
 
     foamFluidSolver(
-        string name,
+        std::string name,
         shared_ptr<argList> args,
         shared_ptr<Time> runTime
         );
@@ -68,15 +68,13 @@ public:
 
     void run();
 
-    string name;
+    std::string name;
     shared_ptr<argList> args;
     shared_ptr<Time> runTime;
 
     // Mesh
     autoPtr<dynamicFvMesh> meshPtr;
     dynamicFvMesh & mesh;
-
-    static Foam::debug::debugSwitch debug;
 
 protected:
 

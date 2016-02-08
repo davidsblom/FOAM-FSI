@@ -34,7 +34,6 @@ Cos.C
 Oscillator.C
 PIES.C
 SDCFsiSolver.C
-Uniform.C
 
 tests.C
 test_fluidsolver.C
@@ -79,5 +78,7 @@ test_residualrelativeconvergencemeasure.C
 test_dealiisolidsolver.C
 test_gaussradau.C
 test_uniform.C
+test_quadrature.C
+test_gausslobatto.C
 
 EXE = $(FOAM_APPBIN)/tests

@@ -10,7 +10,7 @@
 #include "SDCDynamicMeshFluidSolver.H"
 
 SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
-    string name,
+    std::string name,
     std::shared_ptr<argList> args,
     std::shared_ptr<Time> runTime
     )

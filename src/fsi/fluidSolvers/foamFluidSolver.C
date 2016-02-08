@@ -6,10 +6,8 @@
 
 #include "foamFluidSolver.H"
 
-Foam::debug::debugSwitch foamFluidSolver::debug( "FsiSolver", 0 );
-
 foamFluidSolver::foamFluidSolver(
-    string name,
+    std::string name,
     shared_ptr<argList> args,
     shared_ptr<Time> runTime
     )

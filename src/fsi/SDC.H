@@ -23,6 +23,15 @@ public:
         SDC(
             std::shared_ptr<SDCSolver> solver,
             std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
+            std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> quadrature,
+            scalar tol,
+            int minSweeps,
+            int maxSweeps
+            );
+
+        SDC(
+            std::shared_ptr<SDCSolver> solver,
+            std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
             std::string rule,
             int nbNodes,
             scalar tol,

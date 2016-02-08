@@ -11,17 +11,20 @@
 namespace sdc
 {
     SDC::SDC(
-        std::string rule,
-        int nbNodes,
-        scalar tol
+        std::shared_ptr<SDCSolver> solver,
+        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> quadrature,
+        scalar tol,
+        int minSweeps,
+        int maxSweeps
         )
         :
-        solver( nullptr ),
-        adaptiveTimeStepper( nullptr ),
-        nbNodes( nbNodes ),
-        N( 0 ),
-        k( 0 ),
-        dt( -1 ),
+        solver( solver ),
+        adaptiveTimeStepper( adaptiveTimeStepper ),
+        nbNodes( quadrature->get_num_nodes() ),
+        N( solver->getDOF() ),
+        k( quadrature->get_num_nodes() ),
+        dt( solver->getTimeStep() ),
         tol( tol ),
         nodes(),
         smat(),
@@ -38,37 +41,66 @@ namespace sdc
         solStages(),
         convergence( false ),
         timeIndex( 0 ),
-        minSweeps( 0 ),
-        maxSweeps( 0 ),
-        quadrature( nullptr )
+        minSweeps( minSweeps ),
+        maxSweeps( maxSweeps ),
+        quadrature( quadrature )
     {
+        assert( adaptiveTimeStepper );
+        assert( solver );
+        assert( dt > 0 );
         assert( tol > 0 );
         assert( tol < 1 );
-        assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" || rule == "uniform-right-sided" );
+        assert( maxSweeps >= minSweeps );
+        assert( minSweeps > 0 );
+        assert( N > 0 );
+        assert( quadrature );
+        assert( quadrature->right_is_node() );
 
-        if ( rule == "gauss-radau" )
-        {
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> ( new fsi::quadrature::GaussRadau<scalar> ( nbNodes ) );
-            smat = quadrature->get_s_mat();
-            qmat = quadrature->get_q_mat();
-            const std::vector<scalar> nodes = quadrature->get_nodes();
+        smat = quadrature->get_s_mat();
+        qmat = quadrature->get_q_mat();
+        const std::vector<scalar> nodes = quadrature->get_nodes();
 
-            this->nodes.resize( nodes.size() );
-            for( unsigned int i = 0; i < nodes.size(); i++ )
-                this->nodes(i) = nodes[i];
-        }
-        else
-        {
-            int refine = 1;
-            quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
-        }
+        this->nodes.resize( nodes.size() );
+        for( unsigned int i = 0; i < nodes.size(); i++ )
+            this->nodes(i) = nodes[i];
 
-        k = nodes.rows();
-
-        dsdc.resize( nodes.rows() - 1 );
+        dsdc.resize( this->nodes.rows() - 1 );
 
         for ( int i = 0; i < dsdc.rows(); i++ )
-            dsdc( i ) = nodes( i + 1 ) - nodes( i );
+            dsdc( i ) = this->nodes( i + 1 ) - this->nodes( i );
+
+        solver->setNumberOfImplicitStages( k - 1 );
+
+        assert( std::abs( this->nodes.tail( 1 ) ( 0 ) - 1 ) < 1.0e-13 );
+
+        if ( adaptiveTimeStepper->isEnabled() )
+        {
+            std::string rule = "gauss-radau";
+            int refine = 2;
+            quadrature::rules( rule, nbNodes, refine, nodesEmbedded, smatEmbedded, qmatEmbedded );
+
+            int orderEmbedded = 0;
+
+            if ( rule == "gauss-radau" )
+                orderEmbedded = (nodesEmbedded.rows() - 1) * 2 - 1;
+
+            if ( rule == "gauss-lobatto" )
+                orderEmbedded = nodesEmbedded.rows() * 2 - 3;
+
+            if ( rule == "clenshaw-curtis" )
+                orderEmbedded = nodesEmbedded.rows() - 1;
+
+            if ( rule == "uniform" )
+                orderEmbedded = nodesEmbedded.rows();
+
+            if ( rule == "uniform-right-sided" )
+                orderEmbedded = nodesEmbedded.rows() - 1;
+
+            adaptiveTimeStepper->setOrderEmbeddedMethod( orderEmbedded );
+            adaptiveTimeStepper->setEndTime( solver->getEndTime() );
+
+            assert( std::abs( nodesEmbedded.tail( 1 ) ( 0 ) - 1 ) < 1.0e-13 );
+        }
     }
 
     SDC::SDC(
@@ -175,6 +207,67 @@ namespace sdc
 
             assert( std::abs( nodesEmbedded.tail( 1 ) ( 0 ) - 1 ) < 1.0e-13 );
         }
+    }
+
+    SDC::SDC(
+        std::string rule,
+        int nbNodes,
+        scalar tol
+        )
+        :
+        solver( nullptr ),
+        adaptiveTimeStepper( nullptr ),
+        nbNodes( nbNodes ),
+        N( 0 ),
+        k( 0 ),
+        dt( -1 ),
+        tol( tol ),
+        nodes(),
+        smat(),
+        qmat(),
+        nodesEmbedded(),
+        smatEmbedded(),
+        qmatEmbedded(),
+        dsdc(),
+        corrector( false ),
+        stageIndex( 0 ),
+        F(),
+        Fold(),
+        Sj(),
+        solStages(),
+        convergence( false ),
+        timeIndex( 0 ),
+        minSweeps( 0 ),
+        maxSweeps( 0 ),
+        quadrature( nullptr )
+    {
+        assert( tol > 0 );
+        assert( tol < 1 );
+        assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" || rule == "uniform-right-sided" );
+
+        if ( rule == "gauss-radau" )
+        {
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar>> ( new fsi::quadrature::GaussRadau<scalar> ( nbNodes ) );
+            smat = quadrature->get_s_mat();
+            qmat = quadrature->get_q_mat();
+            const std::vector<scalar> nodes = quadrature->get_nodes();
+
+            this->nodes.resize( nodes.size() );
+            for( unsigned int i = 0; i < nodes.size(); i++ )
+                this->nodes(i) = nodes[i];
+        }
+        else
+        {
+            int refine = 1;
+            quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
+        }
+
+        k = nodes.rows();
+
+        dsdc.resize( nodes.rows() - 1 );
+
+        for ( int i = 0; i < dsdc.rows(); i++ )
+            dsdc( i ) = nodes( i + 1 ) - nodes( i );
     }
 
     SDC::~SDC()

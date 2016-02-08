@@ -22,7 +22,7 @@ class SDCDynamicMeshFluidSolver : public SDCFluidSolver
 public:
 
     SDCDynamicMeshFluidSolver(
-        string name,
+        std::string name,
         shared_ptr<argList> args,
         shared_ptr<Time> runTime
         );
