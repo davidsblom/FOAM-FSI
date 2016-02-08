@@ -175,3 +175,41 @@ build:
                 cd src/thirdParty
 
                 ./compile_yaml
+        - script:
+            name: build
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                ./Allwmake
+        - script:
+            name: test suite
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                tests
