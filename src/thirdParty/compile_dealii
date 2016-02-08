@@ -139,7 +139,12 @@ rm -rf Makefile CMakeFiles cmake_install.cmake CMakeCache.txt
 rm -f boost eigen
 ln -s ../boost
 ln -s ../eigen
+cd eigen
+pwd
+cd ../boost
+pwd
+cd ../
 
 cmake -DDEAL_II_DIR=../dealii/bin/ .
 
-make release
+make VERBOSE=1
