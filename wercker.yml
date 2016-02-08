@@ -63,4 +63,53 @@ build:
                 unset WM_THIRD_PARTY_USE_PYFOAM_064
 
                 # build OpenFOAM libraries and applications
-                src/Allwmake
+                cd src
+                wmakePrintBuild -check || /bin/rm -f foam/Make/$WM_OPTIONS/global.? 2>/dev/null
+                wmakeLnInclude foam
+                wmakeLnInclude meshTools
+                wmakeLnInclude OSspecific/$WM_OSTYPE
+                wmake libo  OSspecific/$WM_OSTYPE
+
+                set +x
+                echo
+                echo "Note: ignore spurious warnings about missing mpicxx.h headers"
+                set -x
+                wmake libso foam
+
+                # Decomposition methods needed by meshTools
+                decompositionMethods/AllwmakeLnInclude
+                decompositionMethods/Allwmake
+
+                wmake libso lagrangian/basic
+
+                wmake libso edgeMesh
+                wmake libso surfMesh
+
+                wmake libso meshTools
+                wmake libso finiteVolume
+                wmake libso finiteArea
+
+                wmake libso lduSolvers
+
+                # Make dynamicMesh tools
+                dynamicMesh/AllwmakeLnInclude
+                dynamicMesh/Allwmake
+
+                wmake libso coupledMatrix
+                wmake libso sampling
+
+                mesh/Allwmake
+
+                thermophysicalModels/Allwmake
+                transportModels/Allwmake
+                turbulenceModels/Allwmake
+                lagrangian/Allwmake
+                postProcessing/Allwmake
+                conversion/Allwmake
+
+                wmake libso errorEstimation
+
+                fvAgglomerationMethods/Allwmake
+
+                wmake libso engine
+                wmake libso solidModels
