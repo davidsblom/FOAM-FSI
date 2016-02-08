@@ -7,6 +7,10 @@ build:
         - install-packages:
             packages: git build-essential flex bison zlib1g-dev qt4-dev-tools libqt4-dev gnuplot libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake
         - script:
+        name: initialize git submodules
+        code: |
+            git submodule update --init --recursive
+        - script:
             name: third-party
             code: |
                 git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2
