@@ -18,6 +18,7 @@ build:
                 export CMAKE_SYSTEM=1
                 export HWLOC_SYSTEM=1
                 export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
                 export CUDA_IGNORE=1
                 export SWAK4FOAM_SYSTEM=1
                 export WM_MPLIB=SYSTEMOPENMPI
@@ -32,6 +33,7 @@ build:
                 unset WM_THIRD_PARTY_USE_CMAKE_322
                 unset WM_THIRD_PARTY_USE_HWLOC_1101
                 unset WM_THIRD_PARTY_USE_SCOTCH_604
+                unset WM_THIRD_PARTY_USE_PYFOAM_064
 
                 # wmake is required for subsequent targets
                 ( cd wmake/src && make )
@@ -45,6 +47,7 @@ build:
                 export CMAKE_SYSTEM=1
                 export HWLOC_SYSTEM=1
                 export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
                 export CUDA_IGNORE=1
                 export SWAK4FOAM_SYSTEM=1
                 export WM_MPLIB=SYSTEMOPENMPI
@@ -57,6 +60,7 @@ build:
                 unset WM_THIRD_PARTY_USE_CMAKE_322
                 unset WM_THIRD_PARTY_USE_HWLOC_1101
                 unset WM_THIRD_PARTY_USE_SCOTCH_604
+                unset WM_THIRD_PARTY_USE_PYFOAM_064
 
                 # build OpenFOAM libraries and applications
                 src/Allwmake
