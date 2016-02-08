@@ -5,7 +5,7 @@ command-timeout: 60
 build:
     steps:
         - install-packages:
-            packages: git build-essential flex bison zlib1g-dev qt4-dev-tools libqt4-dev gnuplot libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget
+            packages: git build-essential flex bison zlib1g-dev qt4-dev-tools libqt4-dev gnuplot libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake
         - script:
             name: third-party
             code: |
@@ -32,6 +32,7 @@ build:
             name: foam-extend
             code: |
                 export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
                 export CUDA_IGNORE=1
                 export SWAK4FOAM_SYSTEM=1
                 export WM_MPLIB=SYSTEMOPENMPI
