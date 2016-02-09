@@ -9,6 +9,7 @@ build:
         - script:
             name: initialize git submodules
             code: |
+                git checkout .
                 git submodule update --init --recursive
         - script:
             name: foam-extend third-party
