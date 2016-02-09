@@ -15,6 +15,10 @@
 #include "ESDIRK.H"
 #include "SDC.H"
 #include "PIES.H"
+#include "GaussRadau.H"
+#include "GaussLobatto.H"
+#include "Uniform.H"
+#include "ClenshawCurtis.H"
 
 int main(
     int argc,
@@ -103,16 +107,30 @@ int main(
         assert( sdcConfig["quadrature-rule"] );
         assert( sdcConfig["min-sweeps"] );
         assert( sdcConfig["max-sweeps"] );
-        assert( adaptiveTimeStepper );
+        assert( not adaptiveTimeStepping );
         assert( solver );
 
-        int n = sdcConfig["number-of-points"].as<int>();
+        int nbNodes = sdcConfig["number-of-points"].as<int>();
         scalar tol = sdcConfig["convergence-tolerance"].as<scalar>();
         std::string quadratureRule = sdcConfig["quadrature-rule"].as<std::string>();
         int minSweeps = sdcConfig["min-sweeps"].as<int>();
         int maxSweeps = sdcConfig["max-sweeps"].as<int>();
 
-        timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( solver, adaptiveTimeStepper, quadratureRule, n, tol, minSweeps, maxSweeps ) );
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+
+        if ( quadratureRule == "gauss-radau" )
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+
+        if ( quadratureRule == "gauss-lobatto" )
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+
+        if ( quadratureRule == "clenshaw-curtis" )
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( nbNodes ) );
+
+        if ( quadratureRule == "uniform" )
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+
+        timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( solver, quadrature, tol, minSweeps, maxSweeps ) );
     }
 
     if ( timeIntegrationScheme == "picard-integral-exponential-solver" )
@@ -125,6 +143,7 @@ int main(
         assert( piesConfig["max-sweeps"] );
         assert( piesConfig["rho"] );
         assert( solver );
+        assert( not adaptiveTimeStepping );
 
         scalar delta = piesConfig["delta"].as<scalar>();
         scalar tol = piesConfig["convergence-tolerance"].as<scalar>();
@@ -132,7 +151,7 @@ int main(
         int minSweeps = piesConfig["min-sweeps"].as<int>();
         int maxSweeps = piesConfig["max-sweeps"].as<int>();
 
-        timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::PIES( solver, adaptiveTimeStepper, rho, delta, tol, minSweeps, maxSweeps ) );
+        timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::PIES( solver, rho, delta, tol, minSweeps, maxSweeps ) );
     }
 
     assert( solid || timeSolver );

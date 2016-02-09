@@ -10,7 +10,6 @@
 #include <memory>
 #include "SDCSolver.H"
 #include "fvCFD.H"
-#include "AdaptiveTimeStepper.H"
 #include "TimeIntegrationScheme.H"
 #include "QuadratureInterface.H"
 
@@ -22,18 +21,7 @@ public:
 
         SDC(
             std::shared_ptr<SDCSolver> solver,
-            std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
             std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
-            scalar tol,
-            int minSweeps,
-            int maxSweeps
-            );
-
-        SDC(
-            std::shared_ptr<SDCSolver> solver,
-            std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
-            std::string rule,
-            int nbNodes,
             scalar tol,
             int minSweeps,
             int maxSweeps
@@ -77,7 +65,6 @@ public:
         virtual bool isConverged();
 
         std::shared_ptr<SDCSolver> solver;
-        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
 
         int nbNodes;
         int N;

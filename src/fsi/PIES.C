@@ -12,12 +12,12 @@
 
 #include "PIES.H"
 #include <math.h>
+#include "GaussRadau.H"
 
 namespace sdc
 {
     PIES::PIES(
         std::shared_ptr<SDCSolver> solver,
-        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
         scalar rho,
         scalar delta,
         scalar tol,
@@ -25,11 +25,10 @@ namespace sdc
         int maxSweeps
         )
         :
-        SDC( solver, adaptiveTimeStepper, "gauss-radau", 2, tol, minSweeps, maxSweeps ),
+        SDC( solver, std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>(nbNodes) ), tol, minSweeps, maxSweeps ),
         rho( rho ),
         delta( delta )
     {
-        assert( not adaptiveTimeStepper->isEnabled() );
         assert( rho > 0 );
 
         std::clock_t start;

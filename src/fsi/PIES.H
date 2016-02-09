@@ -41,7 +41,6 @@ public:
 
         PIES(
             std::shared_ptr<SDCSolver> solver,
-            std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
             scalar rho,
             scalar delta,
             scalar tol,

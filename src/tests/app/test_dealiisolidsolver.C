@@ -8,6 +8,7 @@
 #include "gtest/gtest.h"
 #include "dealiiSolidSolver.H"
 #include "SDC.H"
+#include "GaussRadau.H"
 
 TEST( dealiiSolidSolver, sdc )
 {
@@ -27,15 +28,15 @@ TEST( dealiiSolidSolver, sdc )
 
     std::shared_ptr<sdc::SDCSolver> solver( new dealiiSolidSolver<2> (time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines) );
 
-    std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
-
-    std::string rule = "gauss-radau";
     int nbNodes = 2;
     scalar tol = 1.0e-15;
     int minSweeps = 1;
     int maxSweeps = 10;
 
-    sdc::SDC timeIntegrator( solver, adaptiveTimeStepper, rule, nbNodes, tol, minSweeps, maxSweeps );
+    std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>(nbNodes) );
+
+    sdc::SDC timeIntegrator( solver, quadrature, tol, minSweeps, maxSweeps );
     timeIntegrator.run();
 }
 
@@ -57,15 +58,15 @@ TEST( dealiiSolidSolver, sdc_3 )
 
     std::shared_ptr<sdc::SDCSolver> solver( new dealiiSolidSolver<2> (time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines) );
 
-    std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
-
-    std::string rule = "gauss-radau";
     int nbNodes = 3;
     scalar tol = 1.0e-10;
     int minSweeps = 1;
     int maxSweeps = 100;
 
-    sdc::SDC timeIntegrator( solver, adaptiveTimeStepper, rule, nbNodes, tol, minSweeps, maxSweeps );
+    std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>(nbNodes) );
+
+    sdc::SDC timeIntegrator( solver, quadrature, tol, minSweeps, maxSweeps );
     timeIntegrator.run();
 }
 
@@ -95,15 +96,15 @@ TEST( dealiiSolidSolver, sdc_order )
 
         std::shared_ptr<sdc::SDCSolver> solver( new dealiiSolidSolver<2> ( dt, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ) );
 
-        std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
-
-        std::string rule = "gauss-radau";
         int nbNodes = 3;
         scalar tol = 1.0e-10;
         int minSweeps = 1;
         int maxSweeps = 100;
 
-        sdc::SDC timeIntegrator( solver, adaptiveTimeStepper, rule, nbNodes, tol, minSweeps, maxSweeps );
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+
+        sdc::SDC timeIntegrator( solver, quadrature, tol, minSweeps, maxSweeps );
         timeIntegrator.run();
 
         std::shared_ptr<dealiiSolidSolver<2> > elasticSolver = std::dynamic_pointer_cast<dealiiSolidSolver<2> > ( solver );
