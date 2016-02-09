@@ -96,7 +96,7 @@ TEST( dealiiSolidSolver, sdc_order )
 
         std::shared_ptr<sdc::SDCSolver> solver( new dealiiSolidSolver<2> ( dt, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ) );
 
-        int nbNodes = 3;
+        int nbNodes = 2;
         scalar tol = 1.0e-10;
         int minSweeps = 1;
         int maxSweeps = 100;
@@ -136,6 +136,6 @@ TEST( dealiiSolidSolver, sdc_order )
         order[i] /= std::log10( dtinew ) - std::log10( dti );
         std::cout << "order = " << order[i] << std::endl;
 
-        ASSERT_GT( order[i], 3 );
+        ASSERT_GE( order[i], 3 );
     }
 }

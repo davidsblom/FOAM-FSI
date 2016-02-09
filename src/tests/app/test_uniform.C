@@ -51,7 +51,7 @@ TEST( UniformTest, api )
     Uniform.get_nodes();
     Uniform.get_q_mat();
     Uniform.get_s_mat();
-    ASSERT_EQ( Uniform.get_num_nodes(), num_nodes );
+    ASSERT_EQ( Uniform.get_num_nodes(), num_nodes + 1 );
 }
 
 TEST( UniformTest, smat )

@@ -51,5 +51,5 @@ TEST( GaussRadauTest, api )
     gaussRadau.get_nodes();
     gaussRadau.get_q_mat();
     gaussRadau.get_s_mat();
-    ASSERT_EQ( gaussRadau.get_num_nodes(), num_nodes );
+    ASSERT_EQ( gaussRadau.get_num_nodes(), num_nodes + 1 );
 }
