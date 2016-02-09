@@ -25,7 +25,7 @@ namespace sdc
         int maxSweeps
         )
         :
-        SDC( solver, std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>(nbNodes) ), tol, minSweeps, maxSweeps ),
+        SDC( solver, std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>(2) ), tol, minSweeps, maxSweeps ),
         rho( rho ),
         delta( delta )
     {
@@ -58,7 +58,7 @@ namespace sdc
         scalar tol
         )
         :
-        SDC( std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>(nbNodes) ), tol ),
+        SDC( std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>(2) ), tol ),
         rho( rho ),
         delta( delta )
     {
