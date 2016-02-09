@@ -1,0 +1,216 @@
+box: debian
+
+command-timeout: 60
+
+build:
+    steps:
+        - install-packages:
+            packages: git build-essential flex bison zlib1g-dev qt4-dev-tools libqt4-dev gnuplot libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons
+        - script:
+            name: initialize git submodules
+            code: |
+                git checkout .
+                git submodule update --init --recursive
+        - script:
+            name: foam-extend third-party
+            code: |
+                git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
+
+                cd foam-extend-3.2
+                source etc/bashrc
+                unset WM_THIRD_PARTY_USE_CMAKE_322
+                unset WM_THIRD_PARTY_USE_HWLOC_1101
+                unset WM_THIRD_PARTY_USE_SCOTCH_604
+                unset WM_THIRD_PARTY_USE_PYFOAM_064
+
+                # wmake is required for subsequent targets
+                ( cd wmake/src && make )
+
+                # build ThirdParty sources
+                ( cd $WM_THIRD_PARTY_DIR && ./AllMake )
+        - script:
+            name: foam-extend
+            code: |
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                cd foam-extend-3.2
+                source etc/bashrc
+                unset WM_THIRD_PARTY_USE_CMAKE_322
+                unset WM_THIRD_PARTY_USE_HWLOC_1101
+                unset WM_THIRD_PARTY_USE_SCOTCH_604
+                unset WM_THIRD_PARTY_USE_PYFOAM_064
+
+                src/Allwmake
+        - script:
+            name: environment variable $FOAM_USER_SRC
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                pwdstring=`pwd`
+                prefLocation=$WM_PROJECT_DIR/etc/prefs.sh
+
+                if [ -z "$FOAM_USER_SRC" ]; then
+                    echo "Creating FOAM_USER_SRC before compiling in $prefLocation"
+                    echo "# Setting up environment variable for FOAM-FSI" >> $prefLocation
+                    echo "export FOAM_USER_SRC=$pwdstring/src" >> $prefLocation
+                fi
+
+                source $FOAM_SRC/../etc/bashrc
+        - script:
+            name: deal.II
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                cd src/thirdParty
+
+                ./compile_dealii
+        - script:
+            name: googletest
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                cd src/thirdParty
+
+                ./compile_gtest
+        - script:
+            name: precice
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                cd src/thirdParty
+
+                ./compile_precice
+        - script:
+            name: yaml-cpp
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                cd src/thirdParty
+
+                ./compile_yaml
+        - script:
+            name: build
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                ./Allwmake
+        - script:
+            name: test suite
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                tests
