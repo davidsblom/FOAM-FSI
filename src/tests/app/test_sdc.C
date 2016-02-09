@@ -59,7 +59,7 @@ protected:
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
         sdc = std::shared_ptr<SDC> ( new SDC( piston, quadrature, tol, nbNodes, 10 * nbNodes ) );
 
-        std::shared_ptr<sdc::SDC> sdc( new SDC( rule, nbNodes, tol ) );
+        std::shared_ptr<sdc::SDC> sdc( new SDC( quadrature, tol ) );
         piston_sdc = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, sdc, sdc->nodes.rows() ) );
     }
 

@@ -29,7 +29,6 @@ SDC.C
 ESDIRK.C
 Piston.C
 AdaptiveTimeStepper.C
-QuadratureRules.C
 Cos.C
 Oscillator.C
 PIES.C

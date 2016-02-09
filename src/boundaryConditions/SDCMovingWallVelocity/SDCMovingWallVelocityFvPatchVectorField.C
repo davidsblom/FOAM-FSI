@@ -4,6 +4,10 @@
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "fvcMeshPhi.H"
+#include "GaussRadau.H"
+#include "GaussLobatto.H"
+#include "Uniform.H"
+#include "ClenshawCurtis.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -175,7 +179,21 @@ namespace Foam
             double tol = sdcConfig["convergence-tolerance"].as<double>();
             std::string quadratureRule = sdcConfig["quadrature-rule"].as<std::string>();
 
-            timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( quadratureRule, n, tol ) );
+            std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+
+            if ( quadratureRule == "gauss-radau" )
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( n ) );
+
+            if ( quadratureRule == "gauss-lobatto" )
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( n ) );
+
+            if ( quadratureRule == "clenshaw-curtis" )
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( n ) );
+
+            if ( quadratureRule == "uniform" )
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( n ) );
+
+            timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( quadrature, tol ) );
         }
 
         if ( config["esdirk"] )

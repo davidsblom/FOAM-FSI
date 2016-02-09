@@ -28,12 +28,13 @@ public:
             );
 
         SDC(
-            std::string rule,
-            int nbNodes,
+            std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
             scalar tol
             );
 
         ~SDC();
+
+        void init();
 
         void solveTimeStep( const scalar t0 );
 

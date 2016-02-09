@@ -58,7 +58,7 @@ namespace sdc
         scalar tol
         )
         :
-        SDC( "gauss-radau", 2, tol ),
+        SDC( std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>(nbNodes) ), tol ),
         rho( rho ),
         delta( delta )
     {

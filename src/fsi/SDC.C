@@ -5,8 +5,11 @@
  */
 
 #include "SDC.H"
-#include "QuadratureRules.H"
 #include "GaussRadau.H"
+#include "GaussRadau.H"
+#include "GaussLobatto.H"
+#include "Uniform.H"
+#include "ClenshawCurtis.H"
 
 namespace sdc
 {
@@ -53,33 +56,20 @@ namespace sdc
         assert( quadrature );
         assert( quadrature->right_is_node() );
 
-        smat = quadrature->get_s_mat();
-        qmat = quadrature->get_q_mat();
-        const std::vector<scalar> nodes = quadrature->get_nodes();
-
-        this->nodes.resize( nodes.size() );
-
-        for ( unsigned int i = 0; i < nodes.size(); i++ )
-            this->nodes( i ) = nodes[i];
-
-        dsdc.resize( this->nodes.rows() - 1 );
-
-        for ( int i = 0; i < dsdc.rows(); i++ )
-            dsdc( i ) = this->nodes( i + 1 ) - this->nodes( i );
+        init();
 
         solver->setNumberOfImplicitStages( k - 1 );
     }
 
     SDC::SDC(
-        std::string rule,
-        int nbNodes,
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
         scalar tol
         )
         :
         solver( nullptr ),
-        nbNodes( nbNodes ),
+        nbNodes( quadrature->get_num_nodes() ),
         N( 0 ),
-        k( 0 ),
+        k( quadrature->get_num_nodes() ),
         dt( -1 ),
         tol( tol ),
         nodes(),
@@ -99,40 +89,35 @@ namespace sdc
         timeIndex( 0 ),
         minSweeps( 0 ),
         maxSweeps( 0 ),
-        quadrature( nullptr )
+        quadrature( quadrature )
     {
         assert( tol > 0 );
         assert( tol < 1 );
-        assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" || rule == "uniform-right-sided" );
+        assert( quadrature );
+        assert( quadrature->right_is_node() );
 
-        if ( rule == "gauss-radau" )
-        {
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > ( new fsi::quadrature::GaussRadau<scalar> ( nbNodes ) );
-            smat = quadrature->get_s_mat();
-            qmat = quadrature->get_q_mat();
-            const std::vector<scalar> nodes = quadrature->get_nodes();
-
-            this->nodes.resize( nodes.size() );
-
-            for ( unsigned int i = 0; i < nodes.size(); i++ )
-                this->nodes( i ) = nodes[i];
-        }
-        else
-        {
-            int refine = 1;
-            quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
-        }
-
-        k = nodes.rows();
-
-        dsdc.resize( nodes.rows() - 1 );
-
-        for ( int i = 0; i < dsdc.rows(); i++ )
-            dsdc( i ) = nodes( i + 1 ) - nodes( i );
+        init();
     }
 
     SDC::~SDC()
     {}
+
+    void SDC::init()
+    {
+        smat = quadrature->get_s_mat();
+        qmat = quadrature->get_q_mat();
+        const std::vector<scalar> nodes = quadrature->get_nodes();
+
+        this->nodes.resize( nodes.size() );
+
+        for ( unsigned int i = 0; i < nodes.size(); i++ )
+            this->nodes( i ) = nodes[i];
+
+        dsdc.resize( this->nodes.rows() - 1 );
+
+        for ( int i = 0; i < dsdc.rows(); i++ )
+            dsdc( i ) = this->nodes( i + 1 ) - this->nodes( i );
+    }
 
     void SDC::run()
     {
