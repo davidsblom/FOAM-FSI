@@ -138,7 +138,7 @@ cd deal-fsi
 rm -rf Makefile CMakeFiles cmake_install.cmake CMakeCache.txt
 rm -f boost eigen
 ln -s ../boost
-ln -s ../eigen
+ln -s ../eigen-eigen-b30b87236a1b eigen
 cd eigen
 pwd
 cd ../boost
