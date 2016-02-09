@@ -185,19 +185,19 @@ TEST_P( SDCTest, run )
         ASSERT_NEAR( error, 1.0e-5, 1.0e-4 );
 
     if ( nbTimeSteps == 10 && nbNodes == 3 && rule == "gauss-radau" )
-        ASSERT_NEAR( error, 1.72134678e+03, 1.0e-5 );
+        ASSERT_LE( error, 1.72134678e+03 );
 
     if ( nbTimeSteps == 20 && nbNodes == 3 && rule == "gauss-radau" )
-        ASSERT_NEAR( error, 5.38712906e+02, 1.0e-6 );
+        ASSERT_LE( error, 5.38712906e+02 );
 
     if ( nbTimeSteps == 40 && nbNodes == 3 && rule == "gauss-radau" )
-        ASSERT_NEAR( error, 2.62943671e+01, 1.0e-7 );
+        ASSERT_LE( error, 2.62943671e+01 );
 
     if ( nbTimeSteps == 80 && nbNodes == 3 && rule == "gauss-radau" )
-        ASSERT_NEAR( error, 2.74294224e+00, 1.0e-8 );
+        ASSERT_LE( error, 2.74294224e+00 );
 
     if ( nbTimeSteps == 160 && nbNodes == 3 && rule == "gauss-radau" )
-        ASSERT_NEAR( error, 3.25178345e-01, 1.0e-9 );
+        ASSERT_LE( error, 3.25178345e-01 );
 
     if ( nbTimeSteps == 10 && nbNodes == 3 && rule == "gauss-lobatto" )
         ASSERT_NEAR( error, 1.37211827e+03, 1.0e-5 );
@@ -255,7 +255,7 @@ TEST_P( SDCEstimateOrderTest, order )
     scalar tol = 3.0e-1;
 
     if ( rule == "gauss-radau" )
-        ASSERT_NEAR( order, (nbNodes - 1) * 2 - 1, tol );
+        ASSERT_NEAR( order, nbNodes * 2 - 1, tol );
 
     if ( rule == "gauss-lobatto" )
         ASSERT_NEAR( order, nbNodes * 2 - 2, tol );

@@ -71,7 +71,6 @@ test_multilevelspacemapping.C
 test_multilevelmliqnilssolver.C
 test_sdc.C
 test_esdirk.C
-test_adaptivetime.C
 test_pies.C
 test_absoluteconvergencemeasure.C
 test_residualrelativeconvergencemeasure.C
