@@ -33,8 +33,8 @@ export PETSC_ARCH=x86_64
 
 # Build preCICE
 cd precice
-scons -j $CORES build=debug python=off petsc=on compiler=mpicxx
-scons -j $CORES build=debug python=off petsc=on compiler=mpicxx solib
+scons -j $CORES build=release python=off petsc=on compiler=mpicxx
+scons -j $CORES build=release python=off petsc=on compiler=mpicxx solib
 
 mkdir -p ${FOAM_LIBBIN}
 mkdir -p ${FOAM_APPBIN}
