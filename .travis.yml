@@ -5,6 +5,8 @@ addons:
         sources:
             - ubuntu-toolchain-r-test
         packages:
+            - gcc-4.8
+            - g++-4.8
             - build-essential
             - flex
             - bison
@@ -25,6 +27,12 @@ addons:
             - scons
             - binutils-dev
             - gcc-dev
+
+before_install:
+    - export CXX="g++-4.8"
+    - export CC="gcc-4.8"
+    - export OMPI_CXX=$CXX
+    - export OMPI_CC=$CC
 
 script:
     - git checkout .
