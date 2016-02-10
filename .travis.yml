@@ -18,7 +18,6 @@ addons:
             - openmpi-bin
             - rpm
             - wget
-            - cmake
             - hwloc
             - scotch
             - gfortran
@@ -32,6 +31,11 @@ before_install:
     - export CC="gcc-4.8"
     - export OMPI_CXX=$CXX
     - export OMPI_CC=$CC
+    - yes | sudo add-apt-repository ppa:kalakris/cmake
+    - sudo apt-get update -qq
+
+install:
+    - sudo apt-get install cmake
 
 cache:
     directories:
