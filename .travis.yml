@@ -43,6 +43,7 @@ script:
     - sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
     - cd foam-extend-3.2
     - source etc/bashrc
+    - export WM_NCOMPPROCS=2
     - unset WM_THIRD_PARTY_USE_CMAKE_322
     - unset WM_THIRD_PARTY_USE_HWLOC_1101
     - unset WM_THIRD_PARTY_USE_SCOTCH_604
