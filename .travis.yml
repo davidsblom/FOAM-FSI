@@ -1,8 +1,30 @@
 language: cpp
 
-before_install:
-    - sudo apt-get -qq update
-    - sudo apt-get install -y git build-essential flex bison zlib1g-dev qt4-dev-tools libqt4-dev gnuplot libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - build-essential
+            - flex
+            - bison
+            - zlib1g-dev
+            - libreadline-dev
+            - libncurses5-dev
+            - libxt-dev
+            - libopenmpi-dev
+            - openmpi-bin
+            - rpm
+            - wget
+            - cmake
+            - hwloc
+            - scotch
+            - gfortran
+            - python
+            - unzip
+            - scons
+            - binutils-dev
+            - gcc-dev
 
 script:
     - git checkout .
