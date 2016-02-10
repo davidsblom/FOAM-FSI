@@ -60,7 +60,7 @@ script:
     - unset WM_THIRD_PARTY_USE_PYFOAM_064
     - ( cd wmake/src && make )
     - ( cd $WM_THIRD_PARTY_DIR && ./AllMake )
-    - cd foam-extend-3.2
+    - cd $WM_PROJECT_DIR/src
     - wmakePrintBuild -check || /bin/rm -f foam/Make/$WM_OPTIONS/global.? 2>/dev/null
     - wmakeLnInclude foam
     - wmakeLnInclude meshTools
