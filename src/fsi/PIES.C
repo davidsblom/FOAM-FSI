@@ -79,6 +79,7 @@ namespace sdc
 
     void PIES::computeCoefficients()
     {
+        Info << "PIES: compute integration coefficients" << endl;
         // Initialize variables
         longDouble tstart, tend, tinterval, rho, delta, eps;
         int N, M;
@@ -114,6 +115,8 @@ namespace sdc
         gamma( N + 1 ) = std::complex<longDouble>( 0, -rho );
         gamma( N + 2 ) = std::complex<longDouble>( 0, rho );
 
+        Info << "PIES: discretize gamma on semi-disk" << endl;
+
         for ( int i = 0; i < N; i++ )
         {
             longDouble distanceTravelled = i * dx;
@@ -138,12 +141,16 @@ namespace sdc
         for ( int i = 0; i < t.rows(); i++ )
             t( i ) = tstart + dt * i;
 
+        Info << "PIES: build matrix A of size " << t.rows() << " x " << gamma.rows() << endl;
+
         // Compute the matrix A
         matrix50c A( t.rows(), gamma.rows() );
 
         for ( int i = 0; i < A.rows(); i++ )
             for ( int j = 0; j < A.cols(); j++ )
                 A( i, j ) = sdc::exp( gamma( j ) * t( i ) );
+
+        Info << "PIES: compute QR decomposition of A" << endl;
 
         // Matrix compression by QR decomposition with full pivoting
         Eigen::FullPivHouseholderQR<matrix50c> qr = A.fullPivHouseholderQr();
@@ -182,6 +189,8 @@ namespace sdc
         int index = 0;
         int zeroIndex = -1;
 
+        Info << "PIES: build subset lambda" << endl;
+
         for ( int i = 0; i < k; i++ )
         {
             std::complex<longDouble> value = gamma( idx( i ) );
@@ -206,6 +215,8 @@ namespace sdc
 
         // One extra node due to adding of constraint
         nbNodes += 1;
+
+        Info << "PIES: compute the coeffients omega" << endl;
 
         for ( int iter = 0; iter < 20; iter++ )
         {

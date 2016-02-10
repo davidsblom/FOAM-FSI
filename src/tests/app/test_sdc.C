@@ -299,7 +299,7 @@ TEST( CosTest, SDC )
     // rule = "uniform";
     // rule = "clenshaw-curtis";
     int nbNodes = 3;
-    scalar tol = 1.0e-25;
+    scalar tol = 1.0e-15;
 
     int nbTimeSteps = 5;
     scalar endTime = 0.05;
@@ -341,7 +341,7 @@ TEST( OscillatorTest, SDC )
 {
     std::string rule = "gauss-lobatto";
     int nbNodes = 3;
-    scalar tol = 1.0e-25;
+    scalar tol = 1.0e-15;
 
     int nbTimeSteps = 100;
     scalar endTime = 10;
