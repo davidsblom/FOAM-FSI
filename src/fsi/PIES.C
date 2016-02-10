@@ -80,6 +80,7 @@ namespace sdc
     void PIES::computeCoefficients()
     {
         Info << "PIES: compute integration coefficients" << endl;
+
         // Initialize variables
         longDouble tstart, tend, tinterval, rho, delta, eps;
         int N, M;
