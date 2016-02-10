@@ -34,8 +34,6 @@ before_install:
     - export OMPI_CC=$CC
 
 script:
-    - git checkout .
-    - git submodule update --init --recursive
     - git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2
     - export PARAVIEW_SYSTEM=1
     - export CMAKE_SYSTEM=1
