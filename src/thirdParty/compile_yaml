@@ -41,7 +41,7 @@ if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
 
     CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
 
-    make -j 4
+    make -j $WM_NCOMPPROCS
 
     cd ../..
 

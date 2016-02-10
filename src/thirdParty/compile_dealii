@@ -11,8 +11,6 @@ BOOST_VERSION=1_55_0
 BOOST_VERSION_DOT=1.55.0
 export PETSC_ARCH=x86_64
 
-CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
-
 if [ ! -d "boost" ]; then
     rm -rf boost*
     wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
@@ -126,9 +124,9 @@ if [ ! -d "dealii" ]; then
 
   cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin ..
 
-  make -j $CORES install
+  make -j $WM_NCOMPPROCS install
 
-  make -j $CORES test
+  make -j $WM_NCOMPPROCS test
 
   cd ../..
 
