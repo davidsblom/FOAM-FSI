@@ -38,7 +38,7 @@ cache:
         - foam-extend-3.2
 
 script:
-    - if [ ! -d "foam-extend-3.2" ]; then git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2; fi
+    - if [ ! -d "foam-extend-3.2/.git" ]; then rm -rf foam-extend-3.2 && git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2; fi
     - export PARAVIEW_SYSTEM=1
     - export CMAKE_SYSTEM=1
     - export HWLOC_SYSTEM=1
