@@ -82,6 +82,7 @@ script:
     - wmake libso finiteVolume
     - wmake libso finiteArea
     - wmake libso lduSolvers
+    - wmake libso tetFiniteElement
     - dynamicMesh/AllwmakeLnInclude
     - dynamicMesh/Allwmake
     - wmake libso coupledMatrix
