@@ -74,7 +74,7 @@ script:
     - wmake libo  OSspecific/$WM_OSTYPE
     - wmake libso foam
     - decompositionMethods/AllwmakeLnInclude
-    - decompositionMethods/Allwmake
+    # - decompositionMethods/Allwmake
     - wmake libso lagrangian/basic
     - wmake libso edgeMesh
     - wmake libso surfMesh
