@@ -26,7 +26,6 @@ addons:
             - unzip
             - scons
             - binutils-dev
-            - gcc-dev
 
 before_install:
     - export CXX="g++-4.8"
