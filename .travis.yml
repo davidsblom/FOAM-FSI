@@ -67,6 +67,11 @@ script:
     - wmakeLnInclude OSspecific/$WM_OSTYPE
     - wmake libo  OSspecific/$WM_OSTYPE
     - wmake libso foam
+    - wmake libso finiteVolume
+    - wmake libso finiteArea
+    - dynamicMesh/AllwmakeLnInclude
+    - dynamicMesh/Allwmake
+    - wmake libso coupledMatrix
     # - decompositionMethods/AllwmakeLnInclude
     # - decompositionMethods/Allwmake
     # - cd ..
