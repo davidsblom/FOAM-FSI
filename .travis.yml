@@ -60,7 +60,14 @@ script:
     - unset WM_THIRD_PARTY_USE_PYFOAM_064
     - ( cd wmake/src && make )
     - ( cd $WM_THIRD_PARTY_DIR && ./AllMake )
-    # - src/Allwmake
+    - wmakePrintBuild -check || /bin/rm -f foam/Make/$WM_OPTIONS/global.? 2>/dev/null
+    - wmakeLnInclude foam
+    - wmakeLnInclude meshTools
+    - wmakeLnInclude OSspecific/$WM_OSTYPE
+    - wmake libo  OSspecific/$WM_OSTYPE
+    - wmake libso foam
+    - decompositionMethods/AllwmakeLnInclude
+    - decompositionMethods/Allwmake
     # - cd ..
     # - export FOAM_USER_SRC=`pwd`/src
     # - ./Allwmake.firstInstall
