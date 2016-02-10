@@ -42,7 +42,7 @@ cache:
         # - src/thirdParty/parmetis-4.0.3
         # - src/thirdParty/petsc-3.6.3
         # - src/thirdParty/yaml-cpp-release-0.5.3
-        # - src/thirdParty/boost_1_55_0
+        - src/thirdParty/boost_1_55_0
 
 script:
     - if [ ! -d "foam-extend-3.2/.git" ]; then rm -rf foam-extend-3.2 && git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2; fi
@@ -88,6 +88,7 @@ script:
     - dynamicMesh/Allwmake
     - wmake libso coupledMatrix
     - wmake libso sampling
+    - wmake libso ODE
     - mesh/Allwmake
     - thermophysicalModels/Allwmake
     - transportModels/Allwmake
@@ -109,3 +110,4 @@ script:
 
     - ./compile_gtest
     - ./compile_yaml
+    - ./compile_dealii
