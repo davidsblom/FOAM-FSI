@@ -36,12 +36,12 @@ before_install:
 cache:
     directories:
         - foam-extend-3.2
-        - src/thirdParty/gtest-1.7.0
-        - src/thirdParty/metis-5.1.0
-        - src/thirdParty/parmetis-4.0.3
-        - src/thirdParty/petsc-3.6.3
-        - src/thirdParty/yaml-cpp-release-0.5.3
-        - src/thirdParty/boost_1_55_0
+        # - src/thirdParty/gtest-1.7.0
+        # - src/thirdParty/metis-5.1.0
+        # - src/thirdParty/parmetis-4.0.3
+        # - src/thirdParty/petsc-3.6.3
+        # - src/thirdParty/yaml-cpp-release-0.5.3
+        # - src/thirdParty/boost_1_55_0
 
 script:
     - if [ ! -d "foam-extend-3.2/.git" ]; then rm -rf foam-extend-3.2 && git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2; fi
@@ -69,6 +69,9 @@ script:
     - cd $WM_PROJECT_DIR/src
     - wmakePrintBuild -check || /bin/rm -f foam/Make/$WM_OPTIONS/global.? 2>/dev/null
     - wmakeLnInclude foam
+    - wmake libso lagrangian/basic
+    - wmake libso edgeMesh
+    - wmake libso surfMesh
     - wmakeLnInclude meshTools
     - wmakeLnInclude OSspecific/$WM_OSTYPE
     - wmake libo  OSspecific/$WM_OSTYPE
@@ -85,13 +88,13 @@ script:
     # - export FOAM_USER_SRC=`pwd`/src
     # - ./Allwmake.firstInstall
 
-    - cd $FOAM_INST_DIR/src/thirdParty
-    - if [ ! -d "gtest-1.7.0/libgtest.a" ]; then rm -rf gtest*; fi
-    - if [ ! -d "metis-5.1.0/build/lib/libmetis.a" ]; then rm -rf metis*; fi
-    - if [ ! -d "parmetis-4.0.3/build/lib/libparmetis.a" ]; then rm -rf parmetis*; fi
-    - if [ ! -d "petsc-3.6.3/x86_64/lib/libpetsc.so.3.6.3" ]; then rm -rf petsc*; fi
-    - if [ ! -d "dealii-8.3.0/bin/lib/libdeal_II.so" ]; then rm -rf dealii*; fi
-    - if [ ! -d "boost_1_55_0/bootstrap.sh" ]; then rm -rf boost*; fi
-    - ./compile_precice
-    - ./compile_gtest
-    - ./compile_yaml
+    # - cd $FOAM_INST_DIR/src/thirdParty
+    # - if [ ! -d "gtest-1.7.0/libgtest.a" ]; then rm -rf gtest*; fi
+    # - if [ ! -d "metis-5.1.0/build/lib/libmetis.a" ]; then rm -rf metis*; fi
+    # - if [ ! -d "parmetis-4.0.3/build/lib/libparmetis.a" ]; then rm -rf parmetis*; fi
+    # - if [ ! -d "petsc-3.6.3/x86_64/lib/libpetsc.so.3.6.3" ]; then rm -rf petsc*; fi
+    # - if [ ! -d "dealii-8.3.0/bin/lib/libdeal_II.so" ]; then rm -rf dealii*; fi
+    # - if [ ! -d "boost_1_55_0/bootstrap.sh" ]; then rm -rf boost*; fi
+    # - ./compile_precice
+    # - ./compile_gtest
+    # - ./compile_yaml
