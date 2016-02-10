@@ -49,3 +49,7 @@ script:
     - unset WM_THIRD_PARTY_USE_PYFOAM_064
     - ( cd wmake/src && make )
     - ( cd $WM_THIRD_PARTY_DIR && ./AllMake )
+    - src/Allwmake
+    - cd ..
+    - export FOAM_USER_SRC=`pwd`/src
+    - ./Allwmake.firstInstall
