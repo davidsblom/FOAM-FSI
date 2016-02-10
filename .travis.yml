@@ -85,9 +85,14 @@ script:
     - dynamicMesh/AllwmakeLnInclude
     - dynamicMesh/Allwmake
     - wmake libso coupledMatrix
-    # - decompositionMethods/AllwmakeLnInclude
-    # - decompositionMethods/Allwmake
-    # - cd ..
+    - wmake libso sampling
+    - mesh/Allwmake
+    - thermophysicalModels/Allwmake
+    - transportModels/Allwmake
+    - turbulenceModels/Allwmake
+    - lagrangian/Allwmake
+    - postProcessing/Allwmake
+    - conversion/Allwmake
     # - export FOAM_USER_SRC=`pwd`/src
     # - ./Allwmake.firstInstall
 
