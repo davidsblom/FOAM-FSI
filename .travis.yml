@@ -69,16 +69,19 @@ script:
     - cd $WM_PROJECT_DIR/src
     - wmakePrintBuild -check || /bin/rm -f foam/Make/$WM_OPTIONS/global.? 2>/dev/null
     - wmakeLnInclude foam
-    - wmake libso lagrangian/basic
-    - wmake libso edgeMesh
-    - wmake libso surfMesh
     - wmakeLnInclude meshTools
     - wmakeLnInclude OSspecific/$WM_OSTYPE
     - wmake libo  OSspecific/$WM_OSTYPE
     - wmake libso foam
+    - decompositionMethods/AllwmakeLnInclude
+    - decompositionMethods/Allwmake
+    - wmake libso lagrangian/basic
+    - wmake libso edgeMesh
+    - wmake libso surfMesh
     - wmake libso meshTools
     - wmake libso finiteVolume
     - wmake libso finiteArea
+    - wmake libso lduSolvers
     - dynamicMesh/AllwmakeLnInclude
     - dynamicMesh/Allwmake
     - wmake libso coupledMatrix
