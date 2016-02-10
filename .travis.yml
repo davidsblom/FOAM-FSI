@@ -35,7 +35,7 @@ before_install:
 
 cache:
     directories:
-        - $HOME/foam-extend-3.2
+        - foam-extend-3.2
 
 script:
     - if [ ! -d "foam-extend-3.2" ]; then git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2; fi
