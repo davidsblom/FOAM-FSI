@@ -1,6 +1,9 @@
 c++WARN     = -Wall -Wextra -Werror -Wno-literal-suffix
 
 EXE_INC = -std=c++11 \
+    -I ../../fsi \
+    -I ../../fsi/lnInclude \
+    -I ../../fsi/solidSolvers \
     -DEIGEN_INITIALIZE_MATRICES_BY_NAN \
     -I ../../RBFmeshInterpolation/lnInclude/ \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
@@ -45,4 +48,6 @@ EXE_LIBS = \
     -lbasicThermophysicalModels \
     -lspecie \
     -lcompressibleRASModels \
-    -ldeal_II
+    -ldeal_II \
+    -lfsi \
+    -lboundaryConditions

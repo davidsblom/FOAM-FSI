@@ -1,1 +1,0 @@
-../../fsi/ClenshawCurtis.tpp
