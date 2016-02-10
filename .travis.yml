@@ -67,8 +67,8 @@ script:
     - wmakeLnInclude OSspecific/$WM_OSTYPE
     - wmake libo  OSspecific/$WM_OSTYPE
     - wmake libso foam
-    - decompositionMethods/AllwmakeLnInclude
-    - decompositionMethods/Allwmake
+    # - decompositionMethods/AllwmakeLnInclude
+    # - decompositionMethods/Allwmake
     # - cd ..
     # - export FOAM_USER_SRC=`pwd`/src
     # - ./Allwmake.firstInstall
