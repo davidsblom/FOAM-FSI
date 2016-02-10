@@ -10,6 +10,10 @@
 #include "Cos.H"
 #include "Oscillator.H"
 #include "gtest/gtest.h"
+#include "GaussRadau.H"
+#include "GaussLobatto.H"
+#include "Uniform.H"
+#include "ClenshawCurtis.H"
 
 using namespace sdc;
 using::testing::TestWithParam;
@@ -38,14 +42,24 @@ protected:
         qdot0 = -As;
         tol = 1.0e-10;
 
-        std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
 
-        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
+        if ( rule == "gauss-radau" )
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+
+        if ( rule == "gauss-lobatto" )
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+
+        if ( rule == "clenshaw-curtis" )
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( nbNodes ) );
+
+        if ( rule == "uniform" )
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
 
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc = std::shared_ptr<SDC> ( new SDC( piston, adaptiveTimeStepper, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
+        sdc = std::shared_ptr<SDC> ( new SDC( piston, quadrature, tol, nbNodes, 10 * nbNodes ) );
 
-        std::shared_ptr<sdc::SDC> sdc( new SDC( rule, nbNodes, tol ) );
+        std::shared_ptr<sdc::SDC> sdc( new SDC( quadrature, tol ) );
         piston_sdc = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, sdc, sdc->nodes.rows() ) );
     }
 
@@ -61,7 +75,7 @@ protected:
     std::shared_ptr<Piston> piston_sdc;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, SDCTest, ::testing::Combine( Values( 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ), Values( 1, 10, 20, 40, 80, 100, 160 ), Values( "gauss-radau", "gauss-lobatto", "clenshaw-curtis", "uniform", "uniform-right-sided" ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, SDCTest, ::testing::Combine( Values( 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ), Values( 1, 10, 20, 40, 80, 100, 160 ), Values( "gauss-radau", "gauss-lobatto", "clenshaw-curtis", "uniform" ) ) );
 
 class SDCEstimateOrderTest : public TestWithParam< std::tr1::tuple<int, std::string> >
 {
@@ -84,20 +98,28 @@ protected:
         qdot0 = -As;
         tol = 1.0e-15;
 
-        std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper1;
-        std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper2;
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
 
-        adaptiveTimeStepper1 = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
-        adaptiveTimeStepper2 = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
+        if ( rule == "gauss-radau" )
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+
+        if ( rule == "gauss-lobatto" )
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+
+        if ( rule == "clenshaw-curtis" )
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( nbNodes ) );
+
+        if ( rule == "uniform" )
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
 
         piston1 = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc1 = std::shared_ptr<SDC> ( new SDC( piston1, adaptiveTimeStepper1, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
+        sdc1 = std::shared_ptr<SDC> ( new SDC( piston1, quadrature, tol, nbNodes, 10 * nbNodes ) );
 
         nbTimeSteps *= 2;
         dt = endTime / nbTimeSteps;
 
         piston2 = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc2 = std::shared_ptr<SDC> ( new SDC( piston2, adaptiveTimeStepper2, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
+        sdc2 = std::shared_ptr<SDC> ( new SDC( piston2, quadrature, tol, nbNodes, 10 * nbNodes ) );
     }
 
     virtual void TearDown()
@@ -114,7 +136,7 @@ protected:
     std::shared_ptr<SDC> sdc2;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, SDCEstimateOrderTest, ::testing::Combine( Values( 2, 4 ), Values( "gauss-radau", "gauss-lobatto", "clenshaw-curtis", "uniform", "uniform-right-sided" ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, SDCEstimateOrderTest, ::testing::Combine( Values( 2, 4 ), Values( "gauss-radau", "gauss-lobatto", "clenshaw-curtis", "uniform" ) ) );
 
 TEST_P( SDCTest, object )
 {
@@ -185,19 +207,19 @@ TEST_P( SDCTest, run )
         ASSERT_NEAR( error, 1.0e-5, 1.0e-4 );
 
     if ( nbTimeSteps == 10 && nbNodes == 3 && rule == "gauss-radau" )
-        ASSERT_NEAR( error, 1.72134678e+03, 1.0e-5 );
+        ASSERT_LE( error, 1.72134678e+03 );
 
     if ( nbTimeSteps == 20 && nbNodes == 3 && rule == "gauss-radau" )
-        ASSERT_NEAR( error, 5.38712906e+02, 1.0e-6 );
+        ASSERT_LE( error, 5.38712906e+02 );
 
     if ( nbTimeSteps == 40 && nbNodes == 3 && rule == "gauss-radau" )
-        ASSERT_NEAR( error, 2.62943671e+01, 1.0e-7 );
+        ASSERT_LE( error, 2.62943671e+01 );
 
     if ( nbTimeSteps == 80 && nbNodes == 3 && rule == "gauss-radau" )
-        ASSERT_NEAR( error, 2.74294224e+00, 1.0e-8 );
+        ASSERT_LE( error, 2.74294224e+00 );
 
     if ( nbTimeSteps == 160 && nbNodes == 3 && rule == "gauss-radau" )
-        ASSERT_NEAR( error, 3.25178345e-01, 1.0e-9 );
+        ASSERT_LE( error, 3.25178345e-01 );
 
     if ( nbTimeSteps == 10 && nbNodes == 3 && rule == "gauss-lobatto" )
         ASSERT_NEAR( error, 1.37211827e+03, 1.0e-5 );
@@ -255,7 +277,7 @@ TEST_P( SDCEstimateOrderTest, order )
     scalar tol = 3.0e-1;
 
     if ( rule == "gauss-radau" )
-        ASSERT_NEAR( order, (nbNodes - 1) * 2 - 1, tol );
+        ASSERT_NEAR( order, nbNodes * 2 - 1, tol );
 
     if ( rule == "gauss-lobatto" )
         ASSERT_NEAR( order, nbNodes * 2 - 2, tol );
@@ -285,11 +307,14 @@ TEST( CosTest, SDC )
     scalar amplitude = 0.2;
     scalar frequency = 5;
 
+    std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
     std::shared_ptr<Cos> cos1( new Cos( nbTimeSteps, dt, endTime, amplitude, frequency ) );
-    std::shared_ptr<SDC> sdc1( new SDC( cos1, adaptiveTimeStepper, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
+    std::shared_ptr<SDC> sdc1( new SDC( cos1, quadrature, tol, nbNodes, 10 * nbNodes ) );
     std::shared_ptr<Cos> cos2( new Cos( nbTimeSteps * 2, dt / 2, endTime, amplitude, frequency ) );
-    std::shared_ptr<SDC> sdc2( new SDC( cos2, adaptiveTimeStepper, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
+    std::shared_ptr<SDC> sdc2( new SDC( cos2, quadrature, tol, nbNodes, 10 * nbNodes ) );
 
     sdc1->run();
     sdc2->run();
@@ -328,11 +353,14 @@ TEST( OscillatorTest, SDC )
     fsi::vector q0( 2 );
     q0 << 1, 0;
 
+    std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+
     std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
     std::shared_ptr<Oscillator> oscillator1( new Oscillator( nbTimeSteps, dt, q0, amplitude, frequency, m, k ) );
-    std::shared_ptr<SDC> sdc1( new SDC( oscillator1, adaptiveTimeStepper, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
+    std::shared_ptr<SDC> sdc1( new SDC( oscillator1, quadrature, tol, nbNodes, 10 * nbNodes ) );
     std::shared_ptr<Oscillator> oscillator2( new Oscillator( nbTimeSteps * 2, dt / 2, q0, amplitude, frequency, m, k ) );
-    std::shared_ptr<SDC> sdc2( new SDC( oscillator2, adaptiveTimeStepper, rule, nbNodes, tol, nbNodes, 10 * nbNodes ) );
+    std::shared_ptr<SDC> sdc2( new SDC( oscillator2, quadrature, tol, nbNodes, 10 * nbNodes ) );
 
     sdc1->run();
     sdc2->run();

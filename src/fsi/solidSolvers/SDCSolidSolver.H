@@ -23,13 +23,13 @@ class SDCSolidSolver : public foamSolidSolver, public sdc::SDCFsiSolverInterface
 public:
 
     SDCSolidSolver(
-        string name,
+        std::string name,
         std::shared_ptr<argList> args,
         std::shared_ptr<Time> runTime
         );
 
     SDCSolidSolver(
-        string name,
+        std::string name,
         std::shared_ptr<argList> args,
         std::shared_ptr<Time> runTime,
         std::shared_ptr<rbf::RBFCoarsening> interpolator

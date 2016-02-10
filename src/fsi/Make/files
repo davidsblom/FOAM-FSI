@@ -22,7 +22,6 @@ AndersonPostProcessing.C
 SDC.C
 ESDIRK.C
 AdaptiveTimeStepper.C
-QuadratureRules.C
 PIES.C
 SDCFsiSolver.C
 version.Cver

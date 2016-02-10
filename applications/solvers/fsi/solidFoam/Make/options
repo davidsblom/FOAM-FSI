@@ -1,6 +1,7 @@
 c++WARN     = -Wall -Wextra -Werror
 
 EXE_INC = -std=c++11 \
+    -I../../../../src/fsi \
     -I../../../../src/fsi/lnInclude \
     -isystem ../../../../src/thirdParty/eigen \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \

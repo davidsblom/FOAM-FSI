@@ -30,13 +30,9 @@ protected:
         nbNodes = 10;
         rho = 3.15;
 
-        std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
-
-        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
-
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
 
-        pies = std::shared_ptr<sdc::PIES> ( new sdc::PIES( piston, adaptiveTimeStepper, rho, delta, tol, nbNodes, 10 * nbNodes ) );
+        pies = std::shared_ptr<sdc::PIES> ( new sdc::PIES( piston, rho, delta, tol, nbNodes, 10 * nbNodes ) );
     }
 
     virtual void TearDown()

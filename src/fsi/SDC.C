@@ -5,71 +5,26 @@
  */
 
 #include "SDC.H"
-#include "QuadratureRules.H"
+#include "GaussRadau.H"
+#include "GaussRadau.H"
+#include "GaussLobatto.H"
+#include "Uniform.H"
+#include "ClenshawCurtis.H"
 
 namespace sdc
 {
     SDC::SDC(
-        std::string rule,
-        int nbNodes,
-        scalar tol
-        )
-        :
-        solver( nullptr ),
-        adaptiveTimeStepper( nullptr ),
-        nbNodes( nbNodes ),
-        N( 0 ),
-        k( 0 ),
-        dt( -1 ),
-        tol( tol ),
-        nodes(),
-        smat(),
-        qmat(),
-        nodesEmbedded(),
-        smatEmbedded(),
-        qmatEmbedded(),
-        dsdc(),
-        corrector( false ),
-        stageIndex( 0 ),
-        F(),
-        Fold(),
-        Sj(),
-        solStages(),
-        convergence( false ),
-        timeIndex( 0 ),
-        minSweeps( 0 ),
-        maxSweeps( 0 )
-    {
-        assert( tol > 0 );
-        assert( tol < 1 );
-        assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" || rule == "uniform-right-sided" );
-
-        int refine = 1;
-        quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
-
-        k = nodes.rows();
-
-        dsdc.resize( nodes.rows() - 1 );
-
-        for ( int i = 0; i < dsdc.rows(); i++ )
-            dsdc( i ) = nodes( i + 1 ) - nodes( i );
-    }
-
-    SDC::SDC(
         std::shared_ptr<SDCSolver> solver,
-        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
-        std::string rule,
-        int nbNodes,
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
         scalar tol,
         int minSweeps,
         int maxSweeps
         )
         :
         solver( solver ),
-        adaptiveTimeStepper( adaptiveTimeStepper ),
-        nbNodes( nbNodes ),
+        nbNodes( quadrature->get_num_nodes() ),
         N( solver->getDOF() ),
-        k( 0 ),
+        k( quadrature->get_num_nodes() ),
         dt( solver->getTimeStep() ),
         tol( tol ),
         nodes(),
@@ -88,66 +43,81 @@ namespace sdc
         convergence( false ),
         timeIndex( 0 ),
         minSweeps( minSweeps ),
-        maxSweeps( maxSweeps )
+        maxSweeps( maxSweeps ),
+        quadrature( quadrature )
     {
-        assert( adaptiveTimeStepper );
         assert( solver );
-        assert( nbNodes > 1 );
-        assert( nbNodes < 15 );
         assert( dt > 0 );
         assert( tol > 0 );
         assert( tol < 1 );
-        assert( rule == "gauss-radau" || rule == "gauss-lobatto" || rule == "clenshaw-curtis" || rule == "uniform" || rule == "uniform-right-sided" );
-        assert( maxSweeps > 0 );
         assert( maxSweeps >= minSweeps );
         assert( minSweeps > 0 );
         assert( N > 0 );
+        assert( quadrature );
+        assert( quadrature->right_is_node() );
 
-        int refine = 1;
-        quadrature::rules( rule, nbNodes, refine, nodes, smat, qmat );
-
-        k = nodes.rows();
-
-        dsdc.resize( nodes.rows() - 1 );
-
-        for ( int i = 0; i < dsdc.rows(); i++ )
-            dsdc( i ) = nodes( i + 1 ) - nodes( i );
+        init();
 
         solver->setNumberOfImplicitStages( k - 1 );
+    }
 
-        assert( std::abs( nodes.tail( 1 ) ( 0 ) - 1 ) < 1.0e-13 );
+    SDC::SDC(
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
+        scalar tol
+        )
+        :
+        solver( nullptr ),
+        nbNodes( quadrature->get_num_nodes() ),
+        N( 0 ),
+        k( quadrature->get_num_nodes() ),
+        dt( -1 ),
+        tol( tol ),
+        nodes(),
+        smat(),
+        qmat(),
+        nodesEmbedded(),
+        smatEmbedded(),
+        qmatEmbedded(),
+        dsdc(),
+        corrector( false ),
+        stageIndex( 0 ),
+        F(),
+        Fold(),
+        Sj(),
+        solStages(),
+        convergence( false ),
+        timeIndex( 0 ),
+        minSweeps( 0 ),
+        maxSweeps( 0 ),
+        quadrature( quadrature )
+    {
+        assert( tol > 0 );
+        assert( tol < 1 );
+        assert( quadrature );
+        assert( quadrature->right_is_node() );
 
-        if ( adaptiveTimeStepper->isEnabled() )
-        {
-            refine = 2;
-            quadrature::rules( rule, nbNodes, refine, nodesEmbedded, smatEmbedded, qmatEmbedded );
-
-            int orderEmbedded = 0;
-
-            if ( rule == "gauss-radau" )
-                orderEmbedded = (nodesEmbedded.rows() - 1) * 2 - 1;
-
-            if ( rule == "gauss-lobatto" )
-                orderEmbedded = nodesEmbedded.rows() * 2 - 3;
-
-            if ( rule == "clenshaw-curtis" )
-                orderEmbedded = nodesEmbedded.rows() - 1;
-
-            if ( rule == "uniform" )
-                orderEmbedded = nodesEmbedded.rows();
-
-            if ( rule == "uniform-right-sided" )
-                orderEmbedded = nodesEmbedded.rows() - 1;
-
-            adaptiveTimeStepper->setOrderEmbeddedMethod( orderEmbedded );
-            adaptiveTimeStepper->setEndTime( solver->getEndTime() );
-
-            assert( std::abs( nodesEmbedded.tail( 1 ) ( 0 ) - 1 ) < 1.0e-13 );
-        }
+        init();
     }
 
     SDC::~SDC()
     {}
+
+    void SDC::init()
+    {
+        smat = quadrature->get_s_mat();
+        qmat = quadrature->get_q_mat();
+        const std::vector<scalar> nodes = quadrature->get_nodes();
+
+        this->nodes.resize( nodes.size() );
+
+        for ( unsigned int i = 0; i < nodes.size(); i++ )
+            this->nodes( i ) = nodes[i];
+
+        dsdc.resize( this->nodes.rows() - 1 );
+
+        for ( int i = 0; i < dsdc.rows(); i++ )
+            dsdc( i ) = this->nodes( i + 1 ) - this->nodes( i );
+    }
 
     void SDC::run()
     {
@@ -161,8 +131,7 @@ namespace sdc
 
             solveTimeStep( t );
 
-            if ( adaptiveTimeStepper->isAccepted() )
-                t += computedTimeStep;
+            t += computedTimeStep;
         }
     }
 
@@ -176,11 +145,10 @@ namespace sdc
         assert( N > 0 );
         assert( k > 0 );
 
-        if ( adaptiveTimeStepper->isPreviousStepAccepted() )
-            solver->nextTimeStep();
+        solver->nextTimeStep();
 
         fsi::vector dtsdc = this->dt * dsdc;
-        fsi::matrix solStages( k, N ), F( k, N ), Fembedded( nodesEmbedded.rows(), N ), residual, diff;
+        fsi::matrix solStages( k, N ), F( k, N ), Fembedded( nodesEmbedded.rows(), N ), residual;
         fsi::matrix qj( 1, solStages.cols() ), qjEmbedded( 1, solStages.cols() );
         fsi::vector errorEstimate( N );
 
@@ -243,17 +211,17 @@ namespace sdc
             // Compute the SDC residual
 
             residual = dt * (qmat * F);
-            diff = residual;
 
             for ( int i = 0; i < residual.rows(); i++ )
                 residual.row( i ) += solStages.row( 0 ) - solStages.row( i + 1 );
 
-            scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) ), squaredNormDiff( Pstream::nProcs(), scalar( 0 ) );
+            scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) );
+            labelList dof( Pstream::nProcs(), label( 0 ) );
             squaredNormResidual[Pstream::myProcNo()] = residual.squaredNorm();
-            squaredNormDiff[Pstream::myProcNo()] = diff.squaredNorm();
+            dof[Pstream::myProcNo()] = residual.rows() * residual.cols();
             reduce( squaredNormResidual, sumOp<scalarList>() );
-            reduce( squaredNormDiff, sumOp<scalarList>() );
-            scalar error = std::sqrt( sum( squaredNormResidual ) / (sum( squaredNormDiff ) + SMALL) );
+            reduce( dof, sumOp<labelList>() );
+            scalar error = std::sqrt( sum( squaredNormResidual ) / sum( dof ) );
             bool convergence = error < tol && j >= minSweeps - 2;
 
             std::deque<int> dofVariables;
@@ -302,18 +270,19 @@ namespace sdc
                     {
                         assert( dofVariables.at( i ) > 0 );
 
-                        scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) ), squaredNormDiff( Pstream::nProcs(), scalar( 0 ) );
+                        scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) );
+                        labelList dof( Pstream::nProcs(), label( 0 ) );
 
                         for ( int j = 0; j < dofVariables.at( i ); j++ )
                         {
                             squaredNormResidual[Pstream::myProcNo()] += residual( substep, index ) * residual( substep, index );
-                            squaredNormDiff[Pstream::myProcNo()] += diff( substep, index ) * diff( substep, index );
+                            dof[Pstream::myProcNo()] += 1;
                             index++;
                         }
 
                         reduce( squaredNormResidual, sumOp<scalarList>() );
-                        reduce( squaredNormDiff, sumOp<scalarList>() );
-                        scalar error = std::sqrt( sum( squaredNormResidual ) / (sum( squaredNormDiff ) + SMALL) );
+                        reduce( dof, sumOp<labelList>() );
+                        scalar error = std::sqrt( sum( squaredNormResidual ) / sum( dof ) );
 
                         bool convergence = convergenceVariables.at( i );
 
@@ -355,28 +324,7 @@ namespace sdc
             }
         }
 
-        if ( adaptiveTimeStepper->isEnabled() )
-        {
-            scalar newTimeStep = 0;
-
-            for ( int i = 0; i < Fembedded.rows(); i++ )
-                Fembedded.row( i ) = F.row( i * 2 );
-
-            computeResidual( qmat, F, dt, qj );
-            computeResidual( qmatEmbedded, Fembedded, dt, qjEmbedded );
-
-            errorEstimate.noalias() = qj.row( 0 ) - qjEmbedded.row( 0 );
-
-            bool accepted = adaptiveTimeStepper->determineNewTimeStep( errorEstimate, result, dt, newTimeStep );
-
-            dt = newTimeStep;
-
-            if ( not accepted )
-                solver->setSolution( solStages.row( 0 ), F.row( 0 ) );
-        }
-
-        if ( adaptiveTimeStepper->isAccepted() )
-            solver->finalizeTimeStep();
+        solver->finalizeTimeStep();
     }
 
     void SDC::computeResidual(
@@ -494,14 +442,13 @@ namespace sdc
     {
         fsi::matrix Qj = dt * (qmat * F);
         fsi::matrix residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
-        fsi::matrix diff = Qj.row( k - 2 );
 
-        scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) ), squaredNormDiff( Pstream::nProcs(), scalar( 0 ) );
+        scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) );
+        labelList dof( Pstream::nProcs(), label( 0 ) );
         squaredNormResidual[Pstream::myProcNo()] = residual.squaredNorm();
-        squaredNormDiff[Pstream::myProcNo()] = diff.squaredNorm();
         reduce( squaredNormResidual, sumOp<scalarList>() );
-        reduce( squaredNormDiff, sumOp<scalarList>() );
-        scalar error = std::sqrt( sum( squaredNormResidual ) / sum( squaredNormDiff ) );
+        dof[Pstream::myProcNo()] = residual.rows() * residual.cols();
+        scalar error = std::sqrt( sum( squaredNormResidual ) / sum( dof ) );
         convergence = error < tol;
 
         Info << "SDC " << name.c_str();

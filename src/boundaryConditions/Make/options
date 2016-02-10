@@ -1,11 +1,12 @@
-c++WARN     = -Wall -Werror
+c++WARN     = -Wall -Wextra -Werror
 
 EXE_INC = -std=c++11 \
-	-isystem $(LIB_SRC)/finiteVolume/lnInclude \
-	-isystem ../fsi/lnInclude \
-	-isystem ../thirdParty/eigen \
-	-isystem ../thirdParty/yaml-cpp/include \
-	-isystem ../thirdParty/boost
+    -isystem $(LIB_SRC)/finiteVolume/lnInclude \
+    -isystem ../fsi/lnInclude \
+    -isystem ../fsi \
+    -isystem ../thirdParty/eigen \
+    -isystem ../thirdParty/yaml-cpp/include \
+    -isystem ../thirdParty/boost
 
 LIB_LIBS = \
 	-L$(FOAM_USER_LIBBIN) \

@@ -51,6 +51,10 @@
 #include "AbsoluteConvergenceMeasure.H"
 #include "SteadyStateFluidSolver.H"
 #include "SteadyStateSolidSolver.H"
+#include "GaussRadau.H"
+#include "GaussLobatto.H"
+#include "Uniform.H"
+#include "ClenshawCurtis.H"
 
 using std::list;
 
@@ -166,7 +170,7 @@ int main(
         FatalError.exit();
     }
 
-    Info << nl << "FOAM-FSI build: " << word( FOAMFSIbuild ) << nl << endl;
+    Info << nl << "FOAM-FSI build: " << word( FOAMFSIbuild ) << nl << Foam::endl;
 
     std::shared_ptr<Time> runTime( new Time
         (
@@ -177,7 +181,7 @@ int main(
 
     // Load computation settings
 
-    string filename = static_cast<std::string>( args->rootPath() ) + "/" + static_cast<std::string>( args->globalCaseName() ) + "/constant/fsi.yaml";
+    std::string filename = static_cast<std::string>( args->rootPath() ) + "/" + static_cast<std::string>( args->globalCaseName() ) + "/constant/fsi.yaml";
 
     YAML::Node config = YAML::LoadFile( filename );
 
@@ -802,7 +806,7 @@ int main(
                 assert( sdcConfig["quadrature-rule"] );
                 assert( sdcConfig["min-sweeps"] );
                 assert( sdcConfig["max-sweeps"] );
-                assert( adaptiveTimeStepper );
+                assert( not adaptiveTimeStepping );
 
                 int n = sdcConfig["number-of-points"].as<int>();
                 scalar tol = sdcConfig["convergence-tolerance"].as<scalar>();
@@ -810,7 +814,21 @@ int main(
                 int minSweeps = sdcConfig["min-sweeps"].as<int>();
                 int maxSweeps = sdcConfig["max-sweeps"].as<int>();
 
-                timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( sdcFsiSolver, adaptiveTimeStepper, quadratureRule, n, tol, minSweeps, maxSweeps ) );
+                std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+
+                if ( quadratureRule == "gauss-radau" )
+                    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( n ) );
+
+                if ( quadratureRule == "gauss-lobatto" )
+                    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( n ) );
+
+                if ( quadratureRule == "clenshaw-curtis" )
+                    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( n ) );
+
+                if ( quadratureRule == "uniform" )
+                    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( n ) );
+
+                timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( sdcFsiSolver, quadrature, tol, minSweeps, maxSweeps ) );
             }
 
             if ( timeIntegrationScheme == "picard-integral-exponential-solver" )
@@ -822,6 +840,7 @@ int main(
                 assert( piesConfig["min-sweeps"] );
                 assert( piesConfig["max-sweeps"] );
                 assert( piesConfig["rho"] );
+                assert( not adaptiveTimeStepping );
 
                 scalar delta = piesConfig["delta"].as<scalar>();
                 scalar tol = piesConfig["convergence-tolerance"].as<scalar>();
@@ -829,7 +848,7 @@ int main(
                 int minSweeps = piesConfig["min-sweeps"].as<int>();
                 int maxSweeps = piesConfig["max-sweeps"].as<int>();
 
-                timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::PIES( sdcFsiSolver, adaptiveTimeStepper, rho, delta, tol, minSweeps, maxSweeps ) );
+                timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::PIES( sdcFsiSolver, rho, delta, tol, minSweeps, maxSweeps ) );
             }
 
             assert( timeSolver );
@@ -838,7 +857,7 @@ int main(
         }
     }
 
-    Info << "End\n" << endl;
+    Info << "End\n" << Foam::endl;
 
     label tmp = Pstream::myProcNo();
     reduce( tmp, sumOp<label>() );

@@ -10,8 +10,8 @@
 #include <memory>
 #include "SDCSolver.H"
 #include "fvCFD.H"
-#include "AdaptiveTimeStepper.H"
 #include "TimeIntegrationScheme.H"
+#include "QuadratureInterface.H"
 
 namespace sdc
 {
@@ -21,21 +21,20 @@ public:
 
         SDC(
             std::shared_ptr<SDCSolver> solver,
-            std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper,
-            std::string rule,
-            int nbNodes,
+            std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
             scalar tol,
             int minSweeps,
             int maxSweeps
             );
 
         SDC(
-            std::string rule,
-            int nbNodes,
+            std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
             scalar tol
             );
 
         ~SDC();
+
+        void init();
 
         void solveTimeStep( const scalar t0 );
 
@@ -67,7 +66,6 @@ public:
         virtual bool isConverged();
 
         std::shared_ptr<SDCSolver> solver;
-        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
 
         int nbNodes;
         int N;
@@ -105,6 +103,8 @@ private:
         int timeIndex;
         const int minSweeps;
         const int maxSweeps;
+
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
     };
 }
 

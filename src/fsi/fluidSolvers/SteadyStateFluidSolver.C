@@ -10,7 +10,7 @@
 #include "SteadyStateFluidSolver.H"
 
 SteadyStateFluidSolver::SteadyStateFluidSolver(
-    string name,
+    std::string name,
     std::shared_ptr<argList> args,
     std::shared_ptr<Time> runTime
     )

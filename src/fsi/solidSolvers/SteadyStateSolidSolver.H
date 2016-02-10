@@ -22,13 +22,13 @@ class SteadyStateSolidSolver : public foamSolidSolver
 public:
 
     SteadyStateSolidSolver(
-        string name,
+        std::string name,
         std::shared_ptr<argList> args,
         std::shared_ptr<Time> runTime
         );
 
     SteadyStateSolidSolver(
-        string name,
+        std::string name,
         std::shared_ptr<argList> args,
         std::shared_ptr<Time> runTime,
         std::shared_ptr<rbf::RBFCoarsening> interpolator

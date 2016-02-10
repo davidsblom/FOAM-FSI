@@ -10,7 +10,7 @@
 #include "SDCFluidSolver.H"
 
 SDCFluidSolver::SDCFluidSolver(
-    string name,
+    std::string name,
     std::shared_ptr<argList> args,
     std::shared_ptr<Time> runTime
     )
@@ -310,14 +310,7 @@ scalar SDCFluidSolver::evaluateMomentumResidual()
         residual += -fvc::laplacian( nu, U );
 
     scalarField magResU = mag( residual.internalField() );
-    scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
-    scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
-    rmsU /= runTime->deltaT().value();
-
-    // Scale the residual by the root mean square of the velocity field
-    momentumResidual /= rmsU;
-
-    return momentumResidual;
+    return std::sqrt( gSumSqr( magResU ) / ( mesh.globalData().nTotalCells() * mesh.nGeometricD() ) );
 }
 
 void SDCFluidSolver::getAcousticsDensityLocal( matrix & )
