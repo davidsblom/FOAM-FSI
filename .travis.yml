@@ -92,8 +92,6 @@ script:
     - lagrangian/Allwmake
     - postProcessing/Allwmake
     - conversion/Allwmake
-    # - export FOAM_USER_SRC=`pwd`/src
-    # - ./Allwmake.firstInstall
 
     - cd $FOAM_INST_DIR/src/thirdParty
     - if [ ! -e "gtest-1.7.0/libgtest.a" ]; then rm -rf gtest*; echo "remove gtest"; fi
@@ -102,3 +100,7 @@ script:
 
     - ./compile_gtest
     - ./compile_yaml
+
+    - cd $FOAM_INST_DIR
+    - export FOAM_USER_SRC=`pwd`/src
+    - ./Allwmake
