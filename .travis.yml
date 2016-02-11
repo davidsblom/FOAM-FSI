@@ -40,7 +40,7 @@ cache:
         - src/thirdParty/metis-5.1.0
         - src/thirdParty/parmetis-4.0.3
         - src/thirdParty/boost_1_55_0
-        # - src/thirdParty/petsc-3.6.3
+        - src/thirdParty/petsc-3.6.3
         # - src/thirdParty/dealii-8.3.0
 
 script:

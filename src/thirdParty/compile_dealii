@@ -71,7 +71,7 @@ fi
 rm -f parmetis
 ln -s parmetis-${PARMETIS_VERSION} parmetis
 
-if [ ! -d "petsc" ]; then
+if [ ! -d "petsc-${PETSC_VERSION}" ]; then
 
   rm -rf petsc*
 
@@ -80,8 +80,6 @@ if [ ! -d "petsc" ]; then
   tar -zxf petsc-${PETSC_VERSION}.tar.gz
 
   rm petsc-${PETSC_VERSION}.tar.gz
-
-  ln -s petsc-${PETSC_VERSION} petsc
 
   cd petsc-${PETSC_VERSION}
 
@@ -97,17 +95,18 @@ if [ ! -d "petsc" ]; then
 
 fi
 
+rm -f petsc
+ln -s petsc-${PETSC_VERSION} petsc
+
 cp petsc/${PETSC_ARCH}/lib/lib* ${FOAM_LIBBIN}/
 
-if [ ! -d "dealii" ]; then
+if [ ! -d "dealii-${DEALII_VERSION}" ]; then
 
   rm -rf dealii*
 
   wget https://github.com/dealii/dealii/releases/download/v${DEALII_VERSION}/dealii-${DEALII_VERSION}.tar.gz
 
   tar -zxf dealii-${DEALII_VERSION}.tar.gz
-
-  ln -s dealii-${DEALII_VERSION} dealii
 
   rm dealii-${DEALII_VERSION}.tar.gz
 
@@ -136,6 +135,10 @@ if [ ! -d "dealii" ]; then
   cd ../..
 
 fi
+
+rm -f dealii
+ln -s dealii-${DEALII_VERSION} dealii
+
 cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
 
 cd deal-fsi
