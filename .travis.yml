@@ -109,4 +109,4 @@ script:
     - ./compile_gtest
     - ./compile_yaml
     - ./compile_petsc
-    # - ./compile_dealii
+    - ./compile_dealii
