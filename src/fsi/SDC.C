@@ -44,7 +44,8 @@ namespace sdc
         timeIndex( 0 ),
         minSweeps( minSweeps ),
         maxSweeps( maxSweeps ),
-        quadrature( quadrature )
+        quadrature( quadrature ),
+        data( new DataStorage( quadrature, N ) )
     {
         assert( solver );
         assert( dt > 0 );
@@ -89,7 +90,8 @@ namespace sdc
         timeIndex( 0 ),
         minSweeps( 0 ),
         maxSweeps( 0 ),
-        quadrature( quadrature )
+        quadrature( quadrature ),
+        data( new DataStorage( quadrature, 0 ) )
     {
         assert( tol > 0 );
         assert( tol < 1 );
@@ -148,20 +150,20 @@ namespace sdc
         solver->nextTimeStep();
 
         fsi::vector dtsdc = this->dt * dsdc;
-        fsi::matrix solStages( k, N ), F( k, N ), Fembedded( nodesEmbedded.rows(), N ), residual;
-        fsi::matrix qj( 1, solStages.cols() ), qjEmbedded( 1, solStages.cols() );
+        fsi::matrix residual;
+        fsi::matrix qj( 1, solStages.cols() );
         fsi::vector errorEstimate( N );
-
-        fsi::vector sol( N ), f( N );
-        solver->getSolution( sol, f );
-        solStages.row( 0 ) = sol;
 
         scalar t = t0;
 
+        fsi::vector sol( N ), f( N );
+        solver->getSolution( sol, f );
         solver->evaluateFunction( 0, sol, t, f );
-        F.row( 0 ) = f;
 
-        fsi::vector rhs( N ), result( N ), qold( N );
+        data->storeFunction( f, 0 );
+        data->storeSolution( sol, 0 );
+
+        fsi::vector rhs( N ), result( N );
         rhs.setZero();
 
         solver->initTimeStep();
@@ -171,14 +173,12 @@ namespace sdc
             scalar dt = dtsdc( j );
             t += dt;
 
-            qold = solStages.row( j );
-
             Info << "\nTime = " << t << ", SDC sweep = 1, SDC substep = " << j + 1 << nl << endl;
 
-            solver->implicitSolve( false, j, j, t, dt, qold, rhs, f, result );
+            solver->implicitSolve( false, j, j, t, dt, data->getSolution(j), rhs, f, result );
 
-            solStages.row( j + 1 ) = result;
-            F.row( j + 1 ) = f;
+            data->storeFunction( f, j + 1 );
+            data->storeSolution( result, j + 1 );
         }
 
         // Compute successive corrections
@@ -187,7 +187,7 @@ namespace sdc
         {
             t = t0;
 
-            fsi::matrix Sj = this->dt * (smat * F);
+            fsi::matrix Sj = this->dt * (smat * data->getFunctions());
 
             // SDC sweep
             for ( int p = 0; p < k - 1; p++ )
@@ -197,23 +197,21 @@ namespace sdc
 
                 Info << "\nTime = " << t << ", SDC sweep = " << j + 2 << ", SDC substep = " << p + 1 << nl << endl;
 
-                qold = solStages.row( p );
-
                 // Form right hand side
-                rhs.noalias() = -dt * F.row( p + 1 ) + Sj.row( p );
+                rhs.noalias() = -dt * data->getFunctions().row( p + 1 ) + Sj.row( p );
 
-                solver->implicitSolve( true, p, p, t, dt, qold, rhs, f, result );
+                solver->implicitSolve( true, p, p, t, dt, data->getSolution(p), rhs, f, result );
 
-                solStages.row( p + 1 ) = result;
-                F.row( p + 1 ) = f;
+                data->storeFunction( f, p + 1 );
+                data->storeSolution( result, p + 1 );
             }
 
             // Compute the SDC residual
 
-            residual = dt * (qmat * F);
+            residual = dt * (qmat * data->getFunctions());
 
             for ( int i = 0; i < residual.rows(); i++ )
-                residual.row( i ) += solStages.row( 0 ) - solStages.row( i + 1 );
+                residual.row( i ) += data->getSolutions().row( 0 ) - data->getSolutions().row( i + 1 );
 
             scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) );
             labelList dof( Pstream::nProcs(), label( 0 ) );

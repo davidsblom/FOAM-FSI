@@ -108,4 +108,4 @@ script:
 
     - ./compile_gtest
     - ./compile_yaml
-    - ./compile_dealii
+    # - ./compile_dealii

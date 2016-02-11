@@ -198,6 +198,8 @@ build:
 
                 source foam-extend-3.2/etc/bashrc
 
+                export WM_NCOMPPROCS=1
+
                 ./Allwmake
         - script:
             name: test suite

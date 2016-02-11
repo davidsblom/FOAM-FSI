@@ -12,6 +12,7 @@
 #include "fvCFD.H"
 #include "TimeIntegrationScheme.H"
 #include "QuadratureInterface.H"
+#include "DataStorage.H"
 
 namespace sdc
 {
@@ -105,6 +106,7 @@ private:
         const int maxSweeps;
 
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+        std::shared_ptr<sdc::DataStorage> data;
     };
 }
 
