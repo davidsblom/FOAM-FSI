@@ -1,10 +1,11 @@
 
 #include "GaussLobatto.H"
+#include "fvCFD.H"
 
 namespace fsi
 {
     namespace quadrature
     {
-        template<typename scalar> class GaussLobatto;
+        template class GaussLobatto<scalar>;
     }
 }

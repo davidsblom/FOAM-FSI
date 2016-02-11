@@ -1,10 +1,11 @@
 
 #include "Polynomial.H"
+#include "fvCFD.H"
 
 namespace fsi
 {
     namespace quadrature
     {
-        template<typename scalar> class Polynomial;
+        template class Polynomial<scalar>;
     }
 }

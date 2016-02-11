@@ -1,10 +1,11 @@
 
 #include "ClenshawCurtis.H"
+#include "fvCFD.H"
 
 namespace fsi
 {
     namespace quadrature
     {
-        template<typename scalar> class ClenshawCurtis;
+        template class ClenshawCurtis<scalar>;
     }
 }

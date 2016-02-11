@@ -1,10 +1,11 @@
 
 #include "QuadratureInterface.H"
+#include "fvCFD.H"
 
 namespace fsi
 {
     namespace quadrature
     {
-        template<typename scalar> class QuadratureInterface;
+        template class IQuadrature<scalar>;
     }
 }

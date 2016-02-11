@@ -1,10 +1,11 @@
 
 #include "Uniform.H"
+#include "fvCFD.H"
 
 namespace fsi
 {
     namespace quadrature
     {
-        template<typename scalar> class Uniform;
+        template class Uniform<scalar>;
     }
 }

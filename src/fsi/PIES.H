@@ -7,8 +7,7 @@
  *  Picard Integral Exponential Solver (PIES)
  */
 
-#ifndef PIES_H
-#define PIES_H
+#pragma once
 
 #include "SDC.H"
 #include <complex>
@@ -18,14 +17,6 @@
 
 namespace sdc
 {
-    namespace mp = boost::multiprecision;
-
-    typedef mp::cpp_dec_float_50 longDouble;
-    typedef Eigen::Matrix<std::complex<longDouble>, Eigen::Dynamic, Eigen::Dynamic> matrix50c;
-    typedef Eigen::Matrix<longDouble, Eigen::Dynamic, Eigen::Dynamic> matrix50;
-    typedef Eigen::Matrix<std::complex<longDouble>, Eigen::Dynamic, 1> vector50c;
-    typedef Eigen::Matrix<longDouble, Eigen::Dynamic, 1> vector50;
-
     template<typename T>
     inline std::complex<T>
     exp( const std::complex<T> & x )
@@ -35,6 +26,7 @@ namespace sdc
         return std::polar( r, x.imag() );
     }
 
+    template<typename precision>
     class PIES : public SDC
     {
 public:
@@ -65,5 +57,4 @@ private:
     };
 }
 
-
-#endif
+#include "PIES.tpp"

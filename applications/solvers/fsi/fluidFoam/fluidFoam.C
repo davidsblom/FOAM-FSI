@@ -179,7 +179,7 @@ int main(
             int minSweeps = piesConfig["min-sweeps"].as<int>();
             int maxSweeps = piesConfig["max-sweeps"].as<int>();
 
-            timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::PIES( solver, rho, delta, tol, minSweeps, maxSweeps ) );
+            timeSolver = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::PIES<boost::multiprecision::cpp_dec_float_50>( solver, rho, delta, tol, minSweeps, maxSweeps ) );
         }
     }
 

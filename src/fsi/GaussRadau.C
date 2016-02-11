@@ -1,10 +1,11 @@
 
 #include "GaussRadau.H"
+#include "fvCFD.H"
 
 namespace fsi
 {
     namespace quadrature
     {
-        template<typename scalar> class GaussRadau;
+        template class GaussRadau<scalar>;
     }
 }
