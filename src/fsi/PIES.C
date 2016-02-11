@@ -50,6 +50,8 @@ namespace sdc
             dsdc( i ) = nodes( i + 1 ) - nodes( i );
 
         solver->setNumberOfImplicitStages( k - 1 );
+
+        data->initialize( k, solver->getDOF() );
     }
 
     PIES::PIES(
@@ -126,6 +128,8 @@ namespace sdc
                 gamma( i ) = std::complex<longDouble>( 0, distanceTravelled );
             else
             {
+                using std::cos;
+                using std::sin;
                 longDouble distanceTravelledOnDisk = distanceTravelled - rho + 0.5 * M_PI * rho;
                 longDouble theta = distanceTravelledOnDisk / rho;
                 longDouble x = cos( theta ) * rho;

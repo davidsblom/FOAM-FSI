@@ -83,7 +83,7 @@ public:
         fsi::matrix qmatEmbedded;
         fsi::vector dsdc;
 
-private:
+protected:
 
         void computeResidual(
             const fsi::matrix & qmat,

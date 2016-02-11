@@ -32,7 +32,7 @@ namespace sdc
 
             const fsi::vector getLastSolution() const;
 
-            void setDof( int N );
+            void initialize( int k, int N );
 
             void storeFunction( const fsi::vector & f, int substep );
 

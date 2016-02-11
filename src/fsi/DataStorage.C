@@ -68,11 +68,12 @@
          return getSolution( quadrature->get_num_nodes() - 1 );
      }
 
-     void DataStorage::setDof( int N )
+     void DataStorage::initialize( int k, int N )
      {
          assert( N > 0 );
-         F.resize( quadrature->get_num_nodes(), N );
-         solStages.resize( quadrature->get_num_nodes(), N );
+         assert( k >= 2 );
+         F.resize( k, N );
+         solStages.resize( k, N );
          F.setZero();
          solStages.setZero();
      }

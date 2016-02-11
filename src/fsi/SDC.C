@@ -389,7 +389,7 @@ namespace sdc
         assert( k <= this->k - 1 );
 
         if ( data->getFunctions().cols() == 0 )
-            data->setDof( f.rows() );
+            data->initialize( this->k, f.rows() );
 
         data->storeFunction( f, k + 1 );
         data->storeSolution( result, k + 1 );
@@ -404,7 +404,7 @@ namespace sdc
 
         if ( data->getSolutions().cols() == 0 )
         {
-            data->setDof( result.rows() );
+            data->initialize( this->k, result.rows() );
             data->storeSolution( result, 0 );
         }
         else
