@@ -27,11 +27,26 @@
      const fsi::matrix DataStorage::integrate( const std::vector<scalar> & nodes, scalar dt ) const
      {
          std::vector<scalar> quadratureNodes = quadrature->get_nodes();
+
+         if ( not quadrature->left_is_node() )
          quadratureNodes.erase( quadratureNodes.begin() );
 
          fsi::quadrature::Matrix<scalar> q_matrix = fsi::quadrature::compute_q_matrix( quadratureNodes, nodes );
 
-         return getSolutions().row( 0 ) + dt * (q_matrix * getFunctions());
+         if ( not quadrature->left_is_node() )
+         {
+             fsi::quadrature::Matrix<scalar> q_mat2( q_matrix.rows(), q_matrix.cols() + 1 );
+             q_mat2.setZero();
+             q_mat2.rightCols( q_matrix.cols() ) = q_matrix;
+             q_matrix = q_mat2;
+         }
+
+         fsi::quadrature::Matrix<scalar> data = dt * q_matrix * getFunctions();
+
+         for ( int i = 0; i < data.rows(); i++ )
+             data.row( i ) += getSolutions().row( 0 );
+
+         return data;
      }
 
      const fsi::matrix & DataStorage::getFunctions() const

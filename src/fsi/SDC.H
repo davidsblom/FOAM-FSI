@@ -41,6 +41,12 @@ public:
 
         virtual void run();
 
+        void computeResidual(
+            const fsi::matrix & qmat,
+            const scalar dt,
+            fsi::matrix & qj
+            );
+
         virtual void getSourceTerm(
             const bool corrector,
             const int k,
@@ -82,14 +88,6 @@ public:
         fsi::matrix smatEmbedded;
         fsi::matrix qmatEmbedded;
         fsi::vector dsdc;
-
-protected:
-
-        void computeResidual(
-            const fsi::matrix & qmat,
-            const scalar dt,
-            fsi::matrix & qj
-            );
 
         // Store function in memory in case the source term is requested
         // by the solver

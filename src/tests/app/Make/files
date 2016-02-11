@@ -52,5 +52,6 @@ test_gaussradau.C
 test_uniform.C
 test_quadrature.C
 test_gausslobatto.C
+test_sdcinterpolation.C
 
 EXE = $(FOAM_APPBIN)/tests
