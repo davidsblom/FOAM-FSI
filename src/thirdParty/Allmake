@@ -2,6 +2,7 @@
 
 set -e
 
+./compile_petsc
 ./compile_dealii
 ./compile_gtest
 ./compile_precice

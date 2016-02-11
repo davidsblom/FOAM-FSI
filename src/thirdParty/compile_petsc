@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -e
+
+PETSC_VERSION=3.6.3
+export PETSC_ARCH=x86_64
+
+if [ ! -d "petsc-${PETSC_VERSION}" ]; then
+
+  rm -rf petsc*
+
+  wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-${PETSC_VERSION}.tar.gz
+
+  tar -zxf petsc-${PETSC_VERSION}.tar.gz
+
+  rm petsc-${PETSC_VERSION}.tar.gz
+
+  cd petsc-${PETSC_VERSION}
+
+  export PETSC_DIR=`pwd`
+
+  ./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --download-hypre=1 --download-mumps --download-scalapack --download-ptscotch --download-suitesparse --download-fblaslapack=1
+
+  make
+
+  make test
+
+  cd ../
+
+fi
+
+rm -f petsc
+ln -s petsc-${PETSC_VERSION} petsc
+
+cp petsc/${PETSC_ARCH}/lib/lib* ${FOAM_LIBBIN}/
