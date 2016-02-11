@@ -44,7 +44,6 @@ cache:
         # - src/thirdParty/dealii-8.3.0
 
 script:
-    - set -x
     - if [ ! -d "foam-extend-3.2/.git" ]; then rm -rf foam-extend-3.2 && git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2; fi
     - export PARAVIEW_SYSTEM=1
     - export HWLOC_SYSTEM=1
