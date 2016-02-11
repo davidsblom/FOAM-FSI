@@ -218,7 +218,7 @@ protected:
     SpaceMappingSolver * solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, ManifoldMappingSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 1, 4 ), Values( 1, 2 ), Values( 3 ), Values( 10, 20 ), Bool(), Bool(), Bool() ) );
+INSTANTIATE_TEST_CASE_P( testParameters, ManifoldMappingSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0, 1, 4 ), Values( 2 ), Values( 3 ), Values( 10, 20 ), Bool(), Bool(), Bool() ) );
 
 TEST_P( ManifoldMappingSolverParametrizedTest, object )
 {

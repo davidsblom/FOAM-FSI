@@ -304,7 +304,7 @@ protected:
     shared_ptr<MultiLevelSpaceMappingSolver> solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelSpaceMappingSolverParametrizedTest, ::testing::Combine( Values( 0, 2 ), Values( 0, 2 ), Values( 20, 40 ), Values( 0, 1, 2 ), Values( 0, 5 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelSpaceMappingSolverParametrizedTest, ::testing::Combine( Values( 0, 2 ), Values( 2 ), Values( 20, 40 ), Values( 0, 1, 2 ), Values( 0, 5 ) ) );
 
 TEST_P( MultiLevelSpaceMappingSolverParametrizedTest, run )
 {
