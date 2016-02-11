@@ -44,7 +44,6 @@
      const fsi::matrix & DataStorage::getSolutions() const
      {
          assert( solStages.rows() > 0 );
-         assert( solStages.cols() > 0 );
          return solStages;
      }
 
@@ -64,15 +63,16 @@
          return solStages.row( substep );
      }
 
+     const fsi::vector DataStorage::getLastSolution() const
+     {
+         return getSolution( quadrature->get_num_nodes() - 1 );
+     }
+
      void DataStorage::setDof( int N )
      {
          assert( N > 0 );
-         assert( F.rows() > 0 );
-         assert( solStages.rows() > 0 );
-         assert( F.cols() == 0 );
-         assert( solStages.rows() == 0 );
-         F.resize( F.rows(), N );
-         solStages.resize( solStages.rows(), N );
+         F.resize( quadrature->get_num_nodes(), N );
+         solStages.resize( quadrature->get_num_nodes(), N );
          F.setZero();
          solStages.setZero();
      }

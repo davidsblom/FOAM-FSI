@@ -87,7 +87,6 @@ private:
 
         void computeResidual(
             const fsi::matrix & qmat,
-            const fsi::matrix & F,
             const scalar dt,
             fsi::matrix & qj
             );
@@ -96,10 +95,7 @@ private:
         // by the solver
         bool corrector;
         int stageIndex;
-        fsi::matrix F;
-        fsi::matrix Fold;
         fsi::matrix Sj;
-        fsi::matrix solStages;
         bool convergence;
         int timeIndex;
         const int minSweeps;

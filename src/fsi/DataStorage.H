@@ -30,6 +30,8 @@ namespace sdc
 
             const fsi::vector getSolution( int substep ) const;
 
+            const fsi::vector getLastSolution() const;
+
             void setDof( int N );
 
             void storeFunction( const fsi::vector & f, int substep );

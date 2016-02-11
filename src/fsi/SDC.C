@@ -36,10 +36,7 @@ namespace sdc
         dsdc(),
         corrector( false ),
         stageIndex( 0 ),
-        F(),
-        Fold(),
         Sj(),
-        solStages(),
         convergence( false ),
         timeIndex( 0 ),
         minSweeps( minSweeps ),
@@ -82,10 +79,7 @@ namespace sdc
         dsdc(),
         corrector( false ),
         stageIndex( 0 ),
-        F(),
-        Fold(),
         Sj(),
-        solStages(),
         convergence( false ),
         timeIndex( 0 ),
         minSweeps( 0 ),
@@ -151,7 +145,6 @@ namespace sdc
 
         fsi::vector dtsdc = this->dt * dsdc;
         fsi::matrix residual;
-        fsi::matrix qj( 1, solStages.cols() );
         fsi::vector errorEstimate( N );
 
         scalar t = t0;
@@ -327,7 +320,6 @@ namespace sdc
 
     void SDC::computeResidual(
         const fsi::matrix & qmat,
-        const fsi::matrix & F,
         const scalar dt,
         fsi::matrix & qj
         )
@@ -335,15 +327,15 @@ namespace sdc
         // fsi::matrix Qj = dt * (qmat * F);
 
         // Only compute row k-2 of matrix Qj for efficiency
-        int k = F.rows();
+        int k = data->getFunctions().rows();
         int ii = k - 2, jj, kk;
 
-        for ( jj = 0; jj < F.cols(); ++jj )
+        for ( jj = 0; jj < data->getFunctions().cols(); ++jj )
         {
             qj( 0, jj ) = 0;
 
-            for ( kk = 0; kk < F.rows(); ++kk )
-                qj( 0, jj ) += qmat( ii, kk ) * F( kk, jj );
+            for ( kk = 0; kk < data->getFunctions().rows(); ++kk )
+                qj( 0, jj ) += qmat( ii, kk ) * data->getFunctions()( kk, jj );
 
             qj( 0, jj ) *= dt;
         }
@@ -358,9 +350,8 @@ namespace sdc
         )
     {
         assert( k <= this->k - 1 );
-        assert( solStages.rows() > 0 );
 
-        qold = solStages.row( k );
+        qold = data->getSolution( k );
 
         // Compute the time step from the stage deltaT
         if ( dt < 0 )
@@ -377,12 +368,9 @@ namespace sdc
         if ( corrector )
         {
             if ( (k == 0 && stageIndex != 0) || (k == 0 && nbNodes == 2) )
-            {
-                Sj = dt * (smat * F);
-                Fold = F;
-            }
+                Sj = dt * (smat * data->getFunctions());
 
-            rhs.noalias() = -dt * dsdc( k ) * Fold.row( k + 1 ) + Sj.row( k );
+            rhs.noalias() = -dt * dsdc( k ) * data->getFunctions().row( k + 1 ) + Sj.row( k );
         }
 
         this->stageIndex = k;
@@ -400,20 +388,11 @@ namespace sdc
         assert( f.rows() == result.rows() );
         assert( k <= this->k - 1 );
 
-        if ( F.cols() == 0 )
-        {
-            F.resize( this->k, f.rows() );
-            F.setZero();
-        }
+        if ( data->getFunctions().cols() == 0 )
+            data->setDof( f.rows() );
 
-        if ( solStages.cols() == 0 )
-        {
-            solStages.resize( this->k, f.rows() );
-            solStages.setZero();
-        }
-
-        F.row( k + 1 ) = f;
-        solStages.row( k + 1 ) = result;
+        data->storeFunction( f, k + 1 );
+        data->storeSolution( result, k + 1 );
     }
 
     void SDC::setOldSolution(
@@ -423,23 +402,24 @@ namespace sdc
     {
         assert( timeIndex >= this->timeIndex );
 
-        if ( solStages.cols() == 0 )
+        if ( data->getSolutions().cols() == 0 )
         {
-            solStages.resize( this->k, result.rows() );
-            solStages.setZero();
-            solStages.row( 0 ) = result;
+            data->setDof( result.rows() );
+            data->storeSolution( result, 0 );
         }
         else
         if ( timeIndex > this->timeIndex )
-            solStages.row( 0 ) = solStages.bottomRows( 1 );
+            data->storeSolution( data->getLastSolution(), 0 );
 
         this->timeIndex = timeIndex;
     }
 
     void SDC::outputResidual( std::string name )
     {
-        fsi::matrix Qj = dt * (qmat * F);
-        fsi::matrix residual = solStages.row( 0 ) + Qj.row( k - 2 ) - solStages.row( k - 1 );
+        fsi::matrix residual = dt * (qmat * data->getFunctions());
+
+        for ( int i = 0; i < residual.rows(); i++ )
+            residual.row( i ) += data->getSolutions().row( 0 ) - data->getSolutions().row( i + 1 );
 
         scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) );
         labelList dof( Pstream::nProcs(), label( 0 ) );
