@@ -44,6 +44,7 @@ cache:
         # - src/thirdParty/dealii-8.3.0
 
 script:
+    - set -x
     - if [ ! -d "foam-extend-3.2/.git" ]; then rm -rf foam-extend-3.2 && git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2; fi
     - export PARAVIEW_SYSTEM=1
     - export HWLOC_SYSTEM=1
@@ -98,13 +99,13 @@ script:
     # - ./Allwmake.firstInstall
 
     - cd $FOAM_INST_DIR/src/thirdParty
-    - if [ ! -e "gtest-1.7.0/libgtest.a" ]; then rm -rf gtest*; fi
-    - if [ ! -e "metis-5.1.0/build/lib/libmetis.a" ]; then rm -rf metis*; fi
-    - if [ ! -e "parmetis-4.0.3/build/lib/libparmetis.a" ]; then rm -rf parmetis*; fi
-    - if [ ! -e "petsc-3.6.3/x86_64/lib/libpetsc.so.3.6.3" ]; then rm -rf petsc*; fi
-    - if [ ! -e "dealii-8.3.0/bin/lib/libdeal_II.so" ]; then rm -rf dealii*; fi
-    - if [ ! -e "boost_1_55_0/bootstrap.sh" ]; then rm -rf boost*; fi
-    - if [ ! -e "yaml-cpp-release-0.5.3/build/libyaml-cpp.so.0.5.3" ]; then rm -rf yaml-cpp*; fi
+    - if [ ! -e "gtest-1.7.0/libgtest.a" ]; then rm -rf gtest*; echo "remove gtest"; fi
+    - if [ ! -e "metis-5.1.0/build/lib/libmetis.a" ]; then rm -rf metis*; echo "remove metis"; fi
+    - if [ ! -e "parmetis-4.0.3/build/lib/libparmetis.a" ]; then rm -rf parmetis*; echo "remove parmetis"; fi
+    - if [ ! -e "petsc-3.6.3/x86_64/lib/libpetsc.so.3.6.3" ]; then rm -rf petsc*; echo "remove petsc"; fi
+    - if [ ! -e "dealii-8.3.0/bin/lib/libdeal_II.so" ]; then rm -rf dealii*; echo "remove deal.II"; fi
+    - if [ ! -e "boost_1_55_0/bootstrap.sh" ]; then rm -rf boost*; echo "remove boost"; fi
+    - if [ ! -e "yaml-cpp-release-0.5.3/build/libyaml-cpp.so.0.5.3" ]; then rm -rf yaml-cpp*; echo "remove yaml-cpp"; fi
 
     - ./compile_gtest
     - ./compile_yaml
