@@ -32,5 +32,5 @@ fi
 rm -f petsc
 ln -s petsc-${PETSC_VERSION} petsc
 
-mkdir $FOAM_USER_LIBBIN
+mkdir -p $FOAM_USER_LIBBIN
 cp petsc/${PETSC_ARCH}/lib/lib* ${FOAM_USER_LIBBIN}/
