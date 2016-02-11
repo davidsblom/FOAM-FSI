@@ -16,10 +16,12 @@ if [ ! -d "boost_${BOOST_VERSION}" ]; then
     wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
     tar jxf boost_${BOOST_VERSION}.tar.bz2
     rm -f boost_${BOOST_VERSION}.tar.bz2
-    ln -s boost_${BOOST_VERSION} boost
 fi
 
-if [ ! -d "metis" ]; then
+rm -f boost
+ln -s boost_${BOOST_VERSION} boost
+
+if [ ! -d "metis-${METIS_VERSION}" ]; then
 
   rm -rf metis*
 
@@ -27,8 +29,6 @@ if [ ! -d "metis" ]; then
 
   tar -zxf metis-${METIS_VERSION}.tar.gz
   rm metis-${METIS_VERSION}.tar.gz
-
-  ln -s metis-${METIS_VERSION} metis
 
   cd metis-${METIS_VERSION}
 
@@ -43,7 +43,10 @@ if [ ! -d "metis" ]; then
 
 fi
 
-if [ ! -d "parmetis" ]; then
+rm -f metis
+ln -s metis-${METIS_VERSION} metis
+
+if [ ! -d "parmetis-${PARMETIS_VERSION}" ]; then
 
   rm -rf parmetis*
 
@@ -51,7 +54,6 @@ if [ ! -d "parmetis" ]; then
 
   tar -zxf parmetis-${PARMETIS_VERSION}.tar.gz
   rm parmetis-${PARMETIS_VERSION}.tar.gz
-  ln -s parmetis-${PARMETIS_VERSION} parmetis
 
   cd parmetis-${PARMETIS_VERSION}
 
@@ -65,6 +67,9 @@ if [ ! -d "parmetis" ]; then
   cd ../
 
 fi
+
+rm -f parmetis
+ln -s parmetis-${PARMETIS_VERSION} parmetis
 
 if [ ! -d "petsc" ]; then
 

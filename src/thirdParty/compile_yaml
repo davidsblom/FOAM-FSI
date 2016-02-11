@@ -17,8 +17,10 @@ if [ ! -d "boost_${BOOST_VERSION}" ]; then
     wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
     tar jxf boost_${BOOST_VERSION}.tar.bz2
     rm -f boost_${BOOST_VERSION}.tar.bz2
-    ln -s boost_${BOOST_VERSION} boost
 fi
+
+rm -f boost
+ln -s boost_${BOOST_VERSION} boost
 
 if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
 
@@ -31,13 +33,11 @@ if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
     tar -zxvf yaml-cpp-${VERSION}.tar.gz
     rm -f yaml-cpp-${VERSION}.tar.gz
 
-    ln -s yaml-cpp-release-${VERSION} yaml-cpp
-
     export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
     echo $BOOST_ROOT
     cd $BOOST_ROOT
 
-    cd ../yaml-cpp
+    cd ../yaml-cpp-release-${VERSION}
 
     mkdir build
 
@@ -50,6 +50,9 @@ if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
     cd ../..
 
 fi
+
+rm -f yaml-cpp
+ln -s yaml-cpp-release-${VERSION} yaml-cpp
 
 mkdir -p ${FOAM_LIBBIN}
 cp yaml-cpp-release-${VERSION}/build/libyaml-cpp* ${FOAM_LIBBIN}/
