@@ -41,7 +41,7 @@ cache:
         - src/thirdParty/parmetis-4.0.3
         - src/thirdParty/boost_1_55_0
         - src/thirdParty/petsc-3.6.3
-        # - src/thirdParty/dealii-8.3.0
+        - src/thirdParty/dealii-8.3.0
 
 script:
     - if [ ! -d "foam-extend-3.2/.git" ]; then rm -rf foam-extend-3.2 && git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2; fi
