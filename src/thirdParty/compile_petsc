@@ -19,7 +19,7 @@ if [ ! -d "petsc-${PETSC_VERSION}" ]; then
 
   export PETSC_DIR=`pwd`
 
-  ./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --download-hypre=1 --download-mumps --download-scalapack --download-ptscotch --download-suitesparse --download-fblaslapack=1
+  ./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --download-scalapack --download-ptscotch --download-fblaslapack=1
 
   make
 
@@ -27,10 +27,10 @@ if [ ! -d "petsc-${PETSC_VERSION}" ]; then
 
   cd ../
 
+  mkdir -p $FOAM_USER_LIBBIN
+  cp petsc/${PETSC_ARCH}/lib/lib* ${FOAM_USER_LIBBIN}/
+
 fi
 
 rm -f petsc
 ln -s petsc-${PETSC_VERSION} petsc
-
-mkdir -p $FOAM_USER_LIBBIN
-cp petsc/${PETSC_ARCH}/lib/lib* ${FOAM_USER_LIBBIN}/
