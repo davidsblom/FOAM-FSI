@@ -177,6 +177,8 @@ build:
 
                 source foam-extend-3.2/etc/bashrc
 
+                export WM_NCOMPPROCS=1
+
                 cd src/thirdParty
 
                 ./compile_precice
