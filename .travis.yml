@@ -25,6 +25,8 @@ addons:
             - unzip
             - scons
             - binutils-dev
+            - petsc-dev
+            - libdeal.ii-dev
 
 before_install:
     - export CXX="g++-4.8"
@@ -37,11 +39,7 @@ cache:
         - foam-extend-3.2
         - src/thirdParty/yaml-cpp-release-0.5.3
         - src/thirdParty/gtest-1.7.0
-        - src/thirdParty/metis-5.1.0
-        - src/thirdParty/parmetis-4.0.3
         - src/thirdParty/boost_1_55_0
-        - src/thirdParty/petsc-3.6.3
-        - src/thirdParty/dealii-8.3.0
 
 script:
     - if [ ! -d "foam-extend-3.2/.git" ]; then rm -rf foam-extend-3.2 && git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2; fi
@@ -99,14 +97,8 @@ script:
 
     - cd $FOAM_INST_DIR/src/thirdParty
     - if [ ! -e "gtest-1.7.0/libgtest.a" ]; then rm -rf gtest*; echo "remove gtest"; fi
-    - if [ ! -e "metis-5.1.0/build/lib/libmetis.a" ]; then rm -rf metis*; echo "remove metis"; fi
-    - if [ ! -e "parmetis-4.0.3/build/lib/libparmetis.a" ]; then rm -rf parmetis*; echo "remove parmetis"; fi
-    - if [ ! -e "petsc-3.6.3/x86_64/lib/libpetsc.so.3.6.3" ]; then rm -rf petsc*; echo "remove petsc"; fi
-    - if [ ! -e "dealii-8.3.0/bin/lib/libdeal_II.so" ]; then rm -rf dealii*; echo "remove deal.II"; fi
     - if [ ! -e "boost_1_55_0/bootstrap.sh" ]; then rm -rf boost*; echo "remove boost"; fi
     - if [ ! -e "yaml-cpp-release-0.5.3/build/libyaml-cpp.so.0.5.3" ]; then rm -rf yaml-cpp*; echo "remove yaml-cpp"; fi
 
     - ./compile_gtest
     - ./compile_yaml
-    - ./compile_petsc
-    # - ./compile_dealii
