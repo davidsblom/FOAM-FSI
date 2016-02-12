@@ -51,12 +51,12 @@ if [ ! -d "dealii-${DEALII_VERSION}" ]; then
 
   cd ../..
 
+  cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
+
 fi
 
 rm -f dealii
 ln -s dealii-${DEALII_VERSION} dealii
-
-cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
 
 cd deal-fsi
 
@@ -67,4 +67,4 @@ ln -s ../eigen
 
 cmake -DDEAL_II_DIR=../dealii/bin/ .
 
-make
+make -j $WM_NCOMPPROCS

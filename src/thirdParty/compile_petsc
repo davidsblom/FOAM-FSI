@@ -27,10 +27,9 @@ if [ ! -d "petsc-${PETSC_VERSION}" ]; then
 
   cd ../
 
-fi
+  cp petsc-${PETSC_VERSION}/${PETSC_ARCH}/lib/lib* ${FOAM_LIBBIN}/
 
-mkdir -p $FOAM_USER_LIBBIN
-cp petsc-${PETSC_VERSION}/${PETSC_ARCH}/lib/lib* ${FOAM_USER_LIBBIN}/
+fi
 
 rm -f petsc
 ln -s petsc-${PETSC_VERSION} petsc
