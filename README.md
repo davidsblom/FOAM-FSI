@@ -43,6 +43,12 @@ With this grep command, you can ensure that the `mpicxx` compiler is used during
 sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
 ```
 
+Set the environment variable `$FOAM_INST_DIR` in case foam-extend is installed in a non-standard location:
+
+``` bash
+export FOAM_INST_DIR=`pwd`
+```
+
 Finally, the compilation process of `foam-extend` is started with
 
 ``` bash
