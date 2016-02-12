@@ -51,7 +51,13 @@ build:
                 export PARAVIEW_SYSTEM=1
                 export CMAKE_SYSTEM=1
                 export HWLOC_SYSTEM=1
+
                 export SCOTCH_SYSTEM=1
+                export SCOTCH_DIR=/usr
+                export SCOTCH_BIN_DIR=/usr/bin
+                export SCOTCH_LIB_DIR=/usr/lib
+                export SCOTCH_INCLUDE_DIR=/usr/include/scotch
+
                 export PYFOAM_SYSTEM=1
                 export CUDA_IGNORE=1
                 export SWAK4FOAM_SYSTEM=1
