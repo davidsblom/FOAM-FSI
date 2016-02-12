@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, subprocess, multiprocessing
+import os, subprocess, multiprocessing, time
 
 nbCores = multiprocessing.cpu_count()
 
@@ -12,11 +12,14 @@ for i in range( nbCores ):
 
 returnCode = 0
 for run in runs:
-    code = run.wait()
-    if code > returnCode:
-        returnCode = code
+    while ( not run.poll() ):
+        time.sleep( 5 )
+        print '.'
+        code = run.poll()
+        if code > returnCode:
+            returnCode = code
 
 for i in range( nbCores ):
-    subprocess.call("tail -n 4 tests_" + str(i) + ".log 2>&1", shell=True)
+    subprocess.call("tail -n 50 tests_" + str(i) + ".log 2>&1", shell=True)
 
 exit( returnCode )
