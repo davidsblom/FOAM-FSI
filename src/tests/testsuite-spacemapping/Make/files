@@ -1,0 +1,25 @@
+tests.C
+test_aggressivespacemapping.C
+test_asmils.C
+test_manifoldmapping.C
+test_manifoldmappinglinearizedfsisolver.C
+test_manifoldmappingsolver.C
+test_mliqnilssolver.C
+test_multilevelaggressivespacemappingsolver.C
+test_multilevelasmils.C
+test_multilevelimplicitfsisolver.C
+test_multilevelmanifoldmappingsolver.C
+test_multilevelmliqnilssolver.C
+test_multileveloutputspacemappingsolver.C
+test_multilevelsolver.C
+test_multilevelspacemapping.C
+test_outputspacemapping.C
+
+MonolithicFsiSolver.C
+TubeFlowFluidSolver.C
+TubeFlowLinearizedFluidSolver.C
+TubeFlowLinearizedSolidSolver.C
+TubeFlowLinearSolidSolver.C
+TubeFlowSolidSolver.C
+
+EXE = $(FOAM_APPBIN)/testsuite-spacemapping

@@ -26,5 +26,9 @@ wclean applications/solvers/fsi/fluidFoam
 wclean applications/solvers/fsi/solidFoam
 wclean applications/solvers/fsi/fsiFluidFoam
 wclean applications/solvers/fsi/fsiSolidFoam
-wclean src/tests/app
+wclean src/tests/testsuite-dealii
+wclean src/tests/testsuite-fsi
+wclean src/tests/testsuite-rbf
+wclean src/tests/testsuite-sdc
+wclean src/tests/testsuite-spacemapping
 wclean src/tests/tubeflow

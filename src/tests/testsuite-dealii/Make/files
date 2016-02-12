@@ -1,0 +1,4 @@
+tests.C
+test_dealiisolidsolver.C
+
+EXE = $(FOAM_APPBIN)/testsuite-dealii

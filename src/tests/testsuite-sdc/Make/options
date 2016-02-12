@@ -1,0 +1,53 @@
+c++WARN     = -Wall -Wextra -Werror -Wno-literal-suffix
+
+EXE_INC = -std=c++11 \
+    -I ../../fsi \
+    -I ../../fsi/lnInclude \
+    -I ../../fsi/solidSolvers \
+    -DEIGEN_INITIALIZE_MATRICES_BY_NAN \
+    -I ../../RBFmeshInterpolation/lnInclude/ \
+    -isystem $(LIB_SRC)/finiteVolume/lnInclude \
+    -isystem $(LIB_SRC)/dynamicMesh/lnInclude \
+    -isystem $(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
+    -isystem $(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
+    -isystem $(LIB_SRC)/transportModels \
+    -isystem $(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
+    -isystem $(LIB_SRC)/turbulenceModels \
+    -isystem $(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
+    -isystem $(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
+    -isystem ../../thirdParty/eigen \
+    -isystem ../../thirdParty/boost \
+    -isystem ../../thirdParty/gtest/include \
+    $(WM_DECOMP_INC) \
+    -I ../../RBFMeshMotionSolver/lnInclude/ \
+    -isystem $(LIB_SRC)/meshTools/lnInclude \
+    -isystem $(LIB_SRC)/solidModels/lnInclude \
+    -isystem ../../thirdParty/deal-fsi/include \
+    -isystem ../../thirdParty/dealii/bin/include \
+    -isystem ../../thirdParty/dealii/bin/include/deal.II/bundled \
+    -isystem ../../thirdParty/dealii/bundled/umfpack/UMFPACK/Include \
+    -isystem ../../thirdParty/dealii/bundled/umfpack/AMD/Include \
+    -isystem ../../thirdParty/petsc/include \
+    -isystem ../../thirdParty/petsc/x86_64/include
+
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -L../../thirdParty/gtest \
+    -lgtest \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lmeshTools \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -lfiniteVolume \
+    -lsolidModels \
+    -lRBFMeshMotionSolver \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels \
+    -ldeal_II \
+    -lfsi \
+    -lboundaryConditions

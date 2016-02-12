@@ -1,0 +1,15 @@
+test_esdirk.C
+test_gausslobatto.C
+test_gaussradau.C
+test_pies.C
+test_quadrature.C
+test_sdc.C
+test_sdcinterpolation.C
+test_uniform.C
+tests.C
+
+Piston.C
+Cos.C
+Oscillator.C
+
+EXE = $(FOAM_APPBIN)/testsuite-sdc

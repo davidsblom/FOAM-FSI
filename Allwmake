@@ -30,7 +30,11 @@ wmake applications/solvers/unsteadyPUCoupledFoam
 wmake applications/solvers/fsi/fsiFoam
 wmake applications/solvers/fsi/solidFoam
 wmake applications/solvers/fsi/fluidFoam
-wmake src/tests/app
+wmake src/tests/testsuite-dealii
+wmake src/tests/testsuite-fsi
+wmake src/tests/testsuite-rbf
+wmake src/tests/testsuite-sdc
+wmake src/tests/testsuite-spacemapping
 wmake src/tests/tubeflow
 wmake applications/solvers/fsi/fsiSolidFoam
 wmake applications/solvers/fsi/fsiFluidFoam
