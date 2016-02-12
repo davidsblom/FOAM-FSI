@@ -9,17 +9,17 @@ if [ ! -d "petsc-${PETSC_VERSION}" ]; then
 
   rm -rf petsc*
 
-  wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-${PETSC_VERSION}.tar.gz
+  wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-${PETSC_VERSION}.tar.gz
 
-  tar -zxf petsc-${PETSC_VERSION}.tar.gz
+  tar -zxf petsc-lite-${PETSC_VERSION}.tar.gz
 
-  rm petsc-${PETSC_VERSION}.tar.gz
+  rm petsc-lite-${PETSC_VERSION}.tar.gz
 
   cd petsc-${PETSC_VERSION}
 
   export PETSC_DIR=`pwd`
 
-  ./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --download-scalapack --download-ptscotch --download-fblaslapack=1
+  ./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --download-scalapack --download-fblaslapack=1
 
   make
 
