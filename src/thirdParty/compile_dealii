@@ -51,7 +51,7 @@ if [ ! -d "dealii-${DEALII_VERSION}" ]; then
 
   cd ../..
 
-  cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
+  cp dealii-${DEALII_VERSION}/bin/lib/libdeal* ${FOAM_LIBBIN}/
 
 fi
 
