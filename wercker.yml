@@ -67,8 +67,6 @@ build:
                 unset WM_THIRD_PARTY_USE_SCOTCH_604
                 unset WM_THIRD_PARTY_USE_PYFOAM_064
 
-                ( cd wmake/src && make )
-                ( cd $WM_THIRD_PARTY_DIR && ./AllMake )
                 . $WM_PROJECT_DIR/etc/settings.sh
                 cd $WM_PROJECT_DIR/src
                 wmakePrintBuild -check || /bin/rm -f foam/Make/$WM_OPTIONS/global.? 2>/dev/null
