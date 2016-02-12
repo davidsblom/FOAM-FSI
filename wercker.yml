@@ -8,7 +8,7 @@ build:
             name: install packages
             code: |
                 apt-get update
-                apt-get -y install git build-essential flex bison zlib1g-dev qt4-dev-tools libqt4-dev gnuplot libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev
+                apt-get -y install git build-essential flex bison zlib1g-dev qt4-dev-tools libqt4-dev gnuplot libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev libscotch-dev
         - script:
             name: initialize git submodules
             code: |
