@@ -67,7 +67,35 @@ build:
                 unset WM_THIRD_PARTY_USE_SCOTCH_604
                 unset WM_THIRD_PARTY_USE_PYFOAM_064
 
-                src/Allwmake
+                ( cd wmake/src && make )
+                ( cd $WM_THIRD_PARTY_DIR && ./AllMake )
+                . $WM_PROJECT_DIR/etc/settings.sh
+                cd $WM_PROJECT_DIR/src
+                wmakePrintBuild -check || /bin/rm -f foam/Make/$WM_OPTIONS/global.? 2>/dev/null
+                wmakeLnInclude foam
+                wmakeLnInclude meshTools
+                wmakeLnInclude OSspecific/$WM_OSTYPE
+                wmake libo  OSspecific/$WM_OSTYPE
+                wmake libso foam
+                decompositionMethods/AllwmakeLnInclude
+                wmake libso lagrangian/basic
+                wmake libso edgeMesh
+                wmake libso surfMesh
+                wmake libso meshTools
+                wmake libso finiteVolume
+                wmake libso finiteArea
+                wmake libso lduSolvers
+                wmake libso tetFiniteElement
+                dynamicMesh/AllwmakeLnInclude
+                dynamicMesh/Allwmake
+                wmake libso coupledMatrix
+                wmake libso sampling
+                wmake libso ODE
+                thermophysicalModels/Allwmake
+                transportModels/Allwmake
+                turbulenceModels/Allwmake
+                lagrangian/Allwmake
+                postProcessing/Allwmake
         - script:
             name: environment variable $FOAM_USER_SRC
             code: |
