@@ -76,6 +76,7 @@ build:
                 wmake libo  OSspecific/$WM_OSTYPE
                 wmake libso foam
                 decompositionMethods/AllwmakeLnInclude
+                decompositionMethods/Allwmake
                 wmake libso lagrangian/basic
                 wmake libso edgeMesh
                 wmake libso surfMesh
@@ -203,8 +204,6 @@ build:
 
                 source foam-extend-3.2/etc/bashrc
 
-                export WM_NCOMPPROCS=1
-
                 cd src/thirdParty
 
                 ./compile_precice
@@ -247,8 +246,6 @@ build:
 
                 source foam-extend-3.2/etc/bashrc
 
-                export WM_NCOMPPROCS=1
-
                 wmakeLnInclude src/boundaryConditions
                 wmakeLnInclude src/fvSchemes
                 wmakeLnInclude src/fsi
@@ -273,8 +270,6 @@ build:
 
                 source foam-extend-3.2/etc/bashrc
 
-                export WM_NCOMPPROCS=1
-
                 wmake libso src/fvSchemes
         - script:
             name: fsi
@@ -293,8 +288,6 @@ build:
                 export FOAM_INST_DIR=`pwd`
 
                 source foam-extend-3.2/etc/bashrc
-
-                export WM_NCOMPPROCS=1
 
                 wmake libso src/fsi
         - script:
@@ -315,8 +308,6 @@ build:
 
                 source foam-extend-3.2/etc/bashrc
 
-                export WM_NCOMPPROCS=1
-
                 wmake libso src/RBFMeshMotionSolver
         - script:
             name: FSI solvers
@@ -335,8 +326,6 @@ build:
                 export FOAM_INST_DIR=`pwd`
 
                 source foam-extend-3.2/etc/bashrc
-
-                export WM_NCOMPPROCS=1
 
                 wmake applications/solvers/fsi/fsiFoam
                 wmake applications/solvers/fsi/solidFoam
@@ -359,8 +348,6 @@ build:
 
                 source foam-extend-3.2/etc/bashrc
 
-                export WM_NCOMPPROCS=1
-
                 wmake applications/solvers/fsi/fsiSolidFoam
                 wmake applications/solvers/fsi/fsiFluidFoam
         - script:
@@ -380,8 +367,6 @@ build:
                 export FOAM_INST_DIR=`pwd`
 
                 source foam-extend-3.2/etc/bashrc
-
-                export WM_NCOMPPROCS=1
 
                 wmake src/tests/app
         - script:
