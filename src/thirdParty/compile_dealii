@@ -3,8 +3,6 @@
 set -e
 set -x
 
-METIS_VERSION=5.1.0
-PARMETIS_VERSION=4.0.3
 PETSC_VERSION=3.6.3
 DEALII_VERSION=8.3.0
 BOOST_VERSION=1_55_0
@@ -20,56 +18,6 @@ fi
 
 rm -f boost
 ln -s boost_${BOOST_VERSION} boost
-
-if [ ! -d "metis-${METIS_VERSION}" ]; then
-
-  rm -rf metis*
-
-  wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-${METIS_VERSION}.tar.gz
-
-  tar -zxf metis-${METIS_VERSION}.tar.gz
-  rm metis-${METIS_VERSION}.tar.gz
-
-  cd metis-${METIS_VERSION}
-
-  export CC=mpicc
-  export CXX=mpicxx
-
-  make config prefix=`pwd`/build
-
-  make install
-
-  cd ../
-
-fi
-
-rm -f metis
-ln -s metis-${METIS_VERSION} metis
-
-if [ ! -d "parmetis-${PARMETIS_VERSION}" ]; then
-
-  rm -rf parmetis*
-
-  wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-${PARMETIS_VERSION}.tar.gz
-
-  tar -zxf parmetis-${PARMETIS_VERSION}.tar.gz
-  rm parmetis-${PARMETIS_VERSION}.tar.gz
-
-  cd parmetis-${PARMETIS_VERSION}
-
-  export CC=mpicc
-  export CXX=mpicxx
-
-  make config prefix=`pwd`/build
-
-  make install
-
-  cd ../
-
-fi
-
-rm -f parmetis
-ln -s parmetis-${PARMETIS_VERSION} parmetis
 
 if [ ! -d "dealii-${DEALII_VERSION}" ]; then
 
@@ -88,8 +36,6 @@ if [ ! -d "dealii-${DEALII_VERSION}" ]; then
   export CXX=mpicxx
   export F77=mpif77
   export F90=mpif90
-  export METIS_DIR=`pwd`/metis
-  export PARMETIS_DIR=`pwd`/parmetis
 
   cd dealii-${DEALII_VERSION}
 
