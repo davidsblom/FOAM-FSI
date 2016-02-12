@@ -12,12 +12,14 @@ for i in range( nbCores ):
 
 returnCode = 0
 for run in runs:
-    while ( not run.poll() ):
+    code = None
+    while code is None:
         time.sleep( 5 )
         print '.'
         code = run.poll()
         if code > returnCode:
             returnCode = code
+    print code
 
 for i in range( nbCores ):
     subprocess.call("tail -n 50 tests_" + str(i) + ".log 2>&1", shell=True)
