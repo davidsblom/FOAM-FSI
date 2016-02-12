@@ -1,6 +1,8 @@
 FOAM-FSI
 ========
 
+[![wercker status](https://app.wercker.com/status/80ce1a6b7a23e394c5f07a3f27b5b43e/s/master "wercker status")](https://app.wercker.com/project/bykey/80ce1a6b7a23e394c5f07a3f27b5b43e)
+
 Features
 -----------
 
