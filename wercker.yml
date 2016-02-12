@@ -5,11 +5,10 @@ command-timeout: 60
 build:
     steps:
         - script:
-            name: apt-get update
+            name: install packages
             code: |
                 apt-get update
-        - install-packages:
-            packages: git build-essential flex bison zlib1g-dev qt4-dev-tools libqt4-dev gnuplot libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev
+                apt-get install -y git build-essential flex bison zlib1g-dev qt4-dev-tools libqt4-dev gnuplot libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev
         - script:
             name: initialize git submodules
             code: |
