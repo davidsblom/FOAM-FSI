@@ -49,8 +49,8 @@ export CPLUS_INCLUDE_PATH=`pwd`/eigen
 # Build preCICE
 
 cd precice
-scons -j 4 build=release python=off petsc=off compiler=mpicxx
-scons -j 4 build=release python=off petsc=off compiler=mpicxx solib
+scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx
+scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
 
 mkdir -p ${FOAM_USER_LIBBIN}
 mkdir -p ${FOAM_USER_APPBIN}

@@ -20,7 +20,7 @@ if [ ! -d "gtest-${VERSION}" ]; then
 
     cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CC_COMPILER=gcc
 
-    make
+    make -j $WM_NCOMPPROCS
 
     cd ../
 

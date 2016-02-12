@@ -394,4 +394,4 @@ build:
                 source foam-extend-3.2/etc/bashrc
 
                 cd src/tests
-                ./runTests.py
+                python runTests.py
