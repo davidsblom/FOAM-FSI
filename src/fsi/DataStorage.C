@@ -29,7 +29,7 @@
          std::vector<scalar> quadratureNodes = quadrature->get_nodes();
 
          if ( not quadrature->left_is_node() )
-         quadratureNodes.erase( quadratureNodes.begin() );
+            quadratureNodes.erase( quadratureNodes.begin() );
 
          fsi::quadrature::Matrix<scalar> q_matrix = fsi::quadrature::compute_q_matrix( quadratureNodes, nodes );
 
@@ -47,6 +47,43 @@
              data.row( i ) += getSolutions().row( 0 );
 
          return data;
+     }
+
+     template<typename scalar>
+     static fsi::quadrature::Matrix<scalar> compute_interpolation_matrix(
+         const std::vector<scalar> & from,
+         const std::vector<scalar> & to
+         )
+     {
+         const size_t to_size = to.size();
+         const size_t from_size = from.size();
+         assert( to_size >= 1 && from_size >= 1 );
+
+        fsi::quadrature::Matrix<scalar> q_mat = fsi::quadrature::Matrix<scalar>::Zero( to_size, from_size );
+
+         for ( size_t m = 0; m < from_size; ++m )
+         {
+             fsi::quadrature::Polynomial<scalar> p = fsi::quadrature::build_polynomial( m, from );
+
+             auto den = p.evaluate( from[m] );
+
+             for ( size_t j = 0; j < to_size; ++j )
+             {
+                 q_mat( j, m ) = p.evaluate( to[j] ) / den;
+             }
+         }
+
+         return q_mat;
+     }
+
+     const fsi::matrix DataStorage::interpolate(
+         const fsi::matrix functions,
+         const std::vector<scalar> & nodes ) const
+     {
+         std::vector<scalar> quadratureNodes = quadrature->get_nodes();
+         fsi::quadrature::Matrix<scalar> q_matrix = compute_interpolation_matrix( quadratureNodes, nodes );
+
+         return q_matrix * functions;
      }
 
      const fsi::matrix & DataStorage::getFunctions() const

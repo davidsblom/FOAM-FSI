@@ -136,3 +136,91 @@ TEST( SDC, interpolationGaussLobatto )
 
     ASSERT_GE( order, 4 );
 }
+
+TEST( SDC, polynomialInterpolationGaussLobatto )
+{
+    scalar dt, q0, qdot0, As, Ac, omega, endTime, tol;
+
+    int nbTimeSteps = 1;
+
+    endTime = 10;
+    dt = endTime / nbTimeSteps;
+    As = 100;
+    Ac = As;
+    omega = 1;
+    q0 = -As;
+    qdot0 = -As;
+    tol = 1.0e-17;
+
+    int nbNodes = 10;
+    std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+
+    std::shared_ptr<Piston> piston ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+    std::shared_ptr<SDC> sdc ( new SDC( piston, quadrature, tol, 5, 10 * nbNodes ) );
+
+    fsi::matrix functions ( quadrature->get_num_nodes(), 1 );
+    int i = 0;
+    for ( auto node : quadrature->get_nodes() )
+    {
+        functions( i, 0 ) = std::sin( node );
+        i++;
+    }
+
+    std::vector<scalar> nodes = {0, 0.5, 0.3645, quadrature->get_nodes()[1]};
+
+    const fsi::matrix interp = sdc->data->interpolate( functions, nodes );
+
+    i = 0;
+    for ( auto node : nodes )
+    {
+        scalar ref = std::sin( node );
+        scalar error = abs( interp( i , 0 ) - ref ) / abs( ref + SMALL );
+        ASSERT_LE( error, 1.0e-10 );
+        i++;
+    }
+}
+
+TEST( SDC, polynomialInterpolationGaussRadau )
+{
+    scalar dt, q0, qdot0, As, Ac, omega, endTime, tol;
+
+    int nbTimeSteps = 1;
+
+    endTime = 10;
+    dt = endTime / nbTimeSteps;
+    As = 100;
+    Ac = As;
+    omega = 1;
+    q0 = -As;
+    qdot0 = -As;
+    tol = 1.0e-17;
+
+    int nbNodes = 10;
+    std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+
+    std::shared_ptr<Piston> piston ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+    std::shared_ptr<SDC> sdc ( new SDC( piston, quadrature, tol, 5, 10 * nbNodes ) );
+
+    fsi::matrix functions ( quadrature->get_num_nodes(), 1 );
+    int i = 0;
+    for ( auto node : quadrature->get_nodes() )
+    {
+        functions( i, 0 ) = std::sin( node );
+        i++;
+    }
+
+    std::vector<scalar> nodes = {0, 0.5, 0.3645, quadrature->get_nodes()[1]};
+
+    const fsi::matrix interp = sdc->data->interpolate( functions, nodes );
+
+    i = 0;
+    for ( auto node : nodes )
+    {
+        scalar ref = std::sin( node );
+        scalar error = abs( interp( i , 0 ) - ref ) / abs( ref + SMALL );
+        ASSERT_LE( error, 1.0e-10 );
+        i++;
+    }
+}

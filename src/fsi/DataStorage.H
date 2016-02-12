@@ -26,6 +26,10 @@ namespace sdc
 
             const fsi::matrix integrate( const std::vector<scalar> & nodes, scalar dt ) const;
 
+            const fsi::matrix interpolate(
+                const fsi::matrix functions,
+                const std::vector<scalar> & nodes ) const;
+
             const fsi::vector getFunction( int substep ) const;
 
             const fsi::vector getSolution( int substep ) const;
@@ -39,6 +43,8 @@ namespace sdc
             void storeSolution( const fsi::vector & sol, int substep );
 
         private:
+
+            
 
             std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
             fsi::matrix F, solStages;
