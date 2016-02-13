@@ -20,11 +20,19 @@ AitkenPostProcessing.C
 DataValues.C
 AndersonPostProcessing.C
 SDC.C
+DataStorage.C
 ESDIRK.C
 AdaptiveTimeStepper.C
 PIES.C
 SDCFsiSolver.C
 version.Cver
+Polynomial.C
+QuadratureInterface.C
+Uniform.C
+GaussRadau.C
+GaussLobatto.C
+ClenshawCurtis.C
+
 
 fluidSolvers/CoupledFluidSolver.C
 fluidSolvers/FluidSolver.C

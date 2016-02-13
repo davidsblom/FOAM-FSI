@@ -3,108 +3,29 @@
 set -e
 set -x
 
-METIS_VERSION=5.1.0
-PARMETIS_VERSION=4.0.3
 PETSC_VERSION=3.6.3
 DEALII_VERSION=8.3.0
 BOOST_VERSION=1_55_0
 BOOST_VERSION_DOT=1.55.0
 export PETSC_ARCH=x86_64
 
-CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
-
-if [ ! -d "boost" ]; then
+if [ ! -d "boost_${BOOST_VERSION}" ]; then
     rm -rf boost*
     wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
     tar jxf boost_${BOOST_VERSION}.tar.bz2
     rm -f boost_${BOOST_VERSION}.tar.bz2
-    ln -s boost_${BOOST_VERSION} boost
 fi
 
-if [ ! -d "metis" ]; then
+rm -f boost
+ln -s boost_${BOOST_VERSION} boost
 
-  rm -rf metis*
-
-  wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-${METIS_VERSION}.tar.gz
-
-  tar -zxf metis-${METIS_VERSION}.tar.gz
-  rm metis-${METIS_VERSION}.tar.gz
-
-  ln -s metis-${METIS_VERSION} metis
-
-  cd metis-${METIS_VERSION}
-
-  export CC=mpicc
-  export CXX=mpicxx
-
-  make config prefix=`pwd`/build
-
-  make install
-
-  cd ../
-
-fi
-
-if [ ! -d "parmetis" ]; then
-
-  rm -rf parmetis*
-
-  wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-${PARMETIS_VERSION}.tar.gz
-
-  tar -zxf parmetis-${PARMETIS_VERSION}.tar.gz
-  rm parmetis-${PARMETIS_VERSION}.tar.gz
-  ln -s parmetis-${PARMETIS_VERSION} parmetis
-
-  cd parmetis-${PARMETIS_VERSION}
-
-  export CC=mpicc
-  export CXX=mpicxx
-
-  make config prefix=`pwd`/build
-
-  make install
-
-  cd ../
-
-fi
-
-if [ ! -d "petsc" ]; then
-
-  rm -rf petsc*
-
-  wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-${PETSC_VERSION}.tar.gz
-
-  tar -zxf petsc-${PETSC_VERSION}.tar.gz
-
-  rm petsc-${PETSC_VERSION}.tar.gz
-
-  ln -s petsc-${PETSC_VERSION} petsc
-
-  cd petsc-${PETSC_VERSION}
-
-  export PETSC_DIR=`pwd`
-
-  ./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --download-hypre=1 --download-mumps --download-scalapack --download-ptscotch --download-suitesparse --download-fblaslapack=1
-
-  make
-
-  make test
-
-  cd ../
-
-fi
-
-cp petsc/${PETSC_ARCH}/lib/lib* ${FOAM_LIBBIN}/
-
-if [ ! -d "dealii" ]; then
+if [ ! -d "dealii-${DEALII_VERSION}" ]; then
 
   rm -rf dealii*
 
   wget https://github.com/dealii/dealii/releases/download/v${DEALII_VERSION}/dealii-${DEALII_VERSION}.tar.gz
 
   tar -zxf dealii-${DEALII_VERSION}.tar.gz
-
-  ln -s dealii-${DEALII_VERSION} dealii
 
   rm dealii-${DEALII_VERSION}.tar.gz
 
@@ -115,8 +36,6 @@ if [ ! -d "dealii" ]; then
   export CXX=mpicxx
   export F77=mpif77
   export F90=mpif90
-  export METIS_DIR=`pwd`/metis
-  export PARMETIS_DIR=`pwd`/parmetis
 
   cd dealii-${DEALII_VERSION}
 
@@ -124,16 +43,20 @@ if [ ! -d "dealii" ]; then
   mkdir bin
   cd build
 
-  cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin ..
+  cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin --with-umfpack ..
 
-  make -j $CORES install
+  make -j $WM_NCOMPPROCS install
 
-  make -j $CORES test
+  make -j $WM_NCOMPPROCS test
 
   cd ../..
 
+  cp dealii-${DEALII_VERSION}/bin/lib/libdeal* ${FOAM_LIBBIN}/
+
 fi
-cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
+
+rm -f dealii
+ln -s dealii-${DEALII_VERSION} dealii
 
 cd deal-fsi
 
@@ -144,4 +67,4 @@ ln -s ../eigen
 
 cmake -DDEAL_II_DIR=../dealii/bin/ .
 
-make
+make -j $WM_NCOMPPROCS

@@ -9,12 +9,20 @@ cd $DIR
 # Assume that preCICE has been built before, and boost is already downloaded.
 
 VERSION=0.5.3
+BOOST_VERSION=1_55_0
+BOOST_VERSION_DOT=1.55.0
+
+# Download Boost
+if [ ! -d "boost_${BOOST_VERSION}" ]; then
+    wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
+    tar jxf boost_${BOOST_VERSION}.tar.bz2
+    rm -f boost_${BOOST_VERSION}.tar.bz2
+fi
+
+rm -f boost
+ln -s boost_${BOOST_VERSION} boost
 
 if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
-
-    # Define which versions of the different packages are used
-
-    export BOOST_VERSION=1_55_0
 
     rm -rf yaml-cpp*
 
@@ -25,15 +33,11 @@ if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
     tar -zxvf yaml-cpp-${VERSION}.tar.gz
     rm -f yaml-cpp-${VERSION}.tar.gz
 
-    ln -s yaml-cpp-release-${VERSION} yaml-cpp
-    rm -f boost
-    ln -s boost_${BOOST_VERSION} boost
-
     export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
     echo $BOOST_ROOT
     cd $BOOST_ROOT
 
-    cd ../yaml-cpp
+    cd ../yaml-cpp-release-${VERSION}
 
     mkdir build
 
@@ -41,11 +45,14 @@ if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
 
     CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
 
-    make -j 4
+    make -j $WM_NCOMPPROCS
 
     cd ../..
 
 fi
+
+rm -f yaml-cpp
+ln -s yaml-cpp-release-${VERSION} yaml-cpp
 
 mkdir -p ${FOAM_LIBBIN}
 cp yaml-cpp-release-${VERSION}/build/libyaml-cpp* ${FOAM_LIBBIN}/

@@ -12,6 +12,7 @@
 #include "fvCFD.H"
 #include "TimeIntegrationScheme.H"
 #include "QuadratureInterface.H"
+#include "DataStorage.H"
 
 namespace sdc
 {
@@ -39,6 +40,12 @@ public:
         void solveTimeStep( const scalar t0 );
 
         virtual void run();
+
+        void computeResidual(
+            const fsi::matrix & qmat,
+            const scalar dt,
+            fsi::matrix & qj
+            );
 
         virtual void getSourceTerm(
             const bool corrector,
@@ -82,29 +89,18 @@ public:
         fsi::matrix qmatEmbedded;
         fsi::vector dsdc;
 
-private:
-
-        void computeResidual(
-            const fsi::matrix & qmat,
-            const fsi::matrix & F,
-            const scalar dt,
-            fsi::matrix & qj
-            );
-
         // Store function in memory in case the source term is requested
         // by the solver
         bool corrector;
         int stageIndex;
-        fsi::matrix F;
-        fsi::matrix Fold;
         fsi::matrix Sj;
-        fsi::matrix solStages;
         bool convergence;
         int timeIndex;
         const int minSweeps;
         const int maxSweeps;
 
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+        std::shared_ptr<sdc::DataStorage> data;
     };
 }
 
