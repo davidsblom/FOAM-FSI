@@ -170,7 +170,7 @@ namespace sdc
 
             solver->implicitSolve( false, j, j, t, dt, data->getSolution( j ), rhs, f, result );
 
-            f = 1.0/dt*( result - data->getSolution( j ) - rhs );
+            f = 1.0 / dt * (result - data->getSolution( j ) - rhs);
 
             data->storeFunction( f, j + 1 );
             data->storeSolution( result, j + 1 );
@@ -197,7 +197,7 @@ namespace sdc
 
                 solver->implicitSolve( true, p, p, t, dt, data->getSolution( p ), rhs, f, result );
 
-                f = 1.0/dt*( result - data->getSolution( p ) - rhs );
+                f = 1.0 / dt * (result - data->getSolution( p ) - rhs);
 
                 data->storeFunction( f, p + 1 );
                 data->storeSolution( result, p + 1 );
