@@ -28,6 +28,7 @@ namespace tubeflow
         dx( L / N ),
         cmk( cmk ),
         rho( rho ),
+        L( L ),
         T( T ),
         alpha( a0 / (u0 + dx / dt) ),
         tau( u0 * dt / L ),
@@ -39,13 +40,15 @@ namespace tubeflow
         u( N ),
         p( N ),
         a( N ),
+        rhs( 2*N ),
         iter( 0 ),
         minIter( 1 ),
         maxIter( 30 ),
         tol( 1.0e-14 ),
         nbRes( 0 ),
         nbJac( 0 ),
-        grid()
+        grid(),
+        diffJacobian( false )
     {
         // Verify input parameters
         assert( dt > 0 );
@@ -65,7 +68,72 @@ namespace tubeflow
         p.fill( p0 );
         a.fill( a0 );
         data.fill( p0 );
+        rhs.setZero();
     }
+
+    TubeFlowFluidSolver::TubeFlowFluidSolver(
+        scalar a0,
+        scalar u0,
+        scalar p0,
+        scalar dt,
+        scalar cmk,
+        int N,
+        scalar L,
+        scalar T,
+        scalar rho,
+        bool diffJacobian
+        )
+        :
+       BaseMultiLevelSolver( N, 1, p0 ),
+       a0( a0 ),
+       u0( u0 ),
+       p0( p0 ),
+       dt( dt ),
+       dx( L / N ),
+       cmk( cmk ),
+       rho( rho ),
+       L( L ),
+       T( T ),
+       alpha( a0 / (u0 + dx / dt) ),
+       tau( u0 * dt / L ),
+       p_outn( 0 ),
+       p_out( 0 ),
+       un( N ),
+       pn( N ),
+       an( N ),
+       u( N ),
+       p( N ),
+       a( N ),
+       rhs( 2*N ),
+       iter( 0 ),
+       minIter( 1 ),
+       maxIter( 30 ),
+       tol( 1.0e-14 ),
+       nbRes( 0 ),
+       nbJac( 0 ),
+       grid(),
+       diffJacobian( diffJacobian )
+   {
+       // Verify input parameters
+       assert( dt > 0 );
+       assert( a0 > 0 );
+       assert( cmk > 0 );
+       assert( N > 0 );
+       assert( L > 0 );
+       assert( T > 0 );
+       assert( rho > 0 );
+       assert( alpha > 0 );
+       assert( tau > 0 );
+
+       un.fill( u0 );
+       an.fill( a0 );
+       pn.fill( p0 );
+       u.fill( u0 );
+       p.fill( p0 );
+       a.fill( a0 );
+       data.fill( p0 );
+       rhs.setZero();
+   }
 
     TubeFlowFluidSolver::~TubeFlowFluidSolver()
     {}
@@ -86,7 +154,7 @@ namespace tubeflow
     {
         assert( init );
 
-        return u0 + u0 / 10.0 * std::pow( std::sin( M_PI * timeIndex * tau ), 2 );
+        return u0 + u0 / 10.0 * std::pow( std::sin( M_PI * t * u0 / L ), 2 );
     }
 
     scalar TubeFlowFluidSolver::evaluateOutputPressureBoundaryCondition(
@@ -104,15 +172,100 @@ namespace tubeflow
         return value;
     }
 
+    // Generic functor
+    template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic>
+    struct Functor
+    {
+        typedef _Scalar Scalar;
+        enum {
+            InputsAtCompileTime = NX,
+            ValuesAtCompileTime = NY
+        };
+        typedef Eigen::Matrix<Scalar, InputsAtCompileTime, 1> InputType;
+        typedef Eigen::Matrix<Scalar, ValuesAtCompileTime, 1> ValueType;
+        typedef Eigen::Matrix<Scalar, ValuesAtCompileTime, InputsAtCompileTime> JacobianType;
+
+        int m_inputs, m_values;
+
+        Functor()
+            :
+            m_inputs( InputsAtCompileTime ),
+            m_values( ValuesAtCompileTime )
+        {}
+
+        Functor(
+            int inputs,
+            int values
+            )
+            :
+            m_inputs( inputs ),
+            m_values( values )
+        {}
+
+        int inputs() const
+        {
+            return m_inputs;
+        }
+
+        int values() const
+        {
+            return m_values;
+        }
+    };
+
+    struct residualFunctor : Functor<scalar>
+    {
+        residualFunctor(
+            TubeFlowFluidSolver * fluid,
+            const fsi::vector * a,
+            const fsi::vector * un,
+            const fsi::vector * pn,
+            const fsi::vector * an
+            )
+            :
+            Functor<scalar>( 2 * fluid->N, 2 * fluid->N )
+        {
+            this->fluid = fluid;
+            this->a = a;
+            this->un = un;
+            this->pn = pn;
+            this->an = an;
+        }
+
+        int operator()(
+            fsi::vector & x,
+            fsi::vector & fvec
+            ) const
+        {
+            fluid->evaluateResidual( x, *a, *un, *pn, *an, fvec );
+            return 0;
+        }
+
+        TubeFlowFluidSolver * fluid;
+        const fsi::vector * a;
+        const fsi::vector * un;
+        const fsi::vector * pn;
+        const fsi::vector * an;
+    };
+
     void TubeFlowFluidSolver::evaluateJacobian(
         const fsi::vector & x,
         const fsi::vector & a,
         const fsi::vector & un,
-        const fsi::vector &,
-        const fsi::vector &,
+        const fsi::vector & pn,
+        const fsi::vector & an,
         matrix & J
         )
     {
+        if ( diffJacobian )
+        {
+            residualFunctor functor( this, &a, &un, &pn, &an );
+            Eigen::NumericalDiff<residualFunctor, Eigen::Central> numDiff( functor );
+
+            numDiff.df( x, J );
+            return;
+        }
+
         // Check input parameters
         assert( u.rows() == a.rows() );
         assert( x.rows() == u.rows() * 2 );
@@ -223,6 +376,8 @@ namespace tubeflow
         assert( un.rows() == N );
         assert( pn.rows() == N );
         assert( an.rows() == N );
+        assert( R.rows() == rhs.rows() );
+
         R.setZero();
         nbRes++;
 
@@ -287,6 +442,10 @@ namespace tubeflow
         // Pressure term of momentum conservation
         R.segment( N + 1, N - 2 ) += 0.5 * 1.0 / rho * a_rf.cwiseProduct( p.segment( 2, N - 2 ) - p.segment( 1, N - 2 ) );
         R.segment( N + 1, N - 2 ) += 0.5 * 1.0 / rho * a_lf.cwiseProduct( p.segment( 1, N - 2 ) - p.head( N - 2 ) );
+
+        // SDC terms
+        R.segment( 1, N - 2 ) -= (1.0/dt)* rhs.segment( 1, N - 2 );
+        R.segment( N + 1, N - 2 ) -= (1.0/dt)* rhs.segment( N + 1, N - 2 );
     }
 
     void TubeFlowFluidSolver::finalizeTimeStep()
@@ -333,10 +492,18 @@ namespace tubeflow
         scalar norm = R.norm();
 
         if ( std::isinf( norm ) )
-            throw std::string( "The residual function of the fluid solver contains infinite numbers. Unable to continue the computation." );
+        {
+            std::string msg = "The residual function of the fluid solver contains infinite numbers. Unable to continue the computation.";
+            std::cout << msg << std::endl;
+            throw std::string( msg );
+        }
 
         if ( std::isnan( norm ) )
-            throw std::string( "The residual function of the fluid solver contains NaNs. Unable to continue the computation." );
+        {
+            std::string msg = "The residual function of the fluid solver contains NaNs. Unable to continue the computation.";
+            std::cout << msg << std::endl;
+            throw std::string( msg );
+        }
 
         if ( iter < minIter )
             return false;
@@ -381,89 +548,6 @@ namespace tubeflow
         assert( output.cols() == 1 );
     }
 
-    // Generic functor
-    template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic>
-    struct Functor
-    {
-        typedef _Scalar Scalar;
-        enum {
-            InputsAtCompileTime = NX,
-            ValuesAtCompileTime = NY
-        };
-        typedef Eigen::Matrix<Scalar, InputsAtCompileTime, 1> InputType;
-        typedef Eigen::Matrix<Scalar, ValuesAtCompileTime, 1> ValueType;
-        typedef Eigen::Matrix<Scalar, ValuesAtCompileTime, InputsAtCompileTime> JacobianType;
-
-        int m_inputs, m_values;
-
-        Functor() : m_inputs( InputsAtCompileTime ), m_values( ValuesAtCompileTime ) {}
-
-        Functor(
-            int inputs,
-            int values
-            ) : m_inputs( inputs ), m_values( values ) {}
-
-        virtual ~Functor()
-        {}
-
-        int inputs() const
-        {
-            return m_inputs;
-        }
-
-        int values() const
-        {
-            return m_values;
-        }
-    };
-
-    struct lmderFunctor : Functor<scalar>
-    {
-        lmderFunctor(
-            TubeFlowFluidSolver * fluid,
-            const fsi::vector * a,
-            const fsi::vector * un,
-            const fsi::vector * pn,
-            const fsi::vector * an
-            )
-            :
-            Functor<scalar>( 2 * fluid->N, 2 * fluid->N )
-        {
-            this->fluid = fluid;
-            this->a = a;
-            this->un = un;
-            this->pn = pn;
-            this->an = an;
-        }
-
-        virtual ~lmderFunctor()
-        {}
-
-        int operator()(
-            const fsi::vector & x,
-            fsi::vector & fvec
-            ) const
-        {
-            fluid->evaluateResidual( x, *a, *un, *pn, *an, fvec );
-            return 0;
-        }
-
-        int df(
-            const fsi::vector & x,
-            matrix & fjac
-            ) const
-        {
-            fluid->evaluateJacobian( x, *a, *un, *pn, *an, fjac );
-            return 0;
-        }
-
-        TubeFlowFluidSolver * fluid;
-        const fsi::vector * a;
-        const fsi::vector * un;
-        const fsi::vector * pn;
-        const fsi::vector * an;
-    };
-
     void TubeFlowFluidSolver::solve(
         const fsi::vector & a,
         fsi::vector & p
@@ -471,8 +555,6 @@ namespace tubeflow
     {
         assert( init );
         assert( a.rows() == N );
-        p.resize( N );
-        p.setZero();
 
         std::cout << "Solving fluid domain with size " << N << std::endl;
 
@@ -480,8 +562,8 @@ namespace tubeflow
 
         // Initial guess is current solution or the solution at previous time step
         fsi::vector x( 2 * N );
-        x.head( N ) = un;
-        x.tail( N ) = this->pn;
+        x.head( N ) = u;
+        x.tail( N ) = this->p;
 
         // Optimize the residual function
 
@@ -540,8 +622,12 @@ namespace tubeflow
                 }
 
                 // Fall back to Levenberg-Marquardt algorithm when exact Newton method is not converging
-                if ( alpha < 0.01 )
-                    throw std::string( "Newton-Raphson method is not converging. Unable to solve fluid problem." );
+                if ( alpha < 0.001 )
+                {
+                    std::string msg = "Newton-Raphson method is not converging. Unable to solve fluid problem.";
+                    std::cout << msg << std::endl;
+                    throw std::string( msg );
+                }
             }
 
             x += alpha * dx;

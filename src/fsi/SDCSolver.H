@@ -4,8 +4,7 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#ifndef SDCSolver_H
-#define SDCSolver_H
+#pragma once
 
 #include "BaseMultiLevelSolver.H"
 #include <deque>
@@ -83,5 +82,3 @@ public:
         }
     };
 }
-
-#endif

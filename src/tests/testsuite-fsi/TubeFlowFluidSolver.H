@@ -4,16 +4,15 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#ifndef TubeFlowFluidSolver_H
-#define TubeFlowFluidSolver_H
+#pragma once
 
 #include "BaseMultiLevelSolver.H"
 #include <unsupported/Eigen/NonLinearOptimization>
 
-using namespace fsi;
-
 namespace tubeflow
 {
+    using namespace fsi;
+
     class TubeFlowFluidSolver : public BaseMultiLevelSolver
     {
 public:
@@ -28,6 +27,19 @@ public:
             scalar L,
             scalar T,
             scalar rho
+            );
+
+        TubeFlowFluidSolver(
+            scalar a0,
+            scalar u0,
+            scalar p0,
+            scalar dt,
+            scalar cmk,
+            int N,
+            scalar L,
+            scalar T,
+            scalar rho,
+            bool diffJacobian
             );
 
         virtual ~TubeFlowFluidSolver();
@@ -91,6 +103,7 @@ public:
         scalar dx;
         scalar cmk;
         scalar rho;
+        scalar L;
         scalar T;
         scalar alpha;
         scalar tau;
@@ -103,6 +116,7 @@ public:
         fsi::vector u;
         fsi::vector p;
         fsi::vector a;
+        fsi::vector rhs;
 
         int iter;
         int minIter;
@@ -112,7 +126,7 @@ public:
         int nbJac;
 
         matrix grid;
+
+        bool diffJacobian;
     };
 }
-
-#endif
