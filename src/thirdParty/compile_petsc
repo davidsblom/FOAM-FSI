@@ -19,7 +19,7 @@ if [ ! -d "petsc-${PETSC_VERSION}" ]; then
 
   export PETSC_DIR=`pwd`
 
-  ./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --download-hypre=1 --download-mumps --download-scalapack --download-ptscotch --download-suitesparse --download-fblaslapack=1
+  ./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1
 
   make
 
