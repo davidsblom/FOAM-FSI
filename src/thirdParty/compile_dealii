@@ -45,7 +45,7 @@ if [ ! -d "dealii-${DEALII_VERSION}" ]; then
 
   cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin --with-umfpack ..
 
-  make -j $WM_NCOMPPROCS install
+  make -j $WM_NCOMPPROCS deal_II install
 
   make -j $WM_NCOMPPROCS test
 
@@ -67,4 +67,4 @@ ln -s ../eigen
 
 cmake -DDEAL_II_DIR=../dealii/bin/ .
 
-make -j $WM_NCOMPPROCS
+make -j $WM_NCOMPPROCS release
