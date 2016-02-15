@@ -170,6 +170,9 @@ build:
                 cd src/thirdParty
 
                 ./compile_dealii
+                
+                cd deal-fsi
+                make release run
         - script:
             name: googletest
             code: |
