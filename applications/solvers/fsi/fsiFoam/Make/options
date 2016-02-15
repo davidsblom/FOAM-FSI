@@ -49,4 +49,5 @@ EXE_LIBS = \
     -lbasicThermophysicalModels \
     -lspecie \
     -lcompressibleRASModels \
-    -ldeal_II
+    -ldeal_II \
+    -llduSolvers
