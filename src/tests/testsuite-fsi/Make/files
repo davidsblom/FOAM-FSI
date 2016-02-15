@@ -19,10 +19,5 @@ test_solidsolver.C
 tests.C
 
 MonolithicFsiSolver.C
-TubeFlowFluidSolver.C
-TubeFlowLinearizedFluidSolver.C
-TubeFlowLinearizedSolidSolver.C
-TubeFlowLinearSolidSolver.C
-TubeFlowSolidSolver.C
 
 EXE = $(FOAM_APPBIN)/testsuite-fsi

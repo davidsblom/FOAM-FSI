@@ -1,8 +1,3 @@
-TubeFlowFluidSolver.C
-TubeFlowSolidSolver.C
-TubeFlowLinearSolidSolver.C
-TubeFlowLinearizedSolidSolver.C
-TubeFlowLinearizedFluidSolver.C
 tubeflow.C
 
 EXE = $(FOAM_APPBIN)/tubeflow
