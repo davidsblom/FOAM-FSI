@@ -168,7 +168,7 @@ namespace sdc
 
             Info << "\nTime = " << t << ", SDC sweep = 1, SDC substep = " << j + 1 << nl << endl;
 
-            solver->implicitSolve( false, j, j, t, dt, data->getSolution(j), rhs, f, result );
+            solver->implicitSolve( false, j, j, t, dt, data->getSolution( j ), rhs, f, result );
 
             data->storeFunction( f, j + 1 );
             data->storeSolution( result, j + 1 );
@@ -180,7 +180,7 @@ namespace sdc
         {
             t = t0;
 
-            fsi::matrix Sj = this->dt * (smat * data->getFunctions());
+            fsi::matrix Sj = this->dt * ( smat * data->getFunctions() );
 
             // SDC sweep
             for ( int p = 0; p < k - 1; p++ )
@@ -193,7 +193,7 @@ namespace sdc
                 // Form right hand side
                 rhs.noalias() = -dt * data->getFunctions().row( p + 1 ) + Sj.row( p );
 
-                solver->implicitSolve( true, p, p, t, dt, data->getSolution(p), rhs, f, result );
+                solver->implicitSolve( true, p, p, t, dt, data->getSolution( p ), rhs, f, result );
 
                 data->storeFunction( f, p + 1 );
                 data->storeSolution( result, p + 1 );
@@ -201,7 +201,7 @@ namespace sdc
 
             // Compute the SDC residual
 
-            residual = dt * (qmat * data->getFunctions());
+            residual = dt * ( qmat * data->getFunctions() );
 
             for ( int i = 0; i < residual.rows(); i++ )
                 residual.row( i ) += data->getSolutions().row( 0 ) - data->getSolutions().row( i + 1 );
@@ -335,7 +335,7 @@ namespace sdc
             qj( 0, jj ) = 0;
 
             for ( kk = 0; kk < data->getFunctions().rows(); ++kk )
-                qj( 0, jj ) += qmat( ii, kk ) * data->getFunctions()( kk, jj );
+                qj( 0, jj ) += qmat( ii, kk ) * data->getFunctions() ( kk, jj );
 
             qj( 0, jj ) *= dt;
         }
@@ -368,7 +368,7 @@ namespace sdc
         if ( corrector )
         {
             if ( (k == 0 && stageIndex != 0) || (k == 0 && nbNodes == 2) )
-                Sj = dt * (smat * data->getFunctions());
+                Sj = dt * ( smat * data->getFunctions() );
 
             rhs.noalias() = -dt * dsdc( k ) * data->getFunctions().row( k + 1 ) + Sj.row( k );
         }
@@ -416,7 +416,7 @@ namespace sdc
 
     void SDC::outputResidual( std::string name )
     {
-        fsi::matrix residual = dt * (qmat * data->getFunctions());
+        fsi::matrix residual = dt * ( qmat * data->getFunctions() );
 
         for ( int i = 0; i < residual.rows(); i++ )
             residual.row( i ) += data->getSolutions().row( 0 ) - data->getSolutions().row( i + 1 );
