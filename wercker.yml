@@ -170,6 +170,9 @@ build:
                 cd src/thirdParty
 
                 ./compile_dealii
+
+                cd deal-fsi
+                make release run
         - script:
             name: googletest
             code: |
@@ -393,6 +396,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=1
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -413,6 +417,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=1
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -433,6 +438,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=1
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -453,6 +459,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=1
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -473,6 +480,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=1
 
                 source foam-extend-3.2/etc/bashrc
 
