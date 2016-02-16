@@ -25,5 +25,7 @@ public:
             const fsi::vector & qold,
             const fsi::vector & rhs
             ) = 0;
+
+        virtual void finalizeImplicitSolve( int /*k*/ ){}
     };
 }

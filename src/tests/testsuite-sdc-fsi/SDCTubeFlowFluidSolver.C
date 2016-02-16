@@ -178,12 +178,10 @@ namespace tubeflow
 
         this->solve( a, p );
 
-        pStages.at( k + 1 ) = p;
-        uStages.at( k + 1 ) = u;
-        aStages.at( k + 1 ) = a;
-
         getSolution( result, f );
         evaluateFunction( k, result, t, f );
+
+        finalizeImplicitSolve( k );
     }
 
     void SDCTubeFlowFluidSolver::prepareImplicitSolve(
@@ -199,6 +197,7 @@ namespace tubeflow
         this->dt = dt;
         this->t = t;
         this->tau = u0 * dt / L;
+        this->alpha = a0 / (u0 + dx / dt);
 
         if ( corrector )
         {
@@ -219,5 +218,23 @@ namespace tubeflow
         an = aStages.at( k );
 
         this->rhs = rhs;
+    }
+
+    void SDCTubeFlowFluidSolver::finalizeImplicitSolve( int k )
+    {
+        pStages.at( k + 1 ) = p;
+        uStages.at( k + 1 ) = u;
+        aStages.at( k + 1 ) = a;
+    }
+
+    void SDCTubeFlowFluidSolver::getVariablesInfo(
+        std::deque<int> & dof,
+        std::deque<bool> & enabled,
+        std::deque<std::string> & names
+        )
+    {
+        dof.push_back( 2 * N );
+        enabled.push_back( true );
+        names.push_back( "fluid" );
     }
 }

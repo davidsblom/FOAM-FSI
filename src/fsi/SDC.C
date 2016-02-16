@@ -259,6 +259,9 @@ namespace sdc
 
                     for ( unsigned int i = 0; i < dofVariables.size(); i++ )
                     {
+                        if ( not enabledVariables.at( i ) && dofVariables.at( i ) == 0 )
+                            continue;
+
                         assert( dofVariables.at( i ) > 0 );
 
                         scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) );

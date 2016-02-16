@@ -6,27 +6,30 @@
 
  #pragma once
 
- #include "TubeFlowFluidSolver.H"
+ #include "TubeFlowSolidSolver.H"
  #include "SDCFsiSolverInterface.H"
 
- namespace tubeflow
- {
-     class SDCTubeFlowFluidSolver : public TubeFlowFluidSolver, public sdc::SDCFsiSolverInterface
-     {
-     public:
-         SDCTubeFlowFluidSolver(
-             scalar a0,
-             scalar u0,
-             scalar p0,
-             scalar dt,
-             scalar cmk,
-             int N,
-             scalar L,
-             scalar T,
-             scalar rho
-             );
+namespace tubeflow
+{
+    using namespace fsi;
 
-        virtual ~SDCTubeFlowFluidSolver();
+    /*
+    * The solid solver for the flexible tube fluid-solid interaction test case
+    */
+    class SDCTubeFlowSolidSolver : public TubeFlowSolidSolver, public sdc::SDCFsiSolverInterface
+    {
+    public:
+
+        SDCTubeFlowSolidSolver(
+            scalar a0,
+            scalar cmk,
+            scalar p0,
+            scalar rho,
+            scalar L,
+            int N
+        );
+
+        virtual ~SDCTubeFlowSolidSolver();
 
         virtual void evaluateFunction(
             const int k,
@@ -79,11 +82,7 @@
             const scalar dt,
             const fsi::vector & qold,
             const fsi::vector & rhs
-        ) override;
-
-        virtual void finalizeImplicitSolve(
-            int k
-        ) override;
+            ) override;
 
         virtual void getVariablesInfo(
             std::deque<int> & dof,
@@ -91,11 +90,5 @@
             std::deque<std::string> & names
         ) override;
 
-        private:
-            int k;
-
-            std::deque<fsi::vector> pStages;
-            std::deque<fsi::vector> uStages;
-            std::deque<fsi::vector> aStages;
-     };
- }
+    };
+}

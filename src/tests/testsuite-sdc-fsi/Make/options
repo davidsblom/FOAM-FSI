@@ -5,7 +5,8 @@ EXE_INC = -std=c++11 \
     -I ../../fsi/lnInclude \
     -isystem ../../thirdParty/gtest/include \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
-    -isystem ../../thirdParty/eigen
+    -isystem ../../thirdParty/eigen \
+    -I ../../RBFMeshMotionSolver/lnInclude/
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
