@@ -244,7 +244,7 @@ TEST_P( AggressiveSpaceMappingSolverParametrizedTest, reuse )
     if ( !parallel && couplingGridSize == 20 && nbReuse == 1 && extrapolation == 0 && minIter == 3 )
     {
         ASSERT_LE( solver->fineModel->fsi->nbIter, 580 );
-        ASSERT_LE( solver->coarseModel->fsi->nbIter, 3831 );
+        ASSERT_LE( solver->coarseModel->fsi->nbIter, 3893 );
     }
 
     if ( !parallel && couplingGridSize == 20 && nbReuse == 4 && extrapolation == 0 && minIter == 3 )
@@ -460,7 +460,7 @@ TEST_F( AggressiveSpaceMappingSolverTest, solveTimeStep )
 
     solver->solveTimeStep();
 
-    ASSERT_LE( solver->fineModel->fsi->nbIter, 44 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 45 );
     ASSERT_LE( solver->coarseModel->fsi->nbIter, 209 );
     ASSERT_LE( fineModelFluid->nbRes, 220 );
     ASSERT_LE( fineModelFluid->nbJac, 132 );

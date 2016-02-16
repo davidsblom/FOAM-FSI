@@ -454,31 +454,31 @@ TEST_F( OutputSpaceMappingSolverTest, solveTimeStep )
 {
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 10 );
-    ASSERT_EQ( fineModelFluid->nbRes, 50 );
-    ASSERT_EQ( fineModelFluid->nbJac, 30 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 10 );
+    ASSERT_LE( fineModelFluid->nbRes, 35 );
+    ASSERT_LE( fineModelFluid->nbJac, 30 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 20 );
-    ASSERT_EQ( fineModelFluid->nbRes, 100 );
-    ASSERT_EQ( fineModelFluid->nbJac, 60 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 20 );
+    ASSERT_LE( fineModelFluid->nbRes, 100 );
+    ASSERT_LE( fineModelFluid->nbJac, 60 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 30 );
-    ASSERT_EQ( fineModelFluid->nbRes, 150 );
-    ASSERT_EQ( fineModelFluid->nbJac, 90 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 30 );
+    ASSERT_LE( fineModelFluid->nbRes, 150 );
+    ASSERT_LE( fineModelFluid->nbJac, 90 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 40 );
-    ASSERT_EQ( fineModelFluid->nbRes, 200 );
-    ASSERT_EQ( fineModelFluid->nbJac, 120 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 40 );
+    ASSERT_LE( fineModelFluid->nbRes, 200 );
+    ASSERT_LE( fineModelFluid->nbJac, 120 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 50 );
-    ASSERT_EQ( fineModelFluid->nbRes, 250 );
-    ASSERT_EQ( fineModelFluid->nbJac, 150 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 50 );
+    ASSERT_LE( fineModelFluid->nbRes, 250 );
+    ASSERT_LE( fineModelFluid->nbJac, 150 );
 }

@@ -49,7 +49,7 @@ protected:
         scalar tau = u0 * dt / L;
 
         // Computational settings
-        scalar tol = 1.0e-5;
+        scalar tol = 1.0e-4;
         int maxIter = 50;
         scalar initialRelaxation = 1.0e-3;
         scalar singularityLimit = 1.0e-14;

@@ -479,31 +479,31 @@ TEST_F( MLIQNILSSolverTest, solveTimeStep )
 {
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->models->back()->fsi->nbIter, 10 );
-    ASSERT_EQ( fineModelFluid->nbRes, 50 );
-    ASSERT_EQ( fineModelFluid->nbJac, 30 );
+    ASSERT_LE( solver->models->back()->fsi->nbIter, 10 );
+    ASSERT_LE( fineModelFluid->nbRes, 35 );
+    ASSERT_LE( fineModelFluid->nbJac, 30 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->models->back()->fsi->nbIter, 19 );
-    ASSERT_EQ( fineModelFluid->nbRes, 95 );
-    ASSERT_EQ( fineModelFluid->nbJac, 57 );
+    ASSERT_LE( solver->models->back()->fsi->nbIter, 19 );
+    ASSERT_LE( fineModelFluid->nbRes, 95 );
+    ASSERT_LE( fineModelFluid->nbJac, 57 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->models->back()->fsi->nbIter, 28 );
-    ASSERT_EQ( fineModelFluid->nbRes, 140 );
-    ASSERT_EQ( fineModelFluid->nbJac, 84 );
+    ASSERT_LE( solver->models->back()->fsi->nbIter, 28 );
+    ASSERT_LE( fineModelFluid->nbRes, 140 );
+    ASSERT_LE( fineModelFluid->nbJac, 84 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->models->back()->fsi->nbIter, 37 );
-    ASSERT_EQ( fineModelFluid->nbRes, 185 );
-    ASSERT_EQ( fineModelFluid->nbJac, 111 );
+    ASSERT_LE( solver->models->back()->fsi->nbIter, 37 );
+    ASSERT_LE( fineModelFluid->nbRes, 185 );
+    ASSERT_LE( fineModelFluid->nbJac, 111 );
 
     solver->solveTimeStep();
 
     ASSERT_EQ( solver->models->back()->fsi->nbIter, 46 );
-    ASSERT_EQ( fineModelFluid->nbRes, 230 );
-    ASSERT_EQ( fineModelFluid->nbJac, 138 );
+    ASSERT_LE( fineModelFluid->nbRes, 230 );
+    ASSERT_LE( fineModelFluid->nbJac, 138 );
 }
