@@ -354,7 +354,7 @@ TEST_P( MultiLevelAggressiveSpaceMappingSolverParametrizedTest, timeStep )
 
     if ( couplingGridSize == 50 && !parallel )
     {
-        ASSERT_LE( solver->models->at( 0 )->fsi->nbIter, 549 );
+        ASSERT_LE( solver->models->at( 0 )->fsi->nbIter, 685 );
         ASSERT_LE( solver->models->at( 1 )->fsi->nbIter, 43 );
         ASSERT_LE( solver->models->at( 2 )->fsi->nbIter, 7 );
     }
