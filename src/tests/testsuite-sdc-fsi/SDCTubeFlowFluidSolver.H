@@ -7,11 +7,11 @@
  #pragma once
 
  #include "TubeFlowFluidSolver.H"
- #include "SDCSolver.H"
+ #include "SDCFsiSolverInterface.H"
 
  namespace tubeflow
  {
-     class SDCTubeFlowFluidSolver : public TubeFlowFluidSolver, public sdc::SDCSolver
+     class SDCTubeFlowFluidSolver : public TubeFlowFluidSolver, public sdc::SDCFsiSolverInterface
      {
      public:
          SDCTubeFlowFluidSolver(
@@ -33,31 +33,31 @@
             const fsi::vector & q,
             const scalar t,
             fsi::vector & f
-            );
+            ) override;
 
-        virtual void finalizeTimeStep();
+        virtual void finalizeTimeStep() override;
 
-        virtual int getDOF();
+        virtual int getDOF() override;
 
         virtual void getSolution(
             fsi::vector & solution,
             fsi::vector & f
-            );
+            ) override;
 
         virtual void setSolution(
             const fsi::vector & solution,
             const fsi::vector & f
-            );
+            ) override;
 
-        virtual scalar getEndTime();
+        virtual scalar getEndTime() override;
 
-        virtual scalar getTimeStep();
+        virtual scalar getTimeStep() override;
 
-        virtual void nextTimeStep();
+        virtual void nextTimeStep() override;
 
-        virtual void initTimeStep();
+        virtual void initTimeStep() override;
 
-        virtual void setNumberOfImplicitStages( int k );
+        virtual void setNumberOfImplicitStages( int k ) override;
 
         virtual void implicitSolve(
             bool corrector,
@@ -69,7 +69,17 @@
             const fsi::vector & rhs,
             fsi::vector & f,
             fsi::vector & result
-            );
+            ) override;
+
+        virtual void prepareImplicitSolve(
+            bool corrector,
+            const int k,
+            const int kold,
+            const scalar t,
+            const scalar dt,
+            const fsi::vector & qold,
+            const fsi::vector & rhs
+        ) override;
 
         private:
             int k;

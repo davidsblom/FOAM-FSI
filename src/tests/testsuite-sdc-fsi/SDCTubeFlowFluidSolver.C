@@ -41,7 +41,51 @@ namespace tubeflow
         fsi::vector & f
         )
     {
+        // Check input parameters
+        assert( f.rows() == 2 * N );
+        assert( a.rows() == N );
+        assert( un.rows() == N );
+        assert( pn.rows() == N );
+        assert( an.rows() == N );
+        assert( f.rows() == rhs.rows() );
+
         f.setZero();
+
+        // Conservation of mass: internal system
+
+        // Left and right face of a: a(i-1/2), a(i+1/2)
+        fsi::vector a_lf = 0.5 * ( a.head( N - 2 ) + a.segment( 1, N - 2 ) );
+        fsi::vector a_rf = 0.5 * ( a.segment( 1, N - 2 ) + a.segment( 2, N - 2 ) );
+
+        // Left and right face of u: u(i-1/2), u(i+1/2)
+        fsi::vector u_lf = 0.5 * ( u.head( N - 2 ) + u.segment( 1, N - 2 ) );
+        fsi::vector u_rf = 0.5 * ( u.segment( 1, N - 2 ) + u.segment( 2, N - 2 ) );
+
+        assert( a_lf.rows() == a_rf.rows() );
+        assert( u_lf.rows() == u_rf.rows() );
+        assert( a_lf.rows() == u_lf.rows() );
+        assert( a_lf.rows() == N - 2 );
+
+        // Spatial term of mass conservation
+        f.segment( 1, N - 2 ) += u_rf.cwiseProduct( a_rf ) - u_lf.cwiseProduct( a_lf );
+
+        // Add pressure stabilization with coefficient alpha
+        f.segment( 1, N - 2 ) -= alpha / rho * ( p.segment( 2, N - 2 ) - 2 * p.segment( 1, N - 2 ) + p.head( N - 2 ) );
+
+        f.segment( 1, N - 2 ) /= dx;
+
+        // Conservation of momentum: internal system
+
+        // Convective term of momentum conservation
+        f.segment( N + 1, N - 2 ) += u.segment( 1, N - 2 ).cwiseProduct( u_rf ).cwiseProduct( a_rf ) - u.head( N - 2 ).cwiseProduct( u_lf ).cwiseProduct( a_lf );
+
+        // Pressure term of momentum conservation
+        f.segment( N + 1, N - 2 ) += 0.5 * 1.0 / rho * a_rf.cwiseProduct( p.segment( 2, N - 2 ) - p.segment( 1, N - 2 ) );
+        f.segment( N + 1, N - 2 ) += 0.5 * 1.0 / rho * a_lf.cwiseProduct( p.segment( 1, N - 2 ) - p.head( N - 2 ) );
+
+        f.segment( N + 1, N - 2 ) /= dx;
+
+        f *= -1.0;
     }
 
     void SDCTubeFlowFluidSolver::finalizeTimeStep()
@@ -51,7 +95,7 @@ namespace tubeflow
 
     int SDCTubeFlowFluidSolver::getDOF()
     {
-        return 2*N;
+        return 2 * N;
     }
 
     void SDCTubeFlowFluidSolver::getSolution(
@@ -61,6 +105,12 @@ namespace tubeflow
     {
         solution.head( N ) = a;
         solution.tail( N ) = a.cwiseProduct( u );
+
+        // Ignore the boundary conditions
+        solution( 0 ) = 0;
+        solution( N - 1 ) = 0;
+        solution( N ) = 0;
+        solution( 2 * N - 1 ) = 0;
     }
 
     void SDCTubeFlowFluidSolver::setSolution(
@@ -115,13 +165,35 @@ namespace tubeflow
     void SDCTubeFlowFluidSolver::implicitSolve(
         bool corrector,
         const int k,
+        const int kold,
+        const scalar t,
+        const scalar dt,
+        const fsi::vector & qold,
+        const fsi::vector & rhs,
+        fsi::vector & f,
+        fsi::vector & result
+    )
+    {
+        prepareImplicitSolve( corrector, k, kold, t, dt, qold, rhs );
+
+        this->solve( a, p );
+
+        pStages.at( k + 1 ) = p;
+        uStages.at( k + 1 ) = u;
+        aStages.at( k + 1 ) = a;
+
+        getSolution( result, f );
+        evaluateFunction( k, result, t, f );
+    }
+
+    void SDCTubeFlowFluidSolver::prepareImplicitSolve(
+        bool corrector,
+        const int k,
         const int /*kold*/,
         const scalar t,
         const scalar dt,
         const fsi::vector & /*qold*/,
-        const fsi::vector & rhs,
-        fsi::vector & f,
-        fsi::vector & result
+        const fsi::vector & rhs
     )
     {
         this->dt = dt;
@@ -147,13 +219,5 @@ namespace tubeflow
         an = aStages.at( k );
 
         this->rhs = rhs;
-
-        this->solve( a, p );
-
-        pStages.at( k + 1 ) = p;
-        uStages.at( k + 1 ) = u;
-        aStages.at( k + 1 ) = a;
-
-        getSolution( result, f );
     }
 }

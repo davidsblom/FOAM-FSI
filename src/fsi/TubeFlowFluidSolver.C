@@ -152,8 +152,6 @@ namespace tubeflow
 
     scalar TubeFlowFluidSolver::evaluateInletVelocityBoundaryCondition()
     {
-        assert( init );
-
         return u0 + u0 / 10.0 * std::pow( std::sin( M_PI * t * u0 / L ), 2 );
     }
 
@@ -163,8 +161,6 @@ namespace tubeflow
         scalar uout
         )
     {
-        assert( init );
-
         scalar value = std::sqrt( cmk * cmk - pout_n / (2.0 * rho) );
 
         value = 2 * rho * ( cmk * cmk - std::pow( value - (uout - uout_n) / 4.0, 2 ) );
@@ -444,8 +440,8 @@ namespace tubeflow
         R.segment( N + 1, N - 2 ) += 0.5 * 1.0 / rho * a_lf.cwiseProduct( p.segment( 1, N - 2 ) - p.head( N - 2 ) );
 
         // SDC terms
-        R.segment( 1, N - 2 ) -= (1.0/dt)* rhs.segment( 1, N - 2 );
-        R.segment( N + 1, N - 2 ) -= (1.0/dt)* rhs.segment( N + 1, N - 2 );
+        R.segment( 1, N - 2 ) -= (dx/dt)* rhs.segment( 1, N - 2 );
+        R.segment( N + 1, N - 2 ) -= (dx/dt)* rhs.segment( N + 1, N - 2 );
     }
 
     void TubeFlowFluidSolver::finalizeTimeStep()

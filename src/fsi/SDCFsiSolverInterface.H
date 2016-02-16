@@ -4,8 +4,7 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#ifndef SDCFsiSolverInterface_H
-#define SDCFsiSolverInterface_H
+#pragma once
 
 #include "SDCSolver.H"
 
@@ -28,5 +27,3 @@ public:
             ) = 0;
     };
 }
-
-#endif
