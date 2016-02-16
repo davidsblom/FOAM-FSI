@@ -40,7 +40,7 @@ protected:
         omega = 1;
         q0 = -As;
         qdot0 = -As;
-        tol = 1.0e-10;
+        tol = 1.0e-9;
 
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
 
@@ -96,7 +96,7 @@ protected:
         omega = 1;
         q0 = -As;
         qdot0 = -As;
-        tol = 1.0e-15;
+        tol = 1.0e-9;
 
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
 
@@ -306,7 +306,7 @@ TEST( CosTest, SDC )
     // rule = "uniform";
     // rule = "clenshaw-curtis";
     int nbNodes = 3;
-    scalar tol = 1.0e-12;
+    scalar tol = 1.0e-9;
 
     int nbTimeSteps = 5;
     scalar endTime = 0.05;
@@ -326,7 +326,7 @@ TEST( CosTest, SDC )
     sdc1->run();
     ASSERT_TRUE( sdc1->isConverged() );
 
-    sdc2->run();    
+    sdc2->run();
     ASSERT_TRUE( sdc2->isConverged() );
 
     scalar ref = 0.5 * amplitude * std::sin( M_PI * frequency * endTime ) * M_PI * frequency;
@@ -351,7 +351,7 @@ TEST( OscillatorTest, SDC )
 {
     std::string rule = "gauss-lobatto";
     int nbNodes = 3;
-    scalar tol = 1.0e-15;
+    scalar tol = 1.0e-11;
 
     int nbTimeSteps = 100;
     scalar endTime = 10;
@@ -387,5 +387,5 @@ TEST( OscillatorTest, SDC )
     std::cout << "error2 = " << error2 << std::endl;
     std::cout << "order = " << order << std::endl;
 
-    ASSERT_NEAR( order, 4, 1.0e-3 );
+    ASSERT_GE( order, 4 );
 }
