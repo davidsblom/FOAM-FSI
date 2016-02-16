@@ -242,8 +242,6 @@ TEST_P( SDCTest, runCompareSDC )
     piston_sdc->run();
     sdc->run();
 
-    ASSERT_TRUE( sdc->isConverged() );
-
     fsi::vector solution_piston_sdc( 2 ), solution_piston( 2 ), f;
     piston->getSolution( solution_piston, f );
     piston_sdc->getSolution( solution_piston_sdc, f );
@@ -256,9 +254,6 @@ TEST_P( SDCEstimateOrderTest, order )
 {
     sdc1->run();
     sdc2->run();
-
-    ASSERT_TRUE( sdc1->isConverged() );
-    ASSERT_TRUE( sdc2->isConverged() );
 
     fsi::vector solution1( 2 ), solution2( 2 ), f;
     piston1->getSolution( solution1, f );
@@ -322,10 +317,7 @@ TEST( CosTest, SDC )
     std::shared_ptr<SDC> sdc2( new SDC( cos2, quadrature, tol, nbNodes, 10 * nbNodes ) );
 
     sdc1->run();
-    ASSERT_TRUE( sdc1->isConverged() );
-
     sdc2->run();
-    ASSERT_TRUE( sdc2->isConverged() );
 
     scalar ref = 0.5 * amplitude * std::sin( M_PI * frequency * endTime ) * M_PI * frequency;
     scalar error1 = std::abs( cos1->f - ref ) / std::abs( ref );
@@ -372,9 +364,6 @@ TEST( OscillatorTest, SDC )
 
     sdc1->run();
     sdc2->run();
-
-    ASSERT_TRUE( sdc1->isConverged() );
-    ASSERT_TRUE( sdc2->isConverged() );
 
     scalar ref = std::cos( endTime );
     scalar error1 = std::abs( oscillator1->sol( 0 ) - ref ) / std::abs( ref );
