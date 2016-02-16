@@ -18,21 +18,17 @@ namespace tubeflow
         scalar L,
         scalar T,
         scalar rho
-    )
-    :
-    TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho, true ),
-    k( 0 ),
-    pStages(),
-    uStages(),
-    aStages()
-    {
-
-    }
+        )
+        :
+        TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho, true ),
+        k( 0 ),
+        pStages(),
+        uStages(),
+        aStages()
+    {}
 
     SDCTubeFlowFluidSolver::~SDCTubeFlowFluidSolver()
-    {
-
-    }
+    {}
 
     void SDCTubeFlowFluidSolver::evaluateFunction(
         const int /*k*/,
@@ -172,7 +168,7 @@ namespace tubeflow
         const fsi::vector & rhs,
         fsi::vector & f,
         fsi::vector & result
-    )
+        )
     {
         prepareImplicitSolve( corrector, k, kold, t, dt, qold, rhs );
 
@@ -192,7 +188,7 @@ namespace tubeflow
         const scalar dt,
         const fsi::vector & /*qold*/,
         const fsi::vector & rhs
-    )
+        )
     {
         this->dt = dt;
         this->t = t;

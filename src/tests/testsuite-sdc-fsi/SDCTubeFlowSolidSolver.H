@@ -4,21 +4,21 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
- #pragma once
+#pragma once
 
- #include "TubeFlowSolidSolver.H"
- #include "SDCFsiSolverInterface.H"
+#include "TubeFlowSolidSolver.H"
+#include "SDCFsiSolverInterface.H"
 
 namespace tubeflow
 {
     using namespace fsi;
 
     /*
-    * The solid solver for the flexible tube fluid-solid interaction test case
-    */
+     * The solid solver for the flexible tube fluid-solid interaction test case
+     */
     class SDCTubeFlowSolidSolver : public TubeFlowSolidSolver, public sdc::SDCFsiSolverInterface
     {
-    public:
+public:
 
         SDCTubeFlowSolidSolver(
             scalar a0,
@@ -27,7 +27,7 @@ namespace tubeflow
             scalar rho,
             scalar L,
             int N
-        );
+            );
 
         virtual ~SDCTubeFlowSolidSolver();
 
@@ -88,7 +88,6 @@ namespace tubeflow
             std::deque<int> & dof,
             std::deque<bool> & enabled,
             std::deque<std::string> & names
-        ) override;
-
+            ) override;
     };
 }

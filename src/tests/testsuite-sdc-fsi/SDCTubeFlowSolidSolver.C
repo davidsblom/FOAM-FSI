@@ -15,17 +15,13 @@ namespace tubeflow
         scalar rho,
         scalar L,
         int N
-    )
-    :
-    TubeFlowSolidSolver( a0, cmk, p0, rho, L, N )
-    {
-
-    }
+        )
+        :
+        TubeFlowSolidSolver( a0, cmk, p0, rho, L, N )
+    {}
 
     SDCTubeFlowSolidSolver::~SDCTubeFlowSolidSolver()
-    {
-
-    }
+    {}
 
     void SDCTubeFlowSolidSolver::evaluateFunction(
         const int /*k*/,
@@ -33,9 +29,7 @@ namespace tubeflow
         const scalar /*t*/,
         fsi::vector & /*f*/
         )
-    {
-
-    }
+    {}
 
     void SDCTubeFlowSolidSolver::finalizeTimeStep()
     {
@@ -51,9 +45,7 @@ namespace tubeflow
         fsi::vector & /*solution*/,
         fsi::vector & /*f*/
         )
-    {
-
-    }
+    {}
 
     void SDCTubeFlowSolidSolver::setSolution(
         const fsi::vector & /*solution*/,
@@ -76,9 +68,7 @@ namespace tubeflow
     }
 
     void SDCTubeFlowSolidSolver::nextTimeStep()
-    {
-
-    }
+    {}
 
     void SDCTubeFlowSolidSolver::initTimeStep()
     {
@@ -86,9 +76,7 @@ namespace tubeflow
     }
 
     void SDCTubeFlowSolidSolver::setNumberOfImplicitStages( int /*k*/ )
-    {
-
-    }
+    {}
 
     void SDCTubeFlowSolidSolver::implicitSolve(
         bool corrector,
@@ -114,9 +102,7 @@ namespace tubeflow
         const fsi::vector & /*qold*/,
         const fsi::vector & /*rhs*/
         )
-    {
-
-    }
+    {}
 
     void SDCTubeFlowSolidSolver::getVariablesInfo(
         std::deque<int> & dof,

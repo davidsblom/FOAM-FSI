@@ -40,7 +40,7 @@ namespace tubeflow
         u( N ),
         p( N ),
         a( N ),
-        rhs( 2*N ),
+        rhs( 2 * N ),
         iter( 0 ),
         minIter( 1 ),
         maxIter( 30 ),
@@ -84,56 +84,56 @@ namespace tubeflow
         bool diffJacobian
         )
         :
-       BaseMultiLevelSolver( N, 1, p0 ),
-       a0( a0 ),
-       u0( u0 ),
-       p0( p0 ),
-       dt( dt ),
-       dx( L / N ),
-       cmk( cmk ),
-       rho( rho ),
-       L( L ),
-       T( T ),
-       alpha( a0 / (u0 + dx / dt) ),
-       tau( u0 * dt / L ),
-       p_outn( 0 ),
-       p_out( 0 ),
-       un( N ),
-       pn( N ),
-       an( N ),
-       u( N ),
-       p( N ),
-       a( N ),
-       rhs( 2*N ),
-       iter( 0 ),
-       minIter( 1 ),
-       maxIter( 30 ),
-       tol( 1.0e-14 ),
-       nbRes( 0 ),
-       nbJac( 0 ),
-       grid(),
-       diffJacobian( diffJacobian )
-   {
-       // Verify input parameters
-       assert( dt > 0 );
-       assert( a0 > 0 );
-       assert( cmk > 0 );
-       assert( N > 0 );
-       assert( L > 0 );
-       assert( T > 0 );
-       assert( rho > 0 );
-       assert( alpha > 0 );
-       assert( tau > 0 );
+        BaseMultiLevelSolver( N, 1, p0 ),
+        a0( a0 ),
+        u0( u0 ),
+        p0( p0 ),
+        dt( dt ),
+        dx( L / N ),
+        cmk( cmk ),
+        rho( rho ),
+        L( L ),
+        T( T ),
+        alpha( a0 / (u0 + dx / dt) ),
+        tau( u0 * dt / L ),
+        p_outn( 0 ),
+        p_out( 0 ),
+        un( N ),
+        pn( N ),
+        an( N ),
+        u( N ),
+        p( N ),
+        a( N ),
+        rhs( 2 * N ),
+        iter( 0 ),
+        minIter( 1 ),
+        maxIter( 30 ),
+        tol( 1.0e-14 ),
+        nbRes( 0 ),
+        nbJac( 0 ),
+        grid(),
+        diffJacobian( diffJacobian )
+    {
+        // Verify input parameters
+        assert( dt > 0 );
+        assert( a0 > 0 );
+        assert( cmk > 0 );
+        assert( N > 0 );
+        assert( L > 0 );
+        assert( T > 0 );
+        assert( rho > 0 );
+        assert( alpha > 0 );
+        assert( tau > 0 );
 
-       un.fill( u0 );
-       an.fill( a0 );
-       pn.fill( p0 );
-       u.fill( u0 );
-       p.fill( p0 );
-       a.fill( a0 );
-       data.fill( p0 );
-       rhs.setZero();
-   }
+        un.fill( u0 );
+        an.fill( a0 );
+        pn.fill( p0 );
+        u.fill( u0 );
+        p.fill( p0 );
+        a.fill( a0 );
+        data.fill( p0 );
+        rhs.setZero();
+    }
 
     TubeFlowFluidSolver::~TubeFlowFluidSolver()
     {}
@@ -440,8 +440,8 @@ namespace tubeflow
         R.segment( N + 1, N - 2 ) += 0.5 * 1.0 / rho * a_lf.cwiseProduct( p.segment( 1, N - 2 ) - p.head( N - 2 ) );
 
         // SDC terms
-        R.segment( 1, N - 2 ) -= (dx/dt)* rhs.segment( 1, N - 2 );
-        R.segment( N + 1, N - 2 ) -= (dx/dt)* rhs.segment( N + 1, N - 2 );
+        R.segment( 1, N - 2 ) -= (dx / dt) * rhs.segment( 1, N - 2 );
+        R.segment( N + 1, N - 2 ) -= (dx / dt) * rhs.segment( N + 1, N - 2 );
     }
 
     void TubeFlowFluidSolver::finalizeTimeStep()

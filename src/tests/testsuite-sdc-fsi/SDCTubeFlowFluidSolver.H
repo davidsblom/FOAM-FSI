@@ -4,27 +4,28 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
- #pragma once
+#pragma once
 
- #include "TubeFlowFluidSolver.H"
- #include "SDCFsiSolverInterface.H"
+#include "TubeFlowFluidSolver.H"
+#include "SDCFsiSolverInterface.H"
 
- namespace tubeflow
- {
-     class SDCTubeFlowFluidSolver : public TubeFlowFluidSolver, public sdc::SDCFsiSolverInterface
-     {
-     public:
-         SDCTubeFlowFluidSolver(
-             scalar a0,
-             scalar u0,
-             scalar p0,
-             scalar dt,
-             scalar cmk,
-             int N,
-             scalar L,
-             scalar T,
-             scalar rho
-             );
+namespace tubeflow
+{
+    class SDCTubeFlowFluidSolver : public TubeFlowFluidSolver, public sdc::SDCFsiSolverInterface
+    {
+public:
+
+        SDCTubeFlowFluidSolver(
+            scalar a0,
+            scalar u0,
+            scalar p0,
+            scalar dt,
+            scalar cmk,
+            int N,
+            scalar L,
+            scalar T,
+            scalar rho
+            );
 
         virtual ~SDCTubeFlowFluidSolver();
 
@@ -79,23 +80,22 @@
             const scalar dt,
             const fsi::vector & qold,
             const fsi::vector & rhs
-        ) override;
+            ) override;
 
-        virtual void finalizeImplicitSolve(
-            int k
-        ) override;
+        virtual void finalizeImplicitSolve( int k ) override;
 
         virtual void getVariablesInfo(
             std::deque<int> & dof,
             std::deque<bool> & enabled,
             std::deque<std::string> & names
-        ) override;
+            ) override;
 
-        private:
-            int k;
+private:
 
-            std::deque<fsi::vector> pStages;
-            std::deque<fsi::vector> uStages;
-            std::deque<fsi::vector> aStages;
-     };
- }
+        int k;
+
+        std::deque<fsi::vector> pStages;
+        std::deque<fsi::vector> uStages;
+        std::deque<fsi::vector> aStages;
+    };
+}
