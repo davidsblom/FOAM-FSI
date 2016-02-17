@@ -16,29 +16,29 @@ SteadyStateSolidSolver::SteadyStateSolidSolver (
     gradU( fvc::grad( U ) ),
     epsilon
     (
-    IOobject
-    (
-        "epsilonGreen",
-        runTime->timeName(),
+        IOobject
+        (
+            "epsilonGreen",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
+        dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
     ),
     sigma
     (
-    IOobject
-    (
-        "sigma",
-        runTime->timeName(),
+        IOobject
+        (
+            "sigma",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
+        dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
     ),
     rheology( sigma, U ),
     rho( rheology.rho() ),
@@ -65,29 +65,29 @@ SteadyStateSolidSolver::SteadyStateSolidSolver (
     gradU( fvc::grad( U ) ),
     epsilon
     (
-    IOobject
-    (
-        "epsilonGreen",
-        runTime->timeName(),
+        IOobject
+        (
+            "epsilonGreen",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
+        dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
     ),
     sigma
     (
-    IOobject
-    (
-        "sigma",
-        runTime->timeName(),
+        IOobject
+        (
+            "sigma",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
+        dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
     ),
     rheology( sigma, U ),
     rho( rheology.rho() ),

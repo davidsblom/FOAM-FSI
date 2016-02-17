@@ -13,7 +13,7 @@ namespace fsi
 
         template<typename precision>
         GaussLobatto<precision>::GaussLobatto( const size_t num_nodes )
-            : IQuadrature<precision>(num_nodes)
+            : IQuadrature<precision>( num_nodes )
         {
             if ( this->num_nodes < 2 )
             {

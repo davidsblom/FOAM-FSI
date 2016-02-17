@@ -566,7 +566,7 @@ namespace Foam
                         * (
                             fvc::interpolate( rA * rho.oldTime() ) * phiAbs.oldTime()
                             - ( fvc::interpolate( rA * rho.oldTime() * U.oldTime() )
-                                & mesh().Sf() )
+                            & mesh().Sf() )
                             )
                     )
                        );

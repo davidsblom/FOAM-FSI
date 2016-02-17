@@ -20,48 +20,48 @@ foamSolidSolver::foamSolidSolver (
     runTime( runTime ),
     mesh
     (
-    Foam::IOobject
-    (
-        name,
-        runTime->timeName(),
-        *runTime,
-        Foam::IOobject::MUST_READ
-    )
+        Foam::IOobject
+        (
+            name,
+            runTime->timeName(),
+            *runTime,
+            Foam::IOobject::MUST_READ
+        )
     ),
     U
     (
-    IOobject
-    (
-        "U",
-        runTime->timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
+        IOobject
+        (
+            "U",
+            runTime->timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
     ),
     Uinitial
     (
-    IOobject
-    (
-        "U",
-        runTime->timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh
+        IOobject
+        (
+            "U",
+            runTime->timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh
     ),
     couplingProperties
     (
-    IOobject
-    (
-        "couplingProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    )
+        IOobject
+        (
+            "couplingProperties",
+            runTime->constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
     ),
     movingPatches( couplingProperties.lookup( "movingSolidPatches" ) ),
     movingPatchIDs( movingPatches.size() ),

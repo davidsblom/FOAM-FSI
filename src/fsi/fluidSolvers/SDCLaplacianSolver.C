@@ -21,55 +21,55 @@ SDCLaplacianSolver::SDCLaplacianSolver(
     runTime( runTime ),
     mesh
     (
-    Foam::IOobject
-    (
-        name,
-        runTime->timeName(),
-        *runTime,
-        Foam::IOobject::MUST_READ
-    )
+        Foam::IOobject
+        (
+            name,
+            runTime->timeName(),
+            *runTime,
+            Foam::IOobject::MUST_READ
+        )
     ),
     T
     (
-    IOobject
-    (
-        "T",
-        runTime->timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
+        IOobject
+        (
+            "T",
+            runTime->timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
     ),
     rhsT
     (
-    IOobject
-    (
-        "rhsT",
-        runTime->timeName(),
+        IOobject
+        (
+            "rhsT",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedScalar( "rhsT", dimTemperature / dimTime, 0 )
+        dimensionedScalar( "rhsT", dimTemperature / dimTime, 0 )
     ),
     transportProperties
     (
-    IOobject
-    (
-        "transportProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    )
+        IOobject
+        (
+            "transportProperties",
+            runTime->constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
     ),
     DT
     (
-    transportProperties.lookup( "DT" )
+        transportProperties.lookup( "DT" )
     ),
-    nNonOrthCorr( mesh.solutionDict().subDict( "SIMPLE" ).lookupOrDefault<int>("nNonOrthogonalCorrectors", 0) ),
+    nNonOrthCorr( mesh.solutionDict().subDict( "SIMPLE" ).lookupOrDefault<int>( "nNonOrthogonalCorrectors", 0 ) ),
     k( 0 ),
     TStages()
 {

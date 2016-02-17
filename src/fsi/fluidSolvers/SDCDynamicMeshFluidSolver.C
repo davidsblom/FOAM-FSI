@@ -18,40 +18,40 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     SDCFluidSolver( name, args, runTime ),
     Uf
     (
-    IOobject
-    (
-        "Uf",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    fvc::interpolate( U )
+        IOobject
+        (
+            "Uf",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        fvc::interpolate( U )
     ),
     rhsUf
     (
-    IOobject
-    (
-        "rhsUf",
-        runTime->timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    fvc::interpolate( rhsU )
+        IOobject
+        (
+            "rhsUf",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        fvc::interpolate( rhsU )
     ),
     rhsMeshPhi
     (
-    IOobject
-    (
-        "rhsMeshPhi",
-        runTime->timeName(),
+        IOobject
+        (
+            "rhsMeshPhi",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedScalar( "0", dimVolume / dimTime, 0.0 )
+        dimensionedScalar( "0", dimVolume / dimTime, 0.0 )
     ),
     UfStages(),
     pointsStages(),
@@ -59,29 +59,29 @@ SDCDynamicMeshFluidSolver::SDCDynamicMeshFluidSolver(
     interpolateVolumeStages(),
     UfFHeader
     (
-    "UfF",
-    runTime->timeName(),
-    mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
-    ),
-    UfF
-    (
-    UfFHeader,
-    fvc::interpolate( UF )
-    ),
-    meshPhiF
-    (
-    IOobject
-    (
-        "meshPhiF",
+        "UfF",
         runTime->timeName(),
         mesh,
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
-    mesh,
-    dimensionedScalar( "0", dimVolume / dimTime, 0.0 )
+    UfF
+    (
+        UfFHeader,
+        fvc::interpolate( UF )
+    ),
+    meshPhiF
+    (
+        IOobject
+        (
+            "meshPhiF",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedScalar( "0", dimVolume / dimTime, 0.0 )
     ),
     kold( 0 ),
     indexk( 0 )

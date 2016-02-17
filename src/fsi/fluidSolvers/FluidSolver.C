@@ -18,94 +18,94 @@ FluidSolver::FluidSolver(
     foamFluidSolver( name, args, runTime ),
     transportProperties
     (
-    IOobject
-    (
-        "transportProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    )
+        IOobject
+        (
+            "transportProperties",
+            runTime->constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
     ),
     nu( transportProperties.lookup( "nu" ) ),
     rho( transportProperties.lookup( "rho" ) ),
     p
     (
-    IOobject
-    (
-        "p",
-        runTime->timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
+        IOobject
+        (
+            "p",
+            runTime->timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
     ),
     U
     (
-    IOobject
-    (
-        "U",
-        runTime->timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
+        IOobject
+        (
+            "U",
+            runTime->timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
     ),
     phi
     (
-    IOobject
+        IOobject
+        (
+            "phi",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        linearInterpolate( U ) & mesh.Sf()
+    ),
+    UfHeader
     (
-        "phi",
+        "Uf",
         runTime->timeName(),
         mesh,
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
-    linearInterpolate( U ) & mesh.Sf()
-    ),
-    UfHeader
-    (
-    "Uf",
-    runTime->timeName(),
-    mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
-    ),
     Uf
     (
-    UfHeader,
-    mesh,
-    dimensionedVector( "0", U.dimensions(), Foam::vector::zero )
+        UfHeader,
+        mesh,
+        dimensionedVector( "0", U.dimensions(), Foam::vector::zero )
     ),
     AU
     (
-    IOobject
-    (
-        "AU",
-        runTime->timeName(),
+        IOobject
+        (
+            "AU",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    1.0 / runTime->deltaT(),
-    zeroGradientFvPatchScalarField::typeName
+        1.0 / runTime->deltaT(),
+        zeroGradientFvPatchScalarField::typeName
     ),
     HU
     (
-    IOobject
-    (
-        "HU",
-        runTime->timeName(),
+        IOobject
+        (
+            "HU",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    U.dimensions() / runTime->deltaT().dimensions(),
-    zeroGradientFvPatchVectorField::typeName
+        U.dimensions() / runTime->deltaT().dimensions(),
+        zeroGradientFvPatchVectorField::typeName
     ),
     nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
     nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
@@ -120,9 +120,9 @@ FluidSolver::FluidSolver(
     pRefValue( 0.0 ),
     laminarTransport( U, phi ),
     turbulence( autoPtr<incompressible::turbulenceModel>
-    (
-        incompressible::turbulenceModel::New( U, phi, laminarTransport )
-    ) ),
+        (
+            incompressible::turbulenceModel::New( U, phi, laminarTransport )
+        ) ),
     CoNum( 0 ),
     meanCoNum( 0 ),
     velMag( 0 ),
@@ -224,9 +224,9 @@ void FluidSolver::checkTimeDiscretisationScheme()
     if ( ddtScheme != word( "bdf1" ) && ddtScheme != word( "bdf2" ) && ddtScheme != word( "bdf3" ) )
     {
         FatalErrorIn( "checkTimeDiscretisationScheme: " )
-        << " ddt(U) scheme is currently set to " << ddtScheme
-        << ". This solver only works with ddt(U) scheme = bdf1, bdf2 or bdf3."
-        << abort( FatalError );
+            << " ddt(U) scheme is currently set to " << ddtScheme
+            << ". This solver only works with ddt(U) scheme = bdf1, bdf2 or bdf3."
+            << abort( FatalError );
     }
 
     forAll( U.boundaryField().types(), i )

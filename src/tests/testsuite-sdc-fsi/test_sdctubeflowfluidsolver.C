@@ -9,7 +9,7 @@
 #include "GaussRadau.H"
 #include "SDC.H"
 
-class SDCFluidSolverTest : public::testing::Test
+class SDCFluidSolverTest : public ::testing::Test
 {
 protected:
 

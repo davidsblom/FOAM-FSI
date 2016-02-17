@@ -89,7 +89,7 @@ namespace rbf
         if ( enabled && !livePointSelection && rbf->polynomialTerm )
         {
             WarningIn( "RBFCoarsening::RBFCoarsening" )
-            << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
+                << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
         }
     }
 
@@ -143,7 +143,7 @@ namespace rbf
         if ( enabled && !livePointSelection && rbf->polynomialTerm )
         {
             WarningIn( "RBFCoarsening::RBFCoarsening" )
-            << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
+                << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
         }
     }
 
@@ -199,7 +199,7 @@ namespace rbf
         if ( enabled && !livePointSelection && rbf->polynomialTerm )
         {
             WarningIn( "RBFCoarsening::RBFCoarsening" )
-            << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
+                << "Unit displacement is combined with polynomial addition into RBF interpolation. Could cause 'strange' results." << endl;
         }
     }
 

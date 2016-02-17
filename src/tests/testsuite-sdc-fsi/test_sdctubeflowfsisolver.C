@@ -15,7 +15,7 @@
 #include "RelativeConvergenceMeasure.H"
 #include "MinIterationConvergenceMeasure.H"
 
-class SDCFsiSolverTest : public::testing::Test
+class SDCFsiSolverTest : public ::testing::Test
 {
 protected:
 

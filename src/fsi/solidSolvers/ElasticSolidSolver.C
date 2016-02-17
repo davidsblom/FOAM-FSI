@@ -15,82 +15,82 @@ ElasticSolidSolver::ElasticSolidSolver (
     foamSolidSolver( name, args, runTime ),
     gradU
     (
-    IOobject
-    (
-        "grad(U)",
-        runTime->timeName(),
+        IOobject
+        (
+            "grad(U)",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedTensor( "zero", dimless, tensor::zero )
+        dimensionedTensor( "zero", dimless, tensor::zero )
     ),
     snGradU
     (
-    IOobject
-    (
-        "snGrad(U)",
-        runTime->timeName(),
+        IOobject
+        (
+            "snGrad(U)",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedVector( "zero", dimless, Foam::vector::zero )
+        dimensionedVector( "zero", dimless, Foam::vector::zero )
     ),
     V
     (
-    IOobject
-    (
-        "V",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    fvc::ddt( U )
+        IOobject
+        (
+            "V",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        fvc::ddt( U )
     ),
     gradV( fvc::ddt( gradU ) ),
     snGradV( ( snGradU - snGradU.oldTime() ) / runTime->deltaT() ),
     epsilon
     (
-    IOobject
-    (
-        "epsilon",
-        runTime->timeName(),
+        IOobject
+        (
+            "epsilon",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
+        dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
     ),
     sigma
     (
-    IOobject
-    (
-        "sigma",
-        runTime->timeName(),
+        IOobject
+        (
+            "sigma",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
+        dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
     ),
     divSigmaExp
     (
-    IOobject
-    (
-        "divSigmaExp",
-        runTime->timeName(),
+        IOobject
+        (
+            "divSigmaExp",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedVector( "zero", dimForce / dimVolume, Foam::vector::zero )
+        dimensionedVector( "zero", dimForce / dimVolume, Foam::vector::zero )
     ),
     rheology( sigma, U ),
     rho( rheology.rho() ),
@@ -204,7 +204,7 @@ void ElasticSolidSolver::solve()
         else
         {
             FatalErrorIn( args->executable() )
-            << "divSigmaExp method " << divSigmaExpMethod << " not found!" << endl;
+                << "divSigmaExp method " << divSigmaExpMethod << " not found!" << endl;
         }
 
         // linear momentum equation

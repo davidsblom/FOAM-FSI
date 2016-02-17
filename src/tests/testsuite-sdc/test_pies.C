@@ -8,7 +8,7 @@
 #include "Piston.H"
 #include "gtest/gtest.h"
 
-class PIESTest : public::testing::Test
+class PIESTest : public ::testing::Test
 {
 protected:
 
@@ -63,7 +63,7 @@ TEST_F( PIESTest, run )
     ASSERT_LT( error, 1.0e-8 );
 }
 
-class PIESRunTest : public::testing::Test
+class PIESRunTest : public ::testing::Test
 {
 protected:
 

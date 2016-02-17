@@ -21,10 +21,10 @@
 using namespace tubeflow;
 using namespace rbf;
 using std::shared_ptr;
-using::testing::TestWithParam;
-using::testing::Bool;
-using::testing::Values;
-using::testing::Combine;
+using ::testing::TestWithParam;
+using ::testing::Bool;
+using ::testing::Values;
+using ::testing::Combine;
 
 class ImplicitFsiSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, bool> >
 {
@@ -283,7 +283,7 @@ TEST_P( ImplicitFsiSolverParametrizedTest, numberOfColumnsVIQN )
     }
 }
 
-class ImplicitFsiSolverJacobianTest : public::testing::TestWithParam<int>
+class ImplicitFsiSolverJacobianTest : public ::testing::TestWithParam<int>
 {
 protected:
 

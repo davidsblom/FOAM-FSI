@@ -12,10 +12,10 @@
 #include "Cos.H"
 
 using namespace sdc;
-using::testing::TestWithParam;
-using::testing::Bool;
-using::testing::Values;
-using::testing::Combine;
+using ::testing::TestWithParam;
+using ::testing::Bool;
+using ::testing::Values;
+using ::testing::Combine;
 
 /*
  * Implements the piston problem for which a exact solution exists.

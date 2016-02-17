@@ -18,10 +18,10 @@
 #include "gtest/gtest.h"
 
 using namespace tubeflow;
-using::testing::TestWithParam;
-using::testing::Bool;
-using::testing::Values;
-using::testing::Combine;
+using ::testing::TestWithParam;
+using ::testing::Bool;
+using ::testing::Values;
+using ::testing::Combine;
 
 class BroydenPostProcessingParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int> >
 {

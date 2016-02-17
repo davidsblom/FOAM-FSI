@@ -18,10 +18,10 @@
 #include <unsupported/Eigen/NumericalDiff>
 
 using namespace tubeflow;
-using::testing::TestWithParam;
-using::testing::Bool;
-using::testing::Values;
-using::testing::Combine;
+using ::testing::TestWithParam;
+using ::testing::Bool;
+using ::testing::Values;
+using ::testing::Combine;
 
 class parallelCouplingParametrizedTest : public TestWithParam<int>
 {

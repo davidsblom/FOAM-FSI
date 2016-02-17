@@ -13,7 +13,7 @@
 
 using namespace tubeflow;
 
-class FsiSolverTest : public::testing::TestWithParam<bool>
+class FsiSolverTest : public ::testing::TestWithParam<bool>
 {
 protected:
 

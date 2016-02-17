@@ -19,7 +19,7 @@ CompressibleFluidSolver::CompressibleFluidSolver(
     foamFluidSolver( name, args, runTime ),
     pThermo
     (
-    basicPsiThermo::New( mesh )
+        basicPsiThermo::New( mesh )
     ),
     thermo( pThermo() ),
     p( thermo.p() ),
@@ -28,89 +28,89 @@ CompressibleFluidSolver::CompressibleFluidSolver(
     psi( thermo.psi() ),
     rho
     (
-    IOobject
-    (
-        "rho",
-        runTime->timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
-    ),
-    thermo.rho()
+        IOobject
+        (
+            "rho",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        thermo.rho()
     ),
     U
     (
-    IOobject
-    (
-        "U",
-        runTime->timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
+        IOobject
+        (
+            "U",
+            runTime->timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
     ),
     phi
     (
-    IOobject
-    (
-        "phi",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    ),
-    linearInterpolate( rho * U ) & mesh.Sf()
+        IOobject
+        (
+            "phi",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        ),
+        linearInterpolate( rho * U ) & mesh.Sf()
     ),
     turbulence
     (
-    compressible::RASModel::New
-    (
-        rho,
-        U,
-        phi,
-        thermo
-    )
+        compressible::RASModel::New
+        (
+            rho,
+            U,
+            phi,
+            thermo
+        )
     ),
     Up
     (
-    IOobject
-    (
-        "Up",
-        runTime->timeName(),
+        IOobject
+        (
+            "Up",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedVector4( "zero", dimless, vector4::zero )
+        dimensionedVector4( "zero", dimless, vector4::zero )
     ),
     DpDt(
-    fvc::DDt( surfaceScalarField( "phiU", phi / fvc::interpolate( rho ) ), p ) ),
+        fvc::DDt( surfaceScalarField( "phiU", phi / fvc::interpolate( rho ) ), p ) ),
     ddtp(
-    IOobject
-    (
-        "ddtp",
-        runTime->timeName(),
+        IOobject
+        (
+            "ddtp",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedScalar( "zero", dimPressure / dimTime, 0.0 )
-    ),
+        dimensionedScalar( "zero", dimPressure / dimTime, 0.0 )
+        ),
     ddtrho(
-    IOobject
-    (
-        "ddtrho",
-        runTime->timeName(),
+        IOobject
+        (
+            "ddtrho",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedScalar( "zero", dimDensity / dimTime, 0.0 )
-    ),
+        dimensionedScalar( "zero", dimDensity / dimTime, 0.0 )
+        ),
     cumulativeContErr( 0 ),
     convergenceTolerance( readScalar( mesh.solutionDict().subDict( "blockSolver" ).lookup( "convergenceTolerance" ) ) ),
     nOuterCorr( readLabel( mesh.solutionDict().subDict( "blockSolver" ).lookup( "nOuterCorrectors" ) ) ),

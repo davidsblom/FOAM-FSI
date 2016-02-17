@@ -20,55 +20,55 @@ CoupledSolidSolver::CoupledSolidSolver(
     volToPointInterp( mesh ),
     gradU
     (
-    IOobject
-    (
-        "grad(U)",
-        runTime->timeName(),
+        IOobject
+        (
+            "grad(U)",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedTensor( "zero", dimless, tensor::zero )
+        dimensionedTensor( "zero", dimless, tensor::zero )
     ),
     gradUf
     (
-    IOobject
-    (
-        "gradUf",
-        runTime->timeName(),
+        IOobject
+        (
+            "gradUf",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedTensor( "zero", dimless, tensor::zero )
+        dimensionedTensor( "zero", dimless, tensor::zero )
     ),
     epsilon
     (
-    IOobject
-    (
-        "epsilon",
-        runTime->timeName(),
+        IOobject
+        (
+            "epsilon",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
+        dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
     ),
     sigma
     (
-    IOobject
-    (
-        "sigma",
-        runTime->timeName(),
+        IOobject
+        (
+            "sigma",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
+        dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
     ),
     n( mesh.Sf() / mesh.magSf() ),
     rheology( sigma ),
@@ -78,7 +78,7 @@ CoupledSolidSolver::CoupledSolidSolver(
     muf( fvc::interpolate( mu, "mu" ) ),
     lambdaf( fvc::interpolate( lambda, "lambda" ) ),
     stressControl( mesh.solutionDict().subDict( "solidMechanics" ) ),
-    nCorr( stressControl.lookupOrDefault<int>("nCorrectors", 1000) )
+    nCorr( stressControl.lookupOrDefault<int>( "nCorrectors", 1000 ) )
 {
     createNonLinearGeometry();
 
@@ -909,9 +909,9 @@ void CoupledSolidSolver::solve()
                                 if
                                 (
                                     (curImEdge.end() == imEdgeNei
-                                        && !flipImEdge)
+                                    && !flipImEdge)
                                     || (curImEdge.start() == imEdgeNei
-                                        && flipImEdge)
+                                    && flipImEdge)
                                 )
                                 {
                                     curImEdgeLocalID = imEdgeI;
@@ -922,8 +922,8 @@ void CoupledSolidSolver::solve()
                             if ( curImEdgeLocalID == -1 )
                             {
                                 FatalError
-                                << "curImEdge not found"
-                                << abort( FatalError );
+                                    << "curImEdge not found"
+                                    << abort( FatalError );
                             }
 
                             const label curImEdgeID =
@@ -975,9 +975,9 @@ void CoupledSolidSolver::solve()
                                 if
                                 (
                                     (curImEdge.end() == imEdgeNei
-                                        && !flipImEdge)
+                                    && !flipImEdge)
                                     || (curImEdge.start() == imEdgeNei
-                                        && flipImEdge)
+                                    && flipImEdge)
                                 )
                                 {
                                     curImEdgeLocalID = imEdgeI;
@@ -988,8 +988,8 @@ void CoupledSolidSolver::solve()
                             if ( curImEdgeLocalID == -1 )
                             {
                                 FatalError
-                                << "curImEdge not found"
-                                << abort( FatalError );
+                                    << "curImEdge not found"
+                                    << abort( FatalError );
                             }
 
                             const label curImEdgeID =
@@ -1025,13 +1025,13 @@ void CoupledSolidSolver::solve()
         )
         {
             FatalError
-            << "Boundary condition " << U.boundaryField()[patchI].type()
-            << " not allowed" << nl
-            << "Currently implemented boundary conditions:" << nl
-            << fixedValueFvPatchVectorField::typeName << nl
-            << solidTractionFvPatchVectorField::typeName << nl
-            << "symmetryPlane" << nl
-            << abort( FatalError );
+                << "Boundary condition " << U.boundaryField()[patchI].type()
+                << " not allowed" << nl
+                << "Currently implemented boundary conditions:" << nl
+                << fixedValueFvPatchVectorField::typeName << nl
+                << solidTractionFvPatchVectorField::typeName << nl
+                << "symmetryPlane" << nl
+                << abort( FatalError );
         }
     }
 

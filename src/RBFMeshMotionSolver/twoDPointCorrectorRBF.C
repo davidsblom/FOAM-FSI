@@ -57,8 +57,8 @@ namespace Foam
             else
             {
                 FatalErrorIn( "void twoDPointCorrectorRBF::setMarker()" )
-                << "Both points give back a negative value with the inner product. Programming error?"
-                << abort( FatalError );
+                    << "Both points give back a negative value with the inner product. Programming error?"
+                    << abort( FatalError );
             }
         }
     }
