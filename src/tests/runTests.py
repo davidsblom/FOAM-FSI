@@ -25,7 +25,7 @@ for run in runs:
             returnCode = code
         if code is not None:
             break
-        time.sleep( 5 )
+        time.sleep( 1 )
 
 for i in range( nbCores ):
     subprocess.call("tail -n 20 tests_" + str(i) + ".log 2>&1", shell=True)
