@@ -29,6 +29,12 @@ public:
 
         virtual ~SDCTubeFlowFluidSolver();
 
+        virtual scalar evaluateOutputPressureBoundaryCondition(
+            scalar pout_n,
+            scalar uout_n,
+            scalar uout
+        ) override;
+
         virtual void evaluateFunction(
             const int k,
             const fsi::vector & q,

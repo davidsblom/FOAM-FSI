@@ -25,10 +25,23 @@ namespace tubeflow
         pStages(),
         uStages(),
         aStages()
-    {}
+    {
+        // Ugly hack to get SDC time integration working
+        alpha = a0 / (u0 + dx / 0.1);
+    }
 
     SDCTubeFlowFluidSolver::~SDCTubeFlowFluidSolver()
     {}
+
+    scalar SDCTubeFlowFluidSolver::evaluateOutputPressureBoundaryCondition(
+        scalar /*pout_n*/,
+        scalar /*uout_n*/,
+        scalar /*uout*/
+        )
+    {
+        // Ugly hack to get SDC time integration working
+        return 0;
+    }
 
     void SDCTubeFlowFluidSolver::evaluateFunction(
         const int /*k*/,
@@ -193,7 +206,6 @@ namespace tubeflow
         this->dt = dt;
         this->t = t;
         this->tau = u0 * dt / L;
-        this->alpha = a0 / (u0 + dx / dt);
 
         if ( corrector )
         {

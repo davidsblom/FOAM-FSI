@@ -72,7 +72,7 @@ public:
 
         scalar evaluateInletVelocityBoundaryCondition();
 
-        scalar evaluateOutputPressureBoundaryCondition(
+        virtual scalar evaluateOutputPressureBoundaryCondition(
             scalar pout_n,
             scalar uout_n,
             scalar uout
