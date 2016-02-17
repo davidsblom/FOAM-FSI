@@ -133,16 +133,16 @@ TEST_P( parallelCouplingParametrizedTest, timeStep )
 
     if ( N == 5 )
     {
-        ASSERT_EQ( solver->fsi->nbIter, 12 );
-        ASSERT_EQ( fluid->nbRes, 60 );
-        ASSERT_EQ( fluid->nbJac, 36 );
+        ASSERT_LE( solver->fsi->nbIter, 12 );
+        ASSERT_LE( fluid->nbRes, 60 );
+        ASSERT_LE( fluid->nbJac, 36 );
     }
 
     if ( N == 100 )
     {
-        ASSERT_EQ( solver->fsi->nbIter, 20 );
-        ASSERT_EQ( fluid->nbRes, 100 );
-        ASSERT_EQ( fluid->nbJac, 60 );
+        ASSERT_LE( solver->fsi->nbIter, 20 );
+        ASSERT_LE( fluid->nbRes, 100 );
+        ASSERT_LE( fluid->nbJac, 60 );
     }
 }
 
@@ -154,40 +154,40 @@ TEST_P( parallelCouplingParametrizedTest, timeSteps )
 
     if ( N == 100 )
     {
-        ASSERT_EQ( fluid->nbRes, 100 );
-        ASSERT_EQ( fluid->nbJac, 60 );
+        ASSERT_LE( fluid->nbRes, 100 );
+        ASSERT_LE( fluid->nbJac, 60 );
     }
 
     solver->solveTimeStep();
 
     if ( N == 100 )
     {
-        ASSERT_EQ( fluid->nbRes, 215 );
-        ASSERT_EQ( fluid->nbJac, 129 );
+        ASSERT_LE( fluid->nbRes, 215 );
+        ASSERT_LE( fluid->nbJac, 129 );
     }
 
     solver->solveTimeStep();
 
     if ( N == 100 )
     {
-        ASSERT_EQ( fluid->nbRes, 335 );
-        ASSERT_EQ( fluid->nbJac, 201 );
+        ASSERT_LE( fluid->nbRes, 335 );
+        ASSERT_LE( fluid->nbJac, 201 );
     }
 
     solver->solveTimeStep();
 
     if ( N == 100 )
     {
-        ASSERT_EQ( fluid->nbRes, 474 );
-        ASSERT_EQ( fluid->nbJac, 285 );
+        ASSERT_LE( fluid->nbRes, 474 );
+        ASSERT_LE( fluid->nbJac, 285 );
     }
 
     solver->solveTimeStep();
 
     if ( N == 100 )
     {
-        ASSERT_EQ( fluid->nbRes, 593 );
-        ASSERT_EQ( fluid->nbJac, 357 );
+        ASSERT_LE( fluid->nbRes, 593 );
+        ASSERT_LE( fluid->nbJac, 357 );
     }
 
     solver->solveTimeStep();
