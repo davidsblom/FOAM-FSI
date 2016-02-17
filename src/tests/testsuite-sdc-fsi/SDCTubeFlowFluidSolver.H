@@ -33,7 +33,7 @@ public:
             scalar pout_n,
             scalar uout_n,
             scalar uout
-        ) override;
+            ) override;
 
         virtual void evaluateFunction(
             const int k,
