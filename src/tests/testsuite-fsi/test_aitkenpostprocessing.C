@@ -19,7 +19,7 @@
 
 using namespace tubeflow;
 
-class AitkenPostProcessingTest : public::testing::Test
+class AitkenPostProcessingTest : public ::testing::Test
 {
 protected:
 

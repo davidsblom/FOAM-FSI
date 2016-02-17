@@ -49,7 +49,7 @@ protected:
         scalar tau = u0 * dt / L;
 
         // Computational settings
-        scalar tol = 1.0e-5;
+        scalar tol = 1.0e-4;
         int maxIter = 50;
         scalar initialRelaxation = 1.0e-3;
         scalar singularityLimit = 1.0e-14;
@@ -227,16 +227,17 @@ TEST_P( ManifoldMappingSolverParametrizedTest, object )
 
 TEST_P( ManifoldMappingSolverParametrizedTest, run )
 {
-    solver->run();
+    for ( int i = 0; i < 10; i++ )
+        solver->solveTimeStep();
 
     ASSERT_TRUE( solver->fineModel->fsi->allConverged );
-    ASSERT_FALSE( solver->fineModel->fsi->fluid->isRunning() );
+    ASSERT_TRUE( solver->fineModel->fsi->fluid->isRunning() );
     ASSERT_GT( solver->coarseModel->fsi->nbIter, solver->fineModel->fsi->nbIter );
 
     ASSERT_GT( solver->timeElapsed(), 0 );
-    ASSERT_EQ( solver->spaceMapping->timeIndex, 100 );
-    ASSERT_EQ( solver->fineModel->postProcessing->timeIndex, 100 );
-    ASSERT_EQ( solver->coarseModel->postProcessing->timeIndex, 100 );
+    ASSERT_EQ( solver->spaceMapping->timeIndex, 10 );
+    ASSERT_EQ( solver->fineModel->postProcessing->timeIndex, 10 );
+    ASSERT_EQ( solver->coarseModel->postProcessing->timeIndex, 10 );
 }
 
 TEST_P( ManifoldMappingSolverParametrizedTest, monolithic )

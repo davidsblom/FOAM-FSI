@@ -18,28 +18,28 @@ foamFluidSolver::foamFluidSolver(
     runTime( runTime ),
     meshPtr
     (
-    dynamicFvMesh::New
-    (
-        IOobject
+        dynamicFvMesh::New
         (
-            name,
-            runTime->timeName(),
-            *runTime,
-            IOobject::MUST_READ
+            IOobject
+            (
+                name,
+                runTime->timeName(),
+                *runTime,
+                IOobject::MUST_READ
+            )
         )
-    )
     ),
     mesh( meshPtr() ),
     couplingProperties
     (
-    IOobject
-    (
-        "couplingProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    )
+        IOobject
+        (
+            "couplingProperties",
+            runTime->constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
     ),
     movingPatches( couplingProperties.lookup( "movingFluidPatches" ) ),
     movingPatchIDs( movingPatches.size() ),

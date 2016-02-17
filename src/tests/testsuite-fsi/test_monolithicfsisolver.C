@@ -8,7 +8,7 @@
 #include "gtest/gtest.h"
 using namespace tubeflow;
 
-class MonolithicFsiSolverTest : public::testing::Test
+class MonolithicFsiSolverTest : public ::testing::Test
 {
 protected:
 

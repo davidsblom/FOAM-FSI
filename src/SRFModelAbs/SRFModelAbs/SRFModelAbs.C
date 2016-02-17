@@ -58,14 +58,14 @@ Foam::SRF::SRFModelAbs::SRFModelAbs(
     :
     IOdictionary
     (
-    IOobject
-    (
-        "SRFProperties",
-        U.time().constant(),
-        U.db(),
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    )
+        IOobject
+        (
+            "SRFProperties",
+            U.time().constant(),
+            U.db(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
     ),
     U_( U ),
     mesh_( U_.mesh() ),
@@ -75,7 +75,7 @@ Foam::SRF::SRFModelAbs::SRFModelAbs(
     omega_( dimensionedVector( "omega", dimless / dimTime, vector::zero ) ),
     excludedPatchNames_
     (
-    lookupOrDefault( "nonRotatingPatches", wordList( 0 ) )
+        lookupOrDefault( "nonRotatingPatches", wordList( 0 ) )
     )
 {
     // Normalise the axis
@@ -133,8 +133,8 @@ bool Foam::SRF::SRFModelAbs::read()
         if ( mag( axis_ ) < SMALL )
         {
             FatalErrorIn( "SRF::SRFModelAbs::read()" )
-            << "Zero length axis: " << axis_ << ".  This is not allowed."
-            << abort( FatalError );
+                << "Zero length axis: " << axis_ << ".  This is not allowed."
+                << abort( FatalError );
         }
 
         axis_ /= mag( axis_ );

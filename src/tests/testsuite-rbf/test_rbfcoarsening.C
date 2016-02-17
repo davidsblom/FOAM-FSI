@@ -14,10 +14,10 @@
 #include "gtest/gtest.h"
 
 using namespace rbf;
-using::testing::TestWithParam;
-using::testing::Bool;
-using::testing::Values;
-using::testing::Combine;
+using ::testing::TestWithParam;
+using ::testing::Bool;
+using ::testing::Values;
+using ::testing::Combine;
 
 class RBFCoarseningParametrizedTest : public TestWithParam < std::tr1::tuple<bool, int, int, int, scalar, bool> >
 {

@@ -213,7 +213,7 @@ namespace sdc
             reduce( squaredNormResidual, sumOp<scalarList>() );
             reduce( dof, sumOp<labelList>() );
             scalar error = std::sqrt( sum( squaredNormResidual ) / sum( dof ) );
-            bool convergence = error < tol && j >= minSweeps - 2;
+            convergence = error < tol && j >= minSweeps - 2;
 
             std::deque<int> dofVariables;
             std::deque<bool> enabledVariables;
@@ -259,6 +259,9 @@ namespace sdc
 
                     for ( unsigned int i = 0; i < dofVariables.size(); i++ )
                     {
+                        if ( not enabledVariables.at( i ) && dofVariables.at( i ) == 0 )
+                            continue;
+
                         assert( dofVariables.at( i ) > 0 );
 
                         scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) );

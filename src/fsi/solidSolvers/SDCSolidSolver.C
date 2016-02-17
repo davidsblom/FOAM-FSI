@@ -16,29 +16,29 @@ SDCSolidSolver::SDCSolidSolver (
     gradU( fvc::grad( U ) ),
     epsilon
     (
-    IOobject
-    (
-        "epsilonGreen",
-        runTime->timeName(),
+        IOobject
+        (
+            "epsilonGreen",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
+        dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
     ),
     sigma
     (
-    IOobject
-    (
-        "sigma",
-        runTime->timeName(),
+        IOobject
+        (
+            "sigma",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
+        dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
     ),
     rheology( sigma, U ),
     rho( rheology.rho() ),
@@ -49,15 +49,15 @@ SDCSolidSolver::SDCSolidSolver (
     n( mesh.Sf() / mesh.magSf() ),
     V
     (
-    IOobject
-    (
-        "V",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    fvc::ddt( U )
+        IOobject
+        (
+            "V",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        fvc::ddt( U )
     ),
     minIter( readInt( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "minIter" ) ) ),
     maxIter( readInt( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "maxIter" ) ) ),
@@ -70,55 +70,55 @@ SDCSolidSolver::SDCSolidSolver (
     VStages(),
     rhsU
     (
-    IOobject
-    (
-        "rhsU",
-        runTime->timeName(),
+        IOobject
+        (
+            "rhsU",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedVector( "rhsU", dimLength, Foam::vector::zero )
+        dimensionedVector( "rhsU", dimLength, Foam::vector::zero )
     ),
     rhsV
     (
-    IOobject
-    (
-        "rhsV",
-        runTime->timeName(),
+        IOobject
+        (
+            "rhsV",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedVector( "rhsV", dimVelocity, Foam::vector::zero )
+        dimensionedVector( "rhsV", dimVelocity, Foam::vector::zero )
     ),
     UF
     (
-    IOobject
-    (
-        "UF",
-        runTime->timeName(),
+        IOobject
+        (
+            "UF",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedVector( "UF", dimLength / dimTime, Foam::vector::zero )
+        dimensionedVector( "UF", dimLength / dimTime, Foam::vector::zero )
     ),
     VF
     (
-    IOobject
-    (
-        "VF",
-        runTime->timeName(),
+        IOobject
+        (
+            "VF",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedVector( "VF", dimVelocity / dimTime, Foam::vector::zero )
+        dimensionedVector( "VF", dimVelocity / dimTime, Foam::vector::zero )
     )
 {
     const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>( "fvSchemes" );
@@ -144,29 +144,29 @@ SDCSolidSolver::SDCSolidSolver (
     gradU( fvc::grad( U ) ),
     epsilon
     (
-    IOobject
-    (
-        "epsilonGreen",
-        runTime->timeName(),
+        IOobject
+        (
+            "epsilonGreen",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
+        dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
     ),
     sigma
     (
-    IOobject
-    (
-        "sigma",
-        runTime->timeName(),
+        IOobject
+        (
+            "sigma",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
+        dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
     ),
     rheology( sigma, U ),
     rho( rheology.rho() ),
@@ -177,15 +177,15 @@ SDCSolidSolver::SDCSolidSolver (
     n( mesh.Sf() / mesh.magSf() ),
     V
     (
-    IOobject
-    (
-        "V",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    fvc::ddt( U )
+        IOobject
+        (
+            "V",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        fvc::ddt( U )
     ),
     minIter( readInt( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "minIter" ) ) ),
     maxIter( readInt( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "maxIter" ) ) ),
@@ -198,55 +198,55 @@ SDCSolidSolver::SDCSolidSolver (
     VStages(),
     rhsU
     (
-    IOobject
-    (
-        "rhsU",
-        runTime->timeName(),
+        IOobject
+        (
+            "rhsU",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedVector( "rhsU", dimLength, Foam::vector::zero )
+        dimensionedVector( "rhsU", dimLength, Foam::vector::zero )
     ),
     rhsV
     (
-    IOobject
-    (
-        "rhsV",
-        runTime->timeName(),
+        IOobject
+        (
+            "rhsV",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedVector( "rhsV", dimVelocity, Foam::vector::zero )
+        dimensionedVector( "rhsV", dimVelocity, Foam::vector::zero )
     ),
     UF
     (
-    IOobject
-    (
-        "UF",
-        runTime->timeName(),
+        IOobject
+        (
+            "UF",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedVector( "UF", dimLength / dimTime, Foam::vector::zero )
+        dimensionedVector( "UF", dimLength / dimTime, Foam::vector::zero )
     ),
     VF
     (
-    IOobject
-    (
-        "VF",
-        runTime->timeName(),
+        IOobject
+        (
+            "VF",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
         mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedVector( "VF", dimVelocity / dimTime, Foam::vector::zero )
+        dimensionedVector( "VF", dimVelocity / dimTime, Foam::vector::zero )
     )
 {
     const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>( "fvSchemes" );

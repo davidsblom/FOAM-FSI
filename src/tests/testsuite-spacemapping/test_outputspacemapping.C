@@ -211,8 +211,11 @@ TEST_P( OutputSpaceMappingSolverParametrizedTest, object )
 
 TEST_P( OutputSpaceMappingSolverParametrizedTest, run )
 {
-    solver->run();
-    monolithicSolver->run();
+    for ( int i = 0; i < 10; i++ )
+    {
+        solver->solveTimeStep();
+        monolithicSolver->solveTimeStep();
+    }
 
     scalar tol = 1.0e-5;
     ASSERT_TRUE( solver->fineModel->fsi->allConverged );
@@ -236,19 +239,19 @@ TEST_P( OutputSpaceMappingSolverParametrizedTest, iterations )
     if ( couplingGridSize == 20 && nbReuse == 0 && extrapolation == 2 && minIter == 3 && order == 0 )
     {
         ASSERT_LE( solver->fineModel->fsi->nbIter, 874 );
-        ASSERT_LE( solver->coarseModel->fsi->nbIter, 4044 );
+        ASSERT_LE( solver->coarseModel->fsi->nbIter, 4049 );
     }
 
     if ( couplingGridSize == 20 && nbReuse == 1 && extrapolation == 2 && minIter == 3 && order == 0 )
     {
         ASSERT_LE( solver->fineModel->fsi->nbIter, 874 );
-        ASSERT_LE( solver->coarseModel->fsi->nbIter, 3706 );
+        ASSERT_LE( solver->coarseModel->fsi->nbIter, 3713 );
     }
 
     if ( couplingGridSize == 20 && nbReuse == 4 && extrapolation == 2 && minIter == 3 && order == 0 )
     {
         ASSERT_LE( solver->fineModel->fsi->nbIter, 874 );
-        ASSERT_LE( solver->coarseModel->fsi->nbIter, 3706 );
+        ASSERT_LE( solver->coarseModel->fsi->nbIter, 3713 );
     }
 
     if ( couplingGridSize == 20 && nbReuse == 0 && extrapolation == 2 && minIter == 3 && order == 1 )
@@ -454,31 +457,31 @@ TEST_F( OutputSpaceMappingSolverTest, solveTimeStep )
 {
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 10 );
-    ASSERT_EQ( fineModelFluid->nbRes, 50 );
-    ASSERT_EQ( fineModelFluid->nbJac, 30 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 10 );
+    ASSERT_LE( fineModelFluid->nbRes, 35 );
+    ASSERT_LE( fineModelFluid->nbJac, 30 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 20 );
-    ASSERT_EQ( fineModelFluid->nbRes, 100 );
-    ASSERT_EQ( fineModelFluid->nbJac, 60 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 20 );
+    ASSERT_LE( fineModelFluid->nbRes, 100 );
+    ASSERT_LE( fineModelFluid->nbJac, 60 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 30 );
-    ASSERT_EQ( fineModelFluid->nbRes, 150 );
-    ASSERT_EQ( fineModelFluid->nbJac, 90 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 30 );
+    ASSERT_LE( fineModelFluid->nbRes, 150 );
+    ASSERT_LE( fineModelFluid->nbJac, 90 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 40 );
-    ASSERT_EQ( fineModelFluid->nbRes, 200 );
-    ASSERT_EQ( fineModelFluid->nbJac, 120 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 40 );
+    ASSERT_LE( fineModelFluid->nbRes, 200 );
+    ASSERT_LE( fineModelFluid->nbJac, 120 );
 
     solver->solveTimeStep();
 
-    ASSERT_EQ( solver->fineModel->fsi->nbIter, 50 );
-    ASSERT_EQ( fineModelFluid->nbRes, 250 );
-    ASSERT_EQ( fineModelFluid->nbJac, 150 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 50 );
+    ASSERT_LE( fineModelFluid->nbRes, 250 );
+    ASSERT_LE( fineModelFluid->nbJac, 150 );
 }

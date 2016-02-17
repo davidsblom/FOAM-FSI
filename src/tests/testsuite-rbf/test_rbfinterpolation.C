@@ -15,10 +15,10 @@
 #include "gtest/gtest.h"
 
 using namespace rbf;
-using::testing::TestWithParam;
-using::testing::Bool;
-using::testing::Values;
-using::testing::Combine;
+using ::testing::TestWithParam;
+using ::testing::Bool;
+using ::testing::Values;
+using ::testing::Combine;
 
 class RBFInterpolationParametrizedTest : public TestWithParam < std::tr1::tuple<int, bool> >
 {

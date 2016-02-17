@@ -18,10 +18,10 @@
 #include "gtest/gtest.h"
 
 using namespace tubeflow;
-using::testing::TestWithParam;
-using::testing::Bool;
-using::testing::Values;
-using::testing::Combine;
+using ::testing::TestWithParam;
+using ::testing::Bool;
+using ::testing::Values;
+using ::testing::Combine;
 
 class BroydenPostProcessingParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int> >
 {
@@ -214,13 +214,13 @@ TEST_P( BroydenPostProcessingParametrizedTest, reuse )
         ASSERT_LE( solver->fsi->nbIter, 1072 );
 
     if ( !parallel && nbReuse == 1 )
-        ASSERT_LE( solver->fsi->nbIter, 702 );
+        ASSERT_LE( solver->fsi->nbIter, 703 );
 
     if ( !parallel && nbReuse == 4 )
         ASSERT_LE( solver->fsi->nbIter, 582 );
 
     if ( !parallel && nbReuse == 8 )
-        ASSERT_LE( solver->fsi->nbIter, 526 );
+        ASSERT_LE( solver->fsi->nbIter, 529 );
 
     if ( parallel && nbReuse == 0 )
         ASSERT_LE( solver->fsi->nbIter, 1841 );

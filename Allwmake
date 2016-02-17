@@ -34,6 +34,7 @@ wmake src/tests/testsuite-dealii
 wmake src/tests/testsuite-fsi
 wmake src/tests/testsuite-rbf
 wmake src/tests/testsuite-sdc
+wmake src/tests/testsuite-sdc-fsi
 wmake src/tests/testsuite-spacemapping
 wmake src/tests/tubeflow
 wmake applications/solvers/fsi/fsiSolidFoam

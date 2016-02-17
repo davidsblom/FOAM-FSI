@@ -13,7 +13,7 @@
 
 using namespace tubeflow;
 
-class FsiLinearizedSolidSolverTest : public::testing::Test
+class FsiLinearizedSolidSolverTest : public ::testing::Test
 {
 protected:
 

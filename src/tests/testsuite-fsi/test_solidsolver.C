@@ -9,7 +9,7 @@
 
 using namespace tubeflow;
 
-class SolidSolverTest : public::testing::Test
+class SolidSolverTest : public ::testing::Test
 {
 protected:
 

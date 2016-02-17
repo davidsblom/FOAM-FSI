@@ -21,10 +21,10 @@
 using namespace tubeflow;
 using namespace rbf;
 using std::shared_ptr;
-using::testing::TestWithParam;
-using::testing::Bool;
-using::testing::Values;
-using::testing::Combine;
+using ::testing::TestWithParam;
+using ::testing::Bool;
+using ::testing::Values;
+using ::testing::Combine;
 
 class ImplicitFsiSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, bool> >
 {
@@ -283,7 +283,7 @@ TEST_P( ImplicitFsiSolverParametrizedTest, numberOfColumnsVIQN )
     }
 }
 
-class ImplicitFsiSolverJacobianTest : public::testing::TestWithParam<int>
+class ImplicitFsiSolverJacobianTest : public ::testing::TestWithParam<int>
 {
 protected:
 
@@ -369,7 +369,7 @@ protected:
     TubeFlowFluidSolver * fluid2;
 };
 
-INSTANTIATE_TEST_CASE_P( jacobian, ImplicitFsiSolverJacobianTest, ::testing::Values( 5, 10, 100, 200 ) );
+INSTANTIATE_TEST_CASE_P( jacobian, ImplicitFsiSolverJacobianTest, ::testing::Values( 5, 10, 50 ) );
 
 // Generic functor
 template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic>

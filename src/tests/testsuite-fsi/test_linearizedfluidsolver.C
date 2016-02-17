@@ -9,7 +9,7 @@
 
 using namespace tubeflow;
 
-class TubeFlowLinearizedFluidSolverTest : public::testing::Test
+class TubeFlowLinearizedFluidSolverTest : public ::testing::Test
 {
 protected:
 

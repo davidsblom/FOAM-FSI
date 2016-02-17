@@ -18,107 +18,107 @@ SDCFluidSolver::SDCFluidSolver(
     foamFluidSolver( name, args, runTime ),
     transportProperties
     (
-    IOobject
-    (
-        "transportProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
+        IOobject
+        (
+            "transportProperties",
+            runTime->constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
 
-    )
+        )
     ),
     pimple( mesh.solutionDict().subDict( "PIMPLE" ) ),
     nu( transportProperties.lookup( "nu" ) ),
     rho( transportProperties.lookup( "rho" ) ),
     p
     (
-    IOobject
-    (
-        "p",
-        runTime->timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
+        IOobject
+        (
+            "p",
+            runTime->timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
     ),
     U
     (
-    IOobject
-    (
-        "U",
-        runTime->timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
+        IOobject
+        (
+            "U",
+            runTime->timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
     ),
     phi
     (
-    IOobject
-    (
-        "phi",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    linearInterpolate( U ) & mesh.Sf()
+        IOobject
+        (
+            "phi",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        linearInterpolate( U ) & mesh.Sf()
     ),
     AU
     (
-    IOobject
-    (
-        "AU",
-        runTime->timeName(),
+        IOobject
+        (
+            "AU",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    1.0 / runTime->deltaT(),
-    zeroGradientFvPatchScalarField::typeName
+        1.0 / runTime->deltaT(),
+        zeroGradientFvPatchScalarField::typeName
     ),
     HU
     (
-    IOobject
-    (
-        "HU",
-        runTime->timeName(),
+        IOobject
+        (
+            "HU",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    U.dimensions() / runTime->deltaT().dimensions(),
-    zeroGradientFvPatchVectorField::typeName
+        U.dimensions() / runTime->deltaT().dimensions(),
+        zeroGradientFvPatchVectorField::typeName
     ),
     rhsU
     (
-    IOobject
-    (
-        "rhsU",
-        runTime->timeName(),
+        IOobject
+        (
+            "rhsU",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedVector( "rhsU", dimVelocity, Foam::vector::zero )
+        dimensionedVector( "rhsU", dimVelocity, Foam::vector::zero )
     ),
     rhsPhi
     (
-    IOobject
-    (
-        "rhsPhi",
-        runTime->timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    fvc::interpolate( rhsU ) & mesh.Sf()
+        IOobject
+        (
+            "rhsPhi",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        fvc::interpolate( rhsU ) & mesh.Sf()
     ),
     nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
     nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
@@ -133,39 +133,39 @@ SDCFluidSolver::SDCFluidSolver(
     pRefValue( 0.0 ),
     laminarTransport( U, phi ),
     turbulence( autoPtr<incompressible::turbulenceModel>
-    (
-        incompressible::turbulenceModel::New( U, phi, laminarTransport )
-    ) ),
+        (
+            incompressible::turbulenceModel::New( U, phi, laminarTransport )
+        ) ),
     k( 0 ),
     pStages(),
     phiStages(),
     UStages(),
     UFHeader
     (
-    "UF",
-    runTime->timeName(),
-    mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
+        "UF",
+        runTime->timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
     ),
     phiFHeader
     (
-    "phiF",
-    runTime->timeName(),
-    mesh,
-    IOobject::READ_IF_PRESENT,
-    IOobject::AUTO_WRITE
+        "phiF",
+        runTime->timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
     ),
     UF
     (
-    UFHeader,
-    mesh,
-    dimensionedVector( "UF", dimVelocity / dimTime, Foam::vector::zero )
+        UFHeader,
+        mesh,
+        dimensionedVector( "UF", dimVelocity / dimTime, Foam::vector::zero )
     ),
     phiF
     (
-    phiFHeader,
-    fvc::interpolate( UF ) & mesh.Sf()
+        phiFHeader,
+        fvc::interpolate( UF ) & mesh.Sf()
     ),
     turbulenceSwitch( true ),
     explicitFirstStage( true ),

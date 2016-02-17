@@ -4,8 +4,7 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#ifndef SDCFsiSolver_H
-#define SDCFsiSolver_H
+#pragma once
 
 #include "SDCFsiSolverInterface.H"
 #include "PostProcessing.H"
@@ -89,5 +88,3 @@ private:
         std::deque<fsi::vector> xStages;
     };
 }
-
-#endif

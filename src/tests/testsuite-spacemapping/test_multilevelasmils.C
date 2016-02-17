@@ -287,7 +287,7 @@ TEST_P( MultiLevelASMILSSolverParametrizedTest, object )
 
 TEST_P( MultiLevelASMILSSolverParametrizedTest, monolithic )
 {
-    for ( int i = 0; i < 100; i++ )
+    for ( int i = 0; i < 10; i++ )
     {
         solver->solveTimeStep();
         monolithicSolver->solveTimeStep();

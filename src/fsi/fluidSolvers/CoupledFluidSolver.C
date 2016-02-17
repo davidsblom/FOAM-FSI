@@ -18,52 +18,52 @@ CoupledFluidSolver::CoupledFluidSolver(
     foamFluidSolver( name, args, runTime ),
     p
     (
-    IOobject
-    (
-        "p",
-        runTime->timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
+        IOobject
+        (
+            "p",
+            runTime->timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
     ),
     U
     (
-    IOobject
-    (
-        "U",
-        runTime->timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
+        IOobject
+        (
+            "U",
+            runTime->timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
     ),
     phi
     (
-    IOobject
-    (
-        "phi",
-        runTime->timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    ),
-    linearInterpolate( U ) & mesh.Sf()
+        IOobject
+        (
+            "phi",
+            runTime->timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        ),
+        linearInterpolate( U ) & mesh.Sf()
     ),
     Up
     (
-    IOobject
-    (
-        "Up",
-        runTime->timeName(),
+        IOobject
+        (
+            "Up",
+            runTime->timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
         mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedVector4( "zero", dimless, vector4::zero )
+        dimensionedVector4( "zero", dimless, vector4::zero )
     ),
     laminarTransport( U, phi ),
     turbulence( incompressible::turbulenceModel::New( U, phi, laminarTransport ) ),
@@ -74,14 +74,14 @@ CoupledFluidSolver::CoupledFluidSolver(
     pRefValue( 0 ),
     transportProperties
     (
-    IOobject
-    (
-        "transportProperties",
-        runTime->constant(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    )
+        IOobject
+        (
+            "transportProperties",
+            runTime->constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
     ),
     nu( transportProperties.lookup( "nu" ) ),
     rho( transportProperties.lookup( "rho" ) ),

@@ -12,7 +12,7 @@
 
 using namespace tubeflow;
 
-class FluidSolverTest : public::testing::Test
+class FluidSolverTest : public ::testing::Test
 {
 protected:
 

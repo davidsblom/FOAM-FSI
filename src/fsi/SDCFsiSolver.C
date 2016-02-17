@@ -24,7 +24,7 @@ SDCFsiSolver::SDCFsiSolver(
     assert( solid );
     assert( postProcessing );
     assert( dofFluid > 0 );
-    assert( dofSolid > 0 );
+    assert( dofSolid >= 0 );
 }
 
 SDCFsiSolver::~SDCFsiSolver()
@@ -66,7 +66,7 @@ void SDCFsiSolver::getSolution(
     )
 {
     assert( dofFluid > 0 );
-    assert( dofSolid > 0 );
+    assert( dofSolid >= 0 );
     assert( dofFluid + dofSolid == solution.rows() );
     assert( solution.rows() == f.rows() );
 
@@ -171,8 +171,12 @@ void SDCFsiSolver::implicitSolve(
     postProcessing->finalizeStage();
 
     getSolution( result, f );
+    evaluateFunction( k, result, t, f );
 
     xStages.at( k + 1 ) = postProcessing->fsi->x;
+
+    fluid->finalizeImplicitSolve( k );
+    solid->finalizeImplicitSolve( k );
 }
 
 scalar SDCFsiSolver::getStartTime()

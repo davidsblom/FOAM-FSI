@@ -102,7 +102,7 @@ namespace Foam
     {
         fvPatchVectorField::write( os );
         os.writeKeyword( "maxValue" )
-        << maxValue_ << token::END_STATEMENT << nl;
+            << maxValue_ << token::END_STATEMENT << nl;
         writeEntry( "value", os );
     }
 

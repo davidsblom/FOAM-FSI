@@ -4,8 +4,7 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#ifndef SDCFsiSolverInterface_H
-#define SDCFsiSolverInterface_H
+#pragma once
 
 #include "SDCSolver.H"
 
@@ -26,7 +25,7 @@ public:
             const fsi::vector & qold,
             const fsi::vector & rhs
             ) = 0;
+
+        virtual void finalizeImplicitSolve( int /*k*/ ){}
     };
 }
-
-#endif
