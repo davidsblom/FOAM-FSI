@@ -369,7 +369,7 @@ protected:
     TubeFlowFluidSolver * fluid2;
 };
 
-INSTANTIATE_TEST_CASE_P( jacobian, ImplicitFsiSolverJacobianTest, ::testing::Values( 5, 10, 100, 200 ) );
+INSTANTIATE_TEST_CASE_P( jacobian, ImplicitFsiSolverJacobianTest, ::testing::Values( 5, 10, 50 ) );
 
 // Generic functor
 template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic>

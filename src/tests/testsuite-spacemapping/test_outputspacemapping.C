@@ -211,8 +211,11 @@ TEST_P( OutputSpaceMappingSolverParametrizedTest, object )
 
 TEST_P( OutputSpaceMappingSolverParametrizedTest, run )
 {
-    solver->run();
-    monolithicSolver->run();
+    for ( int i = 0; i < 10; i++ )
+    {
+        solver->solveTimeStep();
+        monolithicSolver->solveTimeStep();
+    }
 
     scalar tol = 1.0e-5;
     ASSERT_TRUE( solver->fineModel->fsi->allConverged );

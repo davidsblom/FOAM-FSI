@@ -134,8 +134,11 @@ TEST_P( ImplicitMultiLevelFsiSolverParametrizedTest, object )
 
 TEST_P( ImplicitMultiLevelFsiSolverParametrizedTest, run )
 {
-    solver->run();
-    monolithicSolver->run();
+    for ( int i = 0; i < 10; i++ )
+    {
+        solver->solveTimeStep();
+        monolithicSolver->solveTimeStep();
+    }
 
     scalar tol = 1.0e-5;
     ASSERT_TRUE( solver->fsi->allConverged );

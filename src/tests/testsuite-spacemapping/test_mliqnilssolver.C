@@ -233,16 +233,17 @@ TEST_P( MLIQNILSSolverParametrizedTest, solveTimeStep )
 
 TEST_P( MLIQNILSSolverParametrizedTest, run )
 {
-    solver->run();
+    for ( int i = 0; i < 10; i++ )
+        solver->solveTimeStep();
 
     ASSERT_TRUE( solver->fineModel->fsi->allConverged );
-    ASSERT_FALSE( solver->fineModel->fsi->fluid->isRunning() );
+    ASSERT_TRUE( solver->fineModel->fsi->fluid->isRunning() );
 
     int couplingGridSize = std::tr1::get<4>( GetParam() );
     bool synchronization = std::tr1::get<5>( GetParam() );
 
     if ( couplingGridSize == 10 && synchronization )
-        ASSERT_EQ( solver->fineModel->fsi->nbIter, 100 );
+        ASSERT_EQ( solver->fineModel->fsi->nbIter, 10 );
 }
 
 TEST_P( MLIQNILSSolverParametrizedTest, monolithic )

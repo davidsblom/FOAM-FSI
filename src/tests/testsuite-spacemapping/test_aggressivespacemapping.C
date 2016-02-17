@@ -213,8 +213,8 @@ TEST_P( AggressiveSpaceMappingSolverParametrizedTest, object )
 
 TEST_P( AggressiveSpaceMappingSolverParametrizedTest, run )
 {
-    solver->run();
-    monolithicSolver->run();
+    solver->solveTimeStep();
+    monolithicSolver->solveTimeStep();
 
     scalar tol = 1.0e-5;
     ASSERT_TRUE( solver->fineModel->fsi->allConverged );

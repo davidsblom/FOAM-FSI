@@ -299,18 +299,19 @@ TEST_P( MultiLevelManifoldMappingSolverParametrizedTest, timeStep )
 
 TEST_P( MultiLevelManifoldMappingSolverParametrizedTest, run )
 {
-    solver->run();
+    for ( int i = 0; i < 10; i++ )
+        solver->solveTimeStep();
 
     ASSERT_TRUE( solver->models->at( solver->models->size() - 1 )->fsi->allConverged );
-    ASSERT_FALSE( solver->models->at( solver->models->size() - 1 )->fsi->fluid->isRunning() );
-    ASSERT_EQ( solver->solvers->at( 0 )->spaceMapping->timeIndex, 100 );
-    ASSERT_EQ( solver->solvers->at( 1 )->spaceMapping->timeIndex, 100 );
+    ASSERT_TRUE( solver->models->at( solver->models->size() - 1 )->fsi->fluid->isRunning() );
+    ASSERT_EQ( solver->solvers->at( 0 )->spaceMapping->timeIndex, 10 );
+    ASSERT_EQ( solver->solvers->at( 1 )->spaceMapping->timeIndex, 10 );
 }
 
 
 TEST_P( MultiLevelManifoldMappingSolverParametrizedTest, monolithic )
 {
-    for ( int i = 0; i < 100; i++ )
+    for ( int i = 0; i < 10; i++ )
     {
         solver->solveTimeStep();
         monolithicSolver->solveTimeStep();
