@@ -465,7 +465,7 @@ build:
                 source foam-extend-3.2/etc/bashrc
 
                 cd src/tests
-                python runTests.py testsuite-spacemapping
+                testsuite-spacemapping
         - script:
             name: testsuite-fsi
             code: |
