@@ -220,7 +220,7 @@ TEST_P( BroydenPostProcessingParametrizedTest, reuse )
         ASSERT_LE( solver->fsi->nbIter, 582 );
 
     if ( !parallel && nbReuse == 8 )
-        ASSERT_LE( solver->fsi->nbIter, 526 );
+        ASSERT_LE( solver->fsi->nbIter, 529 );
 
     if ( parallel && nbReuse == 0 )
         ASSERT_LE( solver->fsi->nbIter, 1841 );
