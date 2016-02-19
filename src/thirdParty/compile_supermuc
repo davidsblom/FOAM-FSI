@@ -138,8 +138,8 @@ export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
 cd precice
 python tools/python_scripts/insert_mpi_header.py
-scons -j $WM_NCOMPPROCS build=release python=off petsc=on compiler=mpicxx
-scons -j $WM_NCOMPPROCS build=release python=off petsc=on compiler=mpicxx solib
+scons -j $WM_NCOMPPROCS build=release python=off petsc=on platform=supermuc compiler=mpicxx
+scons -j $WM_NCOMPPROCS build=release python=off petsc=on platform=supermuc compiler=mpicxx solib
 
 mkdir -p ${FOAM_USER_LIBBIN}
 mkdir -p ${FOAM_USER_APPBIN}
