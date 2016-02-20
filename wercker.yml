@@ -8,7 +8,8 @@ build:
             name: install packages
             code: |
                 apt-get update
-                apt-get -y install git build-essential flex bison zlib1g-dev libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev libscotch-dev liblapack-dev libblas-dev
+                apt-get -y install git build-essential flex bison zlib1g-dev libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev libscotch-dev liblapack-dev libblas-dev python-pip python-dev lcov ruby-full ruby-dev
+                gem install coveralls-lcov
         - script:
             name: initialize git submodules
             code: |
@@ -29,8 +30,10 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
+                sed -i s/"c++DBUG    = -ggdb3 -DFULLDEBUG"/"c++DBUG    = -ggdb3 -DFULLDEBUG --coverage -fprofile-arcs -ftest-coverage"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++Debug
 
                 cd foam-extend-3.2
                 source etc/bashrc
@@ -64,6 +67,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 cd foam-extend-3.2
                 source etc/bashrc
@@ -115,6 +119,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -143,6 +148,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -164,6 +170,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -188,6 +195,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -230,6 +238,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -251,6 +260,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -275,6 +285,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -294,6 +305,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -313,6 +325,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -332,6 +345,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -353,6 +367,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -373,6 +388,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -398,6 +414,7 @@ build:
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
                 export WM_NCOMPPROCS=1
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -419,6 +436,7 @@ build:
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
                 export WM_NCOMPPROCS=1
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -440,6 +458,7 @@ build:
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
                 export WM_NCOMPPROCS=1
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -461,6 +480,8 @@ build:
                 export FOAM_INST_DIR=`pwd`
                 export WM_NCOMPPROCS=1
                 source foam-extend-3.2/etc/bashrc
+                export WM_COMPILE_OPTION=Debug
+
                 cd src/tests
                 python runTests.py testsuite-spacemapping
         - script:
@@ -479,6 +500,7 @@ build:
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
                 export WM_NCOMPPROCS=1
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -500,8 +522,16 @@ build:
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
                 export WM_NCOMPPROCS=1
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
                 cd src/tests
                 python runTests.py testsuite-dealii
+        - script:
+            name: code coverage
+            code: |
+                lcov -c --directory . --output-file coverage.info
+                lcov --remove coverage.info 'fsi/lnInclude/*' 'fsi/fluidSolvers/*' 'fsi/solidSolvers/*' 'thirdParty/*' 'foam-extend-3.2/*' '/usr/*' --output-file coverage.info
+                lcov --list coverage.info # debug before upload
+                coveralls-lcov --repo-token ${COVERALLS_TOKEN} coverage.info
