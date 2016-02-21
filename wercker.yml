@@ -1,6 +1,7 @@
 box: debian
 
 command-timeout: 60
+no-response-timeout: 30
 
 build:
     steps:
