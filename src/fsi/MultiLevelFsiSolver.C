@@ -202,10 +202,11 @@ bool MultiLevelFsiSolver::isConvergence()
 
             valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( fluid->couplingData.dataPreviousTimeStep.data(), fluid->couplingData.dataPreviousTimeStep.rows() * fluid->couplingData.dataPreviousTimeStep.cols() );
 
-            valuesPreviousTimeStep.setZero();
-
             if ( fluid->initialValue > 0 )
+            {
+                valuesPreviousTimeStep.setZero();
                 valuesPreviousTimeStep.array() += fluid->initialValue;
+            }
         }
 
         oldValues -= valuesPreviousTimeStep;
@@ -267,10 +268,11 @@ bool MultiLevelFsiSolver::isConvergence(
                 newValues = Eigen::Map<fsi::vector> ( fluid->couplingData.data.data(), fluid->couplingData.data.rows() * fluid->couplingData.dataprev.cols() );
             }
 
-            valuesPreviousTimeStep.setZero();
-
             if ( fluid->initialValue > 0 )
+            {
+                valuesPreviousTimeStep.setZero();
                 valuesPreviousTimeStep.array() += fluid->initialValue;
+            }
         }
 
         oldValues -= valuesPreviousTimeStep;

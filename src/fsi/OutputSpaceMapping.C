@@ -135,7 +135,7 @@ void OutputSpaceMapping::performPostProcessing(
     sols.push_back( xk );
 
     // Check convergence criteria
-    if ( isConvergence( xk, xkprev, residualCriterium ) )
+    if ( isConvergence( output, xk + y, residualCriterium ) )
     {
         assert( fineModel->allConverged() );
         iterationsConverged();
@@ -387,7 +387,7 @@ void OutputSpaceMapping::performPostProcessing(
         sols.push_back( xk );
 
         // Check convergence criteria
-        if ( isConvergence( xk, xkprev, residualCriterium ) )
+        if ( isConvergence( output, xk + y, residualCriterium ) )
         {
             assert( fineModel->allConverged() );
             iterationsConverged();

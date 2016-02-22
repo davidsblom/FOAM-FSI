@@ -78,7 +78,7 @@ void ASMILS::performPostProcessing(
     fineModel->evaluate( xk, output, R );
 
     // Check convergence criteria
-    if ( isConvergence( xk, xkprev, residualCriterium ) )
+    if ( isConvergence( output, xk + y, residualCriterium ) )
     {
         iterationsConverged();
         return;
@@ -218,7 +218,7 @@ void ASMILS::performPostProcessing(
         fineModel->evaluate( xk, output, R );
 
         // Check convergence criteria
-        if ( isConvergence( xk, xkprev, residualCriterium ) )
+        if ( isConvergence( output, xk + y, residualCriterium ) )
         {
             iterationsConverged();
             break;

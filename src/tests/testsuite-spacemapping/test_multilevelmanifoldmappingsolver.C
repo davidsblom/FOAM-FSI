@@ -299,19 +299,19 @@ TEST_P( MultiLevelManifoldMappingSolverParametrizedTest, timeStep )
 
 TEST_P( MultiLevelManifoldMappingSolverParametrizedTest, run )
 {
-    for ( int i = 0; i < 10; i++ )
+    for ( int i = 0; i < 5; i++ )
         solver->solveTimeStep();
 
     ASSERT_TRUE( solver->models->at( solver->models->size() - 1 )->fsi->allConverged );
     ASSERT_TRUE( solver->models->at( solver->models->size() - 1 )->fsi->fluid->isRunning() );
-    ASSERT_EQ( solver->solvers->at( 0 )->spaceMapping->timeIndex, 10 );
-    ASSERT_EQ( solver->solvers->at( 1 )->spaceMapping->timeIndex, 10 );
+    ASSERT_EQ( solver->solvers->at( 0 )->spaceMapping->timeIndex, 5 );
+    ASSERT_EQ( solver->solvers->at( 1 )->spaceMapping->timeIndex, 5 );
 }
 
 
 TEST_P( MultiLevelManifoldMappingSolverParametrizedTest, monolithic )
 {
-    for ( int i = 0; i < 10; i++ )
+    for ( int i = 0; i < 5; i++ )
     {
         solver->solveTimeStep();
         monolithicSolver->solveTimeStep();
@@ -323,7 +323,6 @@ TEST_P( MultiLevelManifoldMappingSolverParametrizedTest, monolithic )
         else
             ASSERT_FALSE( solver->models->at( solver->models->size() - 1 )->fsi->fluid->isRunning() );
 
-        ASSERT_TRUE( solver->models->at( 1 )->fsi->allConverged );
         ASSERT_TRUE( solver->models->at( 2 )->fsi->allConverged );
         ASSERT_NEAR( solver->models->at( solver->models->size() - 1 )->fsi->fluid->data.norm(), monolithicSolver->pn.norm(), tol );
         ASSERT_NEAR( solver->models->at( solver->models->size() - 1 )->fsi->solid->data.norm(), monolithicSolver->an.norm(), tol );
