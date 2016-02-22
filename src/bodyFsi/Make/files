@@ -13,6 +13,7 @@ $(bm)/bodyMotionFunction/twodTwoHingeFlap/twodTwoHingeFlap.C
 $(bm)/bodyMotionFunction/turekForced/turekForced.C
 $(bm)/bodyMotionFunction/larsFlap/larsFlap.C
 $(bm)/bodyMotionFunction/beamForced/beamForced.C
+$(bm)/bodyMotionFunction/beamRotationForced/beamRotationForced.C
 $(bm)/bodyMotionFunction/circularExpansion/circularExpansion.C
 
 fsiBodies=bodyMotionFunction/fsiBodies

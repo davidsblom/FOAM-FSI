@@ -141,6 +141,12 @@ int main(int argc, char *argv[])
                 maxNonOrtho.internalField()[icell] = nonOrtho;
             }
 
+			forAll(maxNonOrtho.boundaryField(),ipatch){
+				forAll(maxNonOrtho.boundaryField()[ipatch],iface){
+					maxNonOrtho.boundaryField()[ipatch][iface] = nonOrthoFaces.boundaryField()[ipatch][iface];
+				}
+			}
+
             nonOrthoFaces.write();
             maxNonOrtho.write();
         }
