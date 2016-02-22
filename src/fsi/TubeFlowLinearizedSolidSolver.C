@@ -210,7 +210,7 @@ void TubeFlowLinearizedSolidSolver::solve(
     b( N ) = -rn( 0 ) / dt - 1.0 / dt * rhs( 0 );
     b( 2 * N - 1 ) = -rn( N - 1 ) / dt - 1.0 / dt * rhs( N - 1 );
 
-    b.segment( 1, N - 2 ) += rhs.segment( 1, N - 1 );
+    b.segment( 1, N - 2 ) += rhs.segment( 1, N - 2 );
     b.segment( N + 1, N - 2 ) += alpha * rhs.segment( N + 1, N - 2 );
 
     // Solve for x
