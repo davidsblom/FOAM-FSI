@@ -35,7 +35,7 @@ namespace tubeflow
         const scalar /*t*/,
         fsi::vector & f
         )
-    {        
+    {
         f.setZero();
 
         for ( int i = 0; i < N; i++ )

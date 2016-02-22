@@ -34,7 +34,7 @@ build:
                 export WM_COMPILE_OPTION=Debug
 
                 sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
-                sed -i s/"c++DBUG    = -ggdb3 -DFULLDEBUG"/"c++DBUG    = -ggdb3 -DFULLDEBUG --coverage -fprofile-arcs -ftest-coverage"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++Debug
+                sed -i s/"c++DBUG    = -ggdb3 -DFULLDEBUG"/"c++DBUG    = -g -DFULLDEBUG --coverage -fprofile-arcs -ftest-coverage"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++Debug
 
                 cd foam-extend-3.2
                 source etc/bashrc

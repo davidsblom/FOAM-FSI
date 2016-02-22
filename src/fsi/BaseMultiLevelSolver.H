@@ -19,17 +19,20 @@ namespace fsi
     {
 public:
 
-        BaseMultiLevelSolver( int N, int dim )
-        :
-        N( N ),
-        init( false ),
-        data( N, dim ),
-        initialValue( 0 ),
-        substractInitialValue( false ),
-        timeIndex( 0 ),
-        t( 0 ),
-        dim( dim ),
-        couplingData()
+        BaseMultiLevelSolver(
+            int N,
+            int dim
+            )
+            :
+            N( N ),
+            init( false ),
+            data( N, dim ),
+            initialValue( 0 ),
+            substractInitialValue( false ),
+            timeIndex( 0 ),
+            t( 0 ),
+            dim( dim ),
+            couplingData()
         {
             assert( N >= 5 );
             assert( dim > 0 );
