@@ -14,7 +14,7 @@ foamSolidSolver::foamSolidSolver (
     std::shared_ptr<Time> runTime
     )
     :
-    BaseMultiLevelSolver( 5, 3, 0 ),
+    BaseMultiLevelSolver( 5, 3 ),
     name( name ),
     args( args ),
     runTime( runTime ),

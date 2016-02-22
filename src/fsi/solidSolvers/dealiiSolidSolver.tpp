@@ -10,7 +10,7 @@ template <int dimension>
 dealiiSolidSolver<dimension>::dealiiSolidSolver( dealiifsi::DataStorage & data )
     :
     dealiifsi::LinearElasticity<dimension>( data ),
-    BaseMultiLevelSolver( 5, dimension, 0 ),
+    BaseMultiLevelSolver( 5, dimension ),
     k( 0 ),
     kindex( 0 ),
     UStages(),
