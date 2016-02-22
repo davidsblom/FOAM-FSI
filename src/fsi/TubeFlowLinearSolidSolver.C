@@ -21,7 +21,6 @@ TubeFlowLinearSolidSolver::TubeFlowLinearSolidSolver(
     )
     :
     TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0 ),
-    h( h ),
     E0( E0 ),
     nu( nu )
 {
@@ -48,19 +47,18 @@ void TubeFlowLinearSolidSolver::solve(
     {
         // Velocity equation based on backward Euler time stepping
 
-        b( i ) = -rn( i );
+        b( i ) = rn( i );
 
         // Newton's equation rhs
 
         b( i + N ) = p( i ) + alpha * un( i ) + E0 * h / (1.0 - nu * nu) * 1.0 / r0;
     }
 
-    // Boundary conditions
+    b( N ) = -rn( 0 ) / dt - 1.0 / dt * rhs( 0 );
+    b( 2 * N - 1 ) = -rn( N - 1 ) / dt - 1.0 / dt * rhs( N - 1 );
 
-    b( 0 ) = 0;
-    b( N - 1 ) = 0;
-    b( N ) = 0;
-    b( 2 * N - 1 ) = 0;
+    b.segment( 1, N - 2 ) += rhs.segment( 1, N - 2 );
+    b.segment( N + 1, N - 2 ) += alpha * rhs.segment( N + 1, N - 2 );
 
     // Solve for x
 
@@ -68,11 +66,12 @@ void TubeFlowLinearSolidSolver::solve(
 
     // Retrieve solution
 
-    u = x.head( N );
-    r = x.tail( N );
+    r = x.head( N );
+    u = x.tail( N );
 
     // Return area a
     a = M_PI * r.array() * r.array();
 
     data.col( 0 ) = a;
+    this->p = p;
 }

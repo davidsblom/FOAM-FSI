@@ -206,6 +206,8 @@ namespace sdc
             for ( int i = 0; i < residual.rows(); i++ )
                 residual.row( i ) += data->getSolutions().row( 0 ) - data->getSolutions().row( i + 1 );
 
+            assert( not std::isnan( residual.norm() ) );
+
             scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) );
             labelList dof( Pstream::nProcs(), label( 0 ) );
             squaredNormResidual[Pstream::myProcNo()] = residual.squaredNorm();

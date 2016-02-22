@@ -145,6 +145,7 @@ namespace sdc
         assert( substep <= F.rows() );
         assert( F.cols() > 0 );
         assert( F.rows() > 0 );
+        assert( not std::isnan( f.norm() ) );
         F.row( substep ) = f;
     }
 
@@ -157,6 +158,7 @@ namespace sdc
         assert( substep <= solStages.rows() );
         assert( solStages.cols() > 0 );
         assert( solStages.rows() > 0 );
+        assert( not std::isnan( sol.norm() ) );
         solStages.row( substep ) = sol;
     }
 }

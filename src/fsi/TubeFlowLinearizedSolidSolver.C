@@ -29,11 +29,15 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     alpha( rho * h / dt ),
     beta( -kappa * G * h / (dx * dx) ),
     gamma( E0 * h / (1.0 - nu * nu) * ( 1.0 / (r0 * r0) ) ),
+    h( h ),
+    rho( rho ),
     grid(),
     un( N ),
     rn( N ),
     u( N ),
     r( N ),
+    rhs( 2 * N ),
+    p( N ),
     lu()
 {
     assert( N > 0 );
@@ -50,6 +54,8 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     u.setZero();
     rn.setZero();
     r.setZero();
+    rhs.setZero();
+    p.setZero();
 
     scalar a0 = M_PI * r0 * r0;
     data.fill( a0 );
@@ -83,19 +89,16 @@ void TubeFlowLinearizedSolidSolver::factorizeMatrix()
 
     for ( int i = 0; i < N; i++ )
     {
-        // Velocity equation based on backward Euler time stepping
-
-        // Newton's equation
-
         if ( i == 0 )
         {
             // Boundary conditions at inlet
             // r(0) = r(1)
 
             A( i, i ) = 1;
+            A( i, i + 1 ) = -1;
 
+            A( i + N, i ) = -1.0 / dt;
             A( i + N, i + N ) = 1;
-            A( i + N, i + N + 1 ) = -1;
         }
 
         if ( i == N - 1 )
@@ -104,20 +107,22 @@ void TubeFlowLinearizedSolidSolver::factorizeMatrix()
             // r(N) = r(N-1)
 
             A( i, i ) = 1;
+            A( i, i - 1 ) = -1;
 
+            A( i + N, i ) = -1.0 / dt;
             A( i + N, i + N ) = 1;
-            A( i + N, i + N - 1 ) = -1;
         }
 
         if ( i > 0 && i < N - 1 )
         {
-            A( i, i ) = dt;
-            A( i, i + N ) = -1;
+            A( i, i ) = 1;
+            A( i, i + N ) = -dt;
 
-            A( i + N, i ) = alpha;
-            A( i + N, i + N + 1 ) = beta;
-            A( i + N, i + N ) = gamma - 2 * beta;
-            A( i + N, i + N - 1 ) = beta;
+            A( i + N, i ) = gamma - 2 * beta;
+            A( i + N, i + 1 ) = beta;
+            A( i + N, i - 1 ) = beta;
+
+            A( i + N, i + N ) = alpha;
         }
     }
 
@@ -198,21 +203,15 @@ void TubeFlowLinearizedSolidSolver::solve(
 
     for ( int i = 1; i < N - 1; i++ )
     {
-        // Velocity equation based on backward Euler time stepping
-
-        b( i ) = -rn( i );
-
-        // Newton's equation rhs
-
+        b( i ) = rn( i );
         b( i + N ) = p( i ) + alpha * un( i );
     }
 
-    // Boundary conditions
+    b( N ) = -rn( 0 ) / dt - 1.0 / dt * rhs( 0 );
+    b( 2 * N - 1 ) = -rn( N - 1 ) / dt - 1.0 / dt * rhs( N - 1 );
 
-    b( 0 ) = 0;
-    b( N - 1 ) = 0;
-    b( N ) = 0;
-    b( 2 * N - 1 ) = 0;
+    b.segment( 1, N - 2 ) += rhs.segment( 1, N - 1 );
+    b.segment( N + 1, N - 2 ) += alpha * rhs.segment( N + 1, N - 2 );
 
     // Solve for x
 
@@ -220,12 +219,13 @@ void TubeFlowLinearizedSolidSolver::solve(
 
     // Retrieve solution
 
-    u = x.head( N );
-    r = x.tail( N );
+    r = x.head( N );
+    u = x.tail( N );
 
     // Return area a
     a = r.array() + r0;
     a = M_PI * a.array() * a.array();
 
     data.col( 0 ) = a;
+    this->p = p;
 }
