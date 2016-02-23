@@ -273,7 +273,7 @@ TEST( SDCFsiTest, order )
         {
             scalar order = ( std::log10( errors.at( iComputation ) ) - std::log10( errors.at( iComputation + 1 ) ) ) / ( std::log10( nbTimeStepsList.at( iComputation + 1 ) ) - std::log10( nbTimeStepsList.at( iComputation ) ) );
             std::cout << "order = " << order << std::endl;
-            ASSERT_NEAR( order, 4, 0.4 );
+            ASSERT_GE( order, 3.8 );
         }
     }
 }
