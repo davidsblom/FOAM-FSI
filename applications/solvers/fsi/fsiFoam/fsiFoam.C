@@ -179,6 +179,11 @@ int main(
             args->caseName()
         ) );
 
+    std::shared_ptr<dealii::Utilities::MPI::MPI_InitFinalize> mpi_initialization;
+
+    if ( Pstream::nProcs() == 1 )
+        mpi_initialization = std::shared_ptr<dealii::Utilities::MPI::MPI_InitFinalize> ( new dealii::Utilities::MPI::MPI_InitFinalize( argc, argv, 1 ) );
+
     // Load computation settings
 
     std::string filename = static_cast<std::string>( args->rootPath() ) + "/" + static_cast<std::string>( args->globalCaseName() ) + "/constant/fsi.yaml";

@@ -10,7 +10,7 @@ template <int dimension>
 dealiiSolidSolver<dimension>::dealiiSolidSolver( dealiifsi::DataStorage & data )
     :
     dealiifsi::LinearElasticity<dimension>( data ),
-    BaseMultiLevelSolver( 5, dimension, 0 ),
+    BaseMultiLevelSolver( 5, dimension ),
     k( 0 ),
     kindex( 0 ),
     UStages(),
@@ -134,9 +134,11 @@ void dealiiSolidSolver<dimension>::evaluateFunction(
     const int,
     const fsi::vector &,
     const scalar,
-    fsi::vector &
+    fsi::vector & f
     )
-{}
+{
+    f.setZero();
+}
 
 template <int dimension>
 int dealiiSolidSolver<dimension>::getDOF()
@@ -249,10 +251,16 @@ void dealiiSolidSolver<dimension>::implicitSolve(
 
     dealiifsi::LinearElasticity<dimension>::solve();
 
-    UStages.at( k + 1 ) = dealiifsi::LinearElasticity<dimension>::solution_u;
-    VStages.at( k + 1 ) = dealiifsi::LinearElasticity<dimension>::solution_v;
+    finalizeImplicitSolve( k );
 
     getSolution( result, f );
+}
+
+template <int dimension>
+void dealiiSolidSolver<dimension>::finalizeImplicitSolve( int k )
+{
+    UStages.at( k + 1 ) = dealiifsi::LinearElasticity<dimension>::solution_u;
+    VStages.at( k + 1 ) = dealiifsi::LinearElasticity<dimension>::solution_v;
 }
 
 template <int dimension>

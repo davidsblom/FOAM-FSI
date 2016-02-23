@@ -223,16 +223,16 @@ TEST_P( BroydenPostProcessingParametrizedTest, reuse )
         ASSERT_LE( solver->fsi->nbIter, 529 );
 
     if ( parallel && nbReuse == 0 )
-        ASSERT_LE( solver->fsi->nbIter, 1841 );
+        ASSERT_LE( solver->fsi->nbIter, 2069 );
 
     if ( parallel && nbReuse == 1 )
-        ASSERT_LE( solver->fsi->nbIter, 1264 );
+        ASSERT_LE( solver->fsi->nbIter, 1480 );
 
     if ( parallel && nbReuse == 4 )
-        ASSERT_LE( solver->fsi->nbIter, 962 );
+        ASSERT_LE( solver->fsi->nbIter, 1124 );
 
     if ( parallel && nbReuse == 8 )
-        ASSERT_LE( solver->fsi->nbIter, 834 );
+        ASSERT_LE( solver->fsi->nbIter, 993 );
 }
 
 TEST_P( BroydenPostProcessingParametrizedTest, numberOfColumnsVIQN )

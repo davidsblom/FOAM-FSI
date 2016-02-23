@@ -21,7 +21,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class ASMILSSolverParametrizedTest : public TestWithParam< std::tr1::tuple<int, int, int, int> >
+class ASMILSSolverParametrizedTest : public TestWithParam< std::tr1::tuple<int, int> >
 {
 protected:
 
@@ -54,13 +54,13 @@ protected:
         bool scaling = false;
         scalar beta = 1;
         bool updateJacobian = false;
+        bool parallel = false;
+        int extrapolation = 2;
+        int minIter = 2;
 
         // Parametrized settings
-        bool parallel = false;
         int nbReuse = std::tr1::get<0>( GetParam() );
-        int extrapolation = std::tr1::get<1>( GetParam() );
-        int minIter = std::tr1::get<2>( GetParam() );
-        int couplingGridSize = std::tr1::get<3>( GetParam() );
+        int couplingGridSize = std::tr1::get<1>( GetParam() );
 
         ASSERT_NEAR( tau, 0.01, 1.0e-13 );
         ASSERT_NEAR( kappa, 10, 1.0e-13 );
@@ -204,7 +204,7 @@ protected:
     SpaceMappingSolver * solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, ASMILSSolverParametrizedTest, ::testing::Combine( Values( 0, 1, 4 ), Values( 0 ), Values( 3 ), Values( 10, 20 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, ASMILSSolverParametrizedTest, ::testing::Combine( Values( 3 ), Values( 10, 20 ) ) );
 
 TEST_P( ASMILSSolverParametrizedTest, object )
 {

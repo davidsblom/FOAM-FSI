@@ -1,6 +1,7 @@
 box: debian
 
 command-timeout: 60
+no-response-timeout: 30
 
 build:
     steps:
@@ -8,7 +9,8 @@ build:
             name: install packages
             code: |
                 apt-get update
-                apt-get -y install git build-essential flex bison zlib1g-dev libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev libscotch-dev liblapack-dev libblas-dev
+                apt-get -y install git build-essential flex bison zlib1g-dev libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev libscotch-dev liblapack-dev libblas-dev lcov python-pip
+                pip install codecov
         - script:
             name: initialize git submodules
             code: |
@@ -31,6 +33,7 @@ build:
                 export FOAM_INST_DIR=`pwd`
 
                 sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
+                sed -i s/"c++DBUG    = -ggdb3 -DFULLDEBUG"/"c++DBUG    = -g -DFULLDEBUG --coverage -fprofile-arcs -ftest-coverage"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++Debug
 
                 cd foam-extend-3.2
                 source etc/bashrc
@@ -460,6 +463,7 @@ build:
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
                 export WM_NCOMPPROCS=1
+
                 source foam-extend-3.2/etc/bashrc
                 cd src/tests
                 python runTests.py testsuite-spacemapping

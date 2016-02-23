@@ -106,6 +106,7 @@ TEST( dealiiSolidSolver, sdc_order )
 
         sdc::SDC timeIntegrator( solver, quadrature, tol, minSweeps, maxSweeps );
         timeIntegrator.run();
+        ASSERT_TRUE( timeIntegrator.isConverged() );
 
         std::shared_ptr<dealiiSolidSolver<2> > elasticSolver = std::dynamic_pointer_cast<dealiiSolidSolver<2> > ( solver );
         fsi::vector solution( elasticSolver->getDOF() ), f( elasticSolver->getDOF() );

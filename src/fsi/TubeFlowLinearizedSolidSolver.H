@@ -59,14 +59,16 @@ public:
 
         // Constants
 
-        int N;
+        const int N;
         scalar dt;
-        scalar r0;
-        scalar kappa;
-        scalar dx;
+        const scalar r0;
+        const scalar kappa;
+        const scalar dx;
         scalar alpha;
-        scalar beta;
-        scalar gamma;
+        const scalar beta;
+        const scalar gamma;
+        const scalar h;
+        const scalar rho;
 
         matrix grid;
 
@@ -76,8 +78,10 @@ public:
         fsi::vector rn;
         fsi::vector u;
         fsi::vector r;
+        fsi::vector rhs;
+        fsi::vector p;
 
-        Eigen::FullPivLU<matrix> lu;
+        Eigen::PartialPivLU<matrix> lu;
     };
 }
 

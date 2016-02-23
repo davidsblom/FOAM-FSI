@@ -180,7 +180,14 @@ void ManifoldMapping::performPostProcessing(
     iter++;
 
     // Check convergence criteria
-    if ( isConvergence( xk, xkprev, residualCriterium ) )
+    bool convergence = false;
+
+    if ( output.rows() == xk.rows() )
+        convergence = isConvergence( output, xk + y, residualCriterium );
+    else
+        convergence = isConvergence( xkprev, xk, residualCriterium );
+
+    if ( convergence )
     {
         assert( fineModel->allConverged() );
         iterationsConverged();
@@ -391,7 +398,15 @@ void ManifoldMapping::performPostProcessing(
         iter++;
 
         // Check convergence criteria
-        if ( isConvergence( xk, xkprev, residualCriterium ) )
+
+        bool convergence = false;
+
+        if ( output.rows() == xk.rows() )
+            convergence = isConvergence( output, xk + y, residualCriterium );
+        else
+            convergence = isConvergence( xkprev, xk, residualCriterium );
+
+        if ( convergence )
         {
             assert( fineModel->allConverged() );
 

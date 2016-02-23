@@ -4,15 +4,14 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#ifndef TubeFlowLinearSolidSolver_H
-#define TubeFlowLinearSolidSolver_H
+#pragma once
 
 #include "TubeFlowLinearizedSolidSolver.H"
 
-using namespace fsi;
-
 namespace tubeflow
 {
+    using namespace fsi;
+
     class TubeFlowLinearSolidSolver : public TubeFlowLinearizedSolidSolver
     {
 public:
@@ -36,10 +35,7 @@ public:
             fsi::vector & a
             );
 
-        scalar h;
-        scalar E0;
-        scalar nu;
+        const scalar E0;
+        const scalar nu;
     };
 }
-
-#endif

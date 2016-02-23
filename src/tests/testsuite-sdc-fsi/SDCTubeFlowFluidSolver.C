@@ -241,8 +241,11 @@ namespace tubeflow
         std::deque<std::string> & names
         )
     {
-        dof.push_back( 2 * N );
+        dof.push_back( N );
         enabled.push_back( true );
-        names.push_back( "fluid" );
+        names.push_back( "fluid a" );
+        dof.push_back( N );
+        enabled.push_back( true );
+        names.push_back( "fluid a * u" );
     }
 }

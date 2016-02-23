@@ -22,7 +22,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class MultiLevelOutputSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<bool, int, int, int, int, bool> >
+class MultiLevelOutputSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<int, bool> >
 {
 protected:
 
@@ -56,14 +56,14 @@ protected:
         int order = 1;
         scalar beta = 1;
         bool updateJacobian = false;
+        bool parallel = false;
+        int extrapolation = 2;
+        int minIter = 2;
+        int nbReuse = 2;
 
         // Parametrized settings
-        bool parallel = std::tr1::get<0>( GetParam() );
-        int nbReuse = std::tr1::get<1>( GetParam() );
-        int extrapolation = std::tr1::get<2>( GetParam() );
-        int minIter = std::tr1::get<3>( GetParam() );
-        int couplingGridSize = std::tr1::get<4>( GetParam() );
-        bool synchronization = std::tr1::get<5>( GetParam() );
+        int couplingGridSize = std::tr1::get<0>( GetParam() );
+        bool synchronization = std::tr1::get<1>( GetParam() );
 
         ASSERT_NEAR( tau, 0.01, 1.0e-13 );
         ASSERT_NEAR( kappa, 10, 1.0e-13 );
@@ -280,7 +280,7 @@ protected:
     MultiLevelSpaceMappingSolver * solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelOutputSpaceMappingSolverParametrizedTest, ::testing::Combine( Bool(), Values( 0 ), Values( 0 ), Values( 3 ), Values( 20, 40 ), Bool() ) );
+INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelOutputSpaceMappingSolverParametrizedTest, ::testing::Combine( Values( 20, 40 ), Bool() ) );
 
 TEST_P( MultiLevelOutputSpaceMappingSolverParametrizedTest, object )
 {
@@ -301,9 +301,9 @@ TEST_P( MultiLevelOutputSpaceMappingSolverParametrizedTest, run )
 
 TEST_P( MultiLevelOutputSpaceMappingSolverParametrizedTest, monolithic )
 {
-    bool synchronization = std::tr1::get<5>( GetParam() );
+    bool synchronization = std::tr1::get<1>( GetParam() );
 
-    for ( int i = 0; i < 10; i++ )
+    for ( int i = 0; i < 5; i++ )
     {
         solver->solveTimeStep();
         monolithicSolver->solveTimeStep();
@@ -315,8 +315,6 @@ TEST_P( MultiLevelOutputSpaceMappingSolverParametrizedTest, monolithic )
         else
             ASSERT_FALSE( solver->models->at( solver->models->size() - 1 )->fsi->fluid->isRunning() );
 
-        ASSERT_TRUE( solver->models->at( 0 )->fsi->allConverged );
-        ASSERT_TRUE( solver->models->at( 1 )->fsi->allConverged );
         ASSERT_TRUE( solver->models->at( 2 )->fsi->allConverged );
         ASSERT_NEAR( solver->models->at( solver->models->size() - 1 )->fsi->fluid->data.norm(), monolithicSolver->pn.norm(), tol );
         ASSERT_NEAR( solver->models->at( solver->models->size() - 1 )->fsi->solid->data.norm(), monolithicSolver->an.norm(), tol );

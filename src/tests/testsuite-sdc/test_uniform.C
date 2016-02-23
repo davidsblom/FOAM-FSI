@@ -14,6 +14,21 @@ TEST( UniformTest, object )
     fsi::quadrature::Uniform<double> Uniform( num_nodes );
 }
 
+TEST( UniformTest, death )
+{
+    bool exception = false;
+    try
+    {
+        fsi::quadrature::Uniform<double> ( 1 );
+    }
+    catch ( const std::invalid_argument & e )
+    {
+        exception = true;
+        ASSERT_STREQ( e.what(), "Uniform quadrature requires at least two quadrature nodes." );
+    }
+    ASSERT_TRUE( exception );
+}
+
 TEST( UniformTest, nodes )
 {
     const size_t num_nodes = 5;

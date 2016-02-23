@@ -146,7 +146,7 @@ namespace Foam
         tmp<scalarField> Un = phip / (magSf + VSMALL);
 
         // Adjust for surface-normal mesh motion flux
-        vectorField::operator=( Up + n *( Un - (n & Up) ) );
+        vectorField::operator=( Up() + n() *( Un() - ( n() & Up() ) ) );
 
         fixedValueFvPatchVectorField::updateCoeffs();
     }

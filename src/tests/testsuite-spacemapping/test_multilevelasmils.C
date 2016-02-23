@@ -287,7 +287,7 @@ TEST_P( MultiLevelASMILSSolverParametrizedTest, object )
 
 TEST_P( MultiLevelASMILSSolverParametrizedTest, monolithic )
 {
-    for ( int i = 0; i < 10; i++ )
+    for ( int i = 0; i < 5; i++ )
     {
         solver->solveTimeStep();
         monolithicSolver->solveTimeStep();
@@ -299,8 +299,6 @@ TEST_P( MultiLevelASMILSSolverParametrizedTest, monolithic )
         else
             ASSERT_FALSE( solver->models->at( solver->models->size() - 1 )->fsi->fluid->isRunning() );
 
-        ASSERT_TRUE( solver->models->at( 0 )->fsi->allConverged );
-        ASSERT_TRUE( solver->models->at( 1 )->fsi->allConverged );
         ASSERT_TRUE( solver->models->at( 2 )->fsi->allConverged );
         ASSERT_NEAR( solver->models->at( solver->models->size() - 1 )->fsi->fluid->data.norm(), monolithicSolver->pn.norm(), tol );
         ASSERT_NEAR( solver->models->at( solver->models->size() - 1 )->fsi->solid->data.norm(), monolithicSolver->an.norm(), tol );

@@ -25,7 +25,7 @@ using::testing::Bool;
 using::testing::Values;
 using::testing::Combine;
 
-class MultiLevelSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<int, int, int, int, int> >
+class MultiLevelSpaceMappingSolverParametrizedTest : public TestWithParam< std::tr1::tuple<int, int, int, int> >
 {
 protected:
 
@@ -37,7 +37,7 @@ protected:
         scalar u0 = 0.1;
         scalar p0 = 0;
         scalar dt = 0.1;
-        int N = 10;
+        int N = 15;
         scalar L = 1;
         scalar T = 10;
         scalar dx = L / N;
@@ -50,7 +50,7 @@ protected:
         scalar tau = u0 * dt / L;
 
         // Computational settings
-        scalar tol = 1.0e-5;
+        scalar tol = 1.0e-4;
         scalar tolLiveSelection = 1.0e-4;
         int maxIter = 50;
         scalar initialRelaxation = 1.0e-3;
@@ -62,16 +62,16 @@ protected:
         int coarseningMaxPoints = 2000;
         bool parallel = false;
         int order = 0;
-        int minIter = 3;
-
-        // Parametrized settings
-        int nbReuse = std::tr1::get<0>( GetParam() );
-        int extrapolation = std::tr1::get<1>( GetParam() );
-        int couplingGridSize = std::tr1::get<2>( GetParam() );
-        int spaceMappingAlgorithm = std::tr1::get<3>( GetParam() );
-        int reuseInformationStartingFromTimeIndex = std::tr1::get<4>( GetParam() );
+        int minIter = 5;
+        int nbReuse = 2;
         bool coarsening = false;
         bool liveSelection = false;
+
+        // Parametrized settings
+        int extrapolation = std::tr1::get<0>( GetParam() );
+        int couplingGridSize = std::tr1::get<1>( GetParam() );
+        int spaceMappingAlgorithm = std::tr1::get<2>( GetParam() );
+        int reuseInformationStartingFromTimeIndex = std::tr1::get<3>( GetParam() );
 
         assert( spaceMappingAlgorithm > -1 && spaceMappingAlgorithm < 3 );
 
@@ -304,15 +304,15 @@ protected:
     shared_ptr<MultiLevelSpaceMappingSolver> solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelSpaceMappingSolverParametrizedTest, ::testing::Combine( Values( 0, 2 ), Values( 2 ), Values( 20, 40 ), Values( 0, 1, 2 ), Values( 0, 5 ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, MultiLevelSpaceMappingSolverParametrizedTest, ::testing::Combine( Values( 2 ), Values( 30, 40 ), Values( 0, 1, 2 ), Values( 0, 5 ) ) );
 
 TEST_P( MultiLevelSpaceMappingSolverParametrizedTest, run )
 {
-    for ( int i = 0; i < 9; i++ )
+    for ( int i = 0; i < 5; i++ )
         solver->solveTimeStep();
 
     ASSERT_TRUE( solver->models->at( solver->models->size() - 1 )->fsi->allConverged );
     ASSERT_TRUE( solver->models->at( solver->models->size() - 1 )->fsi->fluid->isRunning() );
-    ASSERT_EQ( solver->solvers->at( 0 )->spaceMapping->timeIndex, 9 );
-    ASSERT_EQ( solver->solvers->at( 1 )->spaceMapping->timeIndex, 9 );
+    ASSERT_EQ( solver->solvers->at( 0 )->spaceMapping->timeIndex, 5 );
+    ASSERT_EQ( solver->solvers->at( 1 )->spaceMapping->timeIndex, 5 );
 }

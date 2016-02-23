@@ -6,7 +6,8 @@
 
 #include "gtest/gtest.h"
 #include "SDCTubeFlowFluidSolver.H"
-#include "SDCTubeFlowSolidSolver.H"
+#include "SDCTubeFlowLinearSolidSolver.H"
+#include "SDCTubeFlowLinearizedSolidSolver.H"
 #include "GaussRadau.H"
 #include "GaussLobatto.H"
 #include "SDC.H"
@@ -17,33 +18,35 @@
 #include "ResidualRelativeConvergenceMeasure.H"
 #include "MinIterationConvergenceMeasure.H"
 #include "AitkenPostProcessing.H"
-#include <iomanip>
+#include "AbsoluteConvergenceMeasure.H"
 
-class SDCFsiSolverTest : public ::testing::Test
+class SDCFsiSolidSolverTest : public ::testing::TestWithParam<std::string>
 {
 protected:
 
     virtual void SetUp()
     {
-        scalar r0 = 0.2;
+        scalar r0 = 3.0e-3;
+        scalar h = 3.0e-4;
+        scalar L = 0.126;
+        scalar rho_s = 1000;
+        scalar E0 = 4.0e5;
+        scalar G = 4.0e5;
+        scalar nu = 0.5;
+
         scalar a0 = M_PI * r0 * r0;
-        scalar u0 = 0.1;
+        scalar u0 = 0.26;
         scalar p0 = 0;
         scalar dt = 1;
         int N = 5;
-        scalar L = 1;
         scalar T = 1;
-        scalar dx = L / N;
-        scalar rho = 1.225;
+        scalar rho_f = 1060;
         scalar E = 490;
-        scalar h = 1.0e-3;
-        scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
-        scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
-        scalar kappa = c0 / u0;
+        scalar cmk = std::sqrt( E * h / (2 * rho_f * r0) );
 
         bool parallel = false;
         int extrapolation = 0;
-        scalar tol = 1.0e-2;
+        scalar tol = 1.0e-3;
         int maxIter = 20;
         scalar initialRelaxation = 1.0e-3;
         int maxUsedIterations = 50;
@@ -56,11 +59,19 @@ protected:
         scalar beta = 0.5;
         int minIter = 5;
 
-        ASSERT_NEAR( kappa, 10, 1.0e-13 );
-        ASSERT_TRUE( dx > 0 );
+        std::string solidSolverSetting = GetParam();
 
-        std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
-        std::shared_ptr<tubeflow::SDCTubeFlowSolidSolver> solid( new tubeflow::SDCTubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
+        std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
+
+        std::shared_ptr<fsi::BaseMultiLevelSolver> solid;
+
+        if ( solidSolverSetting == "linear" )
+            solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+
+        if ( solidSolverSetting == "linearized" )
+            solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+
+        assert( solid );
 
         shared_ptr<RBFFunctionInterface> rbfFunction;
         shared_ptr<RBFInterpolation> rbfInterpolator;
@@ -90,7 +101,7 @@ protected:
         std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
         convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, false, tol ) ) );
+        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, true, tol ) ) );
         convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
 
         shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
@@ -121,45 +132,48 @@ protected:
     std::shared_ptr<sdc::SDC> sdc;
 };
 
-TEST_F( SDCFsiSolverTest, object )
+INSTANTIATE_TEST_CASE_P( tests, SDCFsiSolidSolverTest, ::testing::Values( "linearized", "linear" ) );
+
+TEST_P( SDCFsiSolidSolverTest, object )
 {
     ASSERT_TRUE( true );
 }
 
-TEST_F( SDCFsiSolverTest, timeStep )
+TEST_P( SDCFsiSolidSolverTest, timeStep )
 {
-    std::cout << std::setprecision( 9 );
     sdc->solveTimeStep( 0 );
     ASSERT_TRUE( sdc->isConverged() );
 }
 
-TEST_F( SDCFsiSolverTest, run )
+TEST_P( SDCFsiSolidSolverTest, run )
 {
     sdc->run();
     ASSERT_TRUE( sdc->isConverged() );
 }
 
-TEST( SDCFsiTest, order )
+TEST( SDCFsiSolidTest, order )
 {
-    int N = 5;
-    scalar r0 = 0.2;
+    scalar r0 = 3.0e-3;
+    scalar h = 3.0e-4;
+    scalar L = 0.126;
+    scalar rho_s = 1000;
+    scalar E0 = 4.0e5;
+    scalar G = 4.0e5;
+    scalar nu = 0.5;
+
     scalar a0 = M_PI * r0 * r0;
-    scalar u0 = 0.1;
+    scalar u0 = 0.26;
     scalar p0 = 0;
-    scalar L = 1;
+    int N = 5;
     scalar T = 1;
-    scalar dx = L / N;
-    scalar rho = 1.225;
+    scalar rho_f = 1060;
     scalar E = 490;
-    scalar h = 1.0e-3;
-    scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
-    scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
-    scalar kappa = c0 / u0;
+    scalar cmk = std::sqrt( E * h / (2 * rho_f * r0) );
 
     bool parallel = false;
     int extrapolation = 0;
-    scalar tol = 1.0e-5;
-    int maxIter = 20;
+    scalar tol = 1.0e-3;
+    int maxIter = 50;
     scalar initialRelaxation = 1.0e-3;
     int maxUsedIterations = 50;
     int nbReuse = 0;
@@ -170,22 +184,20 @@ TEST( SDCFsiTest, order )
     bool updateJacobian = false;
     int minIter = 5;
 
-    ASSERT_NEAR( kappa, 10, 1.0e-13 );
-    ASSERT_TRUE( dx > 0 );
-
-    int nbComputations = 6;
+    int nbComputations = 3;
 
     std::deque<std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> > fluidSolvers;
+    std::deque<std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> > solidSolvers;
     std::deque<int> nbTimeStepsList;
 
     for ( int iComputation = 0; iComputation < nbComputations; iComputation++ )
     {
-        int nbTimeSteps = 4 * std::pow( 2, iComputation );
+        int nbTimeSteps = 80 * std::pow( 2, iComputation );
         std::cout << "nbTimeSteps = " << nbTimeSteps << std::endl;
         scalar dt = T / nbTimeSteps;
 
-        std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
-        std::shared_ptr<tubeflow::SDCTubeFlowSolidSolver> solid( new tubeflow::SDCTubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
+        std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
+        std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> solid( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
 
         shared_ptr<RBFFunctionInterface> rbfFunction;
         shared_ptr<RBFInterpolation> rbfInterpolator;
@@ -215,7 +227,8 @@ TEST( SDCFsiTest, order )
         std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
         convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new ResidualRelativeConvergenceMeasure( 0, false, tol ) ) );
+        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new ResidualRelativeConvergenceMeasure( 0, true, tol ) ) );
+        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new AbsoluteConvergenceMeasure( 0, true, 1.0e-14 ) ) );
         convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
 
         shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
@@ -235,13 +248,46 @@ TEST( SDCFsiTest, order )
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
         quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
 
-        std::shared_ptr<sdc::SDC> sdc( new sdc::SDC( fsiSolver, quadrature, 1.0e-13, 10, 20 ) );
+        std::shared_ptr<sdc::SDC> sdc( new sdc::SDC( fsiSolver, quadrature, 1.0e-12, 10, 50 ) );
 
         sdc->run();
         ASSERT_TRUE( sdc->isConverged() );
 
         fluidSolvers.push_back( fluid );
+        solidSolvers.push_back( solid );
         nbTimeStepsList.push_back( nbTimeSteps );
+    }
+
+    for ( int i = 0; i < 2; i++ )
+    {
+        fsi::vector ref;
+
+        if ( i == 0 )
+            ref = solidSolvers.back()->r;
+        else
+            ref = solidSolvers.back()->u;
+
+        std::deque<scalar> errors;
+
+        for ( int iComputation = 0; iComputation < nbComputations - 1; iComputation++ )
+        {
+            fsi::vector data;
+
+            if ( i == 0 )
+                data = solidSolvers.at( iComputation )->r;
+            else
+                data = solidSolvers.at( iComputation )->u;
+
+            scalar error = (ref - data).norm() / data.norm();
+            std::cout << "error = " << error << std::endl;
+            errors.push_back( error );
+        }
+
+        for ( int iComputation = 0; iComputation < nbComputations - 2; iComputation++ )
+        {
+            scalar order = ( std::log10( errors.at( iComputation ) ) - std::log10( errors.at( iComputation + 1 ) ) ) / ( std::log10( nbTimeStepsList.at( iComputation + 1 ) ) - std::log10( nbTimeStepsList.at( iComputation ) ) );
+            std::cout << "order = " << order << std::endl;
+        }
     }
 
     for ( int i = 0; i < 2; i++ )
@@ -273,7 +319,7 @@ TEST( SDCFsiTest, order )
         {
             scalar order = ( std::log10( errors.at( iComputation ) ) - std::log10( errors.at( iComputation + 1 ) ) ) / ( std::log10( nbTimeStepsList.at( iComputation + 1 ) ) - std::log10( nbTimeStepsList.at( iComputation ) ) );
             std::cout << "order = " << order << std::endl;
-            ASSERT_GE( order, 3.8 );
+            ASSERT_NEAR( order, 4, 0.3 );
         }
     }
 }

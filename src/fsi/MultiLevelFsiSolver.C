@@ -188,11 +188,8 @@ bool MultiLevelFsiSolver::isConvergence()
 
             valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( solid->couplingData.dataPreviousTimeStep.data(), solid->couplingData.dataPreviousTimeStep.rows() * solid->couplingData.dataPreviousTimeStep.cols() );
 
-            if ( solid->initialValue > 0 )
-            {
-                valuesPreviousTimeStep.setZero();
-                valuesPreviousTimeStep.array() += solid->initialValue;
-            }
+            if ( solid->substractInitialValue )
+                valuesPreviousTimeStep.fill( solid->initialValue );
         }
 
         if ( measure->dataId == 1 )
@@ -202,10 +199,8 @@ bool MultiLevelFsiSolver::isConvergence()
 
             valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( fluid->couplingData.dataPreviousTimeStep.data(), fluid->couplingData.dataPreviousTimeStep.rows() * fluid->couplingData.dataPreviousTimeStep.cols() );
 
-            valuesPreviousTimeStep.setZero();
-
-            if ( fluid->initialValue > 0 )
-                valuesPreviousTimeStep.array() += fluid->initialValue;
+            if ( fluid->substractInitialValue )
+                valuesPreviousTimeStep.fill( fluid->initialValue );
         }
 
         oldValues -= valuesPreviousTimeStep;
@@ -242,11 +237,8 @@ bool MultiLevelFsiSolver::isConvergence(
 
             valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( solid->couplingData.dataPreviousTimeStep.data(), solid->couplingData.dataPreviousTimeStep.rows() * solid->couplingData.dataPreviousTimeStep.cols() );
 
-            if ( solid->initialValue > 0 )
-            {
-                valuesPreviousTimeStep.setZero();
-                valuesPreviousTimeStep.array() += solid->initialValue;
-            }
+            if ( solid->substractInitialValue )
+                valuesPreviousTimeStep.fill( solid->initialValue );
         }
 
         if ( measure->dataId == 1 )
@@ -267,10 +259,8 @@ bool MultiLevelFsiSolver::isConvergence(
                 newValues = Eigen::Map<fsi::vector> ( fluid->couplingData.data.data(), fluid->couplingData.data.rows() * fluid->couplingData.dataprev.cols() );
             }
 
-            valuesPreviousTimeStep.setZero();
-
-            if ( fluid->initialValue > 0 )
-                valuesPreviousTimeStep.array() += fluid->initialValue;
+            if ( fluid->substractInitialValue )
+                valuesPreviousTimeStep.fill( fluid->initialValue );
         }
 
         oldValues -= valuesPreviousTimeStep;

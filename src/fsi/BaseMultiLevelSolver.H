@@ -21,6 +21,25 @@ public:
 
         BaseMultiLevelSolver(
             int N,
+            int dim
+            )
+            :
+            N( N ),
+            init( false ),
+            data( N, dim ),
+            initialValue( 0 ),
+            substractInitialValue( false ),
+            timeIndex( 0 ),
+            t( 0 ),
+            dim( dim ),
+            couplingData()
+        {
+            assert( N >= 5 );
+            assert( dim > 0 );
+        }
+
+        BaseMultiLevelSolver(
+            int N,
             int dim,
             scalar initialValue
             )
@@ -29,6 +48,7 @@ public:
             init( false ),
             data( N, dim ),
             initialValue( initialValue ),
+            substractInitialValue( true ),
             timeIndex( 0 ),
             t( 0 ),
             dim( dim ),
@@ -66,6 +86,7 @@ public:
         bool init;
         matrix data;
         scalar initialValue;
+        bool substractInitialValue;
         int timeIndex;
         scalar t;
         int dim;
