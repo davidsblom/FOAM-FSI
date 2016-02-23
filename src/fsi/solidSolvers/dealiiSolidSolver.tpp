@@ -121,12 +121,6 @@ void dealiiSolidSolver<dimension>::solve(
 
     BaseMultiLevelSolver::data = outputEigen.cast<scalar>();
     output = BaseMultiLevelSolver::data;
-
-    if ( UStages.size() > 0 )
-    {
-        UStages.at( kindex + 1 ) = dealiifsi::LinearElasticity<dimension>::solution_u;
-        VStages.at( kindex + 1 ) = dealiifsi::LinearElasticity<dimension>::solution_v;
-    }
 }
 
 template <int dimension>
