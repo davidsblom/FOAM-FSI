@@ -11,7 +11,7 @@ end
 
 subsection Output
   # This indicates between how many time steps we print the solution.
-  set output_interval = 1
+  set output_interval = 10
 
   # This indicates whether the solution is saved in paraview format.
   set output_paraview = true
