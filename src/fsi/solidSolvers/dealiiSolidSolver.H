@@ -47,49 +47,49 @@ public:
 
         virtual ~dealiiSolidSolver();
 
-        virtual void finalizeTimeStep();
+        virtual void finalizeTimeStep() override;
 
-        virtual void getReadPositions( matrix & readPositions );
+        virtual void getReadPositions( matrix & readPositions ) override;
 
-        virtual void getWritePositions( matrix & writePositions );
+        virtual void getWritePositions( matrix & writePositions ) override;
 
-        virtual void initTimeStep();
+        virtual void initTimeStep() override;
 
-        virtual bool isRunning();
+        virtual bool isRunning() override;
 
-        virtual void resetSolution();
+        virtual void resetSolution() override;
 
         virtual void solve(
             const matrix & input,
             matrix & output
-            );
+            ) override;
 
         virtual void evaluateFunction(
             const int k,
             const fsi::vector & q,
             const scalar t,
             fsi::vector & f
-            );
+            ) override;
 
-        virtual int getDOF();
+        virtual int getDOF() override;
 
         virtual void getSolution(
             fsi::vector & solution,
             fsi::vector & f
-            );
+            ) override;
 
         virtual void setSolution(
             const fsi::vector & solution,
             const fsi::vector & f
-            );
+            ) override;
 
-        virtual scalar getEndTime();
+        virtual scalar getEndTime() override;
 
-        virtual scalar getTimeStep();
+        virtual scalar getTimeStep() override;
 
-        virtual void nextTimeStep();
+        virtual void nextTimeStep() override;
 
-        virtual void setNumberOfImplicitStages( int k );
+        virtual void setNumberOfImplicitStages( int k ) override;
 
         virtual void prepareImplicitSolve(
             bool corrector,
@@ -99,7 +99,7 @@ public:
             const scalar dt,
             const fsi::vector & qold,
             const fsi::vector & rhs
-            );
+            ) override;
 
         virtual void implicitSolve(
             bool corrector,
@@ -111,13 +111,15 @@ public:
             const fsi::vector & rhs,
             fsi::vector & f,
             fsi::vector & result
-            );
+            ) override;
+
+        virtual void finalizeImplicitSolve( int k ) override;
 
         virtual void getVariablesInfo(
             std::deque<int> & dof,
             std::deque<bool> & enabled,
             std::deque<std::string> & names
-            );
+            ) override;
 
 private:
 

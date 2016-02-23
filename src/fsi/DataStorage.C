@@ -92,7 +92,6 @@ namespace sdc
     const fsi::matrix & DataStorage::getFunctions() const
     {
         assert( F.rows() > 0 );
-        assert( F.cols() > 0 );
         return F;
     }
 
@@ -113,8 +112,6 @@ namespace sdc
     const fsi::vector DataStorage::getSolution( int substep ) const
     {
         assert( substep <= solStages.rows() );
-        assert( solStages.cols() > 0 );
-        assert( solStages.rows() > 0 );
         return solStages.row( substep );
     }
 
@@ -128,7 +125,7 @@ namespace sdc
         int N
         )
     {
-        assert( N > 0 );
+        assert( N >= 0 );
         assert( k >= 2 );
         F.resize( k, N );
         solStages.resize( k, N );
@@ -143,8 +140,6 @@ namespace sdc
     {
         assert( f.rows() == F.cols() );
         assert( substep <= F.rows() );
-        assert( F.cols() > 0 );
-        assert( F.rows() > 0 );
         assert( not std::isnan( f.norm() ) );
         F.row( substep ) = f;
     }
@@ -156,8 +151,6 @@ namespace sdc
     {
         assert( sol.rows() == solStages.cols() );
         assert( substep <= solStages.rows() );
-        assert( solStages.cols() > 0 );
-        assert( solStages.rows() > 0 );
         assert( not std::isnan( sol.norm() ) );
         solStages.row( substep ) = sol;
     }

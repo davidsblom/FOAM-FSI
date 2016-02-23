@@ -43,7 +43,7 @@ protected:
 
         bool parallel = false;
         int extrapolation = 0;
-        scalar tol = 1.0e-10;
+        scalar tol = 1.0e-2;
         int maxIter = 20;
         scalar initialRelaxation = 1.0e-3;
         int maxUsedIterations = 50;
@@ -235,9 +235,10 @@ TEST( SDCFsiTest, order )
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
         quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
 
-        std::shared_ptr<sdc::SDC> sdc( new sdc::SDC( fsiSolver, quadrature, 1.0e-15, 10, 20 ) );
+        std::shared_ptr<sdc::SDC> sdc( new sdc::SDC( fsiSolver, quadrature, 1.0e-13, 10, 20 ) );
 
         sdc->run();
+        ASSERT_TRUE( sdc->isConverged() );
 
         fluidSolvers.push_back( fluid );
         nbTimeStepsList.push_back( nbTimeSteps );
@@ -272,7 +273,7 @@ TEST( SDCFsiTest, order )
         {
             scalar order = ( std::log10( errors.at( iComputation ) ) - std::log10( errors.at( iComputation + 1 ) ) ) / ( std::log10( nbTimeStepsList.at( iComputation + 1 ) ) - std::log10( nbTimeStepsList.at( iComputation ) ) );
             std::cout << "order = " << order << std::endl;
-            ASSERT_NEAR( order, 4, 0.3 );
+            ASSERT_NEAR( order, 4, 0.4 );
         }
     }
 }
