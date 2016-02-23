@@ -2,7 +2,6 @@ FOAM-FSI
 ========
 
 [![wercker status](https://app.wercker.com/status/80ce1a6b7a23e394c5f07a3f27b5b43e/s/master "wercker status")](https://app.wercker.com/project/bykey/80ce1a6b7a23e394c5f07a3f27b5b43e)
-[![codecov.io](https://codecov.io/github/davidsblom/FOAM-FSI/coverage.svg?branch=master)](https://codecov.io/github/davidsblom/FOAM-FSI?branch=master)
 
 Features
 -----------
