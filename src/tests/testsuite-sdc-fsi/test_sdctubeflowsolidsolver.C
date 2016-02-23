@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 #include "SDCTubeFlowFluidSolver.H"
 #include "SDCTubeFlowLinearSolidSolver.H"
+#include "SDCTubeFlowLinearizedSolidSolver.H"
 #include "GaussRadau.H"
 #include "GaussLobatto.H"
 #include "SDC.H"
@@ -18,7 +19,7 @@
 #include "MinIterationConvergenceMeasure.H"
 #include "AitkenPostProcessing.H"
 
-class SDCFsiSolidSolverTest : public ::testing::Test
+class SDCFsiSolidSolverTest : public ::testing::TestWithParam<std::string>
 {
 protected:
 
@@ -57,8 +58,19 @@ protected:
         scalar beta = 0.5;
         int minIter = 5;
 
+        std::string solidSolverSetting = GetParam();
+
         std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
-        std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> solid( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+
+        std::shared_ptr<fsi::BaseMultiLevelSolver> solid;
+
+        if ( solidSolverSetting == "linear" )
+            solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+
+        if ( solidSolverSetting == "linearized" )
+            solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+
+        assert( solid );
 
         shared_ptr<RBFFunctionInterface> rbfFunction;
         shared_ptr<RBFInterpolation> rbfInterpolator;
@@ -119,18 +131,20 @@ protected:
     std::shared_ptr<sdc::SDC> sdc;
 };
 
-TEST_F( SDCFsiSolidSolverTest, object )
+INSTANTIATE_TEST_CASE_P( tests, SDCFsiSolidSolverTest, ::testing::Values( "linearized", "linear" ) );
+
+TEST_P( SDCFsiSolidSolverTest, object )
 {
     ASSERT_TRUE( true );
 }
 
-TEST_F( SDCFsiSolidSolverTest, timeStep )
+TEST_P( SDCFsiSolidSolverTest, timeStep )
 {
     sdc->solveTimeStep( 0 );
     ASSERT_TRUE( sdc->isConverged() );
 }
 
-TEST_F( SDCFsiSolidSolverTest, run )
+TEST_P( SDCFsiSolidSolverTest, run )
 {
     sdc->run();
     ASSERT_TRUE( sdc->isConverged() );
@@ -232,7 +246,7 @@ TEST( SDCFsiSolidTest, order )
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
         quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
 
-        std::shared_ptr<sdc::SDC> sdc( new sdc::SDC( fsiSolver, quadrature, 1.0e-13, 10, 50 ) );
+        std::shared_ptr<sdc::SDC> sdc( new sdc::SDC( fsiSolver, quadrature, 1.0e-12, 10, 50 ) );
 
         sdc->run();
         ASSERT_TRUE( sdc->isConverged() );

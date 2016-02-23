@@ -6,5 +6,6 @@ test_sdctubeflowsolidsolver.C
 SDCTubeFlowFluidSolver.C
 SDCTubeFlowSolidSolver.C
 SDCTubeFlowLinearSolidSolver.C
+SDCTubeFlowLinearizedSolidSolver.C
 
 EXE = $(FOAM_APPBIN)/testsuite-sdc-fsi
