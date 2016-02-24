@@ -14,11 +14,13 @@ for i in range( nbCores ):
     run = subprocess.Popen( "GTEST_TOTAL_SHARDS=" + str(nbCores) + " GTEST_SHARD_INDEX=" + str(i) + " " + args.testsuite + " --gtest_throw_on_failure > tests_" + str(i) + ".log 2>&1", shell = True )
     runs.append( run )
 
+i = 0
 returnCode = 0
 for run in runs:
     code = None
     while code is None:
-        print '.'
+        print i
+        i += 1
         sys.stdout.flush()
         code = run.poll()
         if code > returnCode:

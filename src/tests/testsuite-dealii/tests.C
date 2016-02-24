@@ -4,6 +4,7 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+#include <mpi.h>
 #include "gtest/gtest.h"
 #include <limits.h>
 #include <deal.II/base/utilities.h>
