@@ -49,6 +49,20 @@ Set the environment variable `$FOAM_INST_DIR` in case foam-extend is installed i
 export FOAM_INST_DIR=`pwd`
 ```
 
+You can make a distinction between a debug build and a release build. Generally, it is advised to first setup a test case with a debug build, and then do the production run with the production build. By default, foam-extend is configured to build the release version. With the environment variable `WM_COMPILE_OPTION` you can switch between debug and release builds. So for a debug build:
+``` bash
+export WM_COMPILE_OPTION=Debug
+```
+and for a release build:
+``` bash
+export WM_COMPILE_OPTION=Opt
+```
+For optimal performance of the production run, it is advised to add the `NDEBUG` compiler flag in order to disable all assertions as follows:
+
+``` bash
+sed -i s/"c++OPT      = -O3"/"c++OPT      = -O3 -DNDEBUG"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++Opt
+```
+
 Finally, the compilation process of `foam-extend` is started with
 
 ``` bash
