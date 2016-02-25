@@ -19,7 +19,13 @@ if [ ! -d "petsc-${PETSC_VERSION}" ]; then
 
   export PETSC_DIR=`pwd`
 
-  ./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --with-debugging=0
+  if [ "$WM_COMPILE_OPTION" = "Opt" ]
+  then
+      ./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --with-debugging=0 --download-mumps --download-scalapack --download-parmetis --download-metis
+  elif [ "$WM_COMPILE_OPTION" = "Debug" ]
+  then
+      ./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --with-debugging=1 --download-mumps --download-scalapack --download-parmetis --download-metis
+  fi
 
   make
 
