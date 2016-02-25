@@ -154,6 +154,9 @@ void beamRotationForced::setBeamLength(){
 		scalar minLocal = min(normalInitialPoints);
 		minPos = min(minPos,minLocal);
 	}
+    //Ensure for parallel calculations the correct length is achieved
+    reduce( maxPos, maxOp<scalar>() );
+    reduce( minPos, minOp<scalar>() );
 
 	beamLength_ = maxPos - minPos;
 }
