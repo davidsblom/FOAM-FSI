@@ -14,7 +14,9 @@ dealiiSolidSolver<dimension>::dealiiSolidSolver( dealiifsi::DataStorage & data )
     k( 0 ),
     kindex( 0 ),
     UStages(),
-    VStages()
+    VStages(),
+    ndofs( Pstream::nProcs(), 0 ),
+    globalOffset( 0 )
 {
     matrix tmp;
     getWritePositions( tmp );
@@ -43,7 +45,9 @@ dealiiSolidSolver<dimension>::dealiiSolidSolver(
     k( 0 ),
     kindex( 0 ),
     UStages(),
-    VStages()
+    VStages(),
+    ndofs( Pstream::nProcs(), 0 ),
+    globalOffset( 0 )
 {
     matrix tmp;
     getWritePositions( tmp );
@@ -70,17 +74,38 @@ void dealiiSolidSolver<dimension>::finalizeTimeStep()
 template <int dimension>
 void dealiiSolidSolver<dimension>::getReadPositions( matrix & readPositions )
 {
-    EigenMatrix readPositionsEigen;
-    dealiifsi::LinearElasticity<dimension>::getReadPositions( readPositionsEigen );
-    readPositions = readPositionsEigen.cast<scalar>();
+    getWritePositions( readPositions );
 }
 
 template <int dimension>
 void dealiiSolidSolver<dimension>::getWritePositions( matrix & writePositions )
 {
-    EigenMatrix writePositionsEigen;
-    dealiifsi::LinearElasticity<dimension>::getWritePositions( writePositionsEigen );
-    writePositions = writePositionsEigen.cast<scalar>();
+    EigenMatrix local_writePositionsEigen;
+    dealiifsi::LinearElasticity<dimension>::getWritePositions( local_writePositionsEigen );
+    matrix local_writePositions = local_writePositionsEigen.cast<scalar>();
+
+    ndofs = 0;
+    ndofs[Pstream::myProcNo()] = local_writePositions.rows();
+    reduce( ndofs, sumOp<labelList>() );
+
+    globalOffset = 0;
+
+    for ( int i = 0; i < Pstream::myProcNo(); i++ )
+        globalOffset += ndofs[i];
+
+    vectorField writePositionsField( sum( ndofs ), Foam::vector::zero );
+
+    for ( int i = 0; i < local_writePositions.rows(); i++ )
+        for ( int j = 0; j < local_writePositions.cols(); j++ )
+            writePositionsField[i + globalOffset][j] = local_writePositions( i, j );
+
+    reduce( writePositionsField, sumOp<vectorField>() );
+
+    writePositions.resize( writePositionsField.size(), local_writePositions.cols() );
+
+    for ( int i = 0; i < writePositions.rows(); i++ )
+        for ( int j = 0; j < writePositions.cols(); j++ )
+            writePositions( i, j ) = writePositionsField[i][j];
 }
 
 template <int dimension>
@@ -111,16 +136,41 @@ void dealiiSolidSolver<dimension>::solve(
 {
     Info << "Solve solid domain with deal.II" << endl;
 
-    EigenMatrix inputEigen = input.cast<double>();
+    assert( ndofs[0] > 0 );
+
+    matrix local_input( ndofs[Pstream::myProcNo()], input.cols() );
+
+    for ( int i = 0; i < local_input.rows(); i++ )
+        for ( int j = 0; j < local_input.cols(); j++ )
+            local_input( i, j ) = input( i + globalOffset, j );
+
+    EigenMatrix inputEigen = local_input.cast<double>();
+
     dealiifsi::LinearElasticity<dimension>::setTraction( inputEigen );
 
     dealiifsi::LinearElasticity<dimension>::solve();
 
-    EigenMatrix outputEigen;
-    dealiifsi::LinearElasticity<dimension>::getDisplacement( outputEigen );
+    EigenMatrix local_outputEigen( ndofs[Pstream::myProcNo()], local_input.cols() );
+    dealiifsi::LinearElasticity<dimension>::getDisplacement( local_outputEigen );
+    matrix local_output = local_outputEigen.cast<scalar>();
 
-    BaseMultiLevelSolver::data = outputEigen.cast<scalar>();
-    output = BaseMultiLevelSolver::data;
+    assert( local_outputEigen.rows() == ndofs[Pstream::myProcNo()] );
+
+    vectorField displacementField( sum( ndofs ), Foam::vector::zero );
+
+    for ( int i = 0; i < local_output.rows(); i++ )
+        for ( int j = 0; j < local_output.cols(); j++ )
+            displacementField[i + globalOffset][j] = local_output( i, j );
+
+    reduce( displacementField, sumOp<vectorField>() );
+
+    output.resize( displacementField.size(), local_output.cols() );
+
+    for ( int i = 0; i < output.rows(); i++ )
+        for ( int j = 0; j < output.cols(); j++ )
+            output( i, j ) = displacementField[i][j];
+
+    BaseMultiLevelSolver::data = output;
 }
 
 template <int dimension>
@@ -273,21 +323,25 @@ void dealiiSolidSolver<dimension>::getVariablesInfo(
 }
 
 void copy(
-    const dealii::Vector<double> & source,
+    const dealii::PETScWrappers::MPI::Vector & source,
     fsi::vector & target,
     unsigned int targetOffset
     )
 {
-    for ( unsigned int i = 0; i < source.size(); ++i )
-        target( i + targetOffset ) = source[i];
+    dealii::Vector<double> localized_vector( source );
+
+    for ( unsigned int i = 0; i < localized_vector.size(); ++i )
+        target( i + targetOffset ) = localized_vector[i];
 }
 
 void copy(
     const fsi::vector & source,
-    dealii::Vector<double> & target,
+    dealii::PETScWrappers::MPI::Vector & target,
     unsigned int sourceOffset
     )
 {
     for ( unsigned int i = 0; i < target.size(); ++i )
         target[i] = source( i + sourceOffset );
+
+    target.compress( dealii::VectorOperation::insert );
 }
