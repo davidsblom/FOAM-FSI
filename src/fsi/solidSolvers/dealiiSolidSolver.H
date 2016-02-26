@@ -14,14 +14,14 @@
 namespace fsi
 {
     void copy(
-        const dealii::Vector<double> & source,
+        const dealii::PETScWrappers::MPI::Vector & source,
         fsi::vector & target,
         unsigned int targetOffset
         );
 
     void copy(
         const fsi::vector & source,
-        dealii::Vector<double> & target,
+        dealii::PETScWrappers::MPI::Vector & target,
         unsigned int sourceOffset
         );
 
@@ -126,6 +126,8 @@ private:
         int k, kindex;
         std::deque<dealii::Vector<double> > UStages;
         std::deque<dealii::Vector<double> > VStages;
+        labelList ndofs;
+        int globalOffset;
     };
 
     #include "solidSolvers/dealiiSolidSolver.tpp"

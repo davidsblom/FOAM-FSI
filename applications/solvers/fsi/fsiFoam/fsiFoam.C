@@ -181,9 +181,6 @@ int main(
 
     std::shared_ptr<dealii::Utilities::MPI::MPI_InitFinalize> mpi_initialization;
 
-    if ( Pstream::nProcs() == 1 )
-        mpi_initialization = std::shared_ptr<dealii::Utilities::MPI::MPI_InitFinalize> ( new dealii::Utilities::MPI::MPI_InitFinalize( argc, argv, 1 ) );
-
     // Load computation settings
 
     std::string filename = static_cast<std::string>( args->rootPath() ) + "/" + static_cast<std::string>( args->globalCaseName() ) + "/constant/fsi.yaml";
@@ -706,6 +703,10 @@ int main(
             data.read_data( "deal-fsi.prm" );
             data.time_step = runTime->deltaT().value();
             data.final_time = runTime->endTime().value();
+
+            dealii::deallog.depth_console( 0 );
+
+            PetscInitialize( &argc, &argv, PETSC_NULL, PETSC_NULL );
 
             if ( timeIntegrationScheme == "bdf" )
             {
