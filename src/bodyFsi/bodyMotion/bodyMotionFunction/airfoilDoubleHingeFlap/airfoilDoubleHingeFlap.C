@@ -110,7 +110,7 @@ tmp<Field<vectorField> > airfoilDoubleHingeFlap::calculatePosition(const scalar 
     }
     else
     {
-        scalar trel=asin(flapRotAngle/rotationAmplitude_)/(2.0*pi*rotationFrequency_);//relative t for flap angle
+        scalar trel=asin(flapRotAngle/flapRotationAmplitude_)/(2.0*pi*rotationFrequency_);//relative t for flap angle
         scalar tnorm=trel/Ttrans+0.5;//going from 0 to 1
         flapRotationOrigin=topRotationOrigin_-(topRotationOrigin_-bottomRotationOrigin_)*(tnorm-0.5/pi*(sin(2*pi*tnorm)));
     }
