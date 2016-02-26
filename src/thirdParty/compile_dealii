@@ -71,4 +71,10 @@ ln -s ../eigen
 
 cmake -DDEAL_II_DIR=../dealii/bin/ .
 
-make -j $WM_NCOMPPROCS release
+if [ "$WM_COMPILE_OPTION" = "Opt" ]
+then
+    make release
+elif [ "$WM_COMPILE_OPTION" = "Debug" ]
+then
+    make debug
+fi
