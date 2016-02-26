@@ -30,6 +30,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
                 sed -i s/"c++DBUG    = -ggdb3 -DFULLDEBUG"/"c++DBUG    = -g -DFULLDEBUG --coverage -fprofile-arcs -ftest-coverage"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++Debug
@@ -66,6 +67,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 cd foam-extend-3.2
                 source etc/bashrc
@@ -117,6 +119,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -145,6 +148,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -166,6 +170,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -190,6 +195,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -211,6 +217,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -232,6 +239,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -253,6 +261,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -277,6 +286,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -296,6 +306,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -315,6 +326,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -334,6 +346,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -355,6 +368,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -375,6 +389,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -399,6 +414,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
                 export WM_NCOMPPROCS=1
 
                 source foam-extend-3.2/etc/bashrc
@@ -420,6 +436,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
                 export WM_NCOMPPROCS=1
 
                 source foam-extend-3.2/etc/bashrc
@@ -441,6 +458,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
                 export WM_NCOMPPROCS=1
 
                 source foam-extend-3.2/etc/bashrc
@@ -461,6 +479,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
                 export WM_NCOMPPROCS=1
 
                 source foam-extend-3.2/etc/bashrc
@@ -481,6 +500,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
                 export WM_NCOMPPROCS=1
 
                 source foam-extend-3.2/etc/bashrc
@@ -502,6 +522,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_COMPILE_OPTION=Debug
                 export WM_NCOMPPROCS=1
 
                 source foam-extend-3.2/etc/bashrc
