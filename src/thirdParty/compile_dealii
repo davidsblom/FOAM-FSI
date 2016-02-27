@@ -42,14 +42,8 @@ if [ ! -d "dealii-${DEALII_VERSION}" ]; then
   mkdir build
   mkdir bin
   cd build
-
-  if [ "$WM_COMPILE_OPTION" = "Opt" ]
-  then
-      cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DCMAKE_BUILD_TYPE="Release" --with-umfpack ..
-  elif [ "$WM_COMPILE_OPTION" = "Debug" ]
-  then
-      cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DCMAKE_BUILD_TYPE="Debug" --with-umfpack ..
-  fi
+  
+  cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin --with-umfpack ..
 
   make -j $WM_NCOMPPROCS install test
 
@@ -71,4 +65,10 @@ ln -s ../eigen
 
 cmake -DDEAL_II_DIR=../dealii/bin/ .
 
-make -j $WM_NCOMPPROCS release
+if [ "$WM_COMPILE_OPTION" = "Opt" ]
+then
+    make release
+elif [ "$WM_COMPILE_OPTION" = "Debug" ]
+then
+    make debug
+fi
