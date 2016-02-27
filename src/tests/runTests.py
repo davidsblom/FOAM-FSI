@@ -28,7 +28,7 @@ for run in runs:
         if code is not None:
             break
         time.sleep( 1 )
-    run.join()
+    run.wait()
     print 'Run finished'
 print 'All runs finished'
 sys.stdout.flush()
