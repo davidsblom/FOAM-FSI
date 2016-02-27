@@ -28,6 +28,8 @@ for run in runs:
         if code is not None:
             break
         time.sleep( 1 )
+    print 'Run finished'
+print 'All runs finished'
 
 for i in range( nbCores ):
     subprocess.call("tail -n 20 tests_" + str(i) + ".log 2>&1", shell=True)
