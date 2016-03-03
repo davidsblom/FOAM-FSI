@@ -35,3 +35,7 @@ cd fluid
 mpirun -np $NB_FLUID_CORES fsiFluidFoam -parallel > log.fsiFluidFoam 2>&1
 
 wait
+
+runApplication reconstructPar
+cd ../solid
+runApplication reconstructPar

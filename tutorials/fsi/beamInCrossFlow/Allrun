@@ -41,3 +41,4 @@ for i in `seq 0 $CORE_COUNT`
 
 cd fluid
 runParallel fsiFoam $NB_CORES
+runApplication reconstructPar
