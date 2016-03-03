@@ -79,3 +79,7 @@ for i in `seq 0 $CORE_COUNT`
 
 cd fluid-level-1
 runParallel fsiFoam $NB_CORES
+runApplication reconstructPar -region fluid-level-0
+runApplication reconstructPar -region solid-level-0
+runApplication reconstructPar -region fluid-level-1
+runApplication reconstructPar -region solid-level-1

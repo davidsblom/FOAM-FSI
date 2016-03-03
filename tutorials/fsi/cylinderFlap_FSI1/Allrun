@@ -40,5 +40,4 @@ for i in `seq 0 $CORE_COUNT`
   done
 
 cd fluid
-#runParallel fsiFoam $NB_CORES
-runApplication fsiFoam
+runParallel fsiFoam $NB_CORES
