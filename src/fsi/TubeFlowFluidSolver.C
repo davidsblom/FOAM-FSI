@@ -359,7 +359,7 @@ namespace tubeflow
         const fsi::vector & x,
         const fsi::vector & a,
         const fsi::vector & un,
-        const fsi::vector & pn,
+        const fsi::vector & /*pn*/,
         const fsi::vector & an,
         fsi::vector & R
         )
@@ -370,7 +370,6 @@ namespace tubeflow
         assert( x.rows() == 2 * N );
         assert( a.rows() == N );
         assert( un.rows() == N );
-        assert( pn.rows() == N );
         assert( an.rows() == N );
         assert( R.rows() == rhs.rows() );
 

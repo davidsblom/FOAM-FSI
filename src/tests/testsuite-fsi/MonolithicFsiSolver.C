@@ -77,7 +77,7 @@ namespace tubeflow
     void MonolithicFsiSolver::evaluateResidual(
         const fsi::vector & x,
         const fsi::vector & un,
-        const fsi::vector & pn,
+        const fsi::vector & /*pn*/,
         const fsi::vector & an,
         fsi::vector & R
         )
@@ -87,7 +87,6 @@ namespace tubeflow
         assert( R.rows() == 3 * N );
         assert( x.rows() == 3 * N );
         assert( un.rows() == N );
-        assert( pn.rows() == N );
         assert( an.rows() == N );
 
         // Determine the velocity and pressure fsi::vectors from the
@@ -299,6 +298,9 @@ namespace tubeflow
 
         // 2: RelativeErrorTooSmall
         assert( ret == 2 );
+
+        if ( ret != 2 )
+            throw std::runtime_error( "The Levenberg Marquardt solver has not converged." );
 
         // Save the velocity, pressure and displacement
         u = x.head( N );

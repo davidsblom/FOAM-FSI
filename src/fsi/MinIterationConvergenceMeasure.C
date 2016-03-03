@@ -23,12 +23,10 @@ namespace fsi
     }
 
     void MinIterationConvergenceMeasure::measure(
-        vector & oldValues,
-        vector & newValues
+        vector & /*oldValues*/,
+        vector & /*newValues*/
         )
     {
-        assert( oldValues.rows() == newValues.rows() );
-
         currentIteration++;
 
         isConvergence_ = minimumIterationCount <= currentIteration;

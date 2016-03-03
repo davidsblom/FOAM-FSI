@@ -167,7 +167,7 @@ namespace sdc
     }
 
     void ESDIRK::getSourceTerm(
-        const bool corrector,
+        const bool /*corrector*/,
         const int k,
         const scalar deltaT,
         fsi::vector & rhs,
@@ -175,7 +175,6 @@ namespace sdc
         )
     {
         assert( k <= nbStages - 1 );
-        assert( corrector == false );
 
         qold = this->qold;
 

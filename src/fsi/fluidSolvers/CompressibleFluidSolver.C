@@ -127,6 +127,9 @@ CompressibleFluidSolver::CompressibleFluidSolver(
     // used convergence tolerance for the non-linear system.
     scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "Up" ).lookup( "tolerance" ) );
     assert( absTolerance < convergenceTolerance );
+
+    if ( not absTolerance < convergenceTolerance )
+        throw std::runtime_error( "The absolute tolerance for the linear solver Up should be smaller than blockSolver::convergenceTolerance in order to reach convergence of the non-linear system" );
 }
 
 CompressibleFluidSolver::~CompressibleFluidSolver()

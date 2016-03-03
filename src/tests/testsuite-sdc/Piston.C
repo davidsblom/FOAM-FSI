@@ -279,7 +279,7 @@ void Piston::run()
 void Piston::implicitSolve(
     bool,
     const int k,
-    const int kold,
+    const int /*kold*/,
     const scalar t,
     const scalar dt,
     const fsi::vector & qold,
@@ -310,9 +310,6 @@ void Piston::implicitSolve(
     this->t = t;
 
     solStages.at( k + 1 ) = result;
-
-    assert( std::abs( solStages.at( kold ) ( 0 ) - qold( 0 ) ) < 1.0e-13 );
-    assert( std::abs( solStages.at( kold ) ( 1 ) - qold( 1 ) ) < 1.0e-13 );
 }
 
 void Piston::setNumberOfImplicitStages( int k )

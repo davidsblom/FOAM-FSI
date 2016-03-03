@@ -258,6 +258,9 @@ void SolidSolver::readSolidMechanicsControls()
     assert( minIter < maxIter );
     assert( maxIter > 0 );
     assert( minIter >= 0 );
+
+    if ( not linearTolerance < absoluteTolerance )
+        throw std::runtime_error( "The absolute tolerance for the linear solver (U) should be smaller than solidMechanics::absoluteTolerance in order to reach convergence of the non-linear system" );
 }
 
 void SolidSolver::resetSolution()

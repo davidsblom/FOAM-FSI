@@ -184,6 +184,8 @@ void FineModelParabola::optimize(
 
     // 2: RelativeErrorTooSmall
     assert( ret == 2 );
+    if ( ret != 2 )
+         throw std::runtime_error( "The Levenberg Marquardt optimization has not converged." );
 }
 
 class FineModelSimple : public SurrogateModel
@@ -356,12 +358,11 @@ public:
 
     virtual void optimize(
         const fsi::vector & y,
-        const fsi::vector & x0,
+        const fsi::vector & /*x0*/,
         fsi::vector & xk
         )
     {
         assert( y.rows() == 3 );
-        assert( x0.rows() == 2 );
         assert( xk.rows() == 2 );
 
         // Analytical optimum

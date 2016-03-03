@@ -8,6 +8,7 @@
  */
 
 #include "FluidSolver.H"
+#include <stdexcept>
 
 FluidSolver::FluidSolver(
     string name,
@@ -142,8 +143,14 @@ FluidSolver::FluidSolver(
     scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
     assert( absTolerance < absoluteTolerance );
 
+    if ( not absTolerance < absoluteTolerance )
+        throw std::runtime_error( "The absolute tolerance for the linear solver of the momentum equation (U) should be smaller than PIMPLE::absoluteTolerance in order to reach convergence of the non-linear system" );
+
     absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
     assert( absTolerance < absoluteTolerance );
+
+    if ( not absTolerance < absoluteTolerance )
+        throw std::runtime_error( "The absolute tolerance for the linear solver of the Poisson equation (p) should be smaller than PIMPLE::absoluteTolerance in order to reach convergence of the non-linear system" );
 
     checkTimeDiscretisationScheme();
 
