@@ -49,6 +49,8 @@ if [ ! -d "dealii-${DEALII_VERSION}" ]; then
 
   cd ../..
 
+  rm -rf dealii-${DEALII_VERSION}/build
+
   cp dealii-${DEALII_VERSION}/bin/lib/libdeal* ${FOAM_LIBBIN}/
 
 fi
