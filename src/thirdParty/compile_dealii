@@ -42,7 +42,7 @@ if [ ! -d "dealii-${DEALII_VERSION}" ]; then
   mkdir build
   mkdir bin
   cd build
-  
+
   cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin --with-umfpack ..
 
   make -j $WM_NCOMPPROCS install test
