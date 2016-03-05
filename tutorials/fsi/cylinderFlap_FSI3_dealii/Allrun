@@ -15,3 +15,4 @@ runApplication renumberMesh -overwrite
 runApplication checkMesh
 runApplication decomposePar
 runParallel fsiFoam $NB_CORES
+runApplication reconstructPar

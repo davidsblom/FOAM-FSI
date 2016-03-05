@@ -597,14 +597,13 @@ void SDCDynamicMeshFluidSolver::prepareImplicitSolve(
     const int kold,
     const scalar t,
     const scalar dt,
-    const fsi::vector & qold,
+    const fsi::vector & /*qold*/,
     const fsi::vector & rhs
     )
 {
     assert( k < this->k );
     assert( kold < this->k );
     assert( kold <= k );
-    assert( qold.rows() == rhs.rows() );
     this->kold = kold;
     this->indexk = k;
 

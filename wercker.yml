@@ -166,12 +166,27 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export DEALII_VERSION=8.3.0
 
                 source foam-extend-3.2/etc/bashrc
 
                 cd src/thirdParty
 
+                if [ -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}/bin/lib/libdeal_II.so.${DEALII_VERSION}" ]; then
+                    debug "deal.II library found in cache"
+                    ln -s $WERCKER_CACHE_DIR/dealii-${DEALII_VERSION} ./
+                    ln -s dealii-${DEALII_VERSION} dealii
+                    cp dealii-${DEALII_VERSION}/bin/lib/libdeal* ${FOAM_LIBBIN}/
+                else
+                    debug "deal.II library not found in cache, will download and compile"
+                fi
+
                 ./compile_dealii
+
+                if [ ! -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}/bin/lib/libdeal_II.so.${DEALII_VERSION}" ]; then
+                    debug "copy deal.II library to the cache directory"
+                    cp -r dealii-${DEALII_VERSION} $WERCKER_CACHE_DIR/
+                fi
 
                 cd deal-fsi
                 make release run
@@ -375,6 +390,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=2
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -399,7 +415,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
-                export WM_NCOMPPROCS=1
+                export WM_NCOMPPROCS=2
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -420,7 +436,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
-                export WM_NCOMPPROCS=1
+                export WM_NCOMPPROCS=2
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -461,7 +477,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
-                export WM_NCOMPPROCS=1
+                export WM_NCOMPPROCS=2
 
                 source foam-extend-3.2/etc/bashrc
                 cd src/tests
@@ -481,7 +497,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
-                export WM_NCOMPPROCS=1
+                export WM_NCOMPPROCS=2
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -502,7 +518,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
-                export WM_NCOMPPROCS=1
+                export WM_NCOMPPROCS=2
 
                 source foam-extend-3.2/etc/bashrc
 
