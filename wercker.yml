@@ -218,6 +218,7 @@ build:
                     tar -zxf dealii-${DEALII_VERSION}.tar.gz
                     ln -s dealii-${DEALII_VERSION} dealii
                     cp dealii-${DEALII_VERSION}/bin/lib/libdeal_II.so.${DEALII_VERSION} ${FOAM_LIBBIN}/libdeal_II.so
+                    cp dealii-${DEALII_VERSION}/bin/lib/libdeal_II.so.${DEALII_VERSION} ${FOAM_LIBBIN}/
                 else
                     debug "deal.II library not found in cache, will download and compile"
                 fi
