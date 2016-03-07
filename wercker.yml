@@ -125,7 +125,7 @@ build:
                     rsync -azvh foam-extend-3.2.tar.gz $WERCKER_CACHE_DIR/
                 fi
         - script:
-            name: environment variable $FOAM_USER_SRC
+            name: setup environment
             code: |
 
                 export PARAVIEW_SYSTEM=1
