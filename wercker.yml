@@ -207,6 +207,7 @@ build:
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
                 export DEALII_VERSION=8.3.0
+                export BOOST_VERSION=1_55_0
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -219,8 +220,12 @@ build:
                     ln -s dealii-${DEALII_VERSION} dealii
                     cp dealii-${DEALII_VERSION}/bin/lib/libdeal_II.so.${DEALII_VERSION} ${FOAM_LIBBIN}/libdeal_II.so
                     cp dealii-${DEALII_VERSION}/bin/lib/libdeal_II.so.${DEALII_VERSION} ${FOAM_LIBBIN}/
-                else
-                    debug "deal.II library not found in cache, will download and compile"
+                fi
+
+                if [ -f "$WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.gz" ]; then
+                    debug "boost library found in cache"
+                    rsync -azvh $WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.gz ./
+                    tar -zxf boost_${BOOST_VERSION}.tar.gz
                 fi
 
                 ./compile_dealii
@@ -228,6 +233,11 @@ build:
                 if [ ! -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}.tar.gz" ]; then
                     tar -zcf dealii-${DEALII_VERSION}.tar.gz dealii-${DEALII_VERSION}
                     rsync -azvh dealii-${DEALII_VERSION}.tar.gz $WERCKER_CACHE_DIR/
+                fi
+
+                if [ ! -f "$WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.gz" ]; then
+                    tar -zcf boost_${BOOST_VERSION}.tar.gz boost_${BOOST_VERSION}
+                    rsync -azvh boost_${BOOST_VERSION}.tar.gz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: googletest
