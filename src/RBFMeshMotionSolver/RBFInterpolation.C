@@ -333,30 +333,30 @@ namespace rbf
 
         if ( not cpu )
         {
-            double ttmp = 0;
+            // double ttmp = 0;
 
-            if ( debug == 3 )
-            {
-                valuesInterpolation.setZero();
-
-                boolList bla( Pstream::nProcs(), true );
-                reduce( bla, sumOp<boolList>() );
-
-                ttmp = std::clock();
-
-                // Pout << "Debug Interpolation of CPU " << Pstream::myProcNo() << " valuesInterpolation: " << valuesInterpolation.rows() << ", " << valuesInterpolation.cols() << nl;
-            }
+            // if ( debug == 3 )
+            // {
+            //     valuesInterpolation.setZero();
+            //
+            //     boolList bla( Pstream::nProcs(), true );
+            //     reduce( bla, sumOp<boolList>() );
+            //
+            //     ttmp = std::clock();
+            //
+            //     // Pout << "Debug Interpolation of CPU " << Pstream::myProcNo() << " valuesInterpolation: " << valuesInterpolation.rows() << ", " << valuesInterpolation.cols() << nl;
+            // }
 
             valuesInterpolation = Hhat * values;
 
             // valuesInterpolation.noalias() = Hhat * values;
 
-            if ( debug == 3 )
-            {
-                ttmp = std::clock() - ttmp;
-
-                // Pout << "Debug Interpolation of CPU " << Pstream::myProcNo() << " of [" << Hhat.rows() << ", " << Hhat.cols() << "]x[" << values.rows() << ", " << values.cols() << "]: " << static_cast<float>(ttmp) / CLOCKS_PER_SEC << " s" << endl;
-            }
+            // if ( debug == 3 )
+            // {
+            //     ttmp = std::clock() - ttmp;
+            //
+            //     // Pout << "Debug Interpolation of CPU " << Pstream::myProcNo() << " of [" << Hhat.rows() << ", " << Hhat.cols() << "]x[" << values.rows() << ", " << values.cols() << "]: " << static_cast<float>(ttmp) / CLOCKS_PER_SEC << " s" << endl;
+            // }
         }
 
         if ( debug )

@@ -99,7 +99,7 @@ namespace rbf
 
         void correctSurface(
             matrix & valuesInterpolation,
-            const matrix & surfaceError
+            const matrix values
             );
 
         std::shared_ptr<RBFInterpolation> rbf;
@@ -127,7 +127,6 @@ namespace rbf
         matrix values;
         matrix errorInterpolationCoarse;
         Eigen::VectorXi closestBoundaryIndexCorrection;
-        matrix valuesCorrection;
         int nbMovingFaceCenters;
         int fileExportIndex;
         bool computed;

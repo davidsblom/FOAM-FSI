@@ -1023,7 +1023,6 @@ void RBFMeshMotionSolver::solve()
         rbf->interpolate( values, valuesInterpolation );
 
     // Apply the 2d correction
-
     vectorField valuesInterpolationField( mesh().points().size(), Foam::vector::zero );
     int index = 0;
     forAll( valuesInterpolationField, i )

@@ -95,24 +95,27 @@ tmp<Field<vectorField> > airfoilDoubleHingeFlap::calculatePosition(const scalar 
     tensor RzCurFlap(cos(-flapRotAngle), -sin(-flapRotAngle), 0, sin(-flapRotAngle), cos(-flapRotAngle), 0, 0, 0, 1);
 
     //Extra transition between rotation point location
-    scalar eps_alpha=flapRotationAmplitude_*sin(2*pi*transitionFraction_);
-    scalar Ttrans=2.0*transitionFraction_*1.0/flapRotationFrequency_;
+    scalar eps_alpha=flapRotationAmplitude_*sin(pi*transitionFraction_);
+    scalar Ttrans=transitionFraction_/flapRotationFrequency_;
 
     //If rotation is postive rotate around top, otherwise around bottom. In the middle do something else
     vector flapRotationOrigin = vector::zero;
-    if(flapRotAngle<-eps_alpha)
+    if(flapRotAngle<eps_alpha)
     {
         flapRotationOrigin = topRotationOrigin_;
     }
-    else if(flapRotAngle>eps_alpha)
+    else if(flapRotAngle>-eps_alpha)
     {
         flapRotationOrigin = bottomRotationOrigin_;
     }
     else
     {
         scalar trel=asin(flapRotAngle/rotationAmplitude_)/(2.0*pi*rotationFrequency_);//relative t for flap angle
-        scalar tnorm=trel/Ttrans+0.5;//going from 0 to 1
-        flapRotationOrigin=topRotationOrigin_-(topRotationOrigin_-bottomRotationOrigin_)*(tnorm-0.5/pi*(sin(2*pi*tnorm)));
+        scalar tnorm=2.0*trel/Ttrans+0.5;//going from 0 to 1
+
+        // flapRotationOrigin=topRotationOrigin_-(topRotationOrigin_-bottomRotationOrigin_)*(tnorm-0.5/pi*(sin(2*pi*tnorm)));
+        //x(i) = x0 + dx*(10*localt.^3 - 15*localt.^4 + 6*localt.^5);
+        flapRotationOrigin = topRotationOrigin_ - (topRotationOrigin_-bottomRotationOrigin_) * (10*pow(tnorm,3) - 15*pow(tnorm,4) + 6*pow(tnorm,5));
     }
 
     //Displace rotation point with wing motion

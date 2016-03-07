@@ -40,7 +40,6 @@ namespace rbf
         values(),
         errorInterpolationCoarse(),
         closestBoundaryIndexCorrection(),
-        valuesCorrection(),
         nbMovingFaceCenters( 0 ),
         fileExportIndex( 0 ),
         computed( false )
@@ -83,7 +82,6 @@ namespace rbf
         values(),
         errorInterpolationCoarse(),
         closestBoundaryIndexCorrection(),
-        valuesCorrection(),
         nbMovingFaceCenters( 0 ),
         fileExportIndex( 0 ),
         computed( false )
@@ -142,7 +140,6 @@ namespace rbf
         values(),
         errorInterpolationCoarse(),
         closestBoundaryIndexCorrection(),
-        valuesCorrection(),
         nbMovingFaceCenters( 0 ),
         fileExportIndex( 0 ),
         computed( false )
@@ -205,7 +202,6 @@ namespace rbf
         values(),
         errorInterpolationCoarse(),
         closestBoundaryIndexCorrection(),
-        valuesCorrection(),
         nbMovingFaceCenters( 0 ),
         fileExportIndex( 0 ),
         computed( false )
@@ -273,7 +269,6 @@ namespace rbf
         values(),
         errorInterpolationCoarse(),
         closestBoundaryIndexCorrection(),
-        valuesCorrection(),
         nbMovingFaceCenters( 0 ),
         fileExportIndex( 0 ),
         computed( false )
@@ -1051,7 +1046,6 @@ namespace rbf
                 rbf->Hhat.conservativeResize( rbf->Hhat.rows(), rbf->Hhat.cols() - nbStaticFaceCentersRemove );
             }
         }
-
         usedValues.conservativeResize( usedValues.rows() - nbStaticFaceCentersRemove, usedValues.cols() );
         rbf->interpolate( usedValues, valuesInterpolation );
 
@@ -1069,7 +1063,7 @@ namespace rbf
         // start doing correction of surface is requested (and possible)
         if ( enabled && surfaceCorrection )
         {
-            correctSurface( valuesInterpolation, errorInterpolationCoarse );
+            correctSurface( valuesInterpolation, values );
         }
 
         // DEBUG STATEMENT
@@ -1114,20 +1108,30 @@ namespace rbf
 
     void RBFCoarsening::correctSurface(
         matrix & valuesInterpolation,
-        const matrix & surfaceError
+        const matrix values
         )
     {
+        // ==== START Calculate error - changed from original ==== //
+        // Instead of this->values (which is the sum of all values) the values itself are used.
+        // These only contain the motion of the current time step
+        // Eventually the error per time step which needs to be interpolated is based on the motion and not total displacement.
+        // Is a rather "non-checked" fix, so better checks should be made eventually
+
+        rbf::matrix usedValues( selectedPositions.rows(), values.cols() );
+        rbf::matrix valuesInterpolationCoarse( positions.rows(), valuesInterpolation.cols() );
+
+        for ( int j = 0; j < selectedPositions.rows(); j++ ){
+            usedValues.row( j ) = values.row( selectedPositions ( j ) );
+        }
+
+        rbfCoarse->interpolate2( usedValues, valuesInterpolationCoarse );
+        matrix surfaceError = valuesInterpolationCoarse - values;
+
         double maxError = ( surfaceError.rowwise().norm() ).maxCoeff();
 
         // ensure that only performed when there is an error bigger than 0
         if ( maxError > SMALL )
         {
-            if ( valuesCorrection.rows() == 0 )
-            {
-                valuesCorrection.conservativeResize( valuesInterpolation.rows(), valuesInterpolation.cols() );
-                valuesCorrection.setZero();
-            }
-
             double R = 1.0;
 
             if ( surfaceCorrectionRadius > 0 )
@@ -1206,8 +1210,7 @@ namespace rbf
             for ( int i = 0; i < positionsInterpolation.rows(); i++ )
             {
                 matrix fEval = -( surfaceCorrectionRbfFunction->evaluate( closestBoundaryRadius( i ) ) ) * surfaceError.row( closestBoundaryIndexCorrection( i ) );
-                valuesInterpolation.row( i ) += ( fEval - valuesCorrection.row( i ) );
-                valuesCorrection.row( i ) = fEval;
+                valuesInterpolation.row( i ) += fEval;
             }
 
             if ( debug > 0 )
