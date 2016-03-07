@@ -6,10 +6,6 @@ no-response-timeout: 30
 build:
     steps:
         - script:
-            name: cache overview
-            code: |
-                ls -lah $WERCKER_CACHE_DIR/
-        - script:
             name: install packages
             code: |
                 apt-get update
@@ -603,7 +599,3 @@ build:
 
                 cd src/tests
                 python runTests.py testsuite-dealii
-        - script:
-            name: cache overview
-            code: |
-                ls -lah $WERCKER_CACHE_DIR/
