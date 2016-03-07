@@ -6,10 +6,6 @@ no-response-timeout: 30
 build:
     steps:
         - script:
-            name: cache overview
-            code: |
-                ls -lah $WERCKER_CACHE_DIR/
-        - script:
             name: install packages
             code: |
                 apt-get update
@@ -129,7 +125,7 @@ build:
                     rsync -azvh foam-extend-3.2.tar.gz $WERCKER_CACHE_DIR/
                 fi
         - script:
-            name: environment variable $FOAM_USER_SRC
+            name: setup environment
             code: |
 
                 export PARAVIEW_SYSTEM=1
@@ -603,7 +599,3 @@ build:
 
                 cd src/tests
                 python runTests.py testsuite-dealii
-        - script:
-            name: cache overview
-            code: |
-                ls -lah $WERCKER_CACHE_DIR/
