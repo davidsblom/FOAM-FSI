@@ -1053,10 +1053,30 @@ namespace rbf
         {
             tp = std::clock() - tp;
             runTimeInterpolate = static_cast<float>(tp) / CLOCKS_PER_SEC;
-            tp = std::clock();
 
             tp_wall = getwalltime() - tp_wall;
             runTimeInterpolate_wall = tp_wall;
+        }
+
+        //===== IGNORE FOR TIMING AT THE MOMENT ======//
+        // ==== START Calculate error - changed from original ==== //
+        // Instead of this->values (which is the sum of all values) the values itself are used.
+        // These only contain the motion of the current time step
+        // Eventually the error per time step which needs to be interpolated is based on the motion and not total displacement.
+        // Is a rather "non-checked" fix, so better checks should be made eventually
+
+        //rbf::matrix usedValues( selectedPositions.rows(), values.cols() );
+        // for ( int j = 0; j < selectedPositions.rows(); j++ ){
+        //     usedValues.row( j ) = values.row( selectedPositions ( j ) );
+        // }
+
+        rbf::matrix valuesInterpolationCoarse( positions.rows(), valuesInterpolation.cols() );
+        rbfCoarse->interpolate2( usedValues, valuesInterpolationCoarse );
+        errorInterpolationCoarse = valuesInterpolationCoarse - values;
+
+        if ( debug > 2 )
+        {
+            tp = std::clock();
             tp_wall = getwalltime();
         }
 
@@ -1111,23 +1131,7 @@ namespace rbf
         const matrix values
         )
     {
-        // ==== START Calculate error - changed from original ==== //
-        // Instead of this->values (which is the sum of all values) the values itself are used.
-        // These only contain the motion of the current time step
-        // Eventually the error per time step which needs to be interpolated is based on the motion and not total displacement.
-        // Is a rather "non-checked" fix, so better checks should be made eventually
-
-        rbf::matrix usedValues( selectedPositions.rows(), values.cols() );
-        rbf::matrix valuesInterpolationCoarse( positions.rows(), valuesInterpolation.cols() );
-
-        for ( int j = 0; j < selectedPositions.rows(); j++ ){
-            usedValues.row( j ) = values.row( selectedPositions ( j ) );
-        }
-
-        rbfCoarse->interpolate2( usedValues, valuesInterpolationCoarse );
-        matrix surfaceError = valuesInterpolationCoarse - values;
-
-        double maxError = ( surfaceError.rowwise().norm() ).maxCoeff();
+        double maxError = ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff();
 
         // ensure that only performed when there is an error bigger than 0
         if ( maxError > SMALL )
@@ -1209,7 +1213,7 @@ namespace rbf
 
             for ( int i = 0; i < positionsInterpolation.rows(); i++ )
             {
-                matrix fEval = -( surfaceCorrectionRbfFunction->evaluate( closestBoundaryRadius( i ) ) ) * surfaceError.row( closestBoundaryIndexCorrection( i ) );
+                matrix fEval = -( surfaceCorrectionRbfFunction->evaluate( closestBoundaryRadius( i ) ) ) * errorInterpolationCoarse.row( closestBoundaryIndexCorrection( i ) );
                 valuesInterpolation.row( i ) += fEval;
             }
 
