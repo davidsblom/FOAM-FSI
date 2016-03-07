@@ -229,9 +229,6 @@ build:
                     tar -zcf dealii-${DEALII_VERSION}.tar.gz dealii-${DEALII_VERSION}
                     rsync -azvh dealii-${DEALII_VERSION}.tar.gz $WERCKER_CACHE_DIR/
                 fi
-
-                cd deal-fsi
-                make release run
         - script:
             name: googletest
             code: |
