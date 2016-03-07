@@ -716,7 +716,10 @@ int main(
             }
 
             if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
+            {
+                data.theta = 1;
                 sdcSolidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new dealiiSolidSolver<2> ( data ) );
+            }
         }
 
         if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
