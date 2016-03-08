@@ -25,7 +25,7 @@ build:
                 else
                     debug "foam-extend-3.2 not found in cache, will download and compile"
 
-                    git clone --branch v3.2 git://git.code.sf.net/p/openfoam-extend/foam-extend-3.1 foam-extend-3.2
+                    git clone git://git.code.sf.net/p/foam-extend/foam-extend-3.2
                     export PARAVIEW_SYSTEM=1
                     export CMAKE_SYSTEM=1
                     export HWLOC_SYSTEM=1
