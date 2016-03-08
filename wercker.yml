@@ -599,3 +599,9 @@ build:
 
                 cd src/tests
                 python runTests.py testsuite-dealii
+        - script:
+            name: cppcheck
+            code: |
+                (cd src/fsi && cppcheck --enable=performance,portability .)
+                (cd src/RBFMeshMotionSolver && cppcheck --enable=performance,portability .)
+                
