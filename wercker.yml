@@ -9,7 +9,7 @@ build:
             name: install packages
             code: |
                 apt-get update
-                apt-get -y install git build-essential flex bison zlib1g-dev libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev libscotch-dev liblapack-dev libblas-dev
+                apt-get -y install git build-essential flex bison zlib1g-dev libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev libscotch-dev liblapack-dev libblas-dev cppcheck
         - script:
             name: initialize git submodules
             code: |
@@ -599,3 +599,9 @@ build:
 
                 cd src/tests
                 python runTests.py testsuite-dealii
+        - script:
+            name: cppcheck
+            code: |
+                (cd src/fsi && cppcheck --enable=performance,portability .)
+                (cd src/RBFMeshMotionSolver && cppcheck --enable=performance,portability .)
+                
