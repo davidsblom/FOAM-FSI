@@ -604,4 +604,6 @@ build:
             code: |
                 (cd src/fsi && cppcheck --enable=performance,portability .)
                 (cd src/RBFMeshMotionSolver && cppcheck --enable=performance,portability .)
+                (cd src/tests && cppcheck --enable=performance,portability .)
+                (cd applications && cppcheck --enable=performance,portability .)
                 
