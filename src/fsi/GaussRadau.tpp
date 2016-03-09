@@ -15,9 +15,9 @@ namespace fsi
         GaussRadau<precision>::GaussRadau( const size_t num_nodes )
             : IQuadrature<precision>( num_nodes )
         {
-            if ( this->num_nodes < 2 )
+            if ( this->num_nodes < 1 )
             {
-                throw invalid_argument( "Gauss-Radau quadrature requires at least two quadrature nodes." );
+                throw invalid_argument( "Gauss-Radau quadrature requires at least one quadrature node." );
             }
 
             this->compute_nodes();

@@ -764,65 +764,38 @@ void SDCDynamicMeshFluidSolver::getVariablesInfo(
     std::deque<std::string> & names
     )
 {
-    dof.push_back( 0 );
-    dof.push_back( 0 );
-    dof.push_back( 0 );
+    dof.push_back( U.internalField().size() * mesh.nGeometricD() );
     enabled.push_back( true );
-    enabled.push_back( true );
-    enabled.push_back( false );
     names.push_back( "fluid U" );
-    names.push_back( "fluid Uf" );
-    names.push_back( "fluid meshPhi" );
-
-    forAll( U.internalField(), i )
-    {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            dof.at( 0 ) += 1;
-        }
-    }
 
     forAll( U.boundaryField(), patchI )
     {
         if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
-            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity" )
+            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity"
+            && U.boundaryField().types()[patchI] != "empty" )
         {
-            forAll( U.boundaryField()[patchI], i )
-            {
-                for ( int j = 0; j < mesh.nGeometricD(); j++ )
-                {
-                    dof.at( 0 ) += 1;
-                }
-            }
+            dof.push_back( U.boundaryField()[patchI].size() * mesh.nGeometricD() );
+            enabled.push_back( true );
+            names.push_back( "fluid patch " + mesh.boundaryMesh()[patchI].name() );
         }
     }
 
-    forAll( Uf.internalField(), i )
-    {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            dof.at( 1 ) += 1;
-    }
+    dof.push_back( Uf.internalField().size() * mesh.nGeometricD() );
+    enabled.push_back( true );
+    names.push_back( "fluid Uf" );
 
     forAll( Uf.boundaryField(), patchI )
     {
-        forAll( Uf.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-                dof.at( 1 ) += 1;
-        }
+        dof.back() += Uf.boundaryField()[patchI].size() * mesh.nGeometricD();
     }
 
-    forAll( mesh.phi().internalField(), i )
-    {
-        dof.at( 2 ) += 1;
-    }
+    dof.push_back( mesh.phi().internalField().size() );
+    enabled.push_back( true );
+    names.push_back( "fluid meshPhi" );
 
     forAll( mesh.phi().boundaryField(), patchI )
     {
-        forAll( mesh.phi().boundaryField()[patchI], i )
-        {
-            dof.at( 2 ) += 1;
-        }
+        dof.back() += mesh.phi().boundaryField()[patchI].size();
     }
 }
 

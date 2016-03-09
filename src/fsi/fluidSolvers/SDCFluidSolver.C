@@ -436,11 +436,14 @@ int SDCFluidSolver::getDOF()
 
     forAll( U.boundaryField(), patchI )
     {
-        forAll( U.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "oscillatingCavityFixedValue" )
         {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            forAll( U.boundaryField()[patchI], i )
             {
-                index++;
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
+                {
+                    index++;
+                }
             }
         }
     }
@@ -479,12 +482,15 @@ void SDCFluidSolver::getSolution(
 
     forAll( U.boundaryField(), patchI )
     {
-        forAll( U.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "oscillatingCavityFixedValue" )
         {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            forAll( U.boundaryField()[patchI], i )
             {
-                solution( index ) = U.boundaryField()[patchI][i][j];
-                index++;
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
+                {
+                    solution( index ) = U.boundaryField()[patchI][i][j];
+                    index++;
+                }
             }
         }
     }
@@ -519,12 +525,15 @@ void SDCFluidSolver::getSolution(
 
     forAll( UF.boundaryField(), patchI )
     {
-        forAll( UF.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "oscillatingCavityFixedValue" )
         {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            forAll( UF.boundaryField()[patchI], i )
             {
-                f( index ) = UF.boundaryField()[patchI][i][j];
-                index++;
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
+                {
+                    f( index ) = UF.boundaryField()[patchI][i][j];
+                    index++;
+                }
             }
         }
     }
@@ -567,12 +576,15 @@ void SDCFluidSolver::setSolution(
 
     forAll( U.boundaryField(), patchI )
     {
-        forAll( U.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "oscillatingCavityFixedValue" )
         {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            forAll( U.boundaryField()[patchI], i )
             {
-                U.boundaryField()[patchI][i][j] = solution( index );
-                index++;
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
+                {
+                    U.boundaryField()[patchI][i][j] = solution( index );
+                    index++;
+                }
             }
         }
     }
@@ -607,12 +619,15 @@ void SDCFluidSolver::setSolution(
 
     forAll( UF.boundaryField(), patchI )
     {
-        forAll( UF.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "oscillatingCavityFixedValue" )
         {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            forAll( UF.boundaryField()[patchI], i )
             {
-                UF.boundaryField()[patchI][i][j] = f( index );
-                index++;
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
+                {
+                    UF.boundaryField()[patchI][i][j] = f( index );
+                    index++;
+                }
             }
         }
     }
@@ -677,12 +692,15 @@ void SDCFluidSolver::evaluateFunction(
 
     forAll( UF.boundaryField(), patchI )
     {
-        forAll( UF.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "oscillatingCavityFixedValue" )
         {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            forAll( UF.boundaryField()[patchI], i )
             {
-                f( index ) = UF.boundaryField()[patchI][i][j];
-                index++;
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
+                {
+                    f( index ) = UF.boundaryField()[patchI][i][j];
+                    index++;
+                }
             }
         }
     }
@@ -740,12 +758,15 @@ void SDCFluidSolver::implicitSolve(
 
     forAll( U.oldTime().boundaryField(), patchI )
     {
-        forAll( U.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "oscillatingCavityFixedValue" )
         {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            forAll( U.boundaryField()[patchI], i )
             {
-                U.oldTime().boundaryField()[patchI][i][j] = qold( index );
-                index++;
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
+                {
+                    U.oldTime().boundaryField()[patchI][i][j] = qold( index );
+                    index++;
+                }
             }
         }
     }
@@ -780,12 +801,15 @@ void SDCFluidSolver::implicitSolve(
 
     forAll( rhsU.boundaryField(), patchI )
     {
-        forAll( rhsU.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "oscillatingCavityFixedValue" )
         {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            forAll( rhsU.boundaryField()[patchI], i )
             {
-                rhsU.boundaryField()[patchI][i][j] = rhs( index );
-                index++;
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
+                {
+                    rhsU.boundaryField()[patchI][i][j] = rhs( index );
+                    index++;
+                }
             }
         }
     }
@@ -969,41 +993,49 @@ void SDCFluidSolver::getVariablesInfo(
     )
 {
     dof.push_back( 0 );
-    dof.push_back( 0 );
-    enabled.push_back( true );
     enabled.push_back( true );
     names.push_back( "U" );
-    names.push_back( "phi" );
 
     forAll( U.internalField(), i )
     {
         for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
-            dof.at( 0 ) += 1;
+            dof.back() += 1;
         }
     }
 
     forAll( U.boundaryField(), patchI )
     {
-        forAll( U.boundaryField()[patchI], i )
+        if ( U.boundaryField().types()[patchI] != "oscillatingCavityFixedValue" && U.boundaryField().types()[patchI] != "empty" )
         {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            dof.push_back( 0 );
+            enabled.push_back( true );
+            names.push_back( "patch " + mesh.boundaryMesh()[patchI].name() );
+
+            forAll( U.boundaryField()[patchI], i )
             {
-                dof.at( 0 ) += 1;
+                for ( int j = 0; j < mesh.nGeometricD(); j++ )
+                {
+                    dof.back() += 1;
+                }
             }
         }
     }
 
+    dof.push_back( 0 );
+    enabled.push_back( true );
+    names.push_back( "phi" );
+
     forAll( phi.internalField(), i )
     {
-        dof.at( 1 ) += 1;
+        dof.back() += 1;
     }
 
     forAll( phi.boundaryField(), patchI )
     {
         forAll( phi.boundaryField()[patchI], i )
         {
-            dof.at( 1 ) += 1;
+            dof.back() += 1;
         }
     }
 }

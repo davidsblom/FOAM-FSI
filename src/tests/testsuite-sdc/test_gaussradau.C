@@ -14,21 +14,6 @@ TEST( GaussRadauTest, object )
     fsi::quadrature::GaussRadau<double> gaussRadau( num_nodes );
 }
 
-TEST( GaussRadauTest, death )
-{
-    bool exception = false;
-    try
-    {
-        fsi::quadrature::GaussRadau<double> ( 1 );
-    }
-    catch ( const std::invalid_argument & e )
-    {
-        exception = true;
-        ASSERT_STREQ( e.what(), "Gauss-Radau quadrature requires at least two quadrature nodes." );
-    }
-    ASSERT_TRUE( exception );
-}
-
 TEST( GaussRadauTest, nodes )
 {
     const size_t num_nodes = 5;
