@@ -790,7 +790,7 @@ void SDCDynamicMeshFluidSolver::getVariablesInfo(
     }
 
     dof.push_back( mesh.phi().internalField().size() );
-    enabled.push_back( true );
+    enabled.push_back( false );
     names.push_back( "fluid meshPhi" );
 
     forAll( mesh.phi().boundaryField(), patchI )

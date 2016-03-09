@@ -113,6 +113,8 @@ void dealiiSolidSolver<dimension>::initTimeStep()
 {
     assert( !BaseMultiLevelSolver::init );
 
+    BaseMultiLevelSolver::t += dealiifsi::LinearElasticity<dimension>::time_step;
+
     dealiifsi::LinearElasticity<dimension>::initTimeStep();
 
     BaseMultiLevelSolver::init = true;
@@ -181,7 +183,8 @@ void dealiiSolidSolver<dimension>::evaluateFunction(
     fsi::vector & f
     )
 {
-    f.setZero();
+    copy( dealiifsi::LinearElasticity<dimension>::u_f, f, 0 );
+    copy( dealiifsi::LinearElasticity<dimension>::v_f, f, dealiifsi::LinearElasticity<dimension>::u_f.size() );
 }
 
 template <int dimension>
@@ -264,6 +267,7 @@ void dealiiSolidSolver<dimension>::prepareImplicitSolve(
 {
     dealiifsi::LinearElasticity<dimension>::time_step = dt;
     dealiifsi::LinearElasticity<dimension>::time = t;
+    BaseMultiLevelSolver::t = t;
 
     if ( corrector )
     {

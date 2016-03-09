@@ -392,6 +392,8 @@ namespace sdc
     {
         assert( f.rows() == result.rows() );
         assert( k <= this->k - 1 );
+        assert( not std::isnan( f.norm() ) );
+        assert( not std::isnan( result.norm() ) );
 
         if ( data->getFunctions().cols() == 0 )
             data->initialize( this->k, f.rows() );
@@ -406,6 +408,7 @@ namespace sdc
         )
     {
         assert( timeIndex >= this->timeIndex );
+        assert( not std::isnan( result.norm() ) );
 
         if ( data->getSolutions().cols() == 0 )
         {
