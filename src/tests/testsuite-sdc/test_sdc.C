@@ -292,6 +292,43 @@ TEST_P( SDCEstimateOrderTest, order )
         ASSERT_NEAR( order, nbNodes - 1, tol );
 }
 
+TEST( SDCSourceTermTest, SDC )
+{
+    scalar dt, q0, qdot0, As, Ac, omega, endTime, tol;
+
+    int nbNodes = 2;
+    int nbTimeSteps = 1;
+
+    endTime = 100;
+    dt = endTime / nbTimeSteps;
+    As = 100;
+    Ac = As;
+    omega = 1;
+    q0 = -As;
+    qdot0 = -As;
+    tol = 1.0e-9;
+
+    std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+
+    std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature2;
+    quadrature2 = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+
+    std::shared_ptr<Piston> piston ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+    std::shared_ptr<SDC> sdc ( new SDC( piston, quadrature, tol, 1, 20 ) );
+
+    std::shared_ptr<sdc::SDC> sdc2( new SDC( quadrature2, tol ) );
+    std::shared_ptr<Piston> piston2 ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, sdc2, sdc2->nodes.rows() ) );
+
+    sdc->run();
+    piston2->run();
+
+    for ( int i = 0; i < piston->rhs.rows(); i++ )
+        ASSERT_NEAR( piston->rhs(i), piston2->rhs(i), 1.0e-13 );
+    ASSERT_NEAR( piston->q, piston2->q, 1.0e-13 );
+    ASSERT_NEAR( piston->qdot, piston2->qdot, 1.0e-13 );
+}
+
 TEST( CosTest, SDC )
 {
     std::string rule = "gauss-lobatto";

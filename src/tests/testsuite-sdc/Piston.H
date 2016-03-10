@@ -122,6 +122,7 @@ public:
     scalar timeIndex;
     scalar endTime;
     int k;
+    fsi::vector rhs;
 
     std::deque<fsi::vector> solStages;
     std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;

@@ -308,6 +308,7 @@ void Piston::implicitSolve(
     q = result( 1 );
 
     this->t = t;
+    this->rhs = rhs;
 
     solStages.at( k + 1 ) = result;
 }
