@@ -109,6 +109,7 @@ private:
 
     int kold;
     int indexk;
+    int sweep;
 };
 
 #endif

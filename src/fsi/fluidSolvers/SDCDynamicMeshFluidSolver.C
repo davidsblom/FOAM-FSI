@@ -617,6 +617,11 @@ void SDCDynamicMeshFluidSolver::prepareImplicitSolve(
         phi = phiStages.at( k + 1 );
         U = UStages.at( k + 1 );
         Uf = UfStages.at( k + 1 );
+        sweep++;
+    }
+    else
+    {
+        sweep = 0;
     }
 
     Uf.oldTime() = UfStages.at( kold );
@@ -632,7 +637,7 @@ void SDCDynamicMeshFluidSolver::prepareImplicitSolve(
         if ( U.boundaryField().types()[i] == "SDCMovingWallVelocity" )
         {
             SDCMovingWallVelocityFvPatchVectorField & bc = static_cast<SDCMovingWallVelocityFvPatchVectorField &>(U.boundaryField()[i]);
-            bc.setSDCInfo( corrector, k );
+            bc.setSDCInfo( corrector, k, sweep );
         }
     }
 

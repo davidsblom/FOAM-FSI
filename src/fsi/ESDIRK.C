@@ -169,6 +169,7 @@ namespace sdc
     void ESDIRK::getSourceTerm(
         const bool /*corrector*/,
         const int k,
+        const int /*sweep*/,
         const scalar deltaT,
         fsi::vector & rhs,
         fsi::vector & qold

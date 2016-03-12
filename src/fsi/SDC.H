@@ -50,6 +50,7 @@ public:
         virtual void getSourceTerm(
             const bool corrector,
             const int k,
+            const int sweep,
             const scalar deltaT,
             fsi::vector & rhs,
             fsi::vector & qold
@@ -77,6 +78,7 @@ public:
         int nbNodes;
         int N;
         int k;
+        int sweep;
 
         scalar dt;
         scalar tol;

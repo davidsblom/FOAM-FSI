@@ -89,10 +89,21 @@ namespace sdc
         return q_matrix * functions;
     }
 
+    void DataStorage::copyFunctions()
+    {
+        Fold = F;
+    }
+
     const fsi::matrix & DataStorage::getFunctions() const
     {
         assert( F.rows() > 0 );
         return F;
+    }
+
+    const fsi::matrix & DataStorage::getOldFunctions() const
+    {
+        assert( Fold.rows() > 0 );
+        return Fold;
     }
 
     const fsi::matrix & DataStorage::getSolutions() const

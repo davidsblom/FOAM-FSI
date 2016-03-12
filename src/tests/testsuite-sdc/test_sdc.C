@@ -43,18 +43,34 @@ protected:
         tol = 1.0e-9;
 
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature2;
 
         if ( rule == "gauss-radau" )
+        {
             quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+            quadrature2 = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+        }
 
         if ( rule == "gauss-lobatto" )
+        {
             quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+            quadrature2 = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+        }
 
         if ( rule == "clenshaw-curtis" )
+        {
             quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( nbNodes ) );
+            quadrature2 = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( nbNodes ) );
+        }
 
         if ( rule == "uniform" )
+        {
             quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+            quadrature2 = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+        }
+
+        assert( quadrature );
+        assert( quadrature2 );
 
         piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
         sdc = std::shared_ptr<SDC> ( new SDC( piston, quadrature, tol, nbNodes, 10 * nbNodes ) );
@@ -323,6 +339,12 @@ TEST( SDCSourceTermTest, SDC )
     sdc->run();
     piston2->run();
 
+    ASSERT_EQ( sdc->data->getFunctions().rows(), sdc2->data->getFunctions().rows() );
+    ASSERT_EQ( sdc->data->getFunctions().cols(), sdc2->data->getFunctions().cols() );
+
+    for ( int i = 0; i < sdc->data->getFunctions().rows(); i++ )
+        for ( int j = 0; j < sdc->data->getFunctions().cols(); j++ )
+            ASSERT_NEAR( sdc->data->getFunctions()(i,j), sdc2->data->getFunctions()(i,j), 1.0e-13 );
     for ( int i = 0; i < piston->rhs.rows(); i++ )
         ASSERT_NEAR( piston->rhs(i), piston2->rhs(i), 1.0e-13 );
     ASSERT_NEAR( piston->q, piston2->q, 1.0e-13 );

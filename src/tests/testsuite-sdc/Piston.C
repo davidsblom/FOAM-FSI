@@ -251,15 +251,30 @@ void Piston::run()
 
                     Info << "Time = " << t << ", dt = " << dt << ", l = " << l << endl;
 
-                    timeIntegrationScheme->getSourceTerm( corrector, l, deltaT, rhs, qold );
+                    // run the tests twice to mimic the moving wall velocity boundary
+                    // condition.
+                    fsi::vector rhs_tmp;
 
-                    if ( sdc )
-                        implicitSolve( corrector, l, l, t, deltaT, qold, rhs, f, result );
+                    for ( int i = 0; i < 2; i++ )
+                    {
+                        timeIntegrationScheme->getSourceTerm( corrector, l, j, deltaT, rhs, qold );
 
-                    if ( esdirk )
-                        implicitSolve( corrector, iImplicitStage, 0, t, deltaT, qold, rhs, f, result );
+                        if ( i == 0 )
+                            rhs_tmp = rhs;
+                        if ( i == 1 )
+                        {
+                            assert( std::abs( rhs(0) - rhs_tmp(0) ) < 1.0e-13 );
+                            assert( std::abs( rhs(1) - rhs_tmp(1) ) < 1.0e-13 );
+                        }
 
-                    timeIntegrationScheme->setFunction( l, f, result );
+                        if ( sdc )
+                            implicitSolve( corrector, l, l, t, deltaT, qold, rhs, f, result );
+
+                        if ( esdirk )
+                            implicitSolve( corrector, iImplicitStage, 0, t, deltaT, qold, rhs, f, result );
+
+                        timeIntegrationScheme->setFunction( l, f, result );
+                    }
 
                     qdot( i ) = result( 0 );
                     q( i ) = result( 1 );

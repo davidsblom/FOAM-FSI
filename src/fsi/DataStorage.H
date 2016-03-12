@@ -24,7 +24,11 @@ public:
 
         const fsi::matrix & getFunctions() const;
 
+        const fsi::matrix & getOldFunctions() const;
+
         const fsi::matrix & getSolutions() const;
+
+        void copyFunctions();
 
         const fsi::matrix integrate(
             const std::vector<scalar> & nodes,
@@ -60,6 +64,6 @@ public:
 private:
 
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-        fsi::matrix F, solStages;
+        fsi::matrix F, Fold, solStages;
     };
 }

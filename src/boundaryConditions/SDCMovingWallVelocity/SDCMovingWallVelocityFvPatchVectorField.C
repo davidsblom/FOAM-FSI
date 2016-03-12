@@ -117,7 +117,7 @@ namespace Foam
             timeIntegrationScheme->setOldSolution( mesh.time().timeIndex(), result );
         }
 
-        timeIntegrationScheme->getSourceTerm( corrector, k, mesh.time().deltaT().value(), rhs, qold );
+        timeIntegrationScheme->getSourceTerm( corrector, k, sweep, mesh.time().deltaT().value(), rhs, qold );
         forAll( Up(), i )
         {
             for ( int j = 0; j < dim; j++ )
@@ -210,10 +210,12 @@ namespace Foam
 
     void SDCMovingWallVelocityFvPatchVectorField::setSDCInfo(
         bool corrector,
-        int k
+        int k,
+        int sweep
         )
     {
         this->k = k;
+        this->sweep = sweep;
         this->corrector = corrector;
     }
 

@@ -91,7 +91,8 @@ public:
 
         void setSDCInfo(
             bool corrector,
-            int k
+            int k,
+            int sweep
             );
 
         std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
@@ -101,6 +102,7 @@ private:
         void init();
 
         int k;
+        int sweep;
         bool corrector;
     };
 
