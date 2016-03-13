@@ -18,10 +18,10 @@ build:
         - script:
             name: foam-extend third-party
             code: |
-                if [ -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.gz" ]; then
+                if [ -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.xz" ]; then
                     debug "foam-extend-3.2 found in cache"
-                    rsync -azvh $WERCKER_CACHE_DIR/foam-extend-3.2.tar.gz ./
-                    tar -zxf foam-extend-3.2.tar.gz
+                    rsync -azvh $WERCKER_CACHE_DIR/foam-extend-3.2.tar.xz ./
+                    tar -Jxf foam-extend-3.2.tar.xz
                 else
                     debug "foam-extend-3.2 not found in cache, will download and compile"
 
@@ -53,11 +53,14 @@ build:
 
                     # build ThirdParty sources
                     ( cd $WM_THIRD_PARTY_DIR && ./AllMake )
+
+                    # cleanup build files
+                    rm -rf $WM_THIRD_PARTY_DIR/rpmBuild/BUILD/*
                 fi
         - script:
             name: foam-extend
             code: |
-                if [ ! -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.gz" ]; then
+                if [ ! -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.xz" ]; then
                     export PARAVIEW_SYSTEM=1
                     export CMAKE_SYSTEM=1
                     export HWLOC_SYSTEM=1
@@ -115,14 +118,14 @@ build:
         - script:
             name: store cache
             code: |
-                if [ ! -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.gz" ]; then
+                if [ ! -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.xz" ]; then
 
                     cd foam-extend-3.2
                     find . -not -path './lib/linux64GccDPOpt' -not -path './ThirdParty/*' -name 'linux64GccDPOpt' -type d -print -prune -exec rm -rf {} \;
                     cd ../
 
-                    tar -zcf foam-extend-3.2.tar.gz foam-extend-3.2
-                    rsync -azvh foam-extend-3.2.tar.gz $WERCKER_CACHE_DIR/
+                    tar -cJf foam-extend-3.2.tar.xz foam-extend-3.2
+                    rsync -azvh foam-extend-3.2.tar.xz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: setup environment
@@ -173,19 +176,19 @@ build:
 
                 cd src/thirdParty
 
-                if [ -f "$WERCKER_CACHE_DIR/petsc-${PETSC_VERSION}.tar.gz" ]; then
+                if [ -f "$WERCKER_CACHE_DIR/petsc-${PETSC_VERSION}.tar.xz" ]; then
                     debug "PETSc library found in cache"
-                    rsync -azvh $WERCKER_CACHE_DIR/petsc-${PETSC_VERSION}.tar.gz ./
-                    tar -zxf petsc-${PETSC_VERSION}.tar.gz
+                    rsync -azvh $WERCKER_CACHE_DIR/petsc-${PETSC_VERSION}.tar.xz ./
+                    tar -Jxf petsc-${PETSC_VERSION}.tar.xz
                     ln -s petsc-${PETSC_VERSION} petsc
                     cp petsc-${PETSC_VERSION}/${PETSC_ARCH}/lib/lib* ${FOAM_LIBBIN}/
                 fi
 
                 ./compile_petsc
 
-                if [ ! -f "$WERCKER_CACHE_DIR/petsc-${PETSC_VERSION}.tar.gz" ]; then
-                    tar -zcf petsc-${PETSC_VERSION}.tar.gz petsc-${PETSC_VERSION}
-                    rsync -azvh petsc-${PETSC_VERSION}.tar.gz $WERCKER_CACHE_DIR/
+                if [ ! -f "$WERCKER_CACHE_DIR/petsc-${PETSC_VERSION}.tar.xz" ]; then
+                    tar -cJf petsc-${PETSC_VERSION}.tar.xz petsc-${PETSC_VERSION}
+                    rsync -azvh petsc-${PETSC_VERSION}.tar.xz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: deal.II
@@ -209,31 +212,31 @@ build:
 
                 cd src/thirdParty
 
-                if [ -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}.tar.gz" ]; then
+                if [ -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}.tar.xz" ]; then
                     debug "deal.II library found in cache"
-                    rsync -azvh $WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}.tar.gz ./
-                    tar -zxf dealii-${DEALII_VERSION}.tar.gz
+                    rsync -azvh $WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}.tar.xz ./
+                    tar -Jxf dealii-${DEALII_VERSION}.tar.xz
                     ln -s dealii-${DEALII_VERSION} dealii
                     cp dealii-${DEALII_VERSION}/bin/lib/libdeal_II.so.${DEALII_VERSION} ${FOAM_LIBBIN}/libdeal_II.so
                     cp dealii-${DEALII_VERSION}/bin/lib/libdeal_II.so.${DEALII_VERSION} ${FOAM_LIBBIN}/
                 fi
 
-                if [ -f "$WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.gz" ]; then
+                if [ -f "$WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.xz" ]; then
                     debug "boost library found in cache"
-                    rsync -azvh $WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.gz ./
-                    tar -zxf boost_${BOOST_VERSION}.tar.gz
+                    rsync -azvh $WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.xz ./
+                    tar -Jxf boost_${BOOST_VERSION}.tar.xz
                 fi
 
                 ./compile_dealii
 
-                if [ ! -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}.tar.gz" ]; then
-                    tar -zcf dealii-${DEALII_VERSION}.tar.gz dealii-${DEALII_VERSION}
-                    rsync -azvh dealii-${DEALII_VERSION}.tar.gz $WERCKER_CACHE_DIR/
+                if [ ! -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}.tar.xz" ]; then
+                    tar -cJf dealii-${DEALII_VERSION}.tar.xz dealii-${DEALII_VERSION}
+                    rsync -azvh dealii-${DEALII_VERSION}.tar.xz $WERCKER_CACHE_DIR/
                 fi
 
-                if [ ! -f "$WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.gz" ]; then
-                    tar -zcf boost_${BOOST_VERSION}.tar.gz boost_${BOOST_VERSION}
-                    rsync -azvh boost_${BOOST_VERSION}.tar.gz $WERCKER_CACHE_DIR/
+                if [ ! -f "$WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.xz" ]; then
+                    tar -cJf boost_${BOOST_VERSION}.tar.xz boost_${BOOST_VERSION}
+                    rsync -azvh boost_${BOOST_VERSION}.tar.xz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: googletest
@@ -256,10 +259,10 @@ build:
 
                 cd src/thirdParty
 
-                if [ -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.gz" ]; then
+                if [ -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz" ]; then
                     debug "googletest library found in cache"
-                    rsync -azvh $WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.gz ./
-                    tar -zxf gtest-${GTEST_VERSION}.tar.gz
+                    rsync -azvh $WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz ./
+                    tar -Jxf gtest-${GTEST_VERSION}.tar.xz
                     ln -s gtest-${GTEST_VERSION} gtest
                 else
                     debug "googletest library not found in cache, will download and compile"
@@ -267,9 +270,9 @@ build:
 
                 ./compile_gtest
 
-                if [ ! -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.gz" ]; then
-                    tar -zcf gtest-${GTEST_VERSION}.tar.gz gtest-${GTEST_VERSION}
-                    rsync -azvh gtest-${GTEST_VERSION}.tar.gz $WERCKER_CACHE_DIR/
+                if [ ! -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz" ]; then
+                    tar -cJf gtest-${GTEST_VERSION}.tar.xz gtest-${GTEST_VERSION}
+                    rsync -azvh gtest-${GTEST_VERSION}.tar.xz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: precice
@@ -313,10 +316,10 @@ build:
 
                 cd src/thirdParty
 
-                if [ -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.gz" ]; then
+                if [ -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz" ]; then
                     debug "yaml-cpp library found in cache"
-                    rsync -azvh $WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.gz ./
-                    tar -zxf yaml-cpp-release-${YAML_CPP_VERSION}.tar.gz
+                    rsync -azvh $WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz ./
+                    tar -Jxf yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz
                     ln -s yaml-cpp-release-${YAML_CPP_VERSION} yaml-cpp
                 else
                     debug "yaml-cpp library not found in cache, will download and compile"
@@ -324,9 +327,9 @@ build:
 
                 ./compile_yaml
 
-                if [ ! -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.gz" ]; then
-                    tar -zcf yaml-cpp-release-${YAML_CPP_VERSION}.tar.gz yaml-cpp-release-${YAML_CPP_VERSION}
-                    rsync -azvh yaml-cpp-release-${YAML_CPP_VERSION}.tar.gz $WERCKER_CACHE_DIR/
+                if [ ! -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz" ]; then
+                    tar -cJf yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz yaml-cpp-release-${YAML_CPP_VERSION}
+                    rsync -azvh yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: boundary conditions
@@ -606,4 +609,6 @@ build:
                 (cd src/RBFMeshMotionSolver && cppcheck --enable=performance,portability .)
                 (cd src/tests && cppcheck --enable=performance,portability .)
                 (cd applications && cppcheck --enable=performance,portability .)
-                
+        - script:
+            name: list cache files
+            code: ls -la $WERCKER_CACHE_DIR
