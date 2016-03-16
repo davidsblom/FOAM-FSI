@@ -611,4 +611,4 @@ build:
                 (cd applications && cppcheck --enable=performance,portability .)
         - script:
             name: list cache files
-            code: ls -la $WERCKER_CACHE_DIR
+            code: ls -lah $WERCKER_CACHE_DIR
