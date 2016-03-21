@@ -1,4 +1,4 @@
-box: debian
+box: davidsblom/foam-fsi
 
 command-timeout: 60
 no-response-timeout: 30
