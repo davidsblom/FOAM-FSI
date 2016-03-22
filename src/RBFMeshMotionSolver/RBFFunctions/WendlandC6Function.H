@@ -13,15 +13,14 @@ namespace rbf
 {
     class WendlandC6Function : public RBFFunctionInterface
     {
-public:
+        public:
+            explicit WendlandC6Function( scalar radius );
 
-        explicit WendlandC6Function( scalar radius );
+            virtual ~WendlandC6Function();
 
-        virtual ~WendlandC6Function();
+            virtual scalar evaluate( scalar value );
 
-        virtual scalar evaluate( scalar value );
-
-        scalar radius;
+            scalar radius;
     };
 }
 

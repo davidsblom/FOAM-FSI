@@ -15,73 +15,72 @@ namespace tubeflow
 {
     class TubeFlowLinearizedSolidSolver : public BaseMultiLevelSolver
     {
-public:
+        public:
+            TubeFlowLinearizedSolidSolver(
+                int N,
+                scalar nu,
+                scalar rho,
+                scalar h,
+                scalar L,
+                scalar dt,
+                scalar G,
+                scalar E0,
+                scalar r0
+                );
 
-        TubeFlowLinearizedSolidSolver(
-            int N,
-            scalar nu,
-            scalar rho,
-            scalar h,
-            scalar L,
-            scalar dt,
-            scalar G,
-            scalar E0,
-            scalar r0
-            );
+            virtual ~TubeFlowLinearizedSolidSolver();
 
-        virtual ~TubeFlowLinearizedSolidSolver();
+            virtual void finalizeTimeStep();
 
-        virtual void finalizeTimeStep();
+            virtual void getReadPositions( matrix & readPositions );
 
-        virtual void getReadPositions( matrix & readPositions );
+            virtual void getWritePositions( matrix & writePositions );
 
-        virtual void getWritePositions( matrix & writePositions );
+            virtual void initTimeStep();
 
-        virtual void initTimeStep();
+            virtual bool isRunning();
 
-        virtual bool isRunning();
+            virtual void resetSolution();
 
-        virtual void resetSolution();
+            virtual void solve(
+                const matrix & input,
+                matrix & output
+                );
 
-        virtual void solve(
-            const matrix & input,
-            matrix & output
-            );
+            virtual void solve(
+                const fsi::vector & p,
+                fsi::vector & a
+                );
 
-        virtual void solve(
-            const fsi::vector & p,
-            fsi::vector & a
-            );
+            void factorizeMatrix();
 
-        void factorizeMatrix();
+            void calcGrid();
 
-        void calcGrid();
+            // Constants
 
-        // Constants
+            const int N;
+            scalar dt;
+            const scalar r0;
+            const scalar kappa;
+            const scalar dx;
+            scalar alpha;
+            const scalar beta;
+            const scalar gamma;
+            const scalar h;
+            const scalar rho;
 
-        const int N;
-        scalar dt;
-        const scalar r0;
-        const scalar kappa;
-        const scalar dx;
-        scalar alpha;
-        const scalar beta;
-        const scalar gamma;
-        const scalar h;
-        const scalar rho;
+            matrix grid;
 
-        matrix grid;
+            // Fields
 
-        // Fields
+            fsi::vector un;
+            fsi::vector rn;
+            fsi::vector u;
+            fsi::vector r;
+            fsi::vector rhs;
+            fsi::vector p;
 
-        fsi::vector un;
-        fsi::vector rn;
-        fsi::vector u;
-        fsi::vector r;
-        fsi::vector rhs;
-        fsi::vector p;
-
-        Eigen::PartialPivLU<matrix> lu;
+            Eigen::PartialPivLU<matrix> lu;
     };
 }
 

@@ -12,24 +12,23 @@
 
 class Solver
 {
-public:
+    public:
+        Solver()
+            :
+            time()
+        {}
 
-    Solver()
-        :
-        time()
-    {}
+        virtual ~Solver(){}
 
-    virtual ~Solver(){}
+        virtual void run() = 0;
 
-    virtual void run() = 0;
+        virtual scalar timeElapsed()
+        {
+            time = std::clock() - time;
+            return static_cast<scalar>(time) / CLOCKS_PER_SEC;
+        }
 
-    virtual scalar timeElapsed()
-    {
-        time = std::clock() - time;
-        return static_cast<scalar>(time) / CLOCKS_PER_SEC;
-    }
-
-    std::clock_t time;
+        std::clock_t time;
 };
 
 #endif

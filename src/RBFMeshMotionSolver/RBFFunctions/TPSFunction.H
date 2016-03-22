@@ -13,13 +13,12 @@ namespace rbf
 {
     class TPSFunction : public RBFFunctionInterface
     {
-public:
+        public:
+            TPSFunction();
 
-        TPSFunction();
+            virtual ~TPSFunction();
 
-        virtual ~TPSFunction();
-
-        virtual scalar evaluate( scalar value );
+            virtual scalar evaluate( scalar value );
     };
 }
 

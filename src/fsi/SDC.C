@@ -373,7 +373,7 @@ namespace sdc
 
         if ( corrector )
         {
-            if ( ( this->stageIndex != k || this->sweep != sweep ) && k == 0 )
+            if ( (this->stageIndex != k || this->sweep != sweep) && k == 0 )
             {
                 data->copyFunctions();
                 Sj = dt * ( smat * data->getFunctions() );

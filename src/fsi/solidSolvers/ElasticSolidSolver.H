@@ -15,47 +15,45 @@ using namespace fsi;
 
 class ElasticSolidSolver : public foamSolidSolver
 {
-public:
+    public:
+        ElasticSolidSolver(
+            string name,
+            std::shared_ptr<argList> args,
+            std::shared_ptr<Time> runTime
+            );
 
-    ElasticSolidSolver(
-        string name,
-        std::shared_ptr<argList> args,
-        std::shared_ptr<Time> runTime
-        );
+        virtual ~ElasticSolidSolver();
 
-    virtual ~ElasticSolidSolver();
+        virtual void finalizeTimeStep();
 
-    virtual void finalizeTimeStep();
+        virtual void initTimeStep();
 
-    virtual void initTimeStep();
+        virtual bool isRunning();
 
-    virtual bool isRunning();
+        virtual void resetSolution();
 
-    virtual void resetSolution();
+        virtual void solve();
 
-    virtual void solve();
+    private:
+        // Fields
+        volTensorField gradU;
+        surfaceVectorField snGradU;
+        volVectorField V;
+        volTensorField gradV;
+        surfaceVectorField snGradV;
+        volSymmTensorField epsilon;
+        volSymmTensorField sigma;
+        volVectorField divSigmaExp;
+        constitutiveModel rheology;
+        volScalarField rho;
+        volScalarField mu;
+        volScalarField lambda;
+        surfaceScalarField muf;
+        surfaceScalarField lambdaf;
+        surfaceVectorField n;
 
-private:
-
-    // Fields
-    volTensorField gradU;
-    surfaceVectorField snGradU;
-    volVectorField V;
-    volTensorField gradV;
-    surfaceVectorField snGradV;
-    volSymmTensorField epsilon;
-    volSymmTensorField sigma;
-    volVectorField divSigmaExp;
-    constitutiveModel rheology;
-    volScalarField rho;
-    volScalarField mu;
-    volScalarField lambda;
-    surfaceScalarField muf;
-    surfaceScalarField lambdaf;
-    surfaceVectorField n;
-
-    // Controls
-    int nCorr;
-    scalar convergenceTolerance;
-    word divSigmaExpMethod;
+        // Controls
+        int nCorr;
+        scalar convergenceTolerance;
+        word divSigmaExpMethod;
 };

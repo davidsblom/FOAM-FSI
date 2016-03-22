@@ -16,61 +16,60 @@ using namespace fsi;
 
 class ImplicitMultiLevelFsiSolver : public SurrogateModel, public Solver
 {
-public:
+    public:
+        ImplicitMultiLevelFsiSolver(
+            shared_ptr<MultiLevelFsiSolver> fsi,
+            shared_ptr<PostProcessing> postProcessing
+            );
 
-    ImplicitMultiLevelFsiSolver(
-        shared_ptr<MultiLevelFsiSolver> fsi,
-        shared_ptr<PostProcessing> postProcessing
-        );
+        virtual ~ImplicitMultiLevelFsiSolver();
 
-    virtual ~ImplicitMultiLevelFsiSolver();
+        virtual bool allConverged();
 
-    virtual bool allConverged();
+        virtual void evaluate(
+            const fsi::vector & x,
+            fsi::vector & output,
+            fsi::vector & R
+            );
 
-    virtual void evaluate(
-        const fsi::vector & x,
-        fsi::vector & output,
-        fsi::vector & R
-        );
+        virtual bool isConvergence();
 
-    virtual bool isConvergence();
+        virtual bool isConvergence(
+            const fsi::vector & x,
+            const fsi::vector & xprev
+            );
 
-    virtual bool isConvergence(
-        const fsi::vector & x,
-        const fsi::vector & xprev
-        );
+        virtual void optimize(
+            const fsi::vector & x0,
+            fsi::vector & xk
+            );
 
-    virtual void optimize(
-        const fsi::vector & x0,
-        fsi::vector & xk
-        );
+        virtual void optimize(
+            const fsi::vector & y,
+            const fsi::vector & x0,
+            fsi::vector & xk
+            );
 
-    virtual void optimize(
-        const fsi::vector & y,
-        const fsi::vector & x0,
-        fsi::vector & xk
-        );
+        virtual void run();
 
-    virtual void run();
+        virtual void setSurrogateData(
+            fsi::vector & xf,
+            matrix & J
+            );
 
-    virtual void setSurrogateData(
-        fsi::vector & xf,
-        matrix & J
-        );
+        virtual void setUseJacobian( bool useJacobian );
 
-    virtual void setUseJacobian( bool useJacobian );
+        void finalizeTimeStep();
 
-    void finalizeTimeStep();
+        void initTimeStep();
 
-    void initTimeStep();
+        void solve();
 
-    void solve();
+        void solveTimeStep();
 
-    void solveTimeStep();
-
-    shared_ptr<MultiLevelFsiSolver> fsi;
-    shared_ptr<PostProcessing> postProcessing;
-    bool init;
+        shared_ptr<MultiLevelFsiSolver> fsi;
+        shared_ptr<PostProcessing> postProcessing;
+        bool init;
 };
 
 #endif

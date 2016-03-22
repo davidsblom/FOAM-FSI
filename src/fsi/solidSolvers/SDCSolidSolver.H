@@ -20,132 +20,130 @@ using namespace rbf;
 
 class SDCSolidSolver : public foamSolidSolver, public sdc::SDCFsiSolverInterface
 {
-public:
+    public:
+        SDCSolidSolver(
+            std::string name,
+            std::shared_ptr<argList> args,
+            std::shared_ptr<Time> runTime
+            );
 
-    SDCSolidSolver(
-        std::string name,
-        std::shared_ptr<argList> args,
-        std::shared_ptr<Time> runTime
-        );
+        SDCSolidSolver(
+            std::string name,
+            std::shared_ptr<argList> args,
+            std::shared_ptr<Time> runTime,
+            std::shared_ptr<rbf::RBFCoarsening> interpolator
+            );
 
-    SDCSolidSolver(
-        std::string name,
-        std::shared_ptr<argList> args,
-        std::shared_ptr<Time> runTime,
-        std::shared_ptr<rbf::RBFCoarsening> interpolator
-        );
+        virtual ~SDCSolidSolver();
 
-    virtual ~SDCSolidSolver();
+        virtual void initTimeStep();
 
-    virtual void initTimeStep();
+        virtual bool isRunning();
 
-    virtual bool isRunning();
+        virtual void resetSolution();
 
-    virtual void resetSolution();
+        virtual void solve();
 
-    virtual void solve();
+        virtual bool interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> fineModel );
 
-    virtual bool interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> fineModel );
+        virtual void evaluateFunction(
+            const int k,
+            const fsi::vector & q,
+            const scalar t,
+            fsi::vector & f
+            );
 
-    virtual void evaluateFunction(
-        const int k,
-        const fsi::vector & q,
-        const scalar t,
-        fsi::vector & f
-        );
+        virtual void finalizeTimeStep();
 
-    virtual void finalizeTimeStep();
+        virtual int getDOF();
 
-    virtual int getDOF();
+        virtual void getSolution(
+            fsi::vector & solution,
+            fsi::vector & f
+            );
 
-    virtual void getSolution(
-        fsi::vector & solution,
-        fsi::vector & f
-        );
+        virtual void setSolution(
+            const fsi::vector & solution,
+            const fsi::vector & f
+            );
 
-    virtual void setSolution(
-        const fsi::vector & solution,
-        const fsi::vector & f
-        );
+        virtual scalar getEndTime();
 
-    virtual scalar getEndTime();
+        virtual scalar getTimeStep();
 
-    virtual scalar getTimeStep();
+        virtual void nextTimeStep();
 
-    virtual void nextTimeStep();
+        virtual void setNumberOfImplicitStages( int k );
 
-    virtual void setNumberOfImplicitStages( int k );
+        virtual void implicitSolve(
+            bool corrector,
+            const int k,
+            const int kold,
+            const scalar t,
+            const scalar dt,
+            const fsi::vector & qold,
+            const fsi::vector & rhs,
+            fsi::vector & f,
+            fsi::vector & result
+            );
 
-    virtual void implicitSolve(
-        bool corrector,
-        const int k,
-        const int kold,
-        const scalar t,
-        const scalar dt,
-        const fsi::vector & qold,
-        const fsi::vector & rhs,
-        fsi::vector & f,
-        fsi::vector & result
-        );
+        virtual void prepareImplicitSolve(
+            bool corrector,
+            const int k,
+            const int kold,
+            const scalar t,
+            const scalar dt,
+            const fsi::vector & qold,
+            const fsi::vector & rhs
+            );
 
-    virtual void prepareImplicitSolve(
-        bool corrector,
-        const int k,
-        const int kold,
-        const scalar t,
-        const scalar dt,
-        const fsi::vector & qold,
-        const fsi::vector & rhs
-        );
+        virtual scalar getStartTime();
 
-    virtual scalar getStartTime();
+        virtual void getVariablesInfo(
+            std::deque<int> & dof,
+            std::deque<bool> & enabled,
+            std::deque<std::string> & names
+            );
 
-    virtual void getVariablesInfo(
-        std::deque<int> & dof,
-        std::deque<bool> & enabled,
-        std::deque<std::string> & names
-        );
+    protected:
+        void calculateEpsilonSigma();
 
-protected:
+        void initialize();
 
-    void calculateEpsilonSigma();
+        void readSolidMechanicsControls();
 
-    void initialize();
+        // Fields
+        volTensorField gradU;
+        volSymmTensorField epsilon;
+        volSymmTensorField sigma;
 
-    void readSolidMechanicsControls();
+        // Constitutive model
+        constitutiveModel rheology;
+        volScalarField rho;
+        volScalarField mu;
+        volScalarField lambda;
+        surfaceScalarField muf;
+        surfaceScalarField lambdaf;
+        surfaceVectorField n;
 
-    // Fields
-    volTensorField gradU;
-    volSymmTensorField epsilon;
-    volSymmTensorField sigma;
+        volVectorField V;
 
-    // Constitutive model
-    constitutiveModel rheology;
-    volScalarField rho;
-    volScalarField mu;
-    volScalarField lambda;
-    surfaceScalarField muf;
-    surfaceScalarField lambdaf;
-    surfaceVectorField n;
+        // Solid mechanics controls
+        const int minIter;
+        const int maxIter;
+        const scalar absoluteTolerance;
+        const scalar relativeTolerance;
 
-    volVectorField V;
+        const std::shared_ptr<rbf::RBFCoarsening> interpolator;
 
-    // Solid mechanics controls
-    const int minIter;
-    const int maxIter;
-    const scalar absoluteTolerance;
-    const scalar relativeTolerance;
-
-    const std::shared_ptr<rbf::RBFCoarsening> interpolator;
-
-    int k;
-    int indexk;
-    std::deque<volVectorField> UStages;
-    std::deque<volVectorField> VStages;
-    volVectorField rhsU;
-    volVectorField rhsV;
-    volVectorField UF;
-    volVectorField VF;
+        int k;
+        int indexk;
+        std::deque<volVectorField> UStages;
+        std::deque<volVectorField> VStages;
+        volVectorField rhsU;
+        volVectorField rhsV;
+        volVectorField UF;
+        volVectorField VF;
 };
 
 #endif

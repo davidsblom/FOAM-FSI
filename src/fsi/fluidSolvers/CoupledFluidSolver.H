@@ -22,81 +22,79 @@ using std::shared_ptr;
 
 class CoupledFluidSolver : public foamFluidSolver
 {
-public:
+    public:
+        CoupledFluidSolver(
+            string name,
+            shared_ptr<argList> args,
+            shared_ptr<Time> runTime
+            );
 
-    CoupledFluidSolver(
-        string name,
-        shared_ptr<argList> args,
-        shared_ptr<Time> runTime
-        );
+        virtual ~CoupledFluidSolver();
 
-    virtual ~CoupledFluidSolver();
+        virtual void getAcousticsDensityLocal( matrix & data );
 
-    virtual void getAcousticsDensityLocal( matrix & data );
+        virtual void getAcousticsVelocityLocal( matrix & data );
 
-    virtual void getAcousticsVelocityLocal( matrix & data );
+        virtual void getAcousticsPressureLocal( matrix & data );
 
-    virtual void getAcousticsPressureLocal( matrix & data );
+        virtual void getTractionLocal( matrix & traction );
 
-    virtual void getTractionLocal( matrix & traction );
+        virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
 
-    virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
+        virtual void initTimeStep();
 
-    virtual void initTimeStep();
+        virtual bool isRunning();
 
-    virtual bool isRunning();
+        virtual void resetSolution();
 
-    virtual void resetSolution();
+        virtual void solve();
 
-    virtual void solve();
+    protected:
+        void checkTotalVolume();
 
-protected:
+        void continuityErrs();
 
-    void checkTotalVolume();
+        void courantNo();
 
-    void continuityErrs();
+        void readBlockSolverControls();
 
-    void courantNo();
+        // Fields
+        volScalarField p;
+        volVectorField U;
+        surfaceScalarField phi;
+        volVector4Field Up;
 
-    void readBlockSolverControls();
+        // Turbulence
+        singlePhaseTransportModel laminarTransport;
+        autoPtr<incompressible::turbulenceModel> turbulence;
 
-    // Fields
-    volScalarField p;
-    volVectorField U;
-    surfaceScalarField phi;
-    volVector4Field Up;
+        // Continuity errors
+        scalar sumLocalContErr;
+        scalar globalContErr;
+        scalar cumulativeContErr;
 
-    // Turbulence
-    singlePhaseTransportModel laminarTransport;
-    autoPtr<incompressible::turbulenceModel> turbulence;
+        // Pressure reference cell
+        label pRefCell;
+        scalar pRefValue;
 
-    // Continuity errors
-    scalar sumLocalContErr;
-    scalar globalContErr;
-    scalar cumulativeContErr;
+        // Dictionaries
+        IOdictionary transportProperties;
 
-    // Pressure reference cell
-    label pRefCell;
-    scalar pRefValue;
+        // Dimensioned scalars
+        dimensionedScalar nu;
+        dimensionedScalar rho;
 
-    // Dictionaries
-    IOdictionary transportProperties;
+        // Convergence tolerance fluid domain
+        scalar convergenceTolerance;
+        label nOuterCorr;
 
-    // Dimensioned scalars
-    dimensionedScalar nu;
-    dimensionedScalar rho;
+        // Total volume
+        scalar totalVolume;
 
-    // Convergence tolerance fluid domain
-    scalar convergenceTolerance;
-    label nOuterCorr;
-
-    // Total volume
-    scalar totalVolume;
-
-    // Courant no
-    scalar CoNum;
-    scalar meanCoNum;
-    scalar velMag;
+        // Courant no
+        scalar CoNum;
+        scalar meanCoNum;
+        scalar velMag;
 };
 
 #endif

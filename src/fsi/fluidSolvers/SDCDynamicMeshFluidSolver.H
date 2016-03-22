@@ -19,97 +19,95 @@ using std::shared_ptr;
 
 class SDCDynamicMeshFluidSolver : public SDCFluidSolver
 {
-public:
+    public:
+        SDCDynamicMeshFluidSolver(
+            std::string name,
+            shared_ptr<argList> args,
+            shared_ptr<Time> runTime
+            );
 
-    SDCDynamicMeshFluidSolver(
-        std::string name,
-        shared_ptr<argList> args,
-        shared_ptr<Time> runTime
-        );
+        virtual ~SDCDynamicMeshFluidSolver();
 
-    virtual ~SDCDynamicMeshFluidSolver();
+        virtual void resetSolution();
 
-    virtual void resetSolution();
+        virtual void evaluateFunction(
+            const int k,
+            const fsi::vector & q,
+            const scalar t,
+            fsi::vector & f
+            );
 
-    virtual void evaluateFunction(
-        const int k,
-        const fsi::vector & q,
-        const scalar t,
-        fsi::vector & f
-        );
+        virtual int getDOF();
 
-    virtual int getDOF();
+        virtual void getSolution(
+            fsi::vector & solution,
+            fsi::vector & f
+            );
 
-    virtual void getSolution(
-        fsi::vector & solution,
-        fsi::vector & f
-        );
+        virtual void setSolution(
+            const fsi::vector & solution,
+            const fsi::vector & f
+            );
 
-    virtual void setSolution(
-        const fsi::vector & solution,
-        const fsi::vector & f
-        );
+        virtual void implicitSolve(
+            bool corrector,
+            const int k,
+            const int kold,
+            const scalar t,
+            const scalar dt,
+            const fsi::vector & qold,
+            const fsi::vector & rhs,
+            fsi::vector & f,
+            fsi::vector & result
+            );
 
-    virtual void implicitSolve(
-        bool corrector,
-        const int k,
-        const int kold,
-        const scalar t,
-        const scalar dt,
-        const fsi::vector & qold,
-        const fsi::vector & rhs,
-        fsi::vector & f,
-        fsi::vector & result
-        );
+        virtual void prepareImplicitSolve(
+            bool corrector,
+            const int k,
+            const int kold,
+            const scalar t,
+            const scalar dt,
+            const fsi::vector & qold,
+            const fsi::vector & rhs
+            );
 
-    virtual void prepareImplicitSolve(
-        bool corrector,
-        const int k,
-        const int kold,
-        const scalar t,
-        const scalar dt,
-        const fsi::vector & qold,
-        const fsi::vector & rhs
-        );
+        virtual void setNumberOfImplicitStages( int k );
 
-    virtual void setNumberOfImplicitStages( int k );
+        virtual void nextTimeStep();
 
-    virtual void nextTimeStep();
+        virtual void getVariablesInfo(
+            std::deque<int> & dof,
+            std::deque<bool> & enabled,
+            std::deque<std::string> & names
+            );
 
-    virtual void getVariablesInfo(
-        std::deque<int> & dof,
-        std::deque<bool> & enabled,
-        std::deque<std::string> & names
-        );
+        virtual bool isConverged();
 
-    virtual bool isConverged();
+        virtual void solve();
 
-    virtual void solve();
+        virtual void getTractionLocal( matrix & traction );
 
-    virtual void getTractionLocal( matrix & traction );
+    private:
+        void createFields();
 
-private:
+        void initialize();
 
-    void createFields();
+        // Fields
+        surfaceVectorField Uf;
+        surfaceVectorField rhsUf;
+        surfaceScalarField rhsMeshPhi;
 
-    void initialize();
+        std::deque<surfaceVectorField> UfStages;
+        std::deque<pointField> pointsStages;
+        std::deque<volScalarField::DimensionedInternalField> volumeStages;
+        std::deque<surfaceScalarField> interpolateVolumeStages;
+        IOobject UfFHeader;
+        surfaceVectorField UfF;
+        surfaceScalarField meshPhiF;
 
-    // Fields
-    surfaceVectorField Uf;
-    surfaceVectorField rhsUf;
-    surfaceScalarField rhsMeshPhi;
-
-    std::deque<surfaceVectorField> UfStages;
-    std::deque<pointField> pointsStages;
-    std::deque<volScalarField::DimensionedInternalField> volumeStages;
-    std::deque<surfaceScalarField> interpolateVolumeStages;
-    IOobject UfFHeader;
-    surfaceVectorField UfF;
-    surfaceScalarField meshPhiF;
-
-    int kold;
-    int indexk;
-    int sweep;
+        int kold;
+        int indexk;
+        int sweep;
 };
 
 #endif

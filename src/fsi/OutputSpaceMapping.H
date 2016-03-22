@@ -18,40 +18,39 @@ namespace fsi
 {
     class OutputSpaceMapping : public SpaceMapping
     {
-public:
+        public:
+            using SpaceMapping::performPostProcessing;
 
-        using SpaceMapping::performPostProcessing;
+            OutputSpaceMapping(
+                shared_ptr<SurrogateModel> fineModel,
+                shared_ptr<SurrogateModel> coarseModel,
+                int maxIter,
+                int maxUsedIterations,
+                int nbReuse,
+                int reuseInformationStartingFromTimeIndex,
+                scalar singularityLimit,
+                int order
+                );
 
-        OutputSpaceMapping(
-            shared_ptr<SurrogateModel> fineModel,
-            shared_ptr<SurrogateModel> coarseModel,
-            int maxIter,
-            int maxUsedIterations,
-            int nbReuse,
-            int reuseInformationStartingFromTimeIndex,
-            scalar singularityLimit,
-            int order
-            );
+            virtual ~OutputSpaceMapping();
 
-        virtual ~OutputSpaceMapping();
+            virtual void finalizeTimeStep();
 
-        virtual void finalizeTimeStep();
+            virtual void iterationsConverged();
 
-        virtual void iterationsConverged();
+            virtual void performPostProcessing(
+                const vector & y,
+                const vector & x0,
+                vector & xk,
+                bool residualCriterium
+                );
 
-        virtual void performPostProcessing(
-            const vector & y,
-            const vector & x0,
-            vector & xk,
-            bool residualCriterium
-            );
+            shared_ptr<SurrogateModel> surrogateModel;
+            deque<vector> sols;
+            deque<deque<vector> > solsList;
+            deque<deque<deque<vector> > > solsTimeList;
 
-        shared_ptr<SurrogateModel> surrogateModel;
-        deque<vector> sols;
-        deque<deque<vector> > solsList;
-        deque<deque<deque<vector> > > solsTimeList;
-
-        const int order;
+            const int order;
     };
 }
 

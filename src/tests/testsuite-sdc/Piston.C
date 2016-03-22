@@ -261,10 +261,11 @@ void Piston::run()
 
                         if ( i == 0 )
                             rhs_tmp = rhs;
+
                         if ( i == 1 )
                         {
-                            assert( std::abs( rhs(0) - rhs_tmp(0) ) < 1.0e-13 );
-                            assert( std::abs( rhs(1) - rhs_tmp(1) ) < 1.0e-13 );
+                            assert( std::abs( rhs( 0 ) - rhs_tmp( 0 ) ) < 1.0e-13 );
+                            assert( std::abs( rhs( 1 ) - rhs_tmp( 1 ) ) < 1.0e-13 );
                         }
 
                         if ( sdc )

@@ -23,82 +23,80 @@ using std::shared_ptr;
 
 class SteadyStateFluidSolver : public foamFluidSolver
 {
-public:
+    public:
+        SteadyStateFluidSolver(
+            std::string name,
+            shared_ptr<argList> args,
+            shared_ptr<Time> runTime
+            );
 
-    SteadyStateFluidSolver(
-        std::string name,
-        shared_ptr<argList> args,
-        shared_ptr<Time> runTime
-        );
+        virtual ~SteadyStateFluidSolver();
 
-    virtual ~SteadyStateFluidSolver();
+        virtual void getAcousticsDensityLocal( matrix & data );
 
-    virtual void getAcousticsDensityLocal( matrix & data );
+        virtual void getAcousticsVelocityLocal( matrix & data );
 
-    virtual void getAcousticsVelocityLocal( matrix & data );
+        virtual void getAcousticsPressureLocal( matrix & data );
 
-    virtual void getAcousticsPressureLocal( matrix & data );
+        virtual void getTractionLocal( matrix & traction );
 
-    virtual void getTractionLocal( matrix & traction );
+        virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
 
-    virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
+        virtual void initTimeStep();
 
-    virtual void initTimeStep();
+        virtual bool isRunning();
 
-    virtual bool isRunning();
+        virtual void resetSolution();
 
-    virtual void resetSolution();
+        virtual void solve();
 
-    virtual void solve();
+    private:
+        void checkTimeDiscretisationScheme();
 
-private:
+        void continuityErrs();
 
-    void checkTimeDiscretisationScheme();
+        void courantNo();
 
-    void continuityErrs();
+        scalar evaluateMomentumResidual();
 
-    void courantNo();
+        // Dictionaries
+        IOdictionary transportProperties;
 
-    scalar evaluateMomentumResidual();
+        // Dimensioned scalars
+        dimensionedScalar nu;
+        dimensionedScalar rho;
 
-    // Dictionaries
-    IOdictionary transportProperties;
+        // Fields
+        volScalarField p;
+        volVectorField U;
+        surfaceScalarField phi;
+        volScalarField AU;
+        volVectorField HU;
 
-    // Dimensioned scalars
-    dimensionedScalar nu;
-    dimensionedScalar rho;
+        // PIMPLE controls
+        int nCorr;
+        int nNonOrthCorr;
+        int minIter;
+        int maxIter;
+        scalar absoluteTolerance;
+        scalar relativeTolerance;
 
-    // Fields
-    volScalarField p;
-    volVectorField U;
-    surfaceScalarField phi;
-    volScalarField AU;
-    volVectorField HU;
+        // Continuity errors
+        scalar sumLocalContErr;
+        scalar globalContErr;
+        scalar cumulativeContErr;
 
-    // PIMPLE controls
-    int nCorr;
-    int nNonOrthCorr;
-    int minIter;
-    int maxIter;
-    scalar absoluteTolerance;
-    scalar relativeTolerance;
+        label pRefCell;
+        scalar pRefValue;
+        singlePhaseTransportModel laminarTransport;
+        autoPtr<incompressible::turbulenceModel> turbulence;
 
-    // Continuity errors
-    scalar sumLocalContErr;
-    scalar globalContErr;
-    scalar cumulativeContErr;
+        // Courant no
+        scalar CoNum;
+        scalar meanCoNum;
+        scalar velMag;
 
-    label pRefCell;
-    scalar pRefValue;
-    singlePhaseTransportModel laminarTransport;
-    autoPtr<incompressible::turbulenceModel> turbulence;
-
-    // Courant no
-    scalar CoNum;
-    scalar meanCoNum;
-    scalar velMag;
-
-    bool turbulenceSwitch;
+        bool turbulenceSwitch;
 };
 
 #endif

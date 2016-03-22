@@ -11,41 +11,40 @@ using namespace tubeflow;
 
 class SolidSolverTest : public ::testing::Test
 {
-protected:
+    protected:
+        virtual void SetUp()
+        {
+            scalar r0 = 0.2;
+            scalar a0 = M_PI * r0 * r0;
+            scalar u0 = 0.1;
+            scalar p0 = 0;
+            scalar dt = 0.1;
+            int N = 5;
+            scalar L = 1;
+            scalar dx = L / N;
+            scalar rho = 1.225;
+            scalar E = 490;
+            scalar h = 1.0e-3;
+            scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
+            scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
+            scalar kappa = c0 / u0;
+            scalar tau = u0 * dt / L;
 
-    virtual void SetUp()
-    {
-        scalar r0 = 0.2;
-        scalar a0 = M_PI * r0 * r0;
-        scalar u0 = 0.1;
-        scalar p0 = 0;
-        scalar dt = 0.1;
-        int N = 5;
-        scalar L = 1;
-        scalar dx = L / N;
-        scalar rho = 1.225;
-        scalar E = 490;
-        scalar h = 1.0e-3;
-        scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
-        scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
-        scalar kappa = c0 / u0;
-        scalar tau = u0 * dt / L;
+            ASSERT_NEAR( tau, 0.01, 1.0e-13 );
+            ASSERT_NEAR( kappa, 10, 1.0e-13 );
+            ASSERT_NEAR( cmk, 1, 1.0e-15 );
+            ASSERT_TRUE( dx > 0 );
 
-        ASSERT_NEAR( tau, 0.01, 1.0e-13 );
-        ASSERT_NEAR( kappa, 10, 1.0e-13 );
-        ASSERT_NEAR( cmk, 1, 1.0e-15 );
-        ASSERT_TRUE( dx > 0 );
+            solid = new tubeflow::TubeFlowSolidSolver( a0, cmk, p0, rho, L, N );
+        }
 
-        solid = new tubeflow::TubeFlowSolidSolver( a0, cmk, p0, rho, L, N );
-    }
+        virtual void TearDown()
+        {
+            delete solid;
+            solid = NULL;
+        }
 
-    virtual void TearDown()
-    {
-        delete solid;
-        solid = NULL;
-    }
-
-    TubeFlowSolidSolver * solid;
+        TubeFlowSolidSolver * solid;
 };
 
 TEST_F( SolidSolverTest, object )

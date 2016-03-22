@@ -14,70 +14,68 @@ using namespace sdc;
 
 class Cos : public SDCSolver
 {
-public:
+    public:
+        Cos(
+            int nbTimeSteps,
+            scalar dt,
+            scalar endTime,
+            scalar amplitude,
+            scalar frequency
+            );
 
-    Cos(
-        int nbTimeSteps,
-        scalar dt,
-        scalar endTime,
-        scalar amplitude,
-        scalar frequency
-        );
+        virtual void evaluateFunction(
+            const int k,
+            const fsi::vector & q,
+            const scalar t,
+            fsi::vector & f
+            );
 
-    virtual void evaluateFunction(
-        const int k,
-        const fsi::vector & q,
-        const scalar t,
-        fsi::vector & f
-        );
+        virtual void finalizeTimeStep();
 
-    virtual void finalizeTimeStep();
+        virtual int getDOF();
 
-    virtual int getDOF();
+        virtual void getSolution(
+            fsi::vector & solution,
+            fsi::vector & f
+            );
 
-    virtual void getSolution(
-        fsi::vector & solution,
-        fsi::vector & f
-        );
+        virtual void setSolution(
+            const fsi::vector & solution,
+            const fsi::vector & f
+            );
 
-    virtual void setSolution(
-        const fsi::vector & solution,
-        const fsi::vector & f
-        );
+        virtual scalar getEndTime();
 
-    virtual scalar getEndTime();
+        virtual scalar getTimeStep();
 
-    virtual scalar getTimeStep();
+        virtual void nextTimeStep();
 
-    virtual void nextTimeStep();
+        virtual void initTimeStep();
 
-    virtual void initTimeStep();
+        virtual void setNumberOfImplicitStages( int k );
 
-    virtual void setNumberOfImplicitStages( int k );
+        virtual void implicitSolve(
+            bool corrector,
+            const int k,
+            const int kold,
+            const scalar t,
+            const scalar dt,
+            const fsi::vector & qold,
+            const fsi::vector & rhs,
+            fsi::vector & f,
+            fsi::vector & result
+            );
 
-    virtual void implicitSolve(
-        bool corrector,
-        const int k,
-        const int kold,
-        const scalar t,
-        const scalar dt,
-        const fsi::vector & qold,
-        const fsi::vector & rhs,
-        fsi::vector & f,
-        fsi::vector & result
-        );
+        scalar f;
+        scalar sol;
 
-    scalar f;
-    scalar sol;
-
-private:
-
-    int nbTimeSteps;
-    scalar dt;
-    scalar endTime;
-    scalar amplitude;
-    scalar frequency;
-    scalar t;
+    private:
+        int nbTimeSteps;
+        scalar dt;
+        scalar endTime;
+        scalar amplitude;
+        scalar frequency;
+        scalar t;
 };
 
 #endif

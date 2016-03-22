@@ -10,33 +10,32 @@ using namespace tubeflow;
 
 class MonolithicFsiSolverTest : public ::testing::Test
 {
-protected:
+    protected:
+        virtual void SetUp()
+        {
+            // Physical settings
+            scalar r0 = 0.2;
+            scalar a0 = M_PI * r0 * r0;
+            scalar u0 = 0.1;
+            scalar p0 = 0;
+            scalar dt = 0.1;
+            int N = 5;
+            scalar L = 1;
+            scalar T = 10;
+            scalar rho = 1.225;
+            scalar E = 490;
+            scalar h = 1.0e-3;
+            scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
 
-    virtual void SetUp()
-    {
-        // Physical settings
-        scalar r0 = 0.2;
-        scalar a0 = M_PI * r0 * r0;
-        scalar u0 = 0.1;
-        scalar p0 = 0;
-        scalar dt = 0.1;
-        int N = 5;
-        scalar L = 1;
-        scalar T = 10;
-        scalar rho = 1.225;
-        scalar E = 490;
-        scalar h = 1.0e-3;
-        scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
+            fsi = new MonolithicFsiSolver( a0, u0, p0, dt, cmk, N, L, T, rho );
+        }
 
-        fsi = new MonolithicFsiSolver( a0, u0, p0, dt, cmk, N, L, T, rho );
-    }
+        virtual void TearDown()
+        {
+            delete fsi;
+        }
 
-    virtual void TearDown()
-    {
-        delete fsi;
-    }
-
-    MonolithicFsiSolver * fsi;
+        MonolithicFsiSolver * fsi;
 };
 
 TEST_F( MonolithicFsiSolverTest, object )

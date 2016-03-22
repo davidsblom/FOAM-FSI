@@ -17,68 +17,66 @@
 
 class CompressibleFluidSolver : public foamFluidSolver
 {
-public:
+    public:
+        CompressibleFluidSolver(
+            string name,
+            shared_ptr<argList> args,
+            shared_ptr<Time> runTime
+            );
 
-    CompressibleFluidSolver(
-        string name,
-        shared_ptr<argList> args,
-        shared_ptr<Time> runTime
-        );
+        virtual ~CompressibleFluidSolver();
 
-    virtual ~CompressibleFluidSolver();
+        virtual void getAcousticsDensityLocal( matrix & data );
 
-    virtual void getAcousticsDensityLocal( matrix & data );
+        virtual void getAcousticsVelocityLocal( matrix & data );
 
-    virtual void getAcousticsVelocityLocal( matrix & data );
+        virtual void getAcousticsPressureLocal( matrix & data );
 
-    virtual void getAcousticsPressureLocal( matrix & data );
+        virtual void getTractionLocal( matrix & traction );
 
-    virtual void getTractionLocal( matrix & traction );
+        virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
 
-    virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
+        virtual void initTimeStep();
 
-    virtual void initTimeStep();
+        virtual bool isRunning();
 
-    virtual bool isRunning();
+        virtual void resetSolution();
 
-    virtual void resetSolution();
+        virtual void solve();
 
-    virtual void solve();
+        virtual void finalizeTimeStep();
 
-    virtual void finalizeTimeStep();
+    protected:
+        void continuityErrs();
 
-protected:
+        // Fields
+        autoPtr<basicPsiThermo> pThermo;
+        basicPsiThermo & thermo;
 
-    void continuityErrs();
+        volScalarField & p;
+        volScalarField & h;
+        const volScalarField & T;
+        const volScalarField & psi;
+        volScalarField rho;
+        volVectorField U;
+        surfaceScalarField phi;
+        autoPtr<compressible::RASModel> turbulence;
+        volVector4Field Up;
+        volScalarField DpDt;
+        volScalarField ddtp;
+        volScalarField ddtrho;
 
-    // Fields
-    autoPtr<basicPsiThermo> pThermo;
-    basicPsiThermo & thermo;
+        // Continuity errors
+        scalar cumulativeContErr;
 
-    volScalarField & p;
-    volScalarField & h;
-    const volScalarField & T;
-    const volScalarField & psi;
-    volScalarField rho;
-    volVectorField U;
-    surfaceScalarField phi;
-    autoPtr<compressible::RASModel> turbulence;
-    volVector4Field Up;
-    volScalarField DpDt;
-    volScalarField ddtp;
-    volScalarField ddtrho;
+        // Convergence tolerance fluid domain
+        scalar convergenceTolerance;
+        label nOuterCorr;
 
-    // Continuity errors
-    scalar cumulativeContErr;
+        // Acoustics coupling patch
 
-    // Convergence tolerance fluid domain
-    scalar convergenceTolerance;
-    label nOuterCorr;
-
-    // Acoustics coupling patch
-
-    word acousticsPatchName;
-    label acousticsPatchID;
+        word acousticsPatchName;
+        label acousticsPatchID;
 };
 
 #endif

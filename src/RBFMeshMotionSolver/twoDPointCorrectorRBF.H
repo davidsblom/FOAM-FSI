@@ -19,8 +19,8 @@ namespace Foam
     \*---------------------------------------------------------------------------*/
 
     class twoDPointCorrectorRBF
-        :
-        public twoDPointCorrector
+          :
+            public twoDPointCorrector
     {
         // Private data
 
@@ -47,24 +47,23 @@ namespace Foam
 
         void setMarker();
 
-public:
+        public:
+            // Constructors
 
-        // Constructors
-
-        // - Construct from components
-        twoDPointCorrectorRBF( const polyMesh & mesh );
-
-
-        // Destructor
-
-        virtual ~twoDPointCorrectorRBF();
+            // - Construct from components
+            twoDPointCorrectorRBF( const polyMesh & mesh );
 
 
-        // Member Functions
+            // Destructor
 
-        const labelList & marker() const;
+            virtual ~twoDPointCorrectorRBF();
 
-        void setShadowSide( vectorField & newpoints ) const;
+
+            // Member Functions
+
+            const labelList & marker() const;
+
+            void setShadowSide( vectorField & newpoints ) const;
     };
 } // End namespace Foam
 

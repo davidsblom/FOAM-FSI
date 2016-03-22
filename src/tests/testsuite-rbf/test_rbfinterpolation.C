@@ -22,53 +22,52 @@ using ::testing::Combine;
 
 class RBFInterpolationParametrizedTest : public TestWithParam < std::tr1::tuple<int, bool> >
 {
-protected:
+    protected:
+        virtual void SetUp()
+        {
+            int rbfFunctionId = std::tr1::get<0>( GetParam() );
 
-    virtual void SetUp()
-    {
-        int rbfFunctionId = std::tr1::get<0>( GetParam() );
+            std::shared_ptr<RBFFunctionInterface> rbfFunction;
 
-        std::shared_ptr<RBFFunctionInterface> rbfFunction;
+            if ( rbfFunctionId == 0 )
+                rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC0Function( 5 ) );
 
-        if ( rbfFunctionId == 0 )
-            rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC0Function( 5 ) );
+            else
+            if ( rbfFunctionId == 1 )
+                rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC2Function( 5 ) );
 
-        else
-        if ( rbfFunctionId == 1 )
-            rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC2Function( 5 ) );
+            else
+            if ( rbfFunctionId == 2 )
+                rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC4Function( 5 ) );
 
-        else
-        if ( rbfFunctionId == 2 )
-            rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC4Function( 5 ) );
+            else
+            if ( rbfFunctionId == 3 )
+                rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC6Function( 5 ) );
 
-        else
-        if ( rbfFunctionId == 3 )
-            rbfFunction = std::shared_ptr<RBFFunctionInterface>( new WendlandC6Function( 5 ) );
+            else
+            if ( rbfFunctionId == 4 )
+                rbfFunction = std::shared_ptr<RBFFunctionInterface>( new TPSFunction() );
 
-        else
-        if ( rbfFunctionId == 4 )
-            rbfFunction = std::shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+            else
+            if ( rbfFunctionId == 5 )
+                rbfFunction = std::shared_ptr<RBFFunctionInterface>( new LinearFunction() );
 
-        else
-        if ( rbfFunctionId == 5 )
-            rbfFunction = std::shared_ptr<RBFFunctionInterface>( new LinearFunction() );
+            bool polynomialTerm = std::tr1::get<1>( GetParam() );
+            bool cpu = false;
+            rbf = std::shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
 
-        bool polynomialTerm = std::tr1::get<1>( GetParam() );
-        bool cpu = false;
-        rbf = std::shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
+            cpu = true;
+            rbfCPU = std::shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
+        }
 
-        cpu = true;
-        rbfCPU = std::shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction, polynomialTerm, cpu ) );
-    }
+        virtual void TearDown()
+        {
+            rbf.reset();
+            rbfCPU.reset();
+        }
 
-    virtual void TearDown()
-    {
-        rbf.reset();
-        rbfCPU.reset();
-    }
-
-    std::shared_ptr<RBFInterpolation> rbf;
-    std::shared_ptr<RBFInterpolation> rbfCPU;
+        std::shared_ptr<RBFInterpolation> rbf;
+        std::shared_ptr<RBFInterpolation> rbfCPU;
 };
 
 INSTANTIATE_TEST_CASE_P( RBFTest, RBFInterpolationParametrizedTest, ::testing::Combine( Values( 0, 1, 2, 3, 4, 5 ), Bool() ) );

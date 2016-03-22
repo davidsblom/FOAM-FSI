@@ -18,49 +18,48 @@ namespace tubeflow
      */
     class TubeFlowSolidSolver : public BaseMultiLevelSolver
     {
-public:
+        public:
+            TubeFlowSolidSolver(
+                scalar a0,
+                scalar cmk,
+                scalar p0,
+                scalar rho,
+                scalar L,
+                int N
+                );
 
-        TubeFlowSolidSolver(
-            scalar a0,
-            scalar cmk,
-            scalar p0,
-            scalar rho,
-            scalar L,
-            int N
-            );
+            virtual ~TubeFlowSolidSolver();
 
-        virtual ~TubeFlowSolidSolver();
+            virtual void finalizeTimeStep();
 
-        virtual void finalizeTimeStep();
+            virtual void getReadPositions( matrix & readPositions );
 
-        virtual void getReadPositions( matrix & readPositions );
+            virtual void getWritePositions( matrix & writePositions );
 
-        virtual void getWritePositions( matrix & writePositions );
+            virtual void initTimeStep();
 
-        virtual void initTimeStep();
+            virtual bool isRunning();
 
-        virtual bool isRunning();
+            virtual void resetSolution();
 
-        virtual void resetSolution();
+            virtual void solve(
+                const matrix & input,
+                matrix & output
+                );
 
-        virtual void solve(
-            const matrix & input,
-            matrix & output
-            );
+            void calcGrid();
 
-        void calcGrid();
+            void solve(
+                const fsi::vector & p,
+                fsi::vector & a
+                );
 
-        void solve(
-            const fsi::vector & p,
-            fsi::vector & a
-            );
-
-        scalar a0;
-        scalar cmk;
-        scalar p0;
-        scalar rho;
-        scalar dx;
-        matrix grid;
+            scalar a0;
+            scalar cmk;
+            scalar p0;
+            scalar rho;
+            scalar dx;
+            matrix grid;
     };
 }
 

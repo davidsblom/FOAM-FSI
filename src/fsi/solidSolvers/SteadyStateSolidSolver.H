@@ -19,62 +19,60 @@ using namespace rbf;
 
 class SteadyStateSolidSolver : public foamSolidSolver
 {
-public:
+    public:
+        SteadyStateSolidSolver(
+            std::string name,
+            std::shared_ptr<argList> args,
+            std::shared_ptr<Time> runTime
+            );
 
-    SteadyStateSolidSolver(
-        std::string name,
-        std::shared_ptr<argList> args,
-        std::shared_ptr<Time> runTime
-        );
+        SteadyStateSolidSolver(
+            std::string name,
+            std::shared_ptr<argList> args,
+            std::shared_ptr<Time> runTime,
+            std::shared_ptr<rbf::RBFCoarsening> interpolator
+            );
 
-    SteadyStateSolidSolver(
-        std::string name,
-        std::shared_ptr<argList> args,
-        std::shared_ptr<Time> runTime,
-        std::shared_ptr<rbf::RBFCoarsening> interpolator
-        );
+        virtual ~SteadyStateSolidSolver();
 
-    virtual ~SteadyStateSolidSolver();
+        virtual void initTimeStep();
 
-    virtual void initTimeStep();
+        virtual bool isRunning();
 
-    virtual bool isRunning();
+        virtual void resetSolution();
 
-    virtual void resetSolution();
+        virtual void solve();
 
-    virtual void solve();
+        virtual bool interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> fineModel );
 
-    virtual bool interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> fineModel );
+    protected:
+        void calculateEpsilonSigma();
 
-protected:
+        void initialize();
 
-    void calculateEpsilonSigma();
+        void readSolidMechanicsControls();
 
-    void initialize();
+        // Fields
+        volTensorField gradU;
+        volSymmTensorField epsilon;
+        volSymmTensorField sigma;
 
-    void readSolidMechanicsControls();
+        // Constitutive model
+        constitutiveModel rheology;
+        volScalarField rho;
+        volScalarField mu;
+        volScalarField lambda;
+        surfaceScalarField muf;
+        surfaceScalarField lambdaf;
+        surfaceVectorField n;
 
-    // Fields
-    volTensorField gradU;
-    volSymmTensorField epsilon;
-    volSymmTensorField sigma;
+        // Solid mechanics controls
+        int minIter;
+        int maxIter;
+        scalar absoluteTolerance;
+        scalar relativeTolerance;
 
-    // Constitutive model
-    constitutiveModel rheology;
-    volScalarField rho;
-    volScalarField mu;
-    volScalarField lambda;
-    surfaceScalarField muf;
-    surfaceScalarField lambdaf;
-    surfaceVectorField n;
-
-    // Solid mechanics controls
-    int minIter;
-    int maxIter;
-    scalar absoluteTolerance;
-    scalar relativeTolerance;
-
-    std::shared_ptr<rbf::RBFCoarsening> interpolator;
+        std::shared_ptr<rbf::RBFCoarsening> interpolator;
 };
 
 #endif

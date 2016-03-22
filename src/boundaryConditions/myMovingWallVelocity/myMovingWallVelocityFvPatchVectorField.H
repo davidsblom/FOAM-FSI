@@ -14,8 +14,8 @@ namespace Foam
     \*---------------------------------------------------------------------------*/
 
     class myMovingWallVelocityFvPatchVectorField
-        :
-        public fixedValueFvPatchVectorField
+          :
+            public fixedValueFvPatchVectorField
     {
         // To keep track when to copy patch face centres
         label myTimeIndex_;
@@ -25,71 +25,70 @@ namespace Foam
         vectorField oldFc_;
         vectorField oldoldFc_;
 
-public:
+        public:
+            // - Runtime type information
+            TypeName( "myMovingWallVelocity" );
 
-        // - Runtime type information
-        TypeName( "myMovingWallVelocity" );
 
+            // Constructors
 
-        // Constructors
+            // - Construct from patch and internal field
+            myMovingWallVelocityFvPatchVectorField(
+                const fvPatch &,
+                const DimensionedField<vector, volMesh> &
+                );
 
-        // - Construct from patch and internal field
-        myMovingWallVelocityFvPatchVectorField(
-            const fvPatch &,
-            const DimensionedField<vector, volMesh> &
-            );
+            // - Construct from patch, internal field and dictionary
+            myMovingWallVelocityFvPatchVectorField(
+                const fvPatch &,
+                const DimensionedField<vector, volMesh> &,
+                const dictionary &
+                );
 
-        // - Construct from patch, internal field and dictionary
-        myMovingWallVelocityFvPatchVectorField(
-            const fvPatch &,
-            const DimensionedField<vector, volMesh> &,
-            const dictionary &
-            );
+            // - Construct by mapping given myMovingWallVelocityFvPatchVectorField
+            // onto a new patch
+            myMovingWallVelocityFvPatchVectorField(
+                const myMovingWallVelocityFvPatchVectorField &,
+                const fvPatch &,
+                const DimensionedField<vector, volMesh> &,
+                const fvPatchFieldMapper &
+                );
 
-        // - Construct by mapping given myMovingWallVelocityFvPatchVectorField
-        // onto a new patch
-        myMovingWallVelocityFvPatchVectorField(
-            const myMovingWallVelocityFvPatchVectorField &,
-            const fvPatch &,
-            const DimensionedField<vector, volMesh> &,
-            const fvPatchFieldMapper &
-            );
+            // - Construct as copy
+            myMovingWallVelocityFvPatchVectorField( const myMovingWallVelocityFvPatchVectorField & );
 
-        // - Construct as copy
-        myMovingWallVelocityFvPatchVectorField( const myMovingWallVelocityFvPatchVectorField & );
+            // - Construct and return a clone
+            virtual tmp<fvPatchVectorField> clone() const
+            {
+                return tmp<fvPatchVectorField>
+                       (
+                    new myMovingWallVelocityFvPatchVectorField( *this )
+                       );
+            }
 
-        // - Construct and return a clone
-        virtual tmp<fvPatchVectorField> clone() const
-        {
-            return tmp<fvPatchVectorField>
-                   (
-                new myMovingWallVelocityFvPatchVectorField( *this )
-                   );
-        }
+            // - Construct as copy setting internal field reference
+            myMovingWallVelocityFvPatchVectorField(
+                const myMovingWallVelocityFvPatchVectorField &,
+                const DimensionedField<vector, volMesh> &
+                );
 
-        // - Construct as copy setting internal field reference
-        myMovingWallVelocityFvPatchVectorField(
-            const myMovingWallVelocityFvPatchVectorField &,
-            const DimensionedField<vector, volMesh> &
-            );
+            // - Construct and return a clone setting internal field reference
+            virtual tmp<fvPatchVectorField> clone
+                ( const DimensionedField<vector, volMesh> & iF ) const
+            {
+                return tmp<fvPatchVectorField>
+                       (
+                    new myMovingWallVelocityFvPatchVectorField( *this, iF )
+                       );
+            }
 
-        // - Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchVectorField> clone
-            ( const DimensionedField<vector, volMesh> & iF ) const
-        {
-            return tmp<fvPatchVectorField>
-                   (
-                new myMovingWallVelocityFvPatchVectorField( *this, iF )
-                   );
-        }
+            // Member functions
 
-        // Member functions
+            // - Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
 
-        // - Update the coefficients associated with the patch field
-        virtual void updateCoeffs();
-
-        // - Write
-        virtual void write( Ostream & ) const;
+            // - Write
+            virtual void write( Ostream & ) const;
     };
 
 

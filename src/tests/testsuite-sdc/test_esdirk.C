@@ -33,44 +33,43 @@ using ::testing::Combine;
 
 class ESDIRKTest : public TestWithParam< std::tr1::tuple<int, std::string> >
 {
-protected:
+    protected:
+        virtual void SetUp()
+        {
+            scalar dt, q0, qdot0, As, Ac, omega, endTime;
 
-    virtual void SetUp()
-    {
-        scalar dt, q0, qdot0, As, Ac, omega, endTime;
+            int nbTimeSteps = std::tr1::get<0>( GetParam() );
+            std::string method = std::tr1::get<1>( GetParam() );
 
-        int nbTimeSteps = std::tr1::get<0>( GetParam() );
-        std::string method = std::tr1::get<1>( GetParam() );
+            endTime = 100;
+            dt = endTime / nbTimeSteps;
+            As = 100;
+            Ac = As;
+            omega = 1;
+            q0 = -As;
+            qdot0 = -As;
 
-        endTime = 100;
-        dt = endTime / nbTimeSteps;
-        As = 100;
-        Ac = As;
-        omega = 1;
-        q0 = -As;
-        qdot0 = -As;
+            std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
 
-        std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
+            adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
 
-        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( false ) );
+            piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+            esdirk = std::shared_ptr<ESDIRK> ( new ESDIRK( piston, method, adaptiveTimeStepper ) );
 
-        piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        esdirk = std::shared_ptr<ESDIRK> ( new ESDIRK( piston, method, adaptiveTimeStepper ) );
+            std::shared_ptr<sdc::ESDIRK> esdirk( new ESDIRK( method ) );
+            piston_esdirk = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, esdirk, esdirk->getNbImplicitStages() + 1 ) );
+        }
 
-        std::shared_ptr<sdc::ESDIRK> esdirk( new ESDIRK( method ) );
-        piston_esdirk = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, esdirk, esdirk->getNbImplicitStages() + 1 ) );
-    }
+        virtual void TearDown()
+        {
+            piston.reset();
+            esdirk.reset();
+            piston_esdirk.reset();
+        }
 
-    virtual void TearDown()
-    {
-        piston.reset();
-        esdirk.reset();
-        piston_esdirk.reset();
-    }
-
-    std::shared_ptr<Piston> piston;
-    std::shared_ptr<ESDIRK> esdirk;
-    std::shared_ptr<Piston> piston_esdirk;
+        std::shared_ptr<Piston> piston;
+        std::shared_ptr<ESDIRK> esdirk;
+        std::shared_ptr<Piston> piston_esdirk;
 };
 
 INSTANTIATE_TEST_CASE_P( testParameters, ESDIRKTest, ::testing::Combine( Values( 2, 100, 200, 400, 800, 1600, 3200 ), Values( "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5", "ESDIRK53PR", "ESDIRK63PR", "ESDIRK74PR" ) ) );

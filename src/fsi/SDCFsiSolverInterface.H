@@ -12,20 +12,19 @@ namespace sdc
 {
     class SDCFsiSolverInterface : public SDCSolver
     {
-public:
+        public:
+            virtual ~SDCFsiSolverInterface(){}
 
-        virtual ~SDCFsiSolverInterface(){}
+            virtual void prepareImplicitSolve(
+                bool corrector,
+                const int k,
+                const int kold,
+                const scalar t,
+                const scalar dt,
+                const fsi::vector & qold,
+                const fsi::vector & rhs
+                ) = 0;
 
-        virtual void prepareImplicitSolve(
-            bool corrector,
-            const int k,
-            const int kold,
-            const scalar t,
-            const scalar dt,
-            const fsi::vector & qold,
-            const fsi::vector & rhs
-            ) = 0;
-
-        virtual void finalizeImplicitSolve( int /*k*/ ){}
+            virtual void finalizeImplicitSolve( int /*k*/ ){}
     };
 }
