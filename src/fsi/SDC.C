@@ -170,6 +170,8 @@ namespace sdc
 
             solver->implicitSolve( false, j, j, t, dt, data->getSolution( j ), rhs, f, result );
 
+            assert( (1.0 / dt * (result - data->getSolution( j ) - rhs) - f).norm() < 1.0e-12 );
+
             data->storeFunction( f, j + 1 );
             data->storeSolution( result, j + 1 );
         }
@@ -194,6 +196,8 @@ namespace sdc
                 rhs.noalias() = -dt * data->getFunctions().row( p + 1 ) + Sj.row( p );
 
                 solver->implicitSolve( true, p, p, t, dt, data->getSolution( p ), rhs, f, result );
+
+                assert( (1.0 / dt * (result - data->getSolution( p ) - rhs) - f).norm() < 1.0e-12 );
 
                 data->storeFunction( f, p + 1 );
                 data->storeSolution( result, p + 1 );

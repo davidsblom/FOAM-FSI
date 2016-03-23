@@ -137,6 +137,8 @@ namespace sdc
 
             solver->implicitSolve( false, iImplicitStage, 0, t, A( j, j ) * dt, qold, rhs, f, result );
 
+            assert( (1.0 / (A( j, j ) * dt) * (result - qold - rhs) - f).norm() < 1.0e-12 );
+
             solStages.row( j ) = result;
             F.row( j ) = f;
 
