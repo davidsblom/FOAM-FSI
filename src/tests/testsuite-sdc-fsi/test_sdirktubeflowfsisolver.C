@@ -244,8 +244,10 @@ TEST( SDIRKFsiTest, order )
 
         if ( i == 0 )
             ref = fluidSolvers.back()->u;
+
         if ( i == 1 )
             ref = fluidSolvers.back()->a;
+
         if ( i == 2 )
             ref = fluidSolvers.back()->p;
 
@@ -257,8 +259,10 @@ TEST( SDIRKFsiTest, order )
 
             if ( i == 0 )
                 data = fluidSolvers.at( iComputation )->u;
+
             if ( i == 1 )
                 data = fluidSolvers.at( iComputation )->a;
+
             if ( i == 2 )
                 data = fluidSolvers.at( iComputation )->p;
 
