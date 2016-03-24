@@ -125,7 +125,7 @@ build:
                     cd ../
 
                     tar -cJf foam-extend-3.2.tar.xz foam-extend-3.2
-                    # rsync -azvh foam-extend-3.2.tar.xz $WERCKER_CACHE_DIR/
+                    rsync -azvh foam-extend-3.2.tar.xz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: setup environment
@@ -188,7 +188,7 @@ build:
 
                 if [ ! -f "$WERCKER_CACHE_DIR/petsc-${PETSC_VERSION}.tar.xz" ]; then
                     tar -cJf petsc-${PETSC_VERSION}.tar.xz petsc-${PETSC_VERSION}
-                    # rsync -azvh petsc-${PETSC_VERSION}.tar.xz $WERCKER_CACHE_DIR/
+                    rsync -azvh petsc-${PETSC_VERSION}.tar.xz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: deal.II
@@ -231,12 +231,12 @@ build:
 
                 if [ ! -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}.tar.xz" ]; then
                     tar -cJf dealii-${DEALII_VERSION}.tar.xz dealii-${DEALII_VERSION}
-                    # rsync -azvh dealii-${DEALII_VERSION}.tar.xz $WERCKER_CACHE_DIR/
+                    rsync -azvh dealii-${DEALII_VERSION}.tar.xz $WERCKER_CACHE_DIR/
                 fi
 
                 if [ ! -f "$WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.xz" ]; then
                     tar -cJf boost_${BOOST_VERSION}.tar.xz boost_${BOOST_VERSION}
-                    # rsync -azvh boost_${BOOST_VERSION}.tar.xz $WERCKER_CACHE_DIR/
+                    rsync -azvh boost_${BOOST_VERSION}.tar.xz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: googletest
@@ -272,7 +272,7 @@ build:
 
                 if [ ! -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz" ]; then
                     tar -cJf gtest-${GTEST_VERSION}.tar.xz gtest-${GTEST_VERSION}
-                    # rsync -azvh gtest-${GTEST_VERSION}.tar.xz $WERCKER_CACHE_DIR/
+                    rsync -azvh gtest-${GTEST_VERSION}.tar.xz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: precice
@@ -329,7 +329,7 @@ build:
 
                 if [ ! -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz" ]; then
                     tar -cJf yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz yaml-cpp-release-${YAML_CPP_VERSION}
-                    # rsync -azvh yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz $WERCKER_CACHE_DIR/
+                    rsync -azvh yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: boundary conditions
