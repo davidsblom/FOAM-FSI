@@ -170,7 +170,7 @@ namespace sdc
 
             solver->implicitSolve( false, j, j, t, dt, data->getSolution( j ), rhs, f, result );
 
-            assert( (1.0 / dt * (result - data->getSolution( j ) - rhs) - f).norm() < 1.0e-12 );
+            assert( (1.0 / dt * (result - data->getSolution( j ) - rhs) - f).array().abs().maxCoeff() < 1.0e-8 );
 
             data->storeFunction( f, j + 1 );
             data->storeSolution( result, j + 1 );
@@ -197,7 +197,7 @@ namespace sdc
 
                 solver->implicitSolve( true, p, p, t, dt, data->getSolution( p ), rhs, f, result );
 
-                assert( (1.0 / dt * (result - data->getSolution( p ) - rhs) - f).norm() < 1.0e-12 );
+                assert( (1.0 / dt * (result - data->getSolution( p ) - rhs) - f).array().abs().maxCoeff() < 1.0e-8 );
 
                 data->storeFunction( f, p + 1 );
                 data->storeSolution( result, p + 1 );
