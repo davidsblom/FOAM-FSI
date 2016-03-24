@@ -67,9 +67,6 @@ void PostProcessing::finalizeStage()
         }
     }
 
-    residualsStageList.at( stageIndex ).clear();
-    solsStageList.at( stageIndex ).clear();
-
     residualsList.clear();
     solsList.clear();
 
