@@ -172,7 +172,7 @@ TEST( SDCFsiTest, order )
     ASSERT_NEAR( kappa, 10, 1.0e-13 );
     ASSERT_TRUE( dx > 0 );
 
-    int nbComputations = 6;
+    int nbComputations = 5;
 
     std::deque<std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> > fluidSolvers;
     std::deque<int> nbTimeStepsList;
