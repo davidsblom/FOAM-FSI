@@ -138,7 +138,7 @@ namespace tubeflow
     void SDCTubeFlowLinearSolidSolver::prepareImplicitSolve(
         bool corrector,
         const int k,
-        const int /*kold*/,
+        const int kold,
         const scalar t,
         const scalar dt,
         const fsi::vector & /*qold*/,
@@ -160,8 +160,8 @@ namespace tubeflow
             r = rStages.at( k );
         }
 
-        un = uStages.at( k );
-        rn = rStages.at( k );
+        un = uStages.at( kold );
+        rn = rStages.at( kold );
 
         this->rhs = rhs;
 
