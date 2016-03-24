@@ -205,7 +205,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
-                export DEALII_VERSION=8.3.0
+                export DEALII_VERSION=8.4.0
                 export BOOST_VERSION=1_55_0
 
                 source foam-extend-3.2/etc/bashrc
