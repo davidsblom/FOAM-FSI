@@ -1,0 +1,23 @@
+c++WARN     = -Wall -Wextra -Werror
+
+EXE_INC = -std=c++11 \
+    -I ../../fsi \
+    -I ../../fsi/lnInclude \
+    -isystem ../../thirdParty/gtest/include \
+    -isystem $(LIB_SRC)/finiteVolume/lnInclude \
+    -isystem ../../thirdParty/eigen \
+    -I ../../RBFMeshMotionSolver/lnInclude/
+
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -L../../thirdParty/gtest \
+    -lgtest \
+    -lfsi \
+    -ldeal_II \
+    -lsolidModels \
+    -lRBFMeshMotionSolver \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lcompressibleRASModels \
+    -lbasicThermophysicalModels \
+    -lboundaryConditions

@@ -37,6 +37,7 @@ wmake src/tests/testsuite-sdc
 wmake src/tests/testsuite-sdc-fsi
 wmake src/tests/testsuite-spacemapping
 wmake src/tests/tubeflow
+wmake src/tests/tubeflow-sdc
 wmake applications/solvers/fsi/fsiSolidFoam
 wmake applications/solvers/fsi/fsiFluidFoam
 echo 'Finished'

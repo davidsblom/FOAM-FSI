@@ -81,7 +81,6 @@ void MultiLevelFsiSolver::evaluate(
     assert( init );
     assert( fluidSolver->solver->init );
     assert( solidSolver->solver->init );
-    assert( fluidSolver->solver->t > 0 );
     assert( input.rows() == R.rows() );
     assert( input.rows() == solidSolver->couplingGridSize * solid->dim || input.rows() == solidSolver->couplingGridSize * solid->dim + fluidSolver->couplingGridSize * fluid->dim );
     assert( output.rows() == input.rows() );
@@ -171,7 +170,6 @@ bool MultiLevelFsiSolver::isConvergence()
 {
     assert( init );
     assert( convergenceMeasures->size() > 0 );
-    assert( fluid->t > 0 );
 
     for ( auto && measure : *convergenceMeasures )
     {
