@@ -612,3 +612,6 @@ build:
         - script:
             name: list cache files
             code: ls -lah $WERCKER_CACHE_DIR
+        - script:
+            name: cleanup
+            code: rm -rf *
