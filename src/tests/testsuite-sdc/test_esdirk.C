@@ -230,6 +230,7 @@ TEST( CosTest, ESDIRK )
     std::cout << "error1 = " << error1 << std::endl;
     std::cout << "error2 = " << error2 << std::endl;
     std::cout << "order = " << order << std::endl;
+    ASSERT_GE( order, 3.9 );
 
     ref = amplitude * ( 0.5 - 0.5 * std::cos( M_PI * frequency * endTime ) );
     error1 = std::abs( cos1->sol - ref ) / std::abs( ref );
@@ -239,4 +240,104 @@ TEST( CosTest, ESDIRK )
     std::cout << "error1 = " << error1 << std::endl;
     std::cout << "error2 = " << error2 << std::endl;
     std::cout << "order = " << order << std::endl;
+}
+
+class ESDIRKOrderTest : public TestWithParam<std::string>
+{
+    protected:
+        virtual void SetUp()
+        {
+            scalar dt, q0, qdot0, As, Ac, omega, endTime;
+
+            int nbTimeSteps = 100;
+            std::string method = GetParam();
+
+            endTime = 100;
+            dt = endTime / nbTimeSteps;
+            As = 100;
+            Ac = As;
+            omega = 1;
+            q0 = -As;
+            qdot0 = -As;
+
+            std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper1( new sdc::AdaptiveTimeStepper( false ) );
+            std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper2( new sdc::AdaptiveTimeStepper( false ) );
+
+            piston1 = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+            esdirk1 = std::shared_ptr<ESDIRK> ( new ESDIRK( piston1, method, adaptiveTimeStepper1 ) );
+
+            nbTimeSteps *= 2;
+            dt = endTime / nbTimeSteps;
+
+            piston2 = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+            esdirk2 = std::shared_ptr<ESDIRK> ( new ESDIRK( piston2, method, adaptiveTimeStepper2 ) );
+        }
+
+        virtual void TearDown()
+        {
+            piston1.reset();
+            piston2.reset();
+            esdirk1.reset();
+            esdirk2.reset();
+        }
+
+        std::shared_ptr<Piston> piston1;
+        std::shared_ptr<Piston> piston2;
+        std::shared_ptr<ESDIRK> esdirk1;
+        std::shared_ptr<ESDIRK> esdirk2;
+};
+
+INSTANTIATE_TEST_CASE_P( testParameters, ESDIRKOrderTest, ::testing::Values( "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5", "ESDIRK53PR", "ESDIRK63PR", "ESDIRK74PR" ) );
+
+TEST_P( ESDIRKOrderTest, order )
+{
+    esdirk1->run();
+    esdirk2->run();
+
+    fsi::vector solution1( 2 ), solution2( 2 ), f;
+    piston1->getSolution( solution1, f );
+    piston2->getSolution( solution2, f );
+
+    scalar result1 = solution1( 1 );
+    scalar result2 = solution2( 1 );
+
+    scalar ref = piston1->referenceSolution( 100 );
+    scalar error1 = std::abs( result1 - ref ) / std::abs( ref );
+    scalar error2 = std::abs( result2 - ref ) / std::abs( ref );
+
+    Info << "error1 = " << error1 << ", error2 = " << error2 << endl;
+
+    int nbTimeSteps = 10;
+    scalar order = ( std::log10( error1 ) - std::log10( error2 ) ) / ( std::log10( nbTimeSteps * 2 ) - std::log10( nbTimeSteps ) );
+
+    std::string method = GetParam();
+
+    scalar tol = 0.6;
+
+    if ( method == "SDIRK2" )
+        ASSERT_NEAR( order, 2, tol );
+
+    if ( method == "SDIRK3" )
+        ASSERT_NEAR( order, 3, tol );
+
+    if ( method == "SDIRK4" )
+        ASSERT_NEAR( order, 4, tol );
+
+    if ( method == "ESDIRK3" )
+        ASSERT_GE( order, 3 );
+
+    if ( method == "ESDIRK4" )
+        ASSERT_NEAR( order, 4, tol );
+
+    if ( method == "ESDIRK5" )
+        ASSERT_NEAR( order, 5, tol );
+
+    if ( method == "ESDIRK53PR" )
+        ASSERT_NEAR( order, 3, tol );
+
+    if ( method == "ESDIRK63PR" )
+        ASSERT_NEAR( order, 3, tol );
+
+    if ( method == "ESDIRK74PR" )
+        ASSERT_NEAR( order, 4, tol );
 }
