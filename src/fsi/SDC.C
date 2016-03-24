@@ -170,6 +170,8 @@ namespace sdc
 
             solver->implicitSolve( false, j, j, t, dt, data->getSolution( j ), rhs, f, result );
 
+            assert( (1.0 / dt * (result - data->getSolution( j ) - rhs) - f).array().abs().maxCoeff() < 1.0e-8 );
+
             data->storeFunction( f, j + 1 );
             data->storeSolution( result, j + 1 );
         }
@@ -194,6 +196,8 @@ namespace sdc
                 rhs.noalias() = -dt * data->getFunctions().row( p + 1 ) + Sj.row( p );
 
                 solver->implicitSolve( true, p, p, t, dt, data->getSolution( p ), rhs, f, result );
+
+                assert( (1.0 / dt * (result - data->getSolution( p ) - rhs) - f).array().abs().maxCoeff() < 1.0e-8 );
 
                 data->storeFunction( f, p + 1 );
                 data->storeSolution( result, p + 1 );
@@ -349,6 +353,7 @@ namespace sdc
     void SDC::getSourceTerm(
         const bool corrector,
         const int k,
+        const int sweep,
         const scalar deltaT,
         fsi::vector & rhs,
         fsi::vector & qold
@@ -372,13 +377,17 @@ namespace sdc
 
         if ( corrector )
         {
-            if ( (k == 0 && stageIndex != 0) || (k == 0 && nbNodes == 2) )
+            if ( (this->stageIndex != k || this->sweep != sweep) && k == 0 )
+            {
+                data->copyFunctions();
                 Sj = dt * ( smat * data->getFunctions() );
+            }
 
-            rhs.noalias() = -dt * dsdc( k ) * data->getFunctions().row( k + 1 ) + Sj.row( k );
+            rhs.noalias() = -dt * dsdc( k ) * data->getOldFunctions().row( k + 1 ) + Sj.row( k );
         }
 
         this->stageIndex = k;
+        this->sweep = sweep;
         this->corrector = corrector;
 
         assert( rhs.rows() == qold.rows() );

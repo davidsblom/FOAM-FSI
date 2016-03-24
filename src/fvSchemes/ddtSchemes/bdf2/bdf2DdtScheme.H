@@ -18,8 +18,8 @@ namespace Foam
 
         template<class Type>
         class bdf2DdtScheme
-            :
-            public fv::ddtScheme<Type>
+              :
+                public fv::ddtScheme<Type>
         {
             // Private Member Functions
 
@@ -40,81 +40,80 @@ namespace Foam
             // - Disallow default bitwise assignment
             void operator=( const bdf2DdtScheme & );
 
-public:
-
-            // - Runtime type information
-            TypeName( "bdf2" );
-
-
-            // Constructors
-
-            // - Construct from mesh
-            bdf2DdtScheme( const fvMesh & mesh )
-                :
-                ddtScheme<Type>( mesh )
-            {}
-
-            // - Construct from mesh and Istream
-            bdf2DdtScheme(
-                const fvMesh & mesh,
-                Istream & is
-                )
-                :
-                ddtScheme<Type>( mesh, is )
-            {}
+            public:
+                // - Runtime type information
+                TypeName( "bdf2" );
 
 
-            // Member Functions
+                // Constructors
 
-            // - Return mesh reference
-            const fvMesh & mesh() const
-            {
-                return fv::ddtScheme<Type>::mesh();
-            }
+                // - Construct from mesh
+                bdf2DdtScheme( const fvMesh & mesh )
+                    :
+                    ddtScheme<Type>( mesh )
+                {}
 
-            tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt( const dimensioned<Type> & );
-
-            tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt( const GeometricField<Type, fvPatchField, volMesh> & );
-
-            tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt(
-                const dimensionedScalar &,
-                const GeometricField<Type, fvPatchField, volMesh> &
-                );
-
-            tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt(
-                const volScalarField &,
-                const GeometricField<Type, fvPatchField, volMesh> &
-                );
-
-            tmp<fvMatrix<Type> > fvmDdt( GeometricField<Type, fvPatchField, volMesh> & );
-
-            tmp<fvMatrix<Type> > fvmDdt(
-                const dimensionedScalar &,
-                GeometricField<Type, fvPatchField, volMesh> &
-                );
-
-            tmp<fvMatrix<Type> > fvmDdt(
-                const volScalarField &,
-                GeometricField<Type, fvPatchField, volMesh> &
-                );
-
-            typedef typename ddtScheme<Type>::fluxFieldType fluxFieldType;
-
-            tmp<fluxFieldType> fvcDdtPhiCorr(
-                const volScalarField & rA,
-                const GeometricField<Type, fvPatchField, volMesh> & U,
-                const fluxFieldType & phi
-                );
-
-            tmp<fluxFieldType> fvcDdtPhiCorr(
-                const volScalarField & rA,
-                const volScalarField & rho,
-                const GeometricField<Type, fvPatchField, volMesh> & U,
-                const fluxFieldType & phi
-                );
+                // - Construct from mesh and Istream
+                bdf2DdtScheme(
+                    const fvMesh & mesh,
+                    Istream & is
+                    )
+                    :
+                    ddtScheme<Type>( mesh, is )
+                {}
 
 
-            tmp<surfaceScalarField> meshPhi( const GeometricField<Type, fvPatchField, volMesh> & );
+                // Member Functions
+
+                // - Return mesh reference
+                const fvMesh & mesh() const
+                {
+                    return fv::ddtScheme<Type>::mesh();
+                }
+
+                tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt( const dimensioned<Type> & );
+
+                tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt( const GeometricField<Type, fvPatchField, volMesh> & );
+
+                tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt(
+                    const dimensionedScalar &,
+                    const GeometricField<Type, fvPatchField, volMesh> &
+                    );
+
+                tmp<GeometricField<Type, fvPatchField, volMesh> > fvcDdt(
+                    const volScalarField &,
+                    const GeometricField<Type, fvPatchField, volMesh> &
+                    );
+
+                tmp<fvMatrix<Type> > fvmDdt( GeometricField<Type, fvPatchField, volMesh> & );
+
+                tmp<fvMatrix<Type> > fvmDdt(
+                    const dimensionedScalar &,
+                    GeometricField<Type, fvPatchField, volMesh> &
+                    );
+
+                tmp<fvMatrix<Type> > fvmDdt(
+                    const volScalarField &,
+                    GeometricField<Type, fvPatchField, volMesh> &
+                    );
+
+                typedef typename ddtScheme<Type>::fluxFieldType fluxFieldType;
+
+                tmp<fluxFieldType> fvcDdtPhiCorr(
+                    const volScalarField & rA,
+                    const GeometricField<Type, fvPatchField, volMesh> & U,
+                    const fluxFieldType & phi
+                    );
+
+                tmp<fluxFieldType> fvcDdtPhiCorr(
+                    const volScalarField & rA,
+                    const volScalarField & rho,
+                    const GeometricField<Type, fvPatchField, volMesh> & U,
+                    const fluxFieldType & phi
+                    );
+
+
+                tmp<surfaceScalarField> meshPhi( const GeometricField<Type, fvPatchField, volMesh> & );
         };
 
 

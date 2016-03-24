@@ -17,21 +17,20 @@ namespace fsi
 
     class DataValues
     {
-public:
+        public:
+            DataValues();
 
-        DataValues();
+            ~DataValues();
 
-        ~DataValues();
+            void setData( matrix & data );
 
-        void setData( matrix & data );
+            void setDataOld( matrix & data );
 
-        void setDataOld( matrix & data );
+            void finalizeTimeStep();
 
-        void finalizeTimeStep();
-
-        matrix data;
-        matrix dataprev;
-        matrix dataPreviousTimeStep;
+            matrix data;
+            matrix dataprev;
+            matrix dataPreviousTimeStep;
     };
 }
 

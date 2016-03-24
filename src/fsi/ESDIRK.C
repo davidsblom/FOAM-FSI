@@ -137,6 +137,8 @@ namespace sdc
 
             solver->implicitSolve( false, iImplicitStage, 0, t, A( j, j ) * dt, qold, rhs, f, result );
 
+            assert( (1.0 / (A( j, j ) * dt) * (result - qold - rhs) - f).array().abs().maxCoeff() < 1.0e-8 );
+
             solStages.row( j ) = result;
             F.row( j ) = f;
 
@@ -169,6 +171,7 @@ namespace sdc
     void ESDIRK::getSourceTerm(
         const bool /*corrector*/,
         const int k,
+        const int /*sweep*/,
         const scalar deltaT,
         fsi::vector & rhs,
         fsi::vector & qold

@@ -15,76 +15,75 @@ namespace tubeflow
 {
     class TubeFlowLinearizedFluidSolver : public BaseMultiLevelSolver
     {
-public:
+        public:
+            TubeFlowLinearizedFluidSolver(
+                int N,
+                scalar p0,
+                scalar r0,
+                scalar u0,
+                scalar rho,
+                scalar E,
+                scalar h,
+                scalar T,
+                scalar dt,
+                scalar L
+                );
 
-        TubeFlowLinearizedFluidSolver(
-            int N,
-            scalar p0,
-            scalar r0,
-            scalar u0,
-            scalar rho,
-            scalar E,
-            scalar h,
-            scalar T,
-            scalar dt,
-            scalar L
-            );
+            virtual ~TubeFlowLinearizedFluidSolver();
 
-        virtual ~TubeFlowLinearizedFluidSolver();
+            virtual void finalizeTimeStep();
 
-        virtual void finalizeTimeStep();
+            virtual void getReadPositions( matrix & readPositions );
 
-        virtual void getReadPositions( matrix & readPositions );
+            virtual void getWritePositions( matrix & writePositions );
 
-        virtual void getWritePositions( matrix & writePositions );
+            virtual void initTimeStep();
 
-        virtual void initTimeStep();
+            virtual bool isRunning();
 
-        virtual bool isRunning();
+            virtual void resetSolution();
 
-        virtual void resetSolution();
+            virtual void solve(
+                const matrix & input,
+                matrix & output
+                );
 
-        virtual void solve(
-            const matrix & input,
-            matrix & output
-            );
+            void factorizeMatrix();
 
-        void factorizeMatrix();
+            void solve(
+                const fsi::vector & a,
+                fsi::vector & p
+                );
 
-        void solve(
-            const fsi::vector & a,
-            fsi::vector & p
-            );
+            void calcGrid();
 
-        void calcGrid();
+            // Constants
 
-        // Constants
+            scalar p0;
+            scalar r0;
+            scalar u0;
+            scalar a0;
+            scalar rho;
+            scalar h;
+            scalar T;
+            scalar dt;
+            scalar dx;
+            scalar tau;
+            scalar cmk;
+            scalar alpha;
 
-        scalar p0;
-        scalar r0;
-        scalar u0;
-        scalar a0;
-        scalar rho;
-        scalar h;
-        scalar T;
-        scalar dt;
-        scalar dx;
-        scalar tau;
-        scalar cmk;
-        scalar alpha;
+            matrix grid;
 
-        matrix grid;
+            // Fields
 
-        // Fields
+            fsi::vector un;
+            fsi::vector an;
+            fsi::vector pn;
+            fsi::vector u;
+            fsi::vector a;
+            fsi::vector p;
 
-        fsi::vector un;
-        fsi::vector an;
-        fsi::vector pn;
-        fsi::vector u;
-        fsi::vector a;
-        fsi::vector p;
-
-        Eigen::FullPivLU<matrix> lu;
+            Eigen::FullPivLU<matrix> lu;
     };
 }
 

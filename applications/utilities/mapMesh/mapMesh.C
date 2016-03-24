@@ -16,52 +16,51 @@
 
 class MapMeshSolidSolver : public SolidSolver
 {
-public:
+    public:
+        MapMeshSolidSolver(
+            string name,
+            std::shared_ptr<argList> args,
+            std::shared_ptr<Time> runTime
+            )
+            :
+            SolidSolver( name, args, runTime )
+        {}
 
-    MapMeshSolidSolver(
-        string name,
-        std::shared_ptr<argList> args,
-        std::shared_ptr<Time> runTime
-        )
-        :
-        SolidSolver( name, args, runTime )
-    {}
-
-    void getDisplacementLocal( matrix & displacement )
-    {
-        displacement.resize( getInterfaceSizeLocal(), mesh.nGeometricD() );
-
-        int offset = 0;
-
-        forAll( movingPatchIDs, patchI )
+        void getDisplacementLocal( matrix & displacement )
         {
-            int size = U.boundaryField()[movingPatchIDs[patchI]].size();
+            displacement.resize( getInterfaceSizeLocal(), mesh.nGeometricD() );
 
-            for ( int i = 0; i < size; i++ )
-                for ( int j = 0; j < displacement.cols(); j++ )
-                    displacement( i + offset, j ) = U.boundaryField()[movingPatchIDs[patchI]][i][j];
+            int offset = 0;
 
-            offset += size;
+            forAll( movingPatchIDs, patchI )
+            {
+                int size = U.boundaryField()[movingPatchIDs[patchI]].size();
+
+                for ( int i = 0; i < size; i++ )
+                    for ( int j = 0; j < displacement.cols(); j++ )
+                        displacement( i + offset, j ) = U.boundaryField()[movingPatchIDs[patchI]][i][j];
+
+                offset += size;
+            }
         }
-    }
 
-    void getWritePositionsLocal( matrix & writePositions )
-    {
-        writePositions.resize( getInterfaceSizeLocal(), mesh.nGeometricD() );
-
-        int offset = 0;
-
-        forAll( movingPatchIDs, patchI )
+        void getWritePositionsLocal( matrix & writePositions )
         {
-            const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
+            writePositions.resize( getInterfaceSizeLocal(), mesh.nGeometricD() );
 
-            for ( int i = 0; i < faceCentres.size(); i++ )
-                for ( int j = 0; j < writePositions.cols(); j++ )
-                    writePositions( i + offset, j ) = faceCentres[i][j];
+            int offset = 0;
 
-            offset += faceCentres.size();
+            forAll( movingPatchIDs, patchI )
+            {
+                const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
+
+                for ( int i = 0; i < faceCentres.size(); i++ )
+                    for ( int j = 0; j < writePositions.cols(); j++ )
+                        writePositions( i + offset, j ) = faceCentres[i][j];
+
+                offset += faceCentres.size();
+            }
         }
-    }
 };
 
 std::shared_ptr<rbf::RBFInterpolation> createRBFInterpolator(

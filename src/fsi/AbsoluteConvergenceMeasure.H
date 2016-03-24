@@ -14,27 +14,26 @@ namespace fsi
 {
     class AbsoluteConvergenceMeasure : public ConvergenceMeasure
     {
-public:
+        public:
+            AbsoluteConvergenceMeasure(
+                int dataId,
+                bool suffices,
+                scalar convergenceLimit
+                );
 
-        AbsoluteConvergenceMeasure(
-            int dataId,
-            bool suffices,
-            scalar convergenceLimit
-            );
+            virtual void measure(
+                vector & oldValues,
+                vector & newValues
+                );
 
-        virtual void measure(
-            vector & oldValues,
-            vector & newValues
-            );
+            virtual void newMeasurementSeries();
 
-        virtual void newMeasurementSeries();
+            virtual bool isConvergence();
 
-        virtual bool isConvergence();
+            virtual void printState();
 
-        virtual void printState();
-
-        scalar convergenceLimit;
-        scalar normDiff;
+            scalar convergenceLimit;
+            scalar normDiff;
     };
 }
 

@@ -26,73 +26,71 @@ namespace Foam
 {
     class RBFMeshMotionSolver : public motionSolver
     {
-protected:
+        protected:
+            // Disallow default bitwise copy construct
+            RBFMeshMotionSolver( const RBFMeshMotionSolver & );
 
-        // Disallow default bitwise copy construct
-        RBFMeshMotionSolver( const RBFMeshMotionSolver & );
+            // Disallow default bitwise assignment
+            void operator=( const RBFMeshMotionSolver & );
 
-        // Disallow default bitwise assignment
-        void operator=( const RBFMeshMotionSolver & );
+            Field<vectorField> motionCenters;
 
-        Field<vectorField> motionCenters;
+            wordList staticPatches;
+            labelList staticPatchIDs;
+            wordList movingPatches;
+            labelList movingPatchIDs;
+            wordList fixedPatches;
+            labelList fixedPatchIDs;
 
-        wordList staticPatches;
-        labelList staticPatchIDs;
-        wordList movingPatches;
-        labelList movingPatchIDs;
-        wordList fixedPatches;
-        labelList fixedPatchIDs;
+            pointField newPoints;
 
-        pointField newPoints;
+            std::shared_ptr<rbf::RBFCoarsening> rbf;
 
-        std::shared_ptr<rbf::RBFCoarsening> rbf;
+            labelList nbGlobalFaceCenters;
+            labelList nbGlobalMovingFaceCenters;
+            labelList nbGlobalStaticFaceCenters;
+            labelList nbGlobalFixedFaceCenters;
 
-        labelList nbGlobalFaceCenters;
-        labelList nbGlobalMovingFaceCenters;
-        labelList nbGlobalStaticFaceCenters;
-        labelList nbGlobalFixedFaceCenters;
+            List<labelList> globalMovingPointsLabelList;
 
-        List<labelList> globalMovingPointsLabelList;
+            // 2d corrector
+            twoDPointCorrectorRBF twoDCorrector;
+            int nbPoints;
+            bool faceCellCenters;
+            bool cpu;
 
-        // 2d corrector
-        twoDPointCorrectorRBF twoDCorrector;
-        int nbPoints;
-        bool faceCellCenters;
-        bool cpu;
+        public:
+            // Runtime type information
+            TypeName( "RBFMeshMotionSolver" );
 
-public:
+            // Constructors
 
-        // Runtime type information
-        TypeName( "RBFMeshMotionSolver" );
+            // Construct from polyMesh
+            RBFMeshMotionSolver(
+                const polyMesh & mesh,
+                Istream & msData
+                );
 
-        // Constructors
+            // Destructor
+            virtual ~RBFMeshMotionSolver();
 
-        // Construct from polyMesh
-        RBFMeshMotionSolver(
-            const polyMesh & mesh,
-            Istream & msData
-            );
+            // Set the motion of every boundary patch, where m is equal to number of patches and with non-empty vectorFields for moving patches.
+            // The motion is defined at the face centers of the boundary patch.
+            void setMotion( const Field<vectorField> & motion );
 
-        // Destructor
-        virtual ~RBFMeshMotionSolver();
+            // Return point location obtained from the current motion field
+            virtual tmp<pointField> curPoints() const;
 
-        // Set the motion of every boundary patch, where m is equal to number of patches and with non-empty vectorFields for moving patches.
-        // The motion is defined at the face centers of the boundary patch.
-        void setMotion( const Field<vectorField> & motion );
+            // Solve for motion
+            virtual void solve();
 
-        // Return point location obtained from the current motion field
-        virtual tmp<pointField> curPoints() const;
+            // Update the mesh corresponding to given map
+            virtual void updateMesh( const mapPolyMesh & );
 
-        // Solve for motion
-        virtual void solve();
+            std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
 
-        // Update the mesh corresponding to given map
-        virtual void updateMesh( const mapPolyMesh & );
-
-        std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
-
-        bool corrector;
-        int k;
+            bool corrector;
+            int k;
     };
 }
 

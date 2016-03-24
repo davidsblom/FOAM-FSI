@@ -33,41 +33,40 @@ using ::testing::Combine;
 
 class AdaptiveTimeSteppingESDIRKTest : public TestWithParam< std::tr1::tuple<int, std::string, scalar, std::string> >
 {
-protected:
+    protected:
+        virtual void SetUp()
+        {
+            scalar dt, q0, qdot0, As, Ac, omega, endTime;
 
-    virtual void SetUp()
-    {
-        scalar dt, q0, qdot0, As, Ac, omega, endTime;
+            int nbTimeSteps = std::tr1::get<0>( GetParam() );
+            std::string method = std::tr1::get<1>( GetParam() );
+            scalar tol = std::tr1::get<2>( GetParam() );
+            std::string filter = std::tr1::get<3>( GetParam() );
 
-        int nbTimeSteps = std::tr1::get<0>( GetParam() );
-        std::string method = std::tr1::get<1>( GetParam() );
-        scalar tol = std::tr1::get<2>( GetParam() );
-        std::string filter = std::tr1::get<3>( GetParam() );
+            endTime = 100;
+            dt = endTime / nbTimeSteps;
+            As = 100;
+            Ac = As;
+            omega = 1;
+            q0 = -As;
+            qdot0 = -As;
 
-        endTime = 100;
-        dt = endTime / nbTimeSteps;
-        As = 100;
-        Ac = As;
-        omega = 1;
-        q0 = -As;
-        qdot0 = -As;
+            adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( true, filter, tol, 0.5 ) );
 
-        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( true, filter, tol, 0.5 ) );
+            piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+            esdirk = std::shared_ptr<ESDIRK> ( new ESDIRK( piston, method, adaptiveTimeStepper ) );
+        }
 
-        piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        esdirk = std::shared_ptr<ESDIRK> ( new ESDIRK( piston, method, adaptiveTimeStepper ) );
-    }
+        virtual void TearDown()
+        {
+            piston.reset();
+            esdirk.reset();
+            adaptiveTimeStepper.reset();
+        }
 
-    virtual void TearDown()
-    {
-        piston.reset();
-        esdirk.reset();
-        adaptiveTimeStepper.reset();
-    }
-
-    std::shared_ptr<Piston> piston;
-    std::shared_ptr<ESDIRK> esdirk;
-    std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
+        std::shared_ptr<Piston> piston;
+        std::shared_ptr<ESDIRK> esdirk;
+        std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
 };
 
 INSTANTIATE_TEST_CASE_P( testParameters, AdaptiveTimeSteppingESDIRKTest, ::testing::Combine( Values( 2, 100, 200, 400, 800, 1600, 3200 ), Values( "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5" ), Values( 1.0e-2, 1.0e-4, 1.0e-6, 1.0e-8 ), Values( "h211b", "pi42" ) ) );
@@ -103,43 +102,42 @@ TEST_P( AdaptiveTimeSteppingESDIRKTest, run )
 
 class AdaptiveTimeSteppingSDCTest : public TestWithParam< std::tr1::tuple<scalar, int, std::string, std::string> >
 {
-protected:
+    protected:
+        virtual void SetUp()
+        {
+            scalar dt, q0, qdot0, As, Ac, omega, endTime;
 
-    virtual void SetUp()
-    {
-        scalar dt, q0, qdot0, As, Ac, omega, endTime;
+            int nbTimeSteps = 2;
 
-        int nbTimeSteps = 2;
+            scalar tol = std::tr1::get<0>( GetParam() );
+            int nbNodes = std::tr1::get<1>( GetParam() );
+            std::string filter = std::tr1::get<2>( GetParam() );
+            std::string rule = std::tr1::get<3>( GetParam() );
 
-        scalar tol = std::tr1::get<0>( GetParam() );
-        int nbNodes = std::tr1::get<1>( GetParam() );
-        std::string filter = std::tr1::get<2>( GetParam() );
-        std::string rule = std::tr1::get<3>( GetParam() );
+            endTime = 100;
+            dt = endTime / nbTimeSteps;
+            As = 100;
+            Ac = As;
+            omega = 1;
+            q0 = -As;
+            qdot0 = -As;
 
-        endTime = 100;
-        dt = endTime / nbTimeSteps;
-        As = 100;
-        Ac = As;
-        omega = 1;
-        q0 = -As;
-        qdot0 = -As;
+            adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( true, filter, tol, 0.9 ) );
 
-        adaptiveTimeStepper = std::shared_ptr<sdc::AdaptiveTimeStepper> ( new sdc::AdaptiveTimeStepper( true, filter, tol, 0.9 ) );
+            piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+            sdc = std::shared_ptr<SDC> ( new SDC( piston, adaptiveTimeStepper, rule, nbNodes, tol * 1.0e-2, nbNodes, 10 * nbNodes ) );
+        }
 
-        piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc = std::shared_ptr<SDC> ( new SDC( piston, adaptiveTimeStepper, rule, nbNodes, tol * 1.0e-2, nbNodes, 10 * nbNodes ) );
-    }
+        virtual void TearDown()
+        {
+            piston.reset();
+            sdc.reset();
+            adaptiveTimeStepper.reset();
+        }
 
-    virtual void TearDown()
-    {
-        piston.reset();
-        sdc.reset();
-        adaptiveTimeStepper.reset();
-    }
-
-    std::shared_ptr<Piston> piston;
-    std::shared_ptr<SDC> sdc;
-    std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
+        std::shared_ptr<Piston> piston;
+        std::shared_ptr<SDC> sdc;
+        std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
 };
 
 INSTANTIATE_TEST_CASE_P( testParameters, AdaptiveTimeSteppingSDCTest, ::testing::Combine( Values( 1.0e-2, 1.0e-4, 1.0e-6, 1.0e-8 ), Values( 3, 5, 7, 9, 11, 13 ), Values( "h211b", "pi42" ), Values( "clenshaw-curtis", "gauss-radau", "gauss-lobatto" ) ) );

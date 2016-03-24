@@ -14,28 +14,27 @@ namespace tubeflow
 
     class TubeFlowLinearSolidSolver : public TubeFlowLinearizedSolidSolver
     {
-public:
+        public:
+            TubeFlowLinearSolidSolver(
+                int N,
+                scalar nu,
+                scalar rho,
+                scalar h,
+                scalar L,
+                scalar dt,
+                scalar G,
+                scalar E0,
+                scalar r0
+                );
 
-        TubeFlowLinearSolidSolver(
-            int N,
-            scalar nu,
-            scalar rho,
-            scalar h,
-            scalar L,
-            scalar dt,
-            scalar G,
-            scalar E0,
-            scalar r0
-            );
+            virtual ~TubeFlowLinearSolidSolver();
 
-        virtual ~TubeFlowLinearSolidSolver();
+            virtual void solve(
+                const fsi::vector & p,
+                fsi::vector & a
+                );
 
-        virtual void solve(
-            const fsi::vector & p,
-            fsi::vector & a
-            );
-
-        const scalar E0;
-        const scalar nu;
+            const scalar E0;
+            const scalar nu;
     };
 }

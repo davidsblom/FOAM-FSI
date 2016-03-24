@@ -13,13 +13,12 @@ namespace rbf
 {
     class LinearFunction : public RBFFunctionInterface
     {
-public:
+        public:
+            LinearFunction();
 
-        LinearFunction();
+            virtual ~LinearFunction();
 
-        virtual ~LinearFunction();
-
-        virtual scalar evaluate( scalar value );
+            virtual scalar evaluate( scalar value );
     };
 }
 

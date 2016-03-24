@@ -10,39 +10,38 @@
 
 class PIESTest : public ::testing::Test
 {
-protected:
+    protected:
+        virtual void SetUp()
+        {
+            scalar dt, q0, qdot0, As, Ac, omega, endTime, tol, delta, rho;
 
-    virtual void SetUp()
-    {
-        scalar dt, q0, qdot0, As, Ac, omega, endTime, tol, delta, rho;
+            int nbTimeSteps = 100, nbNodes;
 
-        int nbTimeSteps = 100, nbNodes;
+            endTime = 100;
+            dt = endTime / nbTimeSteps;
+            As = 100;
+            Ac = As;
+            omega = 1;
+            q0 = -As;
+            qdot0 = -As;
+            tol = 1.0e-8;
+            delta = 1.0e-9;
+            nbNodes = 10;
+            rho = 3.15;
 
-        endTime = 100;
-        dt = endTime / nbTimeSteps;
-        As = 100;
-        Ac = As;
-        omega = 1;
-        q0 = -As;
-        qdot0 = -As;
-        tol = 1.0e-8;
-        delta = 1.0e-9;
-        nbNodes = 10;
-        rho = 3.15;
+            piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
 
-        piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+            pies = std::shared_ptr<sdc::PIES<scalar> > ( new sdc::PIES<scalar>( piston, rho, delta, tol, nbNodes, 10 * nbNodes ) );
+        }
 
-        pies = std::shared_ptr<sdc::PIES<scalar> > ( new sdc::PIES<scalar>( piston, rho, delta, tol, nbNodes, 10 * nbNodes ) );
-    }
+        virtual void TearDown()
+        {
+            pies.reset();
+            piston.reset();
+        }
 
-    virtual void TearDown()
-    {
-        pies.reset();
-        piston.reset();
-    }
-
-    std::shared_ptr<sdc::PIES<scalar> > pies;
-    std::shared_ptr<Piston> piston;
+        std::shared_ptr<sdc::PIES<scalar> > pies;
+        std::shared_ptr<Piston> piston;
 };
 
 TEST_F( PIESTest, coefficients )
@@ -65,38 +64,37 @@ TEST_F( PIESTest, run )
 
 class PIESRunTest : public ::testing::Test
 {
-protected:
+    protected:
+        virtual void SetUp()
+        {
+            scalar dt, q0, qdot0, As, Ac, omega, endTime, tol, delta, rho;
 
-    virtual void SetUp()
-    {
-        scalar dt, q0, qdot0, As, Ac, omega, endTime, tol, delta, rho;
+            int nbTimeSteps = 100;
 
-        int nbTimeSteps = 100;
+            endTime = 100;
+            dt = endTime / nbTimeSteps;
+            As = 100;
+            Ac = As;
+            omega = 1;
+            q0 = -As;
+            qdot0 = -As;
+            tol = 1.0e-8;
+            delta = 1.0e-9;
+            rho = 3.15;
 
-        endTime = 100;
-        dt = endTime / nbTimeSteps;
-        As = 100;
-        Ac = As;
-        omega = 1;
-        q0 = -As;
-        qdot0 = -As;
-        tol = 1.0e-8;
-        delta = 1.0e-9;
-        rho = 3.15;
+            pies = std::shared_ptr<sdc::PIES<scalar> > ( new sdc::PIES<scalar>( rho, delta, tol ) );
 
-        pies = std::shared_ptr<sdc::PIES<scalar> > ( new sdc::PIES<scalar>( rho, delta, tol ) );
+            piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, pies, pies->nodes.rows() ) );
+        }
 
-        piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, pies, pies->nodes.rows() ) );
-    }
+        virtual void TearDown()
+        {
+            pies.reset();
+            piston.reset();
+        }
 
-    virtual void TearDown()
-    {
-        pies.reset();
-        piston.reset();
-    }
-
-    std::shared_ptr<sdc::PIES<scalar> > pies;
-    std::shared_ptr<Piston> piston;
+        std::shared_ptr<sdc::PIES<scalar> > pies;
+        std::shared_ptr<Piston> piston;
 };
 
 TEST_F( PIESRunTest, run )

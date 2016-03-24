@@ -13,27 +13,26 @@ namespace fsi
 {
     class MinIterationConvergenceMeasure : public ConvergenceMeasure
     {
-public:
+        public:
+            MinIterationConvergenceMeasure(
+                int dataId,
+                bool suffices,
+                int minimumIterationCount
+                );
 
-        MinIterationConvergenceMeasure(
-            int dataId,
-            bool suffices,
-            int minimumIterationCount
-            );
+            virtual void measure(
+                vector & oldValues,
+                vector & newValues
+                );
 
-        virtual void measure(
-            vector & oldValues,
-            vector & newValues
-            );
+            virtual void newMeasurementSeries();
 
-        virtual void newMeasurementSeries();
+            virtual bool isConvergence();
 
-        virtual bool isConvergence();
+            virtual void printState();
 
-        virtual void printState();
-
-        const int minimumIterationCount;
-        int currentIteration;
+            const int minimumIterationCount;
+            int currentIteration;
     };
 }
 

@@ -28,103 +28,103 @@ using namespace sdc;
 
 class Piston : public SDCSolver
 {
-public:
+    public:
+        Piston(
+            int nbTimeSteps,
+            scalar dt,
+            scalar q0,
+            scalar qdot0,
+            scalar As,
+            scalar Ac,
+            scalar omega
+            );
 
-    Piston(
-        int nbTimeSteps,
-        scalar dt,
-        scalar q0,
-        scalar qdot0,
-        scalar As,
-        scalar Ac,
-        scalar omega
-        );
+        Piston(
+            int nbTimeSteps,
+            scalar dt,
+            scalar q0,
+            scalar qdot0,
+            scalar As,
+            scalar Ac,
+            scalar omega,
+            std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme,
+            int k
+            );
 
-    Piston(
-        int nbTimeSteps,
-        scalar dt,
-        scalar q0,
-        scalar qdot0,
-        scalar As,
-        scalar Ac,
-        scalar omega,
-        std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme,
-        int k
-        );
+        ~Piston();
 
-    ~Piston();
+        scalar referenceSolution( scalar t );
 
-    scalar referenceSolution( scalar t );
+        void run();
 
-    void run();
+        virtual void finalizeTimeStep(){}
 
-    virtual void finalizeTimeStep(){}
+        virtual void getSolution(
+            fsi::vector & solution,
+            fsi::vector & f
+            );
 
-    virtual void getSolution(
-        fsi::vector & solution,
-        fsi::vector & f
-        );
+        virtual void setSolution(
+            const fsi::vector & solution,
+            const fsi::vector & f
+            );
 
-    virtual void setSolution(
-        const fsi::vector & solution,
-        const fsi::vector & f
-        );
+        virtual scalar getEndTime();
 
-    virtual scalar getEndTime();
+        virtual void initTimeStep(){}
 
-    virtual void initTimeStep(){}
+        virtual void implicitSolve(
+            bool corrector,
+            const int k,
+            const int kold,
+            const scalar t,
+            const scalar dt,
+            const fsi::vector & qold,
+            const fsi::vector & rhs,
+            fsi::vector & f,
+            fsi::vector & result
+            );
 
-    virtual void implicitSolve(
-        bool corrector,
-        const int k,
-        const int kold,
-        const scalar t,
-        const scalar dt,
-        const fsi::vector & qold,
-        const fsi::vector & rhs,
-        fsi::vector & f,
-        fsi::vector & result
-        );
+        virtual int getDOF();
 
-    virtual int getDOF();
+        virtual scalar getTimeStep();
 
-    virtual scalar getTimeStep();
+        virtual void evaluateFunction(
+            const int k,
+            const fsi::vector & q,
+            const scalar t,
+            fsi::vector & f
+            );
 
-    virtual void evaluateFunction(
-        const int k,
-        const fsi::vector & q,
-        const scalar t,
-        fsi::vector & f
-        );
+        virtual void setNumberOfImplicitStages( int k );
 
-    virtual void setNumberOfImplicitStages( int k );
+        virtual void nextTimeStep();
 
-    virtual void nextTimeStep();
+        virtual void getVariablesInfo(
+            std::deque<int> & dof,
+            std::deque<bool> & enabled,
+            std::deque<std::string> & names
+            );
 
-    virtual void getVariablesInfo(
-        std::deque<int> & dof,
-        std::deque<bool> & enabled,
-        std::deque<std::string> & names
-        );
+        int nbTimeSteps;
+        scalar dt;
+        scalar q0;
+        scalar c1;
+        scalar c2;
+        scalar As;
+        scalar Ac;
+        scalar omega;
+        int N;
+        scalar q;
+        scalar qdot;
+        scalar t;
+        scalar timeIndex;
+        scalar endTime;
+        int k;
+        fsi::vector rhs;
 
-    int nbTimeSteps;
-    scalar dt;
-    scalar q0;
-    scalar c1;
-    scalar c2;
-    scalar As;
-    scalar Ac;
-    scalar omega;
-    int N;
-    scalar q;
-    scalar qdot;
-    scalar t;
-    scalar timeIndex;
-    scalar endTime;
-    int k;
-
-    std::deque<fsi::vector> solStages;
-    std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
+        std::deque<fsi::vector> solStages;
+        std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
 };
 
 #endif

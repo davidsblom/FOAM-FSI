@@ -29,31 +29,29 @@ namespace sdc
     template<typename precision>
     class PIES : public SDC
     {
-public:
+        public:
+            PIES(
+                std::shared_ptr<SDCSolver> solver,
+                scalar rho,
+                scalar delta,
+                scalar tol,
+                int minSweeps,
+                int maxSweeps
+                );
 
-        PIES(
-            std::shared_ptr<SDCSolver> solver,
-            scalar rho,
-            scalar delta,
-            scalar tol,
-            int minSweeps,
-            int maxSweeps
-            );
+            PIES(
+                scalar rho,
+                scalar delta,
+                scalar tol
+                );
 
-        PIES(
-            scalar rho,
-            scalar delta,
-            scalar tol
-            );
+            virtual ~PIES();
 
-        virtual ~PIES();
+        private:
+            void computeCoefficients();
 
-private:
-
-        void computeCoefficients();
-
-        scalar rho;
-        scalar delta;
+            scalar rho;
+            scalar delta;
     };
 }
 

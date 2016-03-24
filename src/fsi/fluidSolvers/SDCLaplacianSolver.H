@@ -19,78 +19,76 @@ using std::shared_ptr;
 
 class SDCLaplacianSolver : public sdc::SDCSolver
 {
-public:
+    public:
+        SDCLaplacianSolver(
+            string name,
+            shared_ptr<argList> args,
+            shared_ptr<Time> runTime
+            );
 
-    SDCLaplacianSolver(
-        string name,
-        shared_ptr<argList> args,
-        shared_ptr<Time> runTime
-        );
+        virtual ~SDCLaplacianSolver();
 
-    virtual ~SDCLaplacianSolver();
+        virtual void evaluateFunction(
+            const int k,
+            const fsi::vector & q,
+            const scalar t,
+            fsi::vector & f
+            );
 
-    virtual void evaluateFunction(
-        const int k,
-        const fsi::vector & q,
-        const scalar t,
-        fsi::vector & f
-        );
+        virtual void finalizeTimeStep();
 
-    virtual void finalizeTimeStep();
+        virtual int getDOF();
 
-    virtual int getDOF();
+        virtual void getSolution( fsi::vector & solution );
 
-    virtual void getSolution( fsi::vector & solution );
+        virtual void setSolution(
+            const fsi::vector & solution,
+            const fsi::vector & f
+            );
 
-    virtual void setSolution(
-        const fsi::vector & solution,
-        const fsi::vector & f
-        );
+        virtual scalar getEndTime();
 
-    virtual scalar getEndTime();
+        virtual scalar getTimeStep();
 
-    virtual scalar getTimeStep();
+        virtual void nextTimeStep();
 
-    virtual void nextTimeStep();
+        virtual void initTimeStep();
 
-    virtual void initTimeStep();
+        virtual bool isRunning();
 
-    virtual bool isRunning();
+        virtual void setDeltaT( scalar dt );
 
-    virtual void setDeltaT( scalar dt );
+        virtual void setNumberOfImplicitStages( int k );
 
-    virtual void setNumberOfImplicitStages( int k );
+        virtual void implicitSolve(
+            bool corrector,
+            const int k,
+            const int kold,
+            const scalar t,
+            const scalar dt,
+            const fsi::vector & qold,
+            const fsi::vector & rhs,
+            fsi::vector & f,
+            fsi::vector & result
+            );
 
-    virtual void implicitSolve(
-        bool corrector,
-        const int k,
-        const int kold,
-        const scalar t,
-        const scalar dt,
-        const fsi::vector & qold,
-        const fsi::vector & rhs,
-        fsi::vector & f,
-        fsi::vector & result
-        );
+    private:
+        bool init;
 
-private:
+        string name;
+        std::shared_ptr<argList> args;
+        std::shared_ptr<Time> runTime;
 
-    bool init;
+        Foam::fvMesh mesh;
 
-    string name;
-    std::shared_ptr<argList> args;
-    std::shared_ptr<Time> runTime;
+        volScalarField T;
+        volScalarField rhsT;
+        IOdictionary transportProperties;
+        dimensionedScalar DT;
+        int nNonOrthCorr;
 
-    Foam::fvMesh mesh;
-
-    volScalarField T;
-    volScalarField rhsT;
-    IOdictionary transportProperties;
-    dimensionedScalar DT;
-    int nNonOrthCorr;
-
-    int k;
-    std::deque<volScalarField> TStages;
+        int k;
+        std::deque<volScalarField> TStages;
 };
 
 #endif

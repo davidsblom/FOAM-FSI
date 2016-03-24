@@ -22,41 +22,40 @@ namespace fsi
 {
     class MultiLevelSolver
     {
-public:
+        public:
+            MultiLevelSolver(
+                shared_ptr<BaseMultiLevelSolver> solver,
+                shared_ptr<BaseMultiLevelSolver> couplingGridSolver,
+                shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh,
+                shared_ptr<RBFCoarsening> rbfInterpToMesh,
+                int participantId,
+                int level
+                );
 
-        MultiLevelSolver(
-            shared_ptr<BaseMultiLevelSolver> solver,
-            shared_ptr<BaseMultiLevelSolver> couplingGridSolver,
-            shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh,
-            shared_ptr<RBFCoarsening> rbfInterpToMesh,
-            int participantId,
-            int level
-            );
+            void interpToCouplingMesh(
+                matrix & data,
+                matrix & dataInterpolated
+                );
 
-        void interpToCouplingMesh(
-            matrix & data,
-            matrix & dataInterpolated
-            );
+            void interpToMesh(
+                matrix & data,
+                matrix & dataInterpolated
+                );
 
-        void interpToMesh(
-            matrix & data,
-            matrix & dataInterpolated
-            );
+            void solve(
+                matrix & input,
+                matrix & outputInterpolated
+                );
 
-        void solve(
-            matrix & input,
-            matrix & outputInterpolated
-            );
+            void updateInterpolationMatrices();
 
-        void updateInterpolationMatrices();
-
-        shared_ptr<BaseMultiLevelSolver> solver;
-        shared_ptr<BaseMultiLevelSolver> couplingGridSolver;
-        shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
-        shared_ptr<RBFCoarsening> rbfInterpToMesh;
-        const int participantId;
-        const int level;
-        int couplingGridSize;
+            shared_ptr<BaseMultiLevelSolver> solver;
+            shared_ptr<BaseMultiLevelSolver> couplingGridSolver;
+            shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
+            shared_ptr<RBFCoarsening> rbfInterpToMesh;
+            const int participantId;
+            const int level;
+            int couplingGridSize;
     };
 }
 

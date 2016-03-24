@@ -21,81 +21,79 @@ using std::shared_ptr;
 
 class foamFluidSolver : public BaseMultiLevelSolver
 {
-public:
+    public:
+        foamFluidSolver(
+            std::string name,
+            shared_ptr<argList> args,
+            shared_ptr<Time> runTime
+            );
 
-    foamFluidSolver(
-        std::string name,
-        shared_ptr<argList> args,
-        shared_ptr<Time> runTime
-        );
+        ~foamFluidSolver();
 
-    ~foamFluidSolver();
+        virtual void getAcousticsDensityLocal( matrix & data ) = 0;
 
-    virtual void getAcousticsDensityLocal( matrix & data ) = 0;
+        virtual void getAcousticsVelocityLocal( matrix & data ) = 0;
 
-    virtual void getAcousticsVelocityLocal( matrix & data ) = 0;
+        virtual void getAcousticsPressureLocal( matrix & data ) = 0;
 
-    virtual void getAcousticsPressureLocal( matrix & data ) = 0;
+        virtual void getTractionLocal( matrix & traction ) = 0;
 
-    virtual void getTractionLocal( matrix & traction ) = 0;
+        virtual void getWritePositionsLocalAcoustics( matrix & writePositions ) = 0;
 
-    virtual void getWritePositionsLocalAcoustics( matrix & writePositions ) = 0;
+        virtual void finalizeTimeStep();
 
-    virtual void finalizeTimeStep();
+        virtual void getReadPositions( matrix & readPositions );
 
-    virtual void getReadPositions( matrix & readPositions );
+        virtual void getWritePositions( matrix & writePositions );
 
-    virtual void getWritePositions( matrix & writePositions );
+        virtual void moveMesh();
 
-    virtual void moveMesh();
+        virtual void solve() = 0;
 
-    virtual void solve() = 0;
+        virtual void solve(
+            const matrix & input,
+            matrix & output
+            );
 
-    virtual void solve(
-        const matrix & input,
-        matrix & output
-        );
+        int getInterfaceSize();
 
-    int getInterfaceSize();
+        int getInterfaceSizeLocal();
 
-    int getInterfaceSizeLocal();
+        void setDisplacementLocal( const matrix & displacement );
 
-    void setDisplacementLocal( const matrix & displacement );
+        void getReadPositionsLocal( matrix & readPositions );
 
-    void getReadPositionsLocal( matrix & readPositions );
+        void getWritePositionsLocal( matrix & writePositions );
 
-    void getWritePositionsLocal( matrix & writePositions );
+        void run();
 
-    void run();
+        std::string name;
+        shared_ptr<argList> args;
+        shared_ptr<Time> runTime;
 
-    std::string name;
-    shared_ptr<argList> args;
-    shared_ptr<Time> runTime;
+        // Mesh
+        autoPtr<dynamicFvMesh> meshPtr;
+        dynamicFvMesh & mesh;
 
-    // Mesh
-    autoPtr<dynamicFvMesh> meshPtr;
-    dynamicFvMesh & mesh;
+    protected:
+        // Dictionaries
+        IOdictionary couplingProperties;
 
-protected:
+        // FSI interface displacement
+        wordList movingPatches;
+        labelList movingPatchIDs;
+        Field<vectorField> movingPatchesDispl;
+        Field<vectorField> movingPatchesDisplOld;
 
-    // Dictionaries
-    IOdictionary couplingProperties;
+        // Parallel FSI coupling variables
+        labelList nPoints;
+        labelList nGlobalPoints;
+        labelList nGlobalCenters;
+        labelList globalPointsUnique;
+        labelList globalPointsNonUnique;
 
-    // FSI interface displacement
-    wordList movingPatches;
-    labelList movingPatchIDs;
-    Field<vectorField> movingPatchesDispl;
-    Field<vectorField> movingPatchesDisplOld;
-
-    // Parallel FSI coupling variables
-    labelList nPoints;
-    labelList nGlobalPoints;
-    labelList nGlobalCenters;
-    labelList globalPointsUnique;
-    labelList globalPointsNonUnique;
-
-    float totalRunTime;
-    int totalNbIterations;
+        float totalRunTime;
+        int totalNbIterations;
 };
 
 #endif

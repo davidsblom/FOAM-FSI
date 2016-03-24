@@ -17,71 +17,70 @@ namespace sdc
 {
     class ESDIRK : public TimeIntegrationScheme
     {
-public:
+        public:
+            ESDIRK(
+                std::shared_ptr<SDCSolver> solver,
+                std::string method,
+                std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper
+                );
 
-        ESDIRK(
-            std::shared_ptr<SDCSolver> solver,
-            std::string method,
-            std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper
-            );
+            explicit ESDIRK( std::string method );
 
-        explicit ESDIRK( std::string method );
+            ~ESDIRK();
 
-        ~ESDIRK();
+            void run();
 
-        void run();
+            void solveTimeStep( const scalar t0 );
 
-        void solveTimeStep( const scalar t0 );
+            virtual void getSourceTerm(
+                const bool corrector,
+                const int k,
+                const int sweep,
+                const scalar deltaT,
+                fsi::vector & rhs,
+                fsi::vector & qold
+                );
 
-        virtual void getSourceTerm(
-            const bool corrector,
-            const int k,
-            const scalar deltaT,
-            fsi::vector & rhs,
-            fsi::vector & qold
-            );
+            virtual void setFunction(
+                const int k,
+                const fsi::vector & f,
+                const fsi::vector & result
+                );
 
-        virtual void setFunction(
-            const int k,
-            const fsi::vector & f,
-            const fsi::vector & result
-            );
+            virtual int getNbImplicitStages();
 
-        virtual int getNbImplicitStages();
+            virtual void setOldSolution(
+                int timeIndex,
+                const fsi::vector & result
+                );
 
-        virtual void setOldSolution(
-            int timeIndex,
-            const fsi::vector & result
-            );
+            virtual void outputResidual( std::string name );
 
-        virtual void outputResidual( std::string name );
+            virtual bool isConverged();
 
-        virtual bool isConverged();
+            static bool isStageImplicit( scalar Akk );
 
-        static bool isStageImplicit( scalar Akk );
+            std::shared_ptr<SDCSolver> solver;
+            std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
+            scalar dt;
+            int nbStages;
+            fsi::matrix A;
+            fsi::vector B;
+            fsi::vector C;
+            fsi::vector Bhat;
+            int N;
 
-        std::shared_ptr<SDCSolver> solver;
-        std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper;
-        scalar dt;
-        int nbStages;
-        fsi::matrix A;
-        fsi::vector B;
-        fsi::vector C;
-        fsi::vector Bhat;
-        int N;
+        private:
+            void initializeButcherTableau( std::string method );
 
-private:
-
-        void initializeButcherTableau( std::string method );
-
-        // Store function in memory in case the source term is requested
-        // by the solver. This functionality is used by the moving wall
-        // velocity boundary condition.
-        int stageIndex;
-        fsi::matrix F;
-        fsi::matrix solStages;
-        fsi::vector qold;
-        int timeIndex;
+            // Store function in memory in case the source term is requested
+            // by the solver. This functionality is used by the moving wall
+            // velocity boundary condition.
+            int stageIndex;
+            fsi::matrix F;
+            fsi::matrix solStages;
+            fsi::vector qold;
+            int timeIndex;
     };
 }
 

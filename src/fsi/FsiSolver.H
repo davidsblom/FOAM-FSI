@@ -22,53 +22,52 @@ namespace fsi
 {
     class FsiSolver
     {
-public:
+        public:
+            FsiSolver(
+                shared_ptr<BaseMultiLevelSolver> fluid,
+                shared_ptr<BaseMultiLevelSolver> solid,
+                shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures,
+                bool parallel,
+                int extrapolationOrder
+                );
 
-        FsiSolver(
-            shared_ptr<BaseMultiLevelSolver> fluid,
-            shared_ptr<BaseMultiLevelSolver> solid,
-            shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures,
-            bool parallel,
-            int extrapolationOrder
-            );
+            virtual ~FsiSolver();
 
-        virtual ~FsiSolver();
+            virtual void evaluate(
+                const vector & input,
+                vector & output,
+                vector & R
+                );
 
-        virtual void evaluate(
-            const vector & input,
-            vector & output,
-            vector & R
-            );
+            void extrapolateData();
 
-        void extrapolateData();
+            void finalizeTimeStep();
 
-        void finalizeTimeStep();
+            void initTimeStep();
 
-        void initTimeStep();
+            bool isConvergence();
 
-        bool isConvergence();
+            bool isConvergence(
+                const vector & x,
+                const vector & xprev
+                );
 
-        bool isConvergence(
-            const vector & x,
-            const vector & xprev
-            );
+            bool isRunning();
 
-        bool isRunning();
+            void newMeasurementSeries();
 
-        void newMeasurementSeries();
-
-        bool init;
-        shared_ptr<BaseMultiLevelSolver> fluid;
-        shared_ptr<BaseMultiLevelSolver> solid;
-        shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
-        const bool parallel;
-        int N;
-        int iter;
-        int nbIter;
-        bool allConverged;
-        vector x;
-        const int extrapolationOrder;
-        std::deque<vector> previousSolutions;
+            bool init;
+            shared_ptr<BaseMultiLevelSolver> fluid;
+            shared_ptr<BaseMultiLevelSolver> solid;
+            shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
+            const bool parallel;
+            int N;
+            int iter;
+            int nbIter;
+            bool allConverged;
+            vector x;
+            const int extrapolationOrder;
+            std::deque<vector> previousSolutions;
     };
 }
 

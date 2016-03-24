@@ -13,78 +13,76 @@ namespace fsi
 {
     class SDCFsiSolver : public sdc::SDCSolver
     {
-public:
+        public:
+            SDCFsiSolver(
+                std::shared_ptr<sdc::SDCFsiSolverInterface> fluid,
+                std::shared_ptr<sdc::SDCFsiSolverInterface> solid,
+                std::shared_ptr<PostProcessing> postProcessing
+                );
 
-        SDCFsiSolver(
-            std::shared_ptr<sdc::SDCFsiSolverInterface> fluid,
-            std::shared_ptr<sdc::SDCFsiSolverInterface> solid,
-            std::shared_ptr<PostProcessing> postProcessing
-            );
+            virtual ~SDCFsiSolver();
 
-        virtual ~SDCFsiSolver();
+            virtual void evaluateFunction(
+                const int k,
+                const fsi::vector & q,
+                const scalar t,
+                fsi::vector & f
+                );
 
-        virtual void evaluateFunction(
-            const int k,
-            const fsi::vector & q,
-            const scalar t,
-            fsi::vector & f
-            );
+            virtual void finalizeTimeStep();
 
-        virtual void finalizeTimeStep();
+            virtual int getDOF();
 
-        virtual int getDOF();
+            virtual void getSolution(
+                fsi::vector & solution,
+                fsi::vector & f
+                );
 
-        virtual void getSolution(
-            fsi::vector & solution,
-            fsi::vector & f
-            );
+            virtual void setSolution(
+                const fsi::vector & solution,
+                const fsi::vector & f
+                );
 
-        virtual void setSolution(
-            const fsi::vector & solution,
-            const fsi::vector & f
-            );
+            virtual scalar getEndTime();
 
-        virtual scalar getEndTime();
+            virtual scalar getTimeStep();
 
-        virtual scalar getTimeStep();
+            virtual void nextTimeStep();
 
-        virtual void nextTimeStep();
+            virtual void initTimeStep();
 
-        virtual void initTimeStep();
+            virtual void setNumberOfImplicitStages( int k );
 
-        virtual void setNumberOfImplicitStages( int k );
+            virtual void implicitSolve(
+                bool corrector,
+                const int k,
+                const int kold,
+                const scalar t,
+                const scalar dt,
+                const fsi::vector & qold,
+                const fsi::vector & rhs,
+                fsi::vector & f,
+                fsi::vector & result
+                );
 
-        virtual void implicitSolve(
-            bool corrector,
-            const int k,
-            const int kold,
-            const scalar t,
-            const scalar dt,
-            const fsi::vector & qold,
-            const fsi::vector & rhs,
-            fsi::vector & f,
-            fsi::vector & result
-            );
+            virtual scalar getStartTime();
 
-        virtual scalar getStartTime();
+            virtual void getVariablesInfo(
+                std::deque<int> & dof,
+                std::deque<bool> & enabled,
+                std::deque<std::string> & names
+                );
 
-        virtual void getVariablesInfo(
-            std::deque<int> & dof,
-            std::deque<bool> & enabled,
-            std::deque<std::string> & names
-            );
+            virtual bool isConverged();
 
-        virtual bool isConverged();
+        private:
+            std::shared_ptr<sdc::SDCFsiSolverInterface> fluid;
+            std::shared_ptr<sdc::SDCFsiSolverInterface> solid;
+            std::shared_ptr<PostProcessing> postProcessing;
+            int dofFluid;
+            int dofSolid;
 
-private:
-
-        std::shared_ptr<sdc::SDCFsiSolverInterface> fluid;
-        std::shared_ptr<sdc::SDCFsiSolverInterface> solid;
-        std::shared_ptr<PostProcessing> postProcessing;
-        int dofFluid;
-        int dofSolid;
-
-        int k;
-        std::deque<fsi::vector> xStages;
+            int k;
+            std::deque<fsi::vector> xStages;
     };
 }

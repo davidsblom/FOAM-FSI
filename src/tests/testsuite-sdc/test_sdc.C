@@ -23,117 +23,131 @@ using ::testing::Combine;
 
 class SDCTest : public TestWithParam< std::tr1::tuple<int, int, std::string> >
 {
-protected:
+    protected:
+        virtual void SetUp()
+        {
+            scalar dt, q0, qdot0, As, Ac, omega, endTime, tol;
 
-    virtual void SetUp()
-    {
-        scalar dt, q0, qdot0, As, Ac, omega, endTime, tol;
+            int nbNodes = std::tr1::get<0>( GetParam() );
+            int nbTimeSteps = std::tr1::get<1>( GetParam() );
+            std::string rule = std::tr1::get<2>( GetParam() );
 
-        int nbNodes = std::tr1::get<0>( GetParam() );
-        int nbTimeSteps = std::tr1::get<1>( GetParam() );
-        std::string rule = std::tr1::get<2>( GetParam() );
+            endTime = 100;
+            dt = endTime / nbTimeSteps;
+            As = 100;
+            Ac = As;
+            omega = 1;
+            q0 = -As;
+            qdot0 = -As;
+            tol = 1.0e-9;
 
-        endTime = 100;
-        dt = endTime / nbTimeSteps;
-        As = 100;
-        Ac = As;
-        omega = 1;
-        q0 = -As;
-        qdot0 = -As;
-        tol = 1.0e-9;
+            std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+            std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature2;
 
-        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+            if ( rule == "gauss-radau" )
+            {
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+                quadrature2 = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+            }
 
-        if ( rule == "gauss-radau" )
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+            if ( rule == "gauss-lobatto" )
+            {
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+                quadrature2 = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+            }
 
-        if ( rule == "gauss-lobatto" )
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+            if ( rule == "clenshaw-curtis" )
+            {
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( nbNodes ) );
+                quadrature2 = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( nbNodes ) );
+            }
 
-        if ( rule == "clenshaw-curtis" )
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( nbNodes ) );
+            if ( rule == "uniform" )
+            {
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+                quadrature2 = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+            }
 
-        if ( rule == "uniform" )
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+            assert( quadrature );
+            assert( quadrature2 );
 
-        piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc = std::shared_ptr<SDC> ( new SDC( piston, quadrature, tol, nbNodes, 10 * nbNodes ) );
+            piston = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+            sdc = std::shared_ptr<SDC> ( new SDC( piston, quadrature, tol, nbNodes, 10 * nbNodes ) );
 
-        std::shared_ptr<sdc::SDC> sdc( new SDC( quadrature, tol ) );
-        piston_sdc = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, sdc, sdc->nodes.rows() ) );
-    }
+            std::shared_ptr<sdc::SDC> sdc( new SDC( quadrature, tol ) );
+            piston_sdc = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, sdc, sdc->nodes.rows() ) );
+        }
 
-    virtual void TearDown()
-    {
-        piston.reset();
-        sdc.reset();
-        piston_sdc.reset();
-    }
+        virtual void TearDown()
+        {
+            piston.reset();
+            sdc.reset();
+            piston_sdc.reset();
+        }
 
-    std::shared_ptr<Piston> piston;
-    std::shared_ptr<SDC> sdc;
-    std::shared_ptr<Piston> piston_sdc;
+        std::shared_ptr<Piston> piston;
+        std::shared_ptr<SDC> sdc;
+        std::shared_ptr<Piston> piston_sdc;
 };
 
 INSTANTIATE_TEST_CASE_P( testParameters, SDCTest, ::testing::Combine( Values( 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ), Values( 1, 10, 20, 40, 80, 100, 160 ), Values( "gauss-radau", "gauss-lobatto", "clenshaw-curtis", "uniform" ) ) );
 
 class SDCEstimateOrderTest : public TestWithParam< std::tr1::tuple<int, std::string> >
 {
-protected:
+    protected:
+        virtual void SetUp()
+        {
+            scalar dt, q0, qdot0, As, Ac, omega, endTime, tol;
 
-    virtual void SetUp()
-    {
-        scalar dt, q0, qdot0, As, Ac, omega, endTime, tol;
+            int nbNodes = std::tr1::get<0>( GetParam() );
+            int nbTimeSteps = 100;
+            std::string rule = std::tr1::get<1>( GetParam() );
 
-        int nbNodes = std::tr1::get<0>( GetParam() );
-        int nbTimeSteps = 100;
-        std::string rule = std::tr1::get<1>( GetParam() );
+            endTime = 100;
+            dt = endTime / nbTimeSteps;
+            As = 100;
+            Ac = As;
+            omega = 1;
+            q0 = -As;
+            qdot0 = -As;
+            tol = 1.0e-9;
 
-        endTime = 100;
-        dt = endTime / nbTimeSteps;
-        As = 100;
-        Ac = As;
-        omega = 1;
-        q0 = -As;
-        qdot0 = -As;
-        tol = 1.0e-9;
+            std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
 
-        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+            if ( rule == "gauss-radau" )
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
 
-        if ( rule == "gauss-radau" )
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+            if ( rule == "gauss-lobatto" )
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
 
-        if ( rule == "gauss-lobatto" )
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+            if ( rule == "clenshaw-curtis" )
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( nbNodes ) );
 
-        if ( rule == "clenshaw-curtis" )
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::ClenshawCurtis<scalar>( nbNodes ) );
+            if ( rule == "uniform" )
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
 
-        if ( rule == "uniform" )
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+            piston1 = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+            sdc1 = std::shared_ptr<SDC> ( new SDC( piston1, quadrature, tol, nbNodes, 10 * nbNodes ) );
 
-        piston1 = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc1 = std::shared_ptr<SDC> ( new SDC( piston1, quadrature, tol, nbNodes, 10 * nbNodes ) );
+            nbTimeSteps *= 2;
+            dt = endTime / nbTimeSteps;
 
-        nbTimeSteps *= 2;
-        dt = endTime / nbTimeSteps;
+            piston2 = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+            sdc2 = std::shared_ptr<SDC> ( new SDC( piston2, quadrature, tol, nbNodes, 10 * nbNodes ) );
+        }
 
-        piston2 = std::shared_ptr<Piston> ( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
-        sdc2 = std::shared_ptr<SDC> ( new SDC( piston2, quadrature, tol, nbNodes, 10 * nbNodes ) );
-    }
+        virtual void TearDown()
+        {
+            piston1.reset();
+            piston2.reset();
+            sdc1.reset();
+            sdc2.reset();
+        }
 
-    virtual void TearDown()
-    {
-        piston1.reset();
-        piston2.reset();
-        sdc1.reset();
-        sdc2.reset();
-    }
-
-    std::shared_ptr<Piston> piston1;
-    std::shared_ptr<Piston> piston2;
-    std::shared_ptr<SDC> sdc1;
-    std::shared_ptr<SDC> sdc2;
+        std::shared_ptr<Piston> piston1;
+        std::shared_ptr<Piston> piston2;
+        std::shared_ptr<SDC> sdc1;
+        std::shared_ptr<SDC> sdc2;
 };
 
 INSTANTIATE_TEST_CASE_P( testParameters, SDCEstimateOrderTest, ::testing::Combine( Values( 2, 4 ), Values( "gauss-radau", "gauss-lobatto", "clenshaw-curtis", "uniform" ) ) );
@@ -290,6 +304,51 @@ TEST_P( SDCEstimateOrderTest, order )
 
     if ( rule == "uniform-right-sided" )
         ASSERT_NEAR( order, nbNodes - 1, tol );
+}
+
+TEST( SDCSourceTermTest, SDC )
+{
+    scalar dt, q0, qdot0, As, Ac, omega, endTime, tol;
+
+    int nbNodes = 2;
+    int nbTimeSteps = 1;
+
+    endTime = 100;
+    dt = endTime / nbTimeSteps;
+    As = 100;
+    Ac = As;
+    omega = 1;
+    q0 = -As;
+    qdot0 = -As;
+    tol = 1.0e-9;
+
+    std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+
+    std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature2;
+    quadrature2 = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+
+    std::shared_ptr<Piston> piston( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega ) );
+    std::shared_ptr<SDC> sdc( new SDC( piston, quadrature, tol, 1, 20 ) );
+
+    std::shared_ptr<sdc::SDC> sdc2( new SDC( quadrature2, tol ) );
+    std::shared_ptr<Piston> piston2( new Piston( nbTimeSteps, dt, q0, qdot0, As, Ac, omega, sdc2, sdc2->nodes.rows() ) );
+
+    sdc->run();
+    piston2->run();
+
+    ASSERT_EQ( sdc->data->getFunctions().rows(), sdc2->data->getFunctions().rows() );
+    ASSERT_EQ( sdc->data->getFunctions().cols(), sdc2->data->getFunctions().cols() );
+
+    for ( int i = 0; i < sdc->data->getFunctions().rows(); i++ )
+        for ( int j = 0; j < sdc->data->getFunctions().cols(); j++ )
+            ASSERT_NEAR( sdc->data->getFunctions()( i, j ), sdc2->data->getFunctions()( i, j ), 1.0e-13 );
+
+    for ( int i = 0; i < piston->rhs.rows(); i++ )
+        ASSERT_NEAR( piston->rhs( i ), piston2->rhs( i ), 1.0e-13 );
+
+    ASSERT_NEAR( piston->q, piston2->q, 1.0e-13 );
+    ASSERT_NEAR( piston->qdot, piston2->qdot, 1.0e-13 );
 }
 
 TEST( CosTest, SDC )

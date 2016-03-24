@@ -7,10 +7,11 @@
 #include "gtest/gtest.h"
 #include "SDCTubeFlowFluidSolver.H"
 #include "GaussRadau.H"
-#include "GaussLobatto.H"
 #include "SDC.H"
+#include "ESDIRK.H"
+#include "AdaptiveTimeStepper.H"
 
-class SDCFluidSolverTest : public ::testing::Test
+class SDIRKFluidSolverTest : public ::testing::Test
 {
     protected:
         virtual void SetUp()
@@ -18,7 +19,7 @@ class SDCFluidSolverTest : public ::testing::Test
             scalar r0 = 0.2;
             scalar a0 = M_PI * r0 * r0;
             scalar u0 = 0.1;
-            scalar p0 = 0;
+            scalar p0 = 0.1;
             scalar dt = 0.1;
             int N = 5;
             scalar L = 1;
@@ -28,51 +29,41 @@ class SDCFluidSolverTest : public ::testing::Test
             scalar E = 490;
             scalar h = 1.0e-3;
             scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
-            scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
-            scalar kappa = c0 / u0;
             scalar tau = u0 * dt / L;
 
             ASSERT_NEAR( tau, 0.01, 1.0e-13 );
-            ASSERT_NEAR( kappa, 10, 1.0e-13 );
             ASSERT_TRUE( dx > 0 );
 
             std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
 
-            int nbNodes = 6;
-            scalar tol = 1.0e-11;
-
-            std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
-
-            sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( fluid, quadrature, tol, 3, 30 ) );
+            std::shared_ptr<sdc::AdaptiveTimeStepper>adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
+            esdirk = std::shared_ptr<sdc::ESDIRK> ( new sdc::ESDIRK( fluid, "SDIRK3", adaptiveTimeStepper ) );
         }
 
         virtual void TearDown()
         {
-            sdc.reset();
+            esdirk.reset();
         }
 
-        std::shared_ptr<sdc::SDC> sdc;
+        std::shared_ptr<sdc::ESDIRK> esdirk;
 };
 
-TEST_F( SDCFluidSolverTest, object )
+TEST_F( SDIRKFluidSolverTest, object )
 {
     ASSERT_TRUE( true );
 }
 
-TEST_F( SDCFluidSolverTest, timeStep )
+TEST_F( SDIRKFluidSolverTest, timeStep )
 {
-    sdc->solveTimeStep( 0 );
-    ASSERT_TRUE( sdc->isConverged() );
+    esdirk->solveTimeStep( 0 );
 }
 
-TEST_F( SDCFluidSolverTest, run )
+TEST_F( SDIRKFluidSolverTest, run )
 {
-    sdc->run();
-    ASSERT_TRUE( sdc->isConverged() );
+    esdirk->run();
 }
 
-TEST( SDCFluidTest, order )
+TEST( SDIRKFluidTest, order )
 {
     scalar r0 = 0.2;
     scalar a0 = M_PI * r0 * r0;
@@ -86,9 +77,10 @@ TEST( SDCFluidTest, order )
     scalar E = 490;
     scalar h = 1.0e-3;
     scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
+
     ASSERT_TRUE( dx > 0 );
 
-    int nbComputations = 8;
+    int nbComputations = 6;
 
     std::deque<std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> > fluidSolvers;
     std::deque<int> nbTimeStepsList;
@@ -100,15 +92,10 @@ TEST( SDCFluidTest, order )
 
         std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
 
-        int nbNodes = 2;
-        scalar tol = 1.0e-15;
+        std::shared_ptr<sdc::AdaptiveTimeStepper>adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
+        std::shared_ptr<sdc::ESDIRK> esdirk( new sdc::ESDIRK( fluid, "ESDIRK53PR", adaptiveTimeStepper ) );
 
-        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
-
-        std::shared_ptr<sdc::SDC> sdc( new sdc::SDC( fluid, quadrature, tol, 10, 50 ) );
-
-        sdc->run();
+        esdirk->run();
 
         fluidSolvers.push_back( fluid );
         nbTimeStepsList.push_back( nbTimeSteps );
@@ -117,12 +104,9 @@ TEST( SDCFluidTest, order )
     fsi::vector pref = fluidSolvers.back()->p;
     std::deque<scalar> errors;
 
-    std::cout << "uref = " << pref.transpose() << std::endl;
-
     for ( int iComputation = 0; iComputation < nbComputations - 1; iComputation++ )
     {
         scalar error = (pref - fluidSolvers.at( iComputation )->p).norm() / pref.norm();
-        std::cout << "error = " << error << std::endl;
         errors.push_back( error );
     }
 
@@ -130,6 +114,6 @@ TEST( SDCFluidTest, order )
     {
         scalar order = ( std::log10( errors.at( iComputation ) ) - std::log10( errors.at( iComputation + 1 ) ) ) / ( std::log10( nbTimeStepsList.at( iComputation + 1 ) ) - std::log10( nbTimeStepsList.at( iComputation ) ) );
         std::cout << "order = " << order << std::endl;
-        ASSERT_GE( order, 2 );
+        ASSERT_GE( order, 3 );
     }
 }

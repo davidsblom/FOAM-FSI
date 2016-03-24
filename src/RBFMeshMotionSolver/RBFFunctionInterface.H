@@ -17,11 +17,10 @@ namespace rbf
 {
     class RBFFunctionInterface
     {
-public:
+        public:
+            virtual ~RBFFunctionInterface(){}
 
-        virtual ~RBFFunctionInterface(){}
-
-        virtual scalar evaluate( scalar value ) = 0;
+            virtual scalar evaluate( scalar value ) = 0;
     };
 }
 

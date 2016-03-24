@@ -253,72 +253,69 @@ namespace fsi
         template<typename precision>
         class IQuadrature
         {
-protected:
+            protected:
+                // ! @{
+                static const bool LEFT_IS_NODE = false;
+                static const bool RIGHT_IS_NODE = false;
 
-            // ! @{
-            static const bool LEFT_IS_NODE = false;
-            static const bool RIGHT_IS_NODE = false;
+                size_t num_nodes;
+                Matrix<precision> q_mat;
+                Matrix<precision> s_mat;
+                std::vector<precision> q_vec; // XXX: black spot
+                Matrix<precision> b_mat;
+                std::vector<precision> nodes;
 
-            size_t num_nodes;
-            Matrix<precision> q_mat;
-            Matrix<precision> s_mat;
-            std::vector<precision> q_vec; // XXX: black spot
-            Matrix<precision> b_mat;
-            std::vector<precision> nodes;
+                // ! @}
 
-            // ! @}
+            public:
+                // ! @{
 
-public:
+                /**
+                 * @throws invalid_argument if number of nodes is invalid for quadrature type
+                 */
+                explicit IQuadrature( const size_t num_nodes );
 
-            // ! @{
+                /**
+                 * @throws invalid_argument if number of nodes is invalid for quadrature type
+                 */
+                IQuadrature();
+                virtual ~IQuadrature() = default;
 
-            /**
-             * @throws invalid_argument if number of nodes is invalid for quadrature type
-             */
-            explicit IQuadrature( const size_t num_nodes );
+                // ! @}
 
-            /**
-             * @throws invalid_argument if number of nodes is invalid for quadrature type
-             */
-            IQuadrature();
-            virtual ~IQuadrature() = default;
+                // ! @{
+                virtual const Matrix<precision> & get_q_mat() const;
 
-            // ! @}
+                virtual const Matrix<precision> & get_s_mat() const;
 
-            // ! @{
-            virtual const Matrix<precision> & get_q_mat() const;
+                virtual const std::vector<precision> & get_nodes() const;
 
-            virtual const Matrix<precision> & get_s_mat() const;
+                virtual size_t get_num_nodes() const;
 
-            virtual const std::vector<precision> & get_nodes() const;
+                /**
+                 * @throws pfasst::NotImplementedYet if not overwritten by implementation;
+                 *   required for quadrature of any kind
+                 */
+                virtual bool left_is_node() const;
 
-            virtual size_t get_num_nodes() const;
+                /**
+                 * @throws pfasst::NotImplementedYet if not overwritten by implementation;
+                 *   required for quadrature of any kind
+                 */
+                virtual bool right_is_node() const;
 
-            /**
-             * @throws pfasst::NotImplementedYet if not overwritten by implementation;
-             *   required for quadrature of any kind
-             */
-            virtual bool left_is_node() const;
+            protected:
+                // ! @{
 
-            /**
-             * @throws pfasst::NotImplementedYet if not overwritten by implementation;
-             *   required for quadrature of any kind
-             */
-            virtual bool right_is_node() const;
+                /**
+                 * @throws pfasst::NotImplementedYet if not overwritten by implementation;
+                 *   required for quadrature of any kind
+                 */
+                virtual void compute_nodes();
 
-protected:
+                virtual void compute_weights();
 
-            // ! @{
-
-            /**
-             * @throws pfasst::NotImplementedYet if not overwritten by implementation;
-             *   required for quadrature of any kind
-             */
-            virtual void compute_nodes();
-
-            virtual void compute_weights();
-
-            // ! @}
+                // ! @}
         };
     }
 }
