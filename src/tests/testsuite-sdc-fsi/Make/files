@@ -2,6 +2,8 @@ testsuite-sdc-fsi.C
 test_sdctubeflowfluidsolver.C
 test_sdctubeflowfsisolver.C
 test_sdctubeflowsolidsolver.C
+test_sdirktubeflowfsisolver.C
+test_sdirktubeflowfluidsolver.C
 
 SDCTubeFlowFluidSolver.C
 SDCTubeFlowSolidSolver.C
