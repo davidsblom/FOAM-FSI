@@ -4,6 +4,7 @@ test_sdctubeflowfsisolver.C
 test_sdctubeflowsolidsolver.C
 test_sdirktubeflowfsisolver.C
 test_sdirktubeflowfluidsolver.C
+test_sdirktubeflowsolidsolver.C
 
 SDCTubeFlowFluidSolver.C
 SDCTubeFlowSolidSolver.C
