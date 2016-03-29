@@ -117,7 +117,8 @@ The first time the library is compiled, use the `Allwmake_firstInstall` script
 Prerequisites
 -----------
 
-gcc 4.8 or higher due to C++11 features.
+gcc 4.8 or higher due to C++11 features. The gfortran compiler is used for the
+compilation of the deal.II library, and is therefore also needed.
 
 Test suite
 -----------
