@@ -32,7 +32,7 @@ nbNodes = 6
 
 timeIntegrationSchemes = ["IDC", "SDIRK"]
 
-sdirkSchemes = ["SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5", "ESDIRK53PR", "ESDIRK63PR", "ESDIRK74PR"]
+sdirkSchemes = ["SDIRK2", "SDIRK3", "SDIRK4"]
 
 label_ref = "IDC_nbNodes_" + str( nbNodes )
 label_ref += "_nbTimeSteps_" + str( 2 ** (nbComputations-1) )
@@ -109,11 +109,11 @@ for timeIntegrationScheme in timeIntegrationSchemes:
 velocityPlot.set_xlabel( 'Time step [s]' )
 velocityPlot.set_ylabel( 'Error in velocity [-]' )
 velocityPlot.grid( 'on' )
-lgd = velocityPlot.legend( loc='upper center', bbox_to_anchor=(0.4, 1.55), ncol = 3, fancybox = True, shadow = False )
+lgd = velocityPlot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.38), ncol = 3, fancybox = True, shadow = False )
 velocityFig.savefig( 'tubeflow_velocity.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
 
 areaPlot.set_xlabel( 'Time step [s]' )
 areaPlot.set_ylabel( 'Error in area [-]' )
 areaPlot.grid( 'on' )
-lgd = areaPlot.legend( loc='upper center', bbox_to_anchor=(0.4, 1.55), ncol = 3, fancybox = True, shadow = False )
+lgd = areaPlot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.38), ncol = 3, fancybox = True, shadow = False )
 areaFig.savefig( 'tubeflow_area.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )

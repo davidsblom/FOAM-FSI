@@ -172,6 +172,7 @@ int main()
                 ofstream log_file( label + ".log" );
                 ofstream data_a( label + "_data_u.log" );
                 ofstream data_u( label + "_data_a.log" );
+                ofstream data_p( label + "_data_p.log" );
 
                 log_file << "label = " << label << std::endl;
                 log_file << "nbNodes = " << nbNodes << std::endl;
@@ -185,6 +186,7 @@ int main()
 
                 data_u << std::setprecision( 20 ) << fluid->u << std::endl;
                 data_a << std::setprecision( 20 ) << fluid->a << std::endl;
+                data_p << std::setprecision( 20 ) << fluid->p << std::endl;
 
                 log_file.close();
                 data_a.close();
