@@ -4,7 +4,6 @@ EXE_INC = -std=c++11 \
     -I ../../fsi \
     -I ../../fsi/lnInclude \
     -I ../../fsi/solidSolvers \
-    -DEIGEN_INITIALIZE_MATRICES_BY_NAN \
     -I ../../RBFmeshInterpolation/lnInclude/ \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
     -isystem $(LIB_SRC)/dynamicMesh/lnInclude \
@@ -30,6 +29,7 @@ EXE_INC = -std=c++11 \
     -isystem ../../thirdParty/petsc/include \
     -isystem ../../thirdParty/petsc/x86_64/include
 
+ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
     -L../../thirdParty/gtest \
@@ -37,17 +37,46 @@ EXE_LIBS = \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
-    -lmeshTools \
+    -lfiniteVolume \
     -lincompressibleTransportModels \
     -lincompressibleTurbulenceModel \
     -lincompressibleRASModels \
     -lincompressibleLESModels \
-    -lfiniteVolume \
+    -lfvSchemes \
+    -lboundaryConditions \
     -lsolidModels \
+    -lyaml-cpp \
     -lRBFMeshMotionSolver \
+    -lfsi \
     -lbasicThermophysicalModels \
     -lspecie \
     -lcompressibleRASModels \
     -ldeal_II \
+    -llduSolvers
+endif
+
+ifeq ($(WM_COMPILE_OPTION), Debug)
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -L../../thirdParty/gtest \
+    -lgtest \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lfiniteVolume \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -lfvSchemes \
+    -lboundaryConditions \
+    -lsolidModels \
+    -lyaml-cpp \
+    -lRBFMeshMotionSolver \
     -lfsi \
-    -lboundaryConditions
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels \
+    -ldeal_II.g \
+    -llduSolvers
+endif
