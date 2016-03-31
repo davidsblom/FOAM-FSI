@@ -504,7 +504,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
-                export WM_NCOMPPROCS=1
+                export WM_NCOMPPROCS=2
 
                 source foam-extend-3.2/etc/bashrc
 
