@@ -33,13 +33,20 @@ namespace tubeflow
         fsi::vector & f
         )
     {
-        f.setZero();
-
         for ( int i = 0; i < N; i++ )
             f( i ) = u( i );
 
         for ( int i = 1; i < N - 1; i++ )
-            f( i + N ) = -1.0 / (rho * h) * ( beta * ( r( i + 1 ) - 2 * r( i ) + r( i - 1 ) ) + gamma * r( i ) - p( i ) );
+            f( i + N ) = kappa * G / (dx * dx * rho) * ( r( i + 1 ) - 2 * r( i ) + r( i - 1 ) )
+                - E0 / (1 - nu * nu) * r( i ) / (r0 * r0 * rho)
+                + p( i ) / (rho * h);
+
+        f( N ) = kappa * G / (dx * dx * rho) * ( r( 1 ) - r( 0 ) )
+            - E0 / (1 - nu * nu) * r( 0 ) / (r0 * r0 * rho)
+            + p( 0 ) / (rho * h);
+        f( 2 * N - 1 ) = kappa * G / (dx * dx * rho) * ( -r( N - 1 ) + r( N - 2 ) )
+            - E0 / (1 - nu * nu) * r( N - 1 ) / (r0 * r0 * rho)
+            + p( N - 1 ) / (rho * h);
     }
 
     void SDCTubeFlowLinearizedSolidSolver::finalizeTimeStep()
@@ -59,10 +66,6 @@ namespace tubeflow
     {
         solution.head( N ) = r;
         solution.tail( N ) = u;
-
-        // Ignore the boundary conditions
-        solution( N ) = 0;
-        solution( 2 * N - 1 ) = 0;
     }
 
     void SDCTubeFlowLinearizedSolidSolver::setSolution(
@@ -162,7 +165,6 @@ namespace tubeflow
 
         this->rhs = rhs;
 
-        alpha = rho * h / dt;
         factorizeMatrix();
     }
 

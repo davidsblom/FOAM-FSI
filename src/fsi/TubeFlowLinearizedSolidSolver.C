@@ -26,9 +26,9 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     r0( r0 ),
     kappa( 2.0 * (1.0 + nu) / (4.0 + 3.0 * nu) ),
     dx( L / N ),
-    alpha( rho * h / dt ),
-    beta( -kappa * G * h / (dx * dx) ),
-    gamma( E0 * h / (1.0 - nu * nu) * ( 1.0 / (r0 * r0) ) ),
+    G( G ),
+    E0( E0 ),
+    nu( nu ),
     h( h ),
     rho( rho ),
     grid(),
@@ -45,7 +45,6 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     assert( nu < 1 );
     assert( h > 0 );
     assert( kappa > 0 );
-    assert( alpha > 0 );
     assert( L > 0 );
     assert( G > 0 );
     assert( r0 > 0 );
@@ -89,15 +88,17 @@ void TubeFlowLinearizedSolidSolver::factorizeMatrix()
 
     for ( int i = 0; i < N; i++ )
     {
+        A( i, i ) = 1;
+        A( i, i + N ) = -dt;
+
         if ( i == 0 )
         {
             // Boundary conditions at inlet
             // r(0) = r(1)
 
-            A( i, i ) = 1;
-            A( i, i + 1 ) = -1;
+            A( i + N, i ) = kappa * G * dt / (rho * dx * dx) + E0 * dt / (1 - nu * nu) / (rho * r0 * r0);
+            A( i + N, i + 1 ) = -kappa * G * dt / (rho * dx * dx);
 
-            A( i + N, i ) = -1.0 / dt;
             A( i + N, i + N ) = 1;
         }
 
@@ -106,23 +107,19 @@ void TubeFlowLinearizedSolidSolver::factorizeMatrix()
             // Boundary conditions at outlet
             // r(N) = r(N-1)
 
-            A( i, i ) = 1;
-            A( i, i - 1 ) = -1;
+            A( i + N, i ) = kappa * G * dt / (rho * dx * dx) + E0 * dt / (1 - nu * nu) / (rho * r0 * r0);
+            A( i + N, i - 1 ) = -kappa * G * dt / (rho * dx * dx);
 
-            A( i + N, i ) = -1.0 / dt;
             A( i + N, i + N ) = 1;
         }
 
         if ( i > 0 && i < N - 1 )
         {
-            A( i, i ) = 1;
-            A( i, i + N ) = -dt;
+            A( i + N, i ) = 2 * kappa * G * dt / (rho * dx * dx) + E0 * dt / (1 - nu * nu) / (rho * r0 * r0);
+            A( i + N, i + 1 ) = -kappa * G * dt / (rho * dx * dx);
+            A( i + N, i - 1 ) = -kappa * G * dt / (rho * dx * dx);
 
-            A( i + N, i ) = gamma - 2 * beta;
-            A( i + N, i + 1 ) = beta;
-            A( i + N, i - 1 ) = beta;
-
-            A( i + N, i + N ) = alpha;
+            A( i + N, i + N ) = 1;
         }
     }
 
@@ -199,19 +196,14 @@ void TubeFlowLinearizedSolidSolver::solve(
     // Construct right hand size of linear system
 
     fsi::vector b( 2 * N ), x( 2 * N );
-    b.setZero();
 
-    for ( int i = 1; i < N - 1; i++ )
+    for ( int i = 0; i < N; i++ )
     {
         b( i ) = rn( i );
-        b( i + N ) = p( i ) + alpha * un( i );
+        b( i + N ) = un( i ) + p( i ) * dt / (rho * h);
     }
 
-    b( N ) = -rn( 0 ) / dt - 1.0 / dt * rhs( 0 );
-    b( 2 * N - 1 ) = -rn( N - 1 ) / dt - 1.0 / dt * rhs( N - 1 );
-
-    b.segment( 1, N - 2 ) += rhs.segment( 1, N - 2 );
-    b.segment( N + 1, N - 2 ) += alpha * rhs.segment( N + 1, N - 2 );
+    b += rhs;
 
     // Solve for x
 
