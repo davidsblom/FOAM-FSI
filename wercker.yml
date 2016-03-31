@@ -18,10 +18,10 @@ build:
         - script:
             name: foam-extend third-party
             code: |
-                if [ -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.xz" ]; then
+                if [ -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.gz" ]; then
                     debug "foam-extend-3.2 found in cache"
-                    rsync -azvh $WERCKER_CACHE_DIR/foam-extend-3.2.tar.xz ./
-                    tar -Jxf foam-extend-3.2.tar.xz
+                    rsync -azvh $WERCKER_CACHE_DIR/foam-extend-3.2.tar.gz ./
+                    tar -zxf foam-extend-3.2.tar.gz
                 else
                     debug "foam-extend-3.2 not found in cache, will download and compile"
 
@@ -39,7 +39,7 @@ build:
                     export FOAM_INST_DIR=`pwd`
 
                     sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
-                    sed -i s/"c++DBUG    = -ggdb3 -DFULLDEBUG"/"c++DBUG    = -g -DFULLDEBUG --coverage -fprofile-arcs -ftest-coverage"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++Debug
+                    sed -i s/"c++DBUG    = -ggdb3 -DFULLDEBUG"/"c++DBUG    = -g -DFULLDEBUG -DEIGEN_INITIALIZE_MATRICES_BY_NAN --coverage -fprofile-arcs -ftest-coverage"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++Debug
 
                     cd foam-extend-3.2
                     source etc/bashrc
@@ -60,7 +60,7 @@ build:
         - script:
             name: foam-extend
             code: |
-                if [ ! -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.xz" ]; then
+                if [ ! -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.gz" ]; then
                     export PARAVIEW_SYSTEM=1
                     export CMAKE_SYSTEM=1
                     export HWLOC_SYSTEM=1
@@ -107,7 +107,7 @@ build:
         - script:
             name: foam-extend libraries
             code: |
-                if [ ! -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.xz" ]; then
+                if [ ! -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.gz" ]; then
                     export PARAVIEW_SYSTEM=1
                     export CMAKE_SYSTEM=1
                     export HWLOC_SYSTEM=1
@@ -149,14 +149,15 @@ build:
         - script:
             name: store cache
             code: |
-                if [ ! -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.xz" ]; then
+                if [ ! -f "$WERCKER_CACHE_DIR/foam-extend-3.2.tar.gz" ]; then
 
                     cd foam-extend-3.2
                     find . -not -path './lib/linux64GccDPOpt' -not -path './ThirdParty/*' -name 'linux64GccDPOpt' -type d -print -prune -exec rm -rf {} \;
+                    find . -not -path './lib/linux64GccDPDebug' -not -path './ThirdParty/*' -name 'linux64GccDPDebug' -type d -print -prune -exec rm -rf {} \;
                     cd ../
 
-                    tar -cJf foam-extend-3.2.tar.xz foam-extend-3.2
-                    rsync -azvh foam-extend-3.2.tar.xz $WERCKER_CACHE_DIR/
+                    tar -zcf foam-extend-3.2.tar.gz foam-extend-3.2
+                    rsync -azvh foam-extend-3.2.tar.gz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: setup environment
@@ -222,9 +223,25 @@ build:
                     rsync -azvh petsc-${PETSC_VERSION}.tar.xz $WERCKER_CACHE_DIR/
                 fi
         - script:
+            name: boost
+            code: |
+                export BOOST_VERSION=1_55_0
+                export BOOST_VERSION_DOT=1.55.0
+                cd src/thirdParty
+
+                if [ -f "$WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.bz2" ]; then
+                    debug "boost library found in cache"
+                    rsync -azvh $WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.bz2 ./
+                else
+                    wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
+                    rsync -azvh boost_${BOOST_VERSION}.tar.bz2 $WERCKER_CACHE_DIR/
+                fi
+
+                tar jxf boost_${BOOST_VERSION}.tar.bz2
+                ln -s boost_${BOOST_VERSION} boost
+        - script:
             name: deal.II
             code: |
-
                 export PARAVIEW_SYSTEM=1
                 export CMAKE_SYSTEM=1
                 export HWLOC_SYSTEM=1
@@ -248,14 +265,7 @@ build:
                     rsync -azvh $WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}.tar.xz ./
                     tar -Jxf dealii-${DEALII_VERSION}.tar.xz
                     ln -s dealii-${DEALII_VERSION} dealii
-                    cp dealii-${DEALII_VERSION}/bin/lib/libdeal_II.so.${DEALII_VERSION} ${FOAM_LIBBIN}/libdeal_II.so
-                    cp dealii-${DEALII_VERSION}/bin/lib/libdeal_II.so.${DEALII_VERSION} ${FOAM_LIBBIN}/
-                fi
-
-                if [ -f "$WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.xz" ]; then
-                    debug "boost library found in cache"
-                    rsync -azvh $WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.xz ./
-                    tar -Jxf boost_${BOOST_VERSION}.tar.xz
+                    cp dealii-${DEALII_VERSION}/bin/lib/libdeal_II* ${FOAM_LIBBIN}/
                 fi
 
                 ./compile_dealii
@@ -263,11 +273,6 @@ build:
                 if [ ! -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}.tar.xz" ]; then
                     tar -cJf dealii-${DEALII_VERSION}.tar.xz dealii-${DEALII_VERSION}
                     rsync -azvh dealii-${DEALII_VERSION}.tar.xz $WERCKER_CACHE_DIR/
-                fi
-
-                if [ ! -f "$WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.xz" ]; then
-                    tar -cJf boost_${BOOST_VERSION}.tar.xz boost_${BOOST_VERSION}
-                    rsync -azvh boost_${BOOST_VERSION}.tar.xz $WERCKER_CACHE_DIR/
                 fi
         - script:
             name: googletest
@@ -499,7 +504,7 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
-                export WM_NCOMPPROCS=2
+                export WM_NCOMPPROCS=1
 
                 source foam-extend-3.2/etc/bashrc
 

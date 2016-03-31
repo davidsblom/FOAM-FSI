@@ -30,6 +30,7 @@ EXE_INC = -std=c++11 \
     -isystem ../../../../src/thirdParty/petsc/include \
     -isystem ../../../../src/thirdParty/petsc/x86_64/include
 
+ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
     -ldynamicFvMesh \
@@ -51,3 +52,28 @@ EXE_LIBS = \
     -lcompressibleRASModels \
     -ldeal_II \
     -llduSolvers
+endif
+
+ifeq ($(WM_COMPILE_OPTION), Debug)
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lfiniteVolume \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -lfvSchemes \
+    -lboundaryConditions \
+    -lsolidModels \
+    -lyaml-cpp \
+    -lRBFMeshMotionSolver \
+    -lfsi \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels \
+    -ldeal_II.g \
+    -llduSolvers
+endif

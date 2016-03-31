@@ -23,29 +23,50 @@ EXE_INC = -std=c++11 \
     -isystem $(LIB_SRC)/tetFiniteElement/lnInclude \
     -isystem ../../../src/thirdParty/boost
 
+ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -L../../../src/thirdParty/yaml-cpp/build/ \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
-    -lmeshTools \
     -lfiniteVolume \
     -lincompressibleTransportModels \
     -lincompressibleTurbulenceModel \
     -lincompressibleRASModels \
     -lincompressibleLESModels \
-    -llduSolvers \
     -lfvSchemes \
     -lboundaryConditions \
     -lsolidModels \
-    -lsampling \
-    -llagrangian \
+    -lyaml-cpp \
     -lRBFMeshMotionSolver \
     -lfsi \
-    -ltetFiniteElement \
     -lbasicThermophysicalModels \
     -lspecie \
     -lcompressibleRASModels \
+    -ldeal_II \
+    -llduSolvers
+endif
+
+ifeq ($(WM_COMPILE_OPTION), Debug)
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lfiniteVolume \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -lfvSchemes \
+    -lboundaryConditions \
+    -lsolidModels \
     -lyaml-cpp \
-    -ldeal_II
+    -lRBFMeshMotionSolver \
+    -lfsi \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels \
+    -ldeal_II.g \
+    -llduSolvers
+endif
