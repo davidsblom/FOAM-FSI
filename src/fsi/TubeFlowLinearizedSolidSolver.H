@@ -63,9 +63,9 @@ namespace tubeflow
             const scalar r0;
             const scalar kappa;
             const scalar dx;
-            scalar alpha;
-            const scalar beta;
-            const scalar gamma;
+            const scalar G;
+            const scalar E0;
+            const scalar nu;
             const scalar h;
             const scalar rho;
 

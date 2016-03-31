@@ -8,7 +8,7 @@
 #include <chrono>
 
 #include "SDCTubeFlowFluidSolver.H"
-#include "SDCTubeFlowSolidSolver.H"
+#include "SDCTubeFlowLinearSolidSolver.H"
 #include "RBFCoarsening.H"
 #include "SDC.H"
 #include "ESDIRK.H"
@@ -22,7 +22,7 @@
 
 int main()
 {
-    int nbComputations = 6;
+    int nbComputations = 9;
     int nbNodes = 6;
     std::vector<std::string> timeIntegrationSchemes = {
         "IDC", "SDIRK"
@@ -47,30 +47,32 @@ int main()
 
                 std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
                 std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid;
+                std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> solid;
                 std::shared_ptr<MultiLevelFsiSolver> fsi;
 
                 {
-                    scalar r0 = 0.2;
+                    scalar r0 = 3.0e-3;
+                    scalar h = 3.0e-4;
+                    scalar L = 0.126;
+                    scalar rho_s = 1000;
+                    scalar E0 = 4.0e5;
+                    scalar G = 4.0e5;
+                    scalar nu = 0.5;
+
                     scalar a0 = M_PI * r0 * r0;
-                    scalar u0 = 0.1;
+                    scalar u0 = 0.26;
                     scalar p0 = 0;
                     int N = 100;
-                    scalar L = 1;
                     scalar T = 1;
                     scalar dt = T / nbTimeSteps;
-                    scalar rho = 1.225;
+                    scalar rho_f = 1060;
                     scalar E = 490;
-                    scalar h = 1.0e-3;
-                    scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
+                    scalar cmk = std::sqrt( E * h / (2 * rho_f * r0) );
 
                     bool parallel = false;
                     int extrapolation = 0;
-                    scalar tol = 1.0e-5;
-
-                    if ( timeIntegrationSchemeString == "SDIRK" )
-                        tol = 1.0e-10;
-
-                    int maxIter = 50;
+                    scalar tol = 1.0e-3;
+                    int maxIter = 20;
                     scalar initialRelaxation = 1.0e-3;
                     int maxUsedIterations = 50;
                     int nbReuse = 0;
@@ -82,31 +84,31 @@ int main()
                     scalar beta = 0.5;
                     int minIter = 5;
 
-                    fluid = std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> ( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
-                    std::shared_ptr<tubeflow::SDCTubeFlowSolidSolver> solid( new tubeflow::SDCTubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
+                    fluid = std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> ( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
+                    solid = std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver>( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
 
-                    std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
-                    std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator;
-                    std::shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
-                    std::shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;
+                    shared_ptr<RBFFunctionInterface> rbfFunction;
+                    shared_ptr<RBFInterpolation> rbfInterpolator;
+                    shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
+                    shared_ptr<RBFCoarsening> rbfInterpToMesh;
 
-                    rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new TPSFunction() );
-                    rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-                    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
+                    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+                    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+                    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
 
-                    rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new TPSFunction() );
-                    rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-                    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
+                    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+                    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+                    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
 
                     shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
 
-                    rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new TPSFunction() );
-                    rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-                    rbfInterpToCouplingMesh = std::shared_ptr<rbf::RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
+                    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+                    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+                    rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
 
-                    rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new TPSFunction() );
-                    rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-                    rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
+                    rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
+                    rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
+                    rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
 
                     shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
 
@@ -121,7 +123,7 @@ int main()
 
                     convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
 
-                    fsi = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
+                    fsi = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
 
                     shared_ptr<PostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
 
@@ -137,7 +139,7 @@ int main()
                     quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
 
                     if ( timeIntegrationSchemeString == "IDC" )
-                        timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( fsiSolver, quadrature, 1.0e-15, 1, 50 ) );
+                        timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( fsiSolver, quadrature, 1.0e-13, 1, 50 ) );
 
                     if ( timeIntegrationSchemeString == "SDIRK" )
                     {
@@ -149,6 +151,11 @@ int main()
                         timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::ESDIRK( fsiSolver, method, adaptiveTimeStepper ) );
                     }
                 }
+
+                assert( timeIntegrationScheme );
+                assert( fluid );
+                assert( solid );
+                assert( fsi );
 
                 std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
                 start = std::chrono::high_resolution_clock::now();
@@ -170,9 +177,11 @@ int main()
                 label += "_nbTimeSteps_" + std::to_string( nbTimeSteps );
 
                 ofstream log_file( label + ".log" );
-                ofstream data_u( label + "_data_u.log" );
-                ofstream data_a( label + "_data_a.log" );
-                ofstream data_p( label + "_data_p.log" );
+                ofstream data_fluid_u( label + "_data_fluid_u.log" );
+                ofstream data_fluid_a( label + "_data_fluid_a.log" );
+                ofstream data_fluid_p( label + "_data_fluid_p.log" );
+                ofstream data_solid_u( label + "_data_solid_u.log" );
+                ofstream data_solid_r( label + "_data_solid_r.log" );
 
                 log_file << "label = " << label << std::endl;
                 log_file << "nbNodes = " << nbNodes << std::endl;
@@ -184,13 +193,18 @@ int main()
                 if ( timeIntegrationSchemeString == "SDIRK" )
                     log_file << "method = " << sdirkSchemes.at( iNodes ) << std::endl;
 
-                data_u << std::setprecision( 20 ) << fluid->u << std::endl;
-                data_a << std::setprecision( 20 ) << fluid->a << std::endl;
-                data_p << std::setprecision( 20 ) << fluid->p << std::endl;
+                data_fluid_u << std::setprecision( 20 ) << fluid->u << std::endl;
+                data_fluid_a << std::setprecision( 20 ) << fluid->a << std::endl;
+                data_fluid_p << std::setprecision( 20 ) << fluid->p << std::endl;
+                data_solid_u << std::setprecision( 20 ) << solid->u << std::endl;
+                data_solid_r << std::setprecision( 20 ) << solid->r << std::endl;
 
                 log_file.close();
-                data_a.close();
-                data_u.close();
+                data_fluid_u.close();
+                data_fluid_a.close();
+                data_fluid_p.close();
+                data_solid_u.close();
+                data_solid_r.close();
             }
         }
     }

@@ -41,24 +41,15 @@ void TubeFlowLinearSolidSolver::solve(
     // Construct right hand size of linear system
 
     fsi::vector b( 2 * N ), x( 2 * N );
-    b.setZero();
 
-    for ( int i = 1; i < N - 1; i++ )
+    for ( int i = 0; i < N; i++ )
     {
-        // Velocity equation based on backward Euler time stepping
-
         b( i ) = rn( i );
-
-        // Newton's equation rhs
-
-        b( i + N ) = p( i ) + alpha * un( i ) + E0 * h / (1.0 - nu * nu) * 1.0 / r0;
+        b( i + N ) = un( i ) + p( i ) * dt / (rho * h)
+            + E0 * dt / (r0 * rho) / (1 - nu * nu);
     }
 
-    b( N ) = -rn( 0 ) / dt - 1.0 / dt * rhs( 0 );
-    b( 2 * N - 1 ) = -rn( N - 1 ) / dt - 1.0 / dt * rhs( N - 1 );
-
-    b.segment( 1, N - 2 ) += rhs.segment( 1, N - 2 );
-    b.segment( N + 1, N - 2 ) += alpha * rhs.segment( N + 1, N - 2 );
+    b += rhs;
 
     // Solve for x
 

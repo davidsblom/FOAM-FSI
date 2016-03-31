@@ -34,16 +34,26 @@ timeIntegrationSchemes = ["IDC", "SDIRK"]
 
 sdirkSchemes = ["SDIRK2", "SDIRK3", "SDIRK4"]
 
-label_ref = "IDC_nbNodes_" + str( nbNodes )
-label_ref += "_nbTimeSteps_" + str( 2 ** (nbComputations-1) )
 
-data_u_ref = np.loadtxt( "data/" + label_ref + "_data_u.log" )
-data_a_ref = np.loadtxt( "data/" + label_ref + "_data_a.log" )
+for i in np.arange( nbNodes + 1 ):
+    for j in np.arange( nbComputations ):
+
+        label_ref = "IDC_nbNodes_" + str( i )
+        label_ref += "_nbTimeSteps_" + str( 2 ** j)
+
+        try:
+            data_u_ref = np.loadtxt( "data/" + label_ref + "_data_u.log" )
+            data_a_ref = np.loadtxt( "data/" + label_ref + "_data_a.log" )
+            data_p_ref = np.loadtxt( "data/" + label_ref + "_data_p.log" )
+        except:
+            pass
 
 velocityFig = plt.figure()
 velocityPlot = velocityFig.add_subplot(111)
 areaFig = plt.figure()
 areaPlot = areaFig.add_subplot(111)
+pressureFig = plt.figure()
+pressurePlot = pressureFig.add_subplot(111)
 
 for timeIntegrationScheme in timeIntegrationSchemes:
 
@@ -56,6 +66,7 @@ for timeIntegrationScheme in timeIntegrationSchemes:
         timeStepList = []
         errors_u = []
         errors_a = []
+        errors_p = []
 
         for iComputation in np.arange( nbComputations ):
 
@@ -75,14 +86,17 @@ for timeIntegrationScheme in timeIntegrationSchemes:
             try:
                 data_u = np.loadtxt( "data/" + label + "_data_u.log" )
                 data_a = np.loadtxt( "data/" + label + "_data_a.log" )
+                data_p = np.loadtxt( "data/" + label + "_data_p.log" )
             except:
                 continue
 
             error_u = np.linalg.norm(data_u - data_u_ref) / np.linalg.norm( data_u_ref )
             error_a = np.linalg.norm(data_a - data_a_ref) / np.linalg.norm( data_a_ref )
+            error_p = np.linalg.norm(data_p - data_p_ref) / np.linalg.norm( data_p_ref )
 
             errors_u.append( error_u )
             errors_a.append( error_a )
+            errors_p.append( error_p )
             timeStepList.append( 1.0 / float( nbTimeSteps ) )
 
         if timeIntegrationScheme == "SDIRK":
@@ -92,6 +106,7 @@ for timeIntegrationScheme in timeIntegrationSchemes:
 
         velocityPlot.loglog( timeStepList, errors_u, markers[markerIndex], label = legend, markersize = 3 )
         areaPlot.loglog( timeStepList, errors_a, markers[markerIndex], label = legend, markersize = 3 )
+        pressurePlot.loglog( timeStepList, errors_p, markers[markerIndex], label = legend, markersize = 3 )
 
         markerIndex += 1
 
@@ -103,6 +118,10 @@ for timeIntegrationScheme in timeIntegrationSchemes:
             print ''
             for i in np.arange( nbComputations - 1 ):
                 print ( np.log10( errors_a[i+1] ) - np.log10( errors_a[i] ) ) / ( np.log10( timeStepList[i+1] ) - np.log10( timeStepList[i] ) )
+
+            print ''
+            for i in np.arange( nbComputations - 1 ):
+                print ( np.log10( errors_p[i+1] ) - np.log10( errors_p[i] ) ) / ( np.log10( timeStepList[i+1] ) - np.log10( timeStepList[i] ) )
         except:
             pass
 
@@ -117,3 +136,9 @@ areaPlot.set_ylabel( 'Error in area [-]' )
 areaPlot.grid( 'on' )
 lgd = areaPlot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.38), ncol = 3, fancybox = True, shadow = False )
 areaFig.savefig( 'tubeflow_area.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
+
+pressurePlot.set_xlabel( 'Time step [s]' )
+pressurePlot.set_ylabel( 'Error in pressure [-]' )
+pressurePlot.grid( 'on' )
+lgd = pressurePlot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.38), ncol = 3, fancybox = True, shadow = False )
+pressureFig.savefig( 'tubeflow_pressure.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
