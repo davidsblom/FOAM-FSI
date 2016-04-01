@@ -164,7 +164,7 @@ void SDCFsiSolver::implicitSolve(
     if ( corrector )
         x0 = xStages.at( k + 1 );
     else
-        x0 = xStages.at( k );
+        x0 = xStages.at( kold );
 
     postProcessing->initStage( k );
     postProcessing->performPostProcessing( x0, postProcessing->fsi->x );
