@@ -162,8 +162,8 @@ namespace tubeflow
 
         if ( not corrector )
         {
-            u = uStages.at( k );
-            r = rStages.at( k );
+            u = uStages.at( kold );
+            r = rStages.at( kold );
         }
 
         un = uStages.at( kold );
