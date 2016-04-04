@@ -268,7 +268,7 @@ TEST_P( OutputSpaceMappingSolverParametrizedTest, iterations )
 
     if ( couplingGridSize == 20 && nbReuse == 4 && extrapolation == 2 && minIter == 3 && order == 1 )
     {
-        ASSERT_LE( solver->fineModel->fsi->nbIter, 569 );
+        ASSERT_LE( solver->fineModel->fsi->nbIter, 574 );
         ASSERT_LE( solver->coarseModel->fsi->nbIter, 4132 );
     }
 }
