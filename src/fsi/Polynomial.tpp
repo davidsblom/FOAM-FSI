@@ -90,7 +90,7 @@ namespace fsi
 
             for ( size_t j = 0; j < n; j++ )
             {
-                z0[j] = pow( complex<double>( 0.4, 0.9 ), j );
+                z0[j] = pow( complex<CoeffT>( 0.4L, 0.9L ), j );
             }
 
             // durand-kerner-weierstrass iterations
@@ -103,7 +103,7 @@ namespace fsi
                 for ( size_t i = 0; i < n; i++ )
                 {
                     num = p.evaluate( z0[i] );
-                    den = 1.0;
+                    den = 1.0L;
 
                     for ( size_t j = 0; j < n; j++ )
                     {
@@ -123,7 +123,7 @@ namespace fsi
 
             for ( size_t j = 0; j < n; j++ )
             {
-                roots[j] = abs( z0[j] ) < ztol ? 0.0 : real( z0[j] );
+                roots[j] = abs( z0[j] ) < ztol ? 0.0L : real( z0[j] );
             }
 
             sort( roots.begin(), roots.end() );
@@ -136,28 +136,28 @@ namespace fsi
             if ( order == 0 )
             {
                 Polynomial<CoeffT> p( 1 );
-                p[0] = 1.0;
+                p[0] = 1.0L;
                 return p;
             }
 
             if ( order == 1 )
             {
                 Polynomial<CoeffT> p( 2 );
-                p[0] = 0.0;
-                p[1] = 1.0;
+                p[0] = 0.0L;
+                p[1] = 1.0L;
                 return p;
             }
 
             Polynomial<CoeffT> p0( order + 1 ), p1( order + 1 ), p2( order + 1 );
-            p0[0] = 1.0;
-            p1[1] = 1.0;
+            p0[0] = 1.0L;
+            p1[1] = 1.0L;
 
             // (n + 1) P_{n+1} = (2n + 1) x P_{n} - n P_{n-1}
             for ( size_t m = 1; m < order; m++ )
             {
                 for ( size_t j = 1; j < order + 1; j++ )
                 {
-                    p2[j] = ( (2 * m + 1) * p1[j - 1] - m * p0[j] ) / (m + 1);
+                    p2[j] = ( (2L * m + 1L) * p1[j - 1] - m * p0[j] ) / (m + 1L);
                 }
 
                 p2[0] = -int(m) * p0[0] / (m + 1);
