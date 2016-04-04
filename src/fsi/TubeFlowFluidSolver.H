@@ -69,7 +69,7 @@ namespace tubeflow
                 fsi::vector & output
                 );
 
-            scalar evaluateInletVelocityBoundaryCondition();
+            virtual scalar evaluateInletVelocityBoundaryCondition();
 
             virtual scalar evaluateOutputPressureBoundaryCondition(
                 scalar pout_n,

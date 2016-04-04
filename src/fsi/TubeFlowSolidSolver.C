@@ -44,7 +44,7 @@ namespace tubeflow
             grid.setZero();
 
             for ( int i = 0; i < N; i++ )
-                grid( i, 0 ) = dx * i + 0.5 * dx;
+                grid( i, 0 ) = dx * i + 0.5L * dx;
         }
     }
 
@@ -121,8 +121,8 @@ namespace tubeflow
 
         for ( int i = 0; i < a.rows(); i++ )
         {
-            a( i ) = p0 / (2 * rho) - cmk * cmk;
-            a( i ) /= p( i ) / (2 * rho) - cmk * cmk;
+            a( i ) = p0 / (2L * rho) - cmk * cmk;
+            a( i ) /= p( i ) / (2L * rho) - cmk * cmk;
             a( i ) = a0 * a( i ) * a( i );
         }
 

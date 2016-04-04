@@ -6,6 +6,7 @@
 
 #include "TubeFlowFluidSolver.H"
 #include <iomanip>
+#include <boost/math/constants/constants.hpp>
 
 namespace tubeflow
 {
@@ -44,7 +45,7 @@ namespace tubeflow
         iter( 0 ),
         minIter( 1 ),
         maxIter( 30 ),
-        tol( 1.0e-14 ),
+        tol( 1.0e-14L ),
         nbRes( 0 ),
         nbJac( 0 ),
         grid(),
@@ -108,7 +109,7 @@ namespace tubeflow
         iter( 0 ),
         minIter( 1 ),
         maxIter( 30 ),
-        tol( 1.0e-14 ),
+        tol( 1.0e-14L ),
         nbRes( 0 ),
         nbJac( 0 ),
         grid(),
@@ -146,13 +147,13 @@ namespace tubeflow
             grid.setZero();
 
             for ( int i = 0; i < N; i++ )
-                grid( i, 0 ) = dx * i + 0.5 * dx;
+                grid( i, 0 ) = dx * i + 0.5L * dx;
         }
     }
 
     scalar TubeFlowFluidSolver::evaluateInletVelocityBoundaryCondition()
     {
-        return u0 + u0 / 10.0 * std::pow( std::sin( M_PI * t * u0 / L ), 2 );
+        return u0 + u0 / 10.0L * std::pow( std::sin( boost::math::constants::pi<scalar>() * t * u0 / L ), 2 );
     }
 
     scalar TubeFlowFluidSolver::evaluateOutputPressureBoundaryCondition(
@@ -161,9 +162,9 @@ namespace tubeflow
         scalar uout
         )
     {
-        scalar value = std::sqrt( cmk * cmk - pout_n / (2.0 * rho) );
+        scalar value = std::sqrt( cmk * cmk - pout_n / (2.0L * rho) );
 
-        value = 2 * rho * ( cmk * cmk - std::pow( value - (uout - uout_n) / 4.0, 2 ) );
+        value = 2L * rho * ( cmk * cmk - std::pow( value - (uout - uout_n) / 4.0L, 2 ) );
 
         return value;
     }
@@ -287,65 +288,65 @@ namespace tubeflow
             if ( i == 0 )
             {
                 // Derivatives mass conservation
-                J( 0, 0 ) = 1.0;
+                J( 0, 0 ) = 1.0L;
 
-                J( N, N ) = 1.0;
-                J( N, N + 1 ) = -2.0;
-                J( N, N + 2 ) = 1.0;
+                J( N, N ) = 1.0L;
+                J( N, N + 1 ) = -2.0L;
+                J( N, N + 2 ) = 1.0L;
             }
 
             if ( i == N - 1 )
             {
                 // Derivatives mass conservation
-                J( N - 1, N - 3 ) = 1.0;
-                J( N - 1, N - 2 ) = -2.0;
-                J( N - 1, N - 1 ) = 1.0;
+                J( N - 1, N - 3 ) = 1.0L;
+                J( N - 1, N - 2 ) = -2.0L;
+                J( N - 1, N - 1 ) = 1.0L;
 
-                J( 2 * N - 1, N - 3 ) = 0.5 * std::sqrt( 2 ) * std::sqrt( 2 * cmk * cmk * rho - p_outn ) * std::sqrt( rho );
-                J( 2 * N - 1, N - 3 ) += -0.5 * u( N - 2 ) * rho;
-                J( 2 * N - 1, N - 3 ) += 0.25 * u( N - 3 ) * rho;
-                J( 2 * N - 1, N - 3 ) += 0.5 * un( N - 2 ) * rho;
-                J( 2 * N - 1, N - 3 ) += -0.25 * un( N - 3 ) * rho;
+                J( 2 * N - 1, N - 3 ) = 0.5L * std::sqrt( 2L ) * std::sqrt( 2L * cmk * cmk * rho - p_outn ) * std::sqrt( rho );
+                J( 2 * N - 1, N - 3 ) += -0.5L * u( N - 2 ) * rho;
+                J( 2 * N - 1, N - 3 ) += 0.25L * u( N - 3 ) * rho;
+                J( 2 * N - 1, N - 3 ) += 0.5L * un( N - 2 ) * rho;
+                J( 2 * N - 1, N - 3 ) += -0.25L * un( N - 3 ) * rho;
 
-                J( 2 * N - 1, N - 2 ) = -std::sqrt( 2 ) * std::sqrt( 2 * cmk * cmk * rho - p_outn ) * std::sqrt( rho );
+                J( 2 * N - 1, N - 2 ) = -std::sqrt( 2L ) * std::sqrt( 2L * cmk * cmk * rho - p_outn ) * std::sqrt( rho );
                 J( 2 * N - 1, N - 2 ) += u( N - 2 ) * rho;
-                J( 2 * N - 1, N - 2 ) += -0.5 * u( N - 3 ) * rho;
+                J( 2 * N - 1, N - 2 ) += -0.5L * u( N - 3 ) * rho;
                 J( 2 * N - 1, N - 2 ) += -un( N - 2 ) * rho;
-                J( 2 * N - 1, N - 2 ) += 0.5 * un( N - 3 ) * rho;
+                J( 2 * N - 1, N - 2 ) += 0.5L * un( N - 3 ) * rho;
 
-                J( 2 * N - 1, 2 * N - 1 ) = 1.0;
+                J( 2 * N - 1, 2 * N - 1 ) = 1.0L;
             }
 
             if ( i > 0 && i < N - 1 )
             {
                 // Derivatives mass conservation
-                J( i, i - 1 ) = 0.25 * ( -a( i - 1 ) - a( i ) );
-                J( i, i ) = 0.25 * ( -a( i - 1 ) + a( i + 1 ) );
-                J( i, i + 1 ) = 0.25 * ( a( i ) + a( i + 1 ) );
+                J( i, i - 1 ) = 0.25L * ( -a( i - 1 ) - a( i ) );
+                J( i, i ) = 0.25L * ( -a( i - 1 ) + a( i + 1 ) );
+                J( i, i + 1 ) = 0.25L * ( a( i ) + a( i + 1 ) );
                 J( i, N + i - 1 ) = -alpha / rho;
-                J( i, N + i ) = 2.0 * alpha / rho;
+                J( i, N + i ) = 2.0L * alpha / rho;
                 J( i, N + i + 1 ) = -alpha / rho;
 
                 // Derivatives momentum conservation
 
-                J( N + i, i - 1 ) = -0.5 * u( i - 1 ) * a( i - 1 );
-                J( N + i, i - 1 ) += -0.5 * u( i - 1 ) * a( i );
-                J( N + i, i - 1 ) += -0.25 * u( i ) * a( i - 1 );
-                J( N + i, i - 1 ) += -0.25 * u( i ) * a( i );
+                J( N + i, i - 1 ) = -0.5L * u( i - 1 ) * a( i - 1 );
+                J( N + i, i - 1 ) += -0.5L * u( i - 1 ) * a( i );
+                J( N + i, i - 1 ) += -0.25L * u( i ) * a( i - 1 );
+                J( N + i, i - 1 ) += -0.25L * u( i ) * a( i );
 
                 J( N + i, i ) = dx / dt * a( i );
-                J( N + i, i ) += 0.5 * u( i ) * a( i );
-                J( N + i, i ) += 0.25 * u( i + 1 ) * a( i );
-                J( N + i, i ) += 0.5 * u( i ) * a( i + 1 );
-                J( N + i, i ) += 0.25 * u( i + 1 ) * a( i + 1 );
-                J( N + i, i ) += -0.25 * u( i - 1 ) * a( i );
-                J( N + i, i ) += -0.25 * u( i - 1 ) * a( i - 1 );
+                J( N + i, i ) += 0.5L * u( i ) * a( i );
+                J( N + i, i ) += 0.25L * u( i + 1 ) * a( i );
+                J( N + i, i ) += 0.5L * u( i ) * a( i + 1 );
+                J( N + i, i ) += 0.25L * u( i + 1 ) * a( i + 1 );
+                J( N + i, i ) += -0.25L * u( i - 1 ) * a( i );
+                J( N + i, i ) += -0.25L * u( i - 1 ) * a( i - 1 );
 
-                J( N + i, i + 1 ) = 0.25 * u( i ) * a( i ) + 0.25 * u( i ) * a( i + 1 );
+                J( N + i, i + 1 ) = 0.25L * u( i ) * a( i ) + 0.25L * u( i ) * a( i + 1 );
 
-                J( N + i, N + i - 1 ) = 1.0 / rho * ( -0.25 * a( i - 1 ) - 0.25 * a( i ) );
-                J( N + i, N + i ) = 1.0 / rho * ( -0.25 * a( i + 1 ) + 0.25 * a( i - 1 ) );
-                J( N + i, N + i + 1 ) = 1.0 / rho * ( 0.25 * a( i ) + 0.25 * a( i + 1 ) );
+                J( N + i, N + i - 1 ) = 1.0L / rho * ( -0.25L * a( i - 1 ) - 0.25L * a( i ) );
+                J( N + i, N + i ) = 1.0L / rho * ( -0.25L * a( i + 1 ) + 0.25L * a( i - 1 ) );
+                J( N + i, N + i + 1 ) = 1.0L / rho * ( 0.25L * a( i ) + 0.25L * a( i + 1 ) );
             }
         }
     }
@@ -383,9 +384,9 @@ namespace tubeflow
 
         // Boundary conditions
         scalar u_in = evaluateInletVelocityBoundaryCondition();
-        scalar u_out = 2 * u( N - 2 ) - u( N - 3 );
-        scalar u_outn = 2 * un( N - 2 ) - un( N - 3 );
-        scalar p_in = 2 * p( 1 ) - p( 2 );
+        scalar u_out = 2L * u( N - 2 ) - u( N - 3 );
+        scalar u_outn = 2L * un( N - 2 ) - un( N - 3 );
+        scalar p_in = 2L * p( 1 ) - p( 2 );
         p_out = evaluateOutputPressureBoundaryCondition( p_outn, u_outn, u_out );
 
         // Apply boundary conditions
@@ -405,12 +406,12 @@ namespace tubeflow
         // Conservation of mass: internal system
 
         // Left and right face of a: a(i-1/2), a(i+1/2)
-        fsi::vector a_lf = 0.5 * ( a.head( N - 2 ) + a.segment( 1, N - 2 ) );
-        fsi::vector a_rf = 0.5 * ( a.segment( 1, N - 2 ) + a.segment( 2, N - 2 ) );
+        fsi::vector a_lf = 0.5L * ( a.head( N - 2 ) + a.segment( 1, N - 2 ) );
+        fsi::vector a_rf = 0.5L * ( a.segment( 1, N - 2 ) + a.segment( 2, N - 2 ) );
 
         // Left and right face of u: u(i-1/2), u(i+1/2)
-        fsi::vector u_lf = 0.5 * ( u.head( N - 2 ) + u.segment( 1, N - 2 ) );
-        fsi::vector u_rf = 0.5 * ( u.segment( 1, N - 2 ) + u.segment( 2, N - 2 ) );
+        fsi::vector u_lf = 0.5L * ( u.head( N - 2 ) + u.segment( 1, N - 2 ) );
+        fsi::vector u_rf = 0.5L * ( u.segment( 1, N - 2 ) + u.segment( 2, N - 2 ) );
 
         assert( a_lf.rows() == a_rf.rows() );
         assert( u_lf.rows() == u_rf.rows() );
@@ -435,8 +436,8 @@ namespace tubeflow
         R.segment( N + 1, N - 2 ) += u.segment( 1, N - 2 ).cwiseProduct( u_rf ).cwiseProduct( a_rf ) - u.head( N - 2 ).cwiseProduct( u_lf ).cwiseProduct( a_lf );
 
         // Pressure term of momentum conservation
-        R.segment( N + 1, N - 2 ) += 0.5 * 1.0 / rho * a_rf.cwiseProduct( p.segment( 2, N - 2 ) - p.segment( 1, N - 2 ) );
-        R.segment( N + 1, N - 2 ) += 0.5 * 1.0 / rho * a_lf.cwiseProduct( p.segment( 1, N - 2 ) - p.head( N - 2 ) );
+        R.segment( N + 1, N - 2 ) += 0.5L / rho * a_rf.cwiseProduct( p.segment( 2, N - 2 ) - p.segment( 1, N - 2 ) );
+        R.segment( N + 1, N - 2 ) += 0.5L / rho * a_lf.cwiseProduct( p.segment( 1, N - 2 ) - p.head( N - 2 ) );
 
         // SDC terms
         R.segment( 1, N - 2 ) -= (dx / dt) * rhs.segment( 1, N - 2 );
@@ -565,8 +566,8 @@ namespace tubeflow
         iter = 0;
 
         // Wolfe conditions settings
-        scalar c1 = 1.0e-4;
-        scalar c2 = 0.9;
+        scalar c1 = 1.0e-4L;
+        scalar c2 = 0.9L;
         int nbBackTrack = 0;
 
         // Initialize variables
