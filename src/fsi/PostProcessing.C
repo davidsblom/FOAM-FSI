@@ -65,12 +65,19 @@ void PostProcessing::finalizeStage()
             residualsStageList.at( stageIndex ).push_front( residualsList.at( i ) );
             solsStageList.at( stageIndex ).push_front( solsList.at( i ) );
         }
+
+        while ( static_cast<int>( residualsStageList.at( stageIndex ).size() ) > nbReuse )
+        {
+            residualsStageList.at( stageIndex ).pop_back();
+            solsStageList.at( stageIndex ).pop_back();
+        }
     }
 
     residualsList.clear();
     solsList.clear();
 
     assert( residualsStageList.size() == solsStageList.size() );
+    assert( residualsStageList.at( stageIndex ).size() == solsStageList.at( stageIndex ).size() );
 
     stageIndex++;
     initStage_ = false;
