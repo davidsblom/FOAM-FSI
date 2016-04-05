@@ -22,7 +22,7 @@
 
 int main()
 {
-    int nbComputations = 9;
+    int nbComputations = 6;
     int nbNodes = 6;
     std::vector<std::string> timeIntegrationSchemes = {
         "IDC", "SDIRK"
@@ -38,6 +38,8 @@ int main()
         if ( timeIntegrationSchemeString == "SDIRK" )
             nbSchemes = sdirkSchemes.size();
 
+        #pragma omp parallel for collapse(2), schedule(dynamic,1)
+
         for ( int iNodes = 0; iNodes < nbSchemes; iNodes++ )
         {
             for ( int iComputation = 0; iComputation < nbComputations; iComputation++ )
@@ -51,28 +53,26 @@ int main()
                 std::shared_ptr<MultiLevelFsiSolver> fsi;
 
                 {
-                    scalar r0 = 3.0e-3;
-                    scalar h = 3.0e-4;
-                    scalar L = 0.126;
-                    scalar rho_s = 1000;
-                    scalar E0 = 4.0e5;
-                    scalar G = 4.0e5;
-                    scalar nu = 0.5;
-
+                    scalar r0 = 0.2;
                     scalar a0 = M_PI * r0 * r0;
-                    scalar u0 = 0.26;
+                    scalar u0 = 0.1;
                     scalar p0 = 0;
-                    int N = 100;
+                    scalar L = 1;
                     scalar T = 1;
                     scalar dt = T / nbTimeSteps;
-                    scalar rho_f = 1060;
-                    scalar E = 490;
-                    scalar cmk = std::sqrt( E * h / (2 * rho_f * r0) );
+                    scalar rho_f = 1.225;
+                    scalar rho_s = 1.225;
+                    scalar E0 = 490;
+                    scalar G = 490;
+                    scalar h = 1.0e-3;
+                    scalar nu = 0.5;
+                    scalar cmk = std::sqrt( E0 * h / (2 * rho_f * r0) );
 
+                    int N = 100;
                     bool parallel = false;
                     int extrapolation = 0;
-                    scalar tol = 1.0e-3;
-                    int maxIter = 20;
+                    scalar tol = 1.0e-5;
+                    int maxIter = 50;
                     scalar initialRelaxation = 1.0e-3;
                     int maxUsedIterations = 50;
                     int nbReuse = 0;
@@ -81,8 +81,7 @@ int main()
                     int reuseInformationStartingFromTimeIndex = 0;
                     bool scaling = false;
                     bool updateJacobian = false;
-                    scalar beta = 0.5;
-                    int minIter = 5;
+                    scalar beta = 0.01;
 
                     fluid = std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> ( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
                     solid = std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver>( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
@@ -121,8 +120,6 @@ int main()
                     if ( timeIntegrationSchemeString == "SDIRK" )
                         convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, false, tol ) ) );
 
-                    convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
-
                     fsi = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
 
                     shared_ptr<PostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
@@ -139,13 +136,10 @@ int main()
                     quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
 
                     if ( timeIntegrationSchemeString == "IDC" )
-                        timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( fsiSolver, quadrature, 1.0e-13, 1, 50 ) );
+                        timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( fsiSolver, quadrature, 1.0e-15, nbNodes, 50 ) );
 
                     if ( timeIntegrationSchemeString == "SDIRK" )
                     {
-                        if ( iNodes + 1 > int( sdirkSchemes.size() ) )
-                            continue;
-
                         std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
                         std::string method = sdirkSchemes.at( iNodes );
                         timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::ESDIRK( fsiSolver, method, adaptiveTimeStepper ) );

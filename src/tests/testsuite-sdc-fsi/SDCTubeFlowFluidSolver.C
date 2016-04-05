@@ -216,9 +216,9 @@ namespace tubeflow
 
         if ( not corrector )
         {
-            p = pStages.at( k );
-            u = uStages.at( k );
-            a = aStages.at( k );
+            p = pStages.at( kold );
+            u = uStages.at( kold );
+            a = aStages.at( kold );
         }
 
         pn = pStages.at( kold );

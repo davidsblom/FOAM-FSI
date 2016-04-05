@@ -1,6 +1,6 @@
 c++WARN     = -Wall -Wextra -Werror
 
-EXE_INC = -std=c++11 \
+EXE_INC = -std=c++11 -fopenmp \
     -I ../../fsi \
     -I ../../fsi/lnInclude \
     -isystem ../../thirdParty/gtest/include \
