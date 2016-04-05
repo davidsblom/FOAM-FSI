@@ -196,10 +196,6 @@ namespace fsi
             int nbCols = residuals.size() - 1;
             nbCols = std::max( nbCols, 0 );
 
-            // Include information from previous optimization solves
-            for ( auto && sols : solsList )
-                nbCols += sols.size() - 1;
-
             // Include information from previous stages
             for ( unsigned i = solsStageList.size(); i-- > 0; )
                 for ( auto && sols : solsStageList.at( i ) )
@@ -244,23 +240,6 @@ namespace fsi
                     V.col( i ) = residuals.at( i ) - residuals.at( i + 1 );
                     W.col( i ) = sols.at( i ) - sols.at( i + 1 );
                     colIndex++;
-                }
-
-                // Include information from previous optimization solves
-
-                for ( unsigned i = 0; i < residualsList.size(); i++ )
-                {
-                    assert( residualsList.at( i ).size() >= 2 );
-
-                    for ( unsigned j = 0; j < residualsList.at( i ).size() - 1; j++ )
-                    {
-                        if ( colIndex >= V.cols() )
-                            continue;
-
-                        V.col( colIndex ) = residualsList.at( i ).at( j ) - residualsList.at( i ).at( j + 1 );
-                        W.col( colIndex ) = solsList.at( i ).at( j ) - solsList.at( i ).at( j + 1 );
-                        colIndex++;
-                    }
                 }
 
                 // Include information from previous stages
