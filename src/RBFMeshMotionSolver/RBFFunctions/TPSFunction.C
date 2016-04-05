@@ -19,6 +19,6 @@ namespace rbf
         if ( value > 0 )
             return std::log( value ) * value * value;
 
-        return 0;
+        return 0L;
     }
 }

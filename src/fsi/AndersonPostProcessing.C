@@ -343,7 +343,7 @@ namespace fsi
                 for ( unsigned int i = 0; i < singularValues_inv.rows(); ++i )
                 {
                     if ( svd.singularValues() ( i ) > singularityLimit )
-                        singularValues_inv( i ) = 1.0 / svd.singularValues() ( i );
+                        singularValues_inv( i ) = 1.0L / svd.singularValues() ( i );
                     else
                         singularValues_inv( i ) = 0;
                 }

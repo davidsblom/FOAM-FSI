@@ -5,6 +5,7 @@
  */
 
 #include "TubeFlowLinearizedSolidSolver.H"
+#include <boost/math/constants/constants.hpp>
 
 using namespace tubeflow;
 
@@ -20,11 +21,11 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     scalar r0
     )
     :
-    BaseMultiLevelSolver( N, 1, M_PI * r0 * r0 ),
+    BaseMultiLevelSolver( N, 1, boost::math::constants::pi<scalar>() * r0 * r0 ),
     N( N ),
     dt( dt ),
     r0( r0 ),
-    kappa( 2.0 * (1.0 + nu) / (4.0 + 3.0 * nu) ),
+    kappa( 2.0L * (1.0L + nu) / (4.0L + 3.0L * nu) ),
     dx( L / N ),
     G( G ),
     E0( E0 ),
@@ -56,7 +57,7 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     rhs.setZero();
     p.setZero();
 
-    scalar a0 = M_PI * r0 * r0;
+    scalar a0 = boost::math::constants::pi<scalar>() * r0 * r0;
     data.fill( a0 );
 
     factorizeMatrix();
@@ -73,7 +74,7 @@ void TubeFlowLinearizedSolidSolver::calcGrid()
         grid.setZero();
 
         for ( int i = 0; i < N; i++ )
-            grid( i, 0 ) = dx * i + 0.5 * dx;
+            grid( i, 0 ) = dx * i + 0.5L * dx;
     }
 }
 
@@ -88,7 +89,7 @@ void TubeFlowLinearizedSolidSolver::factorizeMatrix()
 
     for ( int i = 0; i < N; i++ )
     {
-        A( i, i ) = 1;
+        A( i, i ) = 1L;
         A( i, i + N ) = -dt;
 
         if ( i == 0 )
@@ -96,10 +97,10 @@ void TubeFlowLinearizedSolidSolver::factorizeMatrix()
             // Boundary conditions at inlet
             // r(0) = r(1)
 
-            A( i + N, i ) = kappa * G * dt / (rho * dx * dx) + E0 * dt / (1 - nu * nu) / (rho * r0 * r0);
+            A( i + N, i ) = kappa * G * dt / (rho * dx * dx) + E0 * dt / (1L - nu * nu) / (rho * r0 * r0);
             A( i + N, i + 1 ) = -kappa * G * dt / (rho * dx * dx);
 
-            A( i + N, i + N ) = 1;
+            A( i + N, i + N ) = 1L;
         }
 
         if ( i == N - 1 )
@@ -107,19 +108,19 @@ void TubeFlowLinearizedSolidSolver::factorizeMatrix()
             // Boundary conditions at outlet
             // r(N) = r(N-1)
 
-            A( i + N, i ) = kappa * G * dt / (rho * dx * dx) + E0 * dt / (1 - nu * nu) / (rho * r0 * r0);
+            A( i + N, i ) = kappa * G * dt / (rho * dx * dx) + E0 * dt / (1L - nu * nu) / (rho * r0 * r0);
             A( i + N, i - 1 ) = -kappa * G * dt / (rho * dx * dx);
 
-            A( i + N, i + N ) = 1;
+            A( i + N, i + N ) = 1L;
         }
 
         if ( i > 0 && i < N - 1 )
         {
-            A( i + N, i ) = 2 * kappa * G * dt / (rho * dx * dx) + E0 * dt / (1 - nu * nu) / (rho * r0 * r0);
+            A( i + N, i ) = 2L * kappa * G * dt / (rho * dx * dx) + E0 * dt / (1L - nu * nu) / (rho * r0 * r0);
             A( i + N, i + 1 ) = -kappa * G * dt / (rho * dx * dx);
             A( i + N, i - 1 ) = -kappa * G * dt / (rho * dx * dx);
 
-            A( i + N, i + N ) = 1;
+            A( i + N, i + N ) = 1L;
         }
     }
 
@@ -216,7 +217,7 @@ void TubeFlowLinearizedSolidSolver::solve(
 
     // Return area a
     a = r.array() + r0;
-    a = M_PI * a.array() * a.array();
+    a = boost::math::constants::pi<scalar>() * a.array() * a.array();
 
     data.col( 0 ) = a;
     this->p = p;

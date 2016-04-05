@@ -5,6 +5,7 @@
  */
 
 #include "TubeFlowLinearSolidSolver.H"
+#include <boost/math/constants/constants.hpp>
 
 using namespace tubeflow;
 
@@ -46,7 +47,7 @@ void TubeFlowLinearSolidSolver::solve(
     {
         b( i ) = rn( i );
         b( i + N ) = un( i ) + p( i ) * dt / (rho * h)
-            + E0 * dt / (r0 * rho) / (1 - nu * nu);
+            + E0 * dt / (r0 * rho) / (1L - nu * nu);
     }
 
     b += rhs;
@@ -61,7 +62,7 @@ void TubeFlowLinearSolidSolver::solve(
     u = x.tail( N );
 
     // Return area a
-    a = M_PI * r.array() * r.array();
+    a = boost::math::constants::pi<scalar>() * r.array() * r.array();
 
     data.col( 0 ) = a;
     this->p = p;
