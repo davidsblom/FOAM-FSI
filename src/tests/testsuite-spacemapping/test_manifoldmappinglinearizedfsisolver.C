@@ -92,7 +92,7 @@ protected:
         fluid = shared_ptr<BaseMultiLevelSolver> ( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, couplingGridSize, L, T, rho ) );
 
         // solid = shared_ptr<BaseMultiLevelSolver> ( new TubeFlowLinearizedSolidSolver( couplingGridSize, nu, rho, h, L, dt, G, E, r0 ) );
-        solid = shared_ptr<BaseMultiLevelSolver> ( new TubeFlowLinearSolidSolver( couplingGridSize, nu, rho, h, L, dt, G, E, r0 ) );
+        solid = shared_ptr<BaseMultiLevelSolver> ( new TubeFlowLinearSolidSolver( couplingGridSize, nu, rho, h, L, dt, G, E, r0, T ) );
 
         shared_ptr<RBFFunctionInterface> rbfFunction;
         shared_ptr<RBFInterpolation> rbfInterpolator;

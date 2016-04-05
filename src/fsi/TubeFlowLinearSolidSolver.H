@@ -24,7 +24,8 @@ namespace tubeflow
                 scalar dt,
                 scalar G,
                 scalar E0,
-                scalar r0
+                scalar r0,
+                scalar T
                 );
 
             virtual ~TubeFlowLinearSolidSolver();
@@ -36,5 +37,6 @@ namespace tubeflow
 
             const scalar E0;
             const scalar nu;
+            const scalar T;
     };
 }

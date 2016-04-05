@@ -21,11 +21,12 @@ class TubeFlowLinearSolidSolverTest : public ::testing::Test
             scalar E0 = 4.0e5;
             scalar G = 4.0e5;
             scalar nu = 0.5;
+            scalar T = 1;
 
             scalar dt = 0.1;
             int N = 5;
 
-            solid = new tubeflow::TubeFlowLinearSolidSolver( N, nu, rho, h, L, dt, G, E0, r0 );
+            solid = new tubeflow::TubeFlowLinearSolidSolver( N, nu, rho, h, L, dt, G, E0, r0, T );
         }
 
         virtual void TearDown()

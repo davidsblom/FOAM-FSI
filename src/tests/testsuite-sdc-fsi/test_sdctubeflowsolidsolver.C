@@ -10,6 +10,7 @@
 #include "SDCTubeFlowLinearizedSolidSolver.H"
 #include "GaussRadau.H"
 #include "GaussLobatto.H"
+#include "Uniform.H"
 #include "SDC.H"
 #include "SDCFsiSolver.H"
 #include "AndersonPostProcessing.H"
@@ -19,6 +20,70 @@
 #include "MinIterationConvergenceMeasure.H"
 #include "AitkenPostProcessing.H"
 #include "AbsoluteConvergenceMeasure.H"
+
+TEST( SDCSolidTest, order )
+{
+    scalar r0 = 0.2;
+    scalar h = 1.0e-3;
+    scalar L = 1;
+    scalar rho_s = 1.225;
+    scalar E0 = 490;
+    scalar G = 490;
+    scalar nu = 0.5;
+    scalar p0 = 0.001;
+    scalar T = 1;
+
+    int N = 10;
+    int nbComputations = 3;
+
+    std::deque<std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> > solidSolvers;
+    std::deque<int> nbTimeStepsList;
+
+    for ( int iComputation = 0; iComputation < nbComputations; iComputation++ )
+    {
+        int nbTimeSteps = 200 * std::pow( 2, iComputation );
+        scalar dt = T / nbTimeSteps;
+
+        std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> solid( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
+        solid->p.fill( p0 );
+
+        int nbNodes = 2;
+
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+
+        std::shared_ptr<sdc::SDC> sdc( new sdc::SDC( solid, quadrature, 1.0e-13, 10, 50 ) );
+
+        sdc->run();
+        ASSERT_TRUE( sdc->isConverged() );
+
+        solidSolvers.push_back( solid );
+        nbTimeStepsList.push_back( nbTimeSteps );
+    }
+
+    fsi::vector ref = solidSolvers.back()->r;
+
+    std::deque<scalar> errors;
+
+    for ( int iComputation = 0; iComputation < nbComputations - 1; iComputation++ )
+    {
+        fsi::vector data;
+
+        data = solidSolvers.at( iComputation )->r;
+
+        scalar error = (ref - data).norm() / data.norm();
+        std::cout << "error = " << error << std::endl;
+        errors.push_back( error );
+    }
+
+    for ( int iComputation = 0; iComputation < nbComputations - 2; iComputation++ )
+    {
+        scalar order = ( std::log10( errors.at( iComputation ) ) - std::log10( errors.at( iComputation + 1 ) ) ) / ( std::log10( nbTimeStepsList.at( iComputation + 1 ) ) - std::log10( nbTimeStepsList.at( iComputation ) ) );
+        std::cout << "order = " << order << std::endl;
+        ASSERT_GE( order, 2 );
+    }
+}
+
 
 class SDCFsiSolidSolverTest : public ::testing::TestWithParam<std::string>
 {
@@ -65,7 +130,7 @@ class SDCFsiSolidSolverTest : public ::testing::TestWithParam<std::string>
             std::shared_ptr<fsi::BaseMultiLevelSolver> solid;
 
             if ( solidSolverSetting == "linear" )
-                solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+                solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
 
             if ( solidSolverSetting == "linearized" )
                 solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
@@ -166,8 +231,7 @@ TEST( SDCFsiSolidTest, order )
     int N = 5;
     scalar T = 1;
     scalar rho_f = 1060;
-    scalar E = 490;
-    scalar cmk = std::sqrt( E * h / (2 * rho_f * r0) );
+    scalar cmk = std::sqrt( E0 * h / (2 * rho_f * r0) );
 
     bool parallel = false;
     int extrapolation = 0;
@@ -196,7 +260,7 @@ TEST( SDCFsiSolidTest, order )
         scalar dt = T / nbTimeSteps;
 
         std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
-        std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> solid( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+        std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> solid( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
 
         shared_ptr<RBFFunctionInterface> rbfFunction;
         shared_ptr<RBFInterpolation> rbfInterpolator;

@@ -23,7 +23,8 @@ namespace tubeflow
                 scalar dt,
                 scalar G,
                 scalar E0,
-                scalar r0
+                scalar r0,
+                scalar T
                 );
 
             virtual ~SDCTubeFlowLinearSolidSolver();
