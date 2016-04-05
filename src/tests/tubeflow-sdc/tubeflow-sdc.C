@@ -38,6 +38,8 @@ int main()
         if ( timeIntegrationSchemeString == "SDIRK" )
             nbSchemes = sdirkSchemes.size();
 
+        #pragma omp parallel for collapse(2), schedule(dynamic,1)
+
         for ( int iNodes = 0; iNodes < nbSchemes; iNodes++ )
         {
             for ( int iComputation = 0; iComputation < nbComputations; iComputation++ )
@@ -66,9 +68,7 @@ int main()
                     bool parallel = false;
                     int extrapolation = 0;
                     scalar tol = 1.0e-5;
-
-                    if ( timeIntegrationSchemeString == "SDIRK" )
-                        tol = 1.0e-10;
+                    scalar absoluteTol = 1.0e-15;
 
                     int maxIter = 50;
                     scalar initialRelaxation = 1.0e-3;
@@ -80,7 +80,6 @@ int main()
                     bool scaling = false;
                     bool updateJacobian = false;
                     scalar beta = 0.5;
-                    int minIter = 5;
 
                     fluid = std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> ( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
                     std::shared_ptr<tubeflow::SDCTubeFlowSolidSolver> solid( new tubeflow::SDCTubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
@@ -117,9 +116,7 @@ int main()
                         convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new ResidualRelativeConvergenceMeasure( 0, false, tol ) ) );
 
                     if ( timeIntegrationSchemeString == "SDIRK" )
-                        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, false, tol ) ) );
-
-                    convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+                        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, false, absoluteTol ) ) );
 
                     fsi = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
 
@@ -137,7 +134,7 @@ int main()
                     quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
 
                     if ( timeIntegrationSchemeString == "IDC" )
-                        timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( fsiSolver, quadrature, 1.0e-15, 1, 50 ) );
+                        timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( fsiSolver, quadrature, absoluteTol, 1, 50 ) );
 
                     if ( timeIntegrationSchemeString == "SDIRK" )
                     {

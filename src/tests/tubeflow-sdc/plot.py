@@ -114,14 +114,6 @@ for timeIntegrationScheme in timeIntegrationSchemes:
             print '\n' + legend
             for i in np.arange( nbComputations - 1 ):
                 print ( np.log10( errors_u[i+1] ) - np.log10( errors_u[i] ) ) / ( np.log10( timeStepList[i+1] ) - np.log10( timeStepList[i] ) )
-
-            print ''
-            for i in np.arange( nbComputations - 1 ):
-                print ( np.log10( errors_a[i+1] ) - np.log10( errors_a[i] ) ) / ( np.log10( timeStepList[i+1] ) - np.log10( timeStepList[i] ) )
-
-            print ''
-            for i in np.arange( nbComputations - 1 ):
-                print ( np.log10( errors_p[i+1] ) - np.log10( errors_p[i] ) ) / ( np.log10( timeStepList[i+1] ) - np.log10( timeStepList[i] ) )
         except:
             pass
 
