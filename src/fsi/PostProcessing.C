@@ -71,6 +71,7 @@ void PostProcessing::finalizeStage()
     solsList.clear();
 
     assert( residualsStageList.size() == solsStageList.size() );
+    assert( residualsStageList.at( stageIndex ).size() == solsStageList.at( stageIndex ).size() );
 
     stageIndex++;
     initStage_ = false;

@@ -196,32 +196,16 @@ namespace fsi
             int nbCols = residuals.size() - 1;
             nbCols = std::max( nbCols, 0 );
 
-            // Include information from previous optimization solves
-            for ( auto && sols : solsList )
-                nbCols += sols.size() - 1;
-
             // Include information from previous stages
             for ( unsigned i = solsStageList.size(); i-- > 0; )
-            {
                 for ( auto && sols : solsStageList.at( i ) )
-                {
-                    if ( i != stageIndex )
-                        continue;
-
                     nbCols += sols.size() - 1;
-                }
-            }
 
             // Include information from previous time steps
             for ( auto && solsStageList : solsTimeList )
-                for ( unsigned j = 0; j < solsStageList.size(); j++ )
-                {
-                    if ( j != stageIndex )
-                        continue;
-
-                    for ( auto && sols : solsStageList.at( j ) )
+                for ( auto && solsStage : solsStageList )
+                    for ( auto && sols : solsStage )
                         nbCols += sols.size() - 1;
-                }
 
             nbCols = std::min( static_cast<int>( xk.rows() ), nbCols );
             nbCols = std::min( nbCols, maxUsedIterations );
@@ -258,32 +242,12 @@ namespace fsi
                     colIndex++;
                 }
 
-                // Include information from previous optimization solves
-
-                for ( unsigned i = 0; i < residualsList.size(); i++ )
-                {
-                    assert( residualsList.at( i ).size() >= 2 );
-
-                    for ( unsigned j = 0; j < residualsList.at( i ).size() - 1; j++ )
-                    {
-                        if ( colIndex >= V.cols() )
-                            continue;
-
-                        V.col( colIndex ) = residualsList.at( i ).at( j ) - residualsList.at( i ).at( j + 1 );
-                        W.col( colIndex ) = solsList.at( i ).at( j ) - solsList.at( i ).at( j + 1 );
-                        colIndex++;
-                    }
-                }
-
                 // Include information from previous stages
 
                 for ( unsigned i = residualsStageList.size(); i-- > 0; )
                 {
                     for ( unsigned j = 0; j < residualsStageList.at( i ).size(); j++ )
                     {
-                        if ( i != stageIndex )
-                            continue;
-
                         assert( residualsStageList.at( i ).at( j ).size() >= 2 );
 
                         for ( unsigned k = 0; k < residualsStageList.at( i ).at( j ).size() - 1; k++ )
@@ -304,9 +268,6 @@ namespace fsi
                 {
                     for ( unsigned j = residualsTimeList.at( i ).size(); j-- > 0; )
                     {
-                        if ( j != stageIndex )
-                            continue;
-
                         for ( unsigned k = 0; k < residualsTimeList.at( i ).at( j ).size(); k++ )
                         {
                             assert( residualsTimeList.at( i ).at( j ).at( k ).size() >= 2 );
