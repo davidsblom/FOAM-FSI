@@ -84,7 +84,7 @@ int main()
                     scalar beta = 0.01;
 
                     fluid = std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> ( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
-                    solid = std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver>( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+                    solid = std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver>( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
 
                     shared_ptr<RBFFunctionInterface> rbfFunction;
                     shared_ptr<RBFInterpolation> rbfInterpolator;

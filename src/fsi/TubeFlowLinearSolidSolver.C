@@ -18,13 +18,16 @@ TubeFlowLinearSolidSolver::TubeFlowLinearSolidSolver(
     scalar dt,
     scalar G,
     scalar E0,
-    scalar r0
+    scalar r0,
+    scalar T
     )
     :
     TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0 ),
     E0( E0 ),
-    nu( nu )
+    nu( nu ),
+    T( T )
 {
+    assert( T > 0 );
     rn.fill( r0 );
     r.fill( r0 );
 }
