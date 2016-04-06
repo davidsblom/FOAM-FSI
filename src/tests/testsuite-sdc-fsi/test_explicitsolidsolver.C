@@ -33,7 +33,7 @@ class ExplicitLinearSolidSolverTest : public TestWithParam< std::tr1::tuple<int,
             scalar dt = 0.01;
             int N = 5;
             scalar L = 1;
-            scalar T = 10;
+            scalar T = 5;
             scalar dx = L / N;
             scalar rho = 1.225;
             scalar E = 490;
@@ -147,11 +147,7 @@ TEST_P( ExplicitLinearSolidSolverTest, initTimeStep )
 
 TEST_P( ExplicitLinearSolidSolverTest, residual )
 {
-    bool parallel = std::tr1::get<0>( GetParam() );
     int N = 5;
-
-    if ( parallel )
-        N = 10;
 
     fsi::vector input( N ), output( N ), R( N );
     input.head( 5 ) = solver->fsi->solid->data.col( 0 );
@@ -167,11 +163,7 @@ TEST_P( ExplicitLinearSolidSolverTest, iqn_evaluate_residual )
 {
     solver->initTimeStep();
 
-    bool parallel = std::tr1::get<0>( GetParam() );
     int N = 5;
-
-    if ( parallel )
-        N = 10;
 
     fsi::vector input( N ), output( N ), R( N );
     input.head( 5 ) = solver->fsi->solid->data.col( 0 );
