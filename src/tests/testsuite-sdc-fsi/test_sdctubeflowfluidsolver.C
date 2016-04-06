@@ -19,7 +19,7 @@ class SDCFluidSolverTest : public ::testing::Test
             scalar a0 = M_PI * r0 * r0;
             scalar u0 = 0.1;
             scalar p0 = 0;
-            scalar dt = 0.1;
+            scalar dt = 0.01;
             int N = 5;
             scalar L = 1;
             scalar T = 1;
