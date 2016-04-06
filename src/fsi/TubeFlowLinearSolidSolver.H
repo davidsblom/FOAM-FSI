@@ -35,8 +35,6 @@ namespace tubeflow
                 fsi::vector & a
                 );
 
-            const scalar E0;
-            const scalar nu;
             const scalar T;
     };
 }

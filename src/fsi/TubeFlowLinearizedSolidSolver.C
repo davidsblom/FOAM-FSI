@@ -49,6 +49,7 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     assert( L > 0 );
     assert( G > 0 );
     assert( r0 > 0 );
+    assert( E0 > 0 );
 
     un.setZero();
     u.setZero();
