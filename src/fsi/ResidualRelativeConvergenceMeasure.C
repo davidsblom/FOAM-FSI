@@ -17,7 +17,7 @@ namespace fsi
         ConvergenceMeasure( dataId, suffices ),
         isFirstIteration( true ),
         convergenceLimit( convergenceLimit ),
-        normFirstResidual( std::numeric_limits<double>::max() ),
+        normFirstResidual( std::numeric_limits<scalar>::max() ),
         normDiff( 0 )
     {
         assert( convergenceLimit > 0 );
