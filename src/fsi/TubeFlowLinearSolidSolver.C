@@ -23,8 +23,6 @@ TubeFlowLinearSolidSolver::TubeFlowLinearSolidSolver(
     )
     :
     TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0 ),
-    E0( E0 ),
-    nu( nu ),
     T( T )
 {
     assert( T > 0 );
