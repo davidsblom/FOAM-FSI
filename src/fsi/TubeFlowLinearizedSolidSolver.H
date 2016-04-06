@@ -80,7 +80,7 @@ namespace tubeflow
             fsi::vector rhs;
             fsi::vector p;
 
-            Eigen::PartialPivLU<matrix> lu;
+            std::shared_ptr<Eigen::FullPivLU<matrix> > lu;
     };
 }
 

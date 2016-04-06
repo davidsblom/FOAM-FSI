@@ -55,7 +55,7 @@ void TubeFlowLinearSolidSolver::solve(
 
     // Solve for x
 
-    x = lu.solve( b );
+    x = lu->solve( b );
 
     // Retrieve solution
 

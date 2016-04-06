@@ -38,14 +38,14 @@ namespace tubeflow
 
         for ( int i = 1; i < N - 1; i++ )
             f( i + N ) = kappa * G / (dx * dx * rho) * ( r( i + 1 ) - 2 * r( i ) + r( i - 1 ) )
-                - E0 / (1 - nu * nu) * r( i ) / (r0 * r0 * rho)
+                - E0 / (1L - nu * nu) * r( i ) / (r0 * r0 * rho)
                 + p( i ) / (rho * h);
 
         f( N ) = kappa * G / (dx * dx * rho) * ( r( 1 ) - r( 0 ) )
-            - E0 / (1 - nu * nu) * r( 0 ) / (r0 * r0 * rho)
+            - E0 / (1L - nu * nu) * r( 0 ) / (r0 * r0 * rho)
             + p( 0 ) / (rho * h);
         f( 2 * N - 1 ) = kappa * G / (dx * dx * rho) * ( -r( N - 1 ) + r( N - 2 ) )
-            - E0 / (1 - nu * nu) * r( N - 1 ) / (r0 * r0 * rho)
+            - E0 / (1L - nu * nu) * r( N - 1 ) / (r0 * r0 * rho)
             + p( N - 1 ) / (rho * h);
     }
 
@@ -182,9 +182,9 @@ namespace tubeflow
     {
         dof.push_back( N );
         enabled.push_back( true );
-        names.push_back( "solid u" );
+        names.push_back( "solid r" );
         dof.push_back( N );
         enabled.push_back( true );
-        names.push_back( "solid r" );
+        names.push_back( "solid u" );
     }
 }

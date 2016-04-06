@@ -41,6 +41,19 @@ namespace tubeflow
                 bool diffJacobian
                 );
 
+            TubeFlowFluidSolver(
+                scalar a0,
+                scalar u0,
+                scalar p0,
+                scalar dt,
+                scalar cmk,
+                int N,
+                scalar L,
+                scalar T,
+                scalar rho,
+                scalar tol
+                );
+
             virtual ~TubeFlowFluidSolver();
 
             virtual void finalizeTimeStep();
@@ -71,11 +84,7 @@ namespace tubeflow
 
             virtual scalar evaluateInletVelocityBoundaryCondition();
 
-            virtual scalar evaluateOutputPressureBoundaryCondition(
-                scalar pout_n,
-                scalar uout_n,
-                scalar uout
-                );
+            virtual scalar evaluateOutputPressureBoundaryCondition( const fsi::vector & u );
 
             void evaluateJacobian(
                 const fsi::vector & x,

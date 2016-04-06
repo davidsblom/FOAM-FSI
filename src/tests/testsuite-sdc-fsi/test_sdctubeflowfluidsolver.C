@@ -44,7 +44,7 @@ class SDCFluidSolverTest : public ::testing::Test
             std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
             quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
 
-            sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( fluid, quadrature, tol, 3, 30 ) );
+            sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( fluid, quadrature, tol, 3, 100 ) );
         }
 
         virtual void TearDown()

@@ -1,5 +1,5 @@
 tubeflow-sdc-solid.C
 SDCTubeFlowFluidSolver.C
-SDCTubeFlowLinearSolidSolver.C
+SDCTubeFlowLinearizedSolidSolver.C
 
 EXE = $(FOAM_APPBIN)/tubeflow-sdc-solid

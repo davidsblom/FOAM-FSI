@@ -181,8 +181,8 @@ void TubeFlowExplicitLinearSolidSolver::solve(
         u.array() += b_RK4[iStage] * kStages[iStage].array().tail( N );
     }
 
-    r.array() *= dt;
-    u.array() *= dt;
+    r *= dt;
+    u *= dt;
     r += rn;
     u += un;
 

@@ -39,7 +39,7 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     r( N ),
     rhs( 2 * N ),
     p( N ),
-    lu()
+    lu( nullptr )
 {
     assert( N > 0 );
     assert( nu > 0 );
@@ -125,7 +125,7 @@ void TubeFlowLinearizedSolidSolver::factorizeMatrix()
         }
     }
 
-    lu.compute( A );
+    lu = std::shared_ptr<Eigen::FullPivLU<matrix> > ( new Eigen::FullPivLU<matrix>( A ) );
 }
 
 void TubeFlowLinearizedSolidSolver::finalizeTimeStep()
@@ -209,7 +209,7 @@ void TubeFlowLinearizedSolidSolver::solve(
 
     // Solve for x
 
-    x = lu.solve( b );
+    x = lu->solve( b );
 
     // Retrieve solution
 

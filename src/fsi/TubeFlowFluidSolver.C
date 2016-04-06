@@ -20,7 +20,8 @@ namespace tubeflow
         scalar L,
         scalar T,
         scalar rho
-        ) :
+        )
+        :
         BaseMultiLevelSolver( N, 1, p0 ),
         a0( a0 ),
         u0( u0 ),
@@ -41,11 +42,11 @@ namespace tubeflow
         u( N ),
         p( N ),
         a( N ),
-        rhs( 2 * N ),
+        rhs( 2 * N + 2 ),
         iter( 0 ),
         minIter( 1 ),
         maxIter( 30 ),
-        tol( 1.0e-14L ),
+        tol( 1.0e-20L ),
         nbRes( 0 ),
         nbJac( 0 ),
         grid(),
@@ -105,11 +106,11 @@ namespace tubeflow
         u( N ),
         p( N ),
         a( N ),
-        rhs( 2 * N ),
+        rhs( 2 * N + 2 ),
         iter( 0 ),
         minIter( 1 ),
         maxIter( 30 ),
-        tol( 1.0e-14L ),
+        tol( 1.0e-20L ),
         nbRes( 0 ),
         nbJac( 0 ),
         grid(),
@@ -125,6 +126,72 @@ namespace tubeflow
         assert( rho > 0 );
         assert( alpha > 0 );
         assert( tau > 0 );
+
+        un.fill( u0 );
+        an.fill( a0 );
+        pn.fill( p0 );
+        u.fill( u0 );
+        p.fill( p0 );
+        a.fill( a0 );
+        data.fill( p0 );
+        rhs.setZero();
+    }
+
+    TubeFlowFluidSolver::TubeFlowFluidSolver(
+        scalar a0,
+        scalar u0,
+        scalar p0,
+        scalar dt,
+        scalar cmk,
+        int N,
+        scalar L,
+        scalar T,
+        scalar rho,
+        scalar tol
+        )
+        :
+        BaseMultiLevelSolver( N, 1, p0 ),
+        a0( a0 ),
+        u0( u0 ),
+        p0( p0 ),
+        dt( dt ),
+        dx( L / N ),
+        cmk( cmk ),
+        rho( rho ),
+        L( L ),
+        T( T ),
+        alpha( a0 / (u0 + dx / dt) ),
+        tau( u0 * dt / L ),
+        p_outn( 0 ),
+        p_out( 0 ),
+        un( N ),
+        pn( N ),
+        an( N ),
+        u( N ),
+        p( N ),
+        a( N ),
+        rhs( 2 * N + 2 ),
+        iter( 0 ),
+        minIter( 1 ),
+        maxIter( 30 ),
+        tol( tol ),
+        nbRes( 0 ),
+        nbJac( 0 ),
+        grid(),
+        diffJacobian( false )
+    {
+        // Verify input parameters
+        assert( dt > 0 );
+        assert( a0 > 0 );
+        assert( cmk > 0 );
+        assert( N > 0 );
+        assert( L > 0 );
+        assert( T > 0 );
+        assert( rho > 0 );
+        assert( alpha > 0 );
+        assert( tau > 0 );
+        assert( tol > 0 );
+        assert( tol < 1 );
 
         un.fill( u0 );
         an.fill( a0 );
@@ -156,15 +223,14 @@ namespace tubeflow
         return u0 + u0 / 10.0L * std::pow( std::sin( boost::math::constants::pi<scalar>() * t * u0 / L ), 2 );
     }
 
-    scalar TubeFlowFluidSolver::evaluateOutputPressureBoundaryCondition(
-        scalar pout_n,
-        scalar uout_n,
-        scalar uout
-        )
+    scalar TubeFlowFluidSolver::evaluateOutputPressureBoundaryCondition( const fsi::vector & u )
     {
-        scalar value = std::sqrt( cmk * cmk - pout_n / (2.0L * rho) );
+        scalar u_out = 2L * u( N - 2 ) - u( N - 3 );
+        scalar u_outn = 2L * un( N - 2 ) - un( N - 3 );
 
-        value = 2L * rho * ( cmk * cmk - std::pow( value - (uout - uout_n) / 4.0L, 2 ) );
+        scalar value = std::sqrt( cmk * cmk - p_outn / (2.0L * rho) );
+
+        value = 2L * rho * ( cmk * cmk - std::pow( value - (u_out - u_outn) / 4.0L, 2 ) );
 
         return value;
     }
@@ -372,7 +438,7 @@ namespace tubeflow
         assert( a.rows() == N );
         assert( un.rows() == N );
         assert( an.rows() == N );
-        assert( R.rows() == rhs.rows() );
+        assert( rhs.rows() == 2 * N + 2 );
 
         R.setZero();
         nbRes++;
@@ -384,10 +450,9 @@ namespace tubeflow
 
         // Boundary conditions
         scalar u_in = evaluateInletVelocityBoundaryCondition();
-        scalar u_out = 2L * u( N - 2 ) - u( N - 3 );
-        scalar u_outn = 2L * un( N - 2 ) - un( N - 3 );
+        p_out = evaluateOutputPressureBoundaryCondition( u );
         scalar p_in = 2L * p( 1 ) - p( 2 );
-        p_out = evaluateOutputPressureBoundaryCondition( p_outn, u_outn, u_out );
+        scalar u_out = 2L * u( N - 2 ) - u( N - 3 );
 
         // Apply boundary conditions
 
@@ -628,22 +693,14 @@ namespace tubeflow
                     Eigen::NumericalDiff<residualFunctor, Eigen::Central> numDiff( functor );
                     Eigen::LevenbergMarquardt<Eigen::NumericalDiff<residualFunctor, Eigen::Central>, scalar> lm( numDiff );
 
-                    lm.parameters.maxfev = 2000;
-                    lm.parameters.xtol = 1.0e-13;
-                    lm.parameters.ftol = 1.0e-13;
+                    lm.parameters.maxfev = 5000;
+                    lm.parameters.xtol = tol;
+                    lm.parameters.ftol = tol;
 
                     fsi::vector x0 = x;
-                    int ret = lm.minimize( x );
+                    lm.minimize( x );
                     alpha = 1;
                     dx = x0 - x;
-
-                    // 2: RelativeErrorTooSmall
-                    assert( ret == 2 );
-
-                    if ( ret != 2 )
-                        throw std::runtime_error( "The Levenberg Marquardt solver has not converged." );
-
-                    // throw std::runtime_error( msg );
                 }
             }
 
