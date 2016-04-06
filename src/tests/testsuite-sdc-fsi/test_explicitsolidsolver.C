@@ -21,7 +21,7 @@ using ::testing::Bool;
 using ::testing::Values;
 using ::testing::Combine;
 
-class ExplicitLinearSolidSolverTest : public TestWithParam< std::tr1::tuple<bool, int, bool> >
+class ExplicitLinearSolidSolverTest : public TestWithParam< std::tr1::tuple<int, bool> >
 {
     protected:
         virtual void SetUp()
@@ -56,9 +56,9 @@ class ExplicitLinearSolidSolverTest : public TestWithParam< std::tr1::tuple<bool
             int extrapolation = 2;
 
             // Parametrized settings
-            bool parallel = std::tr1::get<0>( GetParam() );
-            int nbReuse = std::tr1::get<1>( GetParam() );
-            bool convergenceMeasureTraction = std::tr1::get<2>( GetParam() );
+            bool parallel = false;
+            int nbReuse = std::tr1::get<0>( GetParam() );
+            bool convergenceMeasureTraction = std::tr1::get<1>( GetParam() );
 
             int maxUsedIterations = N;
 
@@ -118,7 +118,7 @@ class ExplicitLinearSolidSolverTest : public TestWithParam< std::tr1::tuple<bool
         ImplicitMultiLevelFsiSolver * solver;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, ExplicitLinearSolidSolverTest, ::testing::Combine( Bool(), Values( 0, 1, 4 ), Bool() ) );
+INSTANTIATE_TEST_CASE_P( testParameters, ExplicitLinearSolidSolverTest, ::testing::Combine( Values( 0, 1, 4 ), Bool() ) );
 
 TEST_P( ExplicitLinearSolidSolverTest, object )
 {
