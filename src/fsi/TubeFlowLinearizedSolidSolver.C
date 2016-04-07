@@ -18,7 +18,8 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     scalar dt,
     scalar G,
     scalar E0,
-    scalar r0
+    scalar r0,
+    scalar T
     )
     :
     BaseMultiLevelSolver( N, 1, boost::math::constants::pi<scalar>() * r0 * r0 ),
@@ -32,6 +33,7 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     nu( nu ),
     h( h ),
     rho( rho ),
+    T( T ),
     grid(),
     un( N ),
     rn( N ),
@@ -50,6 +52,7 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     assert( G > 0 );
     assert( r0 > 0 );
     assert( E0 > 0 );
+    assert( T > 0 );
 
     un.setZero();
     u.setZero();

@@ -17,10 +17,11 @@ namespace tubeflow
         scalar dt,
         scalar G,
         scalar E0,
-        scalar r0
+        scalar r0,
+        scalar T
         )
         :
-        TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0 )
+        TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0, T )
     {}
 
     SDCTubeFlowLinearizedSolidSolver::~SDCTubeFlowLinearizedSolidSolver()
@@ -78,8 +79,7 @@ namespace tubeflow
 
     scalar SDCTubeFlowLinearizedSolidSolver::getEndTime()
     {
-        assert( false );
-        return 0;
+        return T;
     }
 
     scalar SDCTubeFlowLinearizedSolidSolver::getTimeStep()
@@ -128,6 +128,9 @@ namespace tubeflow
         )
     {
         prepareImplicitSolve( corrector, k, kold, t, dt, qold, rhs );
+
+        fsi::vector a;
+        this->solve( p, a );
 
         getSolution( result, f );
         evaluateFunction( k, result, t, f );
