@@ -38,7 +38,7 @@ namespace tubeflow
         assert( rhs.rows() == 2 * N + 2 );
         assert( u.rows() == N );
 
-        scalar c = std::sqrt( cmk * cmk + p( N - 1 ) / 2 );
+        scalar c = std::sqrt( cmk * cmk + pn( N - 1 ) / 2 );
 
         return c * ( u( N - 1 ) - un( N - 1 ) - rhs( 2 * N + 1 ) ) + pn( N - 1 ) + rhs( 2 * N );
     }
@@ -96,7 +96,7 @@ namespace tubeflow
 
         f *= -1.0;
 
-        scalar c = std::sqrt( cmk * cmk + p( N - 1 ) / 2 );
+        scalar c = std::sqrt( cmk * cmk + pn( N - 1 ) / 2 );
         f( 2 * N ) = c / dt * ( u( N - 1 ) - un( N - 1 ) - rhs( 2 * N + 1 ) );
         f( 2 * N + 1 ) = 1.0 / (c * dt) * ( p( N - 1 ) - pn( N - 1 ) - rhs( 2 * N ) );
     }
