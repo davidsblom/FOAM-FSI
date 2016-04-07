@@ -36,7 +36,7 @@ sdirkSchemes = ["SDIRK2", "SDIRK3", "SDIRK4"]
 
 
 for i in np.arange( nbNodes + 1 ):
-    for j in np.arange( nbComputations ):
+    for j in np.arange( 3, nbComputations ):
 
         label_ref = "IDC_nbNodes_" + str( i )
         label_ref += "_nbTimeSteps_" + str( 2 ** j)

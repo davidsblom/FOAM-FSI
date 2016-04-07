@@ -15,6 +15,7 @@
 #include "SDCFsiSolver.H"
 #include "AndersonPostProcessing.H"
 #include "ResidualRelativeConvergenceMeasure.H"
+#include "AbsoluteConvergenceMeasure.H"
 #include "RelativeConvergenceMeasure.H"
 #include "MinIterationConvergenceMeasure.H"
 #include "Uniform.H"
@@ -68,7 +69,7 @@ int main()
                     bool parallel = false;
                     int extrapolation = 0;
                     scalar tol = 1.0e-5;
-                    scalar absoluteTol = 1.0e-15;
+                    scalar absoluteTol = 1.0e-13;
 
                     int maxIter = 50;
                     scalar initialRelaxation = 1.0e-3;
@@ -113,10 +114,12 @@ int main()
                     convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
 
                     if ( timeIntegrationSchemeString == "IDC" )
-                        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new ResidualRelativeConvergenceMeasure( 0, false, tol ) ) );
+                        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new ResidualRelativeConvergenceMeasure( 0, true, tol ) ) );
 
                     if ( timeIntegrationSchemeString == "SDIRK" )
-                        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, false, absoluteTol ) ) );
+                        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, true, absoluteTol ) ) );
+
+                    convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new AbsoluteConvergenceMeasure( 0, true, 0.1 * absoluteTol ) ) );
 
                     fsi = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
 
