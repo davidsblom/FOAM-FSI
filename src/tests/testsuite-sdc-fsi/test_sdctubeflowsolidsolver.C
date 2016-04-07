@@ -241,7 +241,7 @@ TEST( SDCFsiSolidTest, order )
     int nbComputations = 3;
 
     std::deque<std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> > fluidSolvers;
-    std::deque<std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> > solidSolvers;
+    std::deque<std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> > solidSolvers;
     std::deque<int> nbTimeStepsList;
 
     for ( int iComputation = 0; iComputation < nbComputations; iComputation++ )
