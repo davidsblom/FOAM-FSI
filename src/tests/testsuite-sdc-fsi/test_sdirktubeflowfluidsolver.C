@@ -80,7 +80,7 @@ TEST( SDIRKFluidTest, order )
 
     ASSERT_TRUE( dx > 0 );
 
-    int nbComputations = 6;
+    int nbComputations = 4;
 
     std::deque<std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> > fluidSolvers;
     std::deque<int> nbTimeStepsList;
