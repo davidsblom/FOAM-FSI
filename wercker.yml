@@ -508,12 +508,7 @@ build:
 
                 source foam-extend-3.2/etc/bashrc
 
-                wmake src/tests/testsuite-dealii
-                wmake src/tests/testsuite-fsi
-                wmake src/tests/testsuite-rbf
-                wmake src/tests/testsuite-sdc
-                wmake src/tests/testsuite-sdc-fsi
-                wmake src/tests/testsuite-spacemapping
+                wmake all
         - script:
             name: testsuite-sdc
             code: |
