@@ -15,7 +15,6 @@
 #include "TubeFlowSolidSolver.H"
 #include "TubeFlowLinearizedFluidSolver.H"
 #include "TubeFlowLinearizedSolidSolver.H"
-#include "TubeFlowLinearSolidSolver.H"
 #include "AndersonPostProcessing.H"
 #include "gtest/gtest.h"
 
@@ -90,9 +89,7 @@ protected:
         // Fine model
 
         fluid = shared_ptr<BaseMultiLevelSolver> ( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, couplingGridSize, L, T, rho ) );
-
-        // solid = shared_ptr<BaseMultiLevelSolver> ( new TubeFlowLinearizedSolidSolver( couplingGridSize, nu, rho, h, L, dt, G, E, r0 ) );
-        solid = shared_ptr<BaseMultiLevelSolver> ( new TubeFlowLinearSolidSolver( couplingGridSize, nu, rho, h, L, dt, G, E, r0, T ) );
+        solid = shared_ptr<BaseMultiLevelSolver> ( new TubeFlowLinearizedSolidSolver( couplingGridSize, nu, rho, h, L, dt, G, E, r0, T ) );
 
         shared_ptr<RBFFunctionInterface> rbfFunction;
         shared_ptr<RBFInterpolation> rbfInterpolator;
@@ -144,7 +141,7 @@ protected:
         fluid = shared_ptr<BaseMultiLevelSolver> ( new TubeFlowLinearizedFluidSolver( N, p0, r0, u0, rho, E, h, T, dt, L ) );
 
         // solid = shared_ptr<BaseMultiLevelSolver> ( new TubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
-        solid = shared_ptr<BaseMultiLevelSolver> ( new TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E, r0 ) );
+        solid = shared_ptr<BaseMultiLevelSolver> ( new TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E, r0, T ) );
 
         rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
         rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );

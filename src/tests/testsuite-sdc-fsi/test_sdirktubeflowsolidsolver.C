@@ -6,7 +6,6 @@
 
 #include "gtest/gtest.h"
 #include "SDCTubeFlowFluidSolver.H"
-#include "SDCTubeFlowLinearSolidSolver.H"
 #include "SDCTubeFlowLinearizedSolidSolver.H"
 #include "GaussRadau.H"
 #include "GaussLobatto.H"
@@ -21,7 +20,7 @@
 #include "AitkenPostProcessing.H"
 #include "AbsoluteConvergenceMeasure.H"
 
-class SDIRKFsiSolidSolverTest : public ::testing::TestWithParam<std::string>
+class SDIRKFsiSolidSolverTest : public ::testing::Test
 {
     protected:
         virtual void SetUp()
@@ -59,17 +58,10 @@ class SDIRKFsiSolidSolverTest : public ::testing::TestWithParam<std::string>
             scalar beta = 0.5;
             int minIter = 5;
 
-            std::string solidSolverSetting = GetParam();
-
             std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
 
             std::shared_ptr<fsi::BaseMultiLevelSolver> solid;
-
-            if ( solidSolverSetting == "linear" )
-                solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
-
-            if ( solidSolverSetting == "linearized" )
-                solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+            solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
 
             assert( solid );
 
@@ -131,19 +123,17 @@ class SDIRKFsiSolidSolverTest : public ::testing::TestWithParam<std::string>
         std::shared_ptr<sdc::ESDIRK> esdirk;
 };
 
-INSTANTIATE_TEST_CASE_P( tests, SDIRKFsiSolidSolverTest, ::testing::Values( "linearized", "linear" ) );
-
-TEST_P( SDIRKFsiSolidSolverTest, object )
+TEST_F( SDIRKFsiSolidSolverTest, object )
 {
     ASSERT_TRUE( true );
 }
 
-TEST_P( SDIRKFsiSolidSolverTest, timeStep )
+TEST_F( SDIRKFsiSolidSolverTest, timeStep )
 {
     esdirk->solveTimeStep( 0 );
 }
 
-TEST_P( SDIRKFsiSolidSolverTest, run )
+TEST_F( SDIRKFsiSolidSolverTest, run )
 {
     esdirk->run();
 }
@@ -184,7 +174,7 @@ TEST( SDIRKFsiSolidTest, linear )
     int nbComputations = 3;
 
     std::deque<std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> > fluidSolvers;
-    std::deque<std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> > solidSolvers;
+    std::deque<std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> > solidSolvers;
     std::deque<int> nbTimeStepsList;
 
     for ( int iComputation = 0; iComputation < nbComputations; iComputation++ )
@@ -194,7 +184,7 @@ TEST( SDIRKFsiSolidTest, linear )
         scalar dt = T / nbTimeSteps;
 
         std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
-        std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> solid( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
+        std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> solid( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
 
         shared_ptr<RBFFunctionInterface> rbfFunction;
         shared_ptr<RBFInterpolation> rbfInterpolator;
@@ -379,7 +369,7 @@ TEST( SDIRKFsiSolidTest, linearized )
         scalar dt = T / nbTimeSteps;
 
         std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
-        std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> solid( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+        std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> solid( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
 
         shared_ptr<RBFFunctionInterface> rbfFunction;
         shared_ptr<RBFInterpolation> rbfInterpolator;

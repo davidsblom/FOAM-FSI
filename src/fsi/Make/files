@@ -52,7 +52,6 @@ solidSolvers/SteadyStateSolidSolver.C
 TubeFlowFluidSolver.C
 TubeFlowLinearizedFluidSolver.C
 TubeFlowLinearizedSolidSolver.C
-TubeFlowLinearSolidSolver.C
 TubeFlowSolidSolver.C
 
 LIB = $(FOAM_LIBBIN)/libfsi

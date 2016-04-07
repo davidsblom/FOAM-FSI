@@ -73,7 +73,7 @@ class ImplicitFsiLinearizedSolidSolverParametrizedTest : public TestWithParam< s
             ASSERT_TRUE( dx > 0 );
 
             shared_ptr<TubeFlowLinearizedFluidSolver> fluid( new TubeFlowLinearizedFluidSolver( N, p0, r0, u0, rho, E, h, T, dt, L ) );
-            shared_ptr<TubeFlowLinearizedSolidSolver> solid( new TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E, r0 ) );
+            shared_ptr<TubeFlowLinearizedSolidSolver> solid( new TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E, r0, T ) );
 
             shared_ptr<RBFFunctionInterface> rbfFunction;
             shared_ptr<RBFInterpolation> rbfInterpolator;

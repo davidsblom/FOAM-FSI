@@ -25,7 +25,8 @@ namespace tubeflow
                 scalar dt,
                 scalar G,
                 scalar E0,
-                scalar r0
+                scalar r0,
+                scalar T
                 );
 
             virtual ~TubeFlowLinearizedSolidSolver();
@@ -68,6 +69,7 @@ namespace tubeflow
             const scalar nu;
             const scalar h;
             const scalar rho;
+            const scalar T;
 
             matrix grid;
 

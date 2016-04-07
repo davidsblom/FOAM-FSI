@@ -9,7 +9,6 @@ test_explicitsolidsolver.C
 
 SDCTubeFlowFluidSolver.C
 SDCTubeFlowSolidSolver.C
-SDCTubeFlowLinearSolidSolver.C
 SDCTubeFlowLinearizedSolidSolver.C
 TubeFlowExplicitLinearSolidSolver.C
 

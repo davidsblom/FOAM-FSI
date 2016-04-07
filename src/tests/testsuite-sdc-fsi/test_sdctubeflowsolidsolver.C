@@ -6,7 +6,6 @@
 
 #include "gtest/gtest.h"
 #include "SDCTubeFlowFluidSolver.H"
-#include "SDCTubeFlowLinearSolidSolver.H"
 #include "SDCTubeFlowLinearizedSolidSolver.H"
 #include "GaussRadau.H"
 #include "GaussLobatto.H"
@@ -30,13 +29,13 @@ TEST( SDCSolidTest, order )
     scalar E0 = 490;
     scalar G = 490;
     scalar nu = 0.5;
-    scalar p0 = 0.001;
+    scalar p0 = 1e-7;
     scalar T = 1;
 
     int N = 10;
     int nbComputations = 3;
 
-    std::deque<std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> > solidSolvers;
+    std::deque<std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> > solidSolvers;
     std::deque<int> nbTimeStepsList;
 
     for ( int iComputation = 0; iComputation < nbComputations; iComputation++ )
@@ -44,7 +43,7 @@ TEST( SDCSolidTest, order )
         int nbTimeSteps = 200 * std::pow( 2, iComputation );
         scalar dt = T / nbTimeSteps;
 
-        std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> solid( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
+        std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> solid( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
         solid->p.fill( p0 );
 
         int nbNodes = 2;
@@ -126,7 +125,7 @@ class SDCFsiSolidSolverTest : public ::testing::Test
             std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
 
             std::shared_ptr<fsi::BaseMultiLevelSolver> solid;
-            solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+            solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
 
             assert( solid );
 
@@ -251,7 +250,7 @@ TEST( SDCFsiSolidTest, order )
         scalar dt = T / nbTimeSteps;
 
         std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
-        std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> solid( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+        std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> solid( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
 
         shared_ptr<RBFFunctionInterface> rbfFunction;
         shared_ptr<RBFInterpolation> rbfInterpolator;
