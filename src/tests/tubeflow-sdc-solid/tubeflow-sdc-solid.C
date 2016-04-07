@@ -15,6 +15,7 @@
 #include "SDCFsiSolver.H"
 #include "AndersonPostProcessing.H"
 #include "ResidualRelativeConvergenceMeasure.H"
+#include "AbsoluteConvergenceMeasure.H"
 #include "RelativeConvergenceMeasure.H"
 #include "MinIterationConvergenceMeasure.H"
 #include "Uniform.H"
@@ -71,20 +72,21 @@ int main()
                     int N = 100;
                     bool parallel = false;
                     int extrapolation = 0;
-                    scalar tol = 1.0e-5;
                     int maxIter = 50;
                     scalar initialRelaxation = 1.0e-3;
                     int maxUsedIterations = 50;
                     int nbReuse = 0;
+                    scalar tol = 1.0e-5;
+                    scalar absoluteTol = 1.0e-13;
 
                     scalar singularityLimit = 1.0e-13;
                     int reuseInformationStartingFromTimeIndex = 0;
                     bool scaling = false;
                     bool updateJacobian = false;
-                    scalar beta = 0.01;
+                    scalar beta = 0.001;
 
                     fluid = std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> ( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
-                    solid = std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver>( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
+                    solid = std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver>( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
 
                     shared_ptr<RBFFunctionInterface> rbfFunction;
                     shared_ptr<RBFInterpolation> rbfInterpolator;
@@ -115,10 +117,12 @@ int main()
                     convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
 
                     if ( timeIntegrationSchemeString == "IDC" )
-                        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new ResidualRelativeConvergenceMeasure( 0, false, tol ) ) );
+                        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new ResidualRelativeConvergenceMeasure( 0, true, tol ) ) );
 
                     if ( timeIntegrationSchemeString == "SDIRK" )
-                        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, false, tol ) ) );
+                        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, true, absoluteTol ) ) );
+
+                    convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new AbsoluteConvergenceMeasure( 0, true, 0.1 * absoluteTol ) ) );
 
                     fsi = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
 
@@ -136,7 +140,7 @@ int main()
                     quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
 
                     if ( timeIntegrationSchemeString == "IDC" )
-                        timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( fsiSolver, quadrature, 1.0e-15, nbNodes, 50 ) );
+                        timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( fsiSolver, quadrature, absoluteTol, nbNodes, 50 ) );
 
                     if ( timeIntegrationSchemeString == "SDIRK" )
                     {
