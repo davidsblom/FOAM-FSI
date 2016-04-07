@@ -28,11 +28,7 @@ namespace tubeflow
 
             virtual ~SDCTubeFlowFluidSolver();
 
-            virtual scalar evaluateOutputPressureBoundaryCondition(
-                scalar pout_n,
-                scalar uout_n,
-                scalar uout
-                ) override;
+            virtual scalar evaluateOutputPressureBoundaryCondition( const fsi::vector & u ) override;
 
             virtual void evaluateFunction(
                 const int k,

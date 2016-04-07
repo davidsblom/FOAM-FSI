@@ -8,7 +8,7 @@
 #include <chrono>
 
 #include "SDCTubeFlowFluidSolver.H"
-#include "SDCTubeFlowLinearSolidSolver.H"
+#include "SDCTubeFlowLinearizedSolidSolver.H"
 #include "RBFCoarsening.H"
 #include "SDC.H"
 #include "ESDIRK.H"
@@ -49,7 +49,7 @@ int main()
 
                 std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
                 std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid;
-                std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver> solid;
+                std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> solid;
                 std::shared_ptr<MultiLevelFsiSolver> fsi;
 
                 {
@@ -84,7 +84,7 @@ int main()
                     scalar beta = 0.01;
 
                     fluid = std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> ( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
-                    solid = std::shared_ptr<tubeflow::SDCTubeFlowLinearSolidSolver>( new tubeflow::SDCTubeFlowLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
+                    solid = std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver>( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0 ) );
 
                     shared_ptr<RBFFunctionInterface> rbfFunction;
                     shared_ptr<RBFInterpolation> rbfInterpolator;

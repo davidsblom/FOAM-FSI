@@ -96,23 +96,6 @@ TEST_F( FluidSolverTest, inletVelocityBoundaryCondition )
     ASSERT_NEAR( u_in, 0.10000986635, 1.0e-11 );
 }
 
-TEST_F( FluidSolverTest, outputPressureBoundaryCondition )
-{
-    fluid->initTimeStep();
-
-    scalar p_out = fluid->evaluateOutputPressureBoundaryCondition( 0.5, 1, 1 );
-
-    ASSERT_NEAR( p_out, 0.5, 1.0e-13 );
-
-    p_out = fluid->evaluateOutputPressureBoundaryCondition( 0.5, 2, 2 );
-
-    ASSERT_NEAR( p_out, 0.5, 1.0e-13 );
-
-    p_out = fluid->evaluateOutputPressureBoundaryCondition( 0.5, 2, 1 );
-
-    ASSERT_NEAR( p_out, -0.74599964972, 1.0e-12 );
-}
-
 TEST_F( FluidSolverTest, residual )
 {
     fluid->initTimeStep();

@@ -19,7 +19,7 @@ class SDCFluidSolverTest : public ::testing::Test
             scalar a0 = M_PI * r0 * r0;
             scalar u0 = 0.1;
             scalar p0 = 0;
-            scalar dt = 0.1;
+            scalar dt = 0.01;
             int N = 5;
             scalar L = 1;
             scalar T = 1;
@@ -30,21 +30,19 @@ class SDCFluidSolverTest : public ::testing::Test
             scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
             scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
             scalar kappa = c0 / u0;
-            scalar tau = u0 * dt / L;
 
-            ASSERT_NEAR( tau, 0.01, 1.0e-13 );
             ASSERT_NEAR( kappa, 10, 1.0e-13 );
             ASSERT_TRUE( dx > 0 );
 
             std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
 
-            int nbNodes = 6;
-            scalar tol = 1.0e-11;
+            int nbNodes = 1;
+            scalar tol = 1.0e-14;
 
             std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
             quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
 
-            sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( fluid, quadrature, tol, 3, 30 ) );
+            sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( fluid, quadrature, tol, 3, 100 ) );
         }
 
         virtual void TearDown()

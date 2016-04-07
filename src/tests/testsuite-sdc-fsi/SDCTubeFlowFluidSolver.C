@@ -33,14 +33,14 @@ namespace tubeflow
     SDCTubeFlowFluidSolver::~SDCTubeFlowFluidSolver()
     {}
 
-    scalar SDCTubeFlowFluidSolver::evaluateOutputPressureBoundaryCondition(
-        scalar /*pout_n*/,
-        scalar /*uout_n*/,
-        scalar /*uout*/
-        )
+    scalar SDCTubeFlowFluidSolver::evaluateOutputPressureBoundaryCondition( const fsi::vector & u )
     {
-        // Ugly hack to get SDC time integration working
-        return 0;
+        assert( rhs.rows() == 2 * N + 2 );
+        assert( u.rows() == N );
+
+        scalar c = std::sqrt( cmk * cmk + pn( N - 1 ) / 2 );
+
+        return c * ( u( N - 1 ) - un( N - 1 ) - rhs( 2 * N + 1 ) ) + pn( N - 1 ) + rhs( 2 * N );
     }
 
     void SDCTubeFlowFluidSolver::evaluateFunction(
@@ -51,7 +51,7 @@ namespace tubeflow
         )
     {
         // Check input parameters
-        assert( f.rows() == 2 * N );
+        assert( f.rows() == 2 * N + 2 );
         assert( a.rows() == N );
         assert( un.rows() == N );
         assert( pn.rows() == N );
@@ -95,6 +95,10 @@ namespace tubeflow
         f.segment( N + 1, N - 2 ) /= dx;
 
         f *= -1.0;
+
+        scalar c = std::sqrt( cmk * cmk + pn( N - 1 ) / 2 );
+        f( 2 * N ) = c / dt * ( u( N - 1 ) - un( N - 1 ) - rhs( 2 * N + 1 ) );
+        f( 2 * N + 1 ) = 1.0 / (c * dt) * ( p( N - 1 ) - pn( N - 1 ) - rhs( 2 * N ) );
     }
 
     void SDCTubeFlowFluidSolver::finalizeTimeStep()
@@ -104,7 +108,7 @@ namespace tubeflow
 
     int SDCTubeFlowFluidSolver::getDOF()
     {
-        return 2 * N;
+        return 2 * N + 2;
     }
 
     void SDCTubeFlowFluidSolver::getSolution(
@@ -113,13 +117,16 @@ namespace tubeflow
         )
     {
         solution.head( N ) = a;
-        solution.tail( N ) = a.cwiseProduct( u );
+        solution.segment( N, N ) = a.cwiseProduct( u );
 
         // Ignore the boundary conditions
         solution( 0 ) = 0;
         solution( N - 1 ) = 0;
         solution( N ) = 0;
         solution( 2 * N - 1 ) = 0;
+
+        solution( 2 * N ) = p( N - 1 );
+        solution( 2 * N + 1 ) = u( N - 1 );
     }
 
     void SDCTubeFlowFluidSolver::setSolution(
@@ -247,5 +254,11 @@ namespace tubeflow
         dof.push_back( N );
         enabled.push_back( true );
         names.push_back( "fluid a * u" );
+        dof.push_back( 1 );
+        enabled.push_back( true );
+        names.push_back( "fluid p BC" );
+        dof.push_back( 1 );
+        enabled.push_back( true );
+        names.push_back( "fluid u BC" );
     }
 }
