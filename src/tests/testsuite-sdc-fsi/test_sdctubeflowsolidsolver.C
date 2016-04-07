@@ -123,8 +123,6 @@ class SDCFsiSolidSolverTest : public ::testing::Test
             scalar beta = 0.5;
             int minIter = 5;
 
-            std::string solidSolverSetting = GetParam();
-
             std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
 
             std::shared_ptr<fsi::BaseMultiLevelSolver> solid;
