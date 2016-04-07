@@ -9,7 +9,6 @@ test_implicitfsilinearizedsolidsolver.C
 test_implicitfsisolver.C
 test_linearizedfluidsolver.C
 test_linearizedsolidsolver.C
-test_linearsolidsolver.C
 test_miniterationconvergencemeasure.C
 test_monolithicfsisolver.C
 test_parallelcoupling.C

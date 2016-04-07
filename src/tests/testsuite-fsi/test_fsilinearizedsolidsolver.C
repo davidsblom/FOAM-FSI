@@ -52,7 +52,7 @@ class FsiLinearizedSolidSolverTest : public ::testing::Test
 
             // Initialize solvers
             shared_ptr<TubeFlowFluidSolver> fluid( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
-            shared_ptr<TubeFlowLinearizedSolidSolver> solid( new TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0 ) );
+            shared_ptr<TubeFlowLinearizedSolidSolver> solid( new TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0, T ) );
 
             // Convergence measures
             std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
