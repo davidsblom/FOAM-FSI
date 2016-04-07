@@ -69,7 +69,7 @@ class ExplicitLinearSolidSolverTest : public TestWithParam< std::tr1::tuple<int,
             ASSERT_TRUE( dx > 0 );
 
             shared_ptr<TubeFlowLinearizedFluidSolver> fluid( new TubeFlowLinearizedFluidSolver( N, p0, r0, u0, rho, E, h, T, dt, L ) );
-            shared_ptr<TubeFlowExplicitLinearSolidSolver> solid( new TubeFlowExplicitLinearSolidSolver( N, nu, rho, h, L, dt, G, E, r0, p0 ) );
+            shared_ptr<TubeFlowExplicitLinearSolidSolver> solid( new TubeFlowExplicitLinearSolidSolver( N, nu, rho, h, L, dt, G, E, r0, p0, T ) );
 
             shared_ptr<RBFFunctionInterface> rbfFunction;
             shared_ptr<RBFInterpolation> rbfInterpolator;

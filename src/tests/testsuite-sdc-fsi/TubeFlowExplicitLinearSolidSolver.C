@@ -19,7 +19,8 @@ TubeFlowExplicitLinearSolidSolver::TubeFlowExplicitLinearSolidSolver(
     scalar G,
     scalar E0,
     scalar r0,
-    scalar p0
+    scalar p0,
+    scalar T
     )
     :
     BaseMultiLevelSolver( N, 1, boost::math::constants::pi<scalar>() * r0 * r0 ),
@@ -33,6 +34,7 @@ TubeFlowExplicitLinearSolidSolver::TubeFlowExplicitLinearSolidSolver(
     nu( nu ),
     h( h ),
     rho( rho ),
+    T( T ),
     grid(),
     un( N ),
     rn( N ),
@@ -50,17 +52,18 @@ TubeFlowExplicitLinearSolidSolver::TubeFlowExplicitLinearSolidSolver(
     assert( L > 0 );
     assert( G > 0 );
     assert( r0 > 0 );
+    assert( T > 0 );
 
     un.setZero();
     u.setZero();
     rhs.setZero();
     p.fill( p0 );
     pn.fill( p0 );
+    r.setZero();
+    rn.setZero();
 
     scalar a0 = boost::math::constants::pi<scalar>() * r0 * r0;
     data.fill( a0 );
-    r.fill( r0 );
-    rn.fill( r0 );
 }
 
 TubeFlowExplicitLinearSolidSolver::~TubeFlowExplicitLinearSolidSolver()
@@ -187,7 +190,8 @@ void TubeFlowExplicitLinearSolidSolver::solve(
     u += un;
 
     // Return area a
-    a = boost::math::constants::pi<scalar>() * r.array() * r.array();
+    a = r.array() + r0;
+    a = boost::math::constants::pi<scalar>() * a.array() * a.array();
 
     data.col( 0 ) = a;
     this->p = p;
@@ -210,21 +214,21 @@ fsi::vector TubeFlowExplicitLinearSolidSolver::evaluateFunction(
         if ( i == 0 )
         {
             f( i + N ) = kappa * G / rho * ( rn( i + 1 ) - rn( i ) )
-                - E0 / (1 - nu * nu) * (rn( i ) - r0) / (r0 * r0 * rho)
+                - E0 / (1 - nu * nu) * rn( i ) / (r0 * r0 * rho)
                 + pn( i ) / (rho * h);
         }
 
         if ( i > 0 && i < N - 1 )
         {
             f( i + N ) = kappa * G / rho * ( rn( i + 1 ) - 2 * rn( i ) + rn( i - 1 ) )
-                - E0 / (1 - nu * nu) * (rn( i ) - r0) / (r0 * r0 * rho)
+                - E0 / (1 - nu * nu) * rn( i ) / (r0 * r0 * rho)
                 + pn( i ) / (rho * h);
         }
 
         if ( i == N - 1 )
         {
             f( i + N ) = kappa * G / rho * ( -rn( i ) + rn( i - 1 ) )
-                - E0 / (1 - nu * nu) * (rn( i ) - r0) / (r0 * r0 * rho)
+                - E0 / (1 - nu * nu) * rn( i ) / (r0 * r0 * rho)
                 + pn( i ) / (rho * h);
         }
     }
