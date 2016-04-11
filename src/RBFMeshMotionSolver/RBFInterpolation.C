@@ -5,9 +5,26 @@
  */
 
 #include "RBFInterpolation.H"
+#include "TPSFunction.H"
 
 namespace rbf
 {
+    RBFInterpolation::RBFInterpolation()
+        :
+        rbfFunction( std::shared_ptr<RBFFunctionInterface> ( new TPSFunction() ) ),
+        polynomialTerm( true ),
+        cpu( false ),
+        computed( false ),
+        n_A( 0 ),
+        n_B( 0 ),
+        dimGrid( 0 ),
+        Hhat(),
+        Phi(),
+        lu(),
+        positions(),
+        positionsInterpolation()
+    {}
+
     RBFInterpolation::RBFInterpolation( std::shared_ptr<RBFFunctionInterface> rbfFunction )
         :
         rbfFunction( rbfFunction ),

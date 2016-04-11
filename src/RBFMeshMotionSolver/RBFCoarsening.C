@@ -11,6 +11,35 @@ namespace rbf
 {
     Foam::debug::debugSwitch RBFCoarsening::debug( "RBFInterpolation", 0 );
 
+    RBFCoarsening::RBFCoarsening()
+        :
+        rbf( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation() ) ),
+        rbfCoarse( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation( rbf->rbfFunction, rbf->polynomialTerm, rbf->cpu ) ) ),
+        enabled( false ),
+        livePointSelection( false ),
+        livePointSelectionSumValues( false ),
+        tol( 0 ),
+        tolLivePointSelection( 0 ),
+        coarseningMinPoints( 0 ),
+        coarseningMaxPoints( 0 ),
+        twoPointSelection( false ),
+        surfaceCorrection( false ),
+        ratioRadiusError( 10 ),
+        exportTxt( false ),
+        selectedPositions(),
+        nbStaticFaceCentersRemove( 0 ),
+        positions(),
+        positionsInterpolation(),
+        values(),
+        errorInterpolationCoarse(),
+        closestBoundaryIndexCorrection(),
+        valuesCorrection(),
+        nbMovingFaceCenters( 0 ),
+        fileExportIndex( 0 )
+    {
+        assert( rbf );
+    }
+
     RBFCoarsening::RBFCoarsening( std::shared_ptr<RBFInterpolation> rbf )
         :
         rbf( rbf ),

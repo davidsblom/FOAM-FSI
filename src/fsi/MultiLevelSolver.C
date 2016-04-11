@@ -11,6 +11,41 @@ namespace fsi
     MultiLevelSolver::MultiLevelSolver(
         shared_ptr<BaseMultiLevelSolver> solver,
         shared_ptr<BaseMultiLevelSolver> couplingGridSolver,
+        int participantId,
+        int level
+        )
+        :
+        solver( solver ),
+        couplingGridSolver( couplingGridSolver ),
+        rbfInterpToCouplingMesh( shared_ptr<RBFCoarsening> ( new RBFCoarsening() ) ),
+        rbfInterpToMesh( shared_ptr<RBFCoarsening> ( new RBFCoarsening() ) ),
+        participantId( participantId ),
+        level( level ),
+        couplingGridSize( 0 )
+    {
+        assert( solver );
+        assert( couplingGridSolver );
+        assert( participantId == 0 || participantId == 1 );
+        assert( level >= 0 );
+        assert( rbfInterpToCouplingMesh );
+        assert( rbfInterpToMesh );
+
+        matrix couplingGridPositions;
+
+        if ( participantId == 0 )
+            couplingGridSolver->getWritePositions( couplingGridPositions );
+
+        if ( participantId == 1 )
+            couplingGridSolver->getReadPositions( couplingGridPositions );
+
+        couplingGridSize = couplingGridPositions.rows();
+
+        assert( couplingGridSize > 0 );
+    }
+
+    MultiLevelSolver::MultiLevelSolver(
+        shared_ptr<BaseMultiLevelSolver> solver,
+        shared_ptr<BaseMultiLevelSolver> couplingGridSolver,
         shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh,
         shared_ptr<RBFCoarsening> rbfInterpToMesh,
         int participantId,
