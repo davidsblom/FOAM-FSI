@@ -20,6 +20,8 @@ namespace rbf
     class RBFInterpolation
     {
         public:
+            RBFInterpolation();
+
             explicit RBFInterpolation( std::shared_ptr<RBFFunctionInterface> rbfFunction );
 
             RBFInterpolation(

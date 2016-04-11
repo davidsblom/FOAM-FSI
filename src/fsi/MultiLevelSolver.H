@@ -26,6 +26,13 @@ namespace fsi
             MultiLevelSolver(
                 shared_ptr<BaseMultiLevelSolver> solver,
                 shared_ptr<BaseMultiLevelSolver> couplingGridSolver,
+                int participantId,
+                int level
+                );
+
+            MultiLevelSolver(
+                shared_ptr<BaseMultiLevelSolver> solver,
+                shared_ptr<BaseMultiLevelSolver> couplingGridSolver,
                 shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh,
                 shared_ptr<RBFCoarsening> rbfInterpToMesh,
                 int participantId,

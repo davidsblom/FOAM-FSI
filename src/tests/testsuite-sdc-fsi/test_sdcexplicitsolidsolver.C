@@ -58,36 +58,10 @@ class SDCFsiExplicitSolidSolverTest : public ::testing::Test
             int minIter = 5;
 
             std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
+            std::shared_ptr<fsi::BaseMultiLevelSolver> solid( new tubeflow::SDCTubeFlowExplicitLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, p0, T ) );
 
-            std::shared_ptr<fsi::BaseMultiLevelSolver> solid;
-            solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowExplicitLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, p0, T ) );
-
-            assert( solid );
-
-            shared_ptr<RBFFunctionInterface> rbfFunction;
-            shared_ptr<RBFInterpolation> rbfInterpolator;
-            shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
-            shared_ptr<RBFCoarsening> rbfInterpToMesh;
-
-            rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
-            rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-            rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
-
-            rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
-            rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-            rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
-
-            shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
-
-            rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
-            rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-            rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
-
-            rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
-            rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-            rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
-
-            shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
+            shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, 0, 0 ) );
+            shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, 1, 0 ) );
 
             std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
             convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
