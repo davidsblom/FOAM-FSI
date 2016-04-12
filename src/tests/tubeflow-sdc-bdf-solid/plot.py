@@ -123,7 +123,10 @@ for iNodes in np.arange( nbNodes ):
         print '\nfluid u ' + legend
         for i in np.arange( nbComputations - 1 ):
             print ( np.log10( errors_fluid_u[i+1] ) - np.log10( errors_fluid_u[i] ) ) / ( np.log10( timeStepList[i+1] ) - np.log10( timeStepList[i] ) )
+    except:
+        pass
 
+    try:
         print '\nsolid u ' + legend
         for i in np.arange( nbComputations - 1 ):
             print ( np.log10( errors_solid_u[i+1] ) - np.log10( errors_solid_u[i] ) ) / ( np.log10( timeStepList[i+1] ) - np.log10( timeStepList[i] ) )

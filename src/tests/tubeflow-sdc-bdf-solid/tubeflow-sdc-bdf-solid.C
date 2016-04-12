@@ -26,14 +26,9 @@ int main()
     int nbComputations = 6;
     int nbNodes = 5;
 
-    std::vector<std::string> sdirkSchemes = {
-        "SDIRK2", "SDIRK3", "SDIRK4"
-    };
-    int nbSchemes = nbNodes;
-
     #pragma omp parallel for collapse(2), schedule(dynamic,1)
 
-    for ( int iNodes = 0; iNodes < nbSchemes; iNodes++ )
+    for ( int iNodes = 0; iNodes < nbNodes; iNodes++ )
     {
         for ( int iComputation = 0; iComputation < nbComputations; iComputation++ )
         {
