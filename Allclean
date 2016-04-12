@@ -35,3 +35,4 @@ wclean src/tests/testsuite-spacemapping
 wclean src/tests/tubeflow
 wclean src/tests/tubeflow-sdc
 wclean src/tests/tubeflow-sdc-solid
+wclean src/tests/tubeflow-sdc-bdf-solid
