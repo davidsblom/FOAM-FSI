@@ -164,7 +164,9 @@ void TubeFlowLinearizedSolidSolver::initTimeStep()
 
 bool TubeFlowLinearizedSolidSolver::isRunning()
 {
-    return true;
+    assert( !init );
+
+    return t < T;
 }
 
 void TubeFlowLinearizedSolidSolver::resetSolution()
@@ -225,4 +227,20 @@ void TubeFlowLinearizedSolidSolver::solve(
 
     data.col( 0 ) = a;
     this->p = p;
+}
+
+void TubeFlowLinearizedSolidSolver::run()
+{
+    while ( isRunning() )
+    {
+        timeIndex++;
+        t = timeIndex * dt;
+        solveTimeStep();
+    }
+}
+
+void TubeFlowLinearizedSolidSolver::solveTimeStep()
+{
+    fsi::vector a;
+    solve( p, a );
 }

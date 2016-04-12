@@ -57,6 +57,10 @@ namespace tubeflow
 
             void calcGrid();
 
+            void run();
+
+            void solveTimeStep();
+
             // Constants
 
             const int N;
