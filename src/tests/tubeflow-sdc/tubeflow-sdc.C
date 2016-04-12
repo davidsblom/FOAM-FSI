@@ -29,7 +29,7 @@ int main()
         "IDC", "SDIRK"
     };
     std::vector<std::string> sdirkSchemes = {
-        "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5", "ESDIRK53PR", "ESDIRK63PR", "ESDIRK74PR"
+        "SDIRK2", "SDIRK3", "SDIRK4"
     };
 
     for ( auto timeIntegrationSchemeString : timeIntegrationSchemes )
@@ -57,7 +57,6 @@ int main()
                     scalar a0 = M_PI * r0 * r0;
                     scalar u0 = 0.1;
                     scalar p0 = 0;
-                    int N = 100;
                     scalar L = 1;
                     scalar T = 1;
                     scalar dt = T / nbTimeSteps;
@@ -66,12 +65,12 @@ int main()
                     scalar h = 1.0e-3;
                     scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
 
+                    int N = 250;
                     bool parallel = false;
                     int extrapolation = 0;
                     scalar tol = 1.0e-5;
                     scalar absoluteTol = 1.0e-13;
-
-                    int maxIter = 50;
+                    int maxIter = 100;
                     scalar initialRelaxation = 1.0e-3;
                     int maxUsedIterations = 50;
                     int nbReuse = 0;
