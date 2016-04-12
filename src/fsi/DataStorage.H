@@ -60,7 +60,6 @@ namespace sdc
                 int substep
                 );
 
-        private:
             std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
             fsi::matrix F, Fold, solStages;
     };

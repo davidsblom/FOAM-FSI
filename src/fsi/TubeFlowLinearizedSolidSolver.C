@@ -326,7 +326,8 @@ void TubeFlowLinearizedSolidSolver::solve(
             b( i + N ) -= alpha[k] * uStages[k]( i );
     }
 
-    b += rhs;
+    if ( rhs.rows() > 0 )
+        b += rhs;
 
     // Solve for x
 
