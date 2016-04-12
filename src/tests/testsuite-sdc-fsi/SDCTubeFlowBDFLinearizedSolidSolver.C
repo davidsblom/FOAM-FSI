@@ -154,6 +154,24 @@ namespace tubeflow
         TubeFlowLinearizedSolidSolver::rStages[0] = rn;
         TubeFlowLinearizedSolidSolver::uStages[0] = un;
 
+        if ( timeIndex == 1 && timeOrder == 2 && k > 1 )
+        {
+            TubeFlowLinearizedSolidSolver::rStages.clear();
+            TubeFlowLinearizedSolidSolver::uStages.clear();
+
+            TubeFlowLinearizedSolidSolver::rStages.push_back( rStages.at( kold - 1 ) );
+            TubeFlowLinearizedSolidSolver::uStages.push_back( uStages.at( kold - 1 ) );
+            TubeFlowLinearizedSolidSolver::rStages.push_back( rn );
+            TubeFlowLinearizedSolidSolver::uStages.push_back( un );
+            TubeFlowLinearizedSolidSolver::rStages.push_back( r );
+            TubeFlowLinearizedSolidSolver::uStages.push_back( u );
+
+            alpha = {
+                1. / 3., -4. / 3., 1.
+            };
+            beta = 2. / 3.;
+        }
+
         if ( timeIndex > 1 && timeOrder == 2 )
         {
             if ( kold - 1 < 0 )

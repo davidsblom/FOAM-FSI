@@ -163,7 +163,7 @@ TEST( SDCFsiBDFSolidTest, order )
             {
                 scalar order = ( std::log10( errors.at( iComputation ) ) - std::log10( errors.at( iComputation + 1 ) ) ) / ( std::log10( nbTimeStepsList.at( iComputation + 1 ) ) - std::log10( nbTimeStepsList.at( iComputation ) ) );
                 std::cout << "fluid order = " << order << std::endl;
-                ASSERT_NEAR( order, 3, 0.3 );
+                ASSERT_GE( order, 2.99 );
             }
         }
     }
