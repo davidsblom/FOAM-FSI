@@ -8,10 +8,12 @@ test_sdirktubeflowsolidsolver.C
 test_explicitsolidsolver.C
 test_sdcexplicitsolidsolver.C
 test_tubeflowsolidsolver.C
+test_sdctubeflowbdfsolidsolver.C
 
 SDCTubeFlowFluidSolver.C
 SDCTubeFlowSolidSolver.C
 SDCTubeFlowLinearizedSolidSolver.C
+SDCTubeFlowBDFLinearizedSolidSolver.C
 TubeFlowExplicitLinearSolidSolver.C
 SDCTubeFlowExplicitLinearSolidSolver.C
 

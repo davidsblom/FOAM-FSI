@@ -263,6 +263,9 @@ void TubeFlowLinearizedSolidSolver::initTimeStep()
 {
     assert( !init );
 
+    timeIndex++;
+    t = timeIndex * dt;
+
     init = true;
 }
 
@@ -326,7 +329,8 @@ void TubeFlowLinearizedSolidSolver::solve(
             b( i + N ) -= alpha[k] * uStages[k]( i );
     }
 
-    b += rhs;
+    if ( rhs.rows() > 0 )
+        b += rhs;
 
     // Solve for x
 
@@ -348,11 +352,7 @@ void TubeFlowLinearizedSolidSolver::solve(
 void TubeFlowLinearizedSolidSolver::run()
 {
     while ( isRunning() )
-    {
-        timeIndex++;
-        t = timeIndex * dt;
         solveTimeStep();
-    }
 }
 
 void TubeFlowLinearizedSolidSolver::solveTimeStep()

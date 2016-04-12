@@ -16,6 +16,54 @@ namespace sdc
     SDC::SDC(
         std::shared_ptr<SDCSolver> solver,
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
+        std::shared_ptr<sdc::DataStorage> data,
+        scalar tol,
+        int minSweeps,
+        int maxSweeps
+        )
+        :
+        solver( solver ),
+        nbNodes( quadrature->get_num_nodes() ),
+        N( solver->getDOF() ),
+        k( quadrature->get_num_nodes() ),
+        dt( solver->getTimeStep() ),
+        tol( tol ),
+        nodes(),
+        smat(),
+        qmat(),
+        nodesEmbedded(),
+        smatEmbedded(),
+        qmatEmbedded(),
+        dsdc(),
+        corrector( false ),
+        stageIndex( 0 ),
+        Sj(),
+        convergence( false ),
+        timeIndex( 0 ),
+        minSweeps( minSweeps ),
+        maxSweeps( maxSweeps ),
+        quadrature( quadrature ),
+        data( data )
+    {
+        assert( solver );
+        assert( dt > 0 );
+        assert( tol > 0 );
+        assert( tol < 1 );
+        assert( maxSweeps >= minSweeps );
+        assert( minSweeps > 0 );
+        assert( N > 0 );
+        assert( quadrature );
+        assert( quadrature->right_is_node() );
+        assert( data );
+
+        init();
+
+        solver->setNumberOfImplicitStages( k - 1 );
+    }
+
+    SDC::SDC(
+        std::shared_ptr<SDCSolver> solver,
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
         scalar tol,
         int minSweeps,
         int maxSweeps

@@ -22,6 +22,15 @@ namespace sdc
             SDC(
                 std::shared_ptr<SDCSolver> solver,
                 std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
+                std::shared_ptr<sdc::DataStorage> data,
+                scalar tol,
+                int minSweeps,
+                int maxSweeps
+                );
+
+            SDC(
+                std::shared_ptr<SDCSolver> solver,
+                std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature,
                 scalar tol,
                 int minSweeps,
                 int maxSweeps
