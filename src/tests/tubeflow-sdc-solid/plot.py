@@ -28,7 +28,7 @@ markers = ["-ob", "-vg", "-<r", "-^c", "->m", "-sy", "-*k", "--ob", "--vg", "--<
 markerIndex = 0
 
 nbComputations = 6
-nbNodes = 6
+nbNodes = 5
 
 timeIntegrationSchemes = ["IDC", "SDIRK"]
 

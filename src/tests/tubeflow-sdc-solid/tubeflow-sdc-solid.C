@@ -24,12 +24,12 @@
 int main()
 {
     int nbComputations = 6;
-    int nbNodes = 6;
+    int nbNodes = 5;
     std::vector<std::string> timeIntegrationSchemes = {
         "IDC", "SDIRK"
     };
     std::vector<std::string> sdirkSchemes = {
-        "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5", "ESDIRK53PR", "ESDIRK63PR", "ESDIRK74PR"
+        "SDIRK2", "SDIRK3", "SDIRK4"
     };
 
     for ( auto timeIntegrationSchemeString : timeIntegrationSchemes )
@@ -69,10 +69,10 @@ int main()
                     scalar nu = 0.5;
                     scalar cmk = std::sqrt( E0 * h / (2 * rho_f * r0) );
 
-                    int N = 100;
+                    int N = 250;
                     bool parallel = false;
                     int extrapolation = 0;
-                    int maxIter = 50;
+                    int maxIter = 100;
                     scalar initialRelaxation = 1.0e-3;
                     int maxUsedIterations = 50;
                     int nbReuse = 0;
@@ -83,7 +83,7 @@ int main()
                     int reuseInformationStartingFromTimeIndex = 0;
                     bool scaling = false;
                     bool updateJacobian = false;
-                    scalar beta = 0.001;
+                    scalar beta = 0.1;
 
                     fluid = std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> ( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
                     solid = std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver>( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
