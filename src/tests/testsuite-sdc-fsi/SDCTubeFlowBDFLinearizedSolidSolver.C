@@ -18,10 +18,11 @@ namespace tubeflow
         scalar G,
         scalar E0,
         scalar r0,
-        scalar T
+        scalar T,
+        int timeOrder
         )
         :
-        TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0, T )
+        TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0, T, timeOrder )
     {}
 
     SDCTubeFlowBDFLinearizedSolidSolver::~SDCTubeFlowBDFLinearizedSolidSolver()
@@ -37,6 +38,8 @@ namespace tubeflow
 
     void SDCTubeFlowBDFLinearizedSolidSolver::finalizeTimeStep()
     {
+        unStages = uStages;
+        rnStages = rStages;
         TubeFlowLinearizedSolidSolver::finalizeTimeStep();
     }
 
@@ -150,6 +153,23 @@ namespace tubeflow
 
         TubeFlowLinearizedSolidSolver::rStages[0] = rn;
         TubeFlowLinearizedSolidSolver::uStages[0] = un;
+
+        if ( timeIndex > 1 && timeOrder == 2 )
+        {
+            if ( kold - 1 < 0 )
+            {
+                TubeFlowLinearizedSolidSolver::rStages[0] = rnStages.at( rnStages.size() - 2 );
+                TubeFlowLinearizedSolidSolver::uStages[0] = unStages.at( unStages.size() - 2 );
+            }
+            else
+            {
+                TubeFlowLinearizedSolidSolver::rStages[0] = rStages.at( kold - 1 );
+                TubeFlowLinearizedSolidSolver::uStages[0] = uStages.at( kold - 1 );
+            }
+
+            TubeFlowLinearizedSolidSolver::rStages[1] = rn;
+            TubeFlowLinearizedSolidSolver::uStages[1] = un;
+        }
 
         this->rhs = rhs;
 

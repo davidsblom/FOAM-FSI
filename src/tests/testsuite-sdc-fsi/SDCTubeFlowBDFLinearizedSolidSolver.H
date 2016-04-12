@@ -24,7 +24,8 @@ namespace tubeflow
                 scalar G,
                 scalar E0,
                 scalar r0,
-                scalar T
+                scalar T,
+                int timeOrder
                 );
 
             virtual ~SDCTubeFlowBDFLinearizedSolidSolver();
@@ -95,5 +96,7 @@ namespace tubeflow
 
             std::deque<fsi::vector> uStages;
             std::deque<fsi::vector> rStages;
+            std::deque<fsi::vector> unStages;
+            std::deque<fsi::vector> rnStages;
     };
 }
