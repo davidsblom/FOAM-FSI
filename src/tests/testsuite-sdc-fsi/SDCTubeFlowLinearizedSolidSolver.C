@@ -166,6 +166,9 @@ namespace tubeflow
         un = uStages.at( kold );
         rn = rStages.at( kold );
 
+        TubeFlowLinearizedSolidSolver::rStages[0] = rn;
+        TubeFlowLinearizedSolidSolver::uStages[0] = un;
+
         this->rhs = rhs;
 
         factorizeMatrix();
