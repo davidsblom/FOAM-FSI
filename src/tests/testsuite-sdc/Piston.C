@@ -33,7 +33,7 @@ Piston::Piston(
     endTime( nbTimeSteps * dt ),
     k( 0 ),
     solStages(),
-    timeIntegrationScheme( false )
+    timeIntegrationScheme( nullptr )
 {
     assert( nbTimeSteps > 0 );
     assert( dt > 0 );
