@@ -353,10 +353,6 @@ TEST( SDCSourceTermTest, SDC )
 
 TEST( CosTest, SDC )
 {
-    std::string rule = "gauss-lobatto";
-
-    // rule = "uniform";
-    // rule = "clenshaw-curtis";
     int nbNodes = 3;
     scalar tol = 1.0e-9;
 
@@ -398,7 +394,6 @@ TEST( CosTest, SDC )
 
 TEST( OscillatorTest, SDC )
 {
-    std::string rule = "gauss-lobatto";
     int nbNodes = 3;
     scalar tol = 1.0e-11;
 

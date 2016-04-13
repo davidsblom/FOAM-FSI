@@ -22,7 +22,8 @@ namespace tubeflow
         int timeOrder
         )
         :
-        TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0, T, timeOrder )
+        TubeFlowLinearizedSolidSolver( N, nu, rho, h, L, dt, G, E0, r0, T, timeOrder ),
+        k( 0 )
     {}
 
     SDCTubeFlowBDFLinearizedSolidSolver::~SDCTubeFlowBDFLinearizedSolidSolver()
