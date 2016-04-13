@@ -6,7 +6,8 @@ EXE_INC = -std=c++11 -fopenmp \
     -isystem ../../thirdParty/gtest/include \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
     -isystem ../../thirdParty/eigen \
-    -I ../../RBFMeshMotionSolver/lnInclude/
+    -I ../../RBFMeshMotionSolver/lnInclude/ \
+    -isystem ../../thirdParty/boost
 
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
