@@ -1,9 +1,9 @@
 # Choose the fluid solver. Possible options: pimple-solver,
-# coupled-pressure-velocity-solver, and compressible-solver.
+# coupled-pressure-velocity-solver, compressible-solver, and steady-state-pimple-solver.
 fluid-solver: pimple-solver
 
-# Choose the solid solver: Currently, only the segregated-solver is
-# available.
+# Choose the solid solver: nonlinear-elastic-solver, linear-elastic-solver or 
+# steady-state-nonlinear-elastic-solver
 solid-solver: nonlinear-elastic-solver
 
 # Solve the fluid and solid solver in a staggered/serial or parallel manner.
