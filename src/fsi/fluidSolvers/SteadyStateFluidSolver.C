@@ -217,13 +217,13 @@ void SteadyStateFluidSolver::checkTimeDiscretisationScheme()
 
 void SteadyStateFluidSolver::continuityErrs()
 {
-    volScalarField contErr = fvc::div( phi );
+    tmp<volScalarField> contErr = fvc::div( phi );
 
     sumLocalContErr = runTime->deltaT().value() *
-        mag( contErr ) ().weightedAverage( mesh.V() ).value();
+        mag( contErr() ) ().weightedAverage( mesh.V() ).value();
 
     globalContErr = runTime->deltaT().value() *
-        contErr.weightedAverage( mesh.V() ).value();
+        contErr->weightedAverage( mesh.V() ).value();
 
     cumulativeContErr += globalContErr;
 
@@ -237,10 +237,10 @@ void SteadyStateFluidSolver::courantNo()
 {
     if ( mesh.nInternalFaces() )
     {
-        surfaceScalarField magPhi = mag( phi );
+        tmp<surfaceScalarField> magPhi = mag( phi );
 
         surfaceScalarField SfUfbyDelta =
-            mesh.surfaceInterpolation::deltaCoeffs() * magPhi;
+            mesh.surfaceInterpolation::deltaCoeffs() * magPhi();
 
         CoNum = max( SfUfbyDelta / mesh.magSf() )
             .value() * runTime->deltaT().value();
@@ -248,7 +248,7 @@ void SteadyStateFluidSolver::courantNo()
         meanCoNum = ( sum( SfUfbyDelta ) / sum( mesh.magSf() ) )
             .value() * runTime->deltaT().value();
 
-        velMag = max( magPhi / mesh.magSf() ).value();
+        velMag = max( magPhi() / mesh.magSf() ).value();
     }
 
     Info << "Courant Number mean: " << meanCoNum
@@ -259,14 +259,14 @@ void SteadyStateFluidSolver::courantNo()
 
 scalar SteadyStateFluidSolver::evaluateMomentumResidual()
 {
-    volVectorField residual = fvc::div( phi, U ) + fvc::grad( p );
+    tmp<volVectorField> residual = fvc::div( phi, U ) + fvc::grad( p );
 
     if ( turbulenceSwitch )
-        residual += turbulence->divDevReff( U ) & U;
+        residual() += turbulence->divDevReff( U ) & U;
     else
-        residual += -fvc::laplacian( nu, U );
+        residual() += -fvc::laplacian( nu, U );
 
-    scalarField magResU = mag( residual.internalField() );
+    scalarField magResU = mag( residual->internalField() );
     scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
     scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
     rmsU /= runTime->deltaT().value();
@@ -302,14 +302,14 @@ void SteadyStateFluidSolver::getTractionLocal( matrix & traction )
     {
         int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
 
-        vectorField tractionFieldPatchI = -rho.value() * nu.value()
+        tmp<vectorField> tractionFieldPatchI = -rho.value() * nu.value()
             * U.boundaryField()[movingPatchIDs[patchI]].snGrad()
             + rho.value() * p.boundaryField()[movingPatchIDs[patchI]]
             * mesh.boundary()[movingPatchIDs[patchI]].nf();
 
-        forAll( tractionFieldPatchI, i )
+        forAll( tractionFieldPatchI(), i )
         {
-            tractionField[i + offset] = tractionFieldPatchI[i];
+            tractionField[i + offset] = tractionFieldPatchI()[i];
         }
 
         offset += size;
