@@ -287,7 +287,7 @@ void SteadyStateSolidSolver::solve()
     {
         U.storePrevIter();
 
-        surfaceTensorField shearGradU =
+        tmp<surfaceTensorField> shearGradU =
             ( (I - n * n) & fvc::interpolate( gradU ) );
 
         fvVectorMatrix UEqn
@@ -298,8 +298,8 @@ void SteadyStateSolidSolver::solve()
                 mesh.magSf()
                 * (
                     -(muf + lambdaf) * ( fvc::snGrad( U ) & (I - n * n) )
-                    + lambdaf * tr( shearGradU & (I - n * n) ) * n
-                    + muf * (shearGradU & n)
+                    + lambdaf * tr( shearGradU() & (I - n * n) ) * n
+                    + muf * (shearGradU() & n)
                     + muf * ( n & fvc::interpolate( gradU & gradU.T() ) )
                     + 0.5 * lambdaf
                     * ( n * tr( fvc::interpolate( gradU & gradU.T() ) ) )

@@ -252,13 +252,13 @@ SDCFluidSolver::~SDCFluidSolver()
 
 void SDCFluidSolver::continuityErrs()
 {
-    volScalarField contErr = fvc::div( phi );
+    tmp<volScalarField> contErr = fvc::div( phi );
 
     sumLocalContErr = runTime->deltaT().value() *
-        mag( contErr ) ().weightedAverage( mesh.V() ).value();
+        mag( contErr() ) ().weightedAverage( mesh.V() ).value();
 
     globalContErr = runTime->deltaT().value() *
-        contErr.weightedAverage( mesh.V() ).value();
+        contErr->weightedAverage( mesh.V() ).value();
 
     cumulativeContErr += globalContErr;
 
@@ -276,10 +276,10 @@ void SDCFluidSolver::courantNo()
 
     if ( mesh.nInternalFaces() )
     {
-        surfaceScalarField magPhi = mag( phi );
+        tmp<surfaceScalarField> magPhi = mag( phi );
 
         surfaceScalarField SfUfbyDelta =
-            mesh.surfaceInterpolation::deltaCoeffs() * magPhi;
+            mesh.surfaceInterpolation::deltaCoeffs() * magPhi();
 
         const scalar deltaT = runTime->deltaT().value();
 
@@ -287,7 +287,7 @@ void SDCFluidSolver::courantNo()
 
         meanCoNum = ( sum( SfUfbyDelta ) / sum( mesh.magSf() ) ).value() * deltaT;
 
-        velMag = max( magPhi / mesh.magSf() ).value();
+        velMag = max( magPhi() / mesh.magSf() ).value();
     }
 
     Info << "Courant Number mean: " << meanCoNum
@@ -308,14 +308,14 @@ void SDCFluidSolver::createFields()
 scalar SDCFluidSolver::evaluateMomentumResidual()
 {
     dimensionedScalar rDeltaT = 1.0 / mesh.time().deltaT();
-    volVectorField residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p ) - rDeltaT * rhsU;
+    tmp<volVectorField> residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p ) - rDeltaT * rhsU;
 
     if ( turbulenceSwitch )
-        residual += turbulence->divDevReff( U ) & U;
+        residual() += turbulence->divDevReff( U ) & U;
     else
-        residual += -fvc::laplacian( nu, U );
+        residual() += -fvc::laplacian( nu, U );
 
-    scalarField magResU = mag( residual.internalField() );
+    scalarField magResU = mag( residual->internalField() );
     return std::sqrt( gSumSqr( magResU ) / ( mesh.globalData().nTotalCells() * mesh.nGeometricD() ) );
 }
 
