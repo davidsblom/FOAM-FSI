@@ -1,0 +1,7 @@
+tubeflow-sdc-rk4-solid.C
+SDCTubeFlowFluidSolver.C
+SDCTubeFlowExplicitLinearSolidSolver.C
+SDCTubeFlowLinearizedSolidSolver.C
+TubeFlowExplicitLinearSolidSolver.C
+
+EXE = $(FOAM_APPBIN)/tubeflow-sdc-rk4-solid
