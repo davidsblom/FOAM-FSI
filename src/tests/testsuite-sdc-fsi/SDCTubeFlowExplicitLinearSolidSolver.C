@@ -22,7 +22,8 @@ namespace tubeflow
         scalar T
         )
         :
-        TubeFlowExplicitLinearSolidSolver( N, nu, rho, h, L, dt, G, E0, r0, p0, T )
+        TubeFlowExplicitLinearSolidSolver( N, nu, rho, h, L, dt, G, E0, r0, p0, T ),
+        k( 0 )
     {}
 
     SDCTubeFlowExplicitLinearSolidSolver::~SDCTubeFlowExplicitLinearSolidSolver()
