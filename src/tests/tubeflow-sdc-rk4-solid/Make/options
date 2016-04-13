@@ -1,0 +1,62 @@
+c++WARN     = -Wall -Wextra -Werror
+
+EXE_INC = -std=c++11 -fopenmp \
+    -I ../../fsi \
+    -I ../../fsi/lnInclude \
+    -isystem ../../thirdParty/gtest/include \
+    -isystem $(LIB_SRC)/finiteVolume/lnInclude \
+    -isystem ../../thirdParty/eigen \
+    -I ../../RBFMeshMotionSolver/lnInclude/ \
+    -isystem ../../thirdParty/boost
+
+ifeq ($(WM_COMPILE_OPTION), Opt)
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -L../../thirdParty/gtest \
+    -lgtest \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lfiniteVolume \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -lfvSchemes \
+    -lboundaryConditions \
+    -lsolidModels \
+    -lyaml-cpp \
+    -lRBFMeshMotionSolver \
+    -lfsi \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels \
+    -ldeal_II \
+    -llduSolvers
+endif
+
+ifeq ($(WM_COMPILE_OPTION), Debug)
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -L../../thirdParty/gtest \
+    -lgtest \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lfiniteVolume \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -lfvSchemes \
+    -lboundaryConditions \
+    -lsolidModels \
+    -lyaml-cpp \
+    -lRBFMeshMotionSolver \
+    -lfsi \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels \
+    -ldeal_II.g \
+    -llduSolvers
+endif

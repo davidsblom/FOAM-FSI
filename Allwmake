@@ -40,6 +40,7 @@ wmake src/tests/tubeflow
 wmake src/tests/tubeflow-sdc
 wmake src/tests/tubeflow-sdc-solid
 wmake src/tests/tubeflow-sdc-bdf-solid
+wmake src/tests/tubeflow-sdc-rk4-solid
 wmake applications/solvers/fsi/fsiSolidFoam
 wmake applications/solvers/fsi/fsiFluidFoam
 echo 'Finished'
