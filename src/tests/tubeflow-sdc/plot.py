@@ -32,8 +32,7 @@ nbNodes = 6
 
 timeIntegrationSchemes = ["IDC", "SDIRK"]
 
-sdirkSchemes = ["SDIRK2", "SDIRK3", "SDIRK4"]
-
+sdirkSchemes = ["SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK74PR"]
 
 for i in np.arange( nbNodes + 1 ):
     for j in np.arange( 3, nbComputations ):
@@ -120,17 +119,17 @@ for timeIntegrationScheme in timeIntegrationSchemes:
 velocityPlot.set_xlabel( 'Time step [s]' )
 velocityPlot.set_ylabel( 'Error in velocity [-]' )
 velocityPlot.grid( 'on' )
-lgd = velocityPlot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.38), ncol = 3, fancybox = True, shadow = False )
+lgd = velocityPlot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.45), ncol = 3, fancybox = True, shadow = False )
 velocityFig.savefig( 'tubeflow_velocity.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
 
 areaPlot.set_xlabel( 'Time step [s]' )
 areaPlot.set_ylabel( 'Error in area [-]' )
 areaPlot.grid( 'on' )
-lgd = areaPlot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.38), ncol = 3, fancybox = True, shadow = False )
+lgd = areaPlot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.45), ncol = 3, fancybox = True, shadow = False )
 areaFig.savefig( 'tubeflow_area.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
 
 pressurePlot.set_xlabel( 'Time step [s]' )
 pressurePlot.set_ylabel( 'Error in pressure [-]' )
 pressurePlot.grid( 'on' )
-lgd = pressurePlot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.38), ncol = 3, fancybox = True, shadow = False )
+lgd = pressurePlot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.45), ncol = 3, fancybox = True, shadow = False )
 pressureFig.savefig( 'tubeflow_pressure.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )

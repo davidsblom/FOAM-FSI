@@ -104,11 +104,7 @@ for iNodes in np.arange( nbNodes ):
                 if "timing = " in line:
                     cpus.append( float( line[9:-1] ) )
 
-    legend = 'IDC' + str(nbNodes)
-    if nbNodes == 1:
-        legend += "-BDF1"
-    if nbNodes > 1:
-        legend += "-BDF2"
+    legend = 'IDC' + str(nbNodes) + "-RK4"
 
     fluid_u_plot.loglog( timeStepList, errors_fluid_u, markers[markerIndex], label = legend, markersize = 3 )
     fluid_a_plot.loglog( timeStepList, errors_fluid_a, markers[markerIndex], label = legend, markersize = 3 )
@@ -140,7 +136,7 @@ lgd = fluid_u_plot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.33), ncol 
 (x1,x2,y1,y2) = fluid_u_plot.axis()
 y2 = np.minimum( 1, y2 )
 fluid_u_plot.axis( (x1,x2,y1,y2) )
-fluid_u_fig.savefig( 'tubeflow_fluid_u.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
+fluid_u_fig.savefig( 'tubeflow_rk4_fluid_u.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
 
 fluid_a_plot.set_xlabel( 'Time step [s]' )
 fluid_a_plot.set_ylabel( 'Error in fluid cross-sectional area [-]' )
@@ -149,7 +145,7 @@ lgd = fluid_a_plot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.33), ncol 
 (x1,x2,y1,y2) = fluid_a_plot.axis()
 y2 = np.minimum( 1, y2 )
 fluid_a_plot.axis( (x1,x2,y1,y2) )
-fluid_a_fig.savefig( 'tubeflow_fluid_a.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
+fluid_a_fig.savefig( 'tubeflow_rk4_fluid_a.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
 
 fluid_p_plot.set_xlabel( 'Time step [s]' )
 fluid_p_plot.set_ylabel( 'Error in fluid pressure [-]' )
@@ -158,7 +154,7 @@ lgd = fluid_p_plot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.33), ncol 
 (x1,x2,y1,y2) = fluid_p_plot.axis()
 y2 = np.minimum( 1, y2 )
 fluid_p_plot.axis( (x1,x2,y1,y2) )
-fluid_p_fig.savefig( 'tubeflow_fluid_p.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
+fluid_p_fig.savefig( 'tubeflow_rk4_fluid_p.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
 
 solid_r_plot.set_xlabel( 'Time step [s]' )
 solid_r_plot.set_ylabel( 'Error in solid radius [-]' )
@@ -167,7 +163,7 @@ lgd = solid_r_plot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.33), ncol 
 (x1,x2,y1,y2) = solid_r_plot.axis()
 y2 = np.minimum( 1, y2 )
 solid_r_plot.axis( (x1,x2,y1,y2) )
-solid_r_fig.savefig( 'tubeflow_solid_r.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
+solid_r_fig.savefig( 'tubeflow_rk4_solid_r.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
 
 solid_u_plot.set_xlabel( 'Time step [s]' )
 solid_u_plot.set_ylabel( 'Error in solid velocity [-]' )
@@ -176,7 +172,7 @@ lgd = solid_u_plot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.33), ncol 
 (x1,x2,y1,y2) = solid_u_plot.axis()
 y2 = np.minimum( 1, y2 )
 solid_u_plot.axis( (x1,x2,y1,y2) )
-solid_u_fig.savefig( 'tubeflow_solid_u.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
+solid_u_fig.savefig( 'tubeflow_rk4_solid_u.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
 
 cpu_plot.set_xlabel( 'Computational costs [s]' )
 cpu_plot.set_ylabel( 'Error in fluid velocity [-]' )
@@ -185,4 +181,4 @@ lgd = cpu_plot.legend( loc='upper center', bbox_to_anchor=(0.5, 1.33), ncol = 2,
 (x1,x2,y1,y2) = cpu_plot.axis()
 y2 = np.minimum( 1, y2 )
 cpu_plot.axis( (x1,x2,y1,y2) )
-cpu_fig.savefig( 'tubeflow_cpu.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )
+cpu_fig.savefig( 'tubeflow_rk4_cpu.pdf', bbox_extra_artists=(lgd,), transparent = True, bbox_inches='tight' )

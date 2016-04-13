@@ -151,28 +151,31 @@ void TubeFlowExplicitLinearSolidSolver::solve(
 
     int nbStages = 4;
     std::vector<fsi::vector> kStages( nbStages );
-    std::vector<scalar> a_RK4 = {
-        0, 0.5, 0.5, 1.
-    };
-    std::vector<scalar> b_RK4 = {
-        1. / 6., 1. / 3., 1. / 3., 1. / 6.
-    };
 
-    fsi::vector f;
+    fsi::matrix A( 4, 4 );
+    A.setZero();
+    A( 1, 0 ) = 1. / 3.;
+    A( 2, 0 ) = -1. / 3.;
+    A( 2, 1 ) = 1.;
+    A( 3, 0 ) = 1.;
+    A( 3, 1 ) = -1.;
+    A( 3, 2 ) = 1.;
+
+    std::vector<scalar> b_RK4 = {
+        1. / 8., 3. / 8., 3. / 8., 1. / 8.
+    };
 
     for ( int iStage = 0; iStage < nbStages; iStage++ )
     {
-        if ( iStage == 0 )
-            f = evaluateFunction( rn, p, un );
-        else
+        fsi::vector rStage = rn, uStage = un;
+
+        for ( int i = 0; i < iStage; i++ )
         {
-            f = evaluateFunction(
-                rn.array() + dt * a_RK4[iStage] * kStages[iStage - 1].array().head( N ),
-                p,
-                un.array() + dt * a_RK4[iStage] * kStages[iStage - 1].array().tail( N ) );
+            rStage.array() += dt * A( iStage, i ) * kStages[i].array().head( N );
+            uStage.array() += dt * A( iStage, i ) * kStages[i].array().tail( N );
         }
 
-        kStages[iStage] = f;
+        kStages[iStage] = evaluateFunction( rStage, p, uStage );
     }
 
     r.setZero();
