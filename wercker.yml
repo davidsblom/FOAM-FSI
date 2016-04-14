@@ -504,11 +504,15 @@ build:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
-                export WM_NCOMPPROCS=2
 
                 source foam-extend-3.2/etc/bashrc
 
-                wmake all
+                wmake src/tests/testsuite-dealii
+                wmake src/tests/testsuite-fsi
+                wmake src/tests/testsuite-rbf
+                wmake src/tests/testsuite-sdc
+                wmake src/tests/testsuite-sdc-fsi
+                wmake src/tests/testsuite-spacemapping
         - script:
             name: testsuite-sdc
             code: |
