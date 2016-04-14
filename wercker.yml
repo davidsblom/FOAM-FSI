@@ -294,6 +294,7 @@ build:
                 then
                     make debug
                 fi
+                cd ..
 
                 if [ ! -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}.tar.xz" ]; then
                     tar -cJf dealii-${DEALII_VERSION}.tar.xz dealii-${DEALII_VERSION}
