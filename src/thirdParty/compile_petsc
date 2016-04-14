@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 PETSC_VERSION=3.6.4
 export PETSC_ARCH=x86_64
@@ -21,10 +22,10 @@ if [ ! -d "petsc-${PETSC_VERSION}" ]; then
 
   if [ "$WM_COMPILE_OPTION" = "Opt" ]
   then
-      ./config/configure.py --with-shared=1 --with-x=0 --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif77 --with-debugging=0 --download-mumps --download-scalapack --download-parmetis --download-metis --download-fblaslapack --download-hypre
+      ./config/configure.py --with-shared=1 --with-x=0 --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif77 --with-debugging=0 --download-mumps --download-scalapack --download-fblaslapack --download-hypre --with-metis-dir=$METIS_DIR --with-parmetis-dir=$PARMETIS_DIR
   elif [ "$WM_COMPILE_OPTION" = "Debug" ]
   then
-      ./config/configure.py --with-shared=1 --with-x=0 --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif77 --with-debugging=1 --download-mumps --download-scalapack --download-parmetis --download-metis --download-fblaslapack --download-hypre
+      ./config/configure.py --with-shared=1 --with-x=0 --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif77 --with-debugging=1 --download-mumps --download-scalapack --download-fblaslapack --download-hypre --with-metis-dir=$METIS_DIR --with-parmetis-dir=$PARMETIS_DIR
   fi
 
   make
