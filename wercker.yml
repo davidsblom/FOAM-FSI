@@ -9,7 +9,7 @@ build:
             name: install packages
             code: |
                 apt-get update
-                apt-get -y install git build-essential flex bison zlib1g-dev libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev libscotch-dev liblapack-dev libblas-dev cppcheck
+                apt-get -y install git build-essential flex bison zlib1g-dev libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev libscotch-dev liblapack-dev libblas-dev cppcheck petsc-dev
         - script:
             name: initialize git submodules
             code: |
@@ -188,41 +188,6 @@ build:
 
                 source $FOAM_SRC/../etc/bashrc
         - script:
-            name: PETSc
-            code: |
-                export PETSC_VERSION=3.6.4
-                export PARAVIEW_SYSTEM=1
-                export CMAKE_SYSTEM=1
-                export HWLOC_SYSTEM=1
-                export SCOTCH_SYSTEM=1
-                export PYFOAM_SYSTEM=1
-                export CUDA_IGNORE=1
-                export SWAK4FOAM_SYSTEM=1
-                export WM_MPLIB=SYSTEMOPENMPI
-                export OPENMPI_DIR=/usr
-                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-                export FOAM_INST_DIR=`pwd`
-                export PETSC_ARCH=x86_64
-
-                source foam-extend-3.2/etc/bashrc
-
-                cd src/thirdParty
-
-                if [ -f "$WERCKER_CACHE_DIR/petsc-${PETSC_VERSION}.tar.xz" ]; then
-                    debug "PETSc library found in cache"
-                    rsync -azvh $WERCKER_CACHE_DIR/petsc-${PETSC_VERSION}.tar.xz ./
-                    tar -Jxf petsc-${PETSC_VERSION}.tar.xz
-                    ln -s petsc-${PETSC_VERSION} petsc
-                    cp petsc-${PETSC_VERSION}/${PETSC_ARCH}/lib/lib* ${FOAM_LIBBIN}/
-                fi
-
-                ./compile_petsc
-
-                if [ ! -f "$WERCKER_CACHE_DIR/petsc-${PETSC_VERSION}.tar.xz" ]; then
-                    tar -cJf petsc-${PETSC_VERSION}.tar.xz petsc-${PETSC_VERSION}
-                    rsync -azvh petsc-${PETSC_VERSION}.tar.xz $WERCKER_CACHE_DIR/
-                fi
-        - script:
             name: boost
             code: |
                 export BOOST_VERSION=1_55_0
@@ -268,7 +233,67 @@ build:
                     cp dealii-${DEALII_VERSION}/bin/lib/libdeal_II* ${FOAM_LIBBIN}/
                 fi
 
-                ./compile_dealii
+                rm -f boost
+                ln -s boost_${BOOST_VERSION} boost
+
+                if [ ! -d "dealii-${DEALII_VERSION}" ]; then
+
+                  rm -rf dealii*
+
+                  wget https://github.com/dealii/dealii/releases/download/v${DEALII_VERSION}/dealii-${DEALII_VERSION}.tar.gz
+
+                  tar -zxf dealii-${DEALII_VERSION}.tar.gz
+
+                  rm dealii-${DEALII_VERSION}.tar.gz
+
+                  export CC=mpicc
+                  export CXX=mpicxx
+                  export F77=mpif77
+                  export F90=mpif90
+
+                  cd dealii-${DEALII_VERSION}
+
+                  mkdir build
+                  mkdir bin
+                  cd build
+
+                  if [ "$WM_COMPILE_OPTION" = "Opt" ]
+                  then
+                    cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DCMAKE_BUILD_TYPE=Release ..
+                  elif [ "$WM_COMPILE_OPTION" = "Debug" ]
+                  then
+                    cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DCMAKE_BUILD_TYPE=Debug ..
+                  fi
+
+                  make -j $WM_NCOMPPROCS install test
+
+                  cd ../..
+
+                  rm -rf dealii-${DEALII_VERSION}/build
+
+                  cp dealii-${DEALII_VERSION}/bin/lib/libdeal* ${FOAM_LIBBIN}/
+
+                fi
+
+                rm -f dealii
+                ln -s dealii-${DEALII_VERSION} dealii
+
+                cd deal-fsi
+
+                rm -rf Makefile CMakeFiles cmake_install.cmake CMakeCache.txt
+                rm -f boost eigen
+                ln -s ../boost
+                ln -s ../eigen
+
+                cmake -DDEAL_II_DIR=../dealii/bin/ .
+
+                if [ "$WM_COMPILE_OPTION" = "Opt" ]
+                then
+                    make release
+                elif [ "$WM_COMPILE_OPTION" = "Debug" ]
+                then
+                    make debug
+                fi
 
                 if [ ! -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}.tar.xz" ]; then
                     tar -cJf dealii-${DEALII_VERSION}.tar.xz dealii-${DEALII_VERSION}
