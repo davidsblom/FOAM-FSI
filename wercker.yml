@@ -190,7 +190,7 @@ build:
         - script:
             name: PETSc
             code: |
-                export PETSC_VERSION=3.6.3
+                export PETSC_VERSION=3.6.4
                 export PARAVIEW_SYSTEM=1
                 export CMAKE_SYSTEM=1
                 export HWLOC_SYSTEM=1
