@@ -1,0 +1,44 @@
+#!/bin/bash
+
+set -e
+
+NB_CORES=3
+
+cp fluid/system/decomposeParDict solid/system/
+cp fluid/constant/couplingProperties solid/constant/
+
+./Allclean
+
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+cd fluid
+touch fluid.foam
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication decomposePar
+cd -
+
+cd solid
+touch solid.foam
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication decomposePar
+cd -
+
+cp -r solid/0 fluid/0/solid
+cp -r solid/constant fluid/constant/solid
+cp -r solid/system fluid/system/solid
+
+CORE_COUNT=`expr $NB_CORES - 1`
+
+for i in `seq 0 $CORE_COUNT`
+  do
+    cp -r solid/processor${i}/0 fluid/processor${i}/0/solid
+    cp -r solid/processor${i}/constant fluid/processor${i}/constant/solid
+  done
+
+cd fluid
+runParallel fsiFoam $NB_CORES
+runApplication reconstructPar
