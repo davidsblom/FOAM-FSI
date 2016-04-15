@@ -356,7 +356,24 @@ build:
 
                 cd src/thirdParty
 
-                ./compile_precice
+                export BOOST_ROOT=`pwd`/boost
+                export PRECICE_BOOST_ROOT=${BOOST_ROOT}
+                export PRECICE_MPI_LIB=mpi
+                export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
+                export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
+                export CPLUS_INCLUDE_PATH=`pwd`/eigen
+
+                # Build preCICE
+                cd precice
+                if [ "$WM_COMPILE_OPTION" = "Opt" ]
+                then
+                    scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
+                    cp build/release-nopython/libprecice.* ${FOAM_LIBBIN}/
+                elif [ "$WM_COMPILE_OPTION" = "Debug" ]
+                then
+                    scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
+                    cp build/debug-nopython/libprecice.* ${FOAM_LIBBIN}/
+                fi
         - script:
             name: yaml-cpp
             code: |
