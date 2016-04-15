@@ -9,7 +9,7 @@ build:
             name: install packages
             code: |
                 apt-get update
-                apt-get -y install git build-essential flex bison zlib1g-dev libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev libscotch-dev liblapack-dev libblas-dev cppcheck petsc-dev
+                apt-get -y install git build-essential flex bison zlib1g-dev libreadline-dev libncurses-dev libxt-dev libopenmpi-dev openmpi-bin rpm wget cmake hwloc scotch gfortran python unzip scons libiberty-dev libscotch-dev liblapack-dev libblas-dev cppcheck petsc-dev libmetis-dev libscotchparmetis-dev
         - script:
             name: initialize git submodules
             code: |
@@ -31,6 +31,8 @@ build:
                     export HWLOC_SYSTEM=1
                     export SCOTCH_SYSTEM=1
                     export PYFOAM_SYSTEM=1
+                    export METIS_SYSTEM=1
+                    export PARMETIS_SYSTEM=1
                     export CUDA_IGNORE=1
                     export SWAK4FOAM_SYSTEM=1
                     export WM_MPLIB=SYSTEMOPENMPI
@@ -64,6 +66,8 @@ build:
                     export PARAVIEW_SYSTEM=1
                     export CMAKE_SYSTEM=1
                     export HWLOC_SYSTEM=1
+                    export METIS_SYSTEM=1
+                    export PARMETIS_SYSTEM=1
 
                     export SCOTCH_SYSTEM=1
                     export SCOTCH_DIR=/usr
@@ -111,6 +115,8 @@ build:
                     export PARAVIEW_SYSTEM=1
                     export CMAKE_SYSTEM=1
                     export HWLOC_SYSTEM=1
+                    export METIS_SYSTEM=1
+                    export PARMETIS_SYSTEM=1
 
                     export SCOTCH_SYSTEM=1
                     export SCOTCH_DIR=/usr
@@ -204,6 +210,13 @@ build:
 
                 tar jxf boost_${BOOST_VERSION}.tar.bz2
                 ln -s boost_${BOOST_VERSION} boost
+        - script:
+            name: PETSc
+            code: |
+                cd src/thirdParty
+                mkdir -p petsc
+                cd petsc
+                ln -s /usr/include/petsc include
         - script:
             name: deal.II
             code: |
