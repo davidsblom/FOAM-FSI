@@ -22,26 +22,6 @@ MultiLevelSpaceMappingSolver::MultiLevelSpaceMappingSolver(
 {
     assert( solvers->size() > 0 );
     assert( models->size() == solvers->size() + 1 );
-
-    int level = 0;
-
-    for ( auto && model : *models )
-    {
-        assert( model->fsi->fluidSolver->level == model->fsi->solidSolver->level );
-        assert( model->fsi->fluidSolver->level == level );
-
-        level++;
-    }
-
-    level = 0;
-
-    for ( auto && solver : *solvers )
-    {
-        assert( solver->fineModel->fsi->fluidSolver->level == level + 1 );
-        assert( solver->coarseModel->fsi->fluidSolver->level == level );
-
-        level++;
-    }
 }
 
 void MultiLevelSpaceMappingSolver::initTimeStep()

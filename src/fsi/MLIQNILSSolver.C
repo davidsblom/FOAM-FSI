@@ -20,16 +20,6 @@ MLIQNILSSolver::MLIQNILSSolver(
 {
     assert( models );
     assert( models->size() >= 2 );
-
-    int level = 0;
-
-    for ( auto && model : *models )
-    {
-        assert( model->fsi->fluidSolver->level == model->fsi->solidSolver->level );
-        assert( model->fsi->fluidSolver->level == level );
-
-        level++;
-    }
 }
 
 void MLIQNILSSolver::finalizeTimeStep()
