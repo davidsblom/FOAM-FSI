@@ -1,5 +1,9 @@
 c++WARN     = -Wall -Wextra -Werror
 
+ifndef PRECICE_ROOT
+    PRECICE_ROOT=../../../../src/thirdParty/precice
+endif
+
 EXE_INC = -std=c++11 \
     -I../../../../src/fsi/lnInclude \
     -isystem ../../../../src/thirdParty/eigen \
@@ -14,7 +18,7 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/solidModels/lnInclude \
-    -I../../../../src/thirdParty/precice/src \
+    -I$(PRECICE_ROOT)/src \
     -isystem ../../../../src/thirdParty/boost \
     -I../../../../src/thirdParty \
     -I../../../../src/RBFMeshMotionSolver/lnInclude/ \

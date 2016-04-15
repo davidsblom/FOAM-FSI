@@ -1,5 +1,9 @@
 c++WARN     = -Wall -Wextra -Werror
 
+ifndef PRECICE_ROOT
+    PRECICE_ROOT=../../../../src/thirdParty/precice
+endif
+
 EXE_INC = -std=c++11 \
     -I../../../../src/fsi/lnInclude \
     -isystem ../../../../src/thirdParty/eigen \
@@ -12,7 +16,7 @@ EXE_INC = -std=c++11 \
     -isystem $(LIB_SRC)/meshTools/lnInclude \
     -isystem $(LIB_SRC)/sampling/lnInclude \
     -isystem $(LIB_SRC)/solidModels/lnInclude \
-    -isystem ../../../../src/thirdParty/precice/src \
+    -isystem $(PRECICE_ROOT)/src \
     -isystem ../../../../src/thirdParty/boost \
     -isystem../../../../src/thirdParty \
     $(WM_DECOMP_INC) \
