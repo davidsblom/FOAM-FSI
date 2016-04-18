@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+
+cd solid
+cleanCase
+cd -
+
+cd fluid
+cleanCase
+cd -
+
+rm -rf fluid/*.foam solid/*.foam fluid/*.txt fluid/*.csv solid/*.txt fluid/*.log fluid/*.msh
+rm -rf fluid/gmon.out solid/*.log fluid/log.* fluid/processor*
+rm -rf fluid/0/solid
+rm -rf fluid/system/solid
+rm -rf fluid/constant/solid
+rm -f solid/constant/polyMesh/boundary
+rm -f fluid/iterations-*.txt solid/iterations-*.txt
+rm -f solid/constant/preCICE.xml system/decomposeParDict
