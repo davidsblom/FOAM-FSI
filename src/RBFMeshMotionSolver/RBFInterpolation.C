@@ -197,7 +197,8 @@ namespace rbf
 
         if ( cpu )
         {
-            matrix B, valuesLU( n_A, values.cols() ), Phi( n_B, n_A );
+            matrix B, valuesLU( n_A, values.cols() );
+            Phi.conservativeResize( n_B, n_A );
 
             if ( polynomialTerm )
             {
