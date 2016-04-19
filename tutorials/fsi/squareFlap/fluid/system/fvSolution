@@ -29,7 +29,7 @@ solvers
     {
         solver           PCG;
         preconditioner   DIC;
-        tolerance        1e-11;
+        tolerance        1e-13;
         relTol           1.0e-2;
     };
 
@@ -37,13 +37,13 @@ solvers
     {
         solver          BiCGStab;
         preconditioner  DILU;
-        tolerance       1e-11;
+        tolerance       1e-13;
     };
 }
 
 PIMPLE
 {
-    tolerance 1.0e-10;
+    tolerance 1.0e-12;
     relTol 1.0e-6;
     maxIter 20;
     minIter 1;
