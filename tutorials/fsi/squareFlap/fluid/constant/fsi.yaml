@@ -55,7 +55,7 @@ coupling-scheme-implicit:
   # converged.
   convergence-measures:
     - relative-convergence-measure:
-        limit: 1e-2
+        limit: 1e-3
 
         # data-id = 0: displacement
         # data-id = 1: pressure/traction acting on the FSI interface. Only

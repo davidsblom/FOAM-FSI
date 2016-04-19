@@ -44,12 +44,17 @@ solvers
 PIMPLE
 {
     tolerance 1.0e-10;
-    relTol 1.0e-5;
-    maxIter 10;
+    relTol 1.0e-6;
+    maxIter 20;
     minIter 1;
     nCorrectors 5;
     nNonOrthogonalCorrectors 0;
 }
 
+relaxationFactors
+{
+    U 0.9;
+    p 0.9;
+}
 
 // ************************************************************************* //
