@@ -40,9 +40,9 @@ void PreciceFluidSolver::init()
     setWritePositions();
     setWritePositionsAcoustics();
 
-    precice->initialize();
-
     writeDataAcoustics();
+
+    precice->initialize();
 
     precice->fulfilledAction( precice::constants::actionWriteInitialData() );
 
