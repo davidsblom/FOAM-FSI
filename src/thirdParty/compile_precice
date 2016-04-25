@@ -36,8 +36,8 @@ mkdir -p ${FOAM_APPBIN}
 cd precice
 if [ "$WM_COMPILE_OPTION" = "Opt" ]
 then
-    scons -j $WM_NCOMPPROCS build=debug python=off petsc=on compiler=mpicxx solib
-    scons -j $WM_NCOMPPROCS build=debug python=off petsc=on compiler=mpicxx
+    scons -j $WM_NCOMPPROCS build=release python=off petsc=on compiler=mpicxx solib
+    scons -j $WM_NCOMPPROCS build=release python=off petsc=on compiler=mpicxx
 elif [ "$WM_COMPILE_OPTION" = "Debug" ]
 then
     scons -j $WM_NCOMPPROCS build=debug python=off petsc=on compiler=mpicxx solib
