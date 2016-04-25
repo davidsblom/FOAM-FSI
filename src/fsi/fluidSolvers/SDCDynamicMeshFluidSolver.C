@@ -204,7 +204,9 @@ int SDCDynamicMeshFluidSolver::getDOF()
     forAll( U.boundaryField(), patchI )
     {
         if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
-            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity" )
+            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity"
+            && U.boundaryField().types()[patchI] != "fixedValue"
+            && U.boundaryField().types()[patchI] != "empty" )
         {
             forAll( U.boundaryField()[patchI], i )
             {
@@ -285,7 +287,9 @@ void SDCDynamicMeshFluidSolver::getSolution(
     forAll( U.boundaryField(), patchI )
     {
         if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
-            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity" )
+            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity"
+            && U.boundaryField().types()[patchI] != "fixedValue"
+            && U.boundaryField().types()[patchI] != "empty" )
         {
             forAll( U.boundaryField()[patchI], i )
             {
@@ -351,7 +355,9 @@ void SDCDynamicMeshFluidSolver::getSolution(
     forAll( UF.boundaryField(), patchI )
     {
         if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
-            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity" )
+            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity"
+            && U.boundaryField().types()[patchI] != "fixedValue"
+            && U.boundaryField().types()[patchI] != "empty" )
         {
             forAll( UF.boundaryField()[patchI], i )
             {
@@ -539,7 +545,9 @@ void SDCDynamicMeshFluidSolver::evaluateFunction(
     forAll( UF.boundaryField(), patchI )
     {
         if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
-            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity" )
+            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity"
+            && U.boundaryField().types()[patchI] != "fixedValue"
+            && U.boundaryField().types()[patchI] != "empty" )
         {
             forAll( UF.boundaryField()[patchI], i )
             {
@@ -655,7 +663,9 @@ void SDCDynamicMeshFluidSolver::prepareImplicitSolve(
     forAll( rhsU.boundaryField(), patchI )
     {
         if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
-            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity" )
+            && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity"
+            && U.boundaryField().types()[patchI] != "fixedValue"
+            && U.boundaryField().types()[patchI] != "empty" )
         {
             forAll( rhsU.boundaryField()[patchI], i )
             {
@@ -778,6 +788,7 @@ void SDCDynamicMeshFluidSolver::getVariablesInfo(
     {
         if ( U.boundaryField().types()[patchI] != "SDCMovingWallVelocity"
             && U.boundaryField().types()[patchI] != "transitionalParabolicVelocity"
+            && U.boundaryField().types()[patchI] != "fixedValue"
             && U.boundaryField().types()[patchI] != "empty" )
         {
             dof.push_back( U.boundaryField()[patchI].size() * mesh.nGeometricD() );
