@@ -21,26 +21,14 @@ wmake applications/utilities/mapMesh
 wmake libso src/SRFModelAbs
 wmake libso src/extraSolidBodyMotion
 wmake applications/utilities/addInitialRandomVelocity
-wmake applications/solvers/consistentSolvers/consistentIcoFoam
-wmake applications/solvers/consistentSolvers/consistentPimpleDyMFoam
-wmake applications/solvers/consistentSolvers/consistentPimpleFoam
-wmake applications/solvers/consistentSolvers/consistentSimpleFoam
-wmake applications/solvers/consistentSolvers/consistentSimpleSRFAbsFoam
+cd applications/solvers/consistentSolvers
+wmake all
+cd -
 wmake applications/solvers/unsteadyPUCoupledFoam
-wmake applications/solvers/fsi/fsiFoam
-wmake applications/solvers/fsi/solidFoam
-wmake applications/solvers/fsi/fluidFoam
-wmake applications/solvers/fsi/fsiSolidFoam
-wmake applications/solvers/fsi/fsiFluidFoam
-wmake src/tests/testsuite-dealii
-wmake src/tests/testsuite-fsi
-wmake src/tests/testsuite-rbf
-wmake src/tests/testsuite-sdc
-wmake src/tests/testsuite-sdc-fsi
-wmake src/tests/testsuite-spacemapping
-wmake src/tests/tubeflow
-wmake src/tests/tubeflow-sdc
-wmake src/tests/tubeflow-sdc-solid
-wmake src/tests/tubeflow-sdc-bdf-solid
-wmake src/tests/tubeflow-sdc-rk4-solid
+cd applications/solvers/fsi
+wmake all
+cd -
+cd src/tests
+wmake all
+cd -
 echo 'Finished'
