@@ -119,6 +119,9 @@ void PreciceFluidSolver::run()
         solver->finalizeTimeStep();
 
         inputOld += input;
+
+        if ( not precice->isCouplingOngoing() )
+            break;
     }
 }
 
