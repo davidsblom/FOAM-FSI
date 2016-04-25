@@ -30,6 +30,8 @@ wmake applications/solvers/unsteadyPUCoupledFoam
 wmake applications/solvers/fsi/fsiFoam
 wmake applications/solvers/fsi/solidFoam
 wmake applications/solvers/fsi/fluidFoam
+wmake applications/solvers/fsi/fsiSolidFoam
+wmake applications/solvers/fsi/fsiFluidFoam
 wmake src/tests/testsuite-dealii
 wmake src/tests/testsuite-fsi
 wmake src/tests/testsuite-rbf
@@ -41,6 +43,4 @@ wmake src/tests/tubeflow-sdc
 wmake src/tests/tubeflow-sdc-solid
 wmake src/tests/tubeflow-sdc-bdf-solid
 wmake src/tests/tubeflow-sdc-rk4-solid
-wmake applications/solvers/fsi/fsiSolidFoam
-wmake applications/solvers/fsi/fsiFluidFoam
 echo 'Finished'
