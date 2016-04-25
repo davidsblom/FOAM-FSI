@@ -74,6 +74,7 @@ void PreciceFluidSolver::run()
     matrix input( solver->getInterfaceSizeLocal(), precice->getDimensions() );
     matrix output;
     inputOld.setZero();
+    input.setZero();
 
     while ( solver->isRunning() )
     {
