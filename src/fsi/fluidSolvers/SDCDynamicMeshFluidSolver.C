@@ -717,6 +717,7 @@ void SDCDynamicMeshFluidSolver::prepareImplicitSolve(
             );
         motionSolver.corrector = corrector;
         motionSolver.k = k;
+        motionSolver.sweep = sweep;
     }
 
     volScalarField V

@@ -91,6 +91,7 @@ namespace Foam
 
             bool corrector;
             int k;
+            int sweep;
     };
 }
 
