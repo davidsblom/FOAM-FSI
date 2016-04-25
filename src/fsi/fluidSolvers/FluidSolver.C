@@ -114,6 +114,7 @@ FluidSolver::FluidSolver(
     maxIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "maxIter" ) ) ),
     absoluteTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "tolerance" ) ) ),
     relativeTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "relTol" ) ) ),
+    pisoTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "pisoTol" ) ) ),
     sumLocalContErr( 0 ),
     globalContErr( 0 ),
     cumulativeContErr( 0 ),
@@ -137,6 +138,8 @@ FluidSolver::FluidSolver(
     assert( relativeTolerance < 1 );
     assert( minIter <= maxIter );
     assert( minIter >= 0 );
+    assert( pisoTolerance < 1 );
+    assert( pisoTolerance > 0 );
 
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
@@ -449,7 +452,6 @@ void FluidSolver::solve()
         scalar initResidual = 1;
         scalar currResidual = 1;
         scalar pressureResidual = 1;
-        scalar tol = 1.0e-2;
 
         // --- PISO loop
         for ( int corr = 0; corr < nCorr; corr++ )
@@ -509,7 +511,7 @@ void FluidSolver::solve()
             U -= (1.0 / AU) * fvc::grad( p );
             U.correctBoundaryConditions();
 
-            if ( currResidual < std::max( tol * initResidual, scalar( 1.0e-15 ) ) )
+            if ( currResidual < std::max( pisoTolerance * initResidual, scalar( 1.0e-15 ) ) )
                 break;
         }
 
