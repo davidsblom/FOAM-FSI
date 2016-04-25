@@ -99,6 +99,9 @@ void PreciceSolidSolver::run()
         solver->finalizeTimeStep();
 
         outputOld = output;
+
+        if ( not precice->isCouplingOngoing() )
+            break;
     }
 }
 
