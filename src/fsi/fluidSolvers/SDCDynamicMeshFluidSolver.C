@@ -747,9 +747,6 @@ void SDCDynamicMeshFluidSolver::prepareImplicitSolve(
 
     V.internalField() = mesh.V();
     V.correctBoundaryConditions();
-    volScalarField V0 = V;
-    V0.internalField() = mesh.V0();
-    V0.correctBoundaryConditions();
 
     rhsU /= V;
     rhsUf /= fvc::interpolate( V );
