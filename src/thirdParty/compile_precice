@@ -36,10 +36,13 @@ mkdir -p ${FOAM_APPBIN}
 cd precice
 if [ "$WM_COMPILE_OPTION" = "Opt" ]
 then
-	scons -j $WM_NCOMPPROCS build=release python=off petsc=on compiler=mpicxx solib
-    cp build/release-nopython/libprecice.* ${FOAM_LIBBIN}/
+    scons -j $WM_NCOMPPROCS build=release python=off petsc=on compiler=mpicxx solib
+    scons -j $WM_NCOMPPROCS build=release python=off petsc=on compiler=mpicxx
 elif [ "$WM_COMPILE_OPTION" = "Debug" ]
 then
     scons -j $WM_NCOMPPROCS build=debug python=off petsc=on compiler=mpicxx solib
-    cp build/debug-nopython/libprecice.* ${FOAM_LIBBIN}/
+    scons -j $WM_NCOMPPROCS build=debug python=off petsc=on compiler=mpicxx
 fi
+
+cp build/last/libprecice.* ${FOAM_LIBBIN}/
+cp build/last/binprecice ${FOAM_APPBIN}/

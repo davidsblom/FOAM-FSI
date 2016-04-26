@@ -34,9 +34,9 @@ if [ ! -d "petsc-${PETSC_VERSION}" ]; then
 
   cd ../
 
-  cp petsc-${PETSC_VERSION}/${PETSC_ARCH}/lib/lib* ${FOAM_LIBBIN}/
-
 fi
+
+cp petsc-${PETSC_VERSION}/${PETSC_ARCH}/lib/lib* ${FOAM_LIBBIN}/
 
 rm -f petsc
 ln -s petsc-${PETSC_VERSION} petsc

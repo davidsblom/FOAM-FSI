@@ -74,6 +74,7 @@ void PreciceFluidSolver::run()
     matrix input( solver->getInterfaceSizeLocal(), precice->getDimensions() );
     matrix output;
     inputOld.setZero();
+    input.setZero();
 
     while ( solver->isRunning() )
     {
@@ -118,6 +119,9 @@ void PreciceFluidSolver::run()
         solver->finalizeTimeStep();
 
         inputOld += input;
+
+        if ( not precice->isCouplingOngoing() )
+            break;
     }
 }
 

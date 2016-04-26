@@ -44,7 +44,8 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     cpu( false ),
     timeIntegrationScheme( false ),
     corrector( false ),
-    k( 0 )
+    k( 0 ),
+    sweep( 0 )
 {
     // Find IDs of staticPatches
     forAll( staticPatches, patchI )
