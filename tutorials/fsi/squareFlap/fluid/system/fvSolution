@@ -47,8 +47,9 @@ PIMPLE
     relTol 1.0e-6;
     maxIter 20;
     minIter 1;
-    nCorrectors 5;
+    nCorrectors 10;
     nNonOrthogonalCorrectors 0;
+    pisoTol 1.0e-3;
 }
 
 relaxationFactors
