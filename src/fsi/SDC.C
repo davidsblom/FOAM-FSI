@@ -313,11 +313,6 @@ namespace sdc
 
                     for ( unsigned int i = 0; i < dofVariables.size(); i++ )
                     {
-                        if ( not enabledVariables.at( i ) && dofVariables.at( i ) == 0 )
-                            continue;
-
-                        assert( dofVariables.at( i ) > 0 );
-
                         scalarList squaredNormResidual( Pstream::nProcs(), scalar( 0 ) );
                         labelList dof( Pstream::nProcs(), label( 0 ) );
 
@@ -491,6 +486,7 @@ namespace sdc
         squaredNormResidual[Pstream::myProcNo()] = residual.squaredNorm();
         reduce( squaredNormResidual, sumOp<scalarList>() );
         dof[Pstream::myProcNo()] = residual.rows() * residual.cols();
+        reduce( dof, sumOp<labelList>() );
         scalar error = std::sqrt( sum( squaredNormResidual ) / sum( dof ) );
         convergence = error < tol;
 
