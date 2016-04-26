@@ -788,9 +788,7 @@ void SDCDynamicMeshFluidSolver::getVariablesInfo(
             && U.boundaryField().types()[patchI] != "fixedValue"
             && U.boundaryField().types()[patchI] != "empty" )
         {
-            dof.push_back( U.boundaryField()[patchI].size() * mesh.nGeometricD() );
-            enabled.push_back( true );
-            names.push_back( "fluid patch " + mesh.boundaryMesh()[patchI].name() );
+            dof.back() += U.boundaryField()[patchI].size() * mesh.nGeometricD();
         }
     }
 
@@ -1030,7 +1028,7 @@ void SDCDynamicMeshFluidSolver::solve()
             U -= fvc::grad( p ) / AU;
             U.correctBoundaryConditions();
 
-            if ( currResidual < std::max( tol * initResidual, scalar( 1.0e-15 ) ) )
+            if ( currResidual < std::max( tol * initResidual, scalar( 1.0e-20 ) ) )
                 break;
         }
 
