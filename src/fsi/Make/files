@@ -32,6 +32,7 @@ Uniform.C
 GaussRadau.C
 GaussLobatto.C
 ClenshawCurtis.C
+UserDefinedNodes.C
 
 fluidSolvers/CoupledFluidSolver.C
 fluidSolvers/FluidSolver.C
