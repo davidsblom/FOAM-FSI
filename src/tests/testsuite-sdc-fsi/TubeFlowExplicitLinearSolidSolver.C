@@ -227,7 +227,7 @@ void TubeFlowExplicitLinearSolidSolver::solve(
     std::vector<scalar> c_RK4 = {
         0, 1. / 3., 2. / 3., 1.0
     };
-    
+
     int nbSteps = pStages.size() - 1;
     scalar dtStep = 1. / nbSteps;
     scalar nodeStart = dtStep * k;
@@ -265,8 +265,6 @@ void TubeFlowExplicitLinearSolidSolver::solve(
             from.push_back( 0 );
             for ( int i = 1; i < functions.rows(); i++ )
                 from.push_back( from.back() + dtStep );
-
-            std::cout << std::endl;
 
             pInterpolate = dataStorage->interpolate( functions, from, nodes );
         }
