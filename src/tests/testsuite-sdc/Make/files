@@ -6,6 +6,7 @@ test_quadrature.C
 test_sdc.C
 test_sdcinterpolation.C
 test_uniform.C
+test_userdefinednodes.C
 tests.C
 
 Piston.C
