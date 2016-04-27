@@ -29,7 +29,7 @@ class SDCFsiExplicitSolidSolverTest : public ::testing::Test
             scalar h = 1.0e-3;
             scalar L = 1;
             scalar rho_f = 1.225;
-            scalar rho_s = 1.225;
+            scalar rho_s = 1000.225;
             scalar E0 = 490;
             scalar G = 490;
             scalar nu = 0.5;
@@ -41,10 +41,10 @@ class SDCFsiExplicitSolidSolverTest : public ::testing::Test
             scalar T = 1;
             scalar cmk = std::sqrt( E0 * h / (2 * rho_f * r0) );
 
-            int N = 5;
+            int N = 10;
             bool parallel = false;
             int extrapolation = 0;
-            scalar tol = 1.0e-3;
+            scalar tol = 1.0e-7;
             int maxIter = 50;
             scalar initialRelaxation = 1.0e-3;
             int maxUsedIterations = 50;
@@ -56,9 +56,15 @@ class SDCFsiExplicitSolidSolverTest : public ::testing::Test
             bool updateJacobian = false;
             scalar beta = 0.5;
             int minIter = 5;
+            int nbNodes = 1;
+
+            std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature2;
+            quadrature2 = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+
+            std::shared_ptr<sdc::DataStorage> data2 ( new sdc::DataStorage( quadrature2, N ) );
 
             std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
-            std::shared_ptr<fsi::BaseMultiLevelSolver> solid( new tubeflow::SDCTubeFlowExplicitLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, p0, T ) );
+            std::shared_ptr<fsi::BaseMultiLevelSolver> solid( new tubeflow::SDCTubeFlowExplicitLinearSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, p0, T, data2 ) );
 
             shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, 0, 0 ) );
             shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, 1, 0 ) );
@@ -66,7 +72,7 @@ class SDCFsiExplicitSolidSolverTest : public ::testing::Test
             std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
             convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
 
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, true, tol ) ) );
+            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, false, tol ) ) );
             convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
 
             shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
@@ -81,12 +87,12 @@ class SDCFsiExplicitSolidSolverTest : public ::testing::Test
 
             std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing ) );
 
-            int nbNodes = 2;
-
             std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
             quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
 
-            sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( fsiSolver, quadrature, 1.0e-15, 1, 10 ) );
+            std::shared_ptr<sdc::DataStorage> data ( new sdc::DataStorage( quadrature, fsiSolver->getDOF() ) );
+
+            sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( fsiSolver, quadrature, data, 1.0e-15, 1, 100 ) );
         }
 
         virtual void TearDown()

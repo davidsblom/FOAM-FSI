@@ -28,6 +28,21 @@ namespace tubeflow
                 scalar T
                 );
 
+            SDCTubeFlowExplicitLinearSolidSolver(
+                int N,
+                scalar nu,
+                scalar rho,
+                scalar h,
+                scalar L,
+                scalar dt,
+                scalar G,
+                scalar E0,
+                scalar r0,
+                scalar p0,
+                scalar T,
+                std::shared_ptr<sdc::DataStorage> dataStorage
+                );
+
             virtual ~SDCTubeFlowExplicitLinearSolidSolver();
 
             virtual void evaluateFunction(

@@ -42,7 +42,67 @@ TubeFlowExplicitLinearSolidSolver::TubeFlowExplicitLinearSolidSolver(
     r( N ),
     rhs( 2 * N ),
     p( N ),
-    pn( N )
+    pn( N ),
+    dataStorage( nullptr )
+{
+    assert( N > 0 );
+    assert( nu > 0 );
+    assert( nu < 1 );
+    assert( h > 0 );
+    assert( kappa > 0 );
+    assert( L > 0 );
+    assert( G > 0 );
+    assert( r0 > 0 );
+    assert( T > 0 );
+
+    un.setZero();
+    u.setZero();
+    rhs.setZero();
+    p.fill( p0 );
+    pn.fill( p0 );
+    r.setZero();
+    rn.setZero();
+
+    scalar a0 = boost::math::constants::pi<scalar>() * r0 * r0;
+    data.fill( a0 );
+}
+
+TubeFlowExplicitLinearSolidSolver::TubeFlowExplicitLinearSolidSolver(
+    int N,
+    scalar nu,
+    scalar rho,
+    scalar h,
+    scalar L,
+    scalar dt,
+    scalar G,
+    scalar E0,
+    scalar r0,
+    scalar p0,
+    scalar T,
+    std::shared_ptr<sdc::DataStorage> dataStorage
+    )
+    :
+    BaseMultiLevelSolver( N, 1, boost::math::constants::pi<scalar>() * r0 * r0 ),
+    N( N ),
+    dt( dt ),
+    r0( r0 ),
+    kappa( 2.0L * (1.0L + nu) / (4.0L + 3.0L * nu) ),
+    dx( L / N ),
+    G( G ),
+    E0( E0 ),
+    nu( nu ),
+    h( h ),
+    rho( rho ),
+    T( T ),
+    grid(),
+    un( N ),
+    rn( N ),
+    u( N ),
+    r( N ),
+    rhs( 2 * N ),
+    p( N ),
+    pn( N ),
+    dataStorage( dataStorage )
 {
     assert( N > 0 );
     assert( nu > 0 );
@@ -164,10 +224,62 @@ void TubeFlowExplicitLinearSolidSolver::solve(
     std::vector<scalar> b_RK4 = {
         1. / 8., 3. / 8., 3. / 8., 1. / 8.
     };
+    std::vector<scalar> c_RK4 = {
+        0, 1. / 3., 2. / 3., 1.0
+    };
+    
+    int nbSteps = pStages.size() - 1;
+    scalar dtStep = 1. / nbSteps;
+    scalar nodeStart = dtStep * k;
+
+    std::vector<scalar> nodes;
+    for ( int i = 0; i < 4; i++ )
+    {
+        nodes.push_back( nodeStart + c_RK4[i] * dtStep );
+    }
+
+    fsi::matrix pInterpolate;
+
+    if ( dataStorage )
+    {
+        if ( corrector )
+        {
+            fsi::matrix functions( pStages.size(), N );
+            for ( int i = 0; i < functions.rows(); i++ )
+                functions.row(i) = pStages[i];
+
+            functions.row( k + 1 ) = p;
+
+            pInterpolate = dataStorage->interpolate( functions, nodes );
+        }
+
+        if ( not corrector )
+        {
+            fsi::matrix functions ( k + 2, N );
+            for ( int i = 0; i < functions.rows(); i++ )
+                functions.row(i) = pStages[i];
+
+            functions.row( k + 1 ) = p;
+
+            std::vector<scalar> from;
+            from.push_back( 0 );
+            for ( int i = 1; i < functions.rows(); i++ )
+                from.push_back( from.back() + dtStep );
+
+            std::cout << std::endl;
+
+            pInterpolate = dataStorage->interpolate( functions, from, nodes );
+        }
+    }
 
     for ( int iStage = 0; iStage < nbStages; iStage++ )
     {
         fsi::vector rStage = rn, uStage = un;
+
+        fsi::vector pStage = p;
+
+        if ( dataStorage )
+            pStage = pInterpolate.row( iStage );
 
         for ( int i = 0; i < iStage; i++ )
         {
@@ -175,7 +287,7 @@ void TubeFlowExplicitLinearSolidSolver::solve(
             uStage.array() += dt * A( iStage, i ) * kStages[i].array().tail( N );
         }
 
-        kStages[iStage] = evaluateFunction( rStage, p, uStage );
+        kStages[iStage] = evaluateFunction( rStage, pStage, uStage );
     }
 
     r.setZero();
