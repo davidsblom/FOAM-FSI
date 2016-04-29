@@ -728,6 +728,8 @@ void SDCDynamicMeshFluidSolver::prepareImplicitSolve(
         motionSolver.corrector = corrector;
         motionSolver.k = k;
         motionSolver.sweep = sweep;
+
+        mesh.update();
     }
 
     volScalarField V
@@ -853,8 +855,6 @@ void SDCDynamicMeshFluidSolver::solve()
 
     // Update mesh.phi()
     {
-        mesh.update();
-
         scalar rDeltaT = 1.0 / runTime->deltaT().value();
 
         // Create swept volumes
