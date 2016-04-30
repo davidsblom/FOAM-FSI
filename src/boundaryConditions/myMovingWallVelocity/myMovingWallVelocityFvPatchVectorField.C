@@ -99,9 +99,10 @@ namespace Foam
         {
             oldoldFc_ = oldFc_;
             oldFc_ = Fc_;
-            Fc_ = pp.faceCentres();
             myTimeIndex_ = mesh.time().timeIndex();
         }
+
+        Fc_ = pp.faceCentres();
 
         // const pointField& oldPoints = mesh.oldPoints();
         const volVectorField & U = mesh.lookupObject<volVectorField>( dimensionedInternalField().name() );
