@@ -109,6 +109,38 @@ void SDCDynamicMeshFluidSolver::createFields()
     setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
 }
 
+scalar SDCDynamicMeshFluidSolver::evaluateMomentumResidual()
+{
+    volScalarField V
+    (
+        IOobject
+        (
+            "V",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimless,
+        zeroGradientFvPatchScalarField::typeName
+    );
+
+    V.internalField() = mesh.V();
+    V.correctBoundaryConditions();
+
+    dimensionedScalar rDeltaT = 1.0 / mesh.time().deltaT();
+    tmp<volVectorField> residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p ) - rDeltaT * rhsU / V;
+
+    if ( turbulenceSwitch )
+        residual() += turbulence->divDevReff( U ) & U;
+    else
+        residual() += -fvc::laplacian( nu, U );
+
+    scalarField magResU = mag( residual->internalField() );
+    return std::sqrt( gSumSqr( magResU ) / ( mesh.globalData().nTotalCells() * mesh.nGeometricD() ) );
+}
+
 void SDCDynamicMeshFluidSolver::initialize()
 {
     assert( !init );
