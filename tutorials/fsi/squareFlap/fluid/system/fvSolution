@@ -45,7 +45,7 @@ PIMPLE
 {
     tolerance 1.0e-12;
     relTol 1.0e-6;
-    maxIter 20;
+    maxIter 10;
     minIter 1;
     nCorrectors 10;
     nNonOrthogonalCorrectors 0;
