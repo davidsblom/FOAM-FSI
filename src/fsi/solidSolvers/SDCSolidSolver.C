@@ -467,6 +467,8 @@ void SDCSolidSolver::solve()
 
         solverPerf = UEqn.solve();
 
+        U.relax();
+
         gradU = fvc::grad( U );
         shearGradU = ( (I - n * n) & fvc::interpolate( gradU ) );
         calculateEpsilonSigma();
