@@ -58,7 +58,7 @@ CompressibleFluidSolver::CompressibleFluidSolver(
             runTime->timeName(),
             mesh,
             IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         linearInterpolate( rho * U ) & mesh.Sf()
     ),
