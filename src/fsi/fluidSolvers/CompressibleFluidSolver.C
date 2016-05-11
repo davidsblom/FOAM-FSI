@@ -122,6 +122,9 @@ CompressibleFluidSolver::CompressibleFluidSolver(
     assert( convergenceTolerance > 0 );
 
     rho.oldTime();
+    h.oldTime();
+    U.oldTime();
+    p.oldTime();
 
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
