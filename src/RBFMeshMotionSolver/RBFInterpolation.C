@@ -122,7 +122,7 @@ namespace rbf
 
         // Radial basis function interpolation
         // Initialize matrices H and Phi
-        matrix H( n_A, n_A ), Phi( n_B, n_A );
+        matrix H( n_A, n_A );
 
         if ( polynomialTerm )
         {
@@ -157,6 +157,8 @@ namespace rbf
         if ( not cpu )
         {
             // Evaluate Phi which contains the evaluation of the radial basis function
+
+            matrix Phi( n_B, n_A );
 
             if ( polynomialTerm )
                 Phi.resize( n_B, n_A + dimGrid + 1 );
