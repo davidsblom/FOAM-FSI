@@ -9,8 +9,6 @@
 
 namespace rbf
 {
-    Foam::debug::debugSwitch RBFCoarsening::debug( "RBFInterpolation", 0 );
-
     RBFCoarsening::RBFCoarsening()
         :
         rbf( std::shared_ptr<RBFInterpolation> ( new RBFInterpolation() ) ),
@@ -278,16 +276,10 @@ namespace rbf
             // Create RBF interpolator
 
             // Run the greedy algorithm
-            scalar runTimeInterpolate = 0.0;
-            scalar runTimeError = 0.0;
-            scalar runTimeConvergence = 0.0;
-            bool addedSecondPoint = false;
             int counter = selectedPositions.rows();
 
             while ( true )
             {
-                std::clock_t t = std::clock();
-
                 // Build the matrices used for the RBF interpolation
                 rbf::matrix positionsCoarse( counter, positions.cols() );
                 rbf::matrix valuesCoarse( positionsCoarse.rows(), positionsCoarse.cols() );
@@ -301,13 +293,6 @@ namespace rbf
 
                 // Perform the RBF interpolation.
                 rbfCoarse->interpolate( positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
-
-                if ( debug > 0 )
-                {
-                    t = std::clock() - t;
-                    runTimeInterpolate += static_cast<float>(t) / CLOCKS_PER_SEC;
-                    t = std::clock();
-                }
 
                 // Evaluate the error
                 for ( int j = 0; j < valuesInterpolationCoarse.rows(); j++ )
@@ -343,13 +328,6 @@ namespace rbf
                     }
                 }
 
-                if ( debug > 0 )
-                {
-                    t = std::clock() - t;
-                    runTimeError += static_cast<float>(t) / CLOCKS_PER_SEC;
-                    t = std::clock();
-                }
-
                 scalar epsilon = std::sqrt( SMALL );
                 error = (errorList).norm() / (values.norm() + epsilon);
                 errorMax = largestError / ( ( values.rowwise().norm() ).maxCoeff() + epsilon );
@@ -381,25 +359,10 @@ namespace rbf
                 // Add second point if possible
                 if ( twoPointSelection && index2 >= 0 && index != index2 )
                 {
-                    addedSecondPoint = true;
                     selectedPositions.conservativeResize( selectedPositions.rows() + 1 );
                     selectedPositions( selectedPositions.rows() - 1 ) = index2;
                     counter++;
                 }
-
-                if ( debug > 0 )
-                {
-                    t = std::clock() - t;
-                    runTimeConvergence += static_cast<float>(t) / CLOCKS_PER_SEC;
-                    t = std::clock();
-                }
-            }
-
-            if ( debug > 0 )
-            {
-                Info << "RBFCoarsening::debug 1. interpolate to surface = " << runTimeInterpolate << " s" << endl;
-                Info << "RBFCoarsening::debug 2. find largest error = " << runTimeError << " s" << ". Added second point = " << addedSecondPoint << endl;
-                Info << "RBFCoarsening::debug 3. convergence check = " << runTimeConvergence << " s" << endl;
             }
 
             Info << "RBF interpolation coarsening: selected " << selectedPositions.rows() << "/" << positions.rows() << " points, 2-norm(error) = "
@@ -411,24 +374,6 @@ namespace rbf
                 positionsCoarse.row( i ) = positions.row( selectedPositions( i ) );
 
             usedPositions = positionsCoarse;
-
-            if ( exportTxt )
-            {
-                std::string fileNameTXT = "rbf-coarsening-greedy-selection-" + std::to_string( fileExportIndex ) + ".txt";
-                std::ofstream fileTXT( fileNameTXT );
-
-                if ( fileTXT.is_open() )
-                    fileTXT << usedPositions;
-
-                std::string fileNameCSV = "rbf-coarsening-greedy-selection-" + std::to_string( fileExportIndex ) + ".csv";
-                std::ofstream fileCSV( fileNameCSV );
-                Eigen::IOFormat CSVFmt( Eigen::FullPrecision, Eigen::DontAlignCols, "," );
-
-                if ( fileCSV.is_open() )
-                    fileCSV << usedPositions.format( CSVFmt );
-
-                fileExportIndex++;
-            }
         }
 
         rbf->compute( usedPositions, positionsInterpolation );
@@ -536,7 +481,6 @@ namespace rbf
                 rbf->Hhat.conservativeResize( rbf->Hhat.rows(), rbf->Hhat.cols() - nbStaticFaceCentersRemove );
             }
         }
-
         usedValues.conservativeResize( usedValues.rows() - nbStaticFaceCentersRemove, usedValues.cols() );
         rbf->interpolate( usedValues, valuesInterpolation );
 
@@ -557,19 +501,12 @@ namespace rbf
 
         scalar R = ratioRadiusError * ( errorInterpolationCoarse.rowwise().norm() ).maxCoeff();
 
-        if ( debug > 0 )
-        {
-            Info << nl << "RBFCoarsening::correctSurface::debug 0: ratioRadiusError = " << ratioRadiusError << ", R = " << R << endl;
-        }
-
         // Find nearest boundary point for each internal point. Do this only the first time
         vector closestBoundaryRadius( positionsInterpolation.rows() );
 
         if ( closestBoundaryIndexCorrection.rows() == 0 )
         {
             closestBoundaryIndexCorrection.conservativeResize( positionsInterpolation.rows() );
-            std::clock_t t = std::clock();
-            scalar runTimeNN = 0;
 
             for ( int i = 0; i < positionsInterpolation.rows(); i++ )
             {
@@ -590,13 +527,6 @@ namespace rbf
                 closestBoundaryIndexCorrection( i ) = boundaryIndex;
                 closestBoundaryRadius( i ) = smallestRadius;
             }
-
-            if ( debug > 0 )
-            {
-                t = std::clock() - t;
-                runTimeNN += static_cast<float>(t) / CLOCKS_PER_SEC;
-                Info << "RBFCoarsening::correctSurface::debug 1. nearest neighbour selection = " << runTimeNN << " s" << endl;
-            }
         }
         else
         {
@@ -607,8 +537,6 @@ namespace rbf
         }
 
         // Start doing the correction
-        std::clock_t t = std::clock();
-        scalar runTimeCorr = 0;
         std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( R ) );
 
         for ( int i = 0; i < positionsInterpolation.rows(); i++ )
@@ -616,13 +544,6 @@ namespace rbf
             matrix fEval = -( rbfFunction->evaluate( closestBoundaryRadius( i ) ) ) * errorInterpolationCoarse.row( closestBoundaryIndexCorrection( i ) );
             valuesInterpolation.row( i ) += ( fEval - valuesCorrection.row( i ) );
             valuesCorrection.row( i ) = fEval;
-        }
-
-        if ( debug > 0 )
-        {
-            t = std::clock() - t;
-            runTimeCorr += static_cast<float>(t) / CLOCKS_PER_SEC;
-            Info << "RBFCoarsening::correctSurface::debug 2. correction evaluation = " << runTimeCorr << " s" << endl;
         }
     }
 
