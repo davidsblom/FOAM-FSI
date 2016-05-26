@@ -204,6 +204,7 @@ int main(
     assert( configInterpolation["coarsening"]["enabled"] );
     assert( configInterpolation["radial-basis-function"] );
     assert( configInterpolation["radial-basis-function"]["function"] );
+    assert( configInterpolation["radial-basis-function"]["cpu"] );
     bool coarsening = configInterpolation["coarsening"]["enabled"].as<bool>();
     std::string interpolationFunction = configInterpolation["radial-basis-function"]["function"].as<std::string>();
     scalar coarseningTol = 1.0e-5;
@@ -212,14 +213,9 @@ int main(
     scalar radius = 1;
     bool livePointSelection = false;
     scalar tolLivePointSelection = 1.0e-5;
-    bool cpu = false;
+    bool cpu = configInterpolation["radial-basis-function"]["cpu"].as<bool>();
 
     assert( interpolationFunction == "thin-plate-spline" || interpolationFunction == "wendland-c0" || interpolationFunction == "wendland-c2" || interpolationFunction == "wendland-c4" || interpolationFunction == "wendland-c6" );
-
-    if ( configInterpolation["radial-basis-function"]["cpu"] )
-    {
-        cpu = configInterpolation["radial-basis-function"]["cpu"].as<bool>();
-    }
 
     if ( interpolationFunction != "thin-plate-spline" )
     {
@@ -712,13 +708,13 @@ int main(
             {
                 assert( not adaptiveTimeStepping );
 
-                solid = std::shared_ptr<BaseMultiLevelSolver>( new dealiiSolidSolver<2> ( data ) );
+                solid = std::shared_ptr<BaseMultiLevelSolver>( new dealiiSolidSolver<3> ( data ) );
             }
 
             if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
             {
                 data.theta = 1;
-                sdcSolidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new dealiiSolidSolver<2> ( data ) );
+                sdcSolidSolver = std::shared_ptr<sdc::SDCFsiSolverInterface> ( new dealiiSolidSolver<3> ( data ) );
             }
         }
 
