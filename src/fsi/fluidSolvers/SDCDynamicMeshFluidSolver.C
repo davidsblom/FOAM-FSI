@@ -708,8 +708,6 @@ void SDCDynamicMeshFluidSolver::solve()
 
     dimensionedScalar rDeltaT = 1.0 / mesh.time().deltaT();
 
-    scalar relaxationFactor = mesh.solutionDict().relaxationFactor( "U" );
-
     // --- PIMPLE loop
     for ( label oCorr = 0; oCorr < maxIter; oCorr++ )
     {
@@ -719,15 +717,11 @@ void SDCDynamicMeshFluidSolver::solve()
 
         U.storePrevIter();
 
-        // Convection-diffusion matrix
-        fvVectorMatrix HUEqn
+        fvVectorMatrix UEqn
         (
             fvm::div( phi, U )
             - fvm::laplacian( nu, U )
         );
-
-        // Time derivative matrix
-        fvVectorMatrix ddtUEqn( fvm::ddt( U ) );
 
         fvVectorMatrix UEqnt
         (
@@ -736,13 +730,33 @@ void SDCDynamicMeshFluidSolver::solve()
             - fvm::laplacian( nu, U )
         );
 
-        Foam::solve
-        (
-            ddtUEqn + relax( HUEqn, relaxationFactor )
-            ==
-            -fvc::grad( p ) + rDeltaT * rhsU / V,
-            mesh.solutionDict().solver( "U" )
-        );
+        {
+            // To ensure S0 and B0 are thrown out of memory
+            // Source and boundaryCoeffs need to be saved when relexation is applied
+            // to still obtain time consistent behavior.
+            // Only source is affected by relaxation, boundaryCoeffs is not relaxation
+            // dependent.
+            // BoundaryCoeffs needs to be saved to generate the correct UEqn after
+            // solving. Explicit terms (depending on U(n)) need to remain depending
+            // on U(n) and not on new solution)
+            vectorField S0 = UEqnt.source();
+            FieldField<Field, Foam::vector> B0 = UEqnt.boundaryCoeffs();
+
+            UEqnt.relax();
+
+            Foam::solve( UEqnt == -fvc::grad( p ) + rDeltaT * rhsU / V );
+
+            // Reset equation to ensure relaxation parameter is not causing problems for time order
+            UEqnt =
+                (
+                fvm::ddt( U )
+                + fvm::div( phi, U )
+                - fvm::laplacian( nu, U )
+                );
+
+            UEqnt.source() = S0;
+            UEqnt.boundaryCoeffs() = B0;
+        }
 
         // Relative convergence measure for the PISO loop:
         // Perform at maximum nCorr PISO corrections.
@@ -759,7 +773,7 @@ void SDCDynamicMeshFluidSolver::solve()
         {
             p.storePrevIter();
 
-            HU = HUEqn.H();
+            HU = UEqn.H();
             AU = UEqnt.A();
 
             U = (UEqnt.H() + rDeltaT * rhsU / V) / AU;
