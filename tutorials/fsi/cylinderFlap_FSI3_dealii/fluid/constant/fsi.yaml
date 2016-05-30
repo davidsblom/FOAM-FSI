@@ -8,6 +8,7 @@ first-participant: fluid-solver
 interpolation:
   radial-basis-function:
     function: thin-plate-spline
+    cpu: true
   coarsening:
     enabled: false
 coupling-scheme-implicit:
