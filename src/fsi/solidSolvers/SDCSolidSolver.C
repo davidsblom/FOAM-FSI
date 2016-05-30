@@ -404,18 +404,13 @@ void SDCSolidSolver::readSolidMechanicsControls()
 }
 
 void SDCSolidSolver::resetSolution()
-{
-    U == U.oldTime();
-    gradU = fvc::grad( U );
-}
+{}
 
 void SDCSolidSolver::solve()
 {
     Info << "Solve solid domain" << endl;
 
     scalar iCorr = 0;
-    scalar displacementResidual = 1;
-    scalar velocityResidual = 1;
     scalar residual = 1;
     scalar initialResidual = 1;
     lduMatrix::solverPerformance solverPerf;
@@ -493,10 +488,27 @@ void SDCSolidSolver::solve()
             + deltaT * gravity
         ;
 
-        displacementResidual = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() - U.oldTime().internalField() ) + SMALL);
-        velocityResidual = gSumMag( V.internalField() - V.prevIter().internalField() ) / (gSumMag( V.internalField() - V.oldTime().internalField() ) + SMALL);
-        residual = max( displacementResidual, solverPerf.initialResidual() );
-        residual = max( residual, velocityResidual );
+        volVectorField residualField = -fvc::ddt( U ) + deltaT / rho * (
+            fvc::laplacian( 2 * muf + lambdaf, U, "laplacian(DU,U)" )
+            + fvc::div(
+                mesh.magSf()
+                * (
+                    -(muf + lambdaf) * ( fvc::snGrad( U ) & (I - n * n) )
+                    + lambdaf * tr( shearGradU & (I - n * n) ) * n
+                    + muf * (shearGradU & n)
+                    + muf * ( n & fvc::interpolate( gradU & gradU.T() ) )
+                    + 0.5 * lambdaf
+                    * ( n * tr( fvc::interpolate( gradU & gradU.T() ) ) )
+                    + ( n & fvc::interpolate( sigma & gradU ) )
+                    )
+                )
+            )
+            + V.oldTime()
+            + rhsV
+            + rhsU / deltaT
+            + deltaT * gravity;
+        tmp<scalarField> magResU = mag( residualField.internalField() );
+        residual = std::sqrt( gSumSqr( magResU ) / ( mesh.globalData().nTotalCells() * mesh.nGeometricD() ) );
 
         if ( iCorr == 0 )
         {
@@ -516,8 +528,7 @@ void SDCSolidSolver::solve()
 
     Info << "Solving for " << U.name();
     Info << ", Initial residual = " << initialResidual;
-    Info << ", Final residual velocity = " << velocityResidual;
-    Info << ", Final residual displacement = " << displacementResidual;
+    Info << ", Final residual = " << residual;
     Info << ", No outer iterations " << iCorr << endl;
 
     // -------------------------------------------------------------------------
@@ -525,9 +536,24 @@ void SDCSolidSolver::solve()
     UStages.at( indexk + 1 ) = U;
     VStages.at( indexk + 1 ) = V;
 
-    dimensionedScalar rDeltaT = 1.0 / mesh.time().deltaT();
-    UF = rDeltaT * (U - U.oldTime() - rhsU);
-    VF = rDeltaT * (V - V.oldTime() - rhsV);
+    surfaceTensorField shearGradU = ( (I - n * n) & fvc::interpolate( gradU ) );
+    UF = V;
+    VF = 1.0 / rho * (
+        fvc::laplacian( 2 * muf + lambdaf, U, "laplacian(DU,U)" )
+        + fvc::div(
+            mesh.magSf()
+            * (
+                -(muf + lambdaf) * ( fvc::snGrad( U ) & (I - n * n) )
+                + lambdaf * tr( shearGradU & (I - n * n) ) * n
+                + muf * (shearGradU & n)
+                + muf * ( n & fvc::interpolate( gradU & gradU.T() ) )
+                + 0.5 * lambdaf
+                * ( n * tr( fvc::interpolate( gradU & gradU.T() ) ) )
+                + ( n & fvc::interpolate( sigma & gradU ) )
+                )
+            )
+        )
+        + gravity;
 }
 
 void SDCSolidSolver::evaluateFunction(
@@ -548,36 +574,12 @@ void SDCSolidSolver::evaluateFunction(
         }
     }
 
-    forAll( UF.boundaryField(), patchI )
-    {
-        forAll( UF.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                f( index ) = UF.boundaryField()[patchI][i][j];
-                index++;
-            }
-        }
-    }
-
     forAll( VF.internalField(), i )
     {
         for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             f( index ) = VF.internalField()[i][j];
             index++;
-        }
-    }
-
-    forAll( VF.boundaryField(), patchI )
-    {
-        forAll( VF.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                f( index ) = VF.boundaryField()[patchI][i][j];
-                index++;
-            }
         }
     }
 
@@ -606,33 +608,11 @@ int SDCSolidSolver::getDOF()
         }
     }
 
-    forAll( U.boundaryField(), patchI )
-    {
-        forAll( U.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                index++;
-            }
-        }
-    }
-
     forAll( V.internalField(), i )
     {
         for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             index++;
-        }
-    }
-
-    forAll( V.boundaryField(), patchI )
-    {
-        forAll( V.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                index++;
-            }
         }
     }
 
@@ -655,36 +635,12 @@ void SDCSolidSolver::getSolution(
         }
     }
 
-    forAll( U.boundaryField(), patchI )
-    {
-        forAll( U.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                solution( index ) = U.boundaryField()[patchI][i][j];
-                index++;
-            }
-        }
-    }
-
     forAll( V.internalField(), i )
     {
         for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             solution( index ) = V.internalField()[i][j];
             index++;
-        }
-    }
-
-    forAll( V.boundaryField(), patchI )
-    {
-        forAll( V.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                solution( index ) = V.boundaryField()[patchI][i][j];
-                index++;
-            }
         }
     }
 
@@ -701,36 +657,12 @@ void SDCSolidSolver::getSolution(
         }
     }
 
-    forAll( UF.boundaryField(), patchI )
-    {
-        forAll( UF.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                f( index ) = UF.boundaryField()[patchI][i][j];
-                index++;
-            }
-        }
-    }
-
     forAll( VF.internalField(), i )
     {
         for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             f( index ) = VF.internalField()[i][j];
             index++;
-        }
-    }
-
-    forAll( VF.boundaryField(), patchI )
-    {
-        forAll( VF.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                f( index ) = VF.boundaryField()[patchI][i][j];
-                index++;
-            }
         }
     }
 
@@ -753,36 +685,12 @@ void SDCSolidSolver::setSolution(
         }
     }
 
-    forAll( U.boundaryField(), patchI )
-    {
-        forAll( U.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                U.boundaryField()[patchI][i][j] = solution( index );
-                index++;
-            }
-        }
-    }
-
     forAll( V.internalField(), i )
     {
         for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             V.internalField()[i][j] = solution( index );
             index++;
-        }
-    }
-
-    forAll( V.boundaryField(), patchI )
-    {
-        forAll( V.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                V.boundaryField()[patchI][i][j] = solution( index );
-                index++;
-            }
         }
     }
 
@@ -860,36 +768,12 @@ void SDCSolidSolver::prepareImplicitSolve(
         }
     }
 
-    forAll( U.oldTime().boundaryField(), patchI )
-    {
-        forAll( U.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                U.oldTime().boundaryField()[patchI][i][j] = qold( index );
-                index++;
-            }
-        }
-    }
-
     forAll( V.oldTime().internalField(), i )
     {
         for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             V.oldTime().internalField()[i][j] = qold( index );
             index++;
-        }
-    }
-
-    forAll( V.oldTime().boundaryField(), patchI )
-    {
-        forAll( V.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                V.oldTime().boundaryField()[patchI][i][j] = qold( index );
-                index++;
-            }
         }
     }
 
@@ -906,36 +790,12 @@ void SDCSolidSolver::prepareImplicitSolve(
         }
     }
 
-    forAll( rhsU.boundaryField(), patchI )
-    {
-        forAll( rhsU.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                rhsU.boundaryField()[patchI][i][j] = rhs( index );
-                index++;
-            }
-        }
-    }
-
     forAll( rhsV.internalField(), i )
     {
         for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             rhsV.internalField()[i][j] = rhs( index );
             index++;
-        }
-    }
-
-    forAll( rhsV.boundaryField(), patchI )
-    {
-        forAll( rhsV.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                rhsV.boundaryField()[patchI][i][j] = rhs( index );
-                index++;
-            }
         }
     }
 
@@ -987,33 +847,11 @@ void SDCSolidSolver::getVariablesInfo(
         }
     }
 
-    forAll( U.boundaryField(), patchI )
-    {
-        forAll( U.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                dof.at( 0 ) += 1;
-            }
-        }
-    }
-
     forAll( V.internalField(), i )
     {
         for ( int j = 0; j < mesh.nGeometricD(); j++ )
         {
             dof.at( 1 ) += 1;
-        }
-    }
-
-    forAll( V.boundaryField(), patchI )
-    {
-        forAll( V.boundaryField()[patchI], i )
-        {
-            for ( int j = 0; j < mesh.nGeometricD(); j++ )
-            {
-                dof.at( 1 ) += 1;
-            }
         }
     }
 }
