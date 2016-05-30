@@ -227,9 +227,6 @@ namespace sdc
     {
         assert( timeIndex >= this->timeIndex );
 
-        if ( qold.rows() == result.rows() )
-            qold = solStages.bottomRows( 1 ).transpose();
-        else
         if ( timeIndex > this->timeIndex )
             qold = result;
 
@@ -250,7 +247,7 @@ namespace sdc
 
     void ESDIRK::initializeButcherTableau( std::string method )
     {
-        assert( method == "SDIRK2" || method == "SDIRK2PR" ||  method == "SDIRK3" || method == "SDIRK4" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK5" || method == "ESDIRK53PR" || method == "ESDIRK63PR" || method == "ESDIRK74PR" );
+        assert( method == "SDIRK2" || method == "SDIRK2PR" || method == "SDIRK3" || method == "SDIRK4" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK5" || method == "ESDIRK53PR" || method == "ESDIRK63PR" || method == "ESDIRK74PR" );
 
         // source: Ellsiepen. Habilitation thesis Philipp Birken
         if ( method == "SDIRK2" )
