@@ -72,7 +72,7 @@ class ESDIRKTest : public TestWithParam< std::tr1::tuple<int, std::string> >
         std::shared_ptr<Piston> piston_esdirk;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, ESDIRKTest, ::testing::Combine( Values( 2, 100, 200, 400, 800, 1600, 3200 ), Values( "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5", "ESDIRK53PR", "ESDIRK63PR", "ESDIRK74PR" ) ) );
+INSTANTIATE_TEST_CASE_P( testParameters, ESDIRKTest, ::testing::Combine( Values( 2, 100, 200, 400, 800, 1600, 3200 ), Values( "SDIRK2", "SDIRK2PR", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5", "ESDIRK53PR", "ESDIRK63PR", "ESDIRK74PR" ) ) );
 
 TEST_P( ESDIRKTest, object )
 {
@@ -287,7 +287,7 @@ class ESDIRKOrderTest : public TestWithParam<std::string>
         std::shared_ptr<ESDIRK> esdirk2;
 };
 
-INSTANTIATE_TEST_CASE_P( testParameters, ESDIRKOrderTest, ::testing::Values( "SDIRK2", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5", "ESDIRK53PR", "ESDIRK63PR", "ESDIRK74PR" ) );
+INSTANTIATE_TEST_CASE_P( testParameters, ESDIRKOrderTest, ::testing::Values( "SDIRK2", "SDIRK2PR", "SDIRK3", "SDIRK4", "ESDIRK3", "ESDIRK4", "ESDIRK5", "ESDIRK53PR", "ESDIRK63PR", "ESDIRK74PR" ) );
 
 TEST_P( ESDIRKOrderTest, order )
 {
@@ -315,6 +315,9 @@ TEST_P( ESDIRKOrderTest, order )
     scalar tol = 0.6;
 
     if ( method == "SDIRK2" )
+        ASSERT_NEAR( order, 2, tol );
+
+    if ( method == "SDIRK2PR" )
         ASSERT_NEAR( order, 2, tol );
 
     if ( method == "SDIRK3" )

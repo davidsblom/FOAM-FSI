@@ -50,7 +50,7 @@ TEST( SDCLinearizedSolidTest, order )
 
         data = solidSolvers.at( iComputation )->u;
 
-        scalar error = (ref - data).norm() / data.norm();
+        scalar error = (ref - data).norm() / ref.norm();
         std::cout << "error = " << error << std::endl;
         errors.push_back( error );
     }

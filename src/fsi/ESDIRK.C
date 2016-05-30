@@ -227,9 +227,6 @@ namespace sdc
     {
         assert( timeIndex >= this->timeIndex );
 
-        if ( qold.rows() == result.rows() )
-            qold = solStages.bottomRows( 1 ).transpose();
-        else
         if ( timeIndex > this->timeIndex )
             qold = result;
 
@@ -250,7 +247,7 @@ namespace sdc
 
     void ESDIRK::initializeButcherTableau( std::string method )
     {
-        assert( method == "SDIRK2" || method == "SDIRK3" || method == "SDIRK4" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK5" || method == "ESDIRK53PR" || method == "ESDIRK63PR" || method == "ESDIRK74PR" );
+        assert( method == "SDIRK2" || method == "SDIRK2PR" || method == "SDIRK3" || method == "SDIRK4" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK5" || method == "ESDIRK53PR" || method == "ESDIRK63PR" || method == "ESDIRK74PR" );
 
         // source: Ellsiepen. Habilitation thesis Philipp Birken
         if ( method == "SDIRK2" )
@@ -269,6 +266,30 @@ namespace sdc
             A( 1, 1 ) = alpha;
             Bhat( 0 ) = 1 - alphahat;
             Bhat( 1 ) = alphahat;
+        }
+
+        // source: Joachim Rang.
+        // The Prothero and Robinson example: Convergence studies for Runge–Kutta and Rosenbrock–Wanner methods
+        // Applied Numerical Mathematics, doi:10.1016/j.apnum.2016.04.012
+        if ( method == "SDIRK2PR" )
+        {
+            if ( adaptiveTimeStepper )
+                adaptiveTimeStepper->setOrderEmbeddedMethod( 1 );
+
+            scalar gamma = 2.3728621957824146e-1;
+            A.resize( 3, 3 );
+            A.setZero();
+            Bhat.resize( A.cols() );
+            Bhat.setZero();
+            A( 0, 0 ) = gamma;
+            A( 1, 0 ) = 7.6271378042175854e-1;
+            A( 2, 0 ) = 6.5555390873299095e-1;
+            A( 2, 1 ) = 1.0715987168876759e-1;
+            A( 1, 1 ) = gamma;
+            A( 2, 2 ) = gamma;
+            Bhat( 0 ) = 7.6271378042175854e-1;
+            Bhat( 1 ) = 2.3728621957824146e-1;
+            Bhat( 2 ) = 0;
         }
 
         // source: Cash. Habilitation thesis Philipp Birken
