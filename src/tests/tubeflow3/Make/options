@@ -1,0 +1,71 @@
+c++WARN     = -Wall -Wextra -Werror
+
+EXE_INC = -std=c++11 \
+    -isystem ../../thirdParty/eigen \
+    -I../../fsi/lnInclude \
+    -I../../tests/app \
+    $(WM_DECOMP_INC) \
+    -isystem $(LIB_SRC)/tetFiniteElement/lnInclude \
+    -isystem $(LIB_SRC)/finiteVolume/lnInclude \
+    -isystem $(LIB_SRC)/dynamicMesh/lnInclude \
+    -isystem $(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
+    -isystem $(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \
+    -isystem $(LIB_SRC)/transportModels \
+    -isystem $(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
+    -isystem $(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
+    -I../../RBFMeshMotionSolver/lnInclude/ \
+    -isystem $(LIB_SRC)/meshTools/lnInclude \
+    -isystem $(LIB_SRC)/solidModels/lnInclude \
+    -isystem ../../../../src/thirdParty/boost
+
+ifeq ($(WM_COMPILE_OPTION), Opt)
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -L../../thirdParty/gtest \
+    -lgtest \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lfiniteVolume \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -lfvSchemes \
+    -lboundaryConditions \
+    -lsolidModels \
+    -lyaml-cpp \
+    -lRBFMeshMotionSolver \
+    -lfsi \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels \
+    -ldeal_II \
+    -llduSolvers
+endif
+
+ifeq ($(WM_COMPILE_OPTION), Debug)
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -L../../thirdParty/gtest \
+    -lgtest \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lfiniteVolume \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -lfvSchemes \
+    -lboundaryConditions \
+    -lsolidModels \
+    -lyaml-cpp \
+    -lRBFMeshMotionSolver \
+    -lfsi \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels \
+    -ldeal_II.g \
+    -llduSolvers
+endif
