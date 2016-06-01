@@ -90,6 +90,8 @@ class SDCDynamicMeshFluidSolver : public SDCFluidSolver
     private:
         void createFields();
 
+        scalar evaluateMomentumResidual();
+
         void initialize();
 
         // Fields

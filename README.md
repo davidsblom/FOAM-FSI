@@ -1,7 +1,9 @@
 FOAM-FSI
 ========
 
-[![wercker status](https://app.wercker.com/status/80ce1a6b7a23e394c5f07a3f27b5b43e/s/master "wercker status")](https://app.wercker.com/project/bykey/80ce1a6b7a23e394c5f07a3f27b5b43e)
+[![wercker status](https://app.wercker.com/status/80ce1a6b7a23e394c5f07a3f27b5b43e/m/master "wercker status")](https://app.wercker.com/project/bykey/80ce1a6b7a23e394c5f07a3f27b5b43e)
+
+[![Travis CI status](https://travis-ci.org/davidsblom/FOAM-FSI.svg?branch=master)](https://travis-ci.org/davidsblom/FOAM-FSI)
 
 Features
 -----------
