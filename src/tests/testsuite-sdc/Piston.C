@@ -307,7 +307,7 @@ void Piston::implicitSolve(
     assert( f.rows() == 2 );
     assert( rhs.rows() == 2 );
     assert( result.rows() == 2 );
-    assert( solStages.size() > 0 );
+    assert( !solStages.empty() );
 
     f( 0 ) = As * std::sin( omega * t );
     f( 0 ) += Ac * std::cos( omega * t );
