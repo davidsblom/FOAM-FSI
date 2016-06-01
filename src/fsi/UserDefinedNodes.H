@@ -17,7 +17,7 @@ namespace fsi
                 static const bool RIGHT_IS_NODE = true;
 
             public:
-                explicit UserDefinedNodes( const std::vector<precision> nodes );
+                explicit UserDefinedNodes( const std::vector<precision> & nodes );
                 UserDefinedNodes() = default;
                 virtual ~UserDefinedNodes() = default;
 

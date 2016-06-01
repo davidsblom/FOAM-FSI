@@ -12,7 +12,7 @@ namespace fsi
     namespace quadrature
     {
         template<typename precision>
-        UserDefinedNodes<precision>::UserDefinedNodes( const std::vector<precision> nodes )
+        UserDefinedNodes<precision>::UserDefinedNodes( const std::vector<precision> & nodes )
             : IQuadrature<precision>( nodes.size() )
         {
             this->nodes = nodes;
