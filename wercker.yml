@@ -699,10 +699,10 @@ build:
         - script:
             name: cppcheck
             code: |
-                (cd src/fsi && cppcheck --enable=performance,portability .)
-                (cd src/RBFMeshMotionSolver && cppcheck --enable=performance,portability .)
-                (cd src/tests && cppcheck --enable=performance,portability .)
-                (cd applications && cppcheck --enable=performance,portability .)
+                (cd src/fsi && cppcheck --error-exitcode=1 --enable=performance,portability .)
+                (cd src/RBFMeshMotionSolver && cppcheck --error-exitcode=1 --enable=performance,portability .)
+                (cd src/tests && cppcheck --error-exitcode=1 --enable=performance,portability .)
+                (cd applications && cppcheck --error-exitcode=1 --enable=performance,portability .)
         - script:
             name: list cache files
             code: ls -lah $WERCKER_CACHE_DIR
