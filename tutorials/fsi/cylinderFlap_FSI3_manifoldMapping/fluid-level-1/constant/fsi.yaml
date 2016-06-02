@@ -5,6 +5,7 @@ fluid-solver: pimple-solver
 interpolation:
   radial-basis-function:
     function: thin-plate-spline
+    cpu: true
   coarsening:
     enabled: false
 multi-level-acceleration:
