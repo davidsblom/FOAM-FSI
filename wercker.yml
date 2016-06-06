@@ -234,6 +234,7 @@ production:
                 export FOAM_INST_DIR=`pwd`
                 export DEALII_VERSION=8.4.1
                 export BOOST_VERSION=1_55_0
+                export WM_NCOMPPROCS=3
 
                 source foam-extend-3.2/etc/bashrc
 
@@ -941,6 +942,7 @@ debug:
                 export FOAM_INST_DIR=`pwd`
                 export DEALII_VERSION=8.4.1
                 export BOOST_VERSION=1_55_0
+                export WM_NCOMPPROCS=3
 
                 source foam-extend-3.2/etc/bashrc
 
