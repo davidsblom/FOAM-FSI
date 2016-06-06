@@ -39,6 +39,7 @@ production:
                     export OPENMPI_DIR=/usr
                     export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                     export FOAM_INST_DIR=`pwd`
+                    export WM_NCOMPPROCS=3
 
                     sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
                     sed -i s/"c++OPT      = -O3"/"c++OPT      = -O3 -DNDEBUG"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++Opt
@@ -69,6 +70,7 @@ production:
                     export HWLOC_SYSTEM=1
                     export METIS_SYSTEM=1
                     export PARMETIS_SYSTEM=1
+                    export WM_NCOMPPROCS=3
 
                     export SCOTCH_SYSTEM=1
                     export SCOTCH_DIR=/usr
@@ -118,6 +120,7 @@ production:
                     export HWLOC_SYSTEM=1
                     export METIS_SYSTEM=1
                     export PARMETIS_SYSTEM=1
+                    export WM_NCOMPPROCS=3
 
                     export SCOTCH_SYSTEM=1
                     export SCOTCH_DIR=/usr
@@ -776,6 +779,7 @@ debug:
                     export HWLOC_SYSTEM=1
                     export METIS_SYSTEM=1
                     export PARMETIS_SYSTEM=1
+                    export WM_NCOMPPROCS=3
 
                     export SCOTCH_SYSTEM=1
                     export SCOTCH_DIR=/usr
@@ -825,6 +829,7 @@ debug:
                     export HWLOC_SYSTEM=1
                     export METIS_SYSTEM=1
                     export PARMETIS_SYSTEM=1
+                    export WM_NCOMPPROCS=3
 
                     export SCOTCH_SYSTEM=1
                     export SCOTCH_DIR=/usr
