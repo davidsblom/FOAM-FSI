@@ -167,6 +167,7 @@ production:
 
                     tar -zcf foam-extend-3.2-${WM_COMPILE_OPTION}.tar.gz foam-extend-3.2
                     rsync -azvh foam-extend-3.2-${WM_COMPILE_OPTION}.tar.gz $WERCKER_CACHE_DIR/
+                    rm foam-extend-3.2-${WM_COMPILE_OPTION}.tar.gz
                 fi
         - script:
             name: setup environment
@@ -315,6 +316,7 @@ production:
                 if [ ! -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz" ]; then
                     tar -cJf dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz dealii-${DEALII_VERSION}
                     rsync -azvh dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz $WERCKER_CACHE_DIR/
+                    rm dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz
                 fi
         - script:
             name: googletest
@@ -879,6 +881,7 @@ debug:
 
                     tar -zcf foam-extend-3.2-${WM_COMPILE_OPTION}.tar.gz foam-extend-3.2
                     rsync -azvh foam-extend-3.2-${WM_COMPILE_OPTION}.tar.gz $WERCKER_CACHE_DIR/
+                    rm foam-extend-3.2-${WM_COMPILE_OPTION}.tar.gz
                 fi
         - script:
             name: setup environment
@@ -1027,6 +1030,7 @@ debug:
                 if [ ! -f "$WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz" ]; then
                     tar -cJf dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz dealii-${DEALII_VERSION}
                     rsync -azvh dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz $WERCKER_CACHE_DIR/
+                    rm dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz
                 fi
         - script:
             name: googletest
