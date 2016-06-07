@@ -6,6 +6,9 @@ no-response-timeout: 30
 production:
     steps:
         - script:
+            name: list cache files
+            code: ls -lah $WERCKER_CACHE_DIR
+        - script:
             name: install packages
             code: |
                 apt-get update
@@ -726,6 +729,9 @@ production:
 
 debug:
     steps:
+        - script:
+            name: list cache files
+            code: ls -lah $WERCKER_CACHE_DIR
         - script:
             name: install packages
             code: |
