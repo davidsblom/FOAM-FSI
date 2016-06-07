@@ -214,6 +214,7 @@ production:
 
                 tar jxf boost_${BOOST_VERSION}.tar.bz2
                 ln -s boost_${BOOST_VERSION} boost
+                rm boost_${BOOST_VERSION}.tar.bz2
         - script:
             name: PETSc
             code: |
@@ -353,6 +354,7 @@ production:
                 if [ ! -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz" ]; then
                     tar -cJf gtest-${GTEST_VERSION}.tar.xz gtest-${GTEST_VERSION}
                     rsync -azvh gtest-${GTEST_VERSION}.tar.xz $WERCKER_CACHE_DIR/
+                    rm gtest-${GTEST_VERSION}.tar.xz
                 fi
         - script:
             name: precice
@@ -431,6 +433,7 @@ production:
                 if [ ! -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz" ]; then
                     tar -cJf yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz yaml-cpp-release-${YAML_CPP_VERSION}
                     rsync -azvh yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz $WERCKER_CACHE_DIR/
+                    rm yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz
                 fi
         - script:
             name: boundary conditions
@@ -928,6 +931,7 @@ debug:
 
                 tar jxf boost_${BOOST_VERSION}.tar.bz2
                 ln -s boost_${BOOST_VERSION} boost
+                rm boost_${BOOST_VERSION}.tar.bz2
         - script:
             name: PETSc
             code: |
@@ -1067,6 +1071,7 @@ debug:
                 if [ ! -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz" ]; then
                     tar -cJf gtest-${GTEST_VERSION}.tar.xz gtest-${GTEST_VERSION}
                     rsync -azvh gtest-${GTEST_VERSION}.tar.xz $WERCKER_CACHE_DIR/
+                    rm gtest-${GTEST_VERSION}.tar.xz
                 fi
         - script:
             name: precice
@@ -1145,6 +1150,7 @@ debug:
                 if [ ! -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz" ]; then
                     tar -cJf yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz yaml-cpp-release-${YAML_CPP_VERSION}
                     rsync -azvh yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz $WERCKER_CACHE_DIR/
+                    rm yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz
                 fi
         - script:
             name: boundary conditions
