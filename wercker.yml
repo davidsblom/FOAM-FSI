@@ -35,6 +35,7 @@ production:
                     export PARMETIS_SYSTEM=1
                     export CUDA_IGNORE=1
                     export SWAK4FOAM_SYSTEM=1
+                    export PARMGRIDGEN_SYSTEM=1
                     export WM_MPLIB=SYSTEMOPENMPI
                     export OPENMPI_DIR=/usr
                     export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
@@ -741,6 +742,7 @@ debug:
                     export PYFOAM_SYSTEM=1
                     export METIS_SYSTEM=1
                     export PARMETIS_SYSTEM=1
+                    export PARMGRIDGEN_SYSTEM=1
                     export CUDA_IGNORE=1
                     export SWAK4FOAM_SYSTEM=1
                     export WM_MPLIB=SYSTEMOPENMPI
