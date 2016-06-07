@@ -319,6 +319,9 @@ production:
                     rsync -azvh dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz $WERCKER_CACHE_DIR/
                     rm dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz
                 fi
+
+                # Cleanup libraries, there are now stored in ${FOAM_LIBBIN}/
+                rm -rf ../dealii/bin
         - script:
             name: googletest
             code: |
@@ -1036,6 +1039,9 @@ debug:
                     rsync -azvh dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz $WERCKER_CACHE_DIR/
                     rm dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz
                 fi
+
+                # Cleanup libraries, there are now stored in ${FOAM_LIBBIN}/
+                rm -rf ../dealii/bin
         - script:
             name: googletest
             code: |
