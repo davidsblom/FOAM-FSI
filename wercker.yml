@@ -279,7 +279,7 @@ production:
                     cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DCMAKE_BUILD_TYPE=Debug ..
                   fi
 
-                  make -j $WM_NCOMPPROCS install test
+                  make -j $WM_NCOMPPROCS install
 
                   cd ../..
 
@@ -986,7 +986,7 @@ debug:
                     cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DCMAKE_BUILD_TYPE=Debug ..
                   fi
 
-                  make -j $WM_NCOMPPROCS install test
+                  make -j $WM_NCOMPPROCS install
 
                   cd ../..
 
