@@ -391,6 +391,9 @@ production:
                     scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
                     cp build/debug-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
                 fi
+
+                # cleanup build files
+                rm -rf build/*
         - script:
             name: yaml-cpp
             code: |
@@ -1100,6 +1103,9 @@ debug:
                     scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
                     cp build/debug-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
                 fi
+
+                # cleanup build files
+                rm -rf build/*
         - script:
             name: yaml-cpp
             code: |
