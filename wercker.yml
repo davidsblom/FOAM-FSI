@@ -25,6 +25,7 @@ production:
                     debug "foam-extend-3.2 found in cache"
                     rsync -azvh $WERCKER_CACHE_DIR/foam-extend-3.2-${WM_COMPILE_OPTION}.tar.gz ./
                     tar -zxf foam-extend-3.2-${WM_COMPILE_OPTION}.tar.gz
+                    rm foam-extend-3.2-${WM_COMPILE_OPTION}.tar.gz
                 else
                     debug "foam-extend-3.2 not found in cache, will download and compile"
 
@@ -250,6 +251,7 @@ production:
                     debug "deal.II library found in cache"
                     rsync -azvh $WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz ./
                     tar -Jxf dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz
+                    rm dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz
                     ln -s dealii-${DEALII_VERSION} dealii
                     cp dealii-${DEALII_VERSION}/bin/lib/libdeal_II* ${FOAM_LIBBIN}/
                 fi
@@ -350,6 +352,7 @@ production:
         #             debug "googletest library found in cache"
         #             rsync -azvh $WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz ./
         #             tar -Jxf gtest-${GTEST_VERSION}.tar.xz
+        #             rm gtest-${GTEST_VERSION}.tar.xz
         #             ln -s gtest-${GTEST_VERSION} gtest
         #         else
         #             debug "googletest library not found in cache, will download and compile"
@@ -749,6 +752,7 @@ debug:
                     debug "foam-extend-3.2 found in cache"
                     rsync -azvh $WERCKER_CACHE_DIR/foam-extend-3.2-${WM_COMPILE_OPTION}.tar.gz ./
                     tar -zxf foam-extend-3.2-${WM_COMPILE_OPTION}.tar.gz
+                    rm foam-extend-3.2-${WM_COMPILE_OPTION}.tar.gz
                 else
                     debug "foam-extend-3.2 not found in cache, will download and compile"
 
@@ -973,6 +977,7 @@ debug:
                     debug "deal.II library found in cache"
                     rsync -azvh $WERCKER_CACHE_DIR/dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz ./
                     tar -Jxf dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz
+                    rm dealii-${DEALII_VERSION}-${WM_COMPILE_OPTION}.tar.xz
                     ln -s dealii-${DEALII_VERSION} dealii
                     cp dealii-${DEALII_VERSION}/bin/lib/libdeal_II* ${FOAM_LIBBIN}/
                 fi
@@ -1073,6 +1078,7 @@ debug:
                     debug "googletest library found in cache"
                     rsync -azvh $WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz ./
                     tar -Jxf gtest-${GTEST_VERSION}.tar.xz
+                    rm gtest-${GTEST_VERSION}.tar.xz
                     ln -s gtest-${GTEST_VERSION} gtest
                 else
                     debug "googletest library not found in cache, will download and compile"
