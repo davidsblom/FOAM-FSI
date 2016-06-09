@@ -327,402 +327,402 @@ production:
 
                 # Cleanup libraries, there are now stored in ${FOAM_LIBBIN}/
                 rm -rf ../dealii/bin
-        # - script:
-        #     name: googletest
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #         export GTEST_VERSION=1.7.0
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         cd src/thirdParty
-        #
-        #         if [ -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz" ]; then
-        #             debug "googletest library found in cache"
-        #             rsync -azvh $WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz ./
-        #             tar -Jxf gtest-${GTEST_VERSION}.tar.xz
-        #             rm gtest-${GTEST_VERSION}.tar.xz
-        #             ln -s gtest-${GTEST_VERSION} gtest
-        #         else
-        #             debug "googletest library not found in cache, will download and compile"
-        #         fi
-        #
-        #         ./compile_gtest
-        #
-        #         if [ ! -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz" ]; then
-        #             tar -cJf gtest-${GTEST_VERSION}.tar.xz gtest-${GTEST_VERSION}
-        #             rsync -azvh gtest-${GTEST_VERSION}.tar.xz $WERCKER_CACHE_DIR/
-        #             rm gtest-${GTEST_VERSION}.tar.xz
-        #         fi
-        # - script:
-        #     name: precice
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #         export WM_NCOMPPROCS=3
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         cd src/thirdParty
-        #
-        #         export BOOST_ROOT=`pwd`/boost
-        #         export PRECICE_BOOST_ROOT=${BOOST_ROOT}
-        #         export PRECICE_MPI_LIB=mpi
-        #         export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
-        #         export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-        #         export CPLUS_INCLUDE_PATH=`pwd`/eigen
-        #
-        #         # Build preCICE
-        #         cd precice
-        #         if [ "$WM_COMPILE_OPTION" = "Opt" ]
-        #         then
-        #             scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
-        #             cp build/release-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
-        #         elif [ "$WM_COMPILE_OPTION" = "Debug" ]
-        #         then
-        #             scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
-        #             cp build/debug-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
-        #         fi
-        #
-        #         # cleanup build files
-        #         rm -rf build/*
-        # - script:
-        #     name: yaml-cpp
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #         export YAML_CPP_VERSION=0.5.3
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         cd src/thirdParty
-        #
-        #         if [ -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz" ]; then
-        #             debug "yaml-cpp library found in cache"
-        #             rsync -azvh $WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz ./
-        #             tar -Jxf yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz
-        #             ln -s yaml-cpp-release-${YAML_CPP_VERSION} yaml-cpp
-        #         else
-        #             debug "yaml-cpp library not found in cache, will download and compile"
-        #         fi
-        #
-        #         ./compile_yaml
-        #
-        #         if [ ! -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz" ]; then
-        #             tar -cJf yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz yaml-cpp-release-${YAML_CPP_VERSION}
-        #             rsync -azvh yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz $WERCKER_CACHE_DIR/
-        #             rm yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz
-        #         fi
-        # - script:
-        #     name: boundary conditions
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         wmakeLnInclude src/boundaryConditions
-        #         wmakeLnInclude src/fvSchemes
-        #         wmakeLnInclude src/fsi
-        #         wmakeLnInclude src/RBFMeshMotionSolver
-        #         wmakeLnInclude src/SRFModelAbs
-        #         wmake libso src/boundaryConditions
-        # - script:
-        #     name: schemes
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #         export WM_NCOMPPROCS=3
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         wmake libso src/fvSchemes
-        # - script:
-        #     name: fsi
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         wmake libso src/fsi
-        # - script:
-        #     name: radial basis function mesh motion solver
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         wmake libso src/RBFMeshMotionSolver
-        # - script:
-        #     name: FSI solvers
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         wmake applications/solvers/fsi/fsiFoam
-        #         wmake applications/solvers/fsi/solidFoam
-        #         wmake applications/solvers/fsi/fluidFoam
-        # - script:
-        #     name: precice FSI solvers
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         wmake applications/solvers/fsi/fsiSolidFoam
-        #         wmake applications/solvers/fsi/fsiFluidFoam
-        # - script:
-        #     name: test app
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #         export WM_NCOMPPROCS=3
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         wmake src/tests/testsuite-dealii
-        #         wmake src/tests/testsuite-fsi
-        #         wmake src/tests/testsuite-rbf
-        #         wmake src/tests/testsuite-sdc
-        #         wmake src/tests/testsuite-sdc-fsi
-        #         wmake src/tests/testsuite-spacemapping
-        # - script:
-        #     name: testsuite-sdc
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #         export WM_NCOMPPROCS=2
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         cd src/tests
-        #         python runTests.py testsuite-sdc
-        # - script:
-        #     name: testsuite-sdc-fsi
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #         export WM_NCOMPPROCS=2
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         cd src/tests
-        #         python runTests.py testsuite-sdc-fsi
-        # - script:
-        #     name: testsuite-rbf
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #         export WM_NCOMPPROCS=1
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         cd src/tests
-        #         python runTests.py testsuite-rbf
-        # - script:
-        #     name: testsuite-spacemapping
-        #     code: |
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #         export WM_NCOMPPROCS=2
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #         cd src/tests
-        #         python runTests.py testsuite-spacemapping
-        # - script:
-        #     name: testsuite-fsi
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #         export WM_NCOMPPROCS=2
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         cd src/tests
-        #         python runTests.py testsuite-fsi
-        # - script:
-        #     name: testsuite-dealii
-        #     code: |
-        #
-        #         export PARAVIEW_SYSTEM=1
-        #         export CMAKE_SYSTEM=1
-        #         export HWLOC_SYSTEM=1
-        #         export SCOTCH_SYSTEM=1
-        #         export PYFOAM_SYSTEM=1
-        #         export CUDA_IGNORE=1
-        #         export SWAK4FOAM_SYSTEM=1
-        #         export WM_MPLIB=SYSTEMOPENMPI
-        #         export OPENMPI_DIR=/usr
-        #         export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-        #         export FOAM_INST_DIR=`pwd`
-        #         export WM_NCOMPPROCS=2
-        #
-        #         source foam-extend-3.2/etc/bashrc
-        #
-        #         cd src/tests
-        #         python runTests.py testsuite-dealii
-        # - script:
-        #     name: cppcheck
-        #     code: |
-        #         (cd src/fsi && cppcheck --error-exitcode=1 --enable=performance,portability .)
-        #         (cd src/RBFMeshMotionSolver && cppcheck --error-exitcode=1 --enable=performance,portability .)
-        #         (cd src/tests && cppcheck --error-exitcode=1 --enable=performance,portability .)
-        #         (cd applications && cppcheck --error-exitcode=1 --enable=performance,portability .)
+        - script:
+            name: googletest
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+                export GTEST_VERSION=1.7.0
+
+                source foam-extend-3.2/etc/bashrc
+
+                cd src/thirdParty
+
+                if [ -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz" ]; then
+                    debug "googletest library found in cache"
+                    rsync -azvh $WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz ./
+                    tar -Jxf gtest-${GTEST_VERSION}.tar.xz
+                    rm gtest-${GTEST_VERSION}.tar.xz
+                    ln -s gtest-${GTEST_VERSION} gtest
+                else
+                    debug "googletest library not found in cache, will download and compile"
+                fi
+
+                ./compile_gtest
+
+                if [ ! -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz" ]; then
+                    tar -cJf gtest-${GTEST_VERSION}.tar.xz gtest-${GTEST_VERSION}
+                    rsync -azvh gtest-${GTEST_VERSION}.tar.xz $WERCKER_CACHE_DIR/
+                    rm gtest-${GTEST_VERSION}.tar.xz
+                fi
+        - script:
+            name: precice
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=3
+
+                source foam-extend-3.2/etc/bashrc
+
+                cd src/thirdParty
+
+                export BOOST_ROOT=`pwd`/boost
+                export PRECICE_BOOST_ROOT=${BOOST_ROOT}
+                export PRECICE_MPI_LIB=mpi
+                export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
+                export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
+                export CPLUS_INCLUDE_PATH=`pwd`/eigen
+
+                # Build preCICE
+                cd precice
+                if [ "$WM_COMPILE_OPTION" = "Opt" ]
+                then
+                    scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
+                    cp build/release-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
+                elif [ "$WM_COMPILE_OPTION" = "Debug" ]
+                then
+                    scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
+                    cp build/debug-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
+                fi
+
+                # cleanup build files
+                rm -rf build/*
+        - script:
+            name: yaml-cpp
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+                export YAML_CPP_VERSION=0.5.3
+
+                source foam-extend-3.2/etc/bashrc
+
+                cd src/thirdParty
+
+                if [ -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz" ]; then
+                    debug "yaml-cpp library found in cache"
+                    rsync -azvh $WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz ./
+                    tar -Jxf yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz
+                    ln -s yaml-cpp-release-${YAML_CPP_VERSION} yaml-cpp
+                else
+                    debug "yaml-cpp library not found in cache, will download and compile"
+                fi
+
+                ./compile_yaml
+
+                if [ ! -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz" ]; then
+                    tar -cJf yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz yaml-cpp-release-${YAML_CPP_VERSION}
+                    rsync -azvh yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz $WERCKER_CACHE_DIR/
+                    rm yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz
+                fi
+        - script:
+            name: boundary conditions
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                wmakeLnInclude src/boundaryConditions
+                wmakeLnInclude src/fvSchemes
+                wmakeLnInclude src/fsi
+                wmakeLnInclude src/RBFMeshMotionSolver
+                wmakeLnInclude src/SRFModelAbs
+                wmake libso src/boundaryConditions
+        - script:
+            name: schemes
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=3
+
+                source foam-extend-3.2/etc/bashrc
+
+                wmake libso src/fvSchemes
+        - script:
+            name: fsi
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                wmake libso src/fsi
+        - script:
+            name: radial basis function mesh motion solver
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                wmake libso src/RBFMeshMotionSolver
+        - script:
+            name: FSI solvers
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                wmake applications/solvers/fsi/fsiFoam
+                wmake applications/solvers/fsi/solidFoam
+                wmake applications/solvers/fsi/fluidFoam
+        - script:
+            name: precice FSI solvers
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+
+                source foam-extend-3.2/etc/bashrc
+
+                wmake applications/solvers/fsi/fsiSolidFoam
+                wmake applications/solvers/fsi/fsiFluidFoam
+        - script:
+            name: test app
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=3
+
+                source foam-extend-3.2/etc/bashrc
+
+                wmake src/tests/testsuite-dealii
+                wmake src/tests/testsuite-fsi
+                wmake src/tests/testsuite-rbf
+                wmake src/tests/testsuite-sdc
+                wmake src/tests/testsuite-sdc-fsi
+                wmake src/tests/testsuite-spacemapping
+        - script:
+            name: testsuite-sdc
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=2
+
+                source foam-extend-3.2/etc/bashrc
+
+                cd src/tests
+                python runTests.py testsuite-sdc
+        - script:
+            name: testsuite-sdc-fsi
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=2
+
+                source foam-extend-3.2/etc/bashrc
+
+                cd src/tests
+                python runTests.py testsuite-sdc-fsi
+        - script:
+            name: testsuite-rbf
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=1
+
+                source foam-extend-3.2/etc/bashrc
+
+                cd src/tests
+                python runTests.py testsuite-rbf
+        - script:
+            name: testsuite-spacemapping
+            code: |
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=2
+
+                source foam-extend-3.2/etc/bashrc
+                cd src/tests
+                python runTests.py testsuite-spacemapping
+        - script:
+            name: testsuite-fsi
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=2
+
+                source foam-extend-3.2/etc/bashrc
+
+                cd src/tests
+                python runTests.py testsuite-fsi
+        - script:
+            name: testsuite-dealii
+            code: |
+
+                export PARAVIEW_SYSTEM=1
+                export CMAKE_SYSTEM=1
+                export HWLOC_SYSTEM=1
+                export SCOTCH_SYSTEM=1
+                export PYFOAM_SYSTEM=1
+                export CUDA_IGNORE=1
+                export SWAK4FOAM_SYSTEM=1
+                export WM_MPLIB=SYSTEMOPENMPI
+                export OPENMPI_DIR=/usr
+                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
+                export FOAM_INST_DIR=`pwd`
+                export WM_NCOMPPROCS=2
+
+                source foam-extend-3.2/etc/bashrc
+
+                cd src/tests
+                python runTests.py testsuite-dealii
+        - script:
+            name: cppcheck
+            code: |
+                (cd src/fsi && cppcheck --error-exitcode=1 --enable=performance,portability .)
+                (cd src/RBFMeshMotionSolver && cppcheck --error-exitcode=1 --enable=performance,portability .)
+                (cd src/tests && cppcheck --error-exitcode=1 --enable=performance,portability .)
+                (cd applications && cppcheck --error-exitcode=1 --enable=performance,portability .)
         - script:
             name: list cache files
             code: ls -lah $WERCKER_CACHE_DIR
@@ -1339,6 +1339,7 @@ debug:
 
                 cd src/tests
                 python runTests.py testsuite-sdc
+                rm *.log
         - script:
             name: testsuite-sdc-fsi
             code: |
@@ -1360,6 +1361,7 @@ debug:
 
                 cd src/tests
                 python runTests.py testsuite-sdc-fsi
+                rm *.log
         - script:
             name: testsuite-rbf
             code: |
@@ -1381,6 +1383,7 @@ debug:
 
                 cd src/tests
                 python runTests.py testsuite-rbf
+                rm *.log
         - script:
             name: testsuite-spacemapping
             code: |
@@ -1400,6 +1403,7 @@ debug:
                 source foam-extend-3.2/etc/bashrc
                 cd src/tests
                 python runTests.py testsuite-spacemapping
+                rm *.log
         - script:
             name: testsuite-fsi
             code: |
@@ -1421,6 +1425,7 @@ debug:
 
                 cd src/tests
                 python runTests.py testsuite-fsi
+                rm *.log
         - script:
             name: testsuite-dealii
             code: |
@@ -1442,6 +1447,7 @@ debug:
 
                 cd src/tests
                 python runTests.py testsuite-dealii
+                rm *.log
         - script:
             name: cppcheck
             code: |
