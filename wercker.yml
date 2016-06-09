@@ -1354,7 +1354,7 @@ debug:
                 export OPENMPI_DIR=/usr
                 export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
                 export FOAM_INST_DIR=`pwd`
-                export WM_NCOMPPROCS=2
+                export WM_NCOMPPROCS=3
 
                 source foam-extend-3.2/etc/bashrc
 
