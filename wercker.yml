@@ -1341,28 +1341,6 @@ debug:
                 python runTests.py testsuite-sdc
                 rm *.log
         - script:
-            name: testsuite-sdc-fsi
-            code: |
-
-                export PARAVIEW_SYSTEM=1
-                export CMAKE_SYSTEM=1
-                export HWLOC_SYSTEM=1
-                export SCOTCH_SYSTEM=1
-                export PYFOAM_SYSTEM=1
-                export CUDA_IGNORE=1
-                export SWAK4FOAM_SYSTEM=1
-                export WM_MPLIB=SYSTEMOPENMPI
-                export OPENMPI_DIR=/usr
-                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-                export FOAM_INST_DIR=`pwd`
-                export WM_NCOMPPROCS=4
-
-                source foam-extend-3.2/etc/bashrc
-
-                cd src/tests
-                python runTests.py testsuite-sdc-fsi
-                rm *.log
-        - script:
             name: testsuite-rbf
             code: |
 
@@ -1383,26 +1361,6 @@ debug:
 
                 cd src/tests
                 python runTests.py testsuite-rbf
-                rm *.log
-        - script:
-            name: testsuite-spacemapping
-            code: |
-                export PARAVIEW_SYSTEM=1
-                export CMAKE_SYSTEM=1
-                export HWLOC_SYSTEM=1
-                export SCOTCH_SYSTEM=1
-                export PYFOAM_SYSTEM=1
-                export CUDA_IGNORE=1
-                export SWAK4FOAM_SYSTEM=1
-                export WM_MPLIB=SYSTEMOPENMPI
-                export OPENMPI_DIR=/usr
-                export OPENMPI_BIN_DIR=$OPENMPI_DIR/bin
-                export FOAM_INST_DIR=`pwd`
-                export WM_NCOMPPROCS=4
-
-                source foam-extend-3.2/etc/bashrc
-                cd src/tests
-                python runTests.py testsuite-spacemapping
                 rm *.log
         - script:
             name: testsuite-fsi
