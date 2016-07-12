@@ -282,10 +282,10 @@ production:
 
                   if [ "$WM_COMPILE_OPTION" = "Opt" ]
                   then
-                    cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DCMAKE_BUILD_TYPE=Release ..
+                    cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DDEAL_II_COMPONENT_EXAMPLES=OFF -DCMAKE_BUILD_TYPE=Release ..
                   elif [ "$WM_COMPILE_OPTION" = "Debug" ]
                   then
-                    cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DCMAKE_BUILD_TYPE=Debug ..
+                    cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DDEAL_II_COMPONENT_EXAMPLES=OFF -DCMAKE_BUILD_TYPE=Debug ..
                   fi
 
                   make -j $WM_NCOMPPROCS install
@@ -1008,10 +1008,10 @@ debug:
 
                   if [ "$WM_COMPILE_OPTION" = "Opt" ]
                   then
-                    cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DCMAKE_BUILD_TYPE=Release ..
+                    cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DDEAL_II_COMPONENT_EXAMPLES=OFF -DCMAKE_BUILD_TYPE=Release ..
                   elif [ "$WM_COMPILE_OPTION" = "Debug" ]
                   then
-                    cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DCMAKE_BUILD_TYPE=Debug ..
+                    cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DDEAL_II_COMPONENT_EXAMPLES=OFF -DCMAKE_BUILD_TYPE=Debug ..
                   fi
 
                   make -j $WM_NCOMPPROCS install
