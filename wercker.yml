@@ -38,9 +38,9 @@ build:
         - script:
             name: deal.II
             code: |
-                ls -lah /pipeline/output
+                ls -lah /home
                 cd src/thirdParty
-                ln -s $WERCKER_OUTPUT_DIR/dealii-8.4.1 dealii
+                ln -s /home/dealii-8.4.1 dealii
                 cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
         - script:
             name: googletest
