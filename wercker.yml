@@ -16,15 +16,7 @@ build:
                 export BOOST_VERSION=1_55_0
                 export BOOST_VERSION_DOT=1.55.0
                 cd src/thirdParty
-
-                if [ -f "$WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.bz2" ]; then
-                    debug "boost library found in cache"
-                    rsync -azvh $WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.bz2 ./
-                else
-                    wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
-                    rsync -azvh boost_${BOOST_VERSION}.tar.bz2 $WERCKER_CACHE_DIR/
-                fi
-
+                wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
                 tar jxf boost_${BOOST_VERSION}.tar.bz2
                 ln -s boost_${BOOST_VERSION} boost
                 rm boost_${BOOST_VERSION}.tar.bz2
@@ -45,27 +37,8 @@ build:
         - script:
             name: googletest
             code: |
-                export GTEST_VERSION=1.7.0
-
                 cd src/thirdParty
-
-                if [ -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz" ]; then
-                    debug "googletest library found in cache"
-                    rsync -azvh $WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz ./
-                    tar -Jxf gtest-${GTEST_VERSION}.tar.xz
-                    rm gtest-${GTEST_VERSION}.tar.xz
-                    ln -s gtest-${GTEST_VERSION} gtest
-                else
-                    debug "googletest library not found in cache, will download and compile"
-                fi
-
                 ./compile_gtest
-
-                if [ ! -f "$WERCKER_CACHE_DIR/gtest-${GTEST_VERSION}.tar.xz" ]; then
-                    tar -cJf gtest-${GTEST_VERSION}.tar.xz gtest-${GTEST_VERSION}
-                    rsync -azvh gtest-${GTEST_VERSION}.tar.xz $WERCKER_CACHE_DIR/
-                    rm gtest-${GTEST_VERSION}.tar.xz
-                fi
         - script:
             name: precice
             code: |
@@ -100,23 +73,7 @@ build:
                 cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
 
                 cd src/thirdParty
-
-                if [ -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz" ]; then
-                    debug "yaml-cpp library found in cache"
-                    rsync -azvh $WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz ./
-                    tar -Jxf yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz
-                    ln -s yaml-cpp-release-${YAML_CPP_VERSION} yaml-cpp
-                else
-                    debug "yaml-cpp library not found in cache, will download and compile"
-                fi
-
                 ./compile_yaml
-
-                if [ ! -f "$WERCKER_CACHE_DIR/yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz" ]; then
-                    tar -cJf yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz yaml-cpp-release-${YAML_CPP_VERSION}
-                    rsync -azvh yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz $WERCKER_CACHE_DIR/
-                    rm yaml-cpp-release-${YAML_CPP_VERSION}.tar.xz
-                fi
         - script:
             name: boundary conditions
             code: |
