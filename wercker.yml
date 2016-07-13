@@ -38,8 +38,12 @@ build:
         - script:
             name: deal.II
             code: |
+                cd /pipeline/source
+                ls -lah
+                cd /pipeline/source/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
                 cd src/thirdParty
-                ln -s ../../dealii-8.4.1 dealii
+                ln -s /pipeline/source/dealii-8.4.1 dealii
+                cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
         - script:
             name: googletest
             code: |
