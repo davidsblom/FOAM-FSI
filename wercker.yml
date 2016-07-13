@@ -38,16 +38,12 @@ build:
         - script:
             name: deal.II
             code: |
-                cd /pipeline/source
-                ls -lah
-                cd /pipeline/source/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
                 cd src/thirdParty
-                ln -s /pipeline/source/dealii-8.4.1 dealii
+                ln -s $WERCKER_OUTPUT_DIR/dealii-8.4.1 dealii
                 cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
         - script:
             name: googletest
             code: |
-
                 export GTEST_VERSION=1.7.0
 
                 cd src/thirdParty
@@ -72,8 +68,7 @@ build:
         - script:
             name: precice
             code: |
-
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
 
                 cd src/thirdParty
 
@@ -101,7 +96,7 @@ build:
         - script:
             name: yaml-cpp
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
 
                 cd src/thirdParty
 
@@ -124,8 +119,7 @@ build:
         - script:
             name: boundary conditions
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
-
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmakeLnInclude src/boundaryConditions
                 wmakeLnInclude src/fvSchemes
                 wmakeLnInclude src/fsi
@@ -135,41 +129,35 @@ build:
         - script:
             name: schemes
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
-
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmake libso src/fvSchemes
         - script:
             name: fsi
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
-
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmake libso src/fsi
         - script:
             name: radial basis function mesh motion solver
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
-
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmake libso src/RBFMeshMotionSolver
         - script:
             name: FSI solvers
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
-
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmake applications/solvers/fsi/fsiFoam
                 wmake applications/solvers/fsi/solidFoam
                 wmake applications/solvers/fsi/fluidFoam
         - script:
             name: precice FSI solvers
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
-
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmake applications/solvers/fsi/fsiSolidFoam
                 wmake applications/solvers/fsi/fsiFluidFoam
         - script:
             name: test app
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
-
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmake src/tests/testsuite-dealii
                 wmake src/tests/testsuite-fsi
                 wmake src/tests/testsuite-rbf
@@ -179,42 +167,37 @@ build:
         - script:
             name: testsuite-sdc
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
-
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests
                 python runTests.py testsuite-sdc
         - script:
             name: testsuite-sdc-fsi
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
-
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests
                 python runTests.py testsuite-sdc-fsi
         - script:
             name: testsuite-rbf
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
-
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests
                 python runTests.py testsuite-rbf
         - script:
             name: testsuite-spacemapping
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests
                 python runTests.py testsuite-spacemapping
         - script:
             name: testsuite-fsi
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
-
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests
                 python runTests.py testsuite-fsi
         - script:
             name: testsuite-dealii
             code: |
-                cd foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd ..
-
+                (cd $WERCKER_OUTPUT_DIR/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests
                 python runTests.py testsuite-dealii
         - script:
