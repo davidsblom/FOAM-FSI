@@ -16,7 +16,15 @@ build:
                 export BOOST_VERSION=1_55_0
                 export BOOST_VERSION_DOT=1.55.0
                 cd src/thirdParty
-                wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
+
+                if [ -f "$WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.bz2" ]; then
+                    debug "boost library found in cache"
+                    rsync -azvh $WERCKER_CACHE_DIR/boost_${BOOST_VERSION}.tar.bz2 ./
+                else
+                    wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
+                    rsync -azvh boost_${BOOST_VERSION}.tar.bz2 $WERCKER_CACHE_DIR/
+                fi
+
                 tar jxf boost_${BOOST_VERSION}.tar.bz2
                 ln -s boost_${BOOST_VERSION} boost
                 rm boost_${BOOST_VERSION}.tar.bz2
