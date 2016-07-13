@@ -38,6 +38,7 @@ build:
         - script:
             name: deal.II
             code: |
+                ls -lah /pipeline/output
                 cd src/thirdParty
                 ln -s $WERCKER_OUTPUT_DIR/dealii-8.4.1 dealii
                 cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
