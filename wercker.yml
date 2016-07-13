@@ -38,6 +38,7 @@ build:
         - script:
             name: deal.II
             code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd src/thirdParty
                 ln -s /home/dealii-8.4.1 dealii
                 cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
