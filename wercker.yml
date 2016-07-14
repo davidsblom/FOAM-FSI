@@ -11,6 +11,11 @@ build:
                 git checkout .
                 git submodule update --init --recursive
         - script:
+            name: extract foam-extend
+            code: |
+                cd /home
+                tar xf foam-extend-3.2.tar.gz
+        - script:
             name: boost
             code: |
                 export BOOST_VERSION=1_55_0
@@ -39,6 +44,7 @@ build:
             name: deal.II
             code: |
                 cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home && tar xf dealii-8.4.1.tar.gz && cd $WERCKER_SOURCE_DIR
                 cd src/thirdParty
                 ln -s /home/dealii-8.4.1 dealii
                 cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
