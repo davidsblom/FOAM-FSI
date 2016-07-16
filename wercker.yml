@@ -38,9 +38,7 @@ build:
                 cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
         - script:
             name: googletest
-            code: |
-                cd src/thirdParty
-                ./compile_gtest
+            code: ln -s /home/gtest-1.7.0 src/thirdParty/gtest
         - script:
             name: precice
             code: |
