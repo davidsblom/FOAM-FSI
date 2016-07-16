@@ -18,12 +18,9 @@ build:
         - script:
             name: boost
             code: |
-                set -e
-                set -x
-                export BOOST_VERSION=1_55_0
                 cd src/thirdParty
-                tar jxf /home/boost_${BOOST_VERSION}.tar.bz2 ./
-                ln -s boost_${BOOST_VERSION} boost
+                tar jxf /home/boost_1_55_0.tar.bz2 -C ./
+                ln -s boost_1_55_0 boost
         - script:
             name: PETSc
             code: |
