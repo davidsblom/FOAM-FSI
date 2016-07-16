@@ -65,7 +65,10 @@ build:
                 rm -rf build/*
         - script:
             name: yaml-cpp
-            code: ln -s /home/yaml-cpp-release-0.5.3 src/thirdParty/yaml-cpp
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                ln -s /home/yaml-cpp-release-0.5.3 src/thirdParty/yaml-cpp
+                cp src/thirdParty/yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
         - script:
             name: boundary conditions
             code: |
