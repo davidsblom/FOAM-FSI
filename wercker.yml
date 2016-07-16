@@ -17,10 +17,7 @@ build:
                 tar xf foam-extend-3.2.tar.gz
         - script:
             name: boost
-            code: |
-                cd src/thirdParty
-                tar jxf /home/boost_1_55_0.tar.bz2 -C ./
-                ln -s boost_1_55_0 boost
+            code: ln -s /home/boost_1_55_0 src/thirdParty/boost
         - script:
             name: PETSc
             code: |
@@ -69,11 +66,7 @@ build:
                 rm -rf build/*
         - script:
             name: yaml-cpp
-            code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
-
-                cd src/thirdParty
-                ./compile_yaml
+            code: ln -s /home/yaml-cpp-release-0.5.3 src/thirdParty/yaml-cpp
         - script:
             name: boundary conditions
             code: |
