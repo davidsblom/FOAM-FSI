@@ -49,19 +49,9 @@ build:
                 export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
                 export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
-                # Build preCICE
                 cd precice
-                if [ "$WM_COMPILE_OPTION" = "Opt" ]
-                then
-                    scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
-                    cp build/release-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
-                elif [ "$WM_COMPILE_OPTION" = "Debug" ]
-                then
-                    scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
-                    cp build/debug-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
-                fi
-
-                # cleanup build files
+                scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
+                cp build/release-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
                 rm -rf build/*
         - script:
             name: yaml-cpp
@@ -211,19 +201,9 @@ debug:
                 export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
                 export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
-                # Build preCICE
                 cd precice
-                if [ "$WM_COMPILE_OPTION" = "Opt" ]
-                then
-                    scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
-                    cp build/release-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
-                elif [ "$WM_COMPILE_OPTION" = "Debug" ]
-                then
-                    scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
-                    cp build/debug-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
-                fi
-
-                # cleanup build files
+                scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
+                cp build/debug-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
                 rm -rf build/*
         - script:
             name: yaml-cpp
