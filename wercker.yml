@@ -163,3 +163,165 @@ build:
         - script:
             name: cleanup
             code: rm -rf *
+
+debug:
+    box: davidsblom/foam-fsi:debug
+    steps:
+        - script:
+            name: initialize git submodules
+            code: |
+                git checkout .
+                git submodule update --init --recursive
+        - script:
+            name: extract foam-extend
+            code: |
+                cd /home
+                tar xf foam-extend-3.2.tar.gz
+        - script:
+            name: boost
+            code: ln -s /home/boost_1_55_0 src/thirdParty/boost
+        - script:
+            name: PETSc
+            code: |
+                cd src/thirdParty
+                mkdir -p petsc
+                cd petsc
+                ln -s /usr/include/petsc include
+        - script:
+            name: deal.II
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd src/thirdParty
+                ln -s /home/dealii-8.4.1 dealii
+                cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
+        - script:
+            name: googletest
+            code: ln -s /home/googletest-release-1.7.0 src/thirdParty/gtest
+        - script:
+            name: precice
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+
+                cd src/thirdParty
+
+                export BOOST_ROOT=`pwd`/boost
+                export PRECICE_BOOST_ROOT=${BOOST_ROOT}
+                export PRECICE_MPI_LIB=mpi
+                export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
+                export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
+                export CPLUS_INCLUDE_PATH=`pwd`/eigen
+
+                # Build preCICE
+                cd precice
+                if [ "$WM_COMPILE_OPTION" = "Opt" ]
+                then
+                    scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
+                    cp build/release-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
+                elif [ "$WM_COMPILE_OPTION" = "Debug" ]
+                then
+                    scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
+                    cp build/debug-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
+                fi
+
+                # cleanup build files
+                rm -rf build/*
+        - script:
+            name: yaml-cpp
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                ln -s /home/yaml-cpp-release-0.5.3 src/thirdParty/yaml-cpp
+                cp src/thirdParty/yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
+        - script:
+            name: boundary conditions
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                wmakeLnInclude src/boundaryConditions
+                wmakeLnInclude src/fvSchemes
+                wmakeLnInclude src/fsi
+                wmakeLnInclude src/RBFMeshMotionSolver
+                wmakeLnInclude src/SRFModelAbs
+                wmake libso src/boundaryConditions
+        - script:
+            name: schemes
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                wmake libso src/fvSchemes
+        - script:
+            name: fsi
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                wmake libso src/fsi
+        - script:
+            name: radial basis function mesh motion solver
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                wmake libso src/RBFMeshMotionSolver
+        - script:
+            name: FSI solvers
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                wmake applications/solvers/fsi/fsiFoam
+                wmake applications/solvers/fsi/solidFoam
+                wmake applications/solvers/fsi/fluidFoam
+        - script:
+            name: precice FSI solvers
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                wmake applications/solvers/fsi/fsiSolidFoam
+                wmake applications/solvers/fsi/fsiFluidFoam
+        - script:
+            name: test app
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                wmake src/tests/testsuite-dealii
+                wmake src/tests/testsuite-fsi
+                wmake src/tests/testsuite-rbf
+                wmake src/tests/testsuite-sdc
+                wmake src/tests/testsuite-sdc-fsi
+                wmake src/tests/testsuite-spacemapping
+        - script:
+            name: testsuite-sdc
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd src/tests
+                python runTests.py testsuite-sdc
+        - script:
+            name: testsuite-sdc-fsi
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd src/tests
+                python runTests.py testsuite-sdc-fsi
+        - script:
+            name: testsuite-rbf
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd src/tests
+                python runTests.py testsuite-rbf
+        - script:
+            name: testsuite-spacemapping
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd src/tests
+                python runTests.py testsuite-spacemapping
+        - script:
+            name: testsuite-fsi
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd src/tests
+                python runTests.py testsuite-fsi
+        - script:
+            name: testsuite-dealii
+            code: |
+                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd src/tests
+                python runTests.py testsuite-dealii
+        - script:
+            name: cppcheck
+            code: |
+                (cd src/fsi && cppcheck --error-exitcode=1 --enable=performance,portability .)
+                (cd src/RBFMeshMotionSolver && cppcheck --error-exitcode=1 --enable=performance,portability .)
+                (cd src/tests && cppcheck --error-exitcode=1 --enable=performance,portability .)
+                (cd applications && cppcheck --error-exitcode=1 --enable=performance,portability .)
+        - script:
+            name: cleanup
+            code: rm -rf *
