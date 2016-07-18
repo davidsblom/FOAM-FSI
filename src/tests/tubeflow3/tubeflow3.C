@@ -25,6 +25,7 @@
 #include "TubeFlowLinearizedSolidSolver.H"
 #include "TubeFlowLinearizedFluidSolver.H"
 #include "AndersonPostProcessing.H"
+#include "AitkenPostProcessing.H"
 
 using namespace std;
 using namespace fsi;
@@ -36,6 +37,7 @@ int main()
     deque<std::string> fsiSolvers;
 
     fsiSolvers.push_back( "Anderson" );
+    fsiSolvers.push_back( "Aitken" );
     fsiSolvers.push_back( "MM" );
 
     // Physical settings
@@ -86,7 +88,19 @@ int main()
                         if ( nbLevels > 1 && fsiSolver == "Anderson" )
                             continue;
 
+                        if ( nbLevels > 1 && fsiSolver == "Aitken" )
+                            continue;
+
                         if ( fluidSolverSetting != "non-linear" && fsiSolver == "Anderson" )
+                            continue;
+
+                        if ( fluidSolverSetting != "non-linear" && fsiSolver == "Aitken" )
+                            continue;
+
+                        if ( fsiSolver == "Aitken" && nbReuse > 0 )
+                            continue;
+
+                        if ( fsiSolver == "Aitken" && updateJacobian )
                             continue;
 
                         if ( nbLevels == 1 && fsiSolver == "MM" )
@@ -244,7 +258,7 @@ int main()
                             }
                         }
 
-                        if ( fsiSolver == "Anderson" )
+                        if ( fsiSolver == "Anderson" || fsiSolver == "Aitken" )
                         {
                             assert( !fsi );
 
@@ -261,7 +275,13 @@ int main()
 
                             fsi = shared_ptr<MultiLevelFsiSolver>( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
 
-                            shared_ptr<PostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
+                            shared_ptr<PostProcessing> postProcessing;
+
+                            if ( fsiSolver == "Anderson" )
+                                postProcessing = shared_ptr<PostProcessing>( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
+
+                            if ( fsiSolver == "Aitken" )
+                                postProcessing = shared_ptr<PostProcessing>( new AitkenPostProcessing( fsi, initialRelaxation, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex ) );
 
                             solver = shared_ptr<Solver>( new ImplicitMultiLevelFsiSolver( fsi, postProcessing ) );
                         }
@@ -284,7 +304,7 @@ int main()
                         logFile << "nbTimeSteps = " << fineModelFluid->timeIndex << endl;
                         logFile << "updateJacobian = " << updateJacobian << endl;
 
-                        if ( fsiSolver == "Anderson" )
+                        if ( fsiSolver == "Anderson" || fsiSolver == "Aitken" )
                         {
                             logFile << "nbIter = " << fsi->nbIter << endl;
                             logFile << "avgIter = " << scalar( fsi->nbIter ) / scalar( fineModelFluid->timeIndex ) << endl;
