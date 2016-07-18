@@ -1,0 +1,52 @@
+# Listing of Parameters
+# ---------------------
+subsection Boundary conditions
+  # Gravity in negative y-direction
+  set gravity  = 0
+
+  # Traction in negative y-direction
+  set traction = 0
+end
+
+
+subsection Output
+  # This indicates between how many time steps we print the solution.
+  set output_interval = 10
+
+  # This indicates whether the solution is saved in paraview format.
+  set output_paraview = true
+end
+
+
+subsection Physical constants
+  # Young's modulus
+  set E   = 2.5e5
+
+  # Poisson ratio
+  set nu  = 0.35
+
+  # Density
+  set rho = 100
+end
+
+
+subsection Space discretization
+  # The polynomial degree for the displacement space.
+  set fe_degree    = 1
+
+  # The number of global refines we do on the mesh.
+  set n_of_refines = 1
+end
+
+
+subsection Time step data
+  # Time step size
+  set dt         = 0.001
+
+  # Final time of the simulation
+  set final_time = 40
+
+  # The variable theta is used to indicate which time stepping scheme to use,
+  # i.e. backward Euler, forward Euler or Crank-Nicolson.
+  set theta      = 1.0
+end
