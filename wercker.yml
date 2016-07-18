@@ -88,25 +88,12 @@ build:
             name: FSI solvers
             code: |
                 cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
-                wmake applications/solvers/fsi/fsiFoam
-                wmake applications/solvers/fsi/solidFoam
-                wmake applications/solvers/fsi/fluidFoam
-        - script:
-            name: precice FSI solvers
-            code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
-                wmake applications/solvers/fsi/fsiSolidFoam
-                wmake applications/solvers/fsi/fsiFluidFoam
+                cd applications/solvers/fsi && wmake all
         - script:
             name: test app
             code: |
                 cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
-                wmake src/tests/testsuite-dealii
-                wmake src/tests/testsuite-fsi
-                wmake src/tests/testsuite-rbf
-                wmake src/tests/testsuite-sdc
-                wmake src/tests/testsuite-sdc-fsi
-                wmake src/tests/testsuite-spacemapping
+                cd src/tests && wmake all
         - script:
             name: testsuite-sdc
             code: |
@@ -240,61 +227,14 @@ debug:
             name: FSI solvers
             code: |
                 cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
-                wmake applications/solvers/fsi/fsiFoam
-                wmake applications/solvers/fsi/solidFoam
-                wmake applications/solvers/fsi/fluidFoam
-        - script:
-            name: precice FSI solvers
-            code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
-                wmake applications/solvers/fsi/fsiSolidFoam
-                wmake applications/solvers/fsi/fsiFluidFoam
+                cd applications/solvers/fsi
+                wmake all
         - script:
             name: test app
             code: |
                 cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
-                wmake src/tests/testsuite-dealii
-                wmake src/tests/testsuite-fsi
-                wmake src/tests/testsuite-rbf
-                wmake src/tests/testsuite-sdc
-                wmake src/tests/testsuite-sdc-fsi
-                wmake src/tests/testsuite-spacemapping
-        - script:
-            name: testsuite-sdc
-            code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd src/tests
-                python runTests.py testsuite-sdc
-        - script:
-            name: testsuite-sdc-fsi
-            code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
-                cd src/tests
-                python runTests.py testsuite-sdc-fsi
-        - script:
-            name: testsuite-rbf
-            code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
-                cd src/tests
-                python runTests.py testsuite-rbf
-        - script:
-            name: testsuite-spacemapping
-            code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
-                cd src/tests
-                python runTests.py testsuite-spacemapping
-        - script:
-            name: testsuite-fsi
-            code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
-                cd src/tests
-                python runTests.py testsuite-fsi
-        - script:
-            name: testsuite-dealii
-            code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
-                cd src/tests
-                python runTests.py testsuite-dealii
+                wmake all
         - script:
             name: cppcheck
             code: |
