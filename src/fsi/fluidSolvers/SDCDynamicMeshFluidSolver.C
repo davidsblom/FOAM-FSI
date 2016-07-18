@@ -812,10 +812,7 @@ void SDCDynamicMeshFluidSolver::solve()
                     currResidual = pressureResidual;
 
                 if ( nonOrth == nNonOrthCorr )
-                {
-                    Uf -= pEqn.flux() * mesh.Sf() / ( mesh.magSf() * mesh.magSf() );
-                    phi = Uf & mesh.Sf();
-                }
+                    phi -= pEqn.flux();
             }
 
             p.relax();
@@ -828,6 +825,17 @@ void SDCDynamicMeshFluidSolver::solve()
 
             if ( currResidual < std::max( tol * initResidual, scalar( 1.0e-20 ) ) )
                 break;
+        }
+
+        {
+            fvc::makeAbsolute( phi, U );
+
+            surfaceVectorField nf = mesh.Sf() / mesh.magSf();
+            surfaceVectorField Utang = fvc::interpolate( U ) - nf * (fvc::interpolate( U ) & nf);
+            surfaceVectorField Unor = phi / mesh.magSf() * nf;
+            Uf = Utang + Unor;
+
+            fvc::makeRelative( phi, U );
         }
 
         scalar momentumResidual = evaluateMomentumResidual();
