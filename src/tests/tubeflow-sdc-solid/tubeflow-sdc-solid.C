@@ -29,7 +29,7 @@ int main()
         "IDC", "SDIRK"
     };
     std::vector<std::string> sdirkSchemes = {
-        "SDIRK2", "SDIRK3", "SDIRK4"
+        "SDIRK2", "SDIRK3", "SDIRK4", "SDIRK2PR"
     };
 
     for ( auto timeIntegrationSchemeString : timeIntegrationSchemes )
