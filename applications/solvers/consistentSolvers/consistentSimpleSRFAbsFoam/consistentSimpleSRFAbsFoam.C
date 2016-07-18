@@ -35,7 +35,7 @@ int main(
             tmp<fvVectorMatrix> UEqn
             (
                 fvm::div( phi, U )
-                + turbulence->divDevReff( U )
+                + turbulence->divDevReff()
 
                 // + SRF->Fcoriolis()
             );

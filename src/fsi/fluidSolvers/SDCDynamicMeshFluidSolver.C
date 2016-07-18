@@ -133,7 +133,7 @@ scalar SDCDynamicMeshFluidSolver::evaluateMomentumResidual()
     tmp<volVectorField> residual = fvc::ddt( U ) + fvc::div( phi, U ) + fvc::grad( p ) - rDeltaT * rhsU / V;
 
     if ( turbulenceSwitch )
-        residual() += turbulence->divDevReff( U ) & U;
+        residual() += turbulence->divDevReff() & U;
     else
         residual() += -fvc::laplacian( nu, U );
 

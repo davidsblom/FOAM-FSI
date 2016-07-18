@@ -413,7 +413,6 @@ void SDCSolidSolver::solve()
     scalar iCorr = 0;
     scalar residual = 1;
     scalar initialResidual = 1;
-    lduMatrix::solverPerformance solverPerf;
     lduMatrix::debug = 0;
     scalar convergenceTolerance = absoluteTolerance;
 
@@ -460,7 +459,7 @@ void SDCSolidSolver::solve()
 
         UEqn -= deltaT * gravity;
 
-        solverPerf = UEqn.solve();
+        UEqn.solve();
 
         U.relax();
 

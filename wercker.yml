@@ -4,6 +4,7 @@ command-timeout: 60
 no-response-timeout: 30
 
 build:
+    box: davidsblom/foam-fsi:build-foam-extend-4.0
     steps:
         - script:
             name: initialize git submodules
@@ -14,7 +15,7 @@ build:
             name: extract foam-extend
             code: |
                 cd /home
-                tar xf foam-extend-3.2.tar.gz
+                tar xf foam-extend-4.0.tar.gz
         - script:
             name: boost
             code: ln -s /home/boost_1_55_0 src/thirdParty/boost
@@ -28,7 +29,7 @@ build:
         - script:
             name: deal.II
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd src/thirdParty
                 ln -s /home/dealii-8.4.1 dealii
                 cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
@@ -38,7 +39,7 @@ build:
         - script:
             name: precice
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
 
                 cd src/thirdParty
 
@@ -56,13 +57,13 @@ build:
         - script:
             name: yaml-cpp
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 ln -s /home/yaml-cpp-release-0.5.3 src/thirdParty/yaml-cpp
                 cp src/thirdParty/yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
         - script:
             name: boundary conditions
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 wmakeLnInclude src/boundaryConditions
                 wmakeLnInclude src/fvSchemes
                 wmakeLnInclude src/fsi
@@ -72,62 +73,62 @@ build:
         - script:
             name: schemes
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 wmake libso src/fvSchemes
         - script:
             name: fsi
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 wmake libso src/fsi
         - script:
             name: radial basis function mesh motion solver
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 wmake libso src/RBFMeshMotionSolver
         - script:
             name: FSI solvers
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd applications/solvers/fsi && wmake all
         - script:
             name: test app
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd src/tests && wmake all
         - script:
             name: testsuite-sdc
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd src/tests
                 python runTests.py testsuite-sdc
         - script:
             name: testsuite-sdc-fsi
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd src/tests
                 python runTests.py testsuite-sdc-fsi
         - script:
             name: testsuite-rbf
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd src/tests
                 python runTests.py testsuite-rbf
         - script:
             name: testsuite-spacemapping
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd src/tests
                 python runTests.py testsuite-spacemapping
         - script:
             name: testsuite-fsi
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd src/tests
                 python runTests.py testsuite-fsi
         - script:
             name: testsuite-dealii
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd src/tests
                 python runTests.py testsuite-dealii
         - script:
@@ -142,7 +143,7 @@ build:
             code: rm -rf *
 
 debug:
-    box: davidsblom/foam-fsi:debug
+    box: davidsblom/foam-fsi:debug-foam-extend-4.0
     steps:
         - script:
             name: initialize git submodules
@@ -153,7 +154,7 @@ debug:
             name: extract foam-extend
             code: |
                 cd /home
-                tar xf foam-extend-3.2.tar.gz
+                tar xf foam-extend-4.0.tar.gz
         - script:
             name: boost
             code: ln -s /home/boost_1_55_0 src/thirdParty/boost
@@ -167,7 +168,7 @@ debug:
         - script:
             name: deal.II
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd src/thirdParty
                 ln -s /home/dealii-8.4.1 dealii
                 cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
@@ -177,7 +178,7 @@ debug:
         - script:
             name: precice
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
 
                 cd src/thirdParty
 
@@ -195,13 +196,13 @@ debug:
         - script:
             name: yaml-cpp
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 ln -s /home/yaml-cpp-release-0.5.3 src/thirdParty/yaml-cpp
                 cp src/thirdParty/yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
         - script:
             name: boundary conditions
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 wmakeLnInclude src/boundaryConditions
                 wmakeLnInclude src/fvSchemes
                 wmakeLnInclude src/fsi
@@ -211,28 +212,28 @@ debug:
         - script:
             name: schemes
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 wmake libso src/fvSchemes
         - script:
             name: fsi
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 wmake libso src/fsi
         - script:
             name: radial basis function mesh motion solver
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 wmake libso src/RBFMeshMotionSolver
         - script:
             name: FSI solvers
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd applications/solvers/fsi
                 wmake all
         - script:
             name: test app
             code: |
-                cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
+                cd /home/foam-extend-4.0 && source etc/prefs.sh && source etc/bashrc && cd $WERCKER_SOURCE_DIR
                 cd src/tests
                 wmake all
         - script:

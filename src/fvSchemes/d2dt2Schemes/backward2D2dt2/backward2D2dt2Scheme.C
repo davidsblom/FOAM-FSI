@@ -229,7 +229,7 @@ template<class Type>
 tmp<fvMatrix<Type> >
 backward2D2dt2Scheme<Type>::fvmD2dt2
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -309,7 +309,7 @@ tmp<fvMatrix<Type> >
 backward2D2dt2Scheme<Type>::fvmD2dt2
 (
     const dimensionedScalar& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm
@@ -364,7 +364,7 @@ tmp<fvMatrix<Type> >
 backward2D2dt2Scheme<Type>::fvmD2dt2
 (
     const volScalarField& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
     tmp<fvMatrix<Type> > tfvm

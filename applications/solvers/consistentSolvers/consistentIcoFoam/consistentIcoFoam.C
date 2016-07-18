@@ -22,10 +22,8 @@ int main(
     {
         Info << "Time = " << runTime.timeName() << nl << endl;
 
-        #include "readTimeControls.H"
         #include "readAutoPISOControls.H"
         #include "CourantNo.H"
-        #include "setDeltaT.H"
 
         label oCorr = 0;
 

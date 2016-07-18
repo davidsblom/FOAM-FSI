@@ -20,10 +20,8 @@ int main(
 
     while ( runTime.run() )
     {
-        #include "readTimeControls.H"
         #include "readAutoPIMPLEControls.H"
         #include "CourantNo.H"
-        #include "setDeltaT.H"
 
         runTime++;
 
