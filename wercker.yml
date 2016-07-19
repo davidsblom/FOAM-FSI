@@ -93,38 +93,32 @@ build:
             name: testsuite-sdc
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-                cd src/tests
-                python runTests.py testsuite-sdc
+                cd src/tests && python runTests.py testsuite-sdc
         - script:
             name: testsuite-sdc-fsi
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-                cd src/tests
-                python runTests.py testsuite-sdc-fsi
+                cd src/tests && python runTests.py testsuite-sdc-fsi
         - script:
             name: testsuite-rbf
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-                cd src/tests
-                python runTests.py testsuite-rbf
+                cd src/tests && python runTests.py testsuite-rbf
         - script:
             name: testsuite-spacemapping
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-                cd src/tests
-                python runTests.py testsuite-spacemapping
+                cd src/tests && python runTests.py testsuite-spacemapping
         - script:
             name: testsuite-fsi
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-                cd src/tests
-                python runTests.py testsuite-fsi
+                cd src/tests && python runTests.py testsuite-fsi
         - script:
             name: testsuite-dealii
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-                cd src/tests
-                python runTests.py testsuite-dealii
+                cd src/tests && python runTests.py testsuite-dealii
         - script:
             name: cppcheck
             code: |
@@ -217,14 +211,12 @@ debug:
             name: FSI solvers
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-                cd applications/solvers/fsi
-                wmake all
+                cd applications/solvers/fsi && wmake all
         - script:
             name: test app
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-                cd src/tests
-                wmake all
+                cd src/tests && wmake all
         - script:
             name: cppcheck
             code: |
