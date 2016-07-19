@@ -35,7 +35,7 @@ build:
 
                 # yaml-cpp
                 ln -s /home/yaml-cpp-release-0.5.3 yaml-cpp
-                cp src/thirdParty/yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
+                cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
         - script:
             name: precice
             code: |
