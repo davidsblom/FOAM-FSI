@@ -19,8 +19,8 @@ build:
                 source foam-extend-3.2/etc/prefs.sh && source foam-extend-3.2/etc/bashrc
 
                 # boost
-                ln -s /home/boost_1_55_0 src/thirdParty/boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
+                ln -s /home/boost_1_55_0 boost
 
                 # petsc
                 mkdir -p petsc
