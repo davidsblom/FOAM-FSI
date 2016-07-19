@@ -410,7 +410,7 @@ void SDCSolidSolver::solve()
 {
     Info << "Solve solid domain" << endl;
 
-    scalar iCorr = 0;
+    label iCorr = 0;
     scalar residual = 1;
     scalar initialResidual = 1;
     lduMatrix::solverPerformance solverPerf;
