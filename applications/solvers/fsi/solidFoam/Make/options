@@ -9,7 +9,8 @@ EXE_INC = -std=c++11 \
     -isystem $(LIB_SRC)/solidModels/lnInclude \
     -isystem ../../../../src/thirdParty/yaml-cpp/include \
     -I../../../../src/RBFMeshMotionSolver/lnInclude \
-    -isystem ../../../../src/thirdParty/boost
+    -isystem ../../../../src/thirdParty/boost \
+    -I$(LIB_SRC)/meshTools/lnInclude
 
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
