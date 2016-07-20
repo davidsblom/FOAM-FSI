@@ -28,6 +28,13 @@ Features
 *   Arbitrary high order time discretization for incompressible flow, solid
     mechanics and FSI simulations.
 
+*   Adaptive radial basis mesh deformation based on coarsening of the
+    boundary points.
+
+*   Tested on high performance computing systems, i.e. the SuperMUC Petascale
+    System located in Munich. Scalability results show good scaling until
+    approximately 2000 MPI ranks.
+
 Installation
 -----------
 
