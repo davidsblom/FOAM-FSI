@@ -72,11 +72,13 @@ during compilation:
 sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
 ```
 
-Set the environment variable `$FOAM_INST_DIR` in case foam-extend is installed
-in a non-standard location:
+In case foam-extend is installed in a non-standard location, the environment
+variable `$FOAM_INST_DIR` needs to be set to the directory where foam-extend-3.2
+is present. So if foam-extend-3.2 is installed at `/home/davidblom/foam-extend-3.2`,
+then set `$FOAM_INST_DIR` to `/home/davidblom` like this:
 
 ``` bash
-export FOAM_INST_DIR=`pwd`
+export FOAM_INST_DIR=/home/davidblom
 ```
 
 You can make a distinction between a debug build and a release build. Generally,
