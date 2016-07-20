@@ -410,7 +410,7 @@ void SDCSolidSolver::solve()
 {
     Info << "Solve solid domain" << endl;
 
-    scalar iCorr = 0;
+    label iCorr = 0;
     scalar residual = 1;
     scalar initialResidual = 1;
     lduMatrix::solverPerformance solverPerf;
@@ -740,10 +740,10 @@ void SDCSolidSolver::setNumberOfImplicitStages( int k )
 void SDCSolidSolver::prepareImplicitSolve(
     bool corrector,
     const int k,
-    const int,
+    const int kold,
     const scalar t,
     const scalar dt,
-    const fsi::vector & qold,
+    const fsi::vector &,
     const fsi::vector & rhs
     )
 {
@@ -757,29 +757,10 @@ void SDCSolidSolver::prepareImplicitSolve(
         V = VStages.at( k + 1 );
     }
 
+    U.oldTime() = UStages[kold];
+    V.oldTime() = VStages[kold];
+
     int index = 0;
-
-    forAll( U.oldTime().internalField(), i )
-    {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            U.oldTime().internalField()[i][j] = qold( index );
-            index++;
-        }
-    }
-
-    forAll( V.oldTime().internalField(), i )
-    {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            V.oldTime().internalField()[i][j] = qold( index );
-            index++;
-        }
-    }
-
-    assert( index == qold.rows() );
-
-    index = 0;
 
     forAll( rhsU.internalField(), i )
     {
