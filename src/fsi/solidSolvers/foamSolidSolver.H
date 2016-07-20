@@ -14,8 +14,10 @@
 #include "fvCFD.H"
 #include "solidTractionFvPatchVectorField.H"
 #include "leastSquaresVolPointInterpolation.H"
+#include "twoDPointCorrectorRBF.H"
 #include <time.h>
 #include <deque>
+#include <unordered_map>
 
 using namespace fsi;
 using std::shared_ptr;
@@ -86,6 +88,10 @@ class foamSolidSolver : public BaseMultiLevelSolver
 
         float totalRunTime;
         int totalNbIterations;
+
+        twoDPointCorrectorRBF twoDCorrector;
+        std::unordered_map<unsigned int, std::unordered_map<std::string, unsigned int> > movingPoints;
+        std::vector<unsigned int> movingPointLabels;
 };
 
 #endif

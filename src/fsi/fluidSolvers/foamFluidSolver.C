@@ -258,10 +258,11 @@ void foamFluidSolver::solve(
 
     for ( int i = 0; i < input.rows(); i++ )
     {
+        int patchId = movingPoints[movingPointLabels[i]]["patch-id"];
+        int pointIndex = movingPoints[movingPointLabels[i]]["point-index"];
+
         for ( int j = 0; j < input.cols(); j++ )
         {
-            int patchId = movingPoints[movingPointLabels[i]]["patch-id"];
-            int pointIndex = movingPoints[movingPointLabels[i]]["point-index"];
             movingPatchesDispl[patchId][pointIndex][j] = input( i, j );
         }
     }
