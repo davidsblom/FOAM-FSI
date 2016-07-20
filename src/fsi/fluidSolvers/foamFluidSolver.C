@@ -51,7 +51,8 @@ foamFluidSolver::foamFluidSolver(
     globalPointsUnique( 1, -1 ),
     globalPointsNonUnique( 1, -1 ),
     totalRunTime( 0 ),
-    totalNbIterations( 0 )
+    totalNbIterations( 0 ),
+    twoDCorrector( mesh )
 {
     // Find IDs of staticPatches_
     forAll( movingPatches, patchI )
@@ -65,7 +66,7 @@ foamFluidSolver::foamFluidSolver(
 
     forAll( movingPatchIDs, patchI )
     {
-        int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
+        int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].meshPoints().size();
 
         movingPatchesDispl[movingPatchIDs[patchI]] = vectorField( size, Foam::vector::zero );
         movingPatchesDisplOld[movingPatchIDs[patchI]] = vectorField( size, Foam::vector::zero );
@@ -117,7 +118,45 @@ int foamFluidSolver::getInterfaceSizeLocal()
 
 void foamFluidSolver::getReadPositions( matrix & readPositions )
 {
-    getWritePositions( readPositions );
+    // Read positions: the face vertices of the moving patches
+
+    movingPoints.clear();
+    movingPointLabels.clear();
+
+    int totalPoints = 0;
+
+    forAll( movingPatchIDs, patchI )
+    {
+        const labelList & meshPoints = mesh.boundaryMesh()[movingPatchIDs[patchI]].meshPoints();
+
+        totalPoints += meshPoints.size();
+
+        forAll( meshPoints, j )
+        {
+            if ( twoDCorrector.marker()[meshPoints[j]] != 0 )
+                continue;
+
+            if ( movingPoints.find( meshPoints[j] ) == movingPoints.end() )
+            {
+                std::unordered_map<std::string, unsigned int> movingPoint;
+                movingPoint["patch-id"] = movingPatchIDs[patchI];
+                movingPoint["point-index"] = j;
+                movingPoint["id"] = movingPoints.size() - 1;
+                movingPoints[meshPoints[j]] = movingPoint;
+                movingPointLabels.push_back( meshPoints[j] );
+            }
+        }
+    }
+
+    assert( movingPointLabels.size() == movingPoints.size() );
+
+    readPositions.resize( movingPoints.size(), mesh.nGeometricD() );
+
+    const Foam::pointField & points = mesh.points();
+
+    for ( int i = 0; i < readPositions.rows(); i++ )
+        for ( int j = 0; j < readPositions.cols(); j++ )
+            readPositions( i, j ) = points[movingPointLabels[i]][j];
 }
 
 void foamFluidSolver::getReadPositionsLocal( matrix & readPositions )
@@ -214,25 +253,18 @@ void foamFluidSolver::solve(
 {
     movingPatchesDisplOld = movingPatchesDispl;
 
-    int globalOffset = 0;
+    assert( input.rows() == static_cast<int>( movingPointLabels.size() ) );
+    assert( movingPoints.size() == movingPointLabels.size() );
 
-    for ( int i = 0; i < Pstream::myProcNo(); i++ )
-        globalOffset += nGlobalCenters[i];
-
-    int offset = 0;
-
-    forAll( movingPatchIDs, patchI )
+    for ( int i = 0; i < input.rows(); i++ )
     {
-        int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
-
-        for ( int i = 0; i < size; i++ )
-            for ( int j = 0; j < input.cols(); j++ )
-                movingPatchesDispl[movingPatchIDs[patchI]][i][j] = input( i + offset + globalOffset, j );
-
-        offset += size;
+        for ( int j = 0; j < input.cols(); j++ )
+        {
+            int patchId = movingPoints[movingPointLabels[i]]["patch-id"];
+            int pointIndex = movingPoints[movingPointLabels[i]]["point-index"];
+            movingPatchesDispl[patchId][pointIndex][j] = input( i, j );
+        }
     }
-
-    assert( offset == getInterfaceSizeLocal() );
 
     moveMesh();
 
@@ -247,6 +279,8 @@ void foamFluidSolver::solve(
     vectorField writePositionsField( sum( nGlobalCenters ), Foam::vector::zero );
 
     assert( writePositionsField.size() == data.rows() );
+
+    int globalOffset = 0;
 
     for ( int i = 0; i < traction.rows(); i++ )
         for ( int j = 0; j < traction.cols(); j++ )
