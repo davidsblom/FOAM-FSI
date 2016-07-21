@@ -137,7 +137,7 @@ operating systems are welcome.
 Test suite
 -----------
 
-Multiple test suite executables iare available implementing a large number of unit and functional
+Multiple test suite executables are available implementing a large number of unit and functional
 tests within the googletest framework. In case you run into problems with the
 FSI solver, preferably run the test suite and attach a log of the test results
 to your bug report.
