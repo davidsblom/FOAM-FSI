@@ -121,8 +121,9 @@ void foamFluidSolver::getReadPositions( matrix & readPositions )
 {
     // Read positions: the face vertices of the moving patches
 
-    movingPoints.clear();
-    movingPointLabels.clear();
+    std::unordered_map<unsigned int, std::unordered_map<std::string, unsigned int> > movingPoints;
+    std::vector<unsigned int> movingPointLabels;
+    
     globalMovingPoints.clear();
     globalMovingPointLabels.clear();
 
@@ -203,7 +204,7 @@ void foamFluidSolver::getReadPositions( matrix & readPositions )
                 int localId = i - globalOffsetNonUnique;
 
                 if ( localId >= 0
-                    && movingPoints.size() > 0
+                    && !movingPoints.empty()
                     && localId < static_cast<int>( movingPoints.size() ) )
                 {
                     movingPoint["local-point"] = true;
@@ -221,38 +222,42 @@ void foamFluidSolver::getReadPositions( matrix & readPositions )
                 globalMovingPointLabels.push_back( globalPointsIndices[i] );
             }
         }
-
-        vectorField positionsField( globalMovingPoints.size(), Foam::vector::zero );
-
-        for ( auto point : globalMovingPoints )
-        {
-            if ( point.second["local-point"] )
-            {
-                for ( int j = 0; j < mesh.nGeometricD(); j++ )
-                {
-                    positionsField[point.second["global-id"]][j] = mesh.points()[point.second["mesh-index"]][j];
-                }
-            }
-        }
-
-        reduce( positionsField, sumOp<vectorField>() );
-
-        readPositions.resize( positionsField.size(), mesh.nGeometricD() );
-
-        for ( int i = 0; i < readPositions.rows(); i++ )
-            for ( int j = 0; j < readPositions.cols(); j++ )
-                readPositions( i, j ) = positionsField[i][j];
     }
     else
     {
-        readPositions.resize( movingPoints.size(), mesh.nGeometricD() );
+        for ( auto point : movingPoints )
+        {
+            point.second["local-point"] = true;
+            point.second["global-id"] = point.second["local-id"];
+            globalMovingPoints[point.first] = point.second;
+        }
 
-        const Foam::pointField & points = mesh.points();
-
-        for ( int i = 0; i < readPositions.rows(); i++ )
-            for ( int j = 0; j < readPositions.cols(); j++ )
-                readPositions( i, j ) = points[movingPointLabels[i]][j];
+        for ( auto label : movingPointLabels )
+        {
+            globalMovingPointLabels.push_back( label );
+        }
     }
+
+    vectorField positionsField( globalMovingPoints.size(), Foam::vector::zero );
+
+    for ( auto point : globalMovingPoints )
+    {
+        if ( point.second["local-point"] )
+        {
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            {
+                positionsField[point.second["global-id"]][j] = mesh.points()[point.second["mesh-index"]][j];
+            }
+        }
+    }
+
+    reduce( positionsField, sumOp<vectorField>() );
+
+    readPositions.resize( positionsField.size(), mesh.nGeometricD() );
+
+    for ( int i = 0; i < readPositions.rows(); i++ )
+        for ( int j = 0; j < readPositions.cols(); j++ )
+            readPositions( i, j ) = positionsField[i][j];
 }
 
 void foamFluidSolver::getReadPositionsLocal( matrix & readPositions )
@@ -349,36 +354,17 @@ void foamFluidSolver::solve(
 {
     movingPatchesDisplOld = movingPatchesDispl;
 
-    if ( Pstream::nProcs() > 1 )
+    assert( input.rows() == static_cast<int>( globalMovingPointLabels.size() ) );
+    assert( globalMovingPoints.size() == globalMovingPointLabels.size() );
+
+    for ( int i = 0; i < input.rows(); i++ )
     {
-        assert( input.rows() == static_cast<int>( globalMovingPointLabels.size() ) );
-        assert( globalMovingPoints.size() == globalMovingPointLabels.size() );
+        bool localPoint = globalMovingPoints[globalMovingPointLabels[i]]["local-point"];
 
-        for ( int i = 0; i < input.rows(); i++ )
+        if ( localPoint )
         {
-            bool localPoint = globalMovingPoints[globalMovingPointLabels[i]]["local-point"];
-
-            if ( localPoint )
-            {
-                int patchId = globalMovingPoints[globalMovingPointLabels[i]]["patch-id"];
-                int pointIndex = globalMovingPoints[globalMovingPointLabels[i]]["point-index"];
-
-                for ( int j = 0; j < input.cols(); j++ )
-                {
-                    movingPatchesDispl[patchId][pointIndex][j] = input( i, j );
-                }
-            }
-        }
-    }
-    else
-    {
-        assert( input.rows() == static_cast<int>( movingPointLabels.size() ) );
-        assert( movingPoints.size() == movingPointLabels.size() );
-
-        for ( int i = 0; i < input.rows(); i++ )
-        {
-            int patchId = movingPoints[movingPointLabels[i]]["patch-id"];
-            int pointIndex = movingPoints[movingPointLabels[i]]["point-index"];
+            int patchId = globalMovingPoints[globalMovingPointLabels[i]]["patch-id"];
+            int pointIndex = globalMovingPoints[globalMovingPointLabels[i]]["point-index"];
 
             for ( int j = 0; j < input.cols(); j++ )
             {

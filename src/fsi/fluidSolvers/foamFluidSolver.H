@@ -98,9 +98,8 @@ class foamFluidSolver : public BaseMultiLevelSolver
         int totalNbIterations;
 
         twoDPointCorrectorRBF twoDCorrector;
-        std::unordered_map<unsigned int, std::unordered_map<std::string, unsigned int> > movingPoints;
+
         std::unordered_map<unsigned int, std::unordered_map<std::string, unsigned int> > globalMovingPoints;
-        std::vector<unsigned int> movingPointLabels;
         std::vector<unsigned int> globalMovingPointLabels;
 
         labelList nbGlobalPoints;
