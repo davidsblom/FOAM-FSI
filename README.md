@@ -137,14 +137,22 @@ operating systems are welcome.
 Test suite
 -----------
 
-A test suite is available implementing a large number of unit and functional
+Multiple test suite executables iare available implementing a large number of unit and functional
 tests within the googletest framework. In case you run into problems with the
 FSI solver, preferably run the test suite and attach a log of the test results
 to your bug report.
-To run the test suite:
+The following test suites are available:
+* testsuite-dealii
+* testsuite-fsi
+* testsuite-rbf
+* testsuite-sdc
+* testsuite-sdc-fsi
+* testsuite-spacemapping
+
+To run one set of tests:
 
 ``` bash
-tests
+testsuite-fsi
 ```
 
 Credits
