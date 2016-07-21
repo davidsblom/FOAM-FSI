@@ -123,17 +123,13 @@ void foamFluidSolver::getReadPositions( matrix & readPositions )
 
     std::unordered_map<unsigned int, std::unordered_map<std::string, unsigned int> > movingPoints;
     std::vector<unsigned int> movingPointLabels;
-    
+
     globalMovingPoints.clear();
     globalMovingPointLabels.clear();
-
-    int totalPoints = 0;
 
     forAll( movingPatchIDs, patchI )
     {
         const labelList & meshPoints = mesh.boundaryMesh()[movingPatchIDs[patchI]].meshPoints();
-
-        totalPoints += meshPoints.size();
 
         forAll( meshPoints, j )
         {
