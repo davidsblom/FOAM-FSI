@@ -62,7 +62,7 @@ void PreciceFluidSolver::readData( matrix & data )
     matrixRowMajor dataRowMajor( idsReadPositions.rows(), precice->getDimensions() );
     dataRowMajor.setZero();
 
-    if ( data.rows() > 0 )
+    if ( dataRowMajor.rows() > 0 )
         precice->readBlockVectorData( dataId, idsReadPositions.rows(), idsReadPositions.data(), dataRowMajor.data() );
 
     data = dataRowMajor.cast<scalar>();
