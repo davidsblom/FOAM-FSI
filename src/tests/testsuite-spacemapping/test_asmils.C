@@ -427,19 +427,19 @@ TEST_F( ASMILSSolverTest, solveTimeStep )
 
     solver->solveTimeStep();
 
-    ASSERT_LE( solver->fineModel->fsi->nbIter, 27 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 29 );
     ASSERT_LE( fineModelFluid->nbRes, 135 );
     ASSERT_LE( fineModelFluid->nbJac, 81 );
 
     solver->solveTimeStep();
 
-    ASSERT_LE( solver->fineModel->fsi->nbIter, 38 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 40 );
     ASSERT_LE( fineModelFluid->nbRes, 190 );
     ASSERT_LE( fineModelFluid->nbJac, 114 );
 
     solver->solveTimeStep();
 
-    ASSERT_LE( solver->fineModel->fsi->nbIter, 48 );
+    ASSERT_LE( solver->fineModel->fsi->nbIter, 50 );
     ASSERT_LE( fineModelFluid->nbRes, 240 );
     ASSERT_LE( fineModelFluid->nbJac, 144 );
 }

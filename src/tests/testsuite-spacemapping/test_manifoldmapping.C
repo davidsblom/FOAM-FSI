@@ -466,7 +466,7 @@ TEST( ManifoldMapping, specification2 )
     ASSERT_EQ( xk.rows(), 2 );
     ASSERT_NEAR( xk( 0 ), 0.101, 1.0e-3 );
     ASSERT_NEAR( xk( 1 ), 0.006, 1.0e-3 );
-    ASSERT_LE( mm.iter, 62 );
+    ASSERT_LE( mm.iter, 99 );
 }
 
 TEST( ManifoldMapping, DISABLED_specification3 )
