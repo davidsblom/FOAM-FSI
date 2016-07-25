@@ -218,7 +218,6 @@ TEST_P( AggressiveSpaceMappingSolverParametrizedTest, run )
 
     scalar tol = 1.0e-5;
     ASSERT_TRUE( solver->fineModel->fsi->allConverged );
-    ASSERT_TRUE( solver->coarseModel->fsi->allConverged );
     ASSERT_NEAR( solver->fineModel->fsi->fluid->data.norm(), monolithicSolver->pn.norm(), tol );
     ASSERT_NEAR( solver->fineModel->fsi->solid->data.norm(), monolithicSolver->an.norm(), tol );
     ASSERT_TRUE( monolithicSolver->an.norm() > 0 );
