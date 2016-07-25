@@ -186,7 +186,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
     rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, ratioRadiusError, exportSelectedPoints ) );
 
-    faceCellCenters = lookup( "faceCellCenters" );
+    faceCellCenters = readBool( lookup( "faceCellCenters" ) );
 
     Info << "RBF mesh deformation settings:" << endl;
     Info << "    interpolation function = " << function << endl;
