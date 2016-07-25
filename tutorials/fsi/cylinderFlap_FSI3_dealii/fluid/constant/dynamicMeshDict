@@ -47,3 +47,5 @@ interpolation
 {
   function TPS;
 }
+
+faceCellCenters false;

@@ -883,7 +883,14 @@ void SDCDynamicMeshFluidSolver::solve()
 
 void SDCDynamicMeshFluidSolver::getTractionLocal( matrix & traction )
 {
-    vectorField tractionField( getInterfaceSizeLocal(), Foam::vector::zero );
+    int size = 0;
+
+    forAll( movingPatchIDs, patchI )
+    {
+        size += mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
+    }
+
+    vectorField tractionField( size, Foam::vector::zero );
 
     int offset = 0;
 

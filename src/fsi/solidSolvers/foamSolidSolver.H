@@ -46,10 +46,6 @@ class foamSolidSolver : public BaseMultiLevelSolver
             matrix & output
             );
 
-        int getInterfaceSize();
-
-        int getInterfaceSizeLocal();
-
         void getDisplacementLocal( matrix & displacement );
 
         void getReadPositionsLocal( matrix & readPositions );

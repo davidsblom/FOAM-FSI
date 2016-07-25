@@ -57,10 +57,6 @@ class foamFluidSolver : public BaseMultiLevelSolver
             matrix & output
             );
 
-        int getInterfaceSize();
-
-        int getInterfaceSizeLocal();
-
         void setDisplacementLocal( const matrix & displacement );
 
         void getReadPositionsLocal( matrix & readPositions );

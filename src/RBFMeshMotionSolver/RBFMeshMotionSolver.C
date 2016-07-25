@@ -186,7 +186,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
 
     rbf = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, true, tol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, twoPointSelection, surfaceCorrection, ratioRadiusError, exportSelectedPoints ) );
 
-    faceCellCenters = lookupOrDefault( "faceCellCenters", true );
+    faceCellCenters = lookup( "faceCellCenters" );
 
     Info << "RBF mesh deformation settings:" << endl;
     Info << "    interpolation function = " << function << endl;
@@ -332,7 +332,10 @@ void RBFMeshMotionSolver::solve()
                     continue;
 
                 if ( staticControlPointLabels.find( meshPoints[j] ) == staticControlPointLabels.end() )
-                    staticControlPointLabels[meshPoints[j]] = staticControlPointLabels.size() - 1;
+                {
+                    int index = staticControlPointLabels.size();
+                    staticControlPointLabels[meshPoints[j]] = index;
+                }
             }
         }
 
@@ -349,7 +352,10 @@ void RBFMeshMotionSolver::solve()
 
                 if ( staticControlPointLabels.find( meshPoints[j] ) == staticControlPointLabels.end()
                     && fixedControlPointLabels.find( meshPoints[j] ) == fixedControlPointLabels.end() )
-                    fixedControlPointLabels[meshPoints[j]] = fixedControlPointLabels.size() - 1;
+                {
+                    int index = fixedControlPointLabels.size();
+                    fixedControlPointLabels[meshPoints[j]] = index;
+                }
             }
         }
 
@@ -379,7 +385,8 @@ void RBFMeshMotionSolver::solve()
                         && fixedControlPointLabels.find( meshPoints[j] ) == fixedControlPointLabels.end()
                         && movingControlPointLabelsMap.find( meshPoints[j] ) == movingControlPointLabelsMap.end() )
                     {
-                        movingControlPointLabelsMap[meshPoints[j]] = movingControlPointLabelsMap.size() - 1;
+                        int index = movingControlPointLabelsMap.size();
+                        movingControlPointLabelsMap[meshPoints[j]] = index;
                         movingControlPointLabelsVector.push_back( meshPoints[j] );
                         movingControlPointPatchIds.push_back( movingPatchIDs[patchI] );
                         movingControlPointIndices.push_back( j );
@@ -495,7 +502,8 @@ void RBFMeshMotionSolver::solve()
             {
                 if ( staticControlGlobalPointLabels.find( globalStaticPointsList[i] ) == staticControlGlobalPointLabels.end() )
                 {
-                    staticControlGlobalPointLabels[globalStaticPointsList[i]] = staticControlGlobalPointLabels.size() - 1;
+                    int index = staticControlGlobalPointLabels.size();
+                    staticControlGlobalPointLabels[globalStaticPointsList[i]] = index;
                     globalStaticPointsListEnabled[i] = 1;
                 }
             }
@@ -505,7 +513,8 @@ void RBFMeshMotionSolver::solve()
                 if ( staticControlGlobalPointLabels.find( globalFixedPointsList[i] ) == staticControlGlobalPointLabels.end()
                     && fixedControlGlobalPointLabels.find( globalFixedPointsList[i] ) == fixedControlGlobalPointLabels.end() )
                 {
-                    fixedControlGlobalPointLabels[globalFixedPointsList[i]] = fixedControlGlobalPointLabels.size() - 1;
+                    int index = fixedControlGlobalPointLabels.size();
+                    fixedControlGlobalPointLabels[globalFixedPointsList[i]] = index;
                     globalFixedPointsListEnabled[i] = 1;
                 }
             }
@@ -524,7 +533,8 @@ void RBFMeshMotionSolver::solve()
                         && fixedControlGlobalPointLabels.find( globalMovingPointsList[i] ) == fixedControlGlobalPointLabels.end()
                         && movingControlGlobalPointLabelsMap.find( globalMovingPointsList[i] ) == movingControlGlobalPointLabelsMap.end() )
                     {
-                        movingControlGlobalPointLabelsMap[globalMovingPointsList[i]] = movingControlGlobalPointLabelsMap.size() - 1;
+                        int index = movingControlGlobalPointLabelsMap.size();
+                        movingControlGlobalPointLabelsMap[globalMovingPointsList[i]] = index;
                         globalMovingPointsListEnabled[i] = 1;
 
                         if ( static_cast<unsigned int>(i) < movingControlPointLabelsVector.size() + globalMovingOffsetNonUnique

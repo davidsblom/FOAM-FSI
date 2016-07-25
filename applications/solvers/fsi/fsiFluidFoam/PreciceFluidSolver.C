@@ -70,11 +70,7 @@ void PreciceFluidSolver::readData( matrix & data )
 
 void PreciceFluidSolver::run()
 {
-    matrix inputOld( solver->getInterfaceSizeLocal(), precice->getDimensions() );
-    matrix input( solver->getInterfaceSizeLocal(), precice->getDimensions() );
-    matrix output;
-    inputOld.setZero();
-    input.setZero();
+    matrix input, inputOld, output;
 
     while ( solver->isRunning() )
     {
@@ -93,7 +89,11 @@ void PreciceFluidSolver::run()
 
             if ( precice->hasMesh( "Fluid_Nodes" ) )
             {
-                solver->setDisplacementLocal( input + inputOld );
+                if ( input.cols() == inputOld.cols() )
+                    solver->setDisplacementLocal( input + inputOld );
+                else
+                    solver->setDisplacementLocal( input );
+
                 solver->moveMesh();
             }
 
@@ -118,7 +118,10 @@ void PreciceFluidSolver::run()
 
         solver->finalizeTimeStep();
 
-        inputOld += input;
+        if ( input.cols() == inputOld.cols() )
+            inputOld += input;
+        else
+            inputOld = input;
 
         if ( not precice->isCouplingOngoing() )
             break;

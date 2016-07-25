@@ -71,7 +71,6 @@ foamSolidSolver::foamSolidSolver (
         movingPatchIDs[patchI] = patchIndex;
     }
 
-    N = getInterfaceSize();
     dim = mesh.nGeometricD();
     data.resize( N, dim );
     data.setZero();
@@ -91,18 +90,66 @@ void foamSolidSolver::finalizeTimeStep()
     init = false;
 }
 
-void foamSolidSolver::getDisplacementLocal( matrix & )
+void foamSolidSolver::getDisplacementLocal( matrix & displacementLocal )
 {
-    assert( false );
+    leastSquaresVolPointInterpolation pointInterpolation( mesh );
+
+    // Create point mesh
+    pointMesh pMesh( mesh );
+
+    wordList types
+    (
+        pMesh.boundary().size(),
+        calculatedFvPatchVectorField::typeName
+    );
+
+    pointVectorField pointU
+    (
+        IOobject
+        (
+            "pointU",
+            runTime->timeName(),
+            mesh
+        ),
+        pMesh,
+        dimensionedVector( "zero", dimLength, Foam::vector::zero ),
+        types
+    );
+
+    pointInterpolation.interpolate( U, pointU );
+
+    assert( globalMovingPoints.size() == globalMovingPointLabels.size() );
+
+    unsigned int N = 0;
+
+    for ( unsigned i = 0; i < globalMovingPoints.size(); i++ )
+        if ( globalMovingPoints[globalMovingPointLabels[i]]["local-point"] == true )
+            N++;
+
+    displacementLocal.resize( N, mesh.nGeometricD() );
+
+    unsigned int i = 0;
+
+    for ( auto point : globalMovingPoints )
+    {
+        bool localPoint = point.second["local-point"];
+
+        if ( localPoint )
+        {
+            int localId = point.second["local-id"];
+
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            {
+                displacementLocal( i, j ) = pointU[movingPointLabels[localId]][j];
+            }
+
+            i++;
+        }
+    }
 }
 
-int foamSolidSolver::getInterfaceSize()
+void foamSolidSolver::getReadPositions( matrix & readPositions )
 {
-    if ( sum( nGlobalCenters ) > 0 )
-        return sum( nGlobalCenters );
-
-    nGlobalCenters = 0;
-
     int size = 0;
 
     forAll( movingPatchIDs, patchI )
@@ -110,22 +157,11 @@ int foamSolidSolver::getInterfaceSize()
         size += mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
     }
 
+    nGlobalCenters = 0;
     nGlobalCenters[Pstream::myProcNo()] = size;
-
     reduce( nGlobalCenters, sumOp<labelList>() );
 
-    return sum( nGlobalCenters );
-}
-
-int foamSolidSolver::getInterfaceSizeLocal()
-{
-    assert( false );
-    return 0;
-}
-
-void foamSolidSolver::getReadPositions( matrix & readPositions )
-{
-    vectorField readPositionsField( getInterfaceSize(), Foam::vector::zero );
+    vectorField readPositionsField( sum( nGlobalCenters ), Foam::vector::zero );
 
     int globalOffset = 0;
 
@@ -152,18 +188,18 @@ void foamSolidSolver::getReadPositionsLocal( matrix & readPositions )
 {
     int size = 0;
 
-    forAll( movingPatchIDs, patchI )
+    forAll( movingPatchIDs, patchId )
     {
-        size += mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
+        size += mesh.boundaryMesh()[movingPatchIDs[patchId]].faceCentres().size();
     }
 
     readPositions.resize( size, mesh.nGeometricD() );
 
     int offset = 0;
 
-    forAll( movingPatchIDs, patchI )
+    forAll( movingPatchIDs, patchId )
     {
-        const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres() );
+        const vectorField faceCentres( mesh.boundaryMesh()[movingPatchIDs[patchId]].faceCentres() );
 
         for ( int i = 0; i < faceCentres.size(); i++ )
             for ( int j = 0; j < readPositions.cols(); j++ )
@@ -312,9 +348,33 @@ void foamSolidSolver::getWritePositions( matrix & writePositions )
             writePositions( i, j ) = positionsField[i][j];
 }
 
-void foamSolidSolver::getWritePositionsLocal( matrix & )
+void foamSolidSolver::getWritePositionsLocal( matrix & writePositionsLocal )
 {
-    assert( false );
+    matrix writePositions;
+    getWritePositions( writePositions );
+
+    unsigned int N = 0;
+
+    for ( auto point : globalMovingPoints )
+        if ( point.second["local-point"] == true )
+            N++;
+
+    writePositionsLocal.resize( N, mesh.nGeometricD() );
+
+    int i = 0;
+
+    for ( auto point : globalMovingPoints )
+    {
+        if ( point.second["local-point"] == true )
+        {
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            {
+                writePositionsLocal( i, j ) = mesh.points()[point.second["mesh-index"]][j];
+            }
+
+            i++;
+        }
+    }
 }
 
 void foamSolidSolver::readCouplingProperties()
@@ -337,7 +397,6 @@ void foamSolidSolver::readCouplingProperties()
 
 void foamSolidSolver::setTractionLocal( const matrix & traction )
 {
-    assert( traction.rows() == getInterfaceSizeLocal() );
     assert( traction.cols() == mesh.nGeometricD() );
 
     int offset = 0;
