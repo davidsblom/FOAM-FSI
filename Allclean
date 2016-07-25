@@ -11,7 +11,6 @@ wclean libso src/boundaryConditions
 wclean libso src/fvSchemes
 wclean libso src/fsi
 wclean libso src/RBFMeshMotionSolver
-wclean libso applications/utilities/mapMesh
 wclean libso src/SRFModelAbs
 wclean libso src/extraSolidBodyMotion
 wclean applications/utilities/addInitialRandomVelocity

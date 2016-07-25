@@ -14,7 +14,9 @@
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
 #include "RBFMeshMotionSolver.H"
+#include "twoDPointCorrectorRBF.H"
 #include <time.h>
+#include <unordered_map>
 
 using namespace fsi;
 using std::shared_ptr;
@@ -55,10 +57,6 @@ class foamFluidSolver : public BaseMultiLevelSolver
             matrix & output
             );
 
-        int getInterfaceSize();
-
-        int getInterfaceSizeLocal();
-
         void setDisplacementLocal( const matrix & displacement );
 
         void getReadPositionsLocal( matrix & readPositions );
@@ -94,6 +92,13 @@ class foamFluidSolver : public BaseMultiLevelSolver
 
         float totalRunTime;
         int totalNbIterations;
+
+        twoDPointCorrectorRBF twoDCorrector;
+
+        std::unordered_map<unsigned int, std::unordered_map<std::string, unsigned int> > globalMovingPoints;
+        std::vector<unsigned int> globalMovingPointLabels;
+
+        labelList nbGlobalPoints;
 };
 
 #endif

@@ -17,7 +17,6 @@ wmake libso src/boundaryConditions
 wmake libso src/fvSchemes
 wmake libso src/fsi
 wmake libso src/RBFMeshMotionSolver
-wmake applications/utilities/mapMesh
 wmake libso src/SRFModelAbs
 wmake libso src/extraSolidBodyMotion
 wmake applications/utilities/addInitialRandomVelocity
