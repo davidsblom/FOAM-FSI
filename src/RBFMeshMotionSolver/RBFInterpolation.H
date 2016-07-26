@@ -66,7 +66,7 @@ namespace rbf
             int dimGrid;
             matrix Hhat;
             matrix Phi;
-            Eigen::PartialPivLU<matrix> lu;
+            Eigen::FullPivLU<matrix> lu;
             matrix positions;
             matrix positionsInterpolation;
 
