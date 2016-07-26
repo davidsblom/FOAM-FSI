@@ -574,6 +574,7 @@ int main(
         std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper;
 
         YAML::Node adaptiveTimeConfig( config["adaptive-time-stepping"] );
+        assert( adaptiveTimeConfig.Type() == YAML::NodeType::Map );
         assert( adaptiveTimeConfig["enabled"] );
         bool adaptiveTimeStepping = adaptiveTimeConfig["enabled"].as<bool>();
 
