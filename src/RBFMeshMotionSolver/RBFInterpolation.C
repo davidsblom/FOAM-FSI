@@ -185,6 +185,9 @@ namespace rbf
         }
 
         computed = true;
+
+        assert( n_A > 0 );
+        assert( n_B > 0 );
     }
 
     void RBFInterpolation::interpolate(
@@ -199,7 +202,12 @@ namespace rbf
 
         if ( cpu )
         {
+            assert( n_A > 0 );
+            assert( n_B > 0 );
+            assert( dimGrid > 0 );
+
             matrix B, valuesLU( n_A, values.cols() );
+
             Phi.conservativeResize( n_B, n_A );
 
             if ( polynomialTerm )
@@ -330,6 +338,11 @@ namespace rbf
         const matrix & positionsInterpolation
         )
     {
+        assert( positions.cols() == positionsInterpolation.cols() );
+        assert( positions.rows() > 0 );
+        assert( positions.cols() > 0 );
+        assert( positionsInterpolation.rows() > 0 );
+
         n_A = positions.rows();
         n_B = positionsInterpolation.rows();
         int phiColsOld = Phi.cols();
