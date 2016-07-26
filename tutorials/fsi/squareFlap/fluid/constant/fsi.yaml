@@ -38,6 +38,7 @@ interpolation:
     # With cpu switched off, the interpolation matrix is saved in memory,
     # otherwise it's partly rebuilt during every interpolation step.
     cpu: true
+    polynomial-term: true
 
   # Use coarsening in order to decrease the computational costs of the RBF
   # interpolation.
