@@ -73,10 +73,10 @@ foamFluidSolver::foamFluidSolver(
         movingPatchesDisplOld[movingPatchIDs[patchI]] = vectorField( size, Foam::vector::zero );
     }
 
-    matrix readPositions;
-    getReadPositions( readPositions );
+    matrix writePositions;
+    getWritePositions( writePositions );
 
-    N = readPositions.rows();
+    N = writePositions.rows();
     dim = mesh.nGeometricD();
     data.resize( N, dim );
     data.setZero();

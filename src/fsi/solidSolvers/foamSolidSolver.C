@@ -71,6 +71,11 @@ foamSolidSolver::foamSolidSolver (
         movingPatchIDs[patchI] = patchIndex;
     }
 
+    matrix writePositions;
+    getWritePositions( writePositions );
+
+    N = writePositions.rows();
+
     dim = mesh.nGeometricD();
     data.resize( N, dim );
     data.setZero();
