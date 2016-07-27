@@ -83,6 +83,7 @@ foamSolidSolver::foamSolidSolver (
     readCouplingProperties();
 
     assert( readLabel( runTime->controlDict().lookup( "writePrecision" ) ) >= 12 );
+    timeIndex = runTime->timeIndex();
 }
 
 foamSolidSolver::~foamSolidSolver()
