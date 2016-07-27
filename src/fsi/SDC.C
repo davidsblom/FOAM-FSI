@@ -189,8 +189,6 @@ namespace sdc
         assert( N > 0 );
         assert( k > 0 );
 
-        solver->nextTimeStep();
-
         fsi::vector dtsdc = this->dt * dsdc;
         fsi::matrix residual;
         fsi::vector errorEstimate( N );
@@ -207,6 +205,7 @@ namespace sdc
         fsi::vector rhs( N ), result( N );
         rhs.setZero();
 
+        solver->nextTimeStep();
         solver->initTimeStep();
 
         for ( int j = 0; j < k - 1; j++ )
