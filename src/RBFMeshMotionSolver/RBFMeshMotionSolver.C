@@ -196,6 +196,17 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     Info << "        coarsening tolerance = " << tol << endl;
     Info << "        coarsening reselection tolerance = " << tolLivePointSelection << endl;
     Info << "        coarsening two-point selection = " << twoPointSelection << endl;
+
+    // Initialize zero motion
+
+    forAll( movingPatchIDs, patchId )
+    {
+        if ( faceCellCenters )
+            motionCenters[movingPatchIDs[patchId]] = vectorField( mesh.boundaryMesh()[movingPatchIDs[patchId]].faceCentres().size(), Foam::vector::zero );
+
+        if ( not faceCellCenters )
+            motionCenters[movingPatchIDs[patchId]] = vectorField( mesh.boundaryMesh()[movingPatchIDs[patchId]].meshPoints().size(), Foam::vector::zero );
+    }
 }
 
 RBFMeshMotionSolver::~RBFMeshMotionSolver()
