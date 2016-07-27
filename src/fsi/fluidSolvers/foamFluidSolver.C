@@ -82,6 +82,7 @@ foamFluidSolver::foamFluidSolver(
     data.setZero();
 
     assert( readLabel( runTime->controlDict().lookup( "writePrecision" ) ) >= 12 );
+    timeIndex = runTime->timeIndex();
 }
 
 foamFluidSolver::~foamFluidSolver()
