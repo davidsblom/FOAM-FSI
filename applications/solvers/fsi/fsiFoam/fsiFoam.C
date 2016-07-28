@@ -767,11 +767,22 @@ int main(
         if ( firstParticipant == "solid-solver" )
             multiLevelSolidSolver = std::shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 1 ) );
 
-        if ( firstParticipant == "fluid-solver" )
-            multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
+        if ( timeIntegrationScheme == "bdf" )
+        {
+            if ( firstParticipant == "fluid-solver" )
+                multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
 
-        if ( firstParticipant == "solid-solver" )
-            multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelSolidSolver, multiLevelFluidSolver, convergenceMeasures, parallel, extrapolation ) );
+            if ( firstParticipant == "solid-solver" )
+                multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelSolidSolver, multiLevelFluidSolver, convergenceMeasures, parallel, extrapolation ) );
+        }
+        else
+        {
+            if ( firstParticipant == "fluid-solver" )
+                multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, 0 ) );
+
+            if ( firstParticipant == "solid-solver" )
+                multiLevelFsiSolver = std::shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelSolidSolver, multiLevelFluidSolver, convergenceMeasures, parallel, 0 ) );
+        }
 
         if ( algorithm == "Aitken" )
             postProcessing = std::shared_ptr<PostProcessing> ( new AitkenPostProcessing( multiLevelFsiSolver, initialRelaxation, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex ) );
@@ -790,7 +801,8 @@ int main(
 
         if ( timeIntegrationScheme == "esdirk" || timeIntegrationScheme == "sdc" || timeIntegrationScheme == "picard-integral-exponential-solver" )
         {
-            std::shared_ptr<SDCFsiSolver> sdcFsiSolver( new SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing ) );
+            std::shared_ptr<SDCFsiSolver> sdcFsiSolver( new SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation ) );
+
             std::shared_ptr<sdc::TimeIntegrationScheme> timeSolver;
 
             if ( timeIntegrationScheme == "esdirk" )
