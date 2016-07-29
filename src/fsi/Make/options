@@ -29,4 +29,5 @@ EXE_INC = -std=c++11 \
     -isystem ../thirdParty/petsc/x86_64/include \
     -isystem ../thirdParty/petsc/include
 
-EXE_LIBS =
+EXE_LIBS = \
+    -lboost_serialization

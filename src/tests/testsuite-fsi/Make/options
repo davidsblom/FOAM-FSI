@@ -47,12 +47,14 @@ EXE_LIBS = \
     -lsolidModels \
     -lyaml-cpp \
     -lRBFMeshMotionSolver \
+    -lboost_serialization \
     -lfsi \
     -lbasicThermophysicalModels \
     -lspecie \
     -lcompressibleRASModels \
     -ldeal_II \
-    -llduSolvers
+    -llduSolvers \
+    -lboost_serialization
 endif
 
 ifeq ($(WM_COMPILE_OPTION), Debug)
@@ -73,10 +75,12 @@ EXE_LIBS = \
     -lsolidModels \
     -lyaml-cpp \
     -lRBFMeshMotionSolver \
+    -lboost_serialization \
     -lfsi \
     -lbasicThermophysicalModels \
     -lspecie \
     -lcompressibleRASModels \
     -ldeal_II.g \
-    -llduSolvers
+    -llduSolvers \
+    -lboost_serialization
 endif

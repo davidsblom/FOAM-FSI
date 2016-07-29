@@ -47,6 +47,7 @@ EXE_LIBS = \
     -lsolidModels \
     -lyaml-cpp \
     -lRBFMeshMotionSolver \
+    -lboost_serialization \
     -lfsi \
     -lbasicThermophysicalModels \
     -lspecie \
@@ -73,6 +74,7 @@ EXE_LIBS = \
     -lsolidModels \
     -lyaml-cpp \
     -lRBFMeshMotionSolver \
+    -lboost_serialization \
     -lfsi \
     -lbasicThermophysicalModels \
     -lspecie \

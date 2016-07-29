@@ -31,6 +31,16 @@ namespace fsi
                 int extrapolationOrder
                 );
 
+            FsiSolver(
+                shared_ptr<BaseMultiLevelSolver> fluid,
+                shared_ptr<BaseMultiLevelSolver> solid,
+                shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures,
+                bool parallel,
+                int extrapolationOrder,
+                bool saveState,
+                int saveInterval
+                );
+
             virtual ~FsiSolver();
 
             virtual void evaluate(
@@ -68,6 +78,8 @@ namespace fsi
             vector x;
             const int extrapolationOrder;
             std::deque<vector> previousSolutions;
+            bool saveState;
+            int saveInterval;
     };
 }
 

@@ -20,6 +20,7 @@
 *.exe
 *.out
 *.app
+*.bin
 
 # OpenFOAM
 lnInclude
