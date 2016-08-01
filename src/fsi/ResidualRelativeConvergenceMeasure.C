@@ -31,7 +31,7 @@ namespace fsi
     {
         normDiff = (newValues - oldValues).norm();
 
-        if ( isFirstIteration )
+        if ( isFirstIteration || normFirstResidual < SMALL )
         {
             normFirstResidual = normDiff;
             isFirstIteration = false;
