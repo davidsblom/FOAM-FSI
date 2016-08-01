@@ -120,6 +120,7 @@ void foamFluidSolver::getReadPositions( matrix & readPositions )
                 movingPoint["patch-id"] = movingPatchIDs[patchI];
                 movingPoint["point-index"] = j;
                 movingPoint["local-id"] = movingPoints.size();
+                movingPoint["local-id-unique"] = movingPoint["local-id"];
                 movingPoint["mesh-index"] = meshPoints[j];
                 movingPoints[meshPoints[j]] = movingPoint;
                 movingPointLabels.push_back( meshPoints[j] );
@@ -169,6 +170,8 @@ void foamFluidSolver::getReadPositions( matrix & readPositions )
 
         // Construct unique list with global indices
 
+        int localIdUnique = 0;
+
         forAll( globalPointsIndices, i )
         {
             if ( globalMovingPoints.find( globalPointsIndices[i] ) == globalMovingPoints.end() )
@@ -184,8 +187,11 @@ void foamFluidSolver::getReadPositions( matrix & readPositions )
                     movingPoint["local-point"] = true;
                     movingPoint["mesh-index"] = movingPointLabels[localId];
                     movingPoint["local-id"] = localId;
+                    movingPoint["local-id-unique"] = localIdUnique;
                     movingPoint["patch-id"] = movingPoints[movingPoint["mesh-index"]]["patch-id"];
                     movingPoint["point-index"] = movingPoints[movingPoint["mesh-index"]]["point-index"];
+
+                    localIdUnique++;
                 }
                 else
                 {
@@ -201,6 +207,8 @@ void foamFluidSolver::getReadPositions( matrix & readPositions )
     {
         for ( auto point : movingPoints )
         {
+            assert( point.second.find( "mesh-index" ) != point.second.end() );
+
             point.second["local-point"] = true;
             point.second["global-id"] = point.second["local-id"];
             globalMovingPoints[point.first] = point.second;
@@ -216,8 +224,13 @@ void foamFluidSolver::getReadPositions( matrix & readPositions )
 
     for ( auto point : globalMovingPoints )
     {
+        assert( point.second.find( "local-point" ) != point.second.end() );
+
         if ( point.second["local-point"] == true )
         {
+            assert( point.second.find( "global-id" ) != point.second.end() );
+            assert( point.second.find( "mesh-index" ) != point.second.end() );
+
             for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
                 positionsField[point.second["global-id"]][j] = mesh.points()[point.second["mesh-index"]][j];
@@ -244,25 +257,28 @@ void foamFluidSolver::getReadPositionsLocal( matrix & readPositionsLocal )
     unsigned int N = 0;
 
     for ( auto point : globalMovingPoints )
+    {
+        assert( point.second.find( "local-point" ) != point.second.end() );
+
         if ( point.second["local-point"] == true )
             N++;
+    }
 
     readPositionsLocal.resize( N, mesh.nGeometricD() );
 
-    int i = 0;
-
     for ( auto && point : globalMovingPoints )
     {
+        assert( point.second.find( "local-point" ) != point.second.end() );
+
         if ( point.second["local-point"] == true )
         {
+            assert( point.second.find( "mesh-index" ) != point.second.end() );
+            assert( point.second.find( "local-id-unique" ) != point.second.end() );
+
             for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
-                readPositionsLocal( i, j ) = mesh.points()[point.second["mesh-index"]][j];
+                readPositionsLocal( point.second["local-id-unique"], j ) = mesh.points()[point.second["mesh-index"]][j];
             }
-
-            point.second["local-id-unique"] = i;
-
-            i++;
         }
     }
 }
@@ -345,8 +361,14 @@ void foamFluidSolver::setDisplacementLocal( const matrix & displacement )
 
     for ( auto point : globalMovingPoints )
     {
+        assert( point.second.find( "local-point" ) != point.second.end() );
+
         if ( point.second["local-point"] == true )
         {
+            assert( point.second.find( "patch-id" ) != point.second.end() );
+            assert( point.second.find( "point-index" ) != point.second.end() );
+            assert( point.second.find( "local-id-unique" ) != point.second.end() );
+
             int patchId = point.second["patch-id"];
             int pointIndex = point.second["point-index"];
             int localId = point.second["local-id-unique"];
@@ -378,19 +400,30 @@ void foamFluidSolver::solve(
 
     assert( input.rows() == static_cast<int>( globalMovingPointLabels.size() ) );
     assert( globalMovingPoints.size() == globalMovingPointLabels.size() );
+    assert( input.cols() == mesh.nGeometricD() );
 
-    for ( int i = 0; i < input.rows(); i++ )
+    for ( auto point : globalMovingPoints )
     {
-        bool localPoint = globalMovingPoints[globalMovingPointLabels[i]]["local-point"];
+        assert( point.second.find( "local-point" ) != point.second.end() );
 
-        if ( localPoint )
+        if ( point.second["local-point"] == true )
         {
-            int patchId = globalMovingPoints[globalMovingPointLabels[i]]["patch-id"];
-            int pointIndex = globalMovingPoints[globalMovingPointLabels[i]]["point-index"];
+            assert( point.second.find( "patch-id" ) != point.second.end() );
+            assert( point.second.find( "point-index" ) != point.second.end() );
+            assert( point.second.find( "local-id-unique" ) != point.second.end() );
+            assert( point.second.find( "global-id" ) != point.second.end() );
 
-            for ( int j = 0; j < input.cols(); j++ )
+            int patchId = point.second["patch-id"];
+            int pointIndex = point.second["point-index"];
+            int globalId = point.second["global-id"];
+
+            assert( patchId < movingPatchesDispl.size() );
+            assert( pointIndex < movingPatchesDispl[patchId].size() );
+            assert( globalId < input.rows() );
+
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
-                movingPatchesDispl[patchId][pointIndex][j] = input( i, j );
+                movingPatchesDispl[patchId][pointIndex][j] = input( globalId, j );
             }
         }
     }
@@ -405,21 +438,24 @@ void foamFluidSolver::solve(
     assert( traction.rows() == nGlobalCenters[Pstream::myProcNo()] );
     assert( traction.cols() == mesh.nGeometricD() );
 
-    vectorField writePositionsField( sum( nGlobalCenters ), Foam::vector::zero );
+    vectorField outputField( sum( nGlobalCenters ), Foam::vector::zero );
 
     int globalOffset = 0;
 
+    for ( int i = 0; i < Pstream::myProcNo(); i++ )
+        globalOffset += nGlobalCenters[i];
+
     for ( int i = 0; i < traction.rows(); i++ )
         for ( int j = 0; j < traction.cols(); j++ )
-            writePositionsField[i + globalOffset][j] = traction( i, j );
+            outputField[i + globalOffset][j] = traction( i, j );
 
-    reduce( writePositionsField, sumOp<vectorField>() );
+    reduce( outputField, sumOp<vectorField>() );
 
-    output.resize( writePositionsField.size(), mesh.nGeometricD() );
+    output.resize( outputField.size(), mesh.nGeometricD() );
 
     for ( int i = 0; i < output.rows(); i++ )
         for ( int j = 0; j < output.cols(); j++ )
-            output( i, j ) = writePositionsField[i][j];
+            output( i, j ) = outputField[i][j];
 
     data = output;
 }

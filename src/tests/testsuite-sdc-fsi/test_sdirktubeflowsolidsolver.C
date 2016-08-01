@@ -106,7 +106,7 @@ class SDIRKFsiSolidSolverTest : public ::testing::Test
             assert( sdcFluidSolver );
             assert( sdcSolidSolver );
 
-            std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing ) );
+            std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation ) );
 
             std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
 
@@ -227,7 +227,7 @@ TEST( SDIRKFsiSolidTest, linear )
         assert( sdcFluidSolver );
         assert( sdcSolidSolver );
 
-        std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing ) );
+        std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation ) );
 
         std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
 
@@ -412,7 +412,7 @@ TEST( SDIRKFsiSolidTest, linearized )
         assert( sdcFluidSolver );
         assert( sdcSolidSolver );
 
-        std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing ) );
+        std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation ) );
 
         std::shared_ptr<sdc::AdaptiveTimeStepper> adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
 
