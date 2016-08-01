@@ -445,8 +445,6 @@ void foamFluidSolver::solve(
     for ( int i = 0; i < Pstream::myProcNo(); i++ )
         globalOffset += nGlobalCenters[i];
 
-    assert( globalOffset >= nGlobalCenters[Pstream::myProcNo()] );
-
     for ( int i = 0; i < traction.rows(); i++ )
         for ( int j = 0; j < traction.cols(); j++ )
             outputField[i + globalOffset][j] = traction( i, j );
