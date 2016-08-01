@@ -103,7 +103,7 @@ class SDIRKFsiSolverTest : public ::testing::Test
             assert( sdcFluidSolver );
             assert( sdcSolidSolver );
 
-            std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing ) );
+            std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation ) );
 
             int nbNodes = 3;
 
@@ -227,7 +227,7 @@ TEST( SDIRKFsiTest, order )
         assert( sdcFluidSolver );
         assert( sdcSolidSolver );
 
-        std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing ) );
+        std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation ) );
 
         std::shared_ptr<sdc::AdaptiveTimeStepper>adaptiveTimeStepper( new sdc::AdaptiveTimeStepper( false ) );
         std::shared_ptr<sdc::ESDIRK> esdirk( new sdc::ESDIRK( fsiSolver, "ESDIRK63PR", adaptiveTimeStepper ) );

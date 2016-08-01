@@ -9,7 +9,8 @@
 SDCFsiSolver::SDCFsiSolver(
     std::shared_ptr<sdc::SDCFsiSolverInterface> fluid,
     std::shared_ptr<sdc::SDCFsiSolverInterface> solid,
-    std::shared_ptr<PostProcessing> postProcessing
+    std::shared_ptr<PostProcessing> postProcessing,
+    int extrapolationOrder
     )
     :
     fluid( fluid ),
@@ -18,13 +19,16 @@ SDCFsiSolver::SDCFsiSolver(
     dofFluid( fluid->getDOF() ),
     dofSolid( solid->getDOF() ),
     k( 0 ),
-    xStages()
+    xStages(),
+    extrapolationOrder( extrapolationOrder )
 {
     assert( fluid );
     assert( solid );
     assert( postProcessing );
     assert( dofFluid > 0 );
     assert( dofSolid >= 0 );
+    assert( extrapolationOrder >= 0 );
+    assert( extrapolationOrder <= 2 );
 }
 
 SDCFsiSolver::~SDCFsiSolver()
@@ -51,6 +55,13 @@ void SDCFsiSolver::evaluateFunction(
 
 void SDCFsiSolver::finalizeTimeStep()
 {
+    for ( unsigned int i = 0; i < xStages.size() - 1; i++ )
+        xStagesPrevious.push_front( xStages[i] );
+
+    // Only save solutions of three time steps
+    while ( xStagesPrevious.size() > 3 )
+        xStagesPrevious.pop_back();
+
     postProcessing->fsi->finalizeTimeStep();
     postProcessing->finalizeTimeStep();
 }
@@ -165,6 +176,63 @@ void SDCFsiSolver::implicitSolve(
         x0 = xStages.at( k + 1 );
     else
         x0 = xStages.at( kold );
+
+    if ( !corrector && extrapolationOrder > 0 )
+    {
+        bool firstOrderExtrapolation = false, secondOrderExtrapolation = false;
+        fsi::vector xprev, xprevprev, xprevprevprev;
+
+        if ( k == 1 && xStagesPrevious.empty() )
+        {
+            xprev = xStages[k];
+            xprevprev = xStages[k - 1];
+
+            firstOrderExtrapolation = true;
+            secondOrderExtrapolation = false;
+        }
+
+        if ( extrapolationOrder == 2 && k == 0 && xStagesPrevious.size() >= 2 )
+        {
+            xprev = xStages[k];
+            xprevprev = xStagesPrevious[0];
+            xprevprevprev = xStagesPrevious[1];
+
+            secondOrderExtrapolation = true;
+            firstOrderExtrapolation = false;
+        }
+
+        if ( extrapolationOrder == 2 && k == 1 && xStagesPrevious.size() >= 1 )
+        {
+            xprev = xStages[k];
+            xprevprev = xStages[k - 1];
+            xprevprevprev = xStagesPrevious[0];
+
+            secondOrderExtrapolation = true;
+            firstOrderExtrapolation = false;
+        }
+
+        if ( extrapolationOrder == 2 && k >= 2 )
+        {
+            xprev = xStages[k];
+            xprevprev = xStages[k - 1];
+            xprevprevprev = xStages[k - 2];
+
+            secondOrderExtrapolation = true;
+            firstOrderExtrapolation = false;
+        }
+
+        if ( firstOrderExtrapolation )
+        {
+            Info << "SDC time integration: perform first order extrapolation of interface displacement and/or traction" << endl;
+            x0 = 2.0 * xprev - xprevprev;
+        }
+
+        if ( secondOrderExtrapolation )
+        {
+            Info << "SDC time integration: perform second order extrapolation of interface displacement and/or traction" << endl;
+            x0 = 2.5 * xprev - 2.0 * xprevprev + 0.5 * xprevprevprev;
+        }
+    }
 
     postProcessing->initStage( k );
     postProcessing->performPostProcessing( x0, postProcessing->fsi->x );
