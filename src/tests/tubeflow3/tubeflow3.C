@@ -89,10 +89,10 @@ int main()
         true, false
     };
     std::vector<int> nbReuseList = {
-        0, 4
+        0, 4, 8
     };
 
-    #pragma omp parallel for schedule(dynamic,1) collapse(4)
+    #pragma omp parallel for schedule(dynamic,1) collapse(7)
 
     for ( auto T = timeList.begin(); T < timeList.end(); ++T )
     {
