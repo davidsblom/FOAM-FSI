@@ -264,10 +264,7 @@ void SolidSolver::readSolidMechanicsControls()
 }
 
 void SolidSolver::resetSolution()
-{
-    U == U.oldTime();
-    gradU = fvc::grad( U );
-}
+{}
 
 void SolidSolver::solve()
 {

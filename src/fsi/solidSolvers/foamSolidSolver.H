@@ -46,10 +46,6 @@ class foamSolidSolver : public BaseMultiLevelSolver
             matrix & output
             );
 
-        int getInterfaceSize();
-
-        int getInterfaceSizeLocal();
-
         void getDisplacementLocal( matrix & displacement );
 
         void getReadPositionsLocal( matrix & readPositions );
@@ -73,7 +69,6 @@ class foamSolidSolver : public BaseMultiLevelSolver
 
         // Fields
         volVectorField U;
-        volVectorField Uinitial;
 
         // Dictionaries
         IOdictionary couplingProperties;
@@ -92,6 +87,11 @@ class foamSolidSolver : public BaseMultiLevelSolver
         twoDPointCorrectorRBF twoDCorrector;
         std::unordered_map<unsigned int, std::unordered_map<std::string, unsigned int> > movingPoints;
         std::vector<unsigned int> movingPointLabels;
+
+        std::unordered_map<unsigned int, std::unordered_map<std::string, unsigned int> > globalMovingPoints;
+        std::vector<unsigned int> globalMovingPointLabels;
+
+        labelList nbGlobalPoints;
 };
 
 #endif

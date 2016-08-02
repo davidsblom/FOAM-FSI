@@ -39,7 +39,7 @@ PIMPLE
     nNonOrthogonalCorrectors 0;
     tolerance 1.0e-13;
     relTol 1.0e-2;
-    maxIter 500;
+    maxIter 5;
     minIter 1;
     pisoTol 1e-3;
 }

@@ -17,7 +17,8 @@ namespace fsi
             SDCFsiSolver(
                 std::shared_ptr<sdc::SDCFsiSolverInterface> fluid,
                 std::shared_ptr<sdc::SDCFsiSolverInterface> solid,
-                std::shared_ptr<PostProcessing> postProcessing
+                std::shared_ptr<PostProcessing> postProcessing,
+                int extrapolationOrder
                 );
 
             virtual ~SDCFsiSolver();
@@ -84,5 +85,7 @@ namespace fsi
 
             int k;
             std::deque<fsi::vector> xStages;
+            std::deque<fsi::vector> xStagesPrevious;
+            int extrapolationOrder;
     };
 }

@@ -57,10 +57,6 @@ class foamFluidSolver : public BaseMultiLevelSolver
             matrix & output
             );
 
-        int getInterfaceSize();
-
-        int getInterfaceSizeLocal();
-
         void setDisplacementLocal( const matrix & displacement );
 
         void getReadPositionsLocal( matrix & readPositions );
@@ -98,8 +94,11 @@ class foamFluidSolver : public BaseMultiLevelSolver
         int totalNbIterations;
 
         twoDPointCorrectorRBF twoDCorrector;
-        std::unordered_map<unsigned int, std::unordered_map<std::string, unsigned int> > movingPoints;
-        std::vector<unsigned int> movingPointLabels;
+
+        std::unordered_map<unsigned int, std::unordered_map<std::string, unsigned int> > globalMovingPoints;
+        std::vector<unsigned int> globalMovingPointLabels;
+
+        labelList nbGlobalPoints;
 };
 
 #endif

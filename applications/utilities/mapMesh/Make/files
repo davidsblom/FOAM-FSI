@@ -1,3 +1,0 @@
-mapMesh.C
-
-EXE = $(FOAM_APPBIN)/mapMesh
