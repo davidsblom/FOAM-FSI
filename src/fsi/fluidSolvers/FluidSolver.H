@@ -44,6 +44,8 @@ class FluidSolver : public foamFluidSolver
 
         virtual void initTimeStep();
 
+        virtual void finalizeTimeStep();
+
         virtual bool isRunning();
 
         virtual void resetSolution();

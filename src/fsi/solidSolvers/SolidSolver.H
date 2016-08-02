@@ -37,6 +37,8 @@ class SolidSolver : public foamSolidSolver
 
         virtual void initTimeStep();
 
+        virtual void finalizeTimeStep();
+
         virtual bool isRunning();
 
         virtual void resetSolution();
