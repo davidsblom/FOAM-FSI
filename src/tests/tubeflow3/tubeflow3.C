@@ -77,7 +77,7 @@ int main()
     };
 
     std::vector<scalar> timeList = {
-        1
+        10
     };
     std::vector<bool> parallelList = {
         true, false
