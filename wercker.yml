@@ -127,6 +127,11 @@ build:
                 (cd src/tests && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
                 (cd applications && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
         - script:
+            name: tutorials
+            code: |
+                (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
+                cd src/tests/tutorials && python testsuite.py
+        - script:
             name: cleanup
             code: rm -rf *
 
