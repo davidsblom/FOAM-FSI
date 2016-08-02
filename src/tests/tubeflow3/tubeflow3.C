@@ -119,12 +119,6 @@ int main()
                                 if ( nbLevels > 1 && *fsiSolver == "Aitken" )
                                     continue;
 
-                                if ( *fluidSolverSetting != "non-linear" && *fsiSolver == "Anderson" )
-                                    continue;
-
-                                if ( *fluidSolverSetting != "non-linear" && *fsiSolver == "Aitken" )
-                                    continue;
-
                                 if ( *fsiSolver == "Aitken" && *nbReuse > 0 )
                                     continue;
 
