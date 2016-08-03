@@ -45,6 +45,9 @@ for tutorial in sorted( os.listdir(".") ):
          if "<max-timesteps value=" in line:
              line = "<max-timesteps value=\"1\" />\n"
              precice[i] = line
+         if "<max-iterations value=" in line:
+             line = "<max-iterations value=\"3\" />\n"
+             precice[i] = line
          i += 1
     f = open( "fluid/constant/preCICE.xml", 'w' )
     f.write( ''.join(precice) )
