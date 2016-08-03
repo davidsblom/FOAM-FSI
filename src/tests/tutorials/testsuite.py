@@ -58,6 +58,9 @@ for tutorial in sorted( os.listdir(".") ):
     controlDict.writeFile()
 
     status = subprocess.call( "./Allrun_precice", shell = True )
+    if status != 0:
+        subprocess.call( "cat fluid/log.fsiFluidFoam", shell = True )
+        subprocess.call( "cat solid/log.fsiSolidFoam", shell = True )
     assert status == 0
 
     simulationCompleted = False
