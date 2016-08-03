@@ -64,6 +64,7 @@ for tutorial in sorted( os.listdir(".") ):
     if status != 0:
         subprocess.call( "cat fluid/log.fsiFluidFoam", shell = True )
         subprocess.call( "cat solid/log.fsiSolidFoam", shell = True )
+        subprocess.call( "cat fluid/log.reconstructPar", shell = True )
     assert status == 0
 
     simulationCompleted = False
