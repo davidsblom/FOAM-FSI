@@ -133,6 +133,14 @@ void SteadyStateSolidSolver::initTimeStep()
     init = true;
 }
 
+void SteadyStateSolidSolver::finalizeTimeStep()
+{
+  foamSolidSolver::finalizeTimeStep();
+
+  if ( runTime->outputTime() )
+      runTime->write();
+}
+
 bool SteadyStateSolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> solver )
 {
     std::shared_ptr<SteadyStateSolidSolver> fineModel;

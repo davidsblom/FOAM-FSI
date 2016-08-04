@@ -7,13 +7,13 @@ import xml.etree.ElementTree
 
 os.chdir( "../../../tutorials/fsi" )
 mainDir = os.getcwd()
-for tutorial in os.listdir("."):
+for tutorial in sorted( os.listdir(".") ):
     print tutorial
 
     os.chdir( mainDir + "/" + tutorial )
 
-    if not os.path.isfile( "fluid/system/controlDict" ): continue 
-    
+    if not os.path.isfile( "fluid/system/controlDict" ): continue
+
     controlDict = ParsedParameterFile( "fluid/system/controlDict" )
     controlDict['endTime'] = controlDict['deltaT']
     controlDict['writeInterval'] = 1
@@ -30,8 +30,9 @@ for tutorial in os.listdir("."):
     stream.close()
 
     status = subprocess.call( "./Allrun", shell = True )
+    if status != 0: subprocess.call( "cat fluid/log.fsiFoam", shell = True )
     assert status == 0
-    
+
     simulationCompleted = False
 
     with open( "fluid/log.fsiFoam" ) as f:
@@ -40,7 +41,7 @@ for tutorial in os.listdir("."):
             if "Finalising parallel run" in line: simulationCompleted = True
 
     assert simulationCompleted == True
-    
+
     if not os.path.isfile( "Allrun_precice" ): continue
 
     # Edit precice configuration file
@@ -51,6 +52,9 @@ for tutorial in os.listdir("."):
     for line in precice:
          if "<max-timesteps value=" in line:
              line = "<max-timesteps value=\"1\" />\n"
+             precice[i] = line
+         if "<max-iterations value=" in line:
+             line = "<max-iterations value=\"3\" />\n"
              precice[i] = line
          i += 1
     f = open( "fluid/constant/preCICE.xml", 'w' )
@@ -63,19 +67,23 @@ for tutorial in os.listdir("."):
     controlDict['writeControl'] = "timeStep"
     controlDict['startFrom'] = "startTime"
     controlDict.writeFile()
-    
+
     status = subprocess.call( "./Allrun_precice", shell = True )
+    if status != 0:
+        subprocess.call( "cat fluid/log.fsiFluidFoam", shell = True )
+        subprocess.call( "cat solid/log.fsiSolidFoam", shell = True )
+        subprocess.call( "cat fluid/log.reconstructPar", shell = True )
     assert status == 0
-    
+
     simulationCompleted = False
 
     with open( "fluid/log.fsiFluidFoam" ) as f:
         for line in f:
             assert "assert" not in line
             if "Finalising parallel run" in line: simulationCompleted = True
-    
+
     assert simulationCompleted == True
-    
+
     simulationCompleted = False
 
     with open( "solid/log.fsiSolidFoam" ) as f:
