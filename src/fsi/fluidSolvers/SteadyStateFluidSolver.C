@@ -350,16 +350,8 @@ void SteadyStateFluidSolver::initTimeStep()
     init = true;
 }
 
-void SteadyStateFluidSolver::finalizeTimeStep()
-{
-  foamFluidSolver::finalizeTimeStep();
-  runTime->write();
-}
-
 bool SteadyStateFluidSolver::isRunning()
 {
-    runTime->write();
-
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
          << "  ClockTime = " << runTime->elapsedClockTime() << " s"
          << endl << endl;

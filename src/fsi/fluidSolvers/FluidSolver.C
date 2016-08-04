@@ -372,12 +372,6 @@ void FluidSolver::initTimeStep()
     init = true;
 }
 
-void FluidSolver::finalizeTimeStep()
-{
-    foamFluidSolver::finalizeTimeStep();
-    runTime->write();
-}
-
 bool FluidSolver::isRunning()
 {
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
