@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-import os, shutil, subprocess
+import os, shutil, subprocess, yaml
 import xml.etree.ElementTree
 
 # Run the tutorials for one time step
@@ -20,6 +20,14 @@ for tutorial in os.listdir("."):
     controlDict['writeControl'] = "timeStep"
     controlDict['startFrom'] = "startTime"
     controlDict.writeFile()
+
+    stream = open( "fluid/constant/fsi.yaml", "r" )
+    fsi = yaml.load( stream )
+    stream.close()
+    fsi["coupling-scheme-implicit"]["max-iterations"] = 3
+    stream = open( "fluid/constant/fsi.yaml", "w" )
+    yaml.dump( fsi, stream, default_flow_style=False )
+    stream.close()
 
     status = subprocess.call( "./Allrun", shell = True )
     assert status == 0
