@@ -374,8 +374,6 @@ void FluidSolver::initTimeStep()
 
 bool FluidSolver::isRunning()
 {
-    runTime->write();
-
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
          << "  ClockTime = " << runTime->elapsedClockTime() << " s"
          << endl << endl;

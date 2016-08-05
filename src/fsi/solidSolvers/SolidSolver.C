@@ -229,8 +229,6 @@ bool SolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> sol
 
 bool SolidSolver::isRunning()
 {
-    runTime->write();
-
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
          << "  ClockTime = " << runTime->elapsedClockTime() << " s"
          << endl << endl;

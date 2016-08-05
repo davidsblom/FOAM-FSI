@@ -352,8 +352,6 @@ void SteadyStateFluidSolver::initTimeStep()
 
 bool SteadyStateFluidSolver::isRunning()
 {
-    runTime->write();
-
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
          << "  ClockTime = " << runTime->elapsedClockTime() << " s"
          << endl << endl;

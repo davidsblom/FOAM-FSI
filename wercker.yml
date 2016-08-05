@@ -15,7 +15,7 @@ build:
             code: |
                 # foam-extend
                 cd /home
-                tar xf foam-extend-3.2.tar.gz
+                tar xf foam-extend-3.2.tar.gz && rm foam-extend-3.2.tar.gz
                 source foam-extend-3.2/etc/prefs.sh && source foam-extend-3.2/etc/bashrc
 
                 # boost
@@ -126,6 +126,11 @@ build:
                 (cd src/RBFMeshMotionSolver && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
                 (cd src/tests && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
                 (cd applications && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+        - script:
+            name: tutorials
+            code: |
+                (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
+                cd src/tests/tutorials && python testsuite.py
         - script:
             name: cleanup
             code: rm -rf *

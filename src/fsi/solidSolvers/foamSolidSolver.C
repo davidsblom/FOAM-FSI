@@ -93,6 +93,9 @@ void foamSolidSolver::finalizeTimeStep()
 {
     assert( init );
 
+    if ( runTime->outputTime() && name == Foam::fvMesh::defaultRegion )
+        runTime->write();
+
     init = false;
 }
 
