@@ -10,8 +10,6 @@ os.chdir( "../../../tutorials/fsi" )
 mainDir = os.getcwd()
 for tutorial in sorted( os.listdir(".") ):
 
-    if tutorial != "cylinderFlap_FSI3_manifoldMapping": continue
-
     if not os.path.isdir( mainDir + "/" + tutorial ): continue
     os.chdir( mainDir + "/" + tutorial )
 
