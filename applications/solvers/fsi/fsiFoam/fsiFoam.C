@@ -326,13 +326,13 @@ int main(
         assert( singularityLimit > 0 );
 
         if ( fluidSolver == "coupled-pressure-velocity-solver" )
-            fluid = std::shared_ptr<foamFluidSolver> ( new CoupledFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
+            fluid = std::shared_ptr<foamFluidSolver> ( new CoupledFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
         if ( fluidSolver == "pimple-solver" )
-            fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
+            fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
         if ( fluidSolver == "compressible-solver" )
-            fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
+            fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
         if ( solidSolver == "nonlinear-elastic-solver" )
         {

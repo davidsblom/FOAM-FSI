@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 import os, shutil, subprocess, yaml
 import xml.etree.ElementTree
@@ -8,37 +9,58 @@ import xml.etree.ElementTree
 os.chdir( "../../../tutorials/fsi" )
 mainDir = os.getcwd()
 for tutorial in sorted( os.listdir(".") ):
-    print tutorial
 
+    if not os.path.isdir( mainDir + "/" + tutorial ): continue
     os.chdir( mainDir + "/" + tutorial )
 
-    if not os.path.isfile( "fluid/system/controlDict" ): continue
+    if not os.path.isfile( "fluid/system/controlDict" ) and not os.path.isfile( "fluid-level-1/system/controlDict" ):
+        continue
 
-    controlDict = ParsedParameterFile( "fluid/system/controlDict" )
+    try:
+        controlDict = ParsedParameterFile( "fluid/system/controlDict" )
+    except:
+        controlDict = ParsedParameterFile( "fluid-level-1/system/controlDict" )
     controlDict['endTime'] = controlDict['deltaT']
     controlDict['writeInterval'] = 1
     controlDict['writeControl'] = "timeStep"
     controlDict['startFrom'] = "startTime"
     controlDict.writeFile()
 
-    stream = open( "fluid/constant/fsi.yaml", "r" )
-    fsi = yaml.load( stream )
-    stream.close()
-    fsi["coupling-scheme-implicit"]["max-iterations"] = 3
-    stream = open( "fluid/constant/fsi.yaml", "w" )
-    yaml.dump( fsi, stream, default_flow_style=False )
-    stream.close()
+    try:
+        stream = open( "fluid/constant/fsi.yaml", "r" )
+        fsi = yaml.load( stream )
+        stream.close()
+        fsi["coupling-scheme-implicit"]["max-iterations"] = 3
+        stream = open( "fluid/constant/fsi.yaml", "w" )
+        yaml.dump( fsi, stream, default_flow_style=False )
+        stream.close()
+    except:
+        stream = open( "fluid-level-1/constant/fsi.yaml", "r" )
+        fsi = yaml.load( stream )
+        stream.close()
+        fsi["multi-level-acceleration"]["levels"][0]["max-iterations"] = 3
+        fsi["multi-level-acceleration"]["levels"][1]["max-iterations"] = 3
+        stream = open( "fluid-level-1/constant/fsi.yaml", "w" )
+        yaml.dump( fsi, stream, default_flow_style=False )
+        stream.close()
 
     status = subprocess.call( "./Allrun", shell = True )
     if status != 0: subprocess.call( "cat fluid/log.fsiFoam", shell = True )
+    if status != 0: subprocess.call( "cat fluid-level-1/log.fsiFoam", shell = True )
     assert status == 0
 
     simulationCompleted = False
 
-    with open( "fluid/log.fsiFoam" ) as f:
+    fileName = "fluid/log.fsiFoam"
+
+    if not os.path.isfile( fileName ):
+        fileName = "fluid-level-1/log.fsiFoam"
+
+    with open( fileName ) as f:
         for line in f:
             assert "assert" not in line
             if "Finalising parallel run" in line: simulationCompleted = True
+            if "End" in line: simulationCompleted = True
 
     assert simulationCompleted == True
 
@@ -81,6 +103,7 @@ for tutorial in sorted( os.listdir(".") ):
         for line in f:
             assert "assert" not in line
             if "Finalising parallel run" in line: simulationCompleted = True
+            if "End" in line: simulationCompleted = True
 
     assert simulationCompleted == True
 
@@ -90,5 +113,6 @@ for tutorial in sorted( os.listdir(".") ):
         for line in f:
             assert "assert" not in line
             if "Finalising parallel run" in line: simulationCompleted = True
+            if "End" in line: simulationCompleted = True
 
     assert simulationCompleted == True
