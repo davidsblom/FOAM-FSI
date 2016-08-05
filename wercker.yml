@@ -13,8 +13,10 @@ build:
         - script:
             name: initialize dependencies
             code: |
-                # foam-extend environment
-                (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
+                # foam-extend
+                cd /home
+                tar xf foam-extend-3.2.tar.gz && rm foam-extend-3.2.tar.gz
+                source foam-extend-3.2/etc/prefs.sh && source foam-extend-3.2/etc/bashrc
 
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
