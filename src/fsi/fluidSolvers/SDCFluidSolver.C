@@ -334,6 +334,15 @@ void SDCFluidSolver::getAcousticsPressureLocal( matrix & )
     assert( false );
 }
 
+void SDCFluidSolver::setAcousticsData(
+    const matrix &,
+    const matrix &,
+    const matrix &
+    )
+{
+    assert( false );
+}
+
 void SDCFluidSolver::getTractionLocal( matrix & )
 {
     assert( false );

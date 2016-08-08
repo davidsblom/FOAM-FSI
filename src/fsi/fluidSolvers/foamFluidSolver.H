@@ -52,6 +52,12 @@ class foamFluidSolver : public BaseMultiLevelSolver
 
         virtual void solve() = 0;
 
+        virtual void setAcousticsData(
+            const matrix & pressure,
+            const matrix & temperature,
+            const matrix & velocity
+            ) = 0;
+
         virtual void solve(
             const matrix & input,
             matrix & output

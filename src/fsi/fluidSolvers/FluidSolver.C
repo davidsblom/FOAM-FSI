@@ -316,6 +316,15 @@ void FluidSolver::getAcousticsPressureLocal( matrix & )
     assert( false );
 }
 
+void FluidSolver::setAcousticsData(
+    const matrix &,
+    const matrix &,
+    const matrix &
+    )
+{
+    assert( false );
+}
+
 void FluidSolver::getTractionLocal( matrix & traction )
 {
     int size = 0;

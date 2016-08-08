@@ -28,6 +28,8 @@ public:
 
   void readData( matrix & data );
 
+  void readDataAcoustics();
+
   void setReadPositions();
 
   void setWritePositions();

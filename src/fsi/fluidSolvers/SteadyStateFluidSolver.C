@@ -292,6 +292,15 @@ void SteadyStateFluidSolver::getAcousticsPressureLocal( matrix & )
     assert( false );
 }
 
+void SteadyStateFluidSolver::setAcousticsData(
+    const matrix &,
+    const matrix &,
+    const matrix &
+    )
+{
+    assert( false );
+}
+
 void SteadyStateFluidSolver::getTractionLocal( matrix & traction )
 {
     int size = 0;

@@ -50,6 +50,12 @@ class FluidSolver : public foamFluidSolver
 
         virtual void solve();
 
+        virtual void setAcousticsData(
+            const matrix & pressure,
+            const matrix & temperature,
+            const matrix & velocity
+            );
+
     private:
         void checkTimeDiscretisationScheme();
 

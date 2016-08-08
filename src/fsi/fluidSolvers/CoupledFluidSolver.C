@@ -178,6 +178,15 @@ void CoupledFluidSolver::getAcousticsPressureLocal( matrix & )
     assert( false );
 }
 
+void CoupledFluidSolver::setAcousticsData(
+    const matrix &,
+    const matrix &,
+    const matrix &
+    )
+{
+    assert( false );
+}
+
 void CoupledFluidSolver::getTractionLocal( matrix & traction )
 {
     int size = 0;

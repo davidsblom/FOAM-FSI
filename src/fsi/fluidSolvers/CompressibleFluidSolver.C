@@ -10,6 +10,11 @@
 #include "CompressibleFluidSolver.H"
 #include <chrono>
 
+namespace Foam
+{
+    defineTemplateTypeNameAndDebugWithName( vectorIOList, "vectorList", 0 );
+}
+
 CompressibleFluidSolver::CompressibleFluidSolver(
     string name,
     shared_ptr<argList> args,
@@ -115,7 +120,10 @@ CompressibleFluidSolver::CompressibleFluidSolver(
     convergenceTolerance( readScalar( mesh.solutionDict().subDict( "blockSolver" ).lookup( "convergenceTolerance" ) ) ),
     nOuterCorr( readLabel( mesh.solutionDict().subDict( "blockSolver" ).lookup( "nOuterCorrectors" ) ) ),
     acousticsPatchName( couplingProperties.lookup( "acousticsPatch" ) ),
-    acousticsPatchID( mesh.boundaryMesh().findPatchID( acousticsPatchName ) )
+    acousticsPatchID( mesh.boundaryMesh().findPatchID( acousticsPatchName ) ),
+    pressureAcousticsBC( IOobject( "pressureAcoustics", runTime->timeName(), *runTime ), mesh.boundaryMesh()[acousticsPatchID].size() ),
+    temperatureAcousticsBC( IOobject( "temperatureAcoustics", runTime->timeName(), *runTime ), mesh.boundaryMesh()[acousticsPatchID].size() ),
+    velocityAcousticsBC( IOobject( "velocityAcoustics", runTime->timeName(), *runTime ), mesh.boundaryMesh()[acousticsPatchID].size() )
 {
     assert( nOuterCorr > 0 );
     assert( convergenceTolerance < 1 );
@@ -263,17 +271,33 @@ void CompressibleFluidSolver::resetSolution()
     // rho == rho.oldTime();
 }
 
+void CompressibleFluidSolver::setAcousticsData(
+    const matrix & pressure,
+    const matrix & temperature,
+    const matrix & velocity
+    )
+{
+    assert( pressure.rows() == pressureAcousticsBC.size() );
+    assert( temperature.rows() == temperatureAcousticsBC.size() );
+    assert( velocity.rows() == velocityAcousticsBC.size() );
+    assert( velocity.cols() == mesh.nGeometricD() );
+
+    for ( int i = 0; i < pressure.rows(); i++ )
+        pressureAcousticsBC[i] = pressure( i, 0 );
+
+    for ( int i = 0; i < temperature.rows(); i++ )
+        temperatureAcousticsBC[i] = temperature( i, 0 );
+
+    for ( int i = 0; i < velocity.rows(); i++ )
+        for ( int j = 0; j < velocity.cols(); j++ )
+            velocityAcousticsBC[i][j] = velocity( i, j );
+}
+
 void CompressibleFluidSolver::solve()
 {
     Info << "Solve fluid domain" << endl;
 
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
     mesh.update();
-    end = std::chrono::system_clock::now();
-
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    Info << "timing mesh deformation = " << elapsed_seconds.count() << "s" << endl;
 
     int oCorr;
 

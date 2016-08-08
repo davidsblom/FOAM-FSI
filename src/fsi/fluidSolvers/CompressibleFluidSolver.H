@@ -14,6 +14,12 @@
 #include "basicPsiThermo.H"
 #include "compressible/RAS/lnInclude/RASModel.H"
 #include "fvBlockMatrix.H"
+#include "scalarIOList.H"
+
+namespace Foam
+{
+    typedef IOList<vector> vectorIOList;
+}
 
 class CompressibleFluidSolver : public foamFluidSolver
 {
@@ -41,6 +47,12 @@ class CompressibleFluidSolver : public foamFluidSolver
         virtual bool isRunning();
 
         virtual void resetSolution();
+
+        virtual void setAcousticsData(
+            const matrix & pressure,
+            const matrix & temperature,
+            const matrix & velocity
+            );
 
         virtual void solve();
 
@@ -77,6 +89,10 @@ class CompressibleFluidSolver : public foamFluidSolver
 
         word acousticsPatchName;
         label acousticsPatchID;
+
+        scalarIOList pressureAcousticsBC;
+        scalarIOList temperatureAcousticsBC;
+        vectorIOList velocityAcousticsBC;
 };
 
 #endif
