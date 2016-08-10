@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+
+<precice-configuration>
+
+   <log-filter target="info" component="" switch="on" />
+   <log-filter target="debug" component="" switch="off" />
+
+    <log-output column-separator=" | " log-time-stamp="no"
+                log-time-stamp-human-readable="no" log-machine-name="no"
+                log-message-type="no" log-trace="yes"/>
+
+   <solver-interface dimensions="3" restart-mode="off" geometry-mode="off">
+
+       <data:scalar name="Acoustics_Density"/>
+       <data:scalar name="Acoustics_Velocity_X"/>
+       <data:scalar name="Acoustics_Velocity_Y"/>
+       <data:scalar name="Acoustics_Velocity_Z"/>
+       <data:scalar name="Acoustics_Pressure"/>
+
+       <mesh name="Fluid_Acoustics">
+         <use-data name="Acoustics_Density"/>
+         <use-data name="Acoustics_Velocity_X"/>
+         <use-data name="Acoustics_Velocity_Y"/>
+         <use-data name="Acoustics_Velocity_Z"/>
+         <use-data name="Acoustics_Pressure"/>
+       </mesh>
+
+       <mesh name="AcousticSurface_Ateles">
+         <use-data name="Acoustics_Density"/>
+         <use-data name="Acoustics_Velocity_X"/>
+         <use-data name="Acoustics_Velocity_Y"/>
+         <use-data name="Acoustics_Velocity_Z"/>
+         <use-data name="Acoustics_Pressure"/>
+       </mesh>
+
+       <participant name="Fluid_Solver">
+         <use-mesh name="Fluid_Acoustics" provide="yes"/>
+         <write-data mesh="Fluid_Acoustics" name="Acoustics_Density"/>
+         <write-data mesh="Fluid_Acoustics" name="Acoustics_Velocity_X"/>
+         <write-data mesh="Fluid_Acoustics" name="Acoustics_Velocity_Y"/>
+         <write-data mesh="Fluid_Acoustics" name="Acoustics_Velocity_Z"/>
+         <write-data mesh="Fluid_Acoustics" name="Acoustics_Pressure"/>
+         <master:mpi-single />
+       </participant>
+
+       <participant name="Ateles_acoustic">
+         <use-mesh name="AcousticSurface_Ateles" provide="yes"/>
+         <use-mesh name="Fluid_Acoustics" from="Fluid_Solver"/>
+         <read-data name="Acoustics_Density" mesh="AcousticSurface_Ateles"/>
+         <read-data name="Acoustics_Velocity_X" mesh="AcousticSurface_Ateles"/>
+         <read-data name="Acoustics_Velocity_Y" mesh="AcousticSurface_Ateles"/>
+         <read-data name="Acoustics_Velocity_Z" mesh="AcousticSurface_Ateles"/>
+         <read-data name="Acoustics_Pressure" mesh="AcousticSurface_Ateles"/>
+         <mapping:nearest-neighbor direction="read" from="Fluid_Acoustics" to="AcousticSurface_Ateles" constraint="consistent" timing="initial"/>
+         <!--<mapping:petrbf-thin-plate-splines direction="read" from="Fluid_Acoustics" to="AcousticSurface_Ateles" constraint="consistent" timing="initial"/>-->
+         <master:mpi-single />
+       </participant>
+
+      <m2n:sockets exchange-directory="../" from="Fluid_Solver" to="Ateles_acoustic" distribution-type="gather-scatter"/>
+
+      <coupling-scheme:parallel-explicit>
+        <participants first="Fluid_Solver" second="Ateles_acoustic"/>
+        <max-timesteps value="900"/>
+        <timestep-length value="1e-5"/>
+        <exchange data="Acoustics_Density" from="Fluid_Solver" to="Ateles_acoustic" mesh="Fluid_Acoustics" initialize="yes"/>
+        <exchange data="Acoustics_Velocity_X" from="Fluid_Solver" to="Ateles_acoustic" mesh="Fluid_Acoustics" initialize="yes"/>
+        <exchange data="Acoustics_Velocity_Y" from="Fluid_Solver" to="Ateles_acoustic" mesh="Fluid_Acoustics" initialize="yes"/>
+        <exchange data="Acoustics_Velocity_Z" from="Fluid_Solver" to="Ateles_acoustic" mesh="Fluid_Acoustics" initialize="yes"/>
+        <exchange data="Acoustics_Pressure" from="Fluid_Solver" to="Ateles_acoustic" mesh="Fluid_Acoustics" initialize="yes"/>
+      </coupling-scheme:parallel-explicit>
+
+   </solver-interface>
+
+</precice-configuration>

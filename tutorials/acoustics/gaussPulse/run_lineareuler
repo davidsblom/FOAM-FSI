@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -e
+
+./clean
+
+cd initialSolutionGaussPulse
+wmake
+cd -
+
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+cp fluid/constant/preCICE.xml ateles/precice.xml
+
+cd fluid
+touch fluid.foam
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication initialSolutionGaussPulse
+runApplication decomposePar
+mpirun -np 2 fsiFluidFoam -parallel &> log.fsiFluidFoam &
+cd -
+
+cd ateles
+mkdir mesh_right restart
+runApplication seeder seeder_right.lua
+mpirun -np 2 ateles ateles_lineareuler.lua &> log.ateles &
+cd -
+
+wait
+
+cd ateles
+./postprocess
+cd -
+
+cd fluid
+runApplication reconstructPar

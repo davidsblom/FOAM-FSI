@@ -1,0 +1,5 @@
+adaptive-time-stepping:
+  enabled: false
+fluid-solver: compressible-solver
+moving-mesh: false
+time-integration-scheme: bdf
