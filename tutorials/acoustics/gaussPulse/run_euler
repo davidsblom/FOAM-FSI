@@ -25,7 +25,7 @@ cd -
 
 cd ateles
 mkdir restart precice_output
-mpirun -np 2 /home/davidblom/repositories/apes/ateles/build/ateles ateles_euler.lua &> log.ateles &
+mpirun -np 2 ateles ateles_euler.lua &> log.ateles &
 cd -
 
 wait
