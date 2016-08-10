@@ -24,6 +24,9 @@ sed -i 's/.*c_sizeof(typesample)/!&/' treelm/source/tem_comm_module.fpp
 ./waf build --target=ateles
 ./waf build --target=atl_harvesting
 
+cp build/ateles $FOAM_APPBIN/
+cp build/atl_harvesting $FOAM_APPBIN/
+
 cd ../seeder
 
 sed -i 's/.*c_sizeof(typesample)/!&/' treelm/source/tem_comm_module.fpp
@@ -31,3 +34,5 @@ sed -i 's/.*c_sizeof(typesample)/!&/' treelm/source/tem_comm_module.fpp
 ./waf configure
 
 ./waf build --target=seeder
+
+cp build/seeder $FOAM_APPBIN/
