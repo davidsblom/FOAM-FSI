@@ -1,26 +1,26 @@
---           2 
+--           2
 --          /
---       -------    
+--       -------
 --      /      /|
 --     /  5   / |
 --     -------  | 4
 --    |  |   |  |
--- 3  |  |   |  | 
+-- 3  |  |   |  |
 --    |   ---|---
 --    | /  6 | /
 --    |/     |/
 --     ------
 --     /
---    1      
---       
+--    1
+--
 --       3 is precice boundary
 --
 --
 printRuntimeInfo = false
-outputname= 'mesh_right'
-comment = 'mesh_right'
+outputname= 'mesh'
+comment = 'mesh'
 minlevel = 4
-folder = 'mesh_right/'
+folder = 'mesh/'
 level = 4
 --debug = {debugMode=true, debugFiles=true, debugMesh='debug/'}
 bounding_cube = { origin = {-4.0, -4.0, -4.0}, length = 8.0 }
@@ -42,7 +42,7 @@ eps=bounding_cube.length/2^(level+1)
     geometry = {
       kind = 'canoND',
       object = {
-        origin = { (0.0-eps), (-2.0-eps), (2.0+eps) }, -- left down front 
+        origin = { (0.0-eps), (-2.0-eps), (2.0+eps) }, -- left down front
         vec = { { (2.0+2*eps), 0.0, 0.0 },
                { 0.0, (4.0+2*eps), 0.0 },
         },
@@ -66,7 +66,7 @@ eps=bounding_cube.length/2^(level+1)
   },
   --------------------------------------------
   { attribute = {
-      kind = 'boundary', label = 'precice_rightmesh', --'wall_3'
+      kind = 'boundary', label = 'precice_mesh', --'wall_3'
       level = level, calc_dist = false,
     },
     geometry = {
@@ -93,7 +93,7 @@ eps=bounding_cube.length/2^(level+1)
         },
       } -- object
     },
-  }, 
+  },
   --------------------------------------------
   { attribute = {
       kind = 'boundary', label = 'wall_5',
@@ -108,7 +108,7 @@ eps=bounding_cube.length/2^(level+1)
         },
       } -- object
     },
-  }, 
+  },
   --------------------------------------------
   { attribute = {
       kind = 'boundary', label = 'wall_6',
@@ -123,5 +123,5 @@ eps=bounding_cube.length/2^(level+1)
         },
       } -- object
     },
-  }, 
+  },
 } -- spatial object

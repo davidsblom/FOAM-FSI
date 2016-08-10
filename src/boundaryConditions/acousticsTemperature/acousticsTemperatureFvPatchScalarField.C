@@ -37,12 +37,7 @@ Foam::acousticsTemperatureFvPatchScalarField::acousticsTemperatureFvPatchScalarF
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
-    UName_("U"),
-    phiName_("phi"),
-    psiName_("psi"),
-    gamma_(0.0),
-    T0_(p.size(), 0.0)
+    fixedValueFvPatchScalarField(p, iF)
 {}
 
 
@@ -54,12 +49,7 @@ Foam::acousticsTemperatureFvPatchScalarField::acousticsTemperatureFvPatchScalarF
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    UName_(ptf.UName_),
-    phiName_(ptf.phiName_),
-    psiName_(ptf.psiName_),
-    gamma_(ptf.gamma_),
-    T0_(ptf.T0_, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
 {}
 
 
@@ -70,24 +60,12 @@ Foam::acousticsTemperatureFvPatchScalarField::acousticsTemperatureFvPatchScalarF
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
-    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    psiName_(dict.lookupOrDefault<word>("psi", "psi")),
-    gamma_(readScalar(dict.lookup("gamma"))),
-    T0_("T0", dict, p.size())
+    fixedValueFvPatchScalarField(p, iF)
 {
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
-    {
-        fvPatchScalarField::operator=(T0_);
-    }
+    fvPatchScalarField::operator=
+    (
+        scalarField("value", dict, p.size())
+    );
 }
 
 
@@ -96,12 +74,7 @@ Foam::acousticsTemperatureFvPatchScalarField::acousticsTemperatureFvPatchScalarF
     const acousticsTemperatureFvPatchScalarField& tppsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf),
-    UName_(tppsf.UName_),
-    phiName_(tppsf.phiName_),
-    psiName_(tppsf.psiName_),
-    gamma_(tppsf.gamma_),
-    T0_(tppsf.T0_)
+    fixedValueFvPatchScalarField(tppsf)
 {}
 
 
@@ -111,12 +84,7 @@ Foam::acousticsTemperatureFvPatchScalarField::acousticsTemperatureFvPatchScalarF
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF),
-    UName_(tppsf.UName_),
-    phiName_(tppsf.phiName_),
-    psiName_(tppsf.psiName_),
-    gamma_(tppsf.gamma_),
-    T0_(tppsf.T0_)
+    fixedValueFvPatchScalarField(tppsf, iF)
 {}
 
 
@@ -128,7 +96,6 @@ void Foam::acousticsTemperatureFvPatchScalarField::autoMap
 )
 {
     fixedValueFvPatchScalarField::autoMap(m);
-    T0_.autoMap(m);
 }
 
 
@@ -139,11 +106,6 @@ void Foam::acousticsTemperatureFvPatchScalarField::rmap
 )
 {
     fixedValueFvPatchScalarField::rmap(ptf, addr);
-
-    const acousticsTemperatureFvPatchScalarField& tiptf =
-        refCast<const acousticsTemperatureFvPatchScalarField>(ptf);
-
-    T0_.rmap(tiptf.T0_, addr);
 }
 
 
@@ -154,14 +116,14 @@ void Foam::acousticsTemperatureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const scalarIOList& temperature = db().lookupObject<scalarIOList>("temperatureAcoustics");
+    const scalarIOList& pressure = db().time().lookupObject<scalarIOList>("temperatureAcoustics");
 
-    scalarField T ( patch().Cf().size(), scalar(0) );
-    T = temperature;
+    scalarField p ( patch().Cf().size(), scalar(0) );
+    p = pressure;
 
     operator==
     (
-        T
+        p
     );
 
     fixedValueFvPatchScalarField::updateCoeffs();
@@ -201,20 +163,6 @@ Foam::acousticsTemperatureFvPatchScalarField::gradientBoundaryCoeffs() const
 void Foam::acousticsTemperatureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-    if (UName_ != "U")
-    {
-        os.writeKeyword("U") << UName_ << token::END_STATEMENT << nl;
-    }
-    if (phiName_ != "phi")
-    {
-        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    }
-    if (psiName_ != "psi")
-    {
-        os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
-    }
-    os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
-    T0_.writeEntry("T0", os);
     writeEntry("value", os);
 }
 

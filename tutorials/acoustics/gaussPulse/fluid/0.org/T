@@ -31,7 +31,8 @@ boundaryField
     }
     east
     {
-        type            zeroGradient;
+        type            acousticsTemperature;
+        value 275.78599007170436;
     }
     west
     {

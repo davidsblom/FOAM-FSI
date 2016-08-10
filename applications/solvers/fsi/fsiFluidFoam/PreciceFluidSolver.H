@@ -40,6 +40,18 @@ public:
 
   void writeDataAcoustics();
 
+  void writeAcousticsDensity();
+
+  void writeAcousticsPressure();
+
+  void writeAcousticsVelocity();
+
+  void writeAcousticsDensityGradient();
+
+  void writeAcousticsPressureGradient();
+
+  void writeAcousticsVelocityGradient();
+
   shared_ptr<foamFluidSolver> solver;
   shared_ptr<precice::SolverInterface> precice;
 

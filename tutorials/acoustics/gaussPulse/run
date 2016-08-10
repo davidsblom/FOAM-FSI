@@ -19,20 +19,20 @@ runApplication renumberMesh -overwrite
 runApplication checkMesh
 runApplication initialSolutionGaussPulse
 runApplication decomposePar
-mpirun -np 2 fsiFluidFoam -parallel &> log.fsiFluidFoam &
+# mpirun -np 4 fsiFluidFoam -parallel &> log.fsiFluidFoam &
 cd -
 
 cd ateles
-mkdir mesh_right restart
-runApplication seeder seeder_right.lua
-mpirun -np 2 ateles ateles_lineareuler.lua &> log.ateles &
+mkdir restart mesh
+runApplication seeder
+# mpirun -np 2 ateles &> log.ateles &
 cd -
 
 wait
 
-cd ateles
-./postprocess
-cd -
-
-cd fluid
-runApplication reconstructPar
+# cd ateles
+# ./postprocess
+# cd -
+#
+# cd fluid
+# runApplication reconstructPar

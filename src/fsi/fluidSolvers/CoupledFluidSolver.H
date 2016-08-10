@@ -37,6 +37,12 @@ class CoupledFluidSolver : public foamFluidSolver
 
         virtual void getAcousticsPressureLocal( matrix & data );
 
+        virtual void getAcousticsDensityGradientLocal( matrix & data );
+
+        virtual void getAcousticsVelocityGradientLocal( matrix & data );
+
+        virtual void getAcousticsPressureGradientLocal( matrix & data );
+
         virtual void setAcousticsData(
             const matrix & pressure,
             const matrix & temperature,

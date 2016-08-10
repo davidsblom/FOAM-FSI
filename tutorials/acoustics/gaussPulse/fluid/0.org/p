@@ -31,7 +31,9 @@ boundaryField
     }
     east
     {
-        type            zeroGradient;
+        type            acousticsPressure;
+        gamma 1;
+        value 100000;
     }
     west
     {

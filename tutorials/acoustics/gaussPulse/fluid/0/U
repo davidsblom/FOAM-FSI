@@ -29,13 +29,14 @@ boundaryField
     {
         type            zeroGradient;
     }
-    east
-    {
-        type            zeroGradient;
-    }
     west
     {
         type            zeroGradient;
+    }
+    east
+    {
+        type            acousticsVelocity;
+        value           uniform (0 0 0);
     }
     north
     {

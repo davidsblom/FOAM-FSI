@@ -38,6 +38,12 @@ class CompressibleFluidSolver : public foamFluidSolver
 
         virtual void getAcousticsPressureLocal( matrix & data );
 
+        virtual void getAcousticsDensityGradientLocal( matrix & data );
+
+        virtual void getAcousticsVelocityGradientLocal( matrix & data );
+
+        virtual void getAcousticsPressureGradientLocal( matrix & data );
+
         virtual void getTractionLocal( matrix & traction );
 
         virtual void getWritePositionsLocalAcoustics( matrix & writePositions );

@@ -14,4 +14,4 @@ cleanCase
 cd -
 
 cd ateles
-rm -rf log.* timing.res .*.address *.txt *.xml restart harvester *.pyc timing* *.log precice_output
+rm -rf log.* timing.res .*.address *.txt *.xml restart harvester *.pyc timing* *.log precice_output mesh

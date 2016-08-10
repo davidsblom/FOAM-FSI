@@ -125,6 +125,22 @@ CompressibleFluidSolver::CompressibleFluidSolver(
     temperatureAcousticsBC( IOobject( "temperatureAcoustics", runTime->timeName(), *runTime ), mesh.boundaryMesh()[acousticsPatchID].size() ),
     velocityAcousticsBC( IOobject( "velocityAcoustics", runTime->timeName(), *runTime ), mesh.boundaryMesh()[acousticsPatchID].size() )
 {
+    forAll( pressureAcousticsBC, i )
+    {
+        pressureAcousticsBC[i] = 0;
+    }
+
+    forAll( temperatureAcousticsBC, i )
+    {
+        temperatureAcousticsBC[i] = 0;
+    }
+
+    forAll( temperatureAcousticsBC, i )
+    {
+        for ( int j = 0; j < 3; j++ )
+            velocityAcousticsBC[i][j] = 0;
+    }
+
     assert( nOuterCorr > 0 );
     assert( convergenceTolerance < 1 );
     assert( convergenceTolerance > 0 );
@@ -187,6 +203,37 @@ void CompressibleFluidSolver::getAcousticsVelocityLocal( matrix & data )
     for ( int i = 0; i < data.rows(); i++ )
         for ( int j = 0; j < data.cols(); j++ )
             data( i, j ) = U.boundaryField()[acousticsPatchID][i][j];
+}
+
+void CompressibleFluidSolver::getAcousticsPressureGradientLocal( matrix & data )
+{
+    scalarField gradient = p.boundaryField()[acousticsPatchID].snGrad();
+
+    data.resize( gradient.size(), 1 );
+
+    for ( int i = 0; i < data.rows(); i++ )
+        data( i, 0 ) = gradient[i];
+}
+
+void CompressibleFluidSolver::getAcousticsDensityGradientLocal( matrix & data )
+{
+    scalarField gradient = rho.boundaryField()[acousticsPatchID].snGrad();
+
+    data.resize( gradient.size(), 1 );
+
+    for ( int i = 0; i < data.rows(); i++ )
+        data( i, 0 ) = gradient[i];
+}
+
+void CompressibleFluidSolver::getAcousticsVelocityGradientLocal( matrix & data )
+{
+    vectorField gradient = U.boundaryField()[acousticsPatchID].snGrad();
+
+    data.resize( gradient.size(), mesh.nGeometricD() );
+
+    for ( int i = 0; i < data.rows(); i++ )
+        for ( int j = 0; j < data.cols(); j++ )
+            data( i, j ) = gradient[i][j];
 }
 
 void CompressibleFluidSolver::getTractionLocal( matrix & traction )

@@ -316,6 +316,21 @@ void FluidSolver::getAcousticsPressureLocal( matrix & )
     assert( false );
 }
 
+void FluidSolver::getAcousticsPressureGradientLocal( matrix & )
+{
+    assert( false );
+}
+
+void FluidSolver::getAcousticsDensityGradientLocal( matrix & )
+{
+    assert( false );
+}
+
+void FluidSolver::getAcousticsVelocityGradientLocal( matrix & )
+{
+    assert( false );
+}
+
 void FluidSolver::setAcousticsData(
     const matrix &,
     const matrix &,

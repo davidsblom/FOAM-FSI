@@ -38,6 +38,12 @@ class foamFluidSolver : public BaseMultiLevelSolver
 
         virtual void getAcousticsPressureLocal( matrix & data ) = 0;
 
+        virtual void getAcousticsDensityGradientLocal( matrix & data ) = 0;
+
+        virtual void getAcousticsVelocityGradientLocal( matrix & data ) = 0;
+
+        virtual void getAcousticsPressureGradientLocal( matrix & data ) = 0;
+
         virtual void getTractionLocal( matrix & traction ) = 0;
 
         virtual void getWritePositionsLocalAcoustics( matrix & writePositions ) = 0;

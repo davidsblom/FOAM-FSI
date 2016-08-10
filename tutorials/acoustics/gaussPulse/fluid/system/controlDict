@@ -24,7 +24,7 @@ deltaT 1e-5;
 
 writeControl timeStep;
 
-writeInterval 100;
+writeInterval 1;
 
 purgeWrite 0;
 
@@ -41,8 +41,3 @@ timePrecision 10;
 runTimeModifiable yes;
 adjustTimeStep no;
 maxCo 0.8;
-
-libs
-  (
-    "libRBFMeshRigidMeshMotionSolver.so"
-  ); 	// ************************************************************************* //

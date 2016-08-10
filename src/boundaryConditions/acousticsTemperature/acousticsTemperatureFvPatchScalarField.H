@@ -52,23 +52,6 @@ class acousticsTemperatureFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
-    // Private data
-
-        //- Name of the velocity field
-        word UName_;
-
-        //- Name of the flux transporting the field
-        word phiName_;
-
-        //- Name of the compressibility field used to calculate the wave speed
-        word psiName_;
-
-        //- Heat capacity ratio
-        scalar gamma_;
-
-        //- Total temperature
-        scalarField T0_;
-
 
 public:
 
@@ -141,24 +124,6 @@ public:
     // Member functions
 
         // Access
-
-            //- Return the name of the velocity field
-            const word& UName() const
-            {
-                return UName_;
-            }
-
-            //- Return the total pressure
-            const scalarField& T0() const
-            {
-                return T0_;
-            }
-
-            //- Return reference to the total pressure to allow adjustment
-            scalarField& T0()
-            {
-                return T0_;
-            }
 
 
         // Mapping functions
