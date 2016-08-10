@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -e
+set -x
+
+export OMPI_FC=gfortran-4.8
+export FC=mpif90
+
+rm -rf ateles seeder
+
+hg clone https://geb.sts.nt.uni-siegen.de/hg/ateles
+hg clone https://geb.sts.nt.uni-siegen.de/hg/seeder
+
+cd ateles
+sed -i 's/.*c_sizeof(typesample)/!&/' treelm/source/tem_comm_module.fpp
+./waf configure --fftw_incpath=/usr/include/ \
+                --fftw_libpath=/usr/lib/x86_64-linux-gnu/ \
+                --precice_libpath=`pwd`/../precice/build/last \
+                --precice_fbindpath=`pwd`/../precice/src/precice/adapters/f2003 \
+                --petsc_libpath=`pwd`/../petsc/x86_64/lib \
+                --boost_system_libpath=/usr/lib/x86_64-linux-gnu \
+                --boost_filesystem_libpath=/usr/lib/x86_64-linux-gnu
+
+./waf build --target=ateles
+./waf build --target=atl_harvesting
+
+cd ../seeder
+
+sed -i 's/.*c_sizeof(typesample)/!&/' treelm/source/tem_comm_module.fpp
+
+./waf configure
+
+./waf build --target=seeder
