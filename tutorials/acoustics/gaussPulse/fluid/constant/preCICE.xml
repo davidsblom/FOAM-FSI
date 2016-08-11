@@ -66,7 +66,7 @@
 
          <mapping:nearest-neighbor direction="read" from="Ateles_Acoustics" to="Fluid_Acoustics" constraint="consistent" timing="initial"/>
 
-         <!-- <master:mpi-single /> -->
+         <master:mpi-single />
        </participant>
 
        <participant name="Ateles">
@@ -87,7 +87,7 @@
 
          <mapping:nearest-neighbor direction="read" from="Fluid_Acoustics" to="Ateles_Acoustics" constraint="consistent" timing="initial"/>
 
-         <!-- <master:mpi-single /> -->
+         <master:mpi-single />
        </participant>
 
       <m2n:sockets exchange-directory="../" from="Fluid_Solver" to="Ateles" distribution-type="gather-scatter"/>
