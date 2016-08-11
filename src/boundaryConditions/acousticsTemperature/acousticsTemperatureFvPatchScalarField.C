@@ -116,14 +116,14 @@ void Foam::acousticsTemperatureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const scalarIOList& pressure = db().time().lookupObject<scalarIOList>("temperatureAcoustics");
+    const scalarIOList& temperature = db().time().lookupObject<scalarIOList>("temperatureAcoustics");
 
-    scalarField p ( patch().Cf().size(), scalar(0) );
-    p = pressure;
+    scalarField T ( patch().Cf().size(), scalar(0) );
+    T = temperature;
 
     operator==
     (
-        p
+        T
     );
 
     fixedValueFvPatchScalarField::updateCoeffs();

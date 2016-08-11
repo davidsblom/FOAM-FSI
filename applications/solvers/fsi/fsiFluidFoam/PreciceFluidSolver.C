@@ -124,7 +124,7 @@ void PreciceFluidSolver::readDataAcoustics()
     const matrix pressureData = pressureDataRowMajor.cast<scalar>();
 
     // Perfect gas law: p = rho * R * T, T = p / ( R * rho )
-    const double R = 8314.51; // N m / kmol K
+    const double R = 296.0; // N m / kmol K
     assert( pressureData.rows() == densityData.rows() );
     matrix temperatureData = pressureData.array() / (R * densityData.array() + SMALL);
 

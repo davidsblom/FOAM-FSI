@@ -111,40 +111,6 @@ void acousticsVelocityFvPatchVectorField::updateCoeffs()
         U
     );
 
-    if (mesh.changing())
-    {
-        const fvPatch& p = patch();
-        const polyPatch& pp = p.patch();
-        const pointField& oldPoints = mesh.oldPoints();
-
-        vectorField oldFc(pp.size());
-
-        forAll(oldFc, i)
-        {
-            oldFc[i] = pp[i].centre(oldPoints);
-        }
-
-        // Get wall-parallel mesh motion velocity from geometry
-        vectorField Up =
-            (pp.faceCentres() - oldFc)/mesh.time().deltaT().value();
-
-        const volVectorField& U =
-            mesh.lookupObject<volVectorField>
-            (
-                dimensionedInternalField().name()
-            );
-
-        scalarField phip =
-            p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U));
-
-        vectorField n = p.nf();
-        const scalarField& magSf = p.magSf();
-        scalarField Un = phip/(magSf + VSMALL);
-
-        // Adjust for surface-normal mesh motion flux
-        vectorField::operator=(Up + n*(Un - (n & Up)));
-    }
-
     fixedValueFvPatchVectorField::updateCoeffs();
 }
 
