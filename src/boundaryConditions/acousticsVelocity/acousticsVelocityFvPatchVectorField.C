@@ -99,8 +99,6 @@ void acousticsVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const fvMesh& mesh = dimensionedInternalField().mesh();
-
     const vectorIOList& velocity = db().time().lookupObject<vectorIOList>("velocityAcoustics");
 
     vectorField U ( patch().Cf().size(), Foam::vector::zero );
