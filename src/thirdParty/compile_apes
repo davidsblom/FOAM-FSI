@@ -23,9 +23,11 @@ sed -i 's/.*c_sizeof(typesample)/!&/' treelm/source/tem_comm_module.fpp
 
 ./waf build --target=ateles
 ./waf build --target=atl_harvesting
+./waf build --target=lua
 
 cp build/ateles $FOAM_APPBIN/
 cp build/atl_harvesting $FOAM_APPBIN/
+cp build/treelm/aotus/lua $FOAM_APPBIN/
 
 cd ../seeder
 
