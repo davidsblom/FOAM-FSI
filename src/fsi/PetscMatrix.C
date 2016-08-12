@@ -32,13 +32,16 @@ namespace fsi
             CHKERRV( ierr );
 
             delete [] arg;
+
+            ierr = PetscPushErrorHandler( &PetscMPIAbortErrorHandler, nullptr );
+            CHKERRV( ierr );
         }
 
         PetscErrorCode ierr = 0;
         ierr = MatCreate( PETSC_COMM_WORLD, &*matrix_ );
         CHKERRV( ierr );
 
-        ierr = MatSetType( *matrix_, MATSEQAIJ );
+        ierr = MatSetType( *matrix_, MATMPIAIJ );
         CHKERRV( ierr );
 
         ierr = MatSetSizes( *matrix_, PETSC_DECIDE, PETSC_DECIDE, rows, cols );
