@@ -30,6 +30,8 @@ namespace fsi
             PetscErrorCode ierr;
             ierr = PetscInitialize( &argc, &argv, "", nullptr );
             CHKERRV( ierr );
+
+            delete [] arg;
         }
 
         PetscErrorCode ierr = 0;
