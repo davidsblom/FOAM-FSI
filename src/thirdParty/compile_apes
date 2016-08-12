@@ -11,6 +11,8 @@ rm -rf ateles seeder
 hg clone https://geb.sts.nt.uni-siegen.de/hg/ateles
 hg clone https://geb.sts.nt.uni-siegen.de/hg/seeder
 
+cp -r ateles harvester
+
 cd ateles
 sed -i 's/.*c_sizeof(typesample)/!&/' treelm/source/tem_comm_module.fpp
 ./waf configure --fftw_incpath=/usr/include/ \
@@ -22,10 +24,20 @@ sed -i 's/.*c_sizeof(typesample)/!&/' treelm/source/tem_comm_module.fpp
                 --boost_filesystem_libpath=/usr/lib/x86_64-linux-gnu
 
 ./waf build --target=ateles
+
+cp build/ateles $FOAM_APPBIN/
+
+cd ../harvester
+
+sed -i 's/.*c_sizeof(typesample)/!&/' treelm/source/tem_comm_module.fpp
+./waf configure --fftw_incpath=/usr/include/ \
+                --fftw_libpath=/usr/lib/x86_64-linux-gnu/ \
+                --boost_system_libpath=/usr/lib/x86_64-linux-gnu \
+                --boost_filesystem_libpath=/usr/lib/x86_64-linux-gnu
+
 ./waf build --target=atl_harvesting
 ./waf build --target=lua
 
-cp build/ateles $FOAM_APPBIN/
 cp build/atl_harvesting $FOAM_APPBIN/
 cp build/treelm/aotus/lua $FOAM_APPBIN/
 

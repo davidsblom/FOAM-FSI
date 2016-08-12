@@ -8,14 +8,14 @@ template = 'harvester.template'
 ## ${filename}$ in the harvester.template.
 ## Can be single file or multiple files
 #in_files = ['restart/spacer_header*.lua']
-in_files = ['restart/*.lua'] 
+in_files = ['restart/*.lua']
 
-## output folder where replaces the string 
+## output folder where replaces the string
 ## ${folder}$ in the harvester.template.
-out_folder = 'harvester/' 
+out_folder = 'harvester/'
 
 ## harvester exectuable
-path_to_exec = '/home/davidblom/repositories/apes/harvester/build/harvester'
+path_to_exec = ''
 
 ## command to run in parallel
 run_command = 'mpirun -np 2'

@@ -1,41 +1,19 @@
-require('ateles_lineareuler')
-name = 'ateles_lineareuler'
+-- Use the configuration of the original simulation run.
+require 'ateles_harvester'
+logging = {level = 10}
 
+-- Set the restart data to harvest.
+restart.read = 'restart/ateles_header_9.000E-03.lua'
 
-input = {
-         --read = './restart/simulation_lastHeader.lua',
-         read = 'restart/ateles_euler_lastHeader.lua',
+-- Subsampling 
+ply_sampling = { nlevels = 4 }
 
-         subsampling = {
-                         levels = math.floor(math.log(degree+1)/math.log(2))+1,
-                         --levels = 1,
-                         projection = 'QLegendrePoint',
-                       },
-
+-- Example tracking to generate vtk files:
+tracking = {
+  { label = 'visu',
+    variable = {'density', 'velocity', 'pressure', 'momentum', 'energy', 'mach_number', 'temperature'},
+    shape = {kind='global'},
+    folder = 'harvester/',
+    output = {format = 'vtk', write_pvd=false}
   }
-
-
-output = {
-            --folder = './harvester/',
-            folder = 'harvester/',
-
-           {
-
-
-            format = 'VTU',
-
-            binary = true,
-            requestedData = {
-                             variable = {
-                                          { name = 'density', },
-                                          { name = 'momentum',},
-                                          { name = 'energy',  },
-                                          { name = 'pressure', ncomponents = 1 },
-                                          { name = 'velocity', ncomponents = 3 },
-                                        },
-                            },
-            vrtx = {
-                   },
-           }
-
-         }
+}
