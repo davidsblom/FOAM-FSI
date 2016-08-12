@@ -120,6 +120,11 @@ build:
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-dealii
         - script:
+            name: testsuite-petsc
+            code: |
+                (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
+                testsuite-petsc
+        - script:
             name: cppcheck
             code: |
                 (cd src/fsi && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
@@ -350,6 +355,11 @@ ubuntu:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-dealii
+        - script:
+            name: testsuite-petsc
+            code: |
+                (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
+                testsuite-petsc
         - script:
             name: cleanup
             code: rm -rf * .git* .travis.yml .uncrustify.cfg
