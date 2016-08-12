@@ -286,7 +286,7 @@ void CoupledFluidSolver::solve()
         (
             fvm::ddt( U )
             + fvm::div( phi, U )
-            + turbulence->divDevReff( U )
+            + turbulence->divDevReff()
         );
 
         if ( underrelaxation )
@@ -354,7 +354,7 @@ void CoupledFluidSolver::solve()
 
         turbulence->correct();
 
-        tmp<volVectorField> residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff( U ) & U) + fvc::grad( p );
+        tmp<volVectorField> residual = fvc::ddt( U ) + fvc::div( phi, U ) + (turbulence->divDevReff() & U) + fvc::grad( p );
 
         tmp<scalarField> magResU = mag( residual->internalField() );
         scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );

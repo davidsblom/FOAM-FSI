@@ -38,12 +38,12 @@ Features
 Installation
 -----------
 
-First, compile `foam-extend-3.2`. A detailed description for the compilation of
-`foam-extend-3.2` can be found here: <https://openfoamwiki.net/index.php/Installation/Linux/foam-extend-3.2>.
+First, compile `foam-extend-4.0`. A detailed description for the compilation of
+`foam-extend-4.0` can be found here: <https://openfoamwiki.net/index.php/Installation/Linux/foam-extend-4.0>.
 Clone the repository as follows:
 
 ``` bash
-git clone git://git.code.sf.net/p/foam-extend/foam-extend-3.2
+git clone -b nextRelease git://git.code.sf.net/p/foam-extend/foam-extend-3.2 foam-extend-4.0
 ```
 
 It is highly advised to the use the system installed gcc (>= 4.8) and OpenMPI
@@ -53,7 +53,7 @@ routines which are needed when running a fluid-structure-acoustics simulation
 with preCICE.
 
 On Ubuntu, the following environment variables should be set before compiling
-`foam-extend-3.2`:
+`foam-extend-4.0`:
 
 ``` bash
 # Use the system installed libraries
@@ -69,7 +69,7 @@ With this grep command, you can ensure that the `mpicxx` compiler is used
 during compilation:
 
 ``` bash
-sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++
+sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-4.0/wmake/rules/linux64Gcc/c++
 ```
 
 In case foam-extend is installed in a non-standard location, the environment
@@ -101,13 +101,13 @@ For optimal performance of the production run, it is advised to add the `NDEBUG`
 compiler flag in order to disable all assertions as follows:
 
 ``` bash
-sed -i s/"c++OPT      = -O3"/"c++OPT      = -O3 -DNDEBUG"/g foam-extend-3.2/wmake/rules/linux64Gcc/c++Opt
+sed -i s/"c++OPT      = -O3"/"c++OPT      = -O3 -DNDEBUG"/g foam-extend-4.0/wmake/rules/linux64Gcc/c++Opt
 ```
 
 Finally, the compilation process of `foam-extend` is started with
 
 ``` bash
-cd foam-extend-3.2
+cd foam-extend-4.0
 source etc/bashrc
 ./Allwmake.firstInstall
 ```
@@ -121,7 +121,7 @@ cd FOAM-FSI
 ```
 
 The first time the library is compiled, use the `Allwmake_firstInstall` script
- which installs the necessary settings in `foam-extend-3.2/etc/prefs.sh`, and
+ which installs the necessary settings in `foam-extend-4.0/etc/prefs.sh`, and
  compiles several third party packages. Thereafter, you can use the `Allwmake`
  script.
 

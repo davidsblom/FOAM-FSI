@@ -271,7 +271,7 @@ void SolidSolver::solve()
     scalar iCorr = 0;
     scalar displacementResidual = 1;
     scalar initialResidual = 1;
-    lduMatrix::solverPerformance solverPerf;
+    lduSolverPerformance solverPerf;
     lduMatrix::debug = 0;
     scalar convergenceTolerance = absoluteTolerance;
 

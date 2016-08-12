@@ -3,7 +3,7 @@ tmp<fvVectorMatrix> UEqn
 (
     fvm::ddt( U )
     + fvm::div( phi, U )
-    + turbulence->divDevReff( U )
+    + turbulence->divDevReff()
 );
 
 { // To ensure S0 and B0 are thrown out of memory
@@ -22,7 +22,7 @@ tmp<fvVectorMatrix> UEqn
         (
         fvm::ddt( U )
         + fvm::div( phi, U )
-        + turbulence->divDevReff( U )
+        + turbulence->divDevReff()
         );
     UEqn().source() = S0;
     UEqn().boundaryCoeffs() = B0;
