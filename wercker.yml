@@ -124,6 +124,7 @@ build:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 testsuite-petsc
+                mpirun -np 2 testsuite-petsc -parallel
         - script:
             name: cppcheck
             code: |
