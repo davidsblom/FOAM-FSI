@@ -133,7 +133,7 @@ build:
                 cd src/tests/tutorials && python testsuite.py
         - script:
             name: cleanup
-            code: rm -rf *
+            code: rm -rf * .git* .travis.yml .uncrustify.cfg
 
 debug:
     box: davidsblom/foam-fsi:debug
@@ -231,7 +231,7 @@ debug:
                 (cd applications && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
         - script:
             name: cleanup
-            code: rm -rf *
+            code: rm -rf * .git* .travis.yml .uncrustify.cfg
 
 ubuntu:
     box: davidsblom/foam-fsi:ubuntu
@@ -352,4 +352,4 @@ ubuntu:
                 cd src/tests && python runTests.py testsuite-dealii
         - script:
             name: cleanup
-            code: rm -rf *
+            code: rm -rf * .git* .travis.yml .uncrustify.cfg
