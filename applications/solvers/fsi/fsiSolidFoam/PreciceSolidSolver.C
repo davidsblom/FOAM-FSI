@@ -51,7 +51,7 @@ void PreciceSolidSolver::readData( matrix & data )
     matrixRowMajor dataRowMajor( idsReadPositions.rows(), precice->getDimensions() );
     dataRowMajor.setZero();
 
-    if ( data.rows() > 0 )
+    if ( dataRowMajor.rows() > 0 )
         precice->readBlockVectorData( dataId, idsReadPositions.rows(), idsReadPositions.data(), dataRowMajor.data() );
 
     data = dataRowMajor.cast<scalar>();
@@ -59,10 +59,7 @@ void PreciceSolidSolver::readData( matrix & data )
 
 void PreciceSolidSolver::run()
 {
-    matrix outputOld( solver->getInterfaceSizeLocal(), precice->getDimensions() );
-    matrix input( solver->getInterfaceSizeLocal(), precice->getDimensions() );
-    matrix output;
-    outputOld.setZero();
+    matrix output, outputOld, input;
 
     while ( solver->isRunning() )
     {
@@ -83,7 +80,10 @@ void PreciceSolidSolver::run()
             solver->solve();
             solver->getDisplacementLocal( output );
 
-            writeData( output - outputOld );
+            if ( outputOld.cols() == output.cols() )
+                writeData( output - outputOld );
+            else
+                writeData( output );
 
             if ( precice->isActionRequired( precice::constants::actionWriteIterationCheckpoint() ) )
                 precice->fulfilledAction( precice::constants::actionWriteIterationCheckpoint() );

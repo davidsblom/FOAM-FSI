@@ -28,6 +28,13 @@ Features
 *   Arbitrary high order time discretization for incompressible flow, solid
     mechanics and FSI simulations.
 
+*   Adaptive radial basis mesh deformation based on coarsening of the
+    boundary points.
+
+*   Tested on high performance computing systems, i.e. the SuperMUC Petascale
+    System located in Munich. Scalability results show good scaling until
+    approximately 2000 MPI ranks.
+
 Installation
 -----------
 
@@ -65,11 +72,13 @@ during compilation:
 sed -i s/"CC          = g++ -m64"/"CC          = mpicxx -m64"/g foam-extend-4.0/wmake/rules/linux64Gcc/c++
 ```
 
-Set the environment variable `$FOAM_INST_DIR` in case foam-extend is installed
-in a non-standard location:
+In case foam-extend is installed in a non-standard location, the environment
+variable `$FOAM_INST_DIR` needs to be set to the directory where foam-extend-3.2
+is present. So if foam-extend-3.2 is installed at `/home/davidblom/foam-extend-3.2`,
+then set `$FOAM_INST_DIR` to `/home/davidblom` like this:
 
 ``` bash
-export FOAM_INST_DIR=`pwd`
+export FOAM_INST_DIR=/home/davidblom
 ```
 
 You can make a distinction between a debug build and a release build. Generally,
@@ -128,14 +137,22 @@ operating systems are welcome.
 Test suite
 -----------
 
-A test suite is available implementing a large number of unit and functional
+Multiple test suite executables are available implementing a large number of unit and functional
 tests within the googletest framework. In case you run into problems with the
 FSI solver, preferably run the test suite and attach a log of the test results
 to your bug report.
-To run the test suite:
+The following test suites are available:
+* testsuite-dealii
+* testsuite-fsi
+* testsuite-rbf
+* testsuite-sdc
+* testsuite-sdc-fsi
+* testsuite-spacemapping
+
+To run one set of tests:
 
 ``` bash
-tests
+testsuite-fsi
 ```
 
 Credits

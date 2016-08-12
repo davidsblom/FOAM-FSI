@@ -94,7 +94,6 @@ functions
     log yes;
     rhoInf 1000;
     CofR (0 0 0);
-    region fluid-level-1;
   }
 }
 

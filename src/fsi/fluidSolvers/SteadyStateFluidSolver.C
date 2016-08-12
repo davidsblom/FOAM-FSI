@@ -294,7 +294,14 @@ void SteadyStateFluidSolver::getAcousticsPressureLocal( matrix & )
 
 void SteadyStateFluidSolver::getTractionLocal( matrix & traction )
 {
-    vectorField tractionField( getInterfaceSizeLocal(), Foam::vector::zero );
+    int size = 0;
+
+    forAll( movingPatchIDs, patchI )
+    {
+        size += mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
+    }
+
+    vectorField tractionField( size, Foam::vector::zero );
 
     int offset = 0;
 
@@ -345,8 +352,6 @@ void SteadyStateFluidSolver::initTimeStep()
 
 bool SteadyStateFluidSolver::isRunning()
 {
-    runTime->write();
-
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
          << "  ClockTime = " << runTime->elapsedClockTime() << " s"
          << endl << endl;

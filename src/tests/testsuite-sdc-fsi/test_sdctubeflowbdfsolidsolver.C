@@ -84,7 +84,7 @@ TEST( SDCFsiBDFSolidTest, order )
             assert( sdcFluidSolver );
             assert( sdcSolidSolver );
 
-            std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing ) );
+            std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation ) );
 
             int nbNodes = 3;
 

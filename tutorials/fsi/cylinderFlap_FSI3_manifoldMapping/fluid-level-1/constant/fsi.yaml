@@ -6,6 +6,7 @@ interpolation:
   radial-basis-function:
     function: thin-plate-spline
     cpu: true
+    polynomial-term: true
   coarsening:
     enabled: false
 multi-level-acceleration:
