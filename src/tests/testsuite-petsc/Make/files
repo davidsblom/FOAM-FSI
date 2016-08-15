@@ -1,4 +1,5 @@
 test_petscmatrix.C
+test_petscvector.C
 testsuite-petsc.C
 
 EXE = $(FOAM_APPBIN)/testsuite-petsc
