@@ -48,6 +48,17 @@ namespace fsi
         CHKERRV( ierr );
     }
 
+    PetscVector::PetscVector( const PetscVector & vec )
+        :
+        vector_( new Vec() ),
+        rows_( vec.rows_ )
+    {
+        std::cout << "copy constructor" << std::endl;
+        PetscErrorCode ierr = 0;
+        ierr = VecDuplicate( *(vec.vector_), &*vector_ );
+        CHKERRV( ierr );
+    }
+
     PetscVector::~PetscVector()
     {
         PetscErrorCode ierr = 0;
@@ -69,6 +80,16 @@ namespace fsi
         CHKERRV( ierr );
         ierr = VecAssemblyEnd( *vector_ );
         CHKERRV( ierr );
+    }
+
+    const Vec & PetscVector::get() const
+    {
+        return *vector_;
+    }
+
+    Vec & PetscVector::get_mut()
+    {
+        return *vector_;
     }
 
     void PetscVector::set(

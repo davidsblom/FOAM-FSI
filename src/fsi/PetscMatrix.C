@@ -75,6 +75,11 @@ namespace fsi
         CHKERRV( ierr );
     }
 
+    const Mat & PetscMatrix::get() const
+    {
+        return *matrix_;
+    }
+
     void PetscMatrix::set(
         const int row,
         const int col,
@@ -87,5 +92,19 @@ namespace fsi
         PetscErrorCode ierr = 0;
         ierr = MatSetValue( *matrix_, row, col, value, INSERT_VALUES );
         CHKERRV( ierr );
+    }
+
+    PetscVector operator *(
+        const PetscMatrix & matrix,
+        const PetscVector & vector
+        )
+    {
+        PetscVector result( vector );
+
+        PetscErrorCode ierr = 0;
+        ierr = MatMult( matrix.get(), vector.get(), result.get_mut() );
+        assert( ierr == 0 );
+
+        return result;
     }
 }

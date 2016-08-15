@@ -9,6 +9,7 @@
 #include <petscmat.h>
 #include <memory>
 #include <iostream>
+#include "PetscVector.H"
 
 namespace fsi
 {
@@ -24,6 +25,8 @@ namespace fsi
 
             void compress();
 
+            const Mat & get() const;
+
             void set(
                 const int row,
                 const int col,
@@ -36,4 +39,9 @@ namespace fsi
             const int rows_;
             const int cols_;
     };
+
+    PetscVector operator *(
+        const PetscMatrix & matrix,
+        const PetscVector & vector
+        );
 }

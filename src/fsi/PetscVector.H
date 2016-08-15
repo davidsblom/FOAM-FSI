@@ -17,7 +17,13 @@ namespace fsi
         public:
             PetscVector( int rows );
 
+            PetscVector( const PetscVector & vec );
+
             ~PetscVector();
+
+            const Vec & get() const;
+
+            Vec & get_mut();
 
             void compress();
 

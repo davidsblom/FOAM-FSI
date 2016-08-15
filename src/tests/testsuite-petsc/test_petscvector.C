@@ -19,3 +19,14 @@ TEST( Vector, set )
     vector.set( Pstream::myProcNo(), 2.3 );
     vector.compress();
 }
+
+TEST( Vector, copy_constructor )
+{
+    fsi::PetscVector vector( Pstream::nProcs() + 1 );
+    vector.set( Pstream::myProcNo(), 2.3 );
+    vector.compress();
+
+    fsi::PetscVector vector2( vector );
+    vector2.set( Pstream::myProcNo(), 23.3 );
+    vector2.compress();
+}
