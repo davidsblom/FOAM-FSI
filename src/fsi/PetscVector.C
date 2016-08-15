@@ -93,4 +93,11 @@ namespace fsi
         ierr = VecSetValue( *vector_, row, value, INSERT_VALUES );
         CHKERRV( ierr );
     }
+
+    void PetscVector::view()
+    {
+        PetscErrorCode ierr = 0;
+        ierr = VecView( *vector_, PETSC_VIEWER_STDOUT_WORLD );
+        CHKERRV( ierr );
+    }
 }

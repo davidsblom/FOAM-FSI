@@ -16,19 +16,27 @@ TEST( Matrix, constructor )
 
 TEST( Matrix, set )
 {
-    fsi::PetscMatrix matrix( Pstream::nProcs() + 1, Pstream::nProcs() + 1 );
-    matrix.set( Pstream::myProcNo(), Pstream::myProcNo(), 5.2 );
+    int rank, size;
+    MPI_Comm_rank( PETSC_COMM_WORLD, &rank );
+    MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+    fsi::PetscMatrix matrix( size + 1, size + 1 );
+    matrix.set( rank, rank, 5.2 );
     matrix.compress();
 }
 
 TEST( Matrix, matmult )
 {
-    fsi::PetscMatrix matrix( Pstream::nProcs() + 1, Pstream::nProcs() + 1 );
-    matrix.set( Pstream::myProcNo(), Pstream::myProcNo(), 5.2 );
+    int rank, size;
+    MPI_Comm_rank( PETSC_COMM_WORLD, &rank );
+    MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+    fsi::PetscMatrix matrix( size + 1, size + 1 );
+    matrix.set( rank, rank, 5.2 );
     matrix.compress();
 
-    fsi::PetscVector vector1( Pstream::nProcs() + 1 );
-    vector1.set( Pstream::myProcNo(), 214.1 );
+    fsi::PetscVector vector1( size + 1 );
+    vector1.set( rank, 214.1 );
     vector1.compress();
 
     fsi::PetscVector result = matrix * vector1;

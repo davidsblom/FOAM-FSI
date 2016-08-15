@@ -30,6 +30,8 @@ namespace fsi
                 const PetscScalar value
                 );
 
+            void view();
+
             friend PetscVector operator *(
                 const PetscMatrix & matrix,
                 const PetscVector & vector
