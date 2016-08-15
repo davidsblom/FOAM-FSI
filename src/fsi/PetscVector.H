@@ -19,6 +19,13 @@ namespace fsi
 
             ~PetscVector();
 
+            void compress();
+
+            void set(
+                const int row,
+                const PetscScalar value
+                );
+
         private:
             const std::unique_ptr<Vec> vector_;
             const int rows_;

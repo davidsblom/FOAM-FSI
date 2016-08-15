@@ -61,4 +61,25 @@ namespace fsi
             CHKERRV( ierr );
         }
     }
+
+    void PetscVector::compress()
+    {
+        PetscErrorCode ierr = 0;
+        ierr = VecAssemblyBegin( *vector_ );
+        CHKERRV( ierr );
+        ierr = VecAssemblyEnd( *vector_ );
+        CHKERRV( ierr );
+    }
+
+    void PetscVector::set(
+        const int row,
+        const PetscScalar value
+        )
+    {
+        assert( row < rows_ );
+
+        PetscErrorCode ierr = 0;
+        ierr = VecSetValue( *vector_, row, value, INSERT_VALUES );
+        CHKERRV( ierr );
+    }
 }
