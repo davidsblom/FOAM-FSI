@@ -50,3 +50,18 @@ TEST( Vector, print )
     vector.compress();
     vector.print();
 }
+
+TEST( Vector, get_value )
+{
+    int rank, size;
+    MPI_Comm_rank( PETSC_COMM_WORLD, &rank );
+    MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+    fsi::PetscVector vector( size + 1 );
+    vector.set( rank, 5.2 );
+    vector.compress();
+
+    PetscScalar value = vector[rank];
+
+    EXPECT_EQ( value, 5.2 );
+}

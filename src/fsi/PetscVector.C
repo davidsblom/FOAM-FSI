@@ -4,8 +4,9 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#include "PetscVector.H"
 #include <cassert>
+#include "PetscVector.H"
+#include "fvCFD.H"
 
 namespace fsi
 {
@@ -99,5 +100,17 @@ namespace fsi
         PetscErrorCode ierr = 0;
         ierr = VecSetValue( *vector_, row, value, INSERT_VALUES );
         CHKERRV( ierr );
+    }
+
+    PetscScalar PetscVector::operator[]( const PetscInt row )
+    {
+        PetscScalar value;
+
+        PetscErrorCode ierr = VecGetValues( *vector_, 1, &row, &value );
+
+        if ( ierr != 0 )
+            Foam::abort( FatalError );
+
+        return value;
     }
 }
