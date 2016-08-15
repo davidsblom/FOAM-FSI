@@ -104,6 +104,12 @@ namespace fsi
 
     PetscScalar PetscVector::operator[]( const PetscInt row )
     {
+        int size;
+        MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+        if ( size != 1 )
+            Foam::abort( FatalError );
+
         PetscScalar value;
 
         PetscErrorCode ierr = VecGetValues( *vector_, 1, &row, &value );

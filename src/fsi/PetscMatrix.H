@@ -41,6 +41,11 @@ namespace fsi
                 const PetscScalar value
                 );
 
+            PetscScalar operator()(
+                const PetscInt row,
+                const PetscInt col
+                );
+
             friend PetscMatrix operator *(
                 const PetscMatrix & A,
                 const PetscMatrix & B

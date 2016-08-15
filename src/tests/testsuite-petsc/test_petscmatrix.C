@@ -72,3 +72,17 @@ TEST( Matrix, matmatmult )
 
     C.print();
 }
+
+TEST( Matrix, get_value )
+{
+    int rank, size;
+    MPI_Comm_rank( PETSC_COMM_WORLD, &rank );
+    MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+    fsi::PetscMatrix matrix( size + 1, size + 1 );
+    matrix.set( rank, rank, 5.2 );
+    matrix.compress();
+
+    if ( size == 1 )
+        ASSERT_EQ( matrix( rank, rank ), 5.2 );
+}

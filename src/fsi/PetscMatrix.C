@@ -117,6 +117,27 @@ namespace fsi
         CHKERRV( ierr );
     }
 
+    PetscScalar PetscMatrix::operator()(
+        const PetscInt row,
+        const PetscInt col
+        )
+    {
+        int size;
+        MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+        if ( size != 1 )
+            Foam::abort( FatalError );
+
+        PetscScalar value;
+
+        const PetscErrorCode ierr = MatGetValues( *matrix_, 1, &row, 1, &col, &value );
+
+        if ( ierr != 0 )
+            Foam::abort( FatalError );
+
+        return value;
+    }
+
     PetscMatrix operator *(
         const PetscMatrix & A,
         const PetscMatrix & B

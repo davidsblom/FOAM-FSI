@@ -61,6 +61,9 @@ TEST( Vector, get_value )
     vector.set( rank, 5.2 );
     vector.compress();
 
-    EXPECT_EQ( vector[rank], 5.2 );
-    EXPECT_EQ( vector( rank ), 5.2 );
+    if ( size == 1 )
+    {
+        EXPECT_EQ( vector[rank], 5.2 );
+        EXPECT_EQ( vector( rank ), 5.2 );
+    }
 }
