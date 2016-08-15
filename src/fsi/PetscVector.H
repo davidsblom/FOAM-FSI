@@ -41,6 +41,11 @@ namespace fsi
                 const PetscVector & vector
                 );
 
+            friend PetscVector solve(
+                const PetscMatrix & mat,
+                const PetscVector & vec
+                );
+
         private:
             const std::unique_ptr<Vec> vector_;
             const int rows_;

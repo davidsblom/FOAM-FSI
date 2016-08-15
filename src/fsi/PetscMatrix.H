@@ -56,6 +56,11 @@ namespace fsi
                 const PetscVector & vector
                 );
 
+            friend PetscVector solve(
+                const PetscMatrix & mat,
+                const PetscVector & vec
+                );
+
         private:
             const std::unique_ptr<Mat> matrix_;
 
@@ -71,5 +76,10 @@ namespace fsi
     PetscVector operator *(
         const PetscMatrix & matrix,
         const PetscVector & vector
+        );
+
+    PetscVector solve(
+        const PetscMatrix & mat,
+        const PetscVector & vec
         );
 }

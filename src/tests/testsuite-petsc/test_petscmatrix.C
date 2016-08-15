@@ -86,3 +86,35 @@ TEST( Matrix, get_value )
     if ( size == 1 )
         ASSERT_EQ( matrix( rank, rank ), 5.2 );
 }
+
+TEST( Matrix, solve )
+{
+    int size;
+    MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+    fsi::PetscMatrix matrix( 2, 2 );
+
+    matrix.set( 0, 0, 1 );
+    matrix.set( 0, 1, 2 );
+    matrix.set( 1, 0, 3 );
+    matrix.set( 1, 1, 4 );
+
+    matrix.compress();
+
+    fsi::PetscVector vector( 2 );
+
+    vector.set( 0, 1 );
+    vector.set( 1, 2 );
+
+    vector.compress();
+
+    fsi::PetscVector result = solve( matrix, vector );
+
+    result.print();
+
+    if ( size == 1 )
+    {
+        ASSERT_NEAR( result[0], 0, 1e-14 );
+        ASSERT_NEAR( result[1], 0.5, 1e-14 );
+    }
+}

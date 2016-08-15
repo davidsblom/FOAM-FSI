@@ -7,6 +7,7 @@
 #include <cassert>
 #include "PetscMatrix.H"
 #include "fvCFD.H"
+#include <petscksp.h>
 
 namespace fsi
 {
@@ -169,6 +170,70 @@ namespace fsi
 
         if ( ierr != 0 )
             Foam::abort( FatalError );
+
+        return result;
+    }
+
+    PetscVector solve(
+        const PetscMatrix & matrix,
+        const PetscVector & vector
+        )
+    {
+        PetscErrorCode ierr = 0;
+
+        KSP ksp;
+        ierr = KSPCreate( PETSC_COMM_WORLD, &ksp );
+
+        if ( ierr != 0 )
+            Foam::abort( FatalError );
+
+        ierr = KSPSetOperators( ksp, *(matrix.matrix_), *(matrix.matrix_) );
+
+        if ( ierr != 0 )
+            Foam::abort( FatalError );
+
+        ierr = KSPSetType( ksp, KSPGMRES );
+
+        if ( ierr != 0 )
+            Foam::abort( FatalError );
+
+        ierr = KSPSetUp( ksp );
+
+        if ( ierr != 0 )
+            Foam::abort( FatalError );
+
+        PetscVector result( vector );
+
+        ierr = KSPSolve( ksp, *(vector.vector_), *(result.vector_) );
+
+        if ( ierr != 0 )
+            Foam::abort( FatalError );
+
+        KSPConvergedReason reason;
+
+        ierr = KSPGetConvergedReason( ksp, &reason );
+
+        if ( ierr != 0 )
+            Foam::abort( FatalError );
+
+        if ( reason == KSP_DIVERGED_INDEFINITE_PC )
+        {
+            std::cout << "Divergence because of indefinite preconditioner" << std::endl;
+            std::cout << "Run the executable again but with -pc_factor_shift_positive_definite option" << std::endl;
+            Foam::abort( FatalError );
+        }
+        else
+        if ( reason < 0 )
+        {
+            std::cout << "Other kind of divergence: this should not happen." << std::endl;
+            Foam::abort( FatalError );
+        }
+        else
+        {
+            PetscInt its;
+            KSPGetIterationNumber( ksp, &its );
+            std::cout << "Convergence in " << its << " iterations." << std::endl;
+        }
 
         return result;
     }
