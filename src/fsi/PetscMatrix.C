@@ -53,6 +53,26 @@ namespace fsi
         CHKERRV( ierr );
     }
 
+    PetscMatrix::PetscMatrix(
+        int rows,
+        int cols,
+        std::unique_ptr<Mat> & matrix
+        )
+        :
+        matrix_( matrix.release() ),
+        rows_( rows ),
+        cols_( cols )
+    {}
+
+    PetscMatrix::PetscMatrix( const PetscMatrix & matrix )
+        :
+        matrix_( new Mat() ),
+        rows_( matrix.rows_ ),
+        cols_( matrix.cols_ )
+    {
+        std::cout << "matrix copy constructor" << std::endl;
+    }
+
     PetscMatrix::~PetscMatrix()
     {
         PetscErrorCode ierr = 0;
@@ -95,6 +115,25 @@ namespace fsi
         PetscErrorCode ierr = 0;
         ierr = MatSetValue( *matrix_, row, col, value, INSERT_VALUES );
         CHKERRV( ierr );
+    }
+
+    PetscMatrix operator *(
+        const PetscMatrix & A,
+        const PetscMatrix & B
+        )
+    {
+        assert( A.cols_ == B.rows_ );
+
+        std::unique_ptr<Mat> C( new Mat() );
+
+        PetscErrorCode ierr = MatMatMult( *(A.matrix_), *(B.matrix_), MAT_INITIAL_MATRIX, PETSC_DEFAULT, &*C );
+
+        PetscMatrix result( A.cols_, B.cols_, C );
+
+        if ( ierr != 0 )
+            Foam::abort( FatalError );
+
+        return result;
     }
 
     PetscVector operator *(

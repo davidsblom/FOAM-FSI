@@ -53,3 +53,22 @@ TEST( Matrix, view )
     matrix.compress();
     matrix.print();
 }
+
+TEST( Matrix, matmatmult )
+{
+    int rank, size;
+    MPI_Comm_rank( PETSC_COMM_WORLD, &rank );
+    MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+    fsi::PetscMatrix A( size + 1, size + 1 );
+    A.set( rank, rank, 5.2 );
+    A.compress();
+
+    fsi::PetscMatrix B( size + 1, size + 1 );
+    B.set( rank, rank, 5.2 );
+    B.compress();
+
+    fsi::PetscMatrix C = A * B;
+
+    C.print();
+}

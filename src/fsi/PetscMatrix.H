@@ -21,6 +21,14 @@ namespace fsi
                 int cols
                 );
 
+            PetscMatrix(
+                int rows,
+                int cols,
+                std::unique_ptr<Mat> & matrix
+                );
+
+            PetscMatrix( const PetscMatrix & matrix );
+
             ~PetscMatrix();
 
             void compress();
@@ -31,6 +39,11 @@ namespace fsi
                 const int row,
                 const int col,
                 const PetscScalar value
+                );
+
+            friend PetscMatrix operator *(
+                const PetscMatrix & A,
+                const PetscMatrix & B
                 );
 
             friend PetscVector operator *(
@@ -44,6 +57,11 @@ namespace fsi
             const int rows_;
             const int cols_;
     };
+
+    PetscMatrix operator *(
+        const PetscMatrix & A,
+        const PetscMatrix & B
+        );
 
     PetscVector operator *(
         const PetscMatrix & matrix,
