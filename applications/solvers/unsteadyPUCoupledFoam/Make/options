@@ -29,6 +29,7 @@ EXE_LIBS = \
     -llagrangian \
     -lyaml-cpp \
     -lRBFMeshMotionSolver \
+    -lboost_serialization \
     -lfsi \
     -ltetFiniteElement \
     -lbasicThermophysicalModels \

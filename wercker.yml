@@ -21,6 +21,7 @@ build:
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_55_0 boost
+                cp boost/bin.v2/libs/serialization/build/gcc-4.9.2/release/link-static/threading-multi/libboost_serialization.a ${FOAM_LIBBIN}/
 
                 # petsc
                 mkdir -p petsc
@@ -154,6 +155,7 @@ debug:
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_55_0 boost
+                cp boost/bin.v2/libs/serialization/build/gcc-4.9.2/release/link-static/threading-multi/libboost_serialization.a ${FOAM_LIBBIN}/
 
                 # petsc
                 mkdir -p petsc

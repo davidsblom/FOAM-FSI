@@ -4,7 +4,59 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+#ifndef EIGEN_CONFIG_H_
+ #define EIGEN_CONFIG_H_
+
+ #include <boost/serialization/array.hpp>
+ #define EIGEN_DENSEBASE_PLUGIN "EigenDenseBaseAddons.h"
+
+ #include <Eigen/Core>
+
+#endif  // EIGEN_CONFIG_H_
+
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 #include "FsiSolver.H"
+
+/// Boost Serialization Helper
+
+template <typename T>
+bool serialize(
+    const T & data,
+    const std::string & filename
+    )
+{
+    std::ofstream ofs( filename.c_str(), std::ios::out );
+
+    if ( !ofs.is_open() )
+        return false;
+
+    {
+        boost::archive::binary_oarchive oa( ofs );
+        oa << data;
+    }
+    ofs.close();
+    return true;
+}
+
+template <typename T>
+bool deSerialize(
+    T & data,
+    const std::string & filename
+    )
+{
+    std::ifstream ifs( filename.c_str(), std::ios::in );
+
+    if ( !ifs.is_open() )
+        return false;
+
+    {
+        boost::archive::binary_iarchive ia( ifs );
+        ia >> data;
+    }
+    ifs.close();
+    return true;
+}
 
 namespace fsi
 {
@@ -27,7 +79,9 @@ namespace fsi
         allConverged( false ),
         x(),
         extrapolationOrder( extrapolationOrder ),
-        previousSolutions()
+        previousSolutions(),
+        saveState( false ),
+        saveInterval( 0 )
     {
         // Verify input parameters
         assert( fluid );
@@ -40,6 +94,68 @@ namespace fsi
         assert( solid->N > 0 );
         assert( extrapolationOrder >= 0 );
         assert( extrapolationOrder <= 2 );
+
+        // Initialize control variable x
+        if ( parallel )
+        {
+            x.resize( solid->data.rows() * solid->data.cols() + fluid->data.rows() * fluid->data.cols() );
+
+            for ( int i = 0; i < solid->data.cols(); i++ )
+                x.segment( i * solid->data.rows(), solid->data.rows() ) = solid->data.col( i );
+
+            for ( int j = 0; j < fluid->data.cols(); j++ )
+                x.segment( j * fluid->data.rows() + solid->data.rows() * solid->data.cols(), fluid->data.rows() ) = fluid->data.col( j );
+        }
+
+        if ( !parallel )
+        {
+            x.resize( solid->data.rows() * solid->data.cols() );
+
+            for ( int i = 0; i < solid->data.cols(); i++ )
+                x.segment( i * solid->data.rows(), solid->data.rows() ) = solid->data.col( i );
+        }
+
+        // Save initial solution for extrapolation
+        previousSolutions.push_front( x );
+    }
+
+    FsiSolver::FsiSolver(
+        shared_ptr<BaseMultiLevelSolver> fluid,
+        shared_ptr<BaseMultiLevelSolver> solid,
+        shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures,
+        bool parallel,
+        int extrapolationOrder,
+        bool saveState,
+        int saveInterval
+        )
+        :
+        init( false ),
+        fluid( fluid ),
+        solid( solid ),
+        convergenceMeasures( convergenceMeasures ),
+        parallel( parallel ),
+        N( fluid->N ),
+        iter( 0 ),
+        nbIter( 0 ),
+        allConverged( false ),
+        x(),
+        extrapolationOrder( extrapolationOrder ),
+        previousSolutions(),
+        saveState( saveState ),
+        saveInterval( saveInterval )
+    {
+        // Verify input parameters
+        assert( fluid );
+        assert( solid );
+        assert( N > 0 );
+        assert( convergenceMeasures );
+        assert( convergenceMeasures->size() > 0 );
+        assert( this->fluid->N == N );
+        assert( fluid->N > 0 );
+        assert( solid->N > 0 );
+        assert( extrapolationOrder >= 0 );
+        assert( extrapolationOrder <= 2 );
+        assert( saveInterval >= 0 );
 
         // Initialize control variable x
         if ( parallel )
@@ -196,6 +312,13 @@ namespace fsi
             previousSolutions.pop_back();
 
         assert( previousSolutions.size() <= 3 );
+
+        // Write current state to disk
+        // if ( saveState && saveInterval % fluid->timeIndex == 0 && Pstream::myProcNo() == 0 )
+        if ( Pstream::myProcNo() == 0 )
+        {
+            serialize( x, "fsi-interface-" + std::to_string( fluid->timeIndex ) + ".bin" );
+        }
 
         init = false;
     }
