@@ -25,12 +25,12 @@ namespace fsi
 
             void compress();
 
+            void print();
+
             void set(
                 const int row,
                 const PetscScalar value
                 );
-
-            void view();
 
             friend PetscVector operator *(
                 const PetscMatrix & matrix,

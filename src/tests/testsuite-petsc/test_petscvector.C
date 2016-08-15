@@ -39,7 +39,7 @@ TEST( Vector, copy_constructor )
     vector2.compress();
 }
 
-TEST( Vector, view )
+TEST( Vector, print )
 {
     int rank, size;
     MPI_Comm_rank( PETSC_COMM_WORLD, &rank );
@@ -48,5 +48,5 @@ TEST( Vector, view )
     fsi::PetscVector vector( size + 1 );
     vector.set( rank, rank );
     vector.compress();
-    vector.view();
+    vector.print();
 }

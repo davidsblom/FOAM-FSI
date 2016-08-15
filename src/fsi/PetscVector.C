@@ -82,6 +82,13 @@ namespace fsi
         CHKERRV( ierr );
     }
 
+    void PetscVector::print()
+    {
+        PetscErrorCode ierr = 0;
+        ierr = VecView( *vector_, PETSC_VIEWER_STDOUT_WORLD );
+        CHKERRV( ierr );
+    }
+
     void PetscVector::set(
         const int row,
         const PetscScalar value
@@ -91,13 +98,6 @@ namespace fsi
 
         PetscErrorCode ierr = 0;
         ierr = VecSetValue( *vector_, row, value, INSERT_VALUES );
-        CHKERRV( ierr );
-    }
-
-    void PetscVector::view()
-    {
-        PetscErrorCode ierr = 0;
-        ierr = VecView( *vector_, PETSC_VIEWER_STDOUT_WORLD );
         CHKERRV( ierr );
     }
 }

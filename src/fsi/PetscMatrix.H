@@ -25,6 +25,8 @@ namespace fsi
 
             void compress();
 
+            void print();
+
             void set(
                 const int row,
                 const int col,

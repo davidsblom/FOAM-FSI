@@ -76,6 +76,13 @@ namespace fsi
         CHKERRV( ierr );
     }
 
+    void PetscMatrix::print()
+    {
+        PetscErrorCode ierr = 0;
+        ierr = MatView( *matrix_, PETSC_VIEWER_STDOUT_WORLD );
+        CHKERRV( ierr );
+    }
+
     void PetscMatrix::set(
         const int row,
         const int col,

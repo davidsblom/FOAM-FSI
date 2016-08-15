@@ -41,3 +41,15 @@ TEST( Matrix, matmult )
 
     fsi::PetscVector result = matrix * vector1;
 }
+
+TEST( Matrix, view )
+{
+    int rank, size;
+    MPI_Comm_rank( PETSC_COMM_WORLD, &rank );
+    MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+    fsi::PetscMatrix matrix( size + 1, size + 1 );
+    matrix.set( rank, rank, 5.2 );
+    matrix.compress();
+    matrix.print();
+}
