@@ -31,6 +31,7 @@ wclean src/tests/testsuite-rbf
 wclean src/tests/testsuite-sdc
 wclean src/tests/testsuite-sdc-fsi
 wclean src/tests/testsuite-spacemapping
+wclean src/tests/testsuite-petsc
 wclean src/tests/tubeflow
 wclean src/tests/tubeflow-sdc
 wclean src/tests/tubeflow-sdc-solid

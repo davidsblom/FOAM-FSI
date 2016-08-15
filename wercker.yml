@@ -361,6 +361,7 @@ ubuntu:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 testsuite-petsc
+                mpirun --allow-run-as-root -np 2 testsuite-petsc -parallel
         - script:
             name: cleanup
             code: rm -rf * .git* .travis.yml .uncrustify.cfg

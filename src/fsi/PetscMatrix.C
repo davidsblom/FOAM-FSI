@@ -5,6 +5,7 @@
  */
 
 #include "PetscMatrix.H"
+#include <cassert>
 
 namespace fsi
 {
@@ -46,6 +47,9 @@ namespace fsi
 
         ierr = MatSetSizes( *matrix_, PETSC_DECIDE, PETSC_DECIDE, rows, cols );
         CHKERRV( ierr );
+
+        ierr = MatSetUp( *matrix_ );
+        CHKERRV( ierr );
     }
 
     PetscMatrix::~PetscMatrix()
@@ -60,5 +64,28 @@ namespace fsi
             ierr = MatDestroy( &*matrix_ );
             CHKERRV( ierr );
         }
+    }
+
+    void PetscMatrix::compress()
+    {
+        PetscErrorCode ierr = 0;
+        ierr = MatAssemblyBegin( *matrix_, MAT_FINAL_ASSEMBLY );
+        CHKERRV( ierr );
+        ierr = MatAssemblyEnd( *matrix_, MAT_FINAL_ASSEMBLY );
+        CHKERRV( ierr );
+    }
+
+    void PetscMatrix::set(
+        const int row,
+        const int col,
+        const PetscScalar value
+        )
+    {
+        assert( row < rows_ );
+        assert( col < cols_ );
+
+        PetscErrorCode ierr = 0;
+        ierr = MatSetValue( *matrix_, row, col, value, INSERT_VALUES );
+        CHKERRV( ierr );
     }
 }
