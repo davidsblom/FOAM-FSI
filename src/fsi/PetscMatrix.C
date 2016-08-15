@@ -71,7 +71,9 @@ namespace fsi
         rows_( matrix.rows_ ),
         cols_( matrix.cols_ )
     {
-        std::cout << "matrix copy constructor" << std::endl;
+        PetscErrorCode ierr = 0;
+        ierr = MatDuplicate( *(matrix.matrix_), MAT_COPY_VALUES, &*matrix_ );
+        CHKERRV( ierr );
     }
 
     PetscMatrix::~PetscMatrix()

@@ -54,7 +54,6 @@ namespace fsi
         vector_( new Vec() ),
         rows_( vec.rows_ )
     {
-        std::cout << "vector copy constructor" << std::endl;
         PetscErrorCode ierr = 0;
         ierr = VecDuplicate( *(vec.vector_), &*vector_ );
         CHKERRV( ierr );

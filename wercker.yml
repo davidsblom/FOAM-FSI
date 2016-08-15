@@ -23,8 +23,8 @@ build:
                 ln -s /home/boost_1_55_0 boost
 
                 # petsc
-                mkdir -p petsc
-                (cd petsc && ln -s /usr/include/petsc include)
+                ln -s /home/petsc-3.6.4 petsc
+                cp petsc/x86_64/lib/lib* ${FOAM_LIBBIN}/
 
                 # deal.II
                 ln -s /home/dealii-8.4.1 dealii

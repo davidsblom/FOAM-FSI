@@ -35,8 +35,18 @@ TEST( Vector, copy_constructor )
     vector.compress();
 
     fsi::PetscVector vector2( vector );
-    vector2.set( Pstream::myProcNo(), 23.3 );
+
+    if ( size == 1 )
+        ASSERT_EQ( vector[rank], vector2[rank] );
+
+    vector2.set( rank, 23.3 );
     vector2.compress();
+
+    if ( size == 1 )
+    {
+        ASSERT_EQ( vector2[rank], 23.3 );
+        ASSERT_EQ( vector[rank], rank );
+    }
 }
 
 TEST( Vector, print )

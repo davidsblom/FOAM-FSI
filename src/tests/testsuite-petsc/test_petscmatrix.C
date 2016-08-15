@@ -118,3 +118,27 @@ TEST( Matrix, solve )
         ASSERT_NEAR( result[1], 0.5, 1e-14 );
     }
 }
+
+TEST( Matrix, duplicate )
+{
+    int size;
+    MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+    fsi::PetscMatrix matrix( 2, 2 );
+
+    matrix.set( 0, 0, 1 );
+    matrix.set( 0, 1, 2 );
+    matrix.set( 1, 0, 3 );
+    matrix.set( 1, 1, 4 );
+
+    matrix.compress();
+
+    fsi::PetscMatrix matrix2( matrix );
+
+    if ( size == 1 )
+    {
+        for ( int i = 0; i < 2; i++ )
+            for ( int j = 0; j < 2; j++ )
+                ASSERT_EQ( matrix( i, j ), matrix2( i, j ) );
+    }
+}
