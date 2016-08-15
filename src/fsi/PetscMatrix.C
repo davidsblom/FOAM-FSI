@@ -4,8 +4,9 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#include "PetscMatrix.H"
 #include <cassert>
+#include "PetscMatrix.H"
+#include "fvCFD.H"
 
 namespace fsi
 {
@@ -75,11 +76,6 @@ namespace fsi
         CHKERRV( ierr );
     }
 
-    const Mat & PetscMatrix::get() const
-    {
-        return *matrix_;
-    }
-
     void PetscMatrix::set(
         const int row,
         const int col,
@@ -102,8 +98,10 @@ namespace fsi
         PetscVector result( vector );
 
         PetscErrorCode ierr = 0;
-        ierr = MatMult( matrix.get(), vector.get(), result.get_mut() );
-        assert( ierr == 0 );
+        ierr = MatMult( *matrix.matrix_, *vector.vector_, *result.vector_ );
+
+        if ( ierr != 0 )
+            Foam::abort( FatalError );
 
         return result;
     }

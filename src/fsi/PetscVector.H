@@ -12,6 +12,8 @@
 
 namespace fsi
 {
+    class PetscMatrix;
+
     class PetscVector
     {
         public:
@@ -21,15 +23,16 @@ namespace fsi
 
             ~PetscVector();
 
-            const Vec & get() const;
-
-            Vec & get_mut();
-
             void compress();
 
             void set(
                 const int row,
                 const PetscScalar value
+                );
+
+            friend PetscVector operator *(
+                const PetscMatrix & matrix,
+                const PetscVector & vector
                 );
 
         private:

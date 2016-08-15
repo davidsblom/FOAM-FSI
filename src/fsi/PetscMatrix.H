@@ -25,12 +25,15 @@ namespace fsi
 
             void compress();
 
-            const Mat & get() const;
-
             void set(
                 const int row,
                 const int col,
                 const PetscScalar value
+                );
+
+            friend PetscVector operator *(
+                const PetscMatrix & matrix,
+                const PetscVector & vector
                 );
 
         private:

@@ -82,16 +82,6 @@ namespace fsi
         CHKERRV( ierr );
     }
 
-    const Vec & PetscVector::get() const
-    {
-        return *vector_;
-    }
-
-    Vec & PetscVector::get_mut()
-    {
-        return *vector_;
-    }
-
     void PetscVector::set(
         const int row,
         const PetscScalar value
