@@ -49,5 +49,16 @@ namespace fsi
     }
 
     PetscVector::~PetscVector()
-    {}
+    {
+        PetscErrorCode ierr = 0;
+        PetscBool petscIsInitialized;
+        PetscInitialized( &petscIsInitialized );
+
+        if ( petscIsInitialized )
+        {
+            // If PetscFinalize is called before ~Matrix
+            ierr = VecDestroy( &*vector_ );
+            CHKERRV( ierr );
+        }
+    }
 }
