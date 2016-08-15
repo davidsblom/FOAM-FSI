@@ -113,4 +113,9 @@ namespace fsi
 
         return value;
     }
+
+    PetscScalar PetscVector::operator()( const PetscInt row )
+    {
+        return this->operator[]( row );
+    }
 }

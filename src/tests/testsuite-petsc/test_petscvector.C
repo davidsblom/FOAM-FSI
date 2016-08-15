@@ -61,7 +61,6 @@ TEST( Vector, get_value )
     vector.set( rank, 5.2 );
     vector.compress();
 
-    PetscScalar value = vector[rank];
-
-    EXPECT_EQ( value, 5.2 );
+    EXPECT_EQ( vector[rank], 5.2 );
+    EXPECT_EQ( vector( rank ), 5.2 );
 }
