@@ -12,8 +12,15 @@ namespace fsi
 {
     PetscVector::PetscVector( int rows )
         :
-        vector_( new Vec() ),
-        rows_( rows )
+        PetscVector( rows, true )
+    {}
+
+    PetscVector::PetscVector(
+        int rows,
+        bool global
+        )
+        :
+        vector_( new Vec() )
     {
         PetscBool petscIsInitialized;
         PetscInitialized( &petscIsInitialized );
@@ -42,7 +49,11 @@ namespace fsi
         ierr = VecSetType( *vector_, VECMPI );
         CHKERRV( ierr );
 
-        ierr = VecSetSizes( *vector_, PETSC_DECIDE, rows );
+        if ( global )
+            ierr = VecSetSizes( *vector_, PETSC_DECIDE, rows );
+        else
+            ierr = VecSetSizes( *vector_, rows, PETSC_DECIDE );
+
         CHKERRV( ierr );
 
         ierr = VecSetUp( *vector_ );
@@ -51,8 +62,7 @@ namespace fsi
 
     PetscVector::PetscVector( const PetscVector & vec )
         :
-        vector_( new Vec() ),
-        rows_( vec.rows_ )
+        vector_( new Vec() )
     {
         PetscErrorCode ierr = 0;
         ierr = VecDuplicate( *(vec.vector_), &*vector_ );
@@ -89,13 +99,23 @@ namespace fsi
         CHKERRV( ierr );
     }
 
+    PetscInt PetscVector::rows()
+    {
+        PetscInt size;
+        PetscErrorCode ierr = 0;
+        ierr = VecGetSize( *vector_, &size );
+
+        if ( ierr != 0 )
+            Foam::abort( FatalError );
+
+        return size;
+    }
+
     void PetscVector::set(
         const int row,
         const PetscScalar value
         )
     {
-        assert( row < rows_ );
-
         PetscErrorCode ierr = 0;
         ierr = VecSetValue( *vector_, row, value, INSERT_VALUES );
         CHKERRV( ierr );

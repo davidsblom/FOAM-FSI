@@ -19,6 +19,11 @@ namespace fsi
         public:
             PetscVector( int rows );
 
+            PetscVector(
+                int rows,
+                bool global
+                );
+
             PetscVector( const PetscVector & vec );
 
             ~PetscVector();
@@ -26,6 +31,8 @@ namespace fsi
             void compress();
 
             void print();
+
+            PetscInt rows();
 
             void set(
                 const int row,
@@ -48,6 +55,5 @@ namespace fsi
 
         private:
             const std::unique_ptr<Vec> vector_;
-            const int rows_;
     };
 }
