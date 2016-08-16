@@ -42,7 +42,8 @@ build:
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
 
                 cd src/thirdParty
-
+                export PETSC_DIR=/home/petsc-3.6.4
+                export PETSC_ARCH=x86_64
                 export BOOST_ROOT=`pwd`/boost
                 export PRECICE_BOOST_ROOT=${BOOST_ROOT}
                 export PRECICE_MPI_LIB=mpi
@@ -51,8 +52,8 @@ build:
                 export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
                 cd precice
-                scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
-                cp build/release-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
+                scons -j $WM_NCOMPPROCS build=release python=on petsc=on compiler=mpicxx solib
+                cp build/release/libprecice.* ${FOAM_LIBBIN}/
                 rm -rf build/*
         - script:
             name: boundary conditions
