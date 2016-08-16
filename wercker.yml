@@ -52,8 +52,8 @@ build:
                 export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
                 cd precice
-                scons -j $WM_NCOMPPROCS build=release python=on petsc=on compiler=mpicxx solib
-                cp build/release/libprecice.* ${FOAM_LIBBIN}/
+                scons -j $WM_NCOMPPROCS build=release python=off petsc=on compiler=mpicxx solib
+                cp build/release-nopython/libprecice.* ${FOAM_LIBBIN}/
                 rm -rf build/*
         - script:
             name: boundary conditions
