@@ -163,8 +163,8 @@ debug:
                 ln -s /home/boost_1_55_0 boost
 
                 # petsc
-                mkdir -p petsc
-                (cd petsc && ln -s /usr/include/petsc include)
+                ln -s /home/petsc-3.6.4 petsc
+                cp petsc/x86_64/lib/lib* ${FOAM_LIBBIN}/
 
                 # deal.II
                 ln -s /home/dealii-8.4.1 dealii
@@ -182,7 +182,8 @@ debug:
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
 
                 cd src/thirdParty
-
+                export PETSC_DIR=/home/petsc-3.6.4
+                export PETSC_ARCH=x86_64
                 export BOOST_ROOT=`pwd`/boost
                 export PRECICE_BOOST_ROOT=${BOOST_ROOT}
                 export PRECICE_MPI_LIB=mpi
@@ -191,8 +192,8 @@ debug:
                 export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
                 cd precice
-                scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
-                cp build/debug-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
+                scons -j $WM_NCOMPPROCS build=debug python=off petsc=on compiler=mpicxx solib
+                cp build/debug-nopython/libprecice.* ${FOAM_LIBBIN}/
                 rm -rf build/*
         - script:
             name: boundary conditions
@@ -261,8 +262,8 @@ ubuntu:
                 ln -s /home/boost_1_55_0 boost
 
                 # petsc
-                mkdir -p petsc
-                (cd petsc && ln -s /usr/include/petsc include)
+                ln -s /home/petsc-3.6.4 petsc
+                cp petsc/x86_64/lib/lib* ${FOAM_LIBBIN}/
 
                 # deal.II
                 ln -s /home/dealii-8.4.1 dealii
@@ -280,7 +281,8 @@ ubuntu:
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
 
                 cd src/thirdParty
-
+                export PETSC_DIR=/home/petsc-3.6.4
+                export PETSC_ARCH=x86_64
                 export BOOST_ROOT=`pwd`/boost
                 export PRECICE_BOOST_ROOT=${BOOST_ROOT}
                 export PRECICE_MPI_LIB=mpi
@@ -289,8 +291,8 @@ ubuntu:
                 export CPLUS_INCLUDE_PATH=`pwd`/eigen
 
                 cd precice
-                scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
-                cp build/release-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
+                scons -j $WM_NCOMPPROCS build=release python=off petsc=on compiler=mpicxx solib
+                cp build/release-nopython/libprecice.* ${FOAM_LIBBIN}/
                 rm -rf build/*
         - script:
             name: boundary conditions
