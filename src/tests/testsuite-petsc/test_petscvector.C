@@ -49,6 +49,32 @@ TEST( Vector, copy_constructor )
     }
 }
 
+TEST( Vector, local_rows )
+{
+    int rank, size;
+    MPI_Comm_rank( PETSC_COMM_WORLD, &rank );
+    MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+    fsi::PetscVector vector( 2, false );
+    vector.set( rank, rank );
+    vector.compress();
+
+    ASSERT_EQ( vector.rows(), size * 2 );
+}
+
+TEST( Vector, rows )
+{
+    int rank, size;
+    MPI_Comm_rank( PETSC_COMM_WORLD, &rank );
+    MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+    fsi::PetscVector vector( size + 1 );
+    vector.set( rank, rank );
+    vector.compress();
+
+    ASSERT_EQ( vector.rows(), size + 1 );
+}
+
 TEST( Vector, print )
 {
     int rank, size;
