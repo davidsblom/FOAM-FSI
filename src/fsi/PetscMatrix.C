@@ -25,9 +25,7 @@ namespace fsi
         bool global
         )
         :
-        matrix_( new Mat() ),
-        rows_( rows ),
-        cols_( cols )
+        matrix_( new Mat() )
     {
         PetscBool petscIsInitialized;
         PetscInitialized( &petscIsInitialized );
@@ -67,22 +65,14 @@ namespace fsi
         CHKERRV( ierr );
     }
 
-    PetscMatrix::PetscMatrix(
-        int rows,
-        int cols,
-        std::unique_ptr<Mat> & matrix
-        )
+    PetscMatrix::PetscMatrix( std::unique_ptr<Mat> & matrix )
         :
-        matrix_( matrix.release() ),
-        rows_( rows ),
-        cols_( cols )
+        matrix_( matrix.release() )
     {}
 
     PetscMatrix::PetscMatrix( const PetscMatrix & matrix )
         :
-        matrix_( new Mat() ),
-        rows_( matrix.rows_ ),
-        cols_( matrix.cols_ )
+        matrix_( new Mat() )
     {
         PetscErrorCode ierr = 0;
         ierr = MatDuplicate( *(matrix.matrix_), MAT_COPY_VALUES, &*matrix_ );
@@ -103,7 +93,19 @@ namespace fsi
         }
     }
 
-    void PetscMatrix::compress()
+    PetscInt PetscMatrix::cols() const
+    {
+        PetscInt rows, cols;
+        PetscErrorCode ierr = 0;
+        ierr = MatGetSize( *matrix_, &rows, &cols );
+
+        if ( ierr != 1 )
+            Foam::abort( FatalError );
+
+        return cols;
+    }
+
+    void PetscMatrix::compress() const
     {
         PetscErrorCode ierr = 0;
         ierr = MatAssemblyBegin( *matrix_, MAT_FINAL_ASSEMBLY );
@@ -112,11 +114,23 @@ namespace fsi
         CHKERRV( ierr );
     }
 
-    void PetscMatrix::print()
+    void PetscMatrix::print() const
     {
         PetscErrorCode ierr = 0;
         ierr = MatView( *matrix_, PETSC_VIEWER_STDOUT_WORLD );
         CHKERRV( ierr );
+    }
+
+    PetscInt PetscMatrix::rows() const
+    {
+        PetscInt rows, cols;
+        PetscErrorCode ierr = 0;
+        ierr = MatGetSize( *matrix_, &rows, &cols );
+
+        if ( ierr != 1 )
+            Foam::abort( FatalError );
+
+        return rows;
     }
 
     void PetscMatrix::set(
@@ -125,11 +139,22 @@ namespace fsi
         const PetscScalar value
         )
     {
-        assert( row < rows_ );
-        assert( col < cols_ );
+        assert( row < rows() );
+        assert( col < cols() );
 
         PetscErrorCode ierr = 0;
         ierr = MatSetValue( *matrix_, row, col, value, INSERT_VALUES );
+        CHKERRV( ierr );
+    }
+
+    void PetscMatrix::setLocal(
+        const int row,
+        const int col,
+        const PetscScalar value
+        )
+    {
+        PetscErrorCode ierr = 0;
+        ierr = MatSetValuesLocal( *matrix_, 1, &row, 1, &col, &value, INSERT_VALUES );
         CHKERRV( ierr );
     }
 
@@ -159,13 +184,13 @@ namespace fsi
         const PetscMatrix & B
         )
     {
-        assert( A.cols_ == B.rows_ );
+        assert( A.cols() == B.rows() );
 
         std::unique_ptr<Mat> C( new Mat() );
 
         PetscErrorCode ierr = MatMatMult( *(A.matrix_), *(B.matrix_), MAT_INITIAL_MATRIX, PETSC_DEFAULT, &*C );
 
-        PetscMatrix result( A.cols_, B.cols_, C );
+        PetscMatrix result( C );
 
         if ( ierr != 0 )
             Foam::abort( FatalError );

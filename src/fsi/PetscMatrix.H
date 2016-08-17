@@ -27,21 +27,27 @@ namespace fsi
                 bool global
                 );
 
-            PetscMatrix(
-                int rows,
-                int cols,
-                std::unique_ptr<Mat> & matrix
-                );
+            PetscMatrix( std::unique_ptr<Mat> & matrix );
 
             PetscMatrix( const PetscMatrix & matrix );
 
             ~PetscMatrix();
 
-            void compress();
+            PetscInt cols() const;
 
-            void print();
+            void compress() const;
+
+            void print() const;
+
+            PetscInt rows() const;
 
             void set(
+                const int row,
+                const int col,
+                const PetscScalar value
+                );
+
+            void setLocal(
                 const int row,
                 const int col,
                 const PetscScalar value
@@ -69,9 +75,6 @@ namespace fsi
 
         private:
             const std::unique_ptr<Mat> matrix_;
-
-            const int rows_;
-            const int cols_;
     };
 
     PetscMatrix operator *(
