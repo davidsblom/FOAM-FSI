@@ -1,3 +1,11 @@
+.init_template: &initialize_git
+    - script:
+        name: initialize git submodules
+        code: |
+            git checkout .
+            git submodule update --init --recursive
+
+
 box: davidsblom/foam-fsi
 
 command-timeout: 60
@@ -5,11 +13,7 @@ no-response-timeout: 30
 
 build:
     steps:
-        - script:
-            name: initialize git submodules
-            code: |
-                git checkout .
-                git submodule update --init --recursive
+        <<: *initialize_git
         - script:
             name: initialize dependencies
             code: |
