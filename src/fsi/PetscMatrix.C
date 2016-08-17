@@ -16,6 +16,15 @@ namespace fsi
         int cols
         )
         :
+        PetscMatrix( rows, cols, true )
+    {}
+
+    PetscMatrix::PetscMatrix(
+        int rows,
+        int cols,
+        bool global
+        )
+        :
         matrix_( new Mat() ),
         rows_( rows ),
         cols_( cols )
@@ -47,7 +56,11 @@ namespace fsi
         ierr = MatSetType( *matrix_, MATMPIAIJ );
         CHKERRV( ierr );
 
-        ierr = MatSetSizes( *matrix_, PETSC_DECIDE, PETSC_DECIDE, rows, cols );
+        if ( global )
+            ierr = MatSetSizes( *matrix_, PETSC_DECIDE, PETSC_DECIDE, rows, cols );
+        else
+            ierr = MatSetSizes( *matrix_, rows, cols, PETSC_DECIDE, PETSC_DECIDE );
+
         CHKERRV( ierr );
 
         ierr = MatSetUp( *matrix_ );

@@ -14,6 +14,11 @@ TEST( Matrix, constructor )
     fsi::PetscMatrix matrix( 5, 5 );
 }
 
+TEST( Matrix, constructor_local )
+{
+    fsi::PetscMatrix matrix( 5, 5, false );
+}
+
 TEST( Matrix, set )
 {
     int rank, size;

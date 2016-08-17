@@ -24,6 +24,12 @@ namespace fsi
             PetscMatrix(
                 int rows,
                 int cols,
+                bool global
+                );
+
+            PetscMatrix(
+                int rows,
+                int cols,
                 std::unique_ptr<Mat> & matrix
                 );
 
