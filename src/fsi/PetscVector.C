@@ -122,6 +122,20 @@ namespace fsi
         CHKERRV( ierr );
     }
 
+    PetscInt PetscVector::localSize()
+    {
+        PetscErrorCode ierr = 0;
+
+        PetscInt size;
+
+        ierr = VecGetLocalSize( *vector_, &size );
+
+        if ( ierr != 0 )
+            Foam::abort( FatalError );
+
+        return size;
+    }
+
     void PetscVector::print()
     {
         PetscErrorCode ierr = 0;
@@ -159,6 +173,11 @@ namespace fsi
         PetscErrorCode ierr = 0;
         ierr = VecSetValuesLocal( *vector_, 1, &row, &value, INSERT_VALUES );
         CHKERRV( ierr );
+    }
+
+    PetscInt PetscVector::size()
+    {
+        return rows();
     }
 
     PetscScalar PetscVector::operator[]( const PetscInt row )

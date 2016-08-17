@@ -30,6 +30,8 @@ namespace fsi
 
             void compress();
 
+            PetscInt localSize();
+
             void print();
 
             PetscInt rows();
@@ -38,6 +40,8 @@ namespace fsi
                 const int row,
                 const PetscScalar value
                 );
+
+            PetscInt size();
 
             void setLocal(
                 const int row,
