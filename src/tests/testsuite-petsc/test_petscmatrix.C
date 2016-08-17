@@ -30,6 +30,17 @@ TEST( Matrix, set )
     matrix.compress();
 }
 
+TEST( Matrix, set_local )
+{
+    int rank, size;
+    MPI_Comm_rank( PETSC_COMM_WORLD, &rank );
+    MPI_Comm_size( PETSC_COMM_WORLD, &size );
+
+    fsi::PetscMatrix matrix( 2, 2, false );
+    matrix.setLocal( 1, 1, 1 );
+    matrix.compress();
+}
+
 TEST( Matrix, matmult )
 {
     int rank, size;
