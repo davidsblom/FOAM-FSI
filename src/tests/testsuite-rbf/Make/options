@@ -52,7 +52,9 @@ EXE_LIBS = \
     -lspecie \
     -lcompressibleRASModels \
     -ldeal_II \
-    -llduSolvers
+    -llduSolvers \
+    -L ../../thirdParty/elemental/install/lib \
+    -lpmrrr -lmetis -lparmetis -lopenblas -lblas -llapack -lscalapack -lEl -lElSuiteSparse
 endif
 
 ifeq ($(WM_COMPILE_OPTION), Debug)
