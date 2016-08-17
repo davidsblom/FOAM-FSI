@@ -33,6 +33,9 @@ GaussRadau.C
 GaussLobatto.C
 ClenshawCurtis.C
 UserDefinedNodes.C
+PetscMatrix.C
+PetscVector.C
+PetRBFInterpolation.C
 
 fluidSolvers/CoupledFluidSolver.C
 fluidSolvers/FluidSolver.C
