@@ -58,6 +58,36 @@ namespace fsi
 
         ierr = VecSetUp( *vector_ );
         CHKERRV( ierr );
+
+        PetscInt N, rstart, rend, ng;
+        ierr = VecGetSize( *vector_, &N );
+        CHKERRV( ierr );
+
+        ierr = VecGetOwnershipRange( *vector_, &rstart, &rend );
+        CHKERRV( ierr );
+
+        ng = rend - rstart + 2;
+        PetscInt gindices[ng];
+
+        gindices[0] = rstart - 1;
+
+        for ( PetscInt i = 0; i < ng - 1; i++ )
+            gindices[i + 1] = gindices[i] + 1;
+
+        /* map the first and last point as periodic */
+        if ( gindices[0] == -1 )
+            gindices[0] = N - 1;
+
+        if ( gindices[ng - 1] == N )
+            gindices[ng - 1] = 0;
+
+        ISLocalToGlobalMapping ltog;
+        ierr = ISLocalToGlobalMappingCreate( PETSC_COMM_SELF, 1, ng, gindices, PETSC_COPY_VALUES, &ltog );
+        CHKERRV( ierr );
+        ierr = VecSetLocalToGlobalMapping( *vector_, ltog );
+        CHKERRV( ierr );
+        ierr = ISLocalToGlobalMappingDestroy( &ltog );
+        CHKERRV( ierr );
     }
 
     PetscVector::PetscVector( const PetscVector & vec )
@@ -118,6 +148,16 @@ namespace fsi
     {
         PetscErrorCode ierr = 0;
         ierr = VecSetValue( *vector_, row, value, INSERT_VALUES );
+        CHKERRV( ierr );
+    }
+
+    void PetscVector::setLocal(
+        const int row,
+        const PetscScalar value
+        )
+    {
+        PetscErrorCode ierr = 0;
+        ierr = VecSetValuesLocal( *vector_, 1, &row, &value, INSERT_VALUES );
         CHKERRV( ierr );
     }
 

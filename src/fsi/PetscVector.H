@@ -39,6 +39,11 @@ namespace fsi
                 const PetscScalar value
                 );
 
+            void setLocal(
+                const int row,
+                const PetscScalar value
+                );
+
             PetscScalar operator[]( const PetscInt row );
 
             PetscScalar operator()( const PetscInt row );
