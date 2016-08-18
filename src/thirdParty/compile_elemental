@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd elemental
+rm -rf build install
+mkdir build install && cd build
+cmake \
+    -D CMAKE_INSTALL_PREFIX=`pwd`/../install \
+    -D INSTALL_PYTHON_PACKAGE=OFF \
+    ..
+make -j `nproc`
+make install
