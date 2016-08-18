@@ -17,8 +17,8 @@ namespace rbf
         public:
             explicit ElRBFInterpolation(
                 std::unique_ptr<RBFFunctionInterface> rbfFunction,
-                std::unique_ptr<El::DistMultiVec<double> > positions,
-                std::unique_ptr<El::DistMultiVec<double> > posInterpolation
+                std::unique_ptr<El::DistMatrix<double> > positions,
+                std::unique_ptr<El::DistMatrix<double> > posInterpolation
                 );
 
             ~ElRBFInterpolation();

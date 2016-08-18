@@ -13,26 +13,36 @@ using namespace rbf;
 TEST( ElRBFInterpolation, constructor )
 {
     std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-    std::unique_ptr<El::DistMultiVec<double> > positions( new El::DistMultiVec<double>( 4, 1 ) );
-    std::unique_ptr<El::DistMultiVec<double> > positionsInterpolation( new El::DistMultiVec<double>( 8, 1 ) );
+    std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>( 4, 1 ) );
+    std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>( 8, 1 ) );
 
     const double dx = 1.0 / (positions->Height() - 1);
     const double dy = 1.0 / (positionsInterpolation->Height() - 1);
 
-    positions->Reserve( positions->LocalHeight() );
+    positions->Reserve( positions->LocalHeight() * positions->LocalWidth() );
 
     for ( int i = 0; i < positions->LocalHeight(); i++ )
     {
         const int globalRow = positions->GlobalRow( i );
-        positions->QueueUpdate( globalRow, 0, globalRow * dx );
+
+        for ( int j = 0; j < positions->LocalWidth(); j++ )
+        {
+            const int globalCol = positions->GlobalCol( j );
+            positions->QueueUpdate( globalRow, globalCol, (globalRow + 1) * dx );
+        }
     }
 
-    positionsInterpolation->Reserve( positionsInterpolation->LocalHeight() );
+    positionsInterpolation->Reserve( positionsInterpolation->LocalHeight() * positionsInterpolation->LocalWidth() );
 
     for ( int i = 0; i < positionsInterpolation->LocalHeight(); i++ )
     {
         const int globalRow = positionsInterpolation->GlobalRow( i );
-        positionsInterpolation->QueueUpdate( globalRow, 0, double(globalRow * dy) );
+
+        for ( int j = 0; j < positionsInterpolation->LocalWidth(); j++ )
+        {
+            const int globalCol = positionsInterpolation->GlobalCol( j );
+            positionsInterpolation->QueueUpdate( globalRow, globalCol, (globalRow + 1) * dy );
+        }
     }
 
     ElRBFInterpolation rbf( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
@@ -41,8 +51,8 @@ TEST( ElRBFInterpolation, constructor )
 TEST( ElRBFInterpolation, interpolate )
 {
     std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-    std::unique_ptr<El::DistMultiVec<double> > positions( new El::DistMultiVec<double>() );
-    std::unique_ptr<El::DistMultiVec<double> > positionsInterpolation( new El::DistMultiVec<double>() );
+    std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
+    std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
     std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
     El::Zeros( *positionsInterpolation, 8, 1 );
     El::Zeros( *positions, 4, 1 );
@@ -51,22 +61,30 @@ TEST( ElRBFInterpolation, interpolate )
     const double dx = 1.0 / positions->Height();
     const double dy = 1.0 / double( positionsInterpolation->Height() );
 
-    positions->Reserve( positions->LocalHeight() );
+    positions->Reserve( positions->LocalHeight() * positions->LocalWidth() );
 
     for ( int i = 0; i < positions->LocalHeight(); i++ )
     {
         const int globalRow = positions->GlobalRow( i );
 
-        positions->QueueUpdate( globalRow, 0, (globalRow + 1) * dx );
+        for ( int j = 0; j < positions->LocalWidth(); j++ )
+        {
+            const int globalCol = positions->GlobalCol( j );
+            positions->QueueUpdate( globalRow, globalCol, (globalRow + 1) * dx );
+        }
     }
 
-    positionsInterpolation->Reserve( positionsInterpolation->LocalHeight() );
+    positionsInterpolation->Reserve( positionsInterpolation->LocalHeight() * positionsInterpolation->LocalWidth() );
 
     for ( int i = 0; i < positionsInterpolation->LocalHeight(); i++ )
     {
         const int globalRow = positionsInterpolation->GlobalRow( i );
 
-        positionsInterpolation->QueueUpdate( globalRow, 0, (globalRow + 1) * dy );
+        for ( int j = 0; j < positionsInterpolation->LocalWidth(); j++ )
+        {
+            const int globalCol = positionsInterpolation->GlobalCol( j );
+            positionsInterpolation->QueueUpdate( globalRow, globalCol, (globalRow + 1) * dy );
+        }
     }
 
     ElRBFInterpolation rbf( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );

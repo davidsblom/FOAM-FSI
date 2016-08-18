@@ -11,8 +11,8 @@ namespace rbf
 {
     ElRBFInterpolation::ElRBFInterpolation(
         std::unique_ptr<RBFFunctionInterface> rbfFunction,
-        std::unique_ptr<El::DistMultiVec<double> > positions,
-        std::unique_ptr<El::DistMultiVec<double> > positionsInterpolation
+        std::unique_ptr<El::DistMatrix<double> > positions,
+        std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
         )
         :
         H( new El::DistMatrix<double>() ),
@@ -31,6 +31,23 @@ namespace rbf
 
         positions->ProcessQueues();
 
+        positions->ReservePulls( H->LocalHeight() * positions->Width() + H->LocalWidth() * positions->Width() );
+
+        for ( int i = 0; i < H->LocalHeight(); i++ )
+        {
+            for ( int iDim = 0; iDim < dim; iDim++ )
+                positions->QueuePull( H->GlobalRow( i ), iDim );
+        }
+
+        for ( int j = 0; j < H->LocalWidth(); j++ )
+        {
+            for ( int iDim = 0; iDim < dim; iDim++ )
+                positions->QueuePull( H->GlobalCol( j ), iDim );
+        }
+
+        std::vector<double> pullBuf;
+        positions->ProcessPullQueue( pullBuf );
+
         for ( int i = 0; i < H->LocalHeight(); i++ )
         {
             const int globalRow = H->GlobalRow( i );
@@ -41,7 +58,7 @@ namespace rbf
                 const int globalCol = H->GlobalCol( j );
 
                 for ( int iDim = 0; iDim < dim; iDim++ )
-                    norm += std::pow( positions->Get( globalRow, iDim ) - positions->Get( globalCol, iDim ), 2 );
+                    norm += std::pow( pullBuf[i * dim + iDim] - pullBuf[j * dim + iDim + H->LocalHeight() * dim], 2 );
 
                 norm = std::sqrt( norm );
 
@@ -55,6 +72,22 @@ namespace rbf
 
         positionsInterpolation->ProcessQueues();
 
+        positions->ReservePulls( Phi->LocalWidth() * dim );
+        positionsInterpolation->ReservePulls( Phi->LocalHeight() * dim );
+
+        for ( int i = 0; i < Phi->LocalWidth(); i++ )
+            for ( int iDim = 0; iDim < dim; iDim++ )
+                positions->QueuePull( Phi->GlobalRow( i ), iDim );
+
+        for ( int i = 0; i < Phi->LocalHeight(); i++ )
+            for ( int iDim = 0; iDim < dim; iDim++ )
+                positionsInterpolation->QueuePull( Phi->GlobalRow( i ), iDim );
+
+        pullBuf.clear();
+        std::vector<double> pullBufInterp;
+        positions->ProcessPullQueue( pullBuf );
+        positionsInterpolation->ProcessPullQueue( pullBufInterp );
+
         for ( int i = 0; i < Phi->LocalHeight(); i++ )
         {
             const int globalRow = Phi->GlobalRow( i );
@@ -65,7 +98,7 @@ namespace rbf
                 const int globalCol = Phi->GlobalCol( j );
 
                 for ( int iDim = 0; iDim < dim; iDim++ )
-                    norm += std::pow( positions->Get( globalCol, iDim ) - positionsInterpolation->Get( globalRow, iDim ), 2 );
+                    norm += std::pow( pullBuf[j * dim + iDim] - pullBufInterp[i * dim + iDim], 2 );
 
                 norm = std::sqrt( norm );
 

@@ -9,3 +9,4 @@ cmake \
     ..
 make -j `nproc`
 make install
+cp ../install/lib/*.so* $FOAM_LIBBIN/
