@@ -26,9 +26,7 @@ namespace rbf
             std::unique_ptr<El::DistMatrix<double> > interpolate( const std::unique_ptr<El::DistMatrix<double> > values );
 
         private:
-            std::unique_ptr<RBFFunctionInterface> rbfFunction;
-            std::unique_ptr<El::DistMultiVec<double> > positions;
-            std::unique_ptr<El::DistMultiVec<double> > positionsInterpolation;
             std::unique_ptr<El::DistMatrix<double> > H;
+            std::unique_ptr<El::DistMatrix<double> > Phi;
     };
 }

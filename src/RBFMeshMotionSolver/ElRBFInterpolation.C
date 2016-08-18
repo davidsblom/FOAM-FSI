@@ -10,19 +10,18 @@
 namespace rbf
 {
     ElRBFInterpolation::ElRBFInterpolation(
-        std::unique_ptr<RBFFunctionInterface> function,
-        std::unique_ptr<El::DistMultiVec<double> > pos,
-        std::unique_ptr<El::DistMultiVec<double> > posInterp
+        std::unique_ptr<RBFFunctionInterface> rbfFunction,
+        std::unique_ptr<El::DistMultiVec<double> > positions,
+        std::unique_ptr<El::DistMultiVec<double> > positionsInterpolation
         )
         :
-        rbfFunction( std::move( function ) ),
-        positions( std::move( pos ) ),
-        positionsInterpolation( std::move( posInterp ) ),
-        H( new El::DistMatrix<double>() )
+        H( new El::DistMatrix<double>() ),
+        Phi( new El::DistMatrix<double>() )
     {
         assert( positions->Width() == positionsInterpolation->Width() );
 
         El::Zeros( *H, positions->Height(), positions->Height() );
+        El::Zeros( *Phi, positionsInterpolation->Height(), positions->Height() );
 
         const int dim = positions->Width();
 
@@ -31,7 +30,6 @@ namespace rbf
         H->Reserve( H->LocalHeight() * H->LocalWidth() );
 
         positions->ProcessQueues();
-        positionsInterpolation->ProcessQueues();
 
         for ( int i = 0; i < H->LocalHeight(); i++ )
         {
@@ -50,6 +48,30 @@ namespace rbf
                 H->QueueUpdate( globalRow, globalCol, rbfFunction->evaluate( norm ) );
             }
         }
+
+        // Evaluate Phi matrix
+
+        Phi->Reserve( Phi->LocalHeight() * Phi->LocalWidth() );
+
+        positionsInterpolation->ProcessQueues();
+
+        for ( int i = 0; i < Phi->LocalHeight(); i++ )
+        {
+            const int globalRow = Phi->GlobalRow( i );
+
+            for ( int j = 0; j < Phi->LocalWidth(); j++ )
+            {
+                double norm = 0;
+                const int globalCol = Phi->GlobalCol( j );
+
+                for ( int iDim = 0; iDim < dim; iDim++ )
+                    norm += std::pow( positions->Get( globalCol, iDim ) - positionsInterpolation->Get( globalRow, iDim ), 2 );
+
+                norm = std::sqrt( norm );
+
+                Phi->QueueUpdate( globalRow, globalCol, rbfFunction->evaluate( norm ) );
+            }
+        }
     }
 
     ElRBFInterpolation::~ElRBFInterpolation()
@@ -58,31 +80,6 @@ namespace rbf
     std::unique_ptr<El::DistMatrix<double> > ElRBFInterpolation::interpolate( const std::unique_ptr<El::DistMatrix<double> > values )
     {
         std::unique_ptr<El::DistMatrix<double> > result( new El::DistMatrix<double>() );
-        const int dim = positions->Width();
-
-        // Evaluate Phi matrix
-
-        El::DistMatrix<double> Phi( positionsInterpolation->Height(), positions->Height() );
-
-        Phi.Reserve( Phi.LocalHeight() * Phi.LocalWidth() );
-
-        for ( int i = 0; i < Phi.LocalHeight(); i++ )
-        {
-            const int globalRow = Phi.GlobalRow( i );
-
-            for ( int j = 0; j < Phi.LocalWidth(); j++ )
-            {
-                double norm = 0;
-                const int globalCol = Phi.GlobalCol( j );
-
-                for ( int iDim = 0; iDim < dim; iDim++ )
-                    norm += std::pow( positions->Get( globalCol, iDim ) - positionsInterpolation->Get( globalRow, iDim ), 2 );
-
-                norm = std::sqrt( norm );
-
-                Phi.QueueUpdate( globalRow, globalCol, rbfFunction->evaluate( norm ) );
-            }
-        }
 
         values->ProcessQueues();
 
@@ -92,9 +89,9 @@ namespace rbf
 
         El::LinearSolve( *H, B );
 
-        Phi.ProcessQueues();
+        Phi->ProcessQueues();
 
-        El::Gemm( El::Orientation::NORMAL, El::Orientation::NORMAL, 1.0, Phi, B, *result );
+        El::Gemm( El::Orientation::NORMAL, El::Orientation::NORMAL, 1.0, *Phi, B, *result );
 
         return result;
     }
