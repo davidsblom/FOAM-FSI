@@ -137,10 +137,10 @@ TEST( ElRBFInterpolation, verify_Eigen )
         positionsEigen( i, 0 ) = (i + 1) * dx;
 
     for ( int i = 0; i < positionsInterpolationEigen.rows(); i++ )
-        positionsInterpolationEigen( i, 0 ) = ( i + 1 ) * dy;
+        positionsInterpolationEigen( i, 0 ) = (i + 1) * dy;
 
     for ( int i = 0; i < valuesEigen.rows(); i++ )
-        valuesEigen( i, 0 ) = std::sin( (i+1) * dx );
+        valuesEigen( i, 0 ) = std::sin( (i + 1) * dx );
 
     RBFInterpolation rbfEigen( rbfFunctionEigen, false, true );
     rbfEigen.compute( positionsEigen, positionsInterpolationEigen );
@@ -194,13 +194,25 @@ TEST( ElRBFInterpolation, verify_Eigen )
         }
     }
 
-    El::Display( *data );
-    std::cout << valuesEigen << std::endl;
-
     std::unique_ptr<El::DistMatrix<double> > result = rbf.interpolate( std::move( data ) );
 
-    El::Display( *result );
+    std::vector<double> buffer;
+    result->ReservePulls( result->Height() * result->Width() );
 
-    std::cout << valuesInterpolationEigen << std::endl;
+    for ( int i = 0; i < result->Height(); i++ )
+        for ( int j = 0; j < result->Width(); j++ )
+            result->QueuePull( i, j );
 
+    result->ProcessPullQueue( buffer );
+
+    int index = 0;
+
+    for ( int i = 0; i < result->Height(); i++ )
+    {
+        for ( int j = 0; j < result->Width(); j++ )
+        {
+            EXPECT_NEAR( valuesInterpolationEigen( i, j ), buffer[index], 1e-13 );
+            index++;
+        }
+    }
 }
