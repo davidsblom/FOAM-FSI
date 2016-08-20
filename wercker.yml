@@ -173,6 +173,9 @@ debug:
                 ln -s /home/yaml-cpp-release-0.5.3 yaml-cpp
                 cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
         - script:
+            name: elemental
+            code: cd src/thirdParty && ./compile_elemental
+        - script:
             name: precice
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
@@ -270,6 +273,9 @@ ubuntu:
                 # yaml-cpp
                 ln -s /home/yaml-cpp-release-0.5.3 yaml-cpp
                 cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
+        - script:
+            name: elemental
+            code: cd src/thirdParty && ./compile_elemental
         - script:
             name: precice
             code: |
