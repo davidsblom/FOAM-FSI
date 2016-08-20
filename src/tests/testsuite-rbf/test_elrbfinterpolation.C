@@ -175,6 +175,54 @@ TEST( ElRBFInterpolation, verify_Eigen )
     positions->ProcessQueues();
     positionsInterpolation->ProcessQueues();
 
+    std::vector<double> bufferPos;
+    positions->ReservePulls( positions->Height() * positions->Width() );
+
+    for ( int i = 0; i < positions->Height(); i++ )
+    {
+        for ( int j = 0; j < positions->Width(); j++ )
+        {
+            positions->QueuePull( i, j );
+        }
+    }
+
+    positions->ProcessPullQueue( bufferPos );
+
+    int index = 0;
+
+    for ( int i = 0; i < positions->Height(); i++ )
+    {
+        for ( int j = 0; j < positions->Width(); j++ )
+        {
+            EXPECT_NEAR( positionsEigen( i, j ), bufferPos[index], 1e-13 );
+            index++;
+        }
+    }
+
+    positionsInterpolation->ReservePulls( positionsInterpolation->Height() * positionsInterpolation->Width() );
+    bufferPos.clear();
+
+    for ( int i = 0; i < positionsInterpolation->Height(); i++ )
+    {
+        for ( int j = 0; j < positionsInterpolation->Width(); j++ )
+        {
+            positionsInterpolation->QueuePull( i, j );
+        }
+    }
+
+    positionsInterpolation->ProcessPullQueue( bufferPos );
+
+    index = 0;
+
+    for ( int i = 0; i < positionsInterpolation->Height(); i++ )
+    {
+        for ( int j = 0; j < positionsInterpolation->Width(); j++ )
+        {
+            EXPECT_NEAR( positionsInterpolationEigen( i, j ), bufferPos[index], 1e-13 );
+            index++;
+        }
+    }
+
     ElRBFInterpolation rbf( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
 
     // Interpolate some data
@@ -194,6 +242,30 @@ TEST( ElRBFInterpolation, verify_Eigen )
         }
     }
 
+    bufferPos.clear();
+    data->ReservePulls( data->Height() * data->Width() );
+
+    for ( int i = 0; i < data->Height(); i++ )
+    {
+        for ( int j = 0; j < data->Width(); j++ )
+        {
+            data->QueuePull( i, j );
+        }
+    }
+
+    data->ProcessPullQueue( bufferPos );
+
+    index = 0;
+
+    for ( int i = 0; i < data->Height(); i++ )
+    {
+        for ( int j = 0; j < data->Width(); j++ )
+        {
+            EXPECT_NEAR( valuesEigen( i, j ), bufferPos[index], 1e-13 );
+            index++;
+        }
+    }
+
     std::unique_ptr<El::DistMatrix<double> > result = rbf.interpolate( std::move( data ) );
 
     std::vector<double> buffer;
@@ -205,7 +277,7 @@ TEST( ElRBFInterpolation, verify_Eigen )
 
     result->ProcessPullQueue( buffer );
 
-    int index = 0;
+    index = 0;
 
     for ( int i = 0; i < result->Height(); i++ )
     {

@@ -77,7 +77,7 @@ namespace rbf
 
         for ( int i = 0; i < Phi->LocalWidth(); i++ )
             for ( int iDim = 0; iDim < dim; iDim++ )
-                positions->QueuePull( Phi->GlobalRow( i ), iDim );
+                positions->QueuePull( Phi->GlobalCol( i ), iDim );
 
         for ( int i = 0; i < Phi->LocalHeight(); i++ )
             for ( int iDim = 0; iDim < dim; iDim++ )
