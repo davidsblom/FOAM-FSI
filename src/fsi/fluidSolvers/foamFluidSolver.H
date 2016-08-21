@@ -17,6 +17,7 @@
 #include "twoDPointCorrectorRBF.H"
 #include <time.h>
 #include <unordered_map>
+#include <vector>
 
 using namespace fsi;
 using std::shared_ptr;

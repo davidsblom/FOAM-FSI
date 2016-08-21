@@ -9,6 +9,7 @@
 
 #include "BaseMultiLevelSolver.H"
 #include <deque>
+#include <vector>
 
 using namespace fsi;
 

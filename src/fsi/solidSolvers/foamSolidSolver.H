@@ -18,6 +18,7 @@
 #include <time.h>
 #include <deque>
 #include <unordered_map>
+#include <vector>
 
 using namespace fsi;
 using std::shared_ptr;

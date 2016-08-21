@@ -20,7 +20,8 @@ build:
 
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
-                ln -s /home/boost_1_55_0 boost
+                ln -s /home/boost_1_61_0 boost
+                sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
 
                 # petsc
                 mkdir -p petsc
@@ -156,7 +157,8 @@ debug:
 
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
-                ln -s /home/boost_1_55_0 boost
+                ln -s /home/boost_1_61_0 boost
+                sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
 
                 # petsc
                 mkdir -p petsc
@@ -257,7 +259,8 @@ ubuntu:
 
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
-                ln -s /home/boost_1_55_0 boost
+                ln -s /home/boost_1_61_0 boost
+                sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
 
                 # petsc
                 mkdir -p petsc
