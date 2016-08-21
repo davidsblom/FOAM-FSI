@@ -108,6 +108,7 @@ build:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-rbf
+                mpirun -np 4 testsuite-rbf
         - script:
             name: testsuite-spacemapping
             code: |
@@ -347,6 +348,7 @@ ubuntu:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-rbf
+                mpirun -np 4 --allow-run-as-root testsuite-rbf
         - script:
             name: testsuite-spacemapping
             code: |
