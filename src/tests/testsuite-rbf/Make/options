@@ -32,9 +32,8 @@ EXE_INC = -std=c++11 -fext-numeric-literals\
 
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
-    -L ../../thirdParty/elemental/install/lib \
-    -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
     -L$(FOAM_USER_LIBBIN) \
+    -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
     -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \
@@ -61,6 +60,7 @@ endif
 ifeq ($(WM_COMPILE_OPTION), Debug)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
     -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \

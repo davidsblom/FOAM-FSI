@@ -11,6 +11,7 @@ EXE_INC = -std=c++11 -fopenmp \
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
     -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \
@@ -37,6 +38,7 @@ endif
 ifeq ($(WM_COMPILE_OPTION), Debug)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
     -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \
