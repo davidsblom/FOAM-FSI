@@ -12,6 +12,7 @@ EXE_INC = -std=c++11 \
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \

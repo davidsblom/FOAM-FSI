@@ -8,3 +8,6 @@
 [submodule "src/thirdParty/elemental"]
 	path = src/thirdParty/elemental
 	url = git://github.com/elemental/Elemental.git
+[submodule "src/thirdParty/mxx"]
+	path = src/thirdParty/mxx
+	url = https://github.com/patflick/mxx.git
