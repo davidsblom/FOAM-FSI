@@ -10,6 +10,7 @@
 #include "GaussLobatto.H"
 #include "Uniform.H"
 #include "ClenshawCurtis.H"
+#include <numeric>
 
 namespace sdc
 {
