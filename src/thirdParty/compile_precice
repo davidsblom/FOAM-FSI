@@ -9,8 +9,8 @@ cd $DIR
 
 # Define which versions of the different packages are used
 
-export BOOST_VERSION=1_55_0
-export BOOST_VERSION_DOT=1.55.0
+export BOOST_VERSION=1_61_0
+export BOOST_VERSION_DOT=1.61.0
 
 # Download Boost
 if [ ! -d "boost_${BOOST_VERSION}" ]; then
