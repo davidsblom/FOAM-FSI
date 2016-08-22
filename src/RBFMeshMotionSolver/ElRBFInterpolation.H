@@ -15,13 +15,21 @@ namespace rbf
     class ElRBFInterpolation
     {
         public:
+            explicit ElRBFInterpolation();
+
             explicit ElRBFInterpolation(
                 std::unique_ptr<RBFFunctionInterface> rbfFunction,
                 std::unique_ptr<El::DistMatrix<double> > positions,
-                std::unique_ptr<El::DistMatrix<double> > posInterpolation
+                std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
                 );
 
             ~ElRBFInterpolation();
+
+            void compute(
+                std::unique_ptr<RBFFunctionInterface> rbfFunction,
+                std::unique_ptr<El::DistMatrix<double> > positions,
+                std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
+                );
 
             std::unique_ptr<El::DistMatrix<double> > interpolate( const std::unique_ptr<El::DistMatrix<double> > & values );
 

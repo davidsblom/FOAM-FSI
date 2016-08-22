@@ -9,6 +9,12 @@
 
 namespace rbf
 {
+    ElRBFInterpolation::ElRBFInterpolation()
+        :
+        H( new El::DistMatrix<double>() ),
+        Phi( new El::DistMatrix<double>() )
+    {}
+
     ElRBFInterpolation::ElRBFInterpolation(
         std::unique_ptr<RBFFunctionInterface> rbfFunction,
         std::unique_ptr<El::DistMatrix<double> > positions,
@@ -18,6 +24,23 @@ namespace rbf
         H( new El::DistMatrix<double>() ),
         Phi( new El::DistMatrix<double>() )
     {
+        compute( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
+    }
+
+    ElRBFInterpolation::~ElRBFInterpolation()
+    {}
+
+    void ElRBFInterpolation::compute(
+        std::unique_ptr<RBFFunctionInterface> rbfFunction,
+        std::unique_ptr<El::DistMatrix<double> > positions,
+        std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
+        )
+    {
+        assert( Phi->Height() == 0 );
+        assert( Phi->Width() == 0 );
+        assert( H->Height() == 0 );
+        assert( H->Width() == 0 );
+
         assert( positions->Width() == positionsInterpolation->Width() );
 
         El::Zeros( *H, positions->Height(), positions->Height() );
@@ -111,11 +134,11 @@ namespace rbf
         }
     }
 
-    ElRBFInterpolation::~ElRBFInterpolation()
-    {}
-
     std::unique_ptr<El::DistMatrix<double> > ElRBFInterpolation::interpolate( const std::unique_ptr<El::DistMatrix<double> > & values )
     {
+        assert( Phi->Height() > 0 );
+        assert( H->Height() > 0 );
+
         std::unique_ptr<El::DistMatrix<double> > result( new El::DistMatrix<double>() );
 
         values->ProcessQueues();
