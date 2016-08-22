@@ -23,7 +23,7 @@ namespace rbf
 
             ~ElRBFInterpolation();
 
-            std::unique_ptr<El::DistMatrix<double> > interpolate( const std::unique_ptr<El::DistMatrix<double> > values );
+            std::unique_ptr<El::DistMatrix<double> > interpolate( const std::unique_ptr<El::DistMatrix<double> > & values );
 
         private:
             std::unique_ptr<El::DistMatrix<double> > H;

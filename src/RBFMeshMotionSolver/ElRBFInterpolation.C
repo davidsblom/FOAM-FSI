@@ -110,7 +110,7 @@ namespace rbf
     ElRBFInterpolation::~ElRBFInterpolation()
     {}
 
-    std::unique_ptr<El::DistMatrix<double> > ElRBFInterpolation::interpolate( const std::unique_ptr<El::DistMatrix<double> > values )
+    std::unique_ptr<El::DistMatrix<double> > ElRBFInterpolation::interpolate( const std::unique_ptr<El::DistMatrix<double> > & values )
     {
         std::unique_ptr<El::DistMatrix<double> > result( new El::DistMatrix<double>() );
 
