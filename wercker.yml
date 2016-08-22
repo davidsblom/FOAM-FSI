@@ -365,5 +365,10 @@ ubuntu:
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-dealii
         - script:
+            name: tutorials
+            code: |
+                (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
+                cd src/tests/tutorials && python testsuite.py
+        - script:
             name: cleanup
             code: rm -rf * .git* .travis.yml .uncrustify.cfg
