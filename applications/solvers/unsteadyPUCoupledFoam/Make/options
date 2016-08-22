@@ -10,6 +10,7 @@ EXE_INC = -std=c++11 \
     -isystem ../../../src/thirdParty/yaml-cpp/include \
     -isystem ../../../src/thirdParty/boost
 
+ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
     -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
@@ -36,3 +37,33 @@ EXE_LIBS = \
     -lspecie \
     -lcompressibleRASModels \
     -ldeal_II
+endif
+
+ifeq ($(WM_COMPILE_OPTION), Debug)
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lmeshTools \
+    -lfiniteVolume \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -llduSolvers \
+    -lfvSchemes \
+    -lboundaryConditions \
+    -lsolidModels \
+    -lsampling \
+    -llagrangian \
+    -lyaml-cpp \
+    -lRBFMeshMotionSolver \
+    -lfsi \
+    -ltetFiniteElement \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels \
+    -ldeal_II.g
+end
