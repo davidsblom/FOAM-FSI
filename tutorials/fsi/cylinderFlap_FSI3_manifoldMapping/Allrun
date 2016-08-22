@@ -78,7 +78,7 @@ for i in `seq 0 $CORE_COUNT`
   done
 
 cd fluid-level-1
-runParallel fsiFoam $NB_CORES
+mpirun -np $NB_CORES --allow-run-as-root fsiFoam -parallel &> log.FsiFoam
 reconstructPar -region fluid-level-0 &> log.reconstructPar_fluid-level-0
 reconstructPar -region solid-level-0 &> log.reconstructPar_solid-level-0
 reconstructPar -region solid-level-1 &> log.reconstructPar_solid-level-1
