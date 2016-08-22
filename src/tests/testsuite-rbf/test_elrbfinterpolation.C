@@ -288,3 +288,169 @@ TEST( ElRBFInterpolation, verify_Eigen )
         }
     }
 }
+
+TEST( ElRBFInterpolation, 2d_grid )
+{
+    std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
+    std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
+    std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
+    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+    El::Zeros( *positions, 5, 2 );
+    El::Zeros( *positionsInterpolation, 5, 2 );
+    El::Zeros( *data, positions->Height(), 1 );
+
+    matrix positionsEigen( positions->Height(), positions->Width() ), positionsInterpolationEigen( positionsInterpolation->Height(), positionsInterpolation->Width() );
+    std::shared_ptr<RBFFunctionInterface> rbfFunctionEigen( new TPSFunction() );
+    matrix valuesEigen( positionsEigen.rows(), 1 ), valuesInterpolationEigen;
+
+    positions->Reserve( positions->LocalHeight() * positions->LocalWidth() );
+
+    for ( int i = 0; i < positions->LocalHeight(); i++ )
+    {
+        const int globalRow = positions->GlobalRow( i );
+
+        for ( int j = 0; j < positions->LocalWidth(); j++ )
+        {
+            const int globalCol = positions->GlobalCol( j );
+            positions->QueueUpdate( globalRow, globalCol, ( (double) rand() / (RAND_MAX) ) * 4.0 - 2.0 );
+        }
+    }
+
+    positionsInterpolation->Reserve( positionsInterpolation->LocalHeight() * positionsInterpolation->LocalWidth() );
+
+    for ( int i = 0; i < positionsInterpolation->LocalHeight(); i++ )
+    {
+        const int globalRow = positionsInterpolation->GlobalRow( i );
+
+        for ( int j = 0; j < positionsInterpolation->LocalWidth(); j++ )
+        {
+            const int globalCol = positionsInterpolation->GlobalCol( j );
+            int row = globalRow % 10;
+            int col = globalRow / 10;
+
+            if ( globalCol == 0 ) // x-coordinate
+                positionsInterpolation->QueueUpdate( globalRow, globalCol, -2.0 + 0.05 * row );
+            else // y-coordinate
+                positionsInterpolation->QueueUpdate( globalRow, globalCol, -2.0 + 0.05 * col );
+        }
+    }
+
+    positions->ProcessQueues();
+    positionsInterpolation->ProcessQueues();
+
+    std::vector<double> bufferPos;
+    positions->ReservePulls( positions->Height() * positions->Width() );
+
+    for ( int i = 0; i < positions->Height(); i++ )
+    {
+        for ( int j = 0; j < positions->Width(); j++ )
+        {
+            positions->QueuePull( i, j );
+        }
+    }
+
+    positions->ProcessPullQueue( bufferPos );
+
+    int index = 0;
+
+    for ( int i = 0; i < positions->Height(); i++ )
+    {
+        for ( int j = 0; j < positions->Width(); j++ )
+        {
+            positionsEigen( i, j ) = bufferPos[index];
+            index++;
+        }
+    }
+
+    // data
+
+    data->Reserve( data->LocalHeight() * data->LocalWidth() );
+
+    for ( int i = 0; i < data->LocalHeight(); i++ )
+    {
+        const int globalRow = data->GlobalRow( i );
+
+        const double x = bufferPos[globalRow * 2];
+        const double y = bufferPos[globalRow * 2 + 1];
+
+        data->QueueUpdate( globalRow, 0, x * std::exp( -x * x - y * y ) );
+    }
+
+    data->ProcessQueues();
+
+    positionsInterpolation->ReservePulls( positionsInterpolation->Height() * positionsInterpolation->Width() );
+    bufferPos.clear();
+
+    for ( int i = 0; i < positionsInterpolation->Height(); i++ )
+    {
+        for ( int j = 0; j < positionsInterpolation->Width(); j++ )
+        {
+            positionsInterpolation->QueuePull( i, j );
+        }
+    }
+
+    positionsInterpolation->ProcessPullQueue( bufferPos );
+
+    index = 0;
+
+    for ( int i = 0; i < positionsInterpolation->Height(); i++ )
+    {
+        for ( int j = 0; j < positionsInterpolation->Width(); j++ )
+        {
+            positionsInterpolationEigen( i, j ) = bufferPos[index];
+            index++;
+        }
+    }
+
+    ElRBFInterpolation rbf( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
+
+    std::unique_ptr<El::DistMatrix<double> > result = rbf.interpolate( data );
+
+    bufferPos.clear();
+    data->ReservePulls( data->Height() * data->Width() );
+
+    for ( int i = 0; i < data->Height(); i++ )
+    {
+        for ( int j = 0; j < data->Width(); j++ )
+        {
+            data->QueuePull( i, j );
+        }
+    }
+
+    data->ProcessPullQueue( bufferPos );
+
+    index = 0;
+
+    for ( int i = 0; i < data->Height(); i++ )
+    {
+        for ( int j = 0; j < data->Width(); j++ )
+        {
+            valuesEigen( i, j ) = bufferPos[index];
+            index++;
+        }
+    }
+
+    RBFInterpolation rbfEigen( rbfFunctionEigen, false, true );
+    rbfEigen.compute( positionsEigen, positionsInterpolationEigen );
+    rbfEigen.interpolate( valuesEigen, valuesInterpolationEigen );
+
+    std::vector<double> buffer;
+    result->ReservePulls( result->Height() * result->Width() );
+
+    for ( int i = 0; i < result->Height(); i++ )
+        for ( int j = 0; j < result->Width(); j++ )
+            result->QueuePull( i, j );
+
+    result->ProcessPullQueue( buffer );
+
+    index = 0;
+
+    for ( int i = 0; i < result->Height(); i++ )
+    {
+        for ( int j = 0; j < result->Width(); j++ )
+        {
+            EXPECT_NEAR( valuesInterpolationEigen( i, j ), buffer[index], 1e-11 );
+            index++;
+        }
+    }
+}
