@@ -14,5 +14,5 @@ runApplication blockMesh
 runApplication renumberMesh -overwrite
 runApplication checkMesh
 runApplication decomposePar
-mpirun -np $NB_CORES --allow-run-as-root fsiFoam -parallel &> log.FsiFoam
+mpirun -np $NB_CORES --allow-run-as-root fsiFoam -parallel &> log.fsiFoam
 runApplication reconstructPar

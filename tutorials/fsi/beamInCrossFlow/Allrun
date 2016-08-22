@@ -40,5 +40,5 @@ for i in `seq 0 $CORE_COUNT`
   done
 
 cd fluid
-mpirun -np $NB_CORES --allow-run-as-root fsiFoam -parallel &> log.FsiFoam
+mpirun -np $NB_CORES --allow-run-as-root fsiFoam -parallel &> log.fsiFoam
 runApplication reconstructPar
