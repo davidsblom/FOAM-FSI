@@ -54,8 +54,12 @@ namespace rbf
 
             for ( int j = 0; j < H->LocalWidth(); j++ )
             {
-                double norm = 0;
                 const int globalCol = H->GlobalCol( j );
+
+                if ( globalCol > globalRow )
+                    continue;
+
+                double norm = 0;
 
                 for ( int iDim = 0; iDim < dim; iDim++ )
                     norm += std::pow( pullBuf[i * dim + iDim] - pullBuf[j * dim + iDim + H->LocalHeight() * dim], 2 );
@@ -120,7 +124,7 @@ namespace rbf
 
         H->ProcessQueues();
 
-        El::LinearSolve( *H, B );
+        El::SymmetricSolve( El::UpperOrLower::LOWER, El::Orientation::NORMAL, *H, B );
 
         Phi->ProcessQueues();
 

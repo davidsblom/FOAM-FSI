@@ -1,7 +1,7 @@
 c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs -Werror -Wredundant-decls -Wcast-align -Wmissing-declarations  -Wswitch-enum -Winvalid-pch -Wredundant-decls -Wformat=2 -Wmissing-format-attribute -Wformat-nonliteral
 
 EXE_INC = -std=c++11 -fext-numeric-literals \
-    -I ../thirdParty/elemental/install/include \
+    -isystem ../thirdParty/elemental/install/include \
     -isystem ../thirdParty/eigen/ \
     -isystem ../fsi/lnInclude \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
