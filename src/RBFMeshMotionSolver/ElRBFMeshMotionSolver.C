@@ -135,6 +135,17 @@ void ElRBFMeshMotionSolver::updateMesh( const mapPolyMesh & )
 
 void ElRBFMeshMotionSolver::solve()
 {
+    typedef std::tuple<int, double, double, double> tuple_type;
+
+    // comparator for sorting
+    auto cmp = []( const tuple_type & x, const tuple_type & y ) {
+            return std::get<0>( x ) < std::get<0>( y );
+        };
+
+    auto cmp_unique = []( const tuple_type & x, const tuple_type & y ) {
+            return std::get<0>( x ) == std::get<0>( y );
+        };
+
     if ( not rbf->initialized() )
     {
         assert( boundaryPoints.empty() );
@@ -185,10 +196,48 @@ void ElRBFMeshMotionSolver::solve()
             }
         }
 
+        if ( Pstream::parRun() )
+        {
+            IOobject addrHeader
+            (
+                "pointProcAddressing",
+                mesh().facesInstance(),
+                mesh().meshSubDir,
+                mesh(),
+                IOobject::MUST_READ
+            );
+
+            assert( addrHeader.headerOk() );
+            labelIOList pointProcAddressing( addrHeader );
+
+            assert( pointProcAddressing.size() == mesh().points().size() );
+
+            for ( auto & vertex : boundaryPoints )
+            {
+                vertex.second.id = pointProcAddressing[vertex.second.id];
+            }
+        }
+
+        std::vector<tuple_type> boundaryData;
+
+        for ( const auto & vertex : boundaryPoints )
+        {
+            if ( mesh().nGeometricD() == 2 )
+                boundaryData.push_back( std::make_tuple( vertex.second.id, vertex.second.data[0], vertex.second.data[1], 0 ) );
+            else
+                boundaryData.push_back( std::make_tuple( vertex.second.id, vertex.second.data[0], vertex.second.data[1], vertex.second.data[2] ) );
+        }
+
+        mxx::sort( boundaryData.begin(), boundaryData.end(), cmp );
+
+        auto it = mxx::unique( boundaryData.begin(), boundaryData.end(), cmp_unique );
+
+        boundaryData.resize( std::distance( boundaryData.begin(), it ) );
+
         std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
         std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double> () );
 
-        std::vector<size_t> allBoundaryPoints = mxx::allgather( boundaryPoints.size() );
+        std::vector<size_t> allBoundaryPoints = mxx::allgather( boundaryData.size() );
         size_t totalNbBoundaryPoints = 0;
 
         for ( size_t n : allBoundaryPoints )
@@ -222,12 +271,13 @@ void ElRBFMeshMotionSolver::solve()
         {
             int i = 0;
 
-            for ( const auto & vertex : boundaryPoints )
+            for ( const auto & vertex : boundaryData )
             {
-                for ( int j = 0; j < mesh().nGeometricD(); j++ )
-                {
-                    positions->QueueUpdate( localBoundaryOffset + i, j, vertex.second.data[j] );
-                }
+                positions->QueueUpdate( localBoundaryOffset + i, 0, std::get<1>( vertex ) );
+                positions->QueueUpdate( localBoundaryOffset + i, 1, std::get<2>( vertex ) );
+
+                if ( mesh().nGeometricD() == 3 )
+                    positions->QueueUpdate( localBoundaryOffset + i, 2, std::get<3>( vertex ) );
 
                 i++;
             }
@@ -259,15 +309,6 @@ void ElRBFMeshMotionSolver::solve()
         rbf->compute( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
     }
 
-    std::vector<size_t> allBoundaryPoints = mxx::allgather( boundaryPoints.size() );
-    size_t totalNbBoundaryPoints = 0;
-
-    for ( size_t n : allBoundaryPoints )
-        totalNbBoundaryPoints += n;
-
-    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
-    El::Zeros( *data, totalNbBoundaryPoints, mesh().nGeometricD() );
-
     for ( auto & vertex : boundaryPoints )
     {
         if ( not vertex.second.moving )
@@ -297,6 +338,31 @@ void ElRBFMeshMotionSolver::solve()
         }
     }
 
+    std::vector<tuple_type> boundaryData;
+
+    for ( const auto & vertex : boundaryPoints )
+    {
+        if ( mesh().nGeometricD() == 2 )
+            boundaryData.push_back( std::make_tuple( vertex.second.id, vertex.second.data[0], vertex.second.data[1], 0 ) );
+        else
+            boundaryData.push_back( std::make_tuple( vertex.second.id, vertex.second.data[0], vertex.second.data[1], vertex.second.data[2] ) );
+    }
+
+    mxx::sort( boundaryData.begin(), boundaryData.end(), cmp );
+
+    auto it = mxx::unique( boundaryData.begin(), boundaryData.end(), cmp_unique );
+
+    boundaryData.resize( std::distance( boundaryData.begin(), it ) );
+
+    std::vector<size_t> allBoundaryPoints = mxx::allgather( boundaryData.size() );
+    size_t totalNbBoundaryPoints = 0;
+
+    for ( size_t n : allBoundaryPoints )
+        totalNbBoundaryPoints += n;
+
+    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+    El::Zeros( *data, totalNbBoundaryPoints, mesh().nGeometricD() );
+
     data->Reserve( boundaryPoints.size() * mesh().nGeometricD() );
 
     size_t localBoundaryOffset = 0;
@@ -307,10 +373,13 @@ void ElRBFMeshMotionSolver::solve()
     {
         int i = 0;
 
-        for ( const auto & vertex : boundaryPoints )
+        for ( const auto & vertex : boundaryData )
         {
-            for ( int j = 0; j < mesh().nGeometricD(); j++ )
-                data->QueueUpdate( localBoundaryOffset + i, j, vertex.second.data[j] );
+            data->QueueUpdate( localBoundaryOffset + i, 0, std::get<1>( vertex ) );
+            data->QueueUpdate( localBoundaryOffset + i, 1, std::get<2>( vertex ) );
+
+            if ( mesh().nGeometricD() == 3 )
+                data->QueueUpdate( localBoundaryOffset + i, 2, std::get<3>( vertex ) );
 
             i++;
         }
