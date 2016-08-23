@@ -134,10 +134,16 @@ namespace rbf
         }
     }
 
+    bool ElRBFInterpolation::initialized()
+    {
+        return Phi->Height() > 0;
+    }
+
     std::unique_ptr<El::DistMatrix<double> > ElRBFInterpolation::interpolate( const std::unique_ptr<El::DistMatrix<double> > & values )
     {
         assert( Phi->Height() > 0 );
         assert( H->Height() > 0 );
+        assert( values->Height() == Phi->Width() );
 
         std::unique_ptr<El::DistMatrix<double> > result( new El::DistMatrix<double>() );
 

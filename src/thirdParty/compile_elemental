@@ -3,10 +3,23 @@
 cd elemental
 rm -rf build install
 mkdir build install && cd build
+
+if [ "$WM_COMPILE_OPTION" = "Opt" ]
+then
 cmake \
     -D CMAKE_INSTALL_PREFIX=`pwd`/../install \
     -D INSTALL_PYTHON_PACKAGE=OFF \
+    -D CMAKE_BUILD_TYPE=Release
     ..
+elif [ "$WM_COMPILE_OPTION" = "Debug" ]
+then
+cmake \
+    -D CMAKE_INSTALL_PREFIX=`pwd`/../install \
+    -D INSTALL_PYTHON_PACKAGE=OFF \
+    -D CMAKE_BUILD_TYPE=Debug
+    ..
+fi
+
 make -j `nproc`
 make install
 cp ../install/lib/*.so* $FOAM_LIBBIN/

@@ -6,9 +6,23 @@
 
 #pragma once
 
+#include "ElRBFInterpolation.H"
 #include "motionSolver.H"
 #include "polyMesh.H"
 #include "addToRunTimeSelectionTable.H"
+#include "twoDPointCorrectorRBF.H"
+#include <unordered_map>
+
+struct Vertex
+{
+    bool owner;
+    int patchId;
+    int meshPointId;
+    int pointId;
+    int globalPointId;
+    int id;
+    std::vector<double> coord;
+};
 
 namespace Foam
 {
@@ -56,5 +70,9 @@ namespace Foam
         private:
             labelList movingPatchIDs;
             labelList staticPatchIDs;
+            std::unique_ptr<rbf::ElRBFInterpolation> rbf;
+            twoDPointCorrectorRBF twoDCorrector;
+            std::unordered_map<int, Vertex> movingPoints;
+            std::unordered_map<int, Vertex> staticPoints;
     };
 }

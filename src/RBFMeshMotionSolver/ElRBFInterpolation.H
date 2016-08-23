@@ -31,6 +31,8 @@ namespace rbf
                 std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
                 );
 
+            bool initialized();
+
             std::unique_ptr<El::DistMatrix<double> > interpolate( const std::unique_ptr<El::DistMatrix<double> > & values );
 
         private:

@@ -5,6 +5,7 @@
  */
 
 #include "ElRBFMeshMotionSolver.H"
+#include "TPSFunction.H"
 #include <cassert>
 
 using namespace Foam;
@@ -19,15 +20,17 @@ addToRunTimeSelectionTable
 );
 
 ElRBFMeshMotionSolver::ElRBFMeshMotionSolver(
-    const polyMesh & mesh,
-    Istream & msData
+    const Foam::polyMesh & mesh,
+    Foam::Istream & msData
     )
     :
     motionSolver( mesh ),
     motionCenters( mesh.boundaryMesh().size(), vectorField( 0 ) ),
     newPoints( mesh.points().size(), vector::zero ),
     movingPatchIDs( wordList( lookup( "movingPatches" ) ).size(), 0 ),
-    staticPatchIDs( wordList( lookup( "staticPatches" ) ).size(), 0 )
+    staticPatchIDs( wordList( lookup( "staticPatches" ) ).size(), 0 ),
+    rbf( new rbf::ElRBFInterpolation() ),
+    twoDCorrector( mesh )
 {
     wordList staticPatches( lookup( "staticPatches" ) );
     wordList movingPatches( lookup( "movingPatches" ) );
@@ -78,8 +81,6 @@ ElRBFMeshMotionSolver::~ElRBFMeshMotionSolver()
 
 tmp<pointField> ElRBFMeshMotionSolver::curPoints() const
 {
-    Pout << "ElRBFMeshMotionSolver::curPoints start" << endl;
-
     // Prepare new points: same as old point
     tmp<pointField> tnewPoints
     (
@@ -93,16 +94,12 @@ tmp<pointField> ElRBFMeshMotionSolver::curPoints() const
     // Add old point positions
     newPoints += mesh().points();
 
-    Pout << "ElRBFMeshMotionSolver::curPoints end" << endl;
-
     return tnewPoints;
 }
 
 // As a first step, the motion is defined in the
 void ElRBFMeshMotionSolver::setMotion( const Field<vectorField> & motion )
 {
-    Pout << "ElRBFMeshMotionSolver::setMotion start" << endl;
-
     // Input checking
 
     assert( motion.size() == mesh().boundaryMesh().size() );
@@ -128,7 +125,6 @@ void ElRBFMeshMotionSolver::setMotion( const Field<vectorField> & motion )
     }
 
     motionCenters = motion;
-    Pout << "ElRBFMeshMotionSolver::setMotion end" << endl;
 }
 
 void ElRBFMeshMotionSolver::updateMesh( const mapPolyMesh & )
@@ -138,7 +134,205 @@ void ElRBFMeshMotionSolver::updateMesh( const mapPolyMesh & )
 
 void ElRBFMeshMotionSolver::solve()
 {
-    Pout << "ElRBFMeshMotionSolver::solve start" << endl;
+    if ( not rbf->initialized() )
+    {
+        forAll( staticPatchIDs, patchId )
+        {
+            const labelList & meshPoints = mesh().boundaryMesh()[staticPatchIDs[patchId]].meshPoints();
 
-    Pout << "ElRBFMeshMotionSolver::solve end" << endl;
+            forAll( meshPoints, i )
+            {
+                if ( twoDCorrector.marker()[meshPoints[i]] != 0 )
+                    continue;
+
+                if ( staticPoints.find( meshPoints[i] ) != staticPoints.end() )
+                    continue;
+
+                Vertex vertex;
+                vertex.owner = true;
+                vertex.patchId = patchId;
+                vertex.meshPointId = i;
+                vertex.pointId = meshPoints[i];
+                vertex.globalPointId = 0;
+                vertex.id = staticPoints.size();
+
+                for ( int j = 0; j < mesh().nGeometricD(); j++ )
+                    vertex.coord.push_back( mesh().points()[vertex.pointId][j] );
+
+                staticPoints[vertex.pointId] = vertex;
+            }
+        }
+
+        forAll( movingPatchIDs, patchId )
+        {
+            const labelList & meshPoints = mesh().boundaryMesh()[movingPatchIDs[patchId]].meshPoints();
+
+            forAll( meshPoints, i )
+            {
+                if ( twoDCorrector.marker()[meshPoints[i]] != 0 )
+                    continue;
+
+                if ( staticPoints.find( meshPoints[i] ) != staticPoints.end() )
+                    continue;
+
+                if ( movingPoints.find( meshPoints[i] ) != movingPoints.end() )
+                    continue;
+
+                Vertex vertex;
+                vertex.owner = true;
+                vertex.patchId = patchId;
+                vertex.meshPointId = i;
+                vertex.pointId = meshPoints[i];
+                vertex.globalPointId = 0;
+                vertex.id = movingPoints.size();
+
+                for ( int j = 0; j < mesh().nGeometricD(); j++ )
+                    vertex.coord.push_back( mesh().points()[vertex.pointId][j] );
+
+                movingPoints[vertex.pointId] = vertex;
+            }
+        }
+
+        std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
+        std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double> () );
+        El::Zeros( *positions, staticPoints.size() + movingPoints.size(), mesh().nGeometricD() );
+
+        int nbInterpolationPoints = 0;
+
+        forAll( mesh().points(), i )
+        {
+            if ( twoDCorrector.marker()[i] == 0 )
+                nbInterpolationPoints++;
+        }
+
+        El::Zeros( *positionsInterpolation, nbInterpolationPoints, mesh().nGeometricD() );
+
+        positions->Reserve( positions->LocalHeight() * positions->LocalWidth() );
+
+        int i = 0;
+
+        for ( const auto & vertex : movingPoints )
+        {
+            const int globalRow = positions->GlobalRow( i );
+
+            for ( int j = 0; j < mesh().nGeometricD(); j++ )
+            {
+                const int globalCol = positions->GlobalCol( j );
+
+                positions->QueueUpdate( globalRow, globalCol, vertex.second.coord[j] );
+            }
+
+            i++;
+        }
+
+        for ( const auto & vertex : staticPoints )
+        {
+            const int globalRow = positions->GlobalRow( i );
+
+            for ( int j = 0; j < mesh().nGeometricD(); j++ )
+            {
+                const int globalCol = positions->GlobalCol( j );
+
+                positions->QueueUpdate( globalRow, globalCol, vertex.second.coord[j] );
+            }
+
+            i++;
+        }
+
+        positionsInterpolation->Reserve( positionsInterpolation->LocalHeight() * positionsInterpolation->Width() );
+
+        int index = 0;
+        forAll( mesh().points(), i )
+        {
+            if ( twoDCorrector.marker()[i] != 0 )
+                continue;
+
+            const int globalRow = positionsInterpolation->GlobalRow( index );
+
+            for ( int j = 0; j < mesh().nGeometricD(); j++ )
+            {
+                const int globalCol = positionsInterpolation->GlobalCol( j );
+
+                positionsInterpolation->QueueUpdate( globalRow, globalCol, mesh().points()[i][j] );
+            }
+
+            index++;
+        }
+
+        std::unique_ptr<rbf::RBFFunctionInterface> rbfFunction( new rbf::TPSFunction() );
+        rbf->compute( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
+    }
+
+    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+    El::Zeros( *data, staticPoints.size() + movingPoints.size(), mesh().nGeometricD() );
+
+    data->Reserve( data->LocalHeight() * data->LocalWidth() );
+
+    forAll( movingPatchIDs, patchId )
+    {
+        const labelList & meshPoints = mesh().boundaryMesh()[movingPatchIDs[patchId]].meshPoints();
+
+        forAll( meshPoints, i )
+        {
+            int pointId = meshPoints[i];
+
+            if ( movingPoints.find( pointId ) != movingPoints.end() )
+            {
+                const auto & vertex = movingPoints[pointId];
+                const int globalRow = data->GlobalRow( vertex.id );
+
+                for ( int j = 0; j < mesh().nGeometricD(); j++ )
+                {
+                    const int globalCol = data->GlobalCol( j );
+                    data->QueueUpdate( globalRow, globalCol, motionCenters[movingPatchIDs[patchId]][i][j] );
+                }
+            }
+        }
+    }
+
+    data->ProcessQueues();
+
+    std::unique_ptr<El::DistMatrix<double> > result = rbf->interpolate( data );
+
+    vectorField valuesInterpolationField( mesh().points().size(), Foam::vector::zero );
+
+    std::vector<double> buffer;
+    result->ReservePulls( result->LocalHeight() * result->LocalWidth() );
+
+    int index = 0;
+    forAll( valuesInterpolationField, i )
+    {
+        if ( twoDCorrector.marker()[i] != 0 )
+            continue;
+
+        const int globalRow = result->GlobalRow( index );
+
+        for ( int j = 0; j < mesh().nGeometricD(); j++ )
+        {
+            const int globalCol = result->GlobalCol( j );
+            result->QueuePull( globalRow, globalCol );
+        }
+
+        index++;
+    }
+    result->ProcessPullQueue( buffer );
+
+    index = 0;
+    forAll( valuesInterpolationField, i )
+    {
+        if ( twoDCorrector.marker()[i] != 0 )
+            continue;
+
+        for ( int j = 0; j < mesh().nGeometricD(); j++ )
+        {
+            valuesInterpolationField[i][j] = buffer[index];
+            index++;
+        }
+    }
+
+    twoDCorrector.setShadowSide( valuesInterpolationField );
+
+    assert( newPoints.size() == valuesInterpolationField.size() );
+
+    newPoints = valuesInterpolationField;
 }
