@@ -163,6 +163,8 @@ void ElRBFMeshMotionSolver::solve()
             }
         }
 
+        assert( movingPoints.size() == 0 );
+
         forAll( movingPatchIDs, patchId )
         {
             const labelList & meshPoints = mesh().boundaryMesh()[movingPatchIDs[patchId]].meshPoints();
@@ -209,11 +211,9 @@ void ElRBFMeshMotionSolver::solve()
 
         positions->Reserve( positions->LocalHeight() * positions->LocalWidth() );
 
-        int i = 0;
-
         for ( const auto & vertex : movingPoints )
         {
-            const int globalRow = positions->GlobalRow( i );
+            const int globalRow = positions->GlobalRow( vertex.second.id );
 
             for ( int j = 0; j < mesh().nGeometricD(); j++ )
             {
@@ -221,13 +221,11 @@ void ElRBFMeshMotionSolver::solve()
 
                 positions->QueueUpdate( globalRow, globalCol, vertex.second.coord[j] );
             }
-
-            i++;
         }
 
         for ( const auto & vertex : staticPoints )
         {
-            const int globalRow = positions->GlobalRow( i );
+            const int globalRow = positions->GlobalRow( movingPoints.size() + vertex.second.id );
 
             for ( int j = 0; j < mesh().nGeometricD(); j++ )
             {
@@ -235,13 +233,12 @@ void ElRBFMeshMotionSolver::solve()
 
                 positions->QueueUpdate( globalRow, globalCol, vertex.second.coord[j] );
             }
-
-            i++;
         }
 
-        positionsInterpolation->Reserve( positionsInterpolation->LocalHeight() * positionsInterpolation->Width() );
+        positionsInterpolation->Reserve( positionsInterpolation->LocalHeight() * positionsInterpolation->LocalWidth() );
 
         int index = 0;
+
         forAll( mesh().points(), i )
         {
             if ( twoDCorrector.marker()[i] != 0 )
@@ -266,7 +263,7 @@ void ElRBFMeshMotionSolver::solve()
     std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
     El::Zeros( *data, staticPoints.size() + movingPoints.size(), mesh().nGeometricD() );
 
-    data->Reserve( data->LocalHeight() * data->LocalWidth() );
+    data->Reserve( movingPoints.size() * data->LocalWidth() );
 
     forAll( movingPatchIDs, patchId )
     {
@@ -290,8 +287,6 @@ void ElRBFMeshMotionSolver::solve()
         }
     }
 
-    data->ProcessQueues();
-
     std::unique_ptr<El::DistMatrix<double> > result = rbf->interpolate( data );
 
     vectorField valuesInterpolationField( mesh().points().size(), Foam::vector::zero );
@@ -300,6 +295,7 @@ void ElRBFMeshMotionSolver::solve()
     result->ReservePulls( result->LocalHeight() * result->LocalWidth() );
 
     int index = 0;
+
     forAll( valuesInterpolationField, i )
     {
         if ( twoDCorrector.marker()[i] != 0 )
@@ -318,6 +314,7 @@ void ElRBFMeshMotionSolver::solve()
     result->ProcessPullQueue( buffer );
 
     index = 0;
+
     forAll( valuesInterpolationField, i )
     {
         if ( twoDCorrector.marker()[i] != 0 )

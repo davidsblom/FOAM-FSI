@@ -7,7 +7,7 @@
 #pragma once
 
 #include <memory>
-#include "El.hpp"
+#include <El.hpp>
 #include "RBFFunctionInterface.H"
 
 namespace rbf
