@@ -14,6 +14,7 @@
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <numeric>
 
 namespace sdc
 {

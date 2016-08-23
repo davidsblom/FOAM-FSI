@@ -1,6 +1,7 @@
 c++WARN     = -Wall -Wextra -Werror -Wno-literal-suffix
 
-EXE_INC = -std=c++11 \
+EXE_INC = -std=c++11 -fext-numeric-literals\
+    -isystem ../../thirdParty/elemental/install/include \
     -I ../../fsi \
     -I ../../fsi/lnInclude \
     -I ../../fsi/solidSolvers \
@@ -32,6 +33,7 @@ EXE_INC = -std=c++11 \
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
     -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \
@@ -58,6 +60,7 @@ endif
 ifeq ($(WM_COMPILE_OPTION), Debug)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
     -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \

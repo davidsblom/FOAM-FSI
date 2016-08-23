@@ -20,7 +20,8 @@ build:
 
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
-                ln -s /home/boost_1_55_0 boost
+                ln -s /home/boost_1_61_0 boost
+                sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
 
                 # petsc
                 mkdir -p petsc
@@ -36,6 +37,9 @@ build:
                 # yaml-cpp
                 ln -s /home/yaml-cpp-release-0.5.3 yaml-cpp
                 cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
+        - script:
+            name: elemental
+            code: cd src/thirdParty && ./compile_elemental
         - script:
             name: precice
             code: |
@@ -80,10 +84,11 @@ build:
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmake libso src/RBFMeshMotionSolver
         - script:
-            name: FSI solvers
+            name: solvers
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd applications/solvers/fsi && wmake all
+                cd ../ && wmake unsteadyPUCoupledFoam
         - script:
             name: test app
             code: |
@@ -104,6 +109,7 @@ build:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-rbf
+                mpirun -np 4 --allow-run-as-root testsuite-rbf
         - script:
             name: testsuite-spacemapping
             code: |
@@ -153,7 +159,8 @@ debug:
 
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
-                ln -s /home/boost_1_55_0 boost
+                ln -s /home/boost_1_61_0 boost
+                sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
 
                 # petsc
                 mkdir -p petsc
@@ -169,6 +176,9 @@ debug:
                 # yaml-cpp
                 ln -s /home/yaml-cpp-release-0.5.3 yaml-cpp
                 cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
+        - script:
+            name: elemental
+            code: cd src/thirdParty && ./compile_elemental
         - script:
             name: precice
             code: |
@@ -213,10 +223,11 @@ debug:
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmake libso src/RBFMeshMotionSolver
         - script:
-            name: FSI solvers
+            name: solvers
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd applications/solvers/fsi && wmake all
+                cd ../ && wmake unsteadyPUCoupledFoam
         - script:
             name: test app
             code: |
@@ -251,7 +262,8 @@ ubuntu:
 
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
-                ln -s /home/boost_1_55_0 boost
+                ln -s /home/boost_1_61_0 boost
+                sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
 
                 # petsc
                 mkdir -p petsc
@@ -267,6 +279,9 @@ ubuntu:
                 # yaml-cpp
                 ln -s /home/yaml-cpp-release-0.5.3 yaml-cpp
                 cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
+        - script:
+            name: elemental
+            code: cd src/thirdParty && ./compile_elemental
         - script:
             name: precice
             code: |
@@ -311,10 +326,11 @@ ubuntu:
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmake libso src/RBFMeshMotionSolver
         - script:
-            name: FSI solvers
+            name: solvers
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd applications/solvers/fsi && wmake all
+                cd ../ && wmake unsteadyPUCoupledFoam
         - script:
             name: test app
             code: |
@@ -335,6 +351,7 @@ ubuntu:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-rbf
+                mpirun -np 4 --allow-run-as-root testsuite-rbf
         - script:
             name: testsuite-spacemapping
             code: |
@@ -350,6 +367,11 @@ ubuntu:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-dealii
+        - script:
+            name: tutorials
+            code: |
+                (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
+                cd src/tests/tutorials && python testsuite.py
         - script:
             name: cleanup
             code: rm -rf * .git* .travis.yml .uncrustify.cfg

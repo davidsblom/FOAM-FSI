@@ -10,6 +10,7 @@
 #include <memory>
 #include <yaml-cpp/yaml.h>
 
+#include "El.hpp"
 #include "dealiiSolidSolver.H"
 #include "version.H"
 #include "ASMILS.H"
@@ -180,6 +181,8 @@ int main(
         ) );
 
     std::shared_ptr<dealii::Utilities::MPI::MPI_InitFinalize> mpi_initialization;
+
+    El::Initialize();
 
     // Load computation settings
 
@@ -881,6 +884,8 @@ int main(
 
     label tmp = Pstream::myProcNo();
     reduce( tmp, sumOp<label>() );
+
+    El::Finalize();
 
     return (0);
 }
