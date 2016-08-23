@@ -223,13 +223,9 @@ void ElRBFMeshMotionSolver::solve()
             if ( twoDCorrector.marker()[i] != 0 )
                 continue;
 
-            const int globalRow = positionsInterpolation->GlobalRow( index );
-
             for ( int j = 0; j < mesh().nGeometricD(); j++ )
             {
-                const int globalCol = positionsInterpolation->GlobalCol( j );
-
-                positionsInterpolation->QueueUpdate( globalRow, globalCol, mesh().points()[i][j] );
+                positionsInterpolation->QueueUpdate( index, j, mesh().points()[i][j] );
             }
 
             index++;
@@ -289,8 +285,17 @@ void ElRBFMeshMotionSolver::solve()
 
     vectorField valuesInterpolationField( mesh().points().size(), Foam::vector::zero );
 
+    int nbInterpolationPoints = 0;
+    forAll( valuesInterpolationField, i )
+    {
+        if ( twoDCorrector.marker()[i] != 0 )
+            continue;
+
+        nbInterpolationPoints++;
+    }
+
     std::vector<double> buffer;
-    result->ReservePulls( result->LocalHeight() * result->LocalWidth() );
+    result->ReservePulls( nbInterpolationPoints * mesh().nGeometricD() );
 
     int index = 0;
 
@@ -299,12 +304,9 @@ void ElRBFMeshMotionSolver::solve()
         if ( twoDCorrector.marker()[i] != 0 )
             continue;
 
-        const int globalRow = result->GlobalRow( index );
-
         for ( int j = 0; j < mesh().nGeometricD(); j++ )
         {
-            const int globalCol = result->GlobalCol( j );
-            result->QueuePull( globalRow, globalCol );
+            result->QueuePull( index, j );
         }
 
         index++;
