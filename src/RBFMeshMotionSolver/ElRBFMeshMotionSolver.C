@@ -4,6 +4,7 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+#include <mxx/sort.hpp>
 #include "ElRBFMeshMotionSolver.H"
 #include "TPSFunction.H"
 #include <cassert>
@@ -186,7 +187,14 @@ void ElRBFMeshMotionSolver::solve()
 
         std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
         std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double> () );
-        El::Zeros( *positions, boundaryPoints.size(), mesh().nGeometricD() );
+
+        std::vector<size_t> allBoundaryPoints = mxx::allgather( boundaryPoints.size() );
+        size_t totalNbBoundaryPoints = 0;
+
+        for ( size_t n : allBoundaryPoints )
+            totalNbBoundaryPoints += n;
+
+        El::Zeros( *positions, totalNbBoundaryPoints, mesh().nGeometricD() );
 
         int nbInterpolationPoints = 0;
 
@@ -196,9 +204,20 @@ void ElRBFMeshMotionSolver::solve()
                 nbInterpolationPoints++;
         }
 
-        El::Zeros( *positionsInterpolation, nbInterpolationPoints, mesh().nGeometricD() );
+        std::vector<int> allInterpolationPoints = mxx::allgather( nbInterpolationPoints );
+        int totalNbInterpolationPoints = 0;
+
+        for ( int n : allInterpolationPoints )
+            totalNbInterpolationPoints += n;
+
+        El::Zeros( *positionsInterpolation, totalNbInterpolationPoints, mesh().nGeometricD() );
 
         positions->Reserve( boundaryPoints.size() * mesh().nGeometricD() );
+
+        size_t localBoundaryOffset = 0;
+
+        for ( int i = 0; i < Pstream::myProcNo(); i++ )
+            localBoundaryOffset += allBoundaryPoints[i];
 
         {
             int i = 0;
@@ -207,7 +226,7 @@ void ElRBFMeshMotionSolver::solve()
             {
                 for ( int j = 0; j < mesh().nGeometricD(); j++ )
                 {
-                    positions->QueueUpdate( i, j, vertex.second.data[j] );
+                    positions->QueueUpdate( localBoundaryOffset + i, j, vertex.second.data[j] );
                 }
 
                 i++;
@@ -215,6 +234,11 @@ void ElRBFMeshMotionSolver::solve()
         }
 
         positionsInterpolation->Reserve( nbInterpolationPoints * mesh().nGeometricD() );
+
+        size_t localInterpolationOffset = 0;
+
+        for ( int i = 0; i < Pstream::myProcNo(); i++ )
+            localInterpolationOffset += allInterpolationPoints[i];
 
         int index = 0;
 
@@ -225,7 +249,7 @@ void ElRBFMeshMotionSolver::solve()
 
             for ( int j = 0; j < mesh().nGeometricD(); j++ )
             {
-                positionsInterpolation->QueueUpdate( index, j, mesh().points()[i][j] );
+                positionsInterpolation->QueueUpdate( localInterpolationOffset + index, j, mesh().points()[i][j] );
             }
 
             index++;
@@ -235,8 +259,14 @@ void ElRBFMeshMotionSolver::solve()
         rbf->compute( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
     }
 
+    std::vector<size_t> allBoundaryPoints = mxx::allgather( boundaryPoints.size() );
+    size_t totalNbBoundaryPoints = 0;
+
+    for ( size_t n : allBoundaryPoints )
+        totalNbBoundaryPoints += n;
+
     std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
-    El::Zeros( *data, boundaryPoints.size(), mesh().nGeometricD() );
+    El::Zeros( *data, totalNbBoundaryPoints, mesh().nGeometricD() );
 
     for ( auto & vertex : boundaryPoints )
     {
@@ -269,13 +299,18 @@ void ElRBFMeshMotionSolver::solve()
 
     data->Reserve( boundaryPoints.size() * mesh().nGeometricD() );
 
+    size_t localBoundaryOffset = 0;
+
+    for ( int i = 0; i < Pstream::myProcNo(); i++ )
+        localBoundaryOffset += allBoundaryPoints[i];
+
     {
         int i = 0;
 
         for ( const auto & vertex : boundaryPoints )
         {
             for ( int j = 0; j < mesh().nGeometricD(); j++ )
-                data->QueueUpdate( i, j, vertex.second.data[j] );
+                data->QueueUpdate( localBoundaryOffset + i, j, vertex.second.data[j] );
 
             i++;
         }
@@ -294,8 +329,15 @@ void ElRBFMeshMotionSolver::solve()
         nbInterpolationPoints++;
     }
 
+    std::vector<int> allInterpolationPoints = mxx::allgather( nbInterpolationPoints );
+
     std::vector<double> buffer;
     result->ReservePulls( nbInterpolationPoints * mesh().nGeometricD() );
+
+    size_t localInterpolationOffset = 0;
+
+    for ( int i = 0; i < Pstream::myProcNo(); i++ )
+        localInterpolationOffset += allInterpolationPoints[i];
 
     int index = 0;
 
@@ -306,7 +348,7 @@ void ElRBFMeshMotionSolver::solve()
 
         for ( int j = 0; j < mesh().nGeometricD(); j++ )
         {
-            result->QueuePull( index, j );
+            result->QueuePull( localInterpolationOffset + index, j );
         }
 
         index++;
