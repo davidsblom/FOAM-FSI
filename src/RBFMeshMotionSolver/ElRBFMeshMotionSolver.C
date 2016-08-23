@@ -136,7 +136,7 @@ void ElRBFMeshMotionSolver::solve()
 {
     if ( not rbf->initialized() )
     {
-        assert( boundaryPoints.size() == 0 );
+        assert( boundaryPoints.empty() );
 
         forAll( staticPatchIDs, patchId )
         {
