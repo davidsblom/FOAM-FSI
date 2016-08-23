@@ -2,8 +2,9 @@ c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-lo
 
 EXE_INC = -std=c++11 -fext-numeric-literals \
     -isystem ../thirdParty/elemental/install/include \
+    -isystem ../thirdParty/mxx/include \
+    -isystem ../thirdParty/mxx/ext \
     -isystem ../thirdParty/eigen/ \
-    -isystem ../thirdParty/mxx/include/ \
     -isystem ../fsi/lnInclude \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
     -isystem $(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \

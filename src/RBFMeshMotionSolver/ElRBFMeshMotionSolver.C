@@ -151,16 +151,13 @@ void ElRBFMeshMotionSolver::solve()
                     continue;
 
                 Vertex vertex;
-                vertex.owner = true;
                 vertex.moving = false;
-                vertex.pointId = meshPoints[i];
-                vertex.globalPointId = 0;
-                vertex.id = boundaryPoints.size();
+                vertex.id = meshPoints[i];
 
                 for ( int j = 0; j < mesh().nGeometricD(); j++ )
-                    vertex.coord.push_back( mesh().points()[vertex.pointId][j] );
+                    vertex.data.push_back( mesh().points()[vertex.id][j] );
 
-                boundaryPoints[vertex.pointId] = vertex;
+                boundaryPoints[vertex.id] = vertex;
             }
         }
 
@@ -177,16 +174,13 @@ void ElRBFMeshMotionSolver::solve()
                     continue;
 
                 Vertex vertex;
-                vertex.owner = true;
                 vertex.moving = true;
-                vertex.pointId = meshPoints[i];
-                vertex.globalPointId = 0;
-                vertex.id = boundaryPoints.size();
+                vertex.id = meshPoints[i];
 
                 for ( int j = 0; j < mesh().nGeometricD(); j++ )
-                    vertex.coord.push_back( mesh().points()[vertex.pointId][j] );
+                    vertex.data.push_back( mesh().points()[vertex.id][j] );
 
-                boundaryPoints[vertex.pointId] = vertex;
+                boundaryPoints[vertex.id] = vertex;
             }
         }
 
@@ -204,21 +198,23 @@ void ElRBFMeshMotionSolver::solve()
 
         El::Zeros( *positionsInterpolation, nbInterpolationPoints, mesh().nGeometricD() );
 
-        positions->Reserve( positions->LocalHeight() * positions->LocalWidth() );
+        positions->Reserve( boundaryPoints.size() * mesh().nGeometricD() );
 
-        for ( const auto & vertex : boundaryPoints )
         {
-            const int globalRow = positions->GlobalRow( vertex.second.id );
+            int i = 0;
 
-            for ( int j = 0; j < mesh().nGeometricD(); j++ )
+            for ( const auto & vertex : boundaryPoints )
             {
-                const int globalCol = positions->GlobalCol( j );
+                for ( int j = 0; j < mesh().nGeometricD(); j++ )
+                {
+                    positions->QueueUpdate( i, j, vertex.second.data[j] );
+                }
 
-                positions->QueueUpdate( globalRow, globalCol, vertex.second.coord[j] );
+                i++;
             }
         }
 
-        positionsInterpolation->Reserve( positionsInterpolation->LocalHeight() * positionsInterpolation->LocalWidth() );
+        positionsInterpolation->Reserve( nbInterpolationPoints * mesh().nGeometricD() );
 
         int index = 0;
 
@@ -246,13 +242,14 @@ void ElRBFMeshMotionSolver::solve()
     std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
     El::Zeros( *data, boundaryPoints.size(), mesh().nGeometricD() );
 
-    int nbMovingPoints = 0;
-
-    for ( const auto & vertex : boundaryPoints )
-        if ( vertex.second.moving )
-            nbMovingPoints++;
-
-    data->Reserve( nbMovingPoints * data->LocalWidth() );
+    for ( auto & vertex : boundaryPoints )
+    {
+        if ( not vertex.second.moving )
+        {
+            for ( auto & el: vertex.second.data )
+                el = 0.0;
+        }
+    }
 
     forAll( movingPatchIDs, patchId )
     {
@@ -264,19 +261,27 @@ void ElRBFMeshMotionSolver::solve()
 
             if ( boundaryPoints.find( pointId ) != boundaryPoints.end() )
             {
-                const auto & vertex = boundaryPoints[pointId];
-
-                if ( not vertex.moving )
-                    continue;
-
-                const int globalRow = data->GlobalRow( vertex.id );
+                auto & vertex = boundaryPoints[pointId];
 
                 for ( int j = 0; j < mesh().nGeometricD(); j++ )
                 {
-                    const int globalCol = data->GlobalCol( j );
-                    data->QueueUpdate( globalRow, globalCol, motionCenters[movingPatchIDs[patchId]][i][j] );
+                    vertex.data[j] = motionCenters[movingPatchIDs[patchId]][i][j];
                 }
             }
+        }
+    }
+
+    data->Reserve( boundaryPoints.size() * mesh().nGeometricD() );
+
+    {
+        int i = 0;
+
+        for ( const auto & vertex : boundaryPoints )
+        {
+            for ( int j = 0; j < mesh().nGeometricD(); j++ )
+                data->QueueUpdate( i, j, vertex.second.data[j] );
+
+            i++;
         }
     }
 

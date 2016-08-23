@@ -15,12 +15,9 @@
 
 struct Vertex
 {
-    bool owner;
     bool moving;
-    int pointId;
-    int globalPointId;
     int id;
-    std::vector<double> coord;
+    std::vector<double> data;
 };
 
 namespace Foam
@@ -71,6 +68,6 @@ namespace Foam
             labelList staticPatchIDs;
             std::unique_ptr<rbf::ElRBFInterpolation> rbf;
             twoDPointCorrectorRBF twoDCorrector;
-            std::unordered_map<int, Vertex> boundaryPoints;
+            std::map<int, Vertex> boundaryPoints;
     };
 }
