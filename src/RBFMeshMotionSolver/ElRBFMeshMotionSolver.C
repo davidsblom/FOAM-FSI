@@ -136,6 +136,8 @@ void ElRBFMeshMotionSolver::solve()
 {
     if ( not rbf->initialized() )
     {
+        assert( boundaryPoints.size() == 0 );
+
         forAll( staticPatchIDs, patchId )
         {
             const labelList & meshPoints = mesh().boundaryMesh()[staticPatchIDs[patchId]].meshPoints();
@@ -145,25 +147,22 @@ void ElRBFMeshMotionSolver::solve()
                 if ( twoDCorrector.marker()[meshPoints[i]] != 0 )
                     continue;
 
-                if ( staticPoints.find( meshPoints[i] ) != staticPoints.end() )
+                if ( boundaryPoints.find( meshPoints[i] ) != boundaryPoints.end() )
                     continue;
 
                 Vertex vertex;
                 vertex.owner = true;
-                vertex.patchId = patchId;
-                vertex.meshPointId = i;
+                vertex.moving = false;
                 vertex.pointId = meshPoints[i];
                 vertex.globalPointId = 0;
-                vertex.id = staticPoints.size();
+                vertex.id = boundaryPoints.size();
 
                 for ( int j = 0; j < mesh().nGeometricD(); j++ )
                     vertex.coord.push_back( mesh().points()[vertex.pointId][j] );
 
-                staticPoints[vertex.pointId] = vertex;
+                boundaryPoints[vertex.pointId] = vertex;
             }
         }
-
-        assert( movingPoints.size() == 0 );
 
         forAll( movingPatchIDs, patchId )
         {
@@ -174,30 +173,26 @@ void ElRBFMeshMotionSolver::solve()
                 if ( twoDCorrector.marker()[meshPoints[i]] != 0 )
                     continue;
 
-                if ( staticPoints.find( meshPoints[i] ) != staticPoints.end() )
-                    continue;
-
-                if ( movingPoints.find( meshPoints[i] ) != movingPoints.end() )
+                if ( boundaryPoints.find( meshPoints[i] ) != boundaryPoints.end() )
                     continue;
 
                 Vertex vertex;
                 vertex.owner = true;
-                vertex.patchId = patchId;
-                vertex.meshPointId = i;
+                vertex.moving = true;
                 vertex.pointId = meshPoints[i];
                 vertex.globalPointId = 0;
-                vertex.id = movingPoints.size();
+                vertex.id = boundaryPoints.size();
 
                 for ( int j = 0; j < mesh().nGeometricD(); j++ )
                     vertex.coord.push_back( mesh().points()[vertex.pointId][j] );
 
-                movingPoints[vertex.pointId] = vertex;
+                boundaryPoints[vertex.pointId] = vertex;
             }
         }
 
         std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
         std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double> () );
-        El::Zeros( *positions, staticPoints.size() + movingPoints.size(), mesh().nGeometricD() );
+        El::Zeros( *positions, boundaryPoints.size(), mesh().nGeometricD() );
 
         int nbInterpolationPoints = 0;
 
@@ -211,21 +206,9 @@ void ElRBFMeshMotionSolver::solve()
 
         positions->Reserve( positions->LocalHeight() * positions->LocalWidth() );
 
-        for ( const auto & vertex : movingPoints )
+        for ( const auto & vertex : boundaryPoints )
         {
             const int globalRow = positions->GlobalRow( vertex.second.id );
-
-            for ( int j = 0; j < mesh().nGeometricD(); j++ )
-            {
-                const int globalCol = positions->GlobalCol( j );
-
-                positions->QueueUpdate( globalRow, globalCol, vertex.second.coord[j] );
-            }
-        }
-
-        for ( const auto & vertex : staticPoints )
-        {
-            const int globalRow = positions->GlobalRow( movingPoints.size() + vertex.second.id );
 
             for ( int j = 0; j < mesh().nGeometricD(); j++ )
             {
@@ -261,9 +244,15 @@ void ElRBFMeshMotionSolver::solve()
     }
 
     std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
-    El::Zeros( *data, staticPoints.size() + movingPoints.size(), mesh().nGeometricD() );
+    El::Zeros( *data, boundaryPoints.size(), mesh().nGeometricD() );
 
-    data->Reserve( movingPoints.size() * data->LocalWidth() );
+    int nbMovingPoints = 0;
+
+    for ( const auto & vertex : boundaryPoints )
+        if ( vertex.second.moving )
+            nbMovingPoints++;
+
+    data->Reserve( nbMovingPoints * data->LocalWidth() );
 
     forAll( movingPatchIDs, patchId )
     {
@@ -273,9 +262,13 @@ void ElRBFMeshMotionSolver::solve()
         {
             int pointId = meshPoints[i];
 
-            if ( movingPoints.find( pointId ) != movingPoints.end() )
+            if ( boundaryPoints.find( pointId ) != boundaryPoints.end() )
             {
-                const auto & vertex = movingPoints[pointId];
+                const auto & vertex = boundaryPoints[pointId];
+
+                if ( not vertex.moving )
+                    continue;
+
                 const int globalRow = data->GlobalRow( vertex.id );
 
                 for ( int j = 0; j < mesh().nGeometricD(); j++ )
@@ -311,6 +304,7 @@ void ElRBFMeshMotionSolver::solve()
 
         index++;
     }
+
     result->ProcessPullQueue( buffer );
 
     index = 0;

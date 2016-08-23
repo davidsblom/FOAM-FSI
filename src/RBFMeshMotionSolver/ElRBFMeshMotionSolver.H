@@ -16,8 +16,7 @@
 struct Vertex
 {
     bool owner;
-    int patchId;
-    int meshPointId;
+    bool moving;
     int pointId;
     int globalPointId;
     int id;
@@ -72,7 +71,6 @@ namespace Foam
             labelList staticPatchIDs;
             std::unique_ptr<rbf::ElRBFInterpolation> rbf;
             twoDPointCorrectorRBF twoDCorrector;
-            std::unordered_map<int, Vertex> movingPoints;
-            std::unordered_map<int, Vertex> staticPoints;
+            std::unordered_map<int, Vertex> boundaryPoints;
     };
 }
