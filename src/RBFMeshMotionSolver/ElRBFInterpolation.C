@@ -169,7 +169,7 @@ namespace rbf
         auto & A = AProx.Get();
         auto & B_LU = BProx.Get();
 
-        El::ldl::SolveAfter( A, dSub, p, B, false );
+        El::ldl::SolveAfter( A, dSub, p, B_LU, false );
 
         Phi->ProcessQueues();
 
