@@ -153,7 +153,23 @@ namespace rbf
 
         H->ProcessQueues();
 
-        El::SymmetricSolve( El::UpperOrLower::LOWER, El::Orientation::NORMAL, *H, B );
+        if ( HCopy.Width() == 0 )
+        {
+            HCopy = El::DistMatrix<double> ( *H );
+            El::DistMatrixReadProxy<double, double, El::MC, El::MR> AProx( HCopy );
+            auto & A = AProx.Get();
+
+            p = El::DistPermutation( A.Grid() );
+            dSub = El::DistMatrix<double, El::MD, El::STAR> ( A.Grid() );
+            El::LDL( A, dSub, p, false, El::LDLPivotCtrl<El::Base<double> >() );
+        }
+
+        El::DistMatrixReadProxy<double, double, El::MC, El::MR> AProx( HCopy );
+        El::DistMatrixReadWriteProxy<double, double, El::MC, El::MR> BProx( B );
+        auto & A = AProx.Get();
+        auto & B_LU = BProx.Get();
+
+        El::ldl::SolveAfter( A, dSub, p, B, false );
 
         Phi->ProcessQueues();
 

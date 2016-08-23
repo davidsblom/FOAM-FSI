@@ -38,5 +38,9 @@ namespace rbf
         private:
             std::unique_ptr<El::DistMatrix<double> > H;
             std::unique_ptr<El::DistMatrix<double> > Phi;
+
+            El::DistMatrix<double> HCopy;
+            El::DistMatrix<double, El::MD, El::STAR> dSub;
+            El::DistPermutation p;
     };
 }
