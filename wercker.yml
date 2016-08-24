@@ -22,6 +22,8 @@ build:
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_61_0 boost
                 sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
+                cd boost && ./bootstrap.sh --with-libraries=log,program_options && ./b2 -j `nproc`
+                cp stage/lib/*.so $FOAM_LIBBIN/
 
                 # petsc
                 mkdir -p petsc
@@ -47,12 +49,11 @@ build:
 
                 cd src/thirdParty
 
-                export BOOST_ROOT=`pwd`/boost
-                export PRECICE_BOOST_ROOT=${BOOST_ROOT}
                 export PRECICE_MPI_LIB=mpi
                 export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
                 export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-                export CPLUS_INCLUDE_PATH=`pwd`/eigen
+                export CPLUS_INCLUDE_PATH=`pwd`/eigen:`pwd`/boost
+                export LIBRARY_PATH=$FOAM_LIBBIN
 
                 cd precice
                 scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
@@ -161,6 +162,8 @@ debug:
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_61_0 boost
                 sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
+                cd boost && ./bootstrap.sh --with-libraries=log,program_options && ./b2 -j `nproc`
+                cp stage/lib/*.so $FOAM_LIBBIN/
 
                 # petsc
                 mkdir -p petsc
@@ -186,12 +189,11 @@ debug:
 
                 cd src/thirdParty
 
-                export BOOST_ROOT=`pwd`/boost
-                export PRECICE_BOOST_ROOT=${BOOST_ROOT}
                 export PRECICE_MPI_LIB=mpi
                 export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
                 export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-                export CPLUS_INCLUDE_PATH=`pwd`/eigen
+                export CPLUS_INCLUDE_PATH=`pwd`/eigen:`pwd`/boost
+                export LIBRARY_PATH=$FOAM_LIBBIN
 
                 cd precice
                 scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
@@ -264,6 +266,8 @@ ubuntu:
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_61_0 boost
                 sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
+                cd boost && ./bootstrap.sh --with-libraries=log,program_options && ./b2 -j `nproc`
+                cp stage/lib/*.so $FOAM_LIBBIN/
 
                 # petsc
                 mkdir -p petsc
@@ -289,12 +293,11 @@ ubuntu:
 
                 cd src/thirdParty
 
-                export BOOST_ROOT=`pwd`/boost
-                export PRECICE_BOOST_ROOT=${BOOST_ROOT}
                 export PRECICE_MPI_LIB=mpi
                 export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
                 export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-                export CPLUS_INCLUDE_PATH=`pwd`/eigen
+                export CPLUS_INCLUDE_PATH=`pwd`/eigen:`pwd`/boost
+                export LIBRARY_PATH=$FOAM_LIBBIN
 
                 cd precice
                 scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
