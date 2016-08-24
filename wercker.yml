@@ -10,6 +10,7 @@ build:
             code: |
                 git checkout .
                 git submodule update --init --recursive
+                sudo apt-get clean && sudo apt-get update && sudo apt-get -y install libopenblas-dev libatlas-dev liblapack-dev
         - script:
             name: initialize dependencies
             code: |
