@@ -23,7 +23,7 @@ build:
                 ln -s /home/boost_1_61_0 boost
                 sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
                 cd boost && ./bootstrap.sh --with-libraries=log,program_options && ./b2 -j `nproc`
-                cp stage/lib/*.so $FOAM_LIBBIN/ && cd ..
+                cp stage/lib/* $FOAM_LIBBIN/ && cd ..
 
                 # petsc
                 mkdir -p petsc
@@ -163,7 +163,7 @@ debug:
                 ln -s /home/boost_1_61_0 boost
                 sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
                 cd boost && ./bootstrap.sh --with-libraries=log,program_options && ./b2 -j `nproc`
-                cp stage/lib/*.so $FOAM_LIBBIN/ && cd ..
+                cp stage/lib/* $FOAM_LIBBIN/ && cd ..
 
                 # petsc
                 mkdir -p petsc
@@ -267,7 +267,7 @@ ubuntu:
                 ln -s /home/boost_1_61_0 boost
                 sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
                 cd boost && ./bootstrap.sh --with-libraries=log,program_options && ./b2 -j `nproc`
-                cp stage/lib/*.so $FOAM_LIBBIN/ && cd ..
+                cp stage/lib/* $FOAM_LIBBIN/ && cd ..
 
                 # petsc
                 mkdir -p petsc
