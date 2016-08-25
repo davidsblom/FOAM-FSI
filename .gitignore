@@ -41,6 +41,9 @@ src/thirdParty/dealii*
 src/thirdParty/petsc*
 src/thirdParty/metis*
 src/thirdParty/parmetis*
+src/thirdParty/ateles
+src/thirdParty/harvester
+src/thirdParty/seeder
 
 # Case files
 boundary

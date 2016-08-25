@@ -10,7 +10,6 @@ build:
             code: |
                 git checkout .
                 git submodule update --init --recursive
-                sudo apt-get clean && sudo apt-get update && sudo apt-get -y install libgfortran-5-dev libgcc-5-dev
         - script:
             name: initialize dependencies
             code: |
