@@ -21,11 +21,11 @@ build:
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_61_0 boost
-                sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
+                cp boost/stage/lib/* $FOAM_LIBBIN/
 
                 # petsc
-                mkdir -p petsc
-                (cd petsc && ln -s /usr/include/petsc include)
+                ln -s /home/petsc-3.6.4 petsc
+                cp petsc/x86_64/lib/lib* ${FOAM_LIBBIN}/
 
                 # deal.II
                 ln -s /home/dealii-8.4.1 dealii
@@ -39,7 +39,9 @@ build:
                 cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
         - script:
             name: elemental
-            code: cd src/thirdParty && ./compile_elemental
+            code: |
+                cd src/thirdParty
+                ./compile_elemental
         - script:
             name: precice
             code: |
@@ -47,12 +49,11 @@ build:
 
                 cd src/thirdParty
 
-                export BOOST_ROOT=`pwd`/boost
-                export PRECICE_BOOST_ROOT=${BOOST_ROOT}
                 export PRECICE_MPI_LIB=mpi
                 export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
                 export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-                export CPLUS_INCLUDE_PATH=`pwd`/eigen
+                export CPLUS_INCLUDE_PATH=`pwd`/eigen:`pwd`/boost
+                export LIBRARY_PATH=$FOAM_LIBBIN
 
                 cd precice
                 scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
@@ -154,17 +155,17 @@ debug:
             code: |
                 # foam-extend
                 cd /home
-                tar xf foam-extend-3.2.tar.gz
+                tar xf foam-extend-3.2.tar.gz && rm foam-extend-3.2.tar.gz
                 source foam-extend-3.2/etc/prefs.sh && source foam-extend-3.2/etc/bashrc
 
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_61_0 boost
-                sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
+                cp boost/stage/lib/* $FOAM_LIBBIN/
 
                 # petsc
-                mkdir -p petsc
-                (cd petsc && ln -s /usr/include/petsc include)
+                ln -s /home/petsc-3.6.4 petsc
+                cp petsc/x86_64/lib/lib* ${FOAM_LIBBIN}/
 
                 # deal.II
                 ln -s /home/dealii-8.4.1 dealii
@@ -186,12 +187,11 @@ debug:
 
                 cd src/thirdParty
 
-                export BOOST_ROOT=`pwd`/boost
-                export PRECICE_BOOST_ROOT=${BOOST_ROOT}
                 export PRECICE_MPI_LIB=mpi
                 export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
                 export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-                export CPLUS_INCLUDE_PATH=`pwd`/eigen
+                export CPLUS_INCLUDE_PATH=`pwd`/eigen:`pwd`/boost
+                export LIBRARY_PATH=$FOAM_LIBBIN
 
                 cd precice
                 scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
@@ -263,11 +263,11 @@ ubuntu:
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_61_0 boost
-                sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
+                cp boost/stage/lib/* $FOAM_LIBBIN/
 
                 # petsc
-                mkdir -p petsc
-                (cd petsc && ln -s /usr/include/petsc include)
+                ln -s /home/petsc-3.6.4 petsc
+                cp petsc/x86_64/lib/lib* ${FOAM_LIBBIN}/
 
                 # deal.II
                 ln -s /home/dealii-8.4.1 dealii
@@ -289,12 +289,11 @@ ubuntu:
 
                 cd src/thirdParty
 
-                export BOOST_ROOT=`pwd`/boost
-                export PRECICE_BOOST_ROOT=${BOOST_ROOT}
                 export PRECICE_MPI_LIB=mpi
                 export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
                 export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-                export CPLUS_INCLUDE_PATH=`pwd`/eigen
+                export CPLUS_INCLUDE_PATH=`pwd`/eigen:`pwd`/boost
+                export LIBRARY_PATH=$FOAM_LIBBIN
 
                 cd precice
                 scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
