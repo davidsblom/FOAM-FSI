@@ -21,8 +21,6 @@ build:
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_61_0 boost
-                sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
-                cd boost && ./bootstrap.sh --with-libraries=log,program_options && ./b2 -j `nproc`
                 cp stage/lib/* $FOAM_LIBBIN/ && cd ..
 
                 # petsc
@@ -163,8 +161,6 @@ debug:
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_61_0 boost
-                sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
-                cd boost && ./bootstrap.sh --with-libraries=log,program_options && ./b2 -j `nproc`
                 cp stage/lib/* $FOAM_LIBBIN/ && cd ..
 
                 # petsc
@@ -267,8 +263,6 @@ ubuntu:
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_61_0 boost
-                sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
-                cd boost && ./bootstrap.sh --with-libraries=log,program_options && ./b2 -j `nproc`
                 cp stage/lib/* $FOAM_LIBBIN/ && cd ..
 
                 # petsc
