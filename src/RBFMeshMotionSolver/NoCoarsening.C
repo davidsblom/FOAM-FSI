@@ -1,0 +1,36 @@
+
+/*
+ * Author
+ *   David Blom, TU Delft. All rights reserved.
+ */
+
+#include "NoCoarsening.H"
+
+namespace rbf
+{
+    NoCoarsening::NoCoarsening( std::unique_ptr<ElRBFInterpolation> rbf )
+        :
+        rbf( std::move( rbf ) )
+    {}
+
+    NoCoarsening::~NoCoarsening(){}
+
+    void NoCoarsening::compute(
+        std::unique_ptr<RBFFunctionInterface> rbfFunction,
+        std::unique_ptr<El::DistMatrix<double> > positions,
+        std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
+        )
+    {
+        rbf->compute( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
+    }
+
+    bool NoCoarsening::initialized()
+    {
+        return rbf->initialized();
+    }
+
+    std::unique_ptr<El::DistMatrix<double> > NoCoarsening::interpolate( const std::unique_ptr<El::DistMatrix<double> > & values )
+    {
+        return rbf->interpolate( values );
+    }
+}

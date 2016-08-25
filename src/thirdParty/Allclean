@@ -4,6 +4,6 @@ set -e
 
 rm -rf gtest* yaml-cpp* boost* dealii* metis* parmetis* petsc*
 rm -rf $FOAM_USER_LIBBIN/libprecice* $FOAM_USER_LIBBIN/libyaml-cpp*
-rm -rf precice/build
-cd elemental
-git clean -fxd
+(cd precice && git clean -fxd)
+(cd mxx && git clean -fxd)
+(cd elemental && git reset --hard origin/master && git clean -fxd)

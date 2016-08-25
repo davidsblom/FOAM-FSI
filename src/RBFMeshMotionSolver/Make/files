@@ -11,5 +11,9 @@ RBFFunctions/LinearFunction.C
 
 ElRBFInterpolation.C
 ElRBFMeshMotionSolver.C
+ElRBFCoarsening.C
+NoCoarsening.C
+UnitCoarsening.C
+AdaptiveCoarsening.C
 
 LIB = $(FOAM_LIBBIN)/libRBFMeshMotionSolver

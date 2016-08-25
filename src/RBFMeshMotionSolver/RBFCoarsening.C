@@ -282,7 +282,7 @@ namespace rbf
             {
                 // Build the matrices used for the RBF interpolation
                 rbf::matrix positionsCoarse( counter, positions.cols() );
-                rbf::matrix valuesCoarse( positionsCoarse.rows(), positionsCoarse.cols() );
+                rbf::matrix valuesCoarse( positionsCoarse.rows(), values.cols() );
                 rbf::matrix valuesInterpolationCoarse( positionsInterpolationCoarse.rows(), positionsInterpolationCoarse.cols() );
 
                 for ( int j = 0; j < selectedPositions.rows(); j++ )
