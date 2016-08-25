@@ -21,7 +21,7 @@ build:
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_61_0 boost
-                cp stage/lib/* $FOAM_LIBBIN/ && cd ..
+                cp boost/stage/lib/* $FOAM_LIBBIN/ && cd ..
 
                 # petsc
                 ln -s /home/petsc-3.6.4 petsc
@@ -161,7 +161,7 @@ debug:
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_61_0 boost
-                cp stage/lib/* $FOAM_LIBBIN/ && cd ..
+                cp boost/stage/lib/* $FOAM_LIBBIN/ && cd ..
 
                 # petsc
                 ln -s /home/petsc-3.6.4 petsc
@@ -263,7 +263,7 @@ ubuntu:
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
                 ln -s /home/boost_1_61_0 boost
-                cp stage/lib/* $FOAM_LIBBIN/ && cd ..
+                cp boost/stage/lib/* $FOAM_LIBBIN/ && cd ..
 
                 # petsc
                 ln -s /home/petsc-3.6.4 petsc
