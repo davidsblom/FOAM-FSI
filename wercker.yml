@@ -42,7 +42,9 @@ build:
                 cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
         - script:
             name: elemental
-            code: cd src/thirdParty && ./compile_elemental
+            code: |
+                cd src/thirdParty
+                ./compile_elemental
         - script:
             name: precice
             code: |
