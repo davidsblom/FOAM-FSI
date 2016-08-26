@@ -141,7 +141,7 @@ namespace rbf
         largestError = *it;
         int globalIndexError = largestErrorGlobalIndexes[largestErrorIndex];
 
-        if ( maxCoeff > 0 || maxCoeff < 0 )
+        if ( maxCoeff != 0 )
             return std::pair<int, double>( globalIndexError, largestError / maxCoeff );
         else
             return std::pair<int, double>( globalIndexError, largestError );
