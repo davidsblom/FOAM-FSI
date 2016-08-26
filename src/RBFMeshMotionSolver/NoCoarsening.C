@@ -8,9 +8,9 @@
 
 namespace rbf
 {
-    NoCoarsening::NoCoarsening( std::unique_ptr<ElRBFInterpolation> rbf )
+    NoCoarsening::NoCoarsening()
         :
-        rbf( std::move( rbf ) )
+        rbf( new ElRBFInterpolation() )
     {}
 
     NoCoarsening::~NoCoarsening(){}

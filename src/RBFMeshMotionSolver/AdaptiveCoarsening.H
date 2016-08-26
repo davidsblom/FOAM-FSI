@@ -54,4 +54,28 @@ namespace rbf
             std::unique_ptr<El::DistMatrix<double> > positions;
             std::unique_ptr<El::DistMatrix<double> > positionsInterpolation;
     };
+
+    template<typename Real>
+    Real MaxAbs( const El::DistMatrix<Real> & A )
+    {
+        Real value = 0;
+
+        if ( A.Participating() )
+        {
+            // Store the index/value of the local pivot candidate
+            const El::Int mLocal = A.LocalHeight();
+            const El::Int nLocal = A.LocalWidth();
+            const Real * ABuf = A.LockedBuffer();
+            const El::Int ALDim = A.LDim();
+
+            for ( El::Int jLoc = 0; jLoc < nLocal; ++jLoc )
+                for ( El::Int iLoc = 0; iLoc < mLocal; ++iLoc )
+                    value = El::Max( std::abs( value ), ABuf[iLoc + jLoc * ALDim] );
+
+            value = El::mpi::AllReduce( value, El::mpi::MAX, A.DistComm() );
+        }
+
+        El::mpi::Broadcast( value, A.Root(), A.CrossComm() );
+        return value;
+    }
 }

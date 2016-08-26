@@ -8,6 +8,14 @@
 #include "ElRBFMeshMotionSolver.H"
 #include "TPSFunction.H"
 #include <cassert>
+#include "WendlandC0Function.H"
+#include "WendlandC2Function.H"
+#include "WendlandC4Function.H"
+#include "WendlandC6Function.H"
+#include "LinearFunction.H"
+#include "NoCoarsening.H"
+#include "AdaptiveCoarsening.H"
+#include "UnitCoarsening.H"
 
 using namespace Foam;
 
@@ -22,7 +30,7 @@ addToRunTimeSelectionTable
 
 ElRBFMeshMotionSolver::ElRBFMeshMotionSolver(
     const Foam::polyMesh & mesh,
-    Foam::Istream & msData
+    Foam::Istream &
     )
     :
     motionSolver( mesh ),
@@ -30,7 +38,8 @@ ElRBFMeshMotionSolver::ElRBFMeshMotionSolver(
     newPoints( mesh.points().size(), vector::zero ),
     movingPatchIDs( wordList( lookup( "movingPatches" ) ).size(), 0 ),
     staticPatchIDs( wordList( lookup( "staticPatches" ) ).size(), 0 ),
-    rbf( new rbf::ElRBFInterpolation() ),
+    rbf( nullptr ),
+    rbfFunction( nullptr ),
     twoDCorrector( mesh )
 {
     wordList staticPatches( lookup( "staticPatches" ) );
@@ -75,6 +84,80 @@ ElRBFMeshMotionSolver::ElRBFMeshMotionSolver(
     {
         motionCenters[movingPatchIDs[patchId]] = vectorField( mesh.boundaryMesh()[movingPatchIDs[patchId]].meshPoints().size(), Foam::vector::zero );
     }
+
+    // Initialize RBF interpolator
+
+    dictionary & dict = subDict( "interpolation" );
+
+    word function = dict.lookup( "function" );
+
+    assert( function == "TPS" || function == "WendlandC0" || function == "WendlandC2" || function == "WendlandC4" || function == "WendlandC6" || function == "linear" );
+
+    Info << "Radial Basis Function interpolation: Selecting RBF function: " << function << endl;
+
+    if ( function == "TPS" )
+        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::TPSFunction() );
+
+    if ( function == "WendlandC0" )
+    {
+        scalar radius = readScalar( dict.lookup( "radius" ) );
+        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC0Function( radius ) );
+    }
+
+    if ( function == "WendlandC2" )
+    {
+        scalar radius = readScalar( dict.lookup( "radius" ) );
+        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC2Function( radius ) );
+    }
+
+    if ( function == "WendlandC4" )
+    {
+        scalar radius = readScalar( dict.lookup( "radius" ) );
+        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC4Function( radius ) );
+    }
+
+    if ( function == "WendlandC6" )
+    {
+        scalar radius = readScalar( dict.lookup( "radius" ) );
+        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::WendlandC6Function( radius ) );
+    }
+
+    if ( function == "linear" )
+    {
+        rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface> ( new rbf::LinearFunction() );
+    }
+
+    assert( rbfFunction );
+
+    // Setup coarsening strategy
+
+    word coarseningStrategy = lookup( "coarseningStrategy" );
+
+    assert( coarseningStrategy == "NoCoarsening" || coarseningStrategy == "UnitCoarsening" || coarseningStrategy == "AdaptiveCoarsening" );
+
+    if ( coarseningStrategy == "NoCoarsening" )
+    {
+        rbf = std::unique_ptr<rbf::Coarsener>( new rbf::NoCoarsening() );
+    }
+
+    if ( coarseningStrategy == "UnitCoarsening" )
+    {
+        double tol = double( readScalar( subDict( "UnitCoarsening" ).lookup( "tol" ) ) );
+        int minPoints = readLabel( subDict( "UnitCoarsening" ).lookup( "minPoints" ) );
+        int maxPoints = readLabel( subDict( "UnitCoarsening" ).lookup( "maxPoints" ) );
+        rbf = std::unique_ptr<rbf::Coarsener>( new rbf::UnitCoarsening( tol, minPoints, maxPoints ) );
+    }
+
+    if ( coarseningStrategy == "AdaptiveCoarsening" )
+    {
+        double tol = double( readScalar( subDict( "AdaptiveCoarsening" ).lookup( "tol" ) ) );
+        double reselectionTol = double( readScalar( subDict( "AdaptiveCoarsening" ).lookup( "reselectionTol" ) ) );
+        int minPoints = readLabel( subDict( "AdaptiveCoarsening" ).lookup( "minPoints" ) );
+        int maxPoints = readLabel( subDict( "AdaptiveCoarsening" ).lookup( "maxPoints" ) );
+        rbf = std::unique_ptr<rbf::Coarsener>( new rbf::AdaptiveCoarsening( tol, reselectionTol, minPoints, maxPoints ) );
+    }
+
+    assert( rbf );
 }
 
 ElRBFMeshMotionSolver::~ElRBFMeshMotionSolver()
@@ -146,10 +229,10 @@ void ElRBFMeshMotionSolver::solve()
             return std::get<0>( x ) == std::get<0>( y );
         };
 
-    if ( not rbf->initialized() )
+    // If the points are already selected, the rbf.compute() is already
+    // called.
+    if ( boundaryPoints.empty() )
     {
-        assert( boundaryPoints.empty() );
-
         forAll( staticPatchIDs, patchId )
         {
             const labelList & meshPoints = mesh().boundaryMesh()[staticPatchIDs[patchId]].meshPoints();
@@ -305,8 +388,7 @@ void ElRBFMeshMotionSolver::solve()
             index++;
         }
 
-        std::unique_ptr<rbf::RBFFunctionInterface> rbfFunction( new rbf::TPSFunction() );
-        rbf->compute( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
+        rbf->compute( rbfFunction, std::move( positions ), std::move( positionsInterpolation ) );
     }
 
     for ( auto & vertex : boundaryPoints )

@@ -14,7 +14,7 @@ using namespace rbf;
 
 TEST( NoCoarsener, interpolate )
 {
-    std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
+    std::shared_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
     std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
     std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
     std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
@@ -51,7 +51,7 @@ TEST( NoCoarsener, interpolate )
         }
     }
 
-    ElRBFInterpolation rbf( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
+    ElRBFInterpolation rbf( rbfFunction, std::move( positions ), std::move( positionsInterpolation ) );
 
     // Interpolate some data
 
@@ -74,7 +74,6 @@ TEST( NoCoarsener, interpolate )
     std::unique_ptr<El::DistMatrix<double> > result2;
 
     {
-        std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
         std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
         std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
         std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
@@ -111,9 +110,8 @@ TEST( NoCoarsener, interpolate )
             }
         }
 
-        std::unique_ptr<ElRBFInterpolation> interpolator( new ElRBFInterpolation() );
-        NoCoarsening rbf( std::move( interpolator ) );
-        rbf.compute( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
+        NoCoarsening rbf;
+        rbf.compute( rbfFunction, std::move( positions ), std::move( positionsInterpolation ) );
 
         // Interpolate some data
 

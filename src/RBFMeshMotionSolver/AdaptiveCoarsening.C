@@ -141,7 +141,10 @@ namespace rbf
         largestError = *it;
         int globalIndexError = largestErrorGlobalIndexes[largestErrorIndex];
 
-        return std::pair<int, double>( globalIndexError, largestError / maxCoeff );
+        if ( maxCoeff > 0 || maxCoeff < 0 )
+            return std::pair<int, double>( globalIndexError, largestError / maxCoeff );
+        else
+            return std::pair<int, double>( globalIndexError, largestError );
     }
 
     void AdaptiveCoarsening::greedySelection( const std::unique_ptr<El::DistMatrix<double> > & values )
@@ -214,12 +217,38 @@ namespace rbf
         // Greedy selection never performed => do it now
         if ( not rbf->initialized() )
         {
-            greedySelection( values );
-            greedyPerformed = true;
+            // Only do a greedy selection if the values actually mean something
+            double maxAbs = rbf::MaxAbs( *values );
+
+            if ( maxAbs > 0 )
+            {
+                greedySelection( values );
+                greedyPerformed = true;
+            }
+            else
+            {
+                std::unique_ptr<El::DistMatrix<double> > result( new El::DistMatrix<double>() );
+                El::Zeros( *result, positionsInterpolation->Height(), positionsInterpolation->Width() );
+                return result;
+            }
         }
 
         // Evaluate error
         std::pair<int, double> largestError = computeError( values );
+
+        if ( !greedyPerformed && El::mpi::Rank() == 0 )
+        {
+            std::cout << "RBF interpolation coarsening: ";
+            std::cout << " error = " << largestError.second << ", tol = " << reselectionTol;
+            std::cout << ", reselection = ";
+
+            if ( largestError.second >= reselectionTol )
+                std::cout << "true";
+            else
+                std::cout << "false";
+
+            std::cout << std::endl;
+        }
 
         if ( largestError.second >= reselectionTol && !greedyPerformed )
         {

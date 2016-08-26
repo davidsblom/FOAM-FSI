@@ -13,7 +13,7 @@ namespace rbf
     class NoCoarsening : public Coarsener
     {
         public:
-            explicit NoCoarsening( std::unique_ptr<ElRBFInterpolation> rbf );
+            explicit NoCoarsening();
 
             ~NoCoarsening();
 
