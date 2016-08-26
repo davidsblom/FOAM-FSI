@@ -91,15 +91,15 @@ TEST_P( RBFInterpolationParametrizedTest, rbf3d_directly_interpolate )
     rbf::vector rowsum = rbf->Hhat.rowwise().sum();
 
     for ( int i = 0; i < rowsum.rows(); i++ )
-        ASSERT_NEAR( rowsum( i ), 1, 1.0e-12 );
+        EXPECT_NEAR( rowsum( i ), 1, 1.0e-10 );
 
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
-            ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-6 );
+            EXPECT_NEAR( y( i, j ), ynew( i, j ), 1.0e-6 );
 
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
-            ASSERT_NEAR( ynew( i, j ), ynew2( i, j ), 1.0e-11 );
+            EXPECT_NEAR( ynew( i, j ), ynew2( i, j ), 1.0e-10 );
 }
 
 TEST_P( RBFInterpolationParametrizedTest, rbf1d_regularity )
@@ -118,11 +118,11 @@ TEST_P( RBFInterpolationParametrizedTest, rbf1d_regularity )
     rbfCPU->interpolate( y, ynew2 );
 
     for ( int i = 0; i < ynew.rows(); i++ )
-        ASSERT_NEAR( ynew( i, 0 ), std::sin( xnew( i, 0 ) ), 1.0e-1 );
+        EXPECT_NEAR( ynew( i, 0 ), std::sin( xnew( i, 0 ) ), 1.0e-1 );
 
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
-            ASSERT_NEAR( ynew( i, j ), ynew2( i, j ), 1.0e-10 );
+            EXPECT_NEAR( ynew( i, j ), ynew2( i, j ), 1.0e-10 );
 }
 
 TEST( RBFInterpolationTest, oneD_small )
@@ -147,16 +147,16 @@ TEST( RBFInterpolationTest, oneD_small )
     rbf.compute( x, xnew );
     rbf.interpolate( y, ynew );
 
-    ASSERT_NEAR( 0.44626242465329269, ynew( 0 ), 1.0e-14 );
-    ASSERT_NEAR( 0.98177874060900239, ynew( 1 ), 1.0e-14 );
-    ASSERT_NEAR( 0.58634017875503497, ynew( 2 ), 1.0e-14 );
-    ASSERT_NEAR( -0.34305440473301307, ynew( 3 ), 1.0e-14 );
-    ASSERT_NEAR( -0.96344050977208218, ynew( 4 ), 1.0e-14 );
-    ASSERT_NEAR( -0.65619975149611487, ynew( 5 ), 1.0e-14 );
-    ASSERT_EQ( 1, ynew.cols() );
-    ASSERT_EQ( 6, ynew.rows() );
-    ASSERT_EQ( xnew.cols(), ynew.cols() );
-    ASSERT_EQ( xnew.rows(), ynew.rows() );
+    EXPECT_NEAR( 0.44626242465329269, ynew( 0 ), 1.0e-14 );
+    EXPECT_NEAR( 0.98177874060900239, ynew( 1 ), 1.0e-14 );
+    EXPECT_NEAR( 0.58634017875503497, ynew( 2 ), 1.0e-14 );
+    EXPECT_NEAR( -0.34305440473301307, ynew( 3 ), 1.0e-14 );
+    EXPECT_NEAR( -0.96344050977208218, ynew( 4 ), 1.0e-14 );
+    EXPECT_NEAR( -0.65619975149611487, ynew( 5 ), 1.0e-14 );
+    EXPECT_EQ( 1, ynew.cols() );
+    EXPECT_EQ( 6, ynew.rows() );
+    EXPECT_EQ( xnew.cols(), ynew.cols() );
+    EXPECT_EQ( xnew.rows(), ynew.rows() );
 
     // Verify consistent interpolation. Rowsum of Hhat is one for a consistent
     // interpolation.
@@ -165,7 +165,7 @@ TEST( RBFInterpolationTest, oneD_small )
     assert( rowsum.rows() > 0 );
 
     for ( int i = 0; i < rowsum.rows(); i++ )
-        ASSERT_NEAR( rowsum( i ), 1, 1.0e-14 );
+        EXPECT_NEAR( rowsum( i ), 1, 1.0e-14 );
 }
 
 TEST( RBFInterpolationTest, oneD_small_cpu )
@@ -192,22 +192,22 @@ TEST( RBFInterpolationTest, oneD_small_cpu )
     rbf.compute( x, xnew );
     rbf.interpolate( y, ynew );
 
-    ASSERT_NEAR( 0.44626242465329269, ynew( 0 ), 1.0e-14 );
-    ASSERT_NEAR( 0.98177874060900239, ynew( 1 ), 1.0e-14 );
-    ASSERT_NEAR( 0.58634017875503497, ynew( 2 ), 1.0e-14 );
-    ASSERT_NEAR( -0.34305440473301307, ynew( 3 ), 1.0e-14 );
-    ASSERT_NEAR( -0.96344050977208218, ynew( 4 ), 1.0e-14 );
-    ASSERT_NEAR( -0.65619975149611487, ynew( 5 ), 1.0e-14 );
-    ASSERT_EQ( 1, ynew.cols() );
-    ASSERT_EQ( 6, ynew.rows() );
-    ASSERT_EQ( xnew.cols(), ynew.cols() );
-    ASSERT_EQ( xnew.rows(), ynew.rows() );
+    EXPECT_NEAR( 0.44626242465329269, ynew( 0 ), 1.0e-14 );
+    EXPECT_NEAR( 0.98177874060900239, ynew( 1 ), 1.0e-14 );
+    EXPECT_NEAR( 0.58634017875503497, ynew( 2 ), 1.0e-14 );
+    EXPECT_NEAR( -0.34305440473301307, ynew( 3 ), 1.0e-14 );
+    EXPECT_NEAR( -0.96344050977208218, ynew( 4 ), 1.0e-14 );
+    EXPECT_NEAR( -0.65619975149611487, ynew( 5 ), 1.0e-14 );
+    EXPECT_EQ( 1, ynew.cols() );
+    EXPECT_EQ( 6, ynew.rows() );
+    EXPECT_EQ( xnew.cols(), ynew.cols() );
+    EXPECT_EQ( xnew.rows(), ynew.rows() );
 
     // Verify consistent interpolation. Rowsum of Hhat is one for a consistent
     // interpolation.
     rbf::vector rowsum = rbf.Hhat.rowwise().sum();
 
-    ASSERT_EQ( rowsum.rows(), 0 );
+    EXPECT_EQ( rowsum.rows(), 0 );
 }
 
 TEST( RBFInterpolationTest, oneD_small_directly_interpolate )
@@ -233,16 +233,16 @@ TEST( RBFInterpolationTest, oneD_small_directly_interpolate )
     rbf.compute( x, xnew );
     rbf.interpolate( y, ynew );
 
-    ASSERT_NEAR( 0.44626242465329269, ynew( 0 ), 1.0e-14 );
-    ASSERT_NEAR( 0.98177874060900239, ynew( 1 ), 1.0e-14 );
-    ASSERT_NEAR( 0.58634017875503497, ynew( 2 ), 1.0e-14 );
-    ASSERT_NEAR( -0.34305440473301307, ynew( 3 ), 1.0e-14 );
-    ASSERT_NEAR( -0.96344050977208218, ynew( 4 ), 1.0e-14 );
-    ASSERT_NEAR( -0.65619975149611487, ynew( 5 ), 1.0e-14 );
-    ASSERT_EQ( 1, ynew.cols() );
-    ASSERT_EQ( 6, ynew.rows() );
-    ASSERT_EQ( xnew.cols(), ynew.cols() );
-    ASSERT_EQ( xnew.rows(), ynew.rows() );
+    EXPECT_NEAR( 0.44626242465329269, ynew( 0 ), 1.0e-14 );
+    EXPECT_NEAR( 0.98177874060900239, ynew( 1 ), 1.0e-14 );
+    EXPECT_NEAR( 0.58634017875503497, ynew( 2 ), 1.0e-14 );
+    EXPECT_NEAR( -0.34305440473301307, ynew( 3 ), 1.0e-14 );
+    EXPECT_NEAR( -0.96344050977208218, ynew( 4 ), 1.0e-14 );
+    EXPECT_NEAR( -0.65619975149611487, ynew( 5 ), 1.0e-14 );
+    EXPECT_EQ( 1, ynew.cols() );
+    EXPECT_EQ( 6, ynew.rows() );
+    EXPECT_EQ( xnew.cols(), ynew.cols() );
+    EXPECT_EQ( xnew.rows(), ynew.rows() );
 }
 
 TEST( RBFInterpolationTest, oneD_smallSamePosition )
@@ -266,19 +266,19 @@ TEST( RBFInterpolationTest, oneD_smallSamePosition )
     rbf.interpolate( y, ynew );
 
     for ( int i = 0; i < ynew.rows(); i++ )
-        ASSERT_NEAR( y( i ), ynew( i ), 1.0e-14 );
+        EXPECT_NEAR( y( i ), ynew( i ), 1.0e-14 );
 
-    ASSERT_EQ( 1, ynew.cols() );
-    ASSERT_EQ( 7, ynew.rows() );
-    ASSERT_EQ( xnew.cols(), ynew.cols() );
-    ASSERT_EQ( xnew.rows(), ynew.rows() );
+    EXPECT_EQ( 1, ynew.cols() );
+    EXPECT_EQ( 7, ynew.rows() );
+    EXPECT_EQ( xnew.cols(), ynew.cols() );
+    EXPECT_EQ( xnew.rows(), ynew.rows() );
 
     // Verify consistent interpolation. Rowsum of Hhat is one for a consistent
     // interpolation.
     rbf::vector rowsum = rbf.Hhat.rowwise().sum();
 
     for ( int i = 0; i < rowsum.rows(); i++ )
-        ASSERT_NEAR( rowsum( i ), 1, 1.0e-14 );
+        EXPECT_NEAR( rowsum( i ), 1, 1.0e-14 );
 }
 
 TEST( RBFInterpolationTest, oneD_smallSamePosition_directlyInterpolate )
@@ -302,12 +302,12 @@ TEST( RBFInterpolationTest, oneD_smallSamePosition_directlyInterpolate )
     rbf.interpolate( y, ynew );
 
     for ( int i = 0; i < ynew.rows(); i++ )
-        ASSERT_NEAR( y( i ), ynew( i ), 1.0e-14 );
+        EXPECT_NEAR( y( i ), ynew( i ), 1.0e-14 );
 
-    ASSERT_EQ( 1, ynew.cols() );
-    ASSERT_EQ( 7, ynew.rows() );
-    ASSERT_EQ( xnew.cols(), ynew.cols() );
-    ASSERT_EQ( xnew.rows(), ynew.rows() );
+    EXPECT_EQ( 1, ynew.cols() );
+    EXPECT_EQ( 7, ynew.rows() );
+    EXPECT_EQ( xnew.cols(), ynew.cols() );
+    EXPECT_EQ( xnew.rows(), ynew.rows() );
 }
 
 TEST( RBFInterpolationTest, rbf1d )
@@ -327,7 +327,7 @@ TEST( RBFInterpolationTest, rbf1d )
 
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
-            ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-11 );
+            EXPECT_NEAR( y( i, j ), ynew( i, j ), 1.0e-11 );
 }
 
 TEST( RBFInterpolationTest, rbf1d_directly_interpolate )
@@ -347,7 +347,7 @@ TEST( RBFInterpolationTest, rbf1d_directly_interpolate )
 
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
-            ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-11 );
+            EXPECT_NEAR( y( i, j ), ynew( i, j ), 1.0e-11 );
 }
 
 TEST( RBFInterpolationTest, rbf2d )
@@ -367,7 +367,7 @@ TEST( RBFInterpolationTest, rbf2d )
 
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
-            ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-10 );
+            EXPECT_NEAR( y( i, j ), ynew( i, j ), 1.0e-10 );
 }
 
 TEST( RBFInterpolationTest, rbf2d_directly_interpolate )
@@ -387,7 +387,7 @@ TEST( RBFInterpolationTest, rbf2d_directly_interpolate )
 
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
-            ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-10 );
+            EXPECT_NEAR( y( i, j ), ynew( i, j ), 1.0e-10 );
 }
 
 TEST( RBFInterpolationTest, rbf3d )
@@ -407,7 +407,7 @@ TEST( RBFInterpolationTest, rbf3d )
 
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
-            ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-11 );
+            EXPECT_NEAR( y( i, j ), ynew( i, j ), 1.0e-11 );
 }
 
 TEST( RBFInterpolationTest, wendlandC6 )
@@ -425,15 +425,15 @@ TEST( RBFInterpolationTest, wendlandC6 )
 
     for ( int i = 0; i < y.rows(); i++ )
         for ( int j = 0; j < y.cols(); j++ )
-            ASSERT_NEAR( y( i, j ), ynew( i, j ), 1.0e-12 );
+            EXPECT_NEAR( y( i, j ), ynew( i, j ), 1.0e-12 );
 }
 
 TEST( RBFInterpolationTest, wendlandC6Unit )
 {
     std::shared_ptr<RBFFunctionInterface> rbfFunction( new WendlandC6Function( 1 ) );
 
-    ASSERT_NEAR( rbfFunction->evaluate( 2 ), 0, 1.0e-13 );
-    ASSERT_NEAR( rbfFunction->evaluate( 2.0e5 ), 0, 1.0e-13 );
-    ASSERT_NEAR( rbfFunction->evaluate( 0.5 ), 0.0595703125, 1.0e-9 );
-    ASSERT_NEAR( rbfFunction->evaluate( 0.69 ), 0.00246782213555, 1.0e-9 );
+    EXPECT_NEAR( rbfFunction->evaluate( 2 ), 0, 1.0e-13 );
+    EXPECT_NEAR( rbfFunction->evaluate( 2.0e5 ), 0, 1.0e-13 );
+    EXPECT_NEAR( rbfFunction->evaluate( 0.5 ), 0.0595703125, 1.0e-9 );
+    EXPECT_NEAR( rbfFunction->evaluate( 0.69 ), 0.00246782213555, 1.0e-9 );
 }
