@@ -16,12 +16,12 @@ namespace rbf
     ElRBFCoarsening::~ElRBFCoarsening(){}
 
     void ElRBFCoarsening::compute(
-        std::unique_ptr<RBFFunctionInterface> rbfFunction,
+        std::shared_ptr<RBFFunctionInterface> rbfFunction,
         std::unique_ptr<El::DistMatrix<double> > positions,
         std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
         )
     {
-        coarsener->compute( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
+        coarsener->compute( rbfFunction, std::move( positions ), std::move( positionsInterpolation ) );
     }
 
     bool ElRBFCoarsening::initialized()

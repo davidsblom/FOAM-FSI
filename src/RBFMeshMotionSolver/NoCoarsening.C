@@ -16,12 +16,12 @@ namespace rbf
     NoCoarsening::~NoCoarsening(){}
 
     void NoCoarsening::compute(
-        std::unique_ptr<RBFFunctionInterface> rbfFunction,
+        std::shared_ptr<RBFFunctionInterface> rbfFunction,
         std::unique_ptr<El::DistMatrix<double> > positions,
         std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
         )
     {
-        rbf->compute( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
+        rbf->compute( rbfFunction, std::move( positions ), std::move( positionsInterpolation ) );
     }
 
     bool NoCoarsening::initialized()

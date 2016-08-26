@@ -11,7 +11,7 @@ namespace rbf
             virtual ~Coarsener(){}
 
             virtual void compute(
-                std::unique_ptr<RBFFunctionInterface> rbfFunction,
+                std::shared_ptr<RBFFunctionInterface> rbfFunction,
                 std::unique_ptr<El::DistMatrix<double> > positions,
                 std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
                 ) = 0;

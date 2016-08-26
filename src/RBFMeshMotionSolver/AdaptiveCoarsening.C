@@ -6,7 +6,6 @@
 
 #include <mxx/sort.hpp>
 #include "AdaptiveCoarsening.H"
-#include "TPSFunction.H"
 
 namespace rbf
 {
@@ -31,7 +30,7 @@ namespace rbf
     {}
 
     void AdaptiveCoarsening::compute(
-        std::unique_ptr<RBFFunctionInterface> function,
+        std::shared_ptr<RBFFunctionInterface> function,
         std::unique_ptr<El::DistMatrix<double> > pos,
         std::unique_ptr<El::DistMatrix<double> > posInterpolation
         )
@@ -42,7 +41,7 @@ namespace rbf
         posInterpolation->ProcessQueues();
 
         // Store the untouched data for later reselection of points
-        this->rbfFunction = std::move( function );
+        this->rbfFunction = function;
         this->positions = std::move( pos );
         this->positionsInterpolation = std::move( posInterpolation );
     }
@@ -163,10 +162,9 @@ namespace rbf
             selectData( positions, positionsCoarse );
 
             // Perform the RBF interpolation
-            std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
             std::unique_ptr<El::DistMatrix<double> > positionsInterpolationCoarse( new El::DistMatrix<double>() );
             *positionsInterpolationCoarse = *positions;
-            rbfCoarse = std::unique_ptr<ElRBFInterpolation>( new ElRBFInterpolation( std::move( rbfFunction ), std::move( positionsCoarse ), std::move( positionsInterpolationCoarse ) ) );
+            rbfCoarse = std::unique_ptr<ElRBFInterpolation>( new ElRBFInterpolation( rbfFunction, std::move( positionsCoarse ), std::move( positionsInterpolationCoarse ) ) );
 
             std::pair<int, double> largestError = computeError( values );
             error = largestError.second;
@@ -199,10 +197,9 @@ namespace rbf
 
         rbf = std::unique_ptr<ElRBFInterpolation>( new ElRBFInterpolation() );
 
-        std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
         std::unique_ptr<El::DistMatrix<double> > positionsInterpolationTmp( new El::DistMatrix<double>( *positionsInterpolation ) );
 
-        rbf->compute( std::move( rbfFunction ), std::move( positionsCoarse ), std::move( positionsInterpolationTmp ) );
+        rbf->compute( rbfFunction, std::move( positionsCoarse ), std::move( positionsInterpolationTmp ) );
     }
 
     bool AdaptiveCoarsening::initialized()

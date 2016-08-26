@@ -6,7 +6,6 @@
 
 #include <mxx/sort.hpp>
 #include "UnitCoarsening.H"
-#include "TPSFunction.H"
 
 namespace rbf
 {
@@ -29,7 +28,7 @@ namespace rbf
     {}
 
     void UnitCoarsening::compute(
-        std::unique_ptr<RBFFunctionInterface> rbfFunction,
+        std::shared_ptr<RBFFunctionInterface> rbfFunction,
         std::unique_ptr<El::DistMatrix<double> > positions,
         std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
         )
@@ -57,13 +56,11 @@ namespace rbf
             selectData( positions, positionsCoarse );
 
             // Perform the RBF interpolation
-            std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-
             std::unique_ptr<El::DistMatrix<double> > positionsInterpolationCoarse( new El::DistMatrix<double>() );
 
             *positionsInterpolationCoarse = *positions;
 
-            ElRBFInterpolation rbf( std::move( rbfFunction ), std::move( positionsCoarse ), std::move( positionsInterpolationCoarse ) );
+            ElRBFInterpolation rbf( rbfFunction, std::move( positionsCoarse ), std::move( positionsInterpolationCoarse ) );
 
             std::unique_ptr<El::DistMatrix<double> > result = rbf.interpolate( std::move( valuesCoarse ) );
 
@@ -141,7 +138,7 @@ namespace rbf
 
         selectData( positions, positionsCoarse );
 
-        rbf.compute( std::move( rbfFunction ), std::move( positionsCoarse ), std::move( positionsInterpolation ) );
+        rbf.compute( rbfFunction, std::move( positionsCoarse ), std::move( positionsInterpolation ) );
     }
 
     bool UnitCoarsening::initialized()
