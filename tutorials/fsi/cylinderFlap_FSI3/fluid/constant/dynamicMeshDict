@@ -24,13 +24,11 @@ FoamFile
 
 dynamicFvMesh dynamicMotionSolverFvMesh;
 
-solver RBFMeshMotionSolver;
+solver ElRBFMeshMotionSolver;
 
 movingPatches ( plate );
 
-staticPatches ( );
-
-fixedPatches ( cylinder outlet inlet top bottom );
+staticPatches ( cylinder outlet inlet top bottom );
 
 coarsening
 {
@@ -47,5 +45,3 @@ interpolation
 {
   function TPS;
 }
-
-faceCellCenters false;

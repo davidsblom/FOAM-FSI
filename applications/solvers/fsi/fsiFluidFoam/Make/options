@@ -4,7 +4,8 @@ ifndef PRECICE_ROOT
     PRECICE_ROOT=../../../../src/thirdParty/precice
 endif
 
-EXE_INC = -std=c++11 \
+EXE_INC = -std=c++11 -fext-numeric-literals \
+    -isystem ../../../../src/thirdParty/elemental/install/include \
     -I../../../../src/fsi/lnInclude \
     -isystem ../../../../src/thirdParty/eigen \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \

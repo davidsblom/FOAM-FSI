@@ -4,6 +4,7 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+#include <El.hpp>
 #include <memory>
 #include <yaml-cpp/yaml.h>
 
@@ -34,6 +35,8 @@ int main(
             args->rootPath(),
             args->caseName()
         ) );
+
+    El::Initialize();
 
     string filename = static_cast<std::string>( args->rootPath() ) + "/" + static_cast<std::string>( args->globalCaseName() ) + "/constant/fsi.yaml";
 
@@ -69,6 +72,8 @@ int main(
 
     label tmp = Pstream::myProcNo();
     reduce( tmp, sumOp<label>() );
+
+    El::Finalize();
 
     return (0);
 }
