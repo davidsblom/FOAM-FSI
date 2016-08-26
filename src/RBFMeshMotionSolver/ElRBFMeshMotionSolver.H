@@ -12,6 +12,7 @@
 #include "addToRunTimeSelectionTable.H"
 #include "twoDPointCorrectorRBF.H"
 #include <unordered_map>
+#include "Coarsener.H"
 
 struct Vertex
 {
@@ -66,7 +67,8 @@ namespace Foam
         private:
             labelList movingPatchIDs;
             labelList staticPatchIDs;
-            std::unique_ptr<rbf::ElRBFInterpolation> rbf;
+            std::unique_ptr<rbf::Coarsener> rbf;
+            std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
             twoDPointCorrectorRBF twoDCorrector;
             std::map<int, Vertex> boundaryPoints;
     };

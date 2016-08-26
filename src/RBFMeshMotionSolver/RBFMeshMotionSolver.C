@@ -21,7 +21,7 @@ addToRunTimeSelectionTable
 
 RBFMeshMotionSolver::RBFMeshMotionSolver(
     const polyMesh & mesh,
-    Istream & msData
+    Istream &
     )
     :
     motionSolver( mesh ),

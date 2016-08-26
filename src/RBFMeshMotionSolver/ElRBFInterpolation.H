@@ -18,7 +18,7 @@ namespace rbf
             explicit ElRBFInterpolation();
 
             explicit ElRBFInterpolation(
-                std::unique_ptr<RBFFunctionInterface> rbfFunction,
+                std::shared_ptr<RBFFunctionInterface> rbfFunction,
                 std::unique_ptr<El::DistMatrix<double> > positions,
                 std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
                 );
@@ -26,7 +26,7 @@ namespace rbf
             ~ElRBFInterpolation();
 
             void compute(
-                std::unique_ptr<RBFFunctionInterface> rbfFunction,
+                std::shared_ptr<RBFFunctionInterface> rbfFunction,
                 std::unique_ptr<El::DistMatrix<double> > positions,
                 std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
                 );

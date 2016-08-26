@@ -1,4 +1,4 @@
-c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs -Werror -Wredundant-decls -Wcast-align -Wmissing-declarations  -Wswitch-enum -Winvalid-pch -Wredundant-decls -Wformat=2 -Wmissing-format-attribute -Wformat-nonliteral
+c++WARN     = -Wall -Wextra -Werror -Wno-unused-parameter
 
 EXE_INC = -std=c++11 -fext-numeric-literals \
     -isystem ../thirdParty/elemental/install/include \
