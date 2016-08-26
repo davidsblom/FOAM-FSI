@@ -212,6 +212,8 @@ namespace rbf
 
     std::unique_ptr<El::DistMatrix<double> > AdaptiveCoarsening::interpolate( const std::unique_ptr<El::DistMatrix<double> > & values )
     {
+        values->ProcessQueues();
+
         bool greedyPerformed = false;
 
         // Greedy selection never performed => do it now
