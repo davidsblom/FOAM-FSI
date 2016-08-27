@@ -220,7 +220,7 @@ namespace rbf
         if ( not rbf->initialized() )
         {
             // Only do a greedy selection if the values actually mean something
-            double maxAbs = rbf::MaxAbs( *values );
+            double maxAbs = El::MaxAbs( *values );
 
             if ( maxAbs > 0 )
             {
