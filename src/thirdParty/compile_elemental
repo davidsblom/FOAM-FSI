@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -x
+
 cd elemental
 mkdir -p build install && cd build
 
