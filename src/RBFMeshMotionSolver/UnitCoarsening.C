@@ -4,7 +4,6 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#include <mxx/sort.hpp>
 #include "UnitCoarsening.H"
 
 namespace rbf
@@ -67,63 +66,26 @@ namespace rbf
             assert( result->Height() == positions->Height() );
             assert( result->Width() == positions->Width() );
 
-            // Evaluate the error locally
-            result->ReservePulls( result->LocalHeight() * result->Width() );
+            // Compute the error
+            El::DistMatrix<double> diff;
+            El::Ones( diff, result->Height(), result->Width() );
+            El::Axpy( -1, *result, diff );
+            El::DistMatrix<double, El::MC, El::STAR> errors;
+            El::RowTwoNorms( diff, errors );
 
-            for ( int k = 0; k < result->LocalHeight(); k++ )
-                for ( int l = 0; l < result->Width(); l++ )
-                    result->QueuePull( result->GlobalRow( k ), l );
-
-            std::vector<double> buffer;
-            result->ProcessPullQueue( buffer );
-
-            std::vector<double> localErrors( result->LocalHeight() );
-
-            int index = 0;
-
-            for ( int k = 0; k < result->LocalHeight(); k++ )
-            {
-                double norm = 0;
-
-                for ( int l = 0; l < result->Width(); l++ )
-                {
-                    norm += std::pow( std::abs( buffer[index] - 1.0 ), 2 );
-                    index++;
-                }
-
-                localErrors[k] = std::sqrt( norm );
-            }
-
-            // Locally, select the point with the largest error
-            auto it = std::max_element( localErrors.begin(), localErrors.end() );
-            int largestErrorLocalIndex = std::distance( localErrors.begin(), it );
-            int largestErrorGlobalIndex = result->GlobalRow( largestErrorLocalIndex );
-            largestError = -1;
-
-            // Add safeguard in case the number cpus is larger than positions->Height()
-            if ( it != localErrors.end() )
-                largestError = *it;
-
-            // Send the largest error, and corresponding index to all (!) cpus.
-            std::vector<double> globalErrors = mxx::allgather( largestError );
-            std::vector<int> largestErrorGlobalIndexes = mxx::allgather( largestErrorGlobalIndex );
-
-            // Select the point with the largest error of the global distribution
-            it = std::max_element( globalErrors.begin(), globalErrors.end() );
-            int largestErrorIndex = std::distance( globalErrors.begin(), it );
-            largestError = *it;
-            int globalIndexError = largestErrorGlobalIndexes[largestErrorIndex];
+            // Get location of max error
+            El::Entry<double> locMax = El::MaxAbsLoc( errors );
 
             // Break if maximum points are reached
             if ( int( selectedPositions.size() ) >= maxPoints )
                 break;
 
-            bool convergence = largestError < tol && int( selectedPositions.size() ) >= minPoints;
+            bool convergence = locMax.value < tol && int( selectedPositions.size() ) >= minPoints;
 
             if ( convergence )
                 break;
 
-            selectedPositions.push_back( globalIndexError );
+            selectedPositions.push_back( locMax.i );
         }
 
         if ( El::mpi::Rank() == 0 )
