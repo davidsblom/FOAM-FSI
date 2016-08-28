@@ -4,7 +4,6 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
-#include <mxx/sort.hpp>
 #include "AdaptiveCoarsening.H"
 
 namespace rbf
@@ -60,91 +59,23 @@ namespace rbf
 
         assert( values->Height() == result->Height() );
 
-        result->AlignWith( *values );
+        // Compute error
+        El::DistMatrix<double> diff = *values;
+        El::Axpy( -1, *result, diff );
+        El::DistMatrix<double, El::MC, El::STAR> errors;
+        El::RowTwoNorms( diff, errors );
 
-        assert( result->LocalHeight() == values->LocalHeight() );
-        assert( result->LocalWidth() == values->LocalWidth() );
+        // Get location of max error
+        El::Entry<double> locMax = El::MaxAbsLoc( errors );
 
-        // Evaluate the error locally
-        result->ReservePulls( result->LocalHeight() * result->Width() );
-        values->ReservePulls( result->LocalHeight() * result->Width() );
+        // Scale by largest value
+        El::RowTwoNorms( *values, errors );
+        double maxValue = El::MaxAbs( errors );
 
-        for ( int k = 0; k < result->LocalHeight(); k++ )
-        {
-            for ( int l = 0; l < result->Width(); l++ )
-            {
-                result->QueuePull( result->GlobalRow( k ), l );
-                values->QueuePull( result->GlobalRow( k ), l );
-            }
-        }
-
-        std::vector<double> bufferResult, bufferValues;
-        result->ProcessPullQueue( bufferResult );
-        values->ProcessPullQueue( bufferValues );
-
-        std::vector<double> localErrors( result->LocalHeight() );
-
-        // The ( values.rowwise().norm() ).maxCoeff() is needed for the scaling
-        // of the error. First, compute the norms locally.
-        std::vector<double> localNorms( values->LocalHeight() );
-
-        int index = 0;
-
-        for ( int k = 0; k < result->LocalHeight(); k++ )
-        {
-            double errorNorm = 0;
-            double valueNorm = 0;
-
-            for ( int l = 0; l < result->Width(); l++ )
-            {
-                errorNorm += std::pow( std::abs( bufferResult[index] - bufferValues[index] ), 2 );
-                valueNorm += std::pow( bufferValues[index], 2 );
-                index++;
-            }
-
-            localErrors[k] = std::sqrt( errorNorm );
-            localNorms[k] = std::sqrt( valueNorm );
-        }
-
-        // Locally, select the point with the largest error
-        auto it = std::max_element( localErrors.begin(), localErrors.end() );
-        int largestErrorLocalIndex = std::distance( localErrors.begin(), it );
-        int largestErrorGlobalIndex = result->GlobalRow( largestErrorLocalIndex );
-        double largestError = -1;
-
-        // Add safeguard in case the number cpus is larger than positions->Height()
-        if ( it != localErrors.end() )
-            largestError = *it;
-
-        // Also locally, just get the largest norm of the values matrix
-        it = std::max_element( localNorms.begin(), localNorms.end() );
-
-        // Now get all the norms globally
-        double largestNorm = -1;
-
-        if ( it != localNorms.end() )
-            largestNorm = *it;
-
-        std::vector<double> globalNorms = mxx::allgather( largestNorm );
-
-        // Select the largest norm, globally :-)
-        it = std::max_element( globalNorms.begin(), globalNorms.end() );
-        double maxCoeff = *it;
-
-        // Send the largest error, and corresponding index to all (!) cpus.
-        std::vector<double> globalErrors = mxx::allgather( largestError );
-        std::vector<int> largestErrorGlobalIndexes = mxx::allgather( largestErrorGlobalIndex );
-
-        // Select the point with the largest error of the global distribution
-        it = std::max_element( globalErrors.begin(), globalErrors.end() );
-        int largestErrorIndex = std::distance( globalErrors.begin(), it );
-        largestError = *it;
-        int globalIndexError = largestErrorGlobalIndexes[largestErrorIndex];
-
-        if ( maxCoeff != 0 )
-            return std::pair<int, double>( globalIndexError, largestError / maxCoeff );
+        if ( maxValue != 0 )
+            return std::pair<int, double>( locMax.i, locMax.value / maxValue );
         else
-            return std::pair<int, double>( globalIndexError, largestError );
+            return std::pair<int, double>( locMax.i, locMax.value );
     }
 
     void AdaptiveCoarsening::greedySelection( const std::unique_ptr<El::DistMatrix<double> > & values )
