@@ -82,8 +82,38 @@ namespace rbf
     {
         selectedPositions.clear();
 
-        selectedPositions.push_back( 0 );
-        selectedPositions.push_back( 1 );
+        // An initial selection is needed before the greedy algorithm starts
+        // adding points to the selection.
+        // The first point is the point with the largest disp/value
+        // The second point is the point with the largest distance from the
+        // first point.
+
+        {
+            // Find first point: largest value
+            El::DistMatrix<double, El::MC, El::STAR> norms;
+            El::RowTwoNorms( *values, norms );
+            El::Entry<double> locMax = El::MaxAbsLoc( norms );
+            selectedPositions.push_back( locMax.i );
+
+            // Find second point: largest distance from the first point
+            El::DistMatrix<double> distance = *positions;
+            El::DistMatrix<double> tmp;
+            El::Ones( tmp, distance.Height(), distance.Width() );
+
+            for ( int iColumn = 0; iColumn < tmp.Width(); iColumn++ )
+            {
+                El::DistMatrix<double> view;
+                El::View( view, tmp, 0, iColumn, tmp.Height(), 1 );
+                El::Scale( positions->Get( locMax.i, iColumn ), view );
+            }
+
+            El::Axpy( -1, tmp, distance );
+
+            El::RowTwoNorms( distance, norms );
+            locMax = El::MaxAbsLoc( norms );
+            selectedPositions.push_back( locMax.i );
+        }
+
         int maxPoints = std::min( this->maxPoints, positions->Height() );
         int minPoints = std::min( this->minPoints, positions->Height() );
         double error = 0;

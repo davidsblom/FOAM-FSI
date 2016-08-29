@@ -261,9 +261,53 @@ namespace rbf
             rbf::vector errorList( positions.rows() );
             selectedPositions.resize( 2 );
 
-            for ( int i = 0; i < selectedPositions.rows(); i++ )
-                selectedPositions( i ) = i;
+            if ( livePointSelection )
+            {
+                // Select the point with the largest displacment
+                int maxDisplacementIndex = -1;
+                ( values.rowwise().norm() ).maxCoeff( &maxDisplacementIndex );
 
+                // Add first point
+                selectedPositions( 0 ) = maxDisplacementIndex;
+            }
+            else
+            {
+                // With unit displacement, first point is point with largest radius from origin and displacement > 0
+                vector rad = positions.rowwise().norm();
+
+                int maxRadiusFromOriginIndex = -1;
+                double maxRadius = -1;
+
+                for ( int i = 0; i < rad.rows(); i++ )
+                {
+                    if ( rad( i ) > maxRadius && values.row( i ).norm() > SMALL )
+                    {
+                        maxRadius = rad( i );
+                        maxRadiusFromOriginIndex = i;
+                    }
+                }
+
+                selectedPositions( 0 ) = maxRadiusFromOriginIndex;
+            }
+
+            // Find point with largest distance from first point
+            vector rad = ( positions - ( matrix::Constant( positions.rows(), 1, 1.0 ) * positions.row( selectedPositions( 0 ) ) ) ).rowwise().norm();
+            int maxRadiusIndex = -1;
+            double maxRadius = -1;
+
+            for ( int i = 0; i < rad.rows(); i++ )
+            {
+                if ( rad( i ) > maxRadius && (rad( i ) < 1.0 - SMALL || rad( i ) > 1.0 + SMALL) )
+                {
+                    maxRadius = rad( i );
+                    maxRadiusIndex = i;
+                }
+            }
+
+            // Add second point
+            selectedPositions( 1 ) = maxRadiusIndex;
+
+            assert( selectedPositions( 0 ) != selectedPositions( 1 ) );
             assert( positions.rows() >= selectedPositions.rows() );
 
             rbf::matrix positionsInterpolationCoarse = positions;
