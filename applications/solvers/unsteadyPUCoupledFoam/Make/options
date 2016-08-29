@@ -7,7 +7,7 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/VectorN/lnInclude \
-    -isystem ../../../src/thirdParty/yaml-cpp/include \
+    -isystem ../../../src/thirdParty/yaml-cpp/install/include \
     -isystem ../../../src/thirdParty/boost
 
 ifeq ($(WM_COMPILE_OPTION), Opt)

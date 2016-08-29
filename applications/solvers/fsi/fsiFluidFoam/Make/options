@@ -25,7 +25,7 @@ EXE_INC = -std=c++11 -fext-numeric-literals \
     -I../../../../src/RBFMeshMotionSolver/lnInclude/ \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
-    -isystem ../../../../src/thirdParty/yaml-cpp/include
+    -isystem ../../../../src/thirdParty/yaml-cpp/install/include
 
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \

@@ -37,7 +37,7 @@ build:
 
                 # yaml-cpp
                 ln -s /home/yaml-cpp-release-0.5.3 yaml-cpp
-                cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
+                cp yaml-cpp/install/lib/libyaml-cpp* ${FOAM_LIBBIN}/
         - script:
             name: elemental
             code: |
@@ -166,7 +166,7 @@ debug:
 
                 # yaml-cpp
                 ln -s /home/yaml-cpp-release-0.5.3 yaml-cpp
-                cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
+                cp yaml-cpp/install/lib/libyaml-cpp* ${FOAM_LIBBIN}/
         - script:
             name: elemental
             code: cd src/thirdParty && ./compile_elemental
@@ -257,7 +257,7 @@ ubuntu:
 
                 # yaml-cpp
                 ln -s /home/yaml-cpp-release-0.5.3 yaml-cpp
-                cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
+                cp yaml-cpp/install/lib/libyaml-cpp* ${FOAM_LIBBIN}/
         - script:
             name: elemental
             code: cd src/thirdParty && ./compile_elemental
