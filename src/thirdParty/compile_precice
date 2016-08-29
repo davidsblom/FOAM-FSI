@@ -42,4 +42,3 @@ then
 fi
 
 cp build/last/libprecice.* ${FOAM_LIBBIN}/
-cp build/last/binprecice ${FOAM_APPBIN}/
