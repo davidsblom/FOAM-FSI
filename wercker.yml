@@ -46,19 +46,7 @@ build:
             name: precice
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-
-                cd src/thirdParty
-
-                export PRECICE_MPI_LIB=mpi
-                export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
-                export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-                export CPLUS_INCLUDE_PATH=`pwd`/eigen:`pwd`/boost
-                export LIBRARY_PATH=$FOAM_LIBBIN
-
-                cd precice
-                scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
-                cp build/release-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
-                rm -rf build/*
+                cd src/thirdParty && ./compile_precice
         - script:
             name: boundary conditions
             code: |
@@ -184,19 +172,7 @@ debug:
             name: precice
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-
-                cd src/thirdParty
-
-                export PRECICE_MPI_LIB=mpi
-                export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
-                export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-                export CPLUS_INCLUDE_PATH=`pwd`/eigen:`pwd`/boost
-                export LIBRARY_PATH=$FOAM_LIBBIN
-
-                cd precice
-                scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
-                cp build/debug-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
-                rm -rf build/*
+                cd src/thirdParty && ./compile_precice
         - script:
             name: boundary conditions
             code: |
@@ -286,19 +262,7 @@ ubuntu:
             name: precice
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-
-                cd src/thirdParty
-
-                export PRECICE_MPI_LIB=mpi
-                export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
-                export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-                export CPLUS_INCLUDE_PATH=`pwd`/eigen:`pwd`/boost
-                export LIBRARY_PATH=$FOAM_LIBBIN
-
-                cd precice
-                scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
-                cp build/release-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
-                rm -rf build/*
+                cd src/thirdParty && ./compile_precice
         - script:
             name: boundary conditions
             code: |

@@ -1,8 +1,10 @@
 #!/bin/bash
 
+set -e
+set -x
+
 cd elemental
-rm -rf build install
-mkdir build install && cd build
+mkdir -p build install && cd build
 
 if [ "$WM_COMPILE_OPTION" = "Opt" ]
 then
