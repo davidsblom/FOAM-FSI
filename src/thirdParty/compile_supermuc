@@ -58,7 +58,7 @@ cd petsc-${PETSC_VERSION}
 
 export PETSC_DIR=`pwd`
 
-./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --with-debugging=0 --with-blas-lapack-dir=$MKL_LIBDIR
+./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --with-debugging=0 --with-blas-lapack-dir=$MKL_LIBDIR --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif90
 
 make
 
@@ -100,13 +100,13 @@ cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
 
 # gtest
 
-GTEST_VERSION=1.7.0
+GTEST_VERSION=1.8.0
 
 rm -rf gtest-${GTEST_VERSION}
 
-unzip gtest-${GTEST_VERSION}
+tar -zxf gtest-${GTEST_VERSION}.tar.gz
 
-ln -s gtest-${GTEST_VERSION} gtest
+ln -s googletest-release-${GTEST_VERSION} gtest
 
 cd gtest-${GTEST_VERSION}
 
@@ -137,7 +137,6 @@ export CPLUS_INCLUDE_PATH=`pwd`/eigen
 cd precice
 python tools/python_scripts/insert_mpi_header.py
 scons -j $WM_NCOMPPROCS build=release python=off petsc=on platform=supermuc compiler=mpicxx
-scons -j $WM_NCOMPPROCS build=release python=off petsc=on platform=supermuc compiler=mpicxx solib
 
 cp build/last/libprecice.so ${FOAM_LIBBIN}/
 cp build/last/binprecice ${FOAM_APPBIN}/
