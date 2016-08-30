@@ -17,7 +17,7 @@ EXE_INC = -std=c++11 -fext-numeric-literals\
     -isystem $(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
     -isystem ../../thirdParty/eigen \
     -isystem ../../thirdParty/boost \
-    -isystem ../../thirdParty/gtest/include \
+    -isystem ../../thirdParty/gtest/install/include \
     $(WM_DECOMP_INC) \
     -I ../../RBFMeshMotionSolver/lnInclude/ \
     -isystem $(LIB_SRC)/meshTools/lnInclude \
@@ -34,7 +34,6 @@ ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
     -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
-    -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
@@ -61,7 +60,6 @@ ifeq ($(WM_COMPILE_OPTION), Debug)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
     -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
-    -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \

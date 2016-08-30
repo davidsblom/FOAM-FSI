@@ -17,7 +17,7 @@ EXE_INC = -std=c++11 -fext-numeric-literals \
     -isystem $(LIB_SRC)/meshTools/lnInclude \
     -isystem $(LIB_SRC)/sampling/lnInclude \
     -isystem $(LIB_SRC)/solidModels/lnInclude \
-    -isystem ../../../../src/thirdParty/yaml-cpp/include \
+    -isystem ../../../../src/thirdParty/yaml-cpp/install/include \
     -isystem ../../../../src/RBFMeshMotionSolver/lnInclude/ \
     $(WM_DECOMP_INC) \
     -isystem ../../../../src/thirdParty/boost \

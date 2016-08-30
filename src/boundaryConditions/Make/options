@@ -5,7 +5,7 @@ EXE_INC = -std=c++11 \
     -isystem ../fsi/lnInclude \
     -isystem ../fsi \
     -isystem ../thirdParty/eigen \
-    -isystem ../thirdParty/yaml-cpp/include \
+    -isystem ../thirdParty/yaml-cpp/install/include \
     -isystem ../thirdParty/boost
 
 LIB_LIBS = \

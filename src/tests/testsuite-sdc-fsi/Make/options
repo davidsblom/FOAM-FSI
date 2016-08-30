@@ -3,7 +3,7 @@ c++WARN     = -Wall -Wextra -Werror
 EXE_INC = -std=c++11 \
     -I ../../fsi \
     -I ../../fsi/lnInclude \
-    -isystem ../../thirdParty/gtest/include \
+    -isystem ../../thirdParty/gtest/install/include \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
     -isystem ../../thirdParty/eigen \
     -I ../../RBFMeshMotionSolver/lnInclude/ \
@@ -13,7 +13,6 @@ ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
     -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
-    -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
@@ -40,7 +39,6 @@ ifeq ($(WM_COMPILE_OPTION), Debug)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
     -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
-    -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \

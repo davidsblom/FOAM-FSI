@@ -35,6 +35,7 @@ uncrustify.cfg
 runTests.sh
 src/thirdParty/boost*
 src/thirdParty/gtest*
+src/thirdParty/googletest*
 src/thirdParty/yaml-cpp*
 src/thirdParty/scons*
 src/thirdParty/dealii*

@@ -24,35 +24,35 @@ ln -s boost_${BOOST_VERSION} boost
 
 if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
 
-    rm -rf yaml-cpp*
-
-    rm -rf yaml-cpp-${VERSION}*
-
-    wget -O yaml-cpp-${VERSION}.tar.gz https://github.com/jbeder/yaml-cpp/archive/release-${VERSION}.tar.gz
-
-    tar -zxvf yaml-cpp-${VERSION}.tar.gz
-    rm -f yaml-cpp-${VERSION}.tar.gz
+    wget https://github.com/jbeder/yaml-cpp/archive/release-0.5.3.tar.gz -O - | tar xz
 
     export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
     echo $BOOST_ROOT
     cd $BOOST_ROOT
 
-    cd ../yaml-cpp-release-${VERSION}
+    cd ../yaml-cpp-release-0.5.3
 
-    mkdir build
+    mkdir -p build install
 
     cd build
 
-    CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
+    CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON \
+        -DBoost_NO_BOOST_CMAKE=TRUE \
+        -DBoost_NO_SYSTEM_PATHS=TRUE \
+        -DBOOST_ROOT=${BOOST_ROOT} \
+        -DCMAKE_INSTALL_PREFIX=`pwd`/../install \
+        ..
 
-    make -j $WM_NCOMPPROCS
+    make -j `nproc`
+    make test
+    make install
 
-    cd ../..
+    cd .. && rm -rf build && cd ..
 
 fi
 
 rm -f yaml-cpp
-ln -s yaml-cpp-release-${VERSION} yaml-cpp
+ln -s yaml-cpp-release-0.5.3 yaml-cpp
 
 mkdir -p ${FOAM_LIBBIN}
-cp yaml-cpp-release-${VERSION}/build/libyaml-cpp* ${FOAM_LIBBIN}/
+cp yaml-cpp/install/lib/libyaml-cpp* ${FOAM_LIBBIN}/

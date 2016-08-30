@@ -7,7 +7,7 @@ EXE_INC = -std=c++11 \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
     -isystem $(LIB_SRC)/sampling/lnInclude \
     -isystem $(LIB_SRC)/solidModels/lnInclude \
-    -isystem ../../../../src/thirdParty/yaml-cpp/include \
+    -isystem ../../../../src/thirdParty/yaml-cpp/install/include \
     -I../../../../src/RBFMeshMotionSolver/lnInclude \
     -isystem ../../../../src/thirdParty/boost \
     -I$(LIB_SRC)/meshTools/lnInclude

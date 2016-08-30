@@ -6,29 +6,28 @@ set -e
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $DIR
 
-VERSION=1.7.0
+if [ ! -d "googletest-release-1.8.0" ]; then
 
-if [ ! -d "gtest-${VERSION}" ]; then
+    wget https://github.com/google/googletest/archive/release-1.8.0.tar.gz -O - | tar xz
 
-    rm -rf gtest-${VERSION}*
+    cd googletest-release-1.8.0
 
-    wget -O gtest-${VERSION}.zip http://googletest.googlecode.com/files/gtest-${VERSION}.zip
+    mkdir -p build install && cd build
 
-    unzip gtest-${VERSION}
+    cmake \
+        -DCMAKE_CXX_COMPILER=g++ \
+        -DCMAKE_CC_COMPILER=gcc \
+        -D CMAKE_INSTALL_PREFIX=`pwd`/../install \
+        ..
 
-    cd gtest-${VERSION}
+    make -j `nproc`
+    make test
+    make install
 
-    cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CC_COMPILER=gcc
-
-    make -j $WM_NCOMPPROCS
-
-    cd ../
-
-    rm -rf gtest
-
-    rm -rf gtest-${VERSION}.zip
+    cd .. && rm -rf build && cd ..
 
 fi
 
 rm -f gtest
-ln -s gtest-${VERSION} gtest
+ln -s googletest-release-1.8.0 gtest
+cp gtest/install/lib/lib* ${FOAM_LIBBIN}/
