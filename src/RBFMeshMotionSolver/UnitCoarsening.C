@@ -105,6 +105,7 @@ namespace rbf
 
             // Get location of max error
             El::Entry<double> locMax = El::MaxAbsLoc( errors );
+            largestError = locMax.value;
 
             // Break if maximum points are reached
             if ( int( selectedPositions.size() ) >= maxPoints )
