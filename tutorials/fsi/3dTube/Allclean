@@ -12,6 +12,7 @@ cd solid
 cleanCase
 cd -
 
+rm -f PlyParser_FoamFileParser_parsetab.py
 rm -rf fluid/*.foam solid/*.foam fluid/*.txt fluid/*.csv solid/*.txt fluid/*.log
 rm -rf fluid/gmon.out solid/*.log
 rm -rf fluid/0/solid
