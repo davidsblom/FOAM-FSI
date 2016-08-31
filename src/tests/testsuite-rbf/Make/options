@@ -1,5 +1,9 @@
 c++WARN     = -Wall -Wextra -Werror -Wno-literal-suffix
 
+ifndef MKL_LIB
+    MKL_LIB=-lopenblas
+endif
+
 EXE_INC = -std=c++11 -fext-numeric-literals\
     -isystem ../../thirdParty/elemental/install/include \
     -I ../../fsi \
@@ -33,7 +37,7 @@ EXE_INC = -std=c++11 -fext-numeric-literals\
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -lopenblas -lpmrrr -lEl -lElSuiteSparse \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -lgtest \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
@@ -59,7 +63,7 @@ endif
 ifeq ($(WM_COMPILE_OPTION), Debug)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -lopenblas -lpmrrr -lEl -lElSuiteSparse \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -lgtest \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
