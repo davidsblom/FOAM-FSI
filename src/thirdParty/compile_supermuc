@@ -175,3 +175,24 @@ rm -f yaml-cpp
 ln -s yaml-cpp-release-0.5.3 yaml-cpp
 
 cp yaml-cpp/install/lib/libyaml-cpp* ${FOAM_LIBBIN}/
+
+# compile elemental
+
+cd elemental
+mkdir -p build install && cd build
+
+cmake \
+    -D CMAKE_INSTALL_PREFIX=`pwd`/../install \
+    -D INSTALL_PYTHON_PACKAGE=OFF \
+    -D CMAKE_BUILD_TYPE=Release \
+    -D EL_DISABLE_PARMETIS=TRUE \
+    -D CMAKE_CXX_COMPILER=g++ \
+    -D CMAKE_C_COMPILER=gcc \
+    -D CMAKE_Fortran_COMPILER=gfortran \
+    -D EL_DISABLE_SCALAPACK=TRUE \
+    -D MATH_LIBS="$MKL_LIB" \
+    ..
+
+make -j $WM_NCOMPPROCS
+make install
+cp ../install/lib64/*.so* $FOAM_LIBBIN/
