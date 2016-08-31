@@ -17,6 +17,7 @@ cmake \
     -D CMAKE_C_COMPILER=gcc \
     -D CMAKE_Fortran_COMPILER=gfortran \
     -D EL_DISABLE_SCALAPACK=TRUE \
+    -D MATH_LIBS="-L/usr/lib -lopenblas" \
     ..
 elif [ "$WM_COMPILE_OPTION" = "Debug" ]
 then
@@ -29,6 +30,7 @@ cmake \
     -D CMAKE_C_COMPILER=gcc \
     -D CMAKE_Fortran_COMPILER=gfortran \
     -D EL_DISABLE_SCALAPACK=TRUE \
+    -D MATH_LIBS="-L/usr/lib -lopenblas" \
     ..
 fi
 
