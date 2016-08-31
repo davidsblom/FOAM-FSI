@@ -128,8 +128,8 @@ cd ../..
 
 # Set environment variables necessary for building preCICE
 export PRECICE_MPI_LIB=mpi
-export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
-export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
+export PRECICE_MPI_LIB_PATH=${MPI_BASE}/lib64
+export PRECICE_MPI_INC_PATH=${MPI_BASE}/include64
 export CPLUS_INCLUDE_PATH=`pwd`/eigen:`pwd`/boost
 export LIBRARY_PATH=$FOAM_LIBBIN
 export LD_LIBRARY_PATH=$FOAM_LIBBIN
