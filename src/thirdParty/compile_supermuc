@@ -122,6 +122,8 @@ make install
 
 cd ../..
 
+cp gtest/install/lib/lib* ${FOAM_LIBBIN}/
+
 # precice
 
 # Set environment variables necessary for building preCICE
