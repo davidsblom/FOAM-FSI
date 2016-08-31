@@ -13,7 +13,6 @@ cmake \
     -D INSTALL_PYTHON_PACKAGE=OFF \
     -D CMAKE_BUILD_TYPE=Release \
     -D EL_DISABLE_PARMETIS=TRUE \
-    -D EL_DISABLE_METIS=TRUE \
     -D CMAKE_CXX_COMPILER=g++ \
     -D CMAKE_C_COMPILER=gcc \
     -D CMAKE_Fortran_COMPILER=gfortran \
@@ -27,7 +26,6 @@ cmake \
     -D INSTALL_PYTHON_PACKAGE=OFF \
     -D CMAKE_BUILD_TYPE=Debug \
     -D EL_DISABLE_PARMETIS=TRUE \
-    -D EL_DISABLE_METIS=TRUE \
     -D CMAKE_CXX_COMPILER=g++ \
     -D CMAKE_C_COMPILER=gcc \
     -D CMAKE_Fortran_COMPILER=gfortran \
