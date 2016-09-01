@@ -14,8 +14,8 @@ using namespace rbf;
 TEST( ElRBFInterpolation, constructor )
 {
     std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-    std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>( 4, 1 ) );
-    std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>( 8, 1 ) );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positions( new El::DistMatrix<double, El::VR, El::STAR>( 4, 1 ) );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positionsInterpolation( new El::DistMatrix<double, El::VR, El::STAR>( 8, 1 ) );
 
     const double dx = 1.0 / (positions->Height() - 1);
     const double dy = 1.0 / (positionsInterpolation->Height() - 1);
@@ -52,9 +52,9 @@ TEST( ElRBFInterpolation, constructor )
 TEST( ElRBFInterpolation, interpolate )
 {
     std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-    std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positions( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positionsInterpolation( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > data( new El::DistMatrix<double, El::VR, El::STAR>() );
     El::Zeros( *positionsInterpolation, 8, 1 );
     El::Zeros( *positions, 4, 1 );
     El::Zeros( *data, positions->Height(), 1 );
@@ -107,7 +107,7 @@ TEST( ElRBFInterpolation, interpolate )
         }
     }
 
-    std::unique_ptr<El::DistMatrix<double> > result = rbf.interpolate( std::move( data ) );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > result = rbf.interpolate( std::move( data ) );
 
     for ( int i = 0; i < result->Height(); i++ )
     {
@@ -120,9 +120,9 @@ TEST( ElRBFInterpolation, interpolate )
 TEST( ElRBFInterpolation, verify_Eigen )
 {
     std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-    std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positions( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positionsInterpolation( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > data( new El::DistMatrix<double, El::VR, El::STAR>() );
     El::Zeros( *positionsInterpolation, 8, 1 );
     El::Zeros( *positions, 4, 1 );
     El::Zeros( *data, positions->Height(), 1 );
@@ -266,7 +266,7 @@ TEST( ElRBFInterpolation, verify_Eigen )
         }
     }
 
-    std::unique_ptr<El::DistMatrix<double> > result = rbf.interpolate( std::move( data ) );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > result = rbf.interpolate( std::move( data ) );
 
     std::vector<double> buffer;
     result->ReservePulls( result->Height() * result->Width() );
@@ -292,9 +292,9 @@ TEST( ElRBFInterpolation, verify_Eigen )
 TEST( ElRBFInterpolation, interpolate_twice )
 {
     std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-    std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positions( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positionsInterpolation( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > data( new El::DistMatrix<double, El::VR, El::STAR>() );
     El::Zeros( *positionsInterpolation, 8, 1 );
     El::Zeros( *positions, 4, 1 );
     El::Zeros( *data, positions->Height(), 1 );
@@ -438,7 +438,7 @@ TEST( ElRBFInterpolation, interpolate_twice )
         }
     }
 
-    std::unique_ptr<El::DistMatrix<double> > result = rbf.interpolate( data );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > result = rbf.interpolate( data );
 
     std::vector<double> buffer;
     result->ReservePulls( result->Height() * result->Width() );
@@ -460,7 +460,7 @@ TEST( ElRBFInterpolation, interpolate_twice )
         }
     }
 
-    std::unique_ptr<El::DistMatrix<double> > result2 = rbf.interpolate( data );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > result2 = rbf.interpolate( data );
 
     buffer.clear();
     result->ReservePulls( result2->Height() * result2->Width() );
@@ -486,9 +486,9 @@ TEST( ElRBFInterpolation, interpolate_twice )
 TEST( ElRBFInterpolation, 2d_grid )
 {
     std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-    std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positions( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positionsInterpolation( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > data( new El::DistMatrix<double, El::VR, El::STAR>() );
     El::Zeros( *positions, 5, 2 );
     El::Zeros( *positionsInterpolation, 5, 2 );
     El::Zeros( *data, positions->Height(), 1 );
@@ -598,7 +598,7 @@ TEST( ElRBFInterpolation, 2d_grid )
 
     ElRBFInterpolation rbf( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
 
-    std::unique_ptr<El::DistMatrix<double> > result = rbf.interpolate( data );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > result = rbf.interpolate( data );
 
     bufferPos.clear();
     data->ReservePulls( data->Height() * data->Width() );

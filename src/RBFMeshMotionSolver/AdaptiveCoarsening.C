@@ -30,8 +30,8 @@ namespace rbf
 
     void AdaptiveCoarsening::compute(
         std::shared_ptr<RBFFunctionInterface> function,
-        std::unique_ptr<El::DistMatrix<double> > pos,
-        std::unique_ptr<El::DistMatrix<double> > posInterpolation
+        std::unique_ptr<ElDistVector> pos,
+        std::unique_ptr<ElDistVector> posInterpolation
         )
     {
         // Selection is performed as necessary. It is only performed when interpolate()
@@ -45,24 +45,24 @@ namespace rbf
         this->positionsInterpolation = std::move( posInterpolation );
     }
 
-    std::pair<int, double> AdaptiveCoarsening::computeError( const std::unique_ptr<El::DistMatrix<double> > & values )
+    std::pair<int, double> AdaptiveCoarsening::computeError( const std::unique_ptr<ElDistVector> & values )
     {
         // Select a subset of values based on the selected points
 
-        std::unique_ptr<El::DistMatrix<double> > valuesCoarse( new El::DistMatrix<double>() );
+        std::unique_ptr<ElDistVector> valuesCoarse( new ElDistVector() );
         El::Zeros( *valuesCoarse, selectedPositions.size(), values->Width() );
         selectData( values, valuesCoarse );
 
         // Perform the interpolation
 
-        std::unique_ptr<El::DistMatrix<double> > result = rbfCoarse->interpolate( valuesCoarse );
+        std::unique_ptr<ElDistVector> result = rbfCoarse->interpolate( valuesCoarse );
 
         assert( values->Height() == result->Height() );
 
         // Compute error
-        El::DistMatrix<double> diff = *values;
+        ElDistVector diff = *values;
         El::Axpy( -1, *result, diff );
-        El::DistMatrix<double, El::MC, El::STAR> errors;
+        ElDistVector errors;
         El::RowTwoNorms( diff, errors );
 
         // Get location of max error
@@ -78,7 +78,7 @@ namespace rbf
             return std::pair<int, double>( locMax.i, locMax.value );
     }
 
-    void AdaptiveCoarsening::greedySelection( const std::unique_ptr<El::DistMatrix<double> > & values )
+    void AdaptiveCoarsening::greedySelection( const std::unique_ptr<ElDistVector> & values )
     {
         selectedPositions.clear();
 
@@ -90,19 +90,19 @@ namespace rbf
 
         {
             // Find first point: largest value
-            El::DistMatrix<double, El::MC, El::STAR> norms;
+            ElDistVector norms;
             El::RowTwoNorms( *values, norms );
             El::Entry<double> locMax = El::MaxAbsLoc( norms );
             selectedPositions.push_back( locMax.i );
 
             // Find second point: largest distance from the first point
-            El::DistMatrix<double> distance = *positions;
-            El::DistMatrix<double> tmp;
+            ElDistVector distance = *positions;
+            ElDistVector tmp;
             El::Ones( tmp, distance.Height(), distance.Width() );
 
             for ( int iColumn = 0; iColumn < tmp.Width(); iColumn++ )
             {
-                El::DistMatrix<double> view;
+                ElDistVector view;
                 El::View( view, tmp, 0, iColumn, tmp.Height(), 1 );
                 El::Scale( positions->Get( locMax.i, iColumn ), view );
             }
@@ -121,12 +121,12 @@ namespace rbf
         for ( int i = 0; i < maxPoints; i++ )
         {
             // Build the matrices for the RBF interpolation
-            std::unique_ptr<El::DistMatrix<double> > positionsCoarse( new El::DistMatrix<double>() );
+            std::unique_ptr<ElDistVector> positionsCoarse( new ElDistVector() );
             El::Zeros( *positionsCoarse, selectedPositions.size(), positions->Width() );
             selectData( positions, positionsCoarse );
 
             // Perform the RBF interpolation
-            std::unique_ptr<El::DistMatrix<double> > positionsInterpolationCoarse( new El::DistMatrix<double>() );
+            std::unique_ptr<ElDistVector> positionsInterpolationCoarse( new ElDistVector() );
             *positionsInterpolationCoarse = *positions;
             rbfCoarse = std::unique_ptr<ElRBFInterpolation>( new ElRBFInterpolation( rbfFunction, std::move( positionsCoarse ), std::move( positionsInterpolationCoarse ) ) );
 
@@ -154,14 +154,14 @@ namespace rbf
 
         // Initialize interpolator
 
-        std::unique_ptr<El::DistMatrix<double> > positionsCoarse( new El::DistMatrix<double>() );
+        std::unique_ptr<ElDistVector> positionsCoarse( new ElDistVector() );
         El::Zeros( *positionsCoarse, selectedPositions.size(), positions->Width() );
 
         selectData( positions, positionsCoarse );
 
         rbf = std::unique_ptr<ElRBFInterpolation>( new ElRBFInterpolation() );
 
-        std::unique_ptr<El::DistMatrix<double> > positionsInterpolationTmp( new El::DistMatrix<double>( *positionsInterpolation ) );
+        std::unique_ptr<ElDistVector> positionsInterpolationTmp( new ElDistVector( *positionsInterpolation ) );
 
         rbf->compute( rbfFunction, std::move( positionsCoarse ), std::move( positionsInterpolationTmp ) );
     }
@@ -171,7 +171,7 @@ namespace rbf
         return rbf->initialized();
     }
 
-    std::unique_ptr<El::DistMatrix<double> > AdaptiveCoarsening::interpolate( const std::unique_ptr<El::DistMatrix<double> > & values )
+    std::unique_ptr<ElDistVector> AdaptiveCoarsening::interpolate( const std::unique_ptr<ElDistVector> & values )
     {
         values->ProcessQueues();
 
@@ -190,7 +190,7 @@ namespace rbf
             }
             else
             {
-                std::unique_ptr<El::DistMatrix<double> > result( new El::DistMatrix<double>() );
+                std::unique_ptr<ElDistVector> result( new ElDistVector() );
                 El::Zeros( *result, positionsInterpolation->Height(), positionsInterpolation->Width() );
                 return result;
             }
@@ -219,7 +219,7 @@ namespace rbf
             greedySelection( values );
         }
 
-        std::unique_ptr<El::DistMatrix<double> > selectedValues( new El::DistMatrix<double>() );
+        std::unique_ptr<ElDistVector> selectedValues( new ElDistVector() );
         El::Zeros( *selectedValues, selectedPositions.size(), values->Width() );
 
         selectData( values, selectedValues );
@@ -228,8 +228,8 @@ namespace rbf
     }
 
     void AdaptiveCoarsening::selectData(
-        const std::unique_ptr<El::DistMatrix<double> > & data,
-        std::unique_ptr<El::DistMatrix<double> > & selection
+        const std::unique_ptr<ElDistVector> & data,
+        std::unique_ptr<ElDistVector> & selection
         )
     {
         assert( selection->Height() == int( selectedPositions.size() ) );

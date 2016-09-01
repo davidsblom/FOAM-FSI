@@ -17,8 +17,8 @@ namespace rbf
 
     void NoCoarsening::compute(
         std::shared_ptr<RBFFunctionInterface> rbfFunction,
-        std::unique_ptr<El::DistMatrix<double> > positions,
-        std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
+        std::unique_ptr<ElDistVector> positions,
+        std::unique_ptr<ElDistVector> positionsInterpolation
         )
     {
         rbf->compute( rbfFunction, std::move( positions ), std::move( positionsInterpolation ) );
@@ -29,7 +29,7 @@ namespace rbf
         return rbf->initialized();
     }
 
-    std::unique_ptr<El::DistMatrix<double> > NoCoarsening::interpolate( const std::unique_ptr<El::DistMatrix<double> > & values )
+    std::unique_ptr<ElDistVector> NoCoarsening::interpolate( const std::unique_ptr<ElDistVector> & values )
     {
         return rbf->interpolate( values );
     }

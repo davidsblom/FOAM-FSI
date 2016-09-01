@@ -17,8 +17,8 @@ namespace rbf
 
     ElRBFInterpolation::ElRBFInterpolation(
         std::shared_ptr<RBFFunctionInterface> rbfFunction,
-        std::unique_ptr<El::DistMatrix<double> > positions,
-        std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
+        std::unique_ptr<ElDistVector> positions,
+        std::unique_ptr<ElDistVector> positionsInterpolation
         )
         :
         H( new El::DistMatrix<double>() ),
@@ -32,8 +32,8 @@ namespace rbf
 
     void ElRBFInterpolation::compute(
         std::shared_ptr<RBFFunctionInterface> rbfFunction,
-        std::unique_ptr<El::DistMatrix<double> > positions,
-        std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
+        std::unique_ptr<ElDistVector> positions,
+        std::unique_ptr<ElDistVector> positionsInterpolation
         )
     {
         assert( Phi->Height() == 0 );
@@ -139,13 +139,13 @@ namespace rbf
         return Phi->Height() > 0;
     }
 
-    std::unique_ptr<El::DistMatrix<double> > ElRBFInterpolation::interpolate( const std::unique_ptr<El::DistMatrix<double> > & values )
+    std::unique_ptr<ElDistVector> ElRBFInterpolation::interpolate( const std::unique_ptr<ElDistVector> & values )
     {
         assert( Phi->Height() > 0 );
         assert( H->Height() > 0 );
         assert( values->Height() == Phi->Width() );
 
-        std::unique_ptr<El::DistMatrix<double> > result( new El::DistMatrix<double>() );
+        std::unique_ptr<ElDistVector> result( new ElDistVector() );
 
         values->ProcessQueues();
 

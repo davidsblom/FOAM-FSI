@@ -317,8 +317,8 @@ void ElRBFMeshMotionSolver::solve()
 
         boundaryData.resize( std::distance( boundaryData.begin(), it ) );
 
-        std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
-        std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double> () );
+        std::unique_ptr<rbf::ElDistVector> positions( new rbf::ElDistVector() );
+        std::unique_ptr<rbf::ElDistVector> positionsInterpolation( new rbf::ElDistVector() );
 
         std::vector<size_t> allBoundaryPoints = mxx::allgather( boundaryData.size() );
         size_t totalNbBoundaryPoints = 0;
@@ -442,7 +442,7 @@ void ElRBFMeshMotionSolver::solve()
     for ( size_t n : allBoundaryPoints )
         totalNbBoundaryPoints += n;
 
-    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+    std::unique_ptr<rbf::ElDistVector> data( new rbf::ElDistVector() );
     El::Zeros( *data, totalNbBoundaryPoints, mesh().nGeometricD() );
 
     data->Reserve( boundaryPoints.size() * mesh().nGeometricD() );
@@ -467,7 +467,7 @@ void ElRBFMeshMotionSolver::solve()
         }
     }
 
-    std::unique_ptr<El::DistMatrix<double> > result = rbf->interpolate( data );
+    std::unique_ptr<rbf::ElDistVector> result = rbf->interpolate( data );
 
     vectorField valuesInterpolationField( mesh().points().size(), Foam::vector::zero );
 
