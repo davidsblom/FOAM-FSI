@@ -97,10 +97,10 @@ namespace rbf
             assert( result->Width() == positions->Width() );
 
             // Compute the error
-            El::DistMatrix<double> diff;
+            ElDistVector diff;
             El::Ones( diff, result->Height(), result->Width() );
             El::Axpy( -1, *result, diff );
-            El::DistMatrix<double, El::MC, El::STAR> errors;
+            ElDistVector errors;
             El::RowTwoNorms( diff, errors );
 
             // Get location of max error
