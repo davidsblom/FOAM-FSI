@@ -16,9 +16,9 @@ using namespace rbf;
 TEST( UnitCoarsener, interpolate )
 {
     std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-    std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positions( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positionsInterpolation( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > data( new El::DistMatrix<double, El::VR, El::STAR>() );
     El::Zeros( *positionsInterpolation, 8, 1 );
     El::Zeros( *positions, 4, 1 );
     El::Zeros( *data, positions->Height(), 1 );
@@ -73,15 +73,15 @@ TEST( UnitCoarsener, interpolate )
         }
     }
 
-    std::unique_ptr<El::DistMatrix<double> > result = rbf.interpolate( std::move( data ) );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > result = rbf.interpolate( std::move( data ) );
 }
 
 TEST( UnitCoarsener, verify_Eigen_coarsening )
 {
     std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-    std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positions( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positionsInterpolation( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > data( new El::DistMatrix<double, El::VR, El::STAR>() );
     El::Zeros( *positionsInterpolation, 20, 1 );
     El::Zeros( *positions, 20, 1 );
     El::Zeros( *data, positions->Height(), 1 );
@@ -228,7 +228,7 @@ TEST( UnitCoarsener, verify_Eigen_coarsening )
         }
     }
 
-    std::unique_ptr<El::DistMatrix<double> > result = rbf.interpolate( std::move( data ) );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > result = rbf.interpolate( std::move( data ) );
 
     std::vector<double> buffer;
     result->ReservePulls( result->Height() * result->Width() );
@@ -253,10 +253,10 @@ TEST( UnitCoarsener, verify_Eigen_coarsening )
 
 TEST( UnitCoarsener, 2d_grid )
 {
-    std::unique_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-    std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+    std::shared_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positions( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positionsInterpolation( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > data( new El::DistMatrix<double, El::VR, El::STAR>() );
     El::Zeros( *positions, 20, 2 );
     El::Zeros( *positionsInterpolation, 50, 2 );
     El::Zeros( *data, positions->Height(), 1 );
@@ -366,9 +366,9 @@ TEST( UnitCoarsener, 2d_grid )
 
     UnitCoarsening rbf( 1e-3, 2, 15 );
 
-    rbf.compute( std::move( rbfFunction ), std::move( positions ), std::move( positionsInterpolation ) );
+    rbf.compute( rbfFunction, std::move( positions ), std::move( positionsInterpolation ) );
 
-    std::unique_ptr<El::DistMatrix<double> > result = rbf.interpolate( data );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > result = rbf.interpolate( data );
 
     bufferPos.clear();
     data->ReservePulls( data->Height() * data->Width() );

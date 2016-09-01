@@ -5,6 +5,7 @@
  */
 
 #include "AdaptiveTimeStepper.H"
+#include "PstreamReduceOps.H"
 
 using namespace sdc;
 

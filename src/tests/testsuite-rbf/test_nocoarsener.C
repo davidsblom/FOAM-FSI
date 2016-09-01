@@ -15,9 +15,9 @@ using namespace rbf;
 TEST( NoCoarsener, interpolate )
 {
     std::shared_ptr<RBFFunctionInterface> rbfFunction( new TPSFunction() );
-    std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
-    std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positions( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positionsInterpolation( new El::DistMatrix<double, El::VR, El::STAR>() );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > data( new El::DistMatrix<double, El::VR, El::STAR>() );
     El::Zeros( *positionsInterpolation, 8, 1 );
     El::Zeros( *positions, 4, 1 );
     El::Zeros( *data, positions->Height(), 1 );
@@ -70,13 +70,13 @@ TEST( NoCoarsener, interpolate )
         }
     }
 
-    std::unique_ptr<El::DistMatrix<double> > result = rbf.interpolate( std::move( data ) );
-    std::unique_ptr<El::DistMatrix<double> > result2;
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > result = rbf.interpolate( std::move( data ) );
+    std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > result2;
 
     {
-        std::unique_ptr<El::DistMatrix<double> > positions( new El::DistMatrix<double>() );
-        std::unique_ptr<El::DistMatrix<double> > positionsInterpolation( new El::DistMatrix<double>() );
-        std::unique_ptr<El::DistMatrix<double> > data( new El::DistMatrix<double>() );
+        std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positions( new El::DistMatrix<double, El::VR, El::STAR>() );
+        std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > positionsInterpolation( new El::DistMatrix<double, El::VR, El::STAR>() );
+        std::unique_ptr<El::DistMatrix<double, El::VR, El::STAR> > data( new El::DistMatrix<double, El::VR, El::STAR>() );
         El::Zeros( *positionsInterpolation, 8, 1 );
         El::Zeros( *positions, 4, 1 );
         El::Zeros( *data, positions->Height(), 1 );

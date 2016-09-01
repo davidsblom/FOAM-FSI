@@ -4,6 +4,7 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+#include "PstreamReduceOps.H"
 #include "SDC.H"
 #include "GaussRadau.H"
 #include "GaussRadau.H"

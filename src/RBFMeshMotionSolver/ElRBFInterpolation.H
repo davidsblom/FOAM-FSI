@@ -12,6 +12,8 @@
 
 namespace rbf
 {
+    typedef El::DistMatrix<double, El::VR, El::STAR> ElDistVector;
+
     class ElRBFInterpolation
     {
         public:
@@ -19,21 +21,21 @@ namespace rbf
 
             explicit ElRBFInterpolation(
                 std::shared_ptr<RBFFunctionInterface> rbfFunction,
-                std::unique_ptr<El::DistMatrix<double> > positions,
-                std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
+                std::unique_ptr<ElDistVector> positions,
+                std::unique_ptr<ElDistVector> positionsInterpolation
                 );
 
             ~ElRBFInterpolation();
 
             void compute(
                 std::shared_ptr<RBFFunctionInterface> rbfFunction,
-                std::unique_ptr<El::DistMatrix<double> > positions,
-                std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
+                std::unique_ptr<ElDistVector> positions,
+                std::unique_ptr<ElDistVector> positionsInterpolation
                 );
 
             bool initialized();
 
-            std::unique_ptr<El::DistMatrix<double> > interpolate( const std::unique_ptr<El::DistMatrix<double> > & values );
+            std::unique_ptr<ElDistVector> interpolate( const std::unique_ptr<ElDistVector> & values );
 
         private:
             std::unique_ptr<El::DistMatrix<double> > H;

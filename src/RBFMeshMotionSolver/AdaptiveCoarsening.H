@@ -24,22 +24,22 @@ namespace rbf
 
             void compute(
                 std::shared_ptr<RBFFunctionInterface> rbfFunction,
-                std::unique_ptr<El::DistMatrix<double> > positions,
-                std::unique_ptr<El::DistMatrix<double> > positionsInterpolation
+                std::unique_ptr<ElDistVector> positions,
+                std::unique_ptr<ElDistVector> positionsInterpolation
                 );
 
-            void greedySelection( const std::unique_ptr<El::DistMatrix<double> > & values );
+            void greedySelection( const std::unique_ptr<ElDistVector> & values );
 
             bool initialized();
 
-            std::unique_ptr<El::DistMatrix<double> > interpolate( const std::unique_ptr<El::DistMatrix<double> > & values );
+            std::unique_ptr<ElDistVector> interpolate( const std::unique_ptr<ElDistVector> & values );
 
         private:
-            std::pair<int, double> computeError( const std::unique_ptr<El::DistMatrix<double> > & values );
+            std::pair<int, double> computeError( const std::unique_ptr<ElDistVector> & values );
 
             void selectData(
-                const std::unique_ptr<El::DistMatrix<double> > & data,
-                std::unique_ptr<El::DistMatrix<double> > & selection
+                const std::unique_ptr<ElDistVector> & data,
+                std::unique_ptr<ElDistVector> & selection
                 );
 
             const double tol;
@@ -51,7 +51,7 @@ namespace rbf
             std::vector<size_t> selectedPositions;
 
             std::shared_ptr<RBFFunctionInterface> rbfFunction;
-            std::unique_ptr<El::DistMatrix<double> > positions;
-            std::unique_ptr<El::DistMatrix<double> > positionsInterpolation;
+            std::unique_ptr<ElDistVector> positions;
+            std::unique_ptr<ElDistVector> positionsInterpolation;
     };
 }
