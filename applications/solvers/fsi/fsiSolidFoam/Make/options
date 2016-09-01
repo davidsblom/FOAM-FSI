@@ -4,6 +4,10 @@ ifndef PRECICE_ROOT
     PRECICE_ROOT=../../../../src/thirdParty/precice
 endif
 
+ifndef MKL_LIB
+    MKL_LIB=-lopenblas
+endif
+
 EXE_INC = -std=c++11 \
     -I../../../../src/fsi/lnInclude \
     -isystem ../../../../src/thirdParty/eigen \
@@ -27,7 +31,7 @@ EXE_INC = -std=c++11 \
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
@@ -53,7 +57,7 @@ endif
 ifeq ($(WM_COMPILE_OPTION), Debug)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -lopenblas -llapack -lscalapack -lpmrrr -lmetis -lparmetis -lEl -lElSuiteSparse \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \

@@ -12,6 +12,12 @@ cmake \
     -D CMAKE_INSTALL_PREFIX=`pwd`/../install \
     -D INSTALL_PYTHON_PACKAGE=OFF \
     -D CMAKE_BUILD_TYPE=Release \
+    -D EL_DISABLE_PARMETIS=TRUE \
+    -D CMAKE_CXX_COMPILER=g++ \
+    -D CMAKE_C_COMPILER=gcc \
+    -D CMAKE_Fortran_COMPILER=gfortran \
+    -D EL_DISABLE_SCALAPACK=TRUE \
+    -D MATH_LIBS="-L/usr/lib -lopenblas" \
     ..
 elif [ "$WM_COMPILE_OPTION" = "Debug" ]
 then
@@ -19,6 +25,12 @@ cmake \
     -D CMAKE_INSTALL_PREFIX=`pwd`/../install \
     -D INSTALL_PYTHON_PACKAGE=OFF \
     -D CMAKE_BUILD_TYPE=Debug \
+    -D EL_DISABLE_PARMETIS=TRUE \
+    -D CMAKE_CXX_COMPILER=g++ \
+    -D CMAKE_C_COMPILER=gcc \
+    -D CMAKE_Fortran_COMPILER=gfortran \
+    -D EL_DISABLE_SCALAPACK=TRUE \
+    -D MATH_LIBS="-L/usr/lib -lopenblas" \
     ..
 fi
 
