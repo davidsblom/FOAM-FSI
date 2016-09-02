@@ -18,7 +18,9 @@ namespace rbf
         reselectionTol( reselectionTol ),
         minPoints( minPoints ),
         maxPoints( maxPoints ),
-        rbf( new ElRBFInterpolation() )
+        rbf( new ElRBFInterpolation() ),
+        positions( new ElDistVector() ),
+        positionsInterpolation( new ElDistVector() )
     {
         assert( maxPoints >= minPoints );
         assert( tol > 0 );
@@ -172,7 +174,7 @@ namespace rbf
 
     bool AdaptiveCoarsening::initialized()
     {
-        return rbf->initialized();
+        return rbf->initialized() || positions->Height() > 0;
     }
 
     std::unique_ptr<ElDistVector> AdaptiveCoarsening::interpolate( const std::unique_ptr<ElDistVector> & values )
