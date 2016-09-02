@@ -55,8 +55,6 @@ namespace rbf
 
         // Evaluate H matrix
 
-        H->Reserve( H->LocalHeight() * H->LocalWidth() );
-
         positions->ProcessQueues();
 
         positions->ReservePulls( H->LocalHeight() * positions->Width() + H->LocalWidth() * positions->Width() );
@@ -75,6 +73,8 @@ namespace rbf
 
         std::vector<double> pullBuf;
         positions->ProcessPullQueue( pullBuf );
+
+        H->Reserve( H->LocalHeight() * H->LocalWidth() );
 
         for ( int i = 0; i < H->LocalHeight(); i++ )
         {
@@ -98,9 +98,9 @@ namespace rbf
             }
         }
 
-        // Evaluate Phi matrix
+        H->ProcessQueues();
 
-        Phi->Reserve( Phi->LocalHeight() * Phi->LocalWidth() );
+        // Evaluate Phi matrix
 
         positionsInterpolation->ProcessQueues();
 
@@ -120,6 +120,8 @@ namespace rbf
         positions->ProcessPullQueue( pullBuf );
         positionsInterpolation->ProcessPullQueue( pullBufInterp );
 
+        Phi->Reserve( Phi->LocalHeight() * Phi->LocalWidth() );
+
         for ( int i = 0; i < Phi->LocalHeight(); i++ )
         {
             const int globalRow = Phi->GlobalRow( i );
@@ -137,6 +139,8 @@ namespace rbf
                 Phi->QueueUpdate( globalRow, globalCol, rbfFunction->evaluate( norm ) );
             }
         }
+
+        Phi->ProcessQueues();
     }
 
     bool ElRBFInterpolation::initialized()
