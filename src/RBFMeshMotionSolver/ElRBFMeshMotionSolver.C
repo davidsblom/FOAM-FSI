@@ -368,6 +368,8 @@ void ElRBFMeshMotionSolver::solve()
             }
         }
 
+        positions->ProcessQueues();
+
         positionsInterpolation->Reserve( nbInterpolationPoints * mesh().nGeometricD() );
 
         size_t localInterpolationOffset = 0;
@@ -389,6 +391,8 @@ void ElRBFMeshMotionSolver::solve()
 
             index++;
         }
+
+        positionsInterpolation->ProcessQueues();
 
         // Align data with positions
         data->AlignWith( *positions );
@@ -470,6 +474,8 @@ void ElRBFMeshMotionSolver::solve()
             i++;
         }
     }
+
+    data->ProcessQueues();
 
     std::unique_ptr<rbf::ElDistVector> result = rbf->interpolate( data );
 

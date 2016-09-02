@@ -164,8 +164,6 @@ namespace rbf
     {
         assert( selection->Height() == int( selectedPositions.size() ) );
 
-        data->ProcessQueues();
-
         int nbPulls = 0;
 
         for ( size_t j = 0; j < selectedPositions.size(); j++ )
