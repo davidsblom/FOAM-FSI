@@ -32,6 +32,9 @@ namespace rbf
         std::unique_ptr<ElDistVector> positionsInterpolation
         )
     {
+        positions->ProcessQueues();
+        positionsInterpolation->ProcessQueues();
+
         // selection is only performed once. Thereafter, the selected points are used for the
         // interpolation.
 
