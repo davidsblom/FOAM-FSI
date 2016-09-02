@@ -50,6 +50,7 @@ namespace rbf
         // Select a subset of values based on the selected points
 
         std::unique_ptr<ElDistVector> valuesCoarse( new ElDistVector() );
+        valuesCoarse->AlignWith( *values );
         El::Zeros( *valuesCoarse, selectedPositions.size(), values->Width() );
         selectData( values, valuesCoarse );
 
@@ -63,6 +64,7 @@ namespace rbf
         ElDistVector diff = *values;
         El::Axpy( -1, *result, diff );
         ElDistVector errors;
+        errors.AlignWith( diff );
         El::RowTwoNorms( diff, errors );
 
         // Get location of max error
@@ -91,6 +93,7 @@ namespace rbf
         {
             // Find first point: largest value
             ElDistVector norms;
+            norms.AlignWith( *values );
             El::RowTwoNorms( *values, norms );
             El::Entry<double> locMax = El::MaxAbsLoc( norms );
             selectedPositions.push_back( locMax.i );
@@ -98,6 +101,7 @@ namespace rbf
             // Find second point: largest distance from the first point
             ElDistVector distance = *positions;
             ElDistVector tmp;
+            tmp.AlignWith( distance );
             El::Ones( tmp, distance.Height(), distance.Width() );
 
             for ( int iColumn = 0; iColumn < tmp.Width(); iColumn++ )
@@ -122,6 +126,7 @@ namespace rbf
         {
             // Build the matrices for the RBF interpolation
             std::unique_ptr<ElDistVector> positionsCoarse( new ElDistVector() );
+            positionsCoarse->AlignWith( *positions );
             El::Zeros( *positionsCoarse, selectedPositions.size(), positions->Width() );
             selectData( positions, positionsCoarse );
 
@@ -155,6 +160,7 @@ namespace rbf
         // Initialize interpolator
 
         std::unique_ptr<ElDistVector> positionsCoarse( new ElDistVector() );
+        positionsCoarse->AlignWith( *positions );
         El::Zeros( *positionsCoarse, selectedPositions.size(), positions->Width() );
 
         selectData( positions, positionsCoarse );
@@ -191,6 +197,7 @@ namespace rbf
             else
             {
                 std::unique_ptr<ElDistVector> result( new ElDistVector() );
+                result->AlignWith( *positionsInterpolation );
                 El::Zeros( *result, positionsInterpolation->Height(), positionsInterpolation->Width() );
                 return result;
             }
@@ -220,6 +227,7 @@ namespace rbf
         }
 
         std::unique_ptr<ElDistVector> selectedValues( new ElDistVector() );
+        selectedValues->AlignWith( *values );
         El::Zeros( *selectedValues, selectedPositions.size(), values->Width() );
 
         selectData( values, selectedValues );

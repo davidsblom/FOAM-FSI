@@ -43,7 +43,10 @@ namespace rbf
 
         assert( positions->Width() == positionsInterpolation->Width() );
 
+        H->AlignWith( *positions );
         El::Zeros( *H, positions->Height(), positions->Height() );
+
+        Phi->AlignRowsWith( *positionsInterpolation );
         El::Zeros( *Phi, positionsInterpolation->Height(), positions->Height() );
 
         const int dim = positions->Width();
@@ -146,6 +149,8 @@ namespace rbf
         assert( values->Height() == Phi->Width() );
 
         std::unique_ptr<ElDistVector> result( new ElDistVector() );
+
+        result->AlignRowsWith( *Phi );
 
         values->ProcessQueues();
 

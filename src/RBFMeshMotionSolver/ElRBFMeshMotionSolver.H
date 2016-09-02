@@ -71,5 +71,6 @@ namespace Foam
             std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
             twoDPointCorrectorRBF twoDCorrector;
             std::map<int, Vertex> boundaryPoints;
+            std::unique_ptr<rbf::ElDistVector> data;
     };
 }

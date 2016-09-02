@@ -46,6 +46,7 @@ namespace rbf
         {
             // Find first point: largest radius from origin
             ElDistVector norms;
+            norms.AlignWith( *positions );
             El::RowTwoNorms( *positions, norms );
             El::Entry<double> locMax = El::MaxAbsLoc( norms );
             selectedPositions.push_back( locMax.i );
@@ -53,6 +54,7 @@ namespace rbf
             // Find second point: largest distance from the first point
             ElDistVector distance = *positions;
             ElDistVector tmp;
+            tmp.AlignWith( distance );
             El::Ones( tmp, distance.Height(), distance.Width() );
 
             for ( int iColumn = 0; iColumn < tmp.Width(); iColumn++ )
@@ -79,6 +81,8 @@ namespace rbf
             // Build the matrices for the RBF interpolation
             std::unique_ptr<ElDistVector> positionsCoarse( new ElDistVector() );
             std::unique_ptr<ElDistVector> valuesCoarse( new ElDistVector() );
+            positionsCoarse->AlignWith( *positions );
+            valuesCoarse->AlignWith( *positions );
             El::Ones( *valuesCoarse, selectedPositions.size(), positions->Width() );
             El::Zeros( *positionsCoarse, selectedPositions.size(), positions->Width() );
 
@@ -91,16 +95,18 @@ namespace rbf
 
             ElRBFInterpolation rbf( rbfFunction, std::move( positionsCoarse ), std::move( positionsInterpolationCoarse ) );
 
-            std::unique_ptr<ElDistVector> result = rbf.interpolate( std::move( valuesCoarse ) );
+            std::unique_ptr<ElDistVector> result = rbf.interpolate( valuesCoarse );
 
             assert( result->Height() == positions->Height() );
             assert( result->Width() == positions->Width() );
 
             // Compute the error
             ElDistVector diff;
+            diff.AlignWith( *result );
             El::Ones( diff, result->Height(), result->Width() );
             El::Axpy( -1, *result, diff );
             ElDistVector errors;
+            errors.AlignWith( diff );
             El::RowTwoNorms( diff, errors );
 
             // Get location of max error
@@ -127,6 +133,7 @@ namespace rbf
         }
 
         std::unique_ptr<ElDistVector> positionsCoarse( new ElDistVector() );
+        positionsCoarse->AlignWith( *positions );
         El::Zeros( *positionsCoarse, selectedPositions.size(), positions->Width() );
 
         selectData( positions, positionsCoarse );
@@ -142,6 +149,7 @@ namespace rbf
     std::unique_ptr<ElDistVector> UnitCoarsening::interpolate( const std::unique_ptr<ElDistVector> & values )
     {
         std::unique_ptr<ElDistVector> selectedValues( new ElDistVector() );
+        selectedValues->AlignWith( *values );
         El::Zeros( *selectedValues, selectedPositions.size(), values->Width() );
 
         selectData( values, selectedValues );

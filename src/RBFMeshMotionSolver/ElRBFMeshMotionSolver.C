@@ -40,7 +40,8 @@ ElRBFMeshMotionSolver::ElRBFMeshMotionSolver(
     staticPatchIDs( wordList( lookup( "staticPatches" ) ).size(), 0 ),
     rbf( nullptr ),
     rbfFunction( nullptr ),
-    twoDCorrector( mesh )
+    twoDCorrector( mesh ),
+    data( new rbf::ElDistVector() )
 {
     wordList staticPatches( lookup( "staticPatches" ) );
     wordList movingPatches( lookup( "movingPatches" ) );
@@ -388,6 +389,9 @@ void ElRBFMeshMotionSolver::solve()
             index++;
         }
 
+        // Align data with positions
+        data->AlignWith( *positions );
+
         rbf->compute( rbfFunction, std::move( positions ), std::move( positionsInterpolation ) );
     }
 
@@ -442,7 +446,6 @@ void ElRBFMeshMotionSolver::solve()
     for ( size_t n : allBoundaryPoints )
         totalNbBoundaryPoints += n;
 
-    std::unique_ptr<rbf::ElDistVector> data( new rbf::ElDistVector() );
     El::Zeros( *data, totalNbBoundaryPoints, mesh().nGeometricD() );
 
     data->Reserve( boundaryPoints.size() * mesh().nGeometricD() );
