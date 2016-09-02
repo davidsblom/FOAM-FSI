@@ -45,19 +45,21 @@ namespace rbf
 
         {
             // Find first point: largest radius from origin
-            ElDistVector norms;
+            ElDistVector norms( positions->Grid() );
+            norms.AlignWith( *positions );
             El::RowTwoNorms( *positions, norms );
             El::Entry<double> locMax = El::MaxAbsLoc( norms );
             selectedPositions.push_back( locMax.i );
 
             // Find second point: largest distance from the first point
             ElDistVector distance = *positions;
-            ElDistVector tmp;
+            ElDistVector tmp( distance.Grid() );
+            tmp.AlignWith( distance );
             El::Ones( tmp, distance.Height(), distance.Width() );
 
             for ( int iColumn = 0; iColumn < tmp.Width(); iColumn++ )
             {
-                ElDistVector view;
+                ElDistVector view( tmp.Grid() );
                 El::View( view, tmp, 0, iColumn, tmp.Height(), 1 );
                 El::Scale( positions->Get( locMax.i, iColumn ), view );
             }
@@ -77,30 +79,34 @@ namespace rbf
         for ( int i = 0; i < maxPoints; i++ )
         {
             // Build the matrices for the RBF interpolation
-            std::unique_ptr<ElDistVector> positionsCoarse( new ElDistVector() );
-            std::unique_ptr<ElDistVector> valuesCoarse( new ElDistVector() );
+            std::unique_ptr<ElDistVector> positionsCoarse( new ElDistVector( positions->Grid() ) );
+            std::unique_ptr<ElDistVector> valuesCoarse( new ElDistVector( positions->Grid() ) );
+            positionsCoarse->AlignWith( *positions );
+            valuesCoarse->AlignWith( *positions );
             El::Ones( *valuesCoarse, selectedPositions.size(), positions->Width() );
             El::Zeros( *positionsCoarse, selectedPositions.size(), positions->Width() );
 
             selectData( positions, positionsCoarse );
 
             // Perform the RBF interpolation
-            std::unique_ptr<ElDistVector> positionsInterpolationCoarse( new ElDistVector() );
+            std::unique_ptr<ElDistVector> positionsInterpolationCoarse( new ElDistVector( positions->Grid() ) );
 
             *positionsInterpolationCoarse = *positions;
 
             ElRBFInterpolation rbf( rbfFunction, std::move( positionsCoarse ), std::move( positionsInterpolationCoarse ) );
 
-            std::unique_ptr<ElDistVector> result = rbf.interpolate( std::move( valuesCoarse ) );
+            std::unique_ptr<ElDistVector> result = rbf.interpolate( valuesCoarse );
 
             assert( result->Height() == positions->Height() );
             assert( result->Width() == positions->Width() );
 
             // Compute the error
-            ElDistVector diff;
+            ElDistVector diff( result->Grid() );
+            diff.AlignWith( *result );
             El::Ones( diff, result->Height(), result->Width() );
             El::Axpy( -1, *result, diff );
-            ElDistVector errors;
+            ElDistVector errors( diff.Grid() );
+            errors.AlignWith( diff );
             El::RowTwoNorms( diff, errors );
 
             // Get location of max error
@@ -126,7 +132,8 @@ namespace rbf
             std::cout << " error = " << largestError << ", tol = " << tol << std::endl;
         }
 
-        std::unique_ptr<ElDistVector> positionsCoarse( new ElDistVector() );
+        std::unique_ptr<ElDistVector> positionsCoarse( new ElDistVector( positions->Grid() ) );
+        positionsCoarse->AlignWith( *positions );
         El::Zeros( *positionsCoarse, selectedPositions.size(), positions->Width() );
 
         selectData( positions, positionsCoarse );
@@ -141,7 +148,8 @@ namespace rbf
 
     std::unique_ptr<ElDistVector> UnitCoarsening::interpolate( const std::unique_ptr<ElDistVector> & values )
     {
-        std::unique_ptr<ElDistVector> selectedValues( new ElDistVector() );
+        std::unique_ptr<ElDistVector> selectedValues( new ElDistVector( values->Grid() ) );
+        selectedValues->AlignWith( *values );
         El::Zeros( *selectedValues, selectedPositions.size(), values->Width() );
 
         selectData( values, selectedValues );

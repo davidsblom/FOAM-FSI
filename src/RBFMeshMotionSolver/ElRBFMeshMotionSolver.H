@@ -67,9 +67,11 @@ namespace Foam
         private:
             labelList movingPatchIDs;
             labelList staticPatchIDs;
+            El::Grid grid;
             std::unique_ptr<rbf::Coarsener> rbf;
             std::shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
             twoDPointCorrectorRBF twoDCorrector;
             std::map<int, Vertex> boundaryPoints;
+            std::unique_ptr<rbf::ElDistVector> data;
     };
 }

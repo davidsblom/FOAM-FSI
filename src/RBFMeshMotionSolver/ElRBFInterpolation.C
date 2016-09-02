@@ -43,7 +43,12 @@ namespace rbf
 
         assert( positions->Width() == positionsInterpolation->Width() );
 
+        H = std::unique_ptr<El::DistMatrix<double> >( new El::DistMatrix<double>( positions->Grid() ) );
+        H->AlignWith( *positions );
         El::Zeros( *H, positions->Height(), positions->Height() );
+
+        Phi = std::unique_ptr<El::DistMatrix<double> >( new El::DistMatrix<double>( positionsInterpolation->Grid() ) );
+        Phi->AlignRowsWith( *positionsInterpolation );
         El::Zeros( *Phi, positionsInterpolation->Height(), positions->Height() );
 
         const int dim = positions->Width();
@@ -145,7 +150,9 @@ namespace rbf
         assert( H->Height() > 0 );
         assert( values->Height() == Phi->Width() );
 
-        std::unique_ptr<ElDistVector> result( new ElDistVector() );
+        std::unique_ptr<ElDistVector> result( new ElDistVector( Phi->Grid() ) );
+
+        result->AlignRowsWith( *Phi );
 
         values->ProcessQueues();
 

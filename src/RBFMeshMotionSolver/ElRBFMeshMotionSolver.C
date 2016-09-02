@@ -38,9 +38,11 @@ ElRBFMeshMotionSolver::ElRBFMeshMotionSolver(
     newPoints( mesh.points().size(), vector::zero ),
     movingPatchIDs( wordList( lookup( "movingPatches" ) ).size(), 0 ),
     staticPatchIDs( wordList( lookup( "staticPatches" ) ).size(), 0 ),
+    grid( El::mpi::COMM_WORLD, El::ROW_MAJOR ),
     rbf( nullptr ),
     rbfFunction( nullptr ),
-    twoDCorrector( mesh )
+    twoDCorrector( mesh ),
+    data( new rbf::ElDistVector( grid ) )
 {
     wordList staticPatches( lookup( "staticPatches" ) );
     wordList movingPatches( lookup( "movingPatches" ) );
@@ -317,8 +319,8 @@ void ElRBFMeshMotionSolver::solve()
 
         boundaryData.resize( std::distance( boundaryData.begin(), it ) );
 
-        std::unique_ptr<rbf::ElDistVector> positions( new rbf::ElDistVector() );
-        std::unique_ptr<rbf::ElDistVector> positionsInterpolation( new rbf::ElDistVector() );
+        std::unique_ptr<rbf::ElDistVector> positions( new rbf::ElDistVector( grid ) );
+        std::unique_ptr<rbf::ElDistVector> positionsInterpolation( new rbf::ElDistVector( grid ) );
 
         std::vector<size_t> allBoundaryPoints = mxx::allgather( boundaryData.size() );
         size_t totalNbBoundaryPoints = 0;
@@ -388,6 +390,9 @@ void ElRBFMeshMotionSolver::solve()
             index++;
         }
 
+        // Align data with positions
+        data->AlignWith( *positions );
+
         rbf->compute( rbfFunction, std::move( positions ), std::move( positionsInterpolation ) );
     }
 
@@ -442,7 +447,6 @@ void ElRBFMeshMotionSolver::solve()
     for ( size_t n : allBoundaryPoints )
         totalNbBoundaryPoints += n;
 
-    std::unique_ptr<rbf::ElDistVector> data( new rbf::ElDistVector() );
     El::Zeros( *data, totalNbBoundaryPoints, mesh().nGeometricD() );
 
     data->Reserve( boundaryPoints.size() * mesh().nGeometricD() );
