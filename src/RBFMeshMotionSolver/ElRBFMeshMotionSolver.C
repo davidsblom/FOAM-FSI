@@ -233,7 +233,7 @@ void ElRBFMeshMotionSolver::solve()
 
     // If the points are already selected, the rbf.compute() is already
     // called.
-    if ( boundaryPoints.empty() )
+    if ( !rbf->initialized() )
     {
         forAll( staticPatchIDs, patchId )
         {
