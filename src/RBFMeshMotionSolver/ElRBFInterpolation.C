@@ -55,8 +55,6 @@ namespace rbf
 
         // Evaluate H matrix
 
-        positions->ProcessQueues();
-
         positions->ReservePulls( H->LocalHeight() * positions->Width() + H->LocalWidth() * positions->Width() );
 
         for ( int i = 0; i < H->LocalHeight(); i++ )
@@ -102,22 +100,22 @@ namespace rbf
 
         // Evaluate Phi matrix
 
-        positionsInterpolation->ProcessQueues();
-
         positions->ReservePulls( Phi->LocalWidth() * dim );
-        positionsInterpolation->ReservePulls( Phi->LocalHeight() * dim );
 
         for ( int i = 0; i < Phi->LocalWidth(); i++ )
             for ( int iDim = 0; iDim < dim; iDim++ )
                 positions->QueuePull( Phi->GlobalCol( i ), iDim );
 
+        pullBuf.clear();
+        positions->ProcessPullQueue( pullBuf );
+
+        positionsInterpolation->ReservePulls( Phi->LocalHeight() * dim );
+
         for ( int i = 0; i < Phi->LocalHeight(); i++ )
             for ( int iDim = 0; iDim < dim; iDim++ )
                 positionsInterpolation->QueuePull( Phi->GlobalRow( i ), iDim );
 
-        pullBuf.clear();
         std::vector<double> pullBufInterp;
-        positions->ProcessPullQueue( pullBuf );
         positionsInterpolation->ProcessPullQueue( pullBufInterp );
 
         Phi->Reserve( Phi->LocalHeight() * Phi->LocalWidth() );
@@ -158,11 +156,7 @@ namespace rbf
 
         result->AlignRowsWith( *Phi );
 
-        values->ProcessQueues();
-
         El::DistMatrix<double> B = *values;
-
-        H->ProcessQueues();
 
         if ( HCopy.Width() == 0 )
         {
@@ -181,8 +175,6 @@ namespace rbf
         auto & B_LU = BProx.Get();
 
         El::ldl::SolveAfter( A, dSub, p, B_LU, false );
-
-        Phi->ProcessQueues();
 
         El::Gemm( El::Orientation::NORMAL, El::Orientation::NORMAL, 1.0, *Phi, B, *result );
 

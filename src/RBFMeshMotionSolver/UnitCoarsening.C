@@ -32,9 +32,6 @@ namespace rbf
         std::unique_ptr<ElDistVector> positionsInterpolation
         )
     {
-        positions->ProcessQueues();
-        positionsInterpolation->ProcessQueues();
-
         // selection is only performed once. Thereafter, the selected points are used for the
         // interpolation.
 
@@ -166,8 +163,6 @@ namespace rbf
         )
     {
         assert( selection->Height() == int( selectedPositions.size() ) );
-
-        data->ProcessQueues();
 
         int nbPulls = 0;
 

@@ -36,8 +36,6 @@ namespace rbf
     {
         // Selection is performed as necessary. It is only performed when interpolate()
         // is called.
-        pos->ProcessQueues();
-        posInterpolation->ProcessQueues();
 
         // Store the untouched data for later reselection of points
         this->rbfFunction = function;
@@ -179,8 +177,6 @@ namespace rbf
 
     std::unique_ptr<ElDistVector> AdaptiveCoarsening::interpolate( const std::unique_ptr<ElDistVector> & values )
     {
-        values->ProcessQueues();
-
         bool greedyPerformed = false;
 
         // Greedy selection never performed => do it now
@@ -241,8 +237,6 @@ namespace rbf
         )
     {
         assert( selection->Height() == int( selectedPositions.size() ) );
-
-        data->ProcessQueues();
 
         int nbPulls = 0;
 
