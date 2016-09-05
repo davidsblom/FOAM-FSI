@@ -28,7 +28,10 @@ namespace rbf
                 std::unique_ptr<ElDistVector> positionsInterpolation
                 );
 
-            void greedySelection( const std::unique_ptr<ElDistVector> & values );
+            void greedySelection(
+                const std::unique_ptr<ElDistVector> & values,
+                bool clear
+                );
 
             bool initialized();
 

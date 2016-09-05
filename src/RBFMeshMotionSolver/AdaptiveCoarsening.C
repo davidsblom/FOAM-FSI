@@ -80,17 +80,21 @@ namespace rbf
             return std::pair<int, double>( locMax.i, locMax.value );
     }
 
-    void AdaptiveCoarsening::greedySelection( const std::unique_ptr<ElDistVector> & values )
+    void AdaptiveCoarsening::greedySelection(
+        const std::unique_ptr<ElDistVector> & values,
+        bool clear = true
+        )
     {
-        selectedPositions.clear();
-
         // An initial selection is needed before the greedy algorithm starts
         // adding points to the selection.
         // The first point is the point with the largest disp/value
         // The second point is the point with the largest distance from the
         // first point.
 
+        if ( clear || selectedPositions.size() < 2 )
         {
+            selectedPositions.clear();
+
             // Find first point: largest value
             ElDistVector norms( values->Grid() );
             norms.AlignWith( *values );
@@ -220,8 +224,15 @@ namespace rbf
 
         if ( largestError.second >= reselectionTol && !greedyPerformed )
         {
-            // the error is too large. Do a reselection
-            greedySelection( values );
+            // The error is too large. Do a reselection
+            // heuristic: Do not throw away the selected points if the number
+            // of selected points is smaller than the half the maximum.
+            bool clear = true;
+
+            if ( int( selectedPositions.size() ) < maxPoints / 2 )
+                clear = false;
+
+            greedySelection( values, clear );
         }
 
         std::unique_ptr<ElDistVector> selectedValues( new ElDistVector( values->Grid() ) );
