@@ -328,7 +328,8 @@ void ElRBFMeshMotionSolver::solve()
         for ( size_t n : allBoundaryPoints )
             totalNbBoundaryPoints += n;
 
-        El::Zeros( *positions, totalNbBoundaryPoints, mesh().nGeometricD() );
+        positions->Resize( totalNbBoundaryPoints, mesh().nGeometricD(), mesh().nGeometricD() * boundaryData.size() );
+        El::Zero( *positions );
 
         int nbInterpolationPoints = 0;
 
@@ -344,7 +345,8 @@ void ElRBFMeshMotionSolver::solve()
         for ( int n : allInterpolationPoints )
             totalNbInterpolationPoints += n;
 
-        El::Zeros( *positionsInterpolation, totalNbInterpolationPoints, mesh().nGeometricD() );
+        positionsInterpolation->Resize( totalNbInterpolationPoints, mesh().nGeometricD(), mesh().nGeometricD() * nbInterpolationPoints );
+        El::Zero( *positionsInterpolation );
 
         positions->Reserve( boundaryPoints.size() * mesh().nGeometricD() );
 
