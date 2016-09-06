@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -euox pipefail
 
 find . -name '*~' -exec rm -rf {} \;
 

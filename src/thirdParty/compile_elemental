@@ -1,7 +1,6 @@
 #!/bin/bash
 
-set -e
-set -x
+set -euox pipefail
 
 cd elemental
 mkdir -p build install && cd build

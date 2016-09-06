@@ -1,7 +1,6 @@
 #!/bin/bash
 
-set -e
-set -x
+set -euox pipefail
 
 if [ ! -d "googletest-release-1.8.0" ]; then
 
