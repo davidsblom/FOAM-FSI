@@ -1,13 +1,11 @@
-addons:
-    apt:
-        packages:
-            - cppcheck
+sudo: required
+
+services:
+    - docker
 
 script:
-    - (cd src/fsi && cppcheck --error-exitcode=1 --enable=performance,portability .)
-    - (cd src/RBFMeshMotionSolver && cppcheck --error-exitcode=1 --enable=performance,portability .)
-    - (cd src/tests && cppcheck --error-exitcode=1 --enable=performance,portability .)
-    - (cd applications && cppcheck --error-exitcode=1 --enable=performance,portability .)
+    - docker pull debian:unstable
+    - docker build .
 
 notifications:
   email:
