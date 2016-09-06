@@ -27,7 +27,7 @@ class foamSolidSolver : public BaseMultiLevelSolver
 {
     public:
         foamSolidSolver(
-            string name,
+            const string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );

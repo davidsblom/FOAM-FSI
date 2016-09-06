@@ -26,7 +26,7 @@ class foamFluidSolver : public BaseMultiLevelSolver
 {
     public:
         foamFluidSolver(
-            std::string name,
+            const std::string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );

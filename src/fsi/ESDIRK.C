@@ -10,7 +10,7 @@ namespace sdc
 {
     ESDIRK::ESDIRK(
         std::shared_ptr<SDCSolver> solver,
-        std::string method,
+        const std::string & method,
         std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper
         )
         :
@@ -45,7 +45,7 @@ namespace sdc
         adaptiveTimeStepper->setEndTime( solver->getEndTime() );
     }
 
-    ESDIRK::ESDIRK( std::string method )
+    ESDIRK::ESDIRK( const std::string & method )
         :
         solver( nullptr ),
         adaptiveTimeStepper( nullptr ),
@@ -245,7 +245,7 @@ namespace sdc
             return nbStages - 1;
     }
 
-    void ESDIRK::initializeButcherTableau( std::string method )
+    void ESDIRK::initializeButcherTableau( const std::string & method )
     {
         assert( method == "SDIRK2" || method == "SDIRK2PR" || method == "SDIRK3" || method == "SDIRK4" || method == "ESDIRK3" || method == "ESDIRK4" || method == "ESDIRK5" || method == "ESDIRK53PR" || method == "ESDIRK63PR" || method == "ESDIRK74PR" );
 
@@ -599,7 +599,7 @@ namespace sdc
             B( i ) = A( nbStages - 1, i );
     }
 
-    void ESDIRK::outputResidual( std::string )
+    void ESDIRK::outputResidual( const std::string & )
     {}
 
     bool ESDIRK::isConverged()

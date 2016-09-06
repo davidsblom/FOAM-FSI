@@ -17,9 +17,9 @@ class ElasticSolidSolver : public foamSolidSolver
 {
     public:
         ElasticSolidSolver(
-            string name,
-            std::shared_ptr<argList> args,
-            std::shared_ptr<Time> runTime
+            const string & name,
+            const std::shared_ptr<argList> & args,
+            const std::shared_ptr<Time> & runTime
             );
 
         virtual ~ElasticSolidSolver();

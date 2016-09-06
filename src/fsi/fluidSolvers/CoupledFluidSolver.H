@@ -24,7 +24,7 @@ class CoupledFluidSolver : public foamFluidSolver
 {
     public:
         CoupledFluidSolver(
-            string name,
+            const string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );

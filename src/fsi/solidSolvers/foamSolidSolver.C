@@ -10,7 +10,7 @@
 Foam::debug::debugSwitch foamSolidSolver::debug( "FsiSolver", 0 );
 
 foamSolidSolver::foamSolidSolver (
-    string name,
+    const string & name,
     std::shared_ptr<argList> args,
     std::shared_ptr<Time> runTime
     )

@@ -77,7 +77,7 @@ namespace sdc
 
             virtual int getNbImplicitStages();
 
-            virtual void outputResidual( std::string name );
+            virtual void outputResidual( const std::string & name );
 
             virtual bool isConverged();
 

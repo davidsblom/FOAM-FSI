@@ -1,8 +1,8 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
-rm -rf gtest* yaml-cpp* boost* dealii* metis* parmetis* petsc*
+rm -rf gtest* yaml-cpp* boost* dealii* metis* parmetis* petsc* googletest*
 rm -rf $FOAM_USER_LIBBIN/libprecice* $FOAM_USER_LIBBIN/libyaml-cpp*
 (cd precice && git clean -fxd)
 (cd mxx && git clean -fxd)

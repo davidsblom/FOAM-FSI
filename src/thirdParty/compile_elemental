@@ -1,7 +1,6 @@
 #!/bin/bash
 
-set -e
-set -x
+set -euox pipefail
 
 cd elemental
 mkdir -p build install && cd build
@@ -36,4 +35,6 @@ fi
 
 make -j `nproc`
 make install
-cp ../install/lib/*.so* $FOAM_LIBBIN/
+cd ..
+cp install/lib/*.so* $FOAM_LIBBIN/
+rm -rf build

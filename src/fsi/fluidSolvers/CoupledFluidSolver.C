@@ -10,7 +10,7 @@
 #include "CoupledFluidSolver.H"
 
 CoupledFluidSolver::CoupledFluidSolver(
-    string name,
+    const string & name,
     shared_ptr<argList> args,
     shared_ptr<Time> runTime
     )

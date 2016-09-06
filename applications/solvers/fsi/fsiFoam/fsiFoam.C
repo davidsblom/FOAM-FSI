@@ -65,7 +65,7 @@ void setConvergenceMeasures(
     );
 
 std::shared_ptr<rbf::RBFInterpolation> createRBFInterpolator(
-    std::string interpolationFunction,
+    const std::string & interpolationFunction,
     scalar radius,
     bool cpu
     );
@@ -131,7 +131,7 @@ void setConvergenceMeasures(
 }
 
 std::shared_ptr<rbf::RBFInterpolation> createRBFInterpolator(
-    std::string interpolationFunction,
+    const std::string & interpolationFunction,
     scalar radius,
     bool cpu,
     bool polynomialTerm

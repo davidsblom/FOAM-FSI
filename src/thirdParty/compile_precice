@@ -1,25 +1,11 @@
 #!/bin/bash
 
-set -e
-set -x
-
-# Ensure the script is executed in this directory
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-cd $DIR
+set -euox pipefail
 
 # Define which versions of the different packages are used
 
 mkdir -p ${FOAM_LIBBIN}
 mkdir -p ${FOAM_APPBIN}
-
-# Download Boost
-if [ ! -d "boost" ]; then
-    wget http://downloads.sourceforge.net/project/boost/boost/1.61.0/boost_1_61_0.tar.bz2 -O - | tar xj
-    ln -s boost_1_61_0 boost
-    sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
-    cd boost && ./bootstrap.sh --with-libraries=log,program_options && ./b2 -j `nproc`
-    cp stage/lib/* $FOAM_LIBBIN/ && cd ..
-fi
 
 # Set environment variables necessary for building preCICE
 export PRECICE_MPI_LIB=mpi
