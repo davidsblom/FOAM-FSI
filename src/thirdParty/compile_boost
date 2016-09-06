@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+set -x
+
+if [ ! -d "boost_1_61_0" ]; then
+    wget http://downloads.sourceforge.net/project/boost/boost/1.61.0/boost_1_61_0.tar.bz2 -O - | tar xj
+    ln -s boost_1_61_0 boost
+    sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
+    cd boost && ./bootstrap.sh --with-libraries=log,program_options,serialization,thread && ./b2 -j `nproc`
+    cp stage/lib/* $FOAM_LIBBIN/ && cd ..
+fi

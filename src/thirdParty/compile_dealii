@@ -4,29 +4,13 @@ set -e
 set -x
 
 DEALII_VERSION=8.4.1
-BOOST_VERSION=1_61_0
-BOOST_VERSION_DOT=1.61.0
 export PETSC_ARCH=x86_64
-
-if [ ! -d "boost_${BOOST_VERSION}" ]; then
-    rm -rf boost*
-    wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
-    tar jxf boost_${BOOST_VERSION}.tar.bz2
-    rm -f boost_${BOOST_VERSION}.tar.bz2
-fi
-
-rm -f boost
-ln -s boost_${BOOST_VERSION} boost
 
 if [ ! -d "dealii-${DEALII_VERSION}" ]; then
 
   rm -rf dealii*
 
-  wget https://github.com/dealii/dealii/releases/download/v${DEALII_VERSION}/dealii-${DEALII_VERSION}.tar.gz
-
-  tar -zxf dealii-${DEALII_VERSION}.tar.gz
-
-  rm dealii-${DEALII_VERSION}.tar.gz
+  wget https://github.com/dealii/dealii/releases/download/v${DEALII_VERSION}/dealii-${DEALII_VERSION}.tar.gz  -O - | tar xz
 
   export PETSC_DIR=`pwd`/petsc
   cd $PETSC_DIR
@@ -37,6 +21,7 @@ if [ ! -d "dealii-${DEALII_VERSION}" ]; then
   export F90=mpif90
 
   cd dealii-${DEALII_VERSION}
+  boost_lib_dir=`pwd`/../boost/stage/lib
 
   mkdir build
   mkdir bin
@@ -44,10 +29,28 @@ if [ ! -d "dealii-${DEALII_VERSION}" ]; then
 
   if [ "$WM_COMPILE_OPTION" = "Opt" ]
   then
-    cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DCMAKE_BUILD_TYPE=Release ..
+    cmake .. \
+        -DCMAKE_INSTALL_PREFIX=`pwd`/../bin \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DDEAL_II_WITH_MPI=ON \
+        -DDEAL_II_WITH_METIS=ON \
+        -DDEAL_II_WITH_PETSC=ON \
+        -DDEAL_II_COMPONENT_EXAMPLES=OFF \
+        -DBOOST_DIR=`pwd`/../../boost \
+        -DBOOST_LIBRARIES="${boost_lib_dir}/libboost_atomic.so;${boost_lib_dir}/libboost_chrono.so;${boost_lib_dir}/libboost_date_time.so;${boost_lib_dir}/libboost_filesystem.so;${boost_lib_dir}/libboost_log.so;${boost_lib_dir}/libboost_log_setup.so;${boost_lib_dir}/libboost_program_options.so;${boost_lib_dir}/libboost_regex.so;${boost_lib_dir}/libboost_serialization.so;${boost_lib_dir}/libboost_system.so;${boost_lib_dir}/libboost_thread.so;${boost_lib_dir}/libboost_wserialization.so" \
+        -DBOOST_INCLUDE_DIRS=`pwd`/../../boost
   elif [ "$WM_COMPILE_OPTION" = "Debug" ]
   then
-    cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../bin -DCMAKE_BUILD_TYPE=Debug ..
+    cmake .. \
+        -DCMAKE_INSTALL_PREFIX=`pwd`/../bin \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DDEAL_II_WITH_MPI=ON \
+        -DDEAL_II_WITH_METIS=ON \
+        -DDEAL_II_WITH_PETSC=ON \
+        -DDEAL_II_COMPONENT_EXAMPLES=OFF \
+        -DBOOST_DIR=`pwd`/../../boost \
+        -DBOOST_LIBRARIES="${boost_lib_dir}/libboost_atomic.so;${boost_lib_dir}/libboost_chrono.so;${boost_lib_dir}/libboost_date_time.so;${boost_lib_dir}/libboost_filesystem.so;${boost_lib_dir}/libboost_log.so;${boost_lib_dir}/libboost_log_setup.so;${boost_lib_dir}/libboost_program_options.so;${boost_lib_dir}/libboost_regex.so;${boost_lib_dir}/libboost_serialization.so;${boost_lib_dir}/libboost_system.so;${boost_lib_dir}/libboost_thread.so;${boost_lib_dir}/libboost_wserialization.so" \
+        -DBOOST_INCLUDE_DIRS=`pwd`/../../boost
   fi
 
   make -j $WM_NCOMPPROCS install test

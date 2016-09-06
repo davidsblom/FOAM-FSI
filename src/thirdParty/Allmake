@@ -2,6 +2,7 @@
 
 set -e
 
+./compile_boost
 ./compile_elemental
 ./compile_petsc
 ./compile_dealii
