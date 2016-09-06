@@ -475,7 +475,7 @@ namespace sdc
         this->timeIndex = timeIndex;
     }
 
-    void SDC::outputResidual( std::string name )
+    void SDC::outputResidual( const std::string & name )
     {
         fsi::matrix residual = dt * ( qmat * data->getFunctions() );
 

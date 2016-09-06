@@ -21,16 +21,16 @@ class SteadyStateSolidSolver : public foamSolidSolver
 {
     public:
         SteadyStateSolidSolver(
-            std::string name,
-            std::shared_ptr<argList> args,
-            std::shared_ptr<Time> runTime
+            const std::string & name,
+            const std::shared_ptr<argList> & args,
+            const std::shared_ptr<Time> & runTime
             );
 
         SteadyStateSolidSolver(
-            std::string name,
-            std::shared_ptr<argList> args,
-            std::shared_ptr<Time> runTime,
-            std::shared_ptr<rbf::RBFCoarsening> interpolator
+            const std::string & name,
+            const std::shared_ptr<argList> & args,
+            const std::shared_ptr<Time> & runTime,
+            const std::shared_ptr<rbf::RBFCoarsening> & interpolator
             );
 
         virtual ~SteadyStateSolidSolver();

@@ -7,9 +7,9 @@
 #include "SolidSolver.H"
 
 SolidSolver::SolidSolver (
-    string name,
-    std::shared_ptr<argList> args,
-    std::shared_ptr<Time> runTime
+    const string & name,
+    const std::shared_ptr<argList> & args,
+    const std::shared_ptr<Time> & runTime
     )
     :
     foamSolidSolver( name, args, runTime ),
@@ -55,10 +55,10 @@ SolidSolver::SolidSolver (
 {}
 
 SolidSolver::SolidSolver (
-    string name,
-    std::shared_ptr<argList> args,
-    std::shared_ptr<Time> runTime,
-    std::shared_ptr<rbf::RBFCoarsening> interpolator
+    const string & name,
+    const std::shared_ptr<argList> & args,
+    const std::shared_ptr<Time> & runTime,
+    const std::shared_ptr<rbf::RBFCoarsening> & interpolator
     )
     :
     foamSolidSolver( name, args, runTime ),

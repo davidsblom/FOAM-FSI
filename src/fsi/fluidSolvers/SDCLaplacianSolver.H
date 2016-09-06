@@ -21,7 +21,7 @@ class SDCLaplacianSolver : public sdc::SDCSolver
 {
     public:
         SDCLaplacianSolver(
-            string name,
+            const string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );

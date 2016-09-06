@@ -8,7 +8,7 @@
 #include "foamFluidSolver.H"
 
 foamFluidSolver::foamFluidSolver(
-    std::string name,
+    const std::string & name,
     shared_ptr<argList> args,
     shared_ptr<Time> runTime
     )

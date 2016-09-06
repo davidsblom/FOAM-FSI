@@ -27,7 +27,7 @@ AdaptiveTimeStepper::AdaptiveTimeStepper( bool enabled )
 
 AdaptiveTimeStepper::AdaptiveTimeStepper(
     bool enabled,
-    std::string filter,
+    const std::string & filter,
     scalar tol,
     scalar safetyFactor
     )

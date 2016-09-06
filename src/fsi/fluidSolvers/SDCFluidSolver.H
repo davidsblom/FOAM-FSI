@@ -28,7 +28,7 @@ class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
 {
     public:
         SDCFluidSolver(
-            std::string name,
+            const std::string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );

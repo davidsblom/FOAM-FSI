@@ -11,7 +11,7 @@
 #include <chrono>
 
 CompressibleFluidSolver::CompressibleFluidSolver(
-    string name,
+    const string & name,
     shared_ptr<argList> args,
     shared_ptr<Time> runTime
     )

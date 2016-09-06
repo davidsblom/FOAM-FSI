@@ -38,7 +38,7 @@ namespace sdc
                 const fsi::vector & result
                 ) = 0;
 
-            virtual void outputResidual( std::string name ) = 0;
+            virtual void outputResidual( const std::string & name ) = 0;
 
             virtual bool isConverged() = 0;
 

@@ -10,7 +10,7 @@
 #include "SDCFluidSolver.H"
 
 SDCFluidSolver::SDCFluidSolver(
-    std::string name,
+    const std::string & name,
     std::shared_ptr<argList> args,
     std::shared_ptr<Time> runTime
     )

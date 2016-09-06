@@ -11,7 +11,7 @@
 #include <stdexcept>
 
 FluidSolver::FluidSolver(
-    string name,
+    const string & name,
     std::shared_ptr<argList> args,
     std::shared_ptr<Time> runTime
     )
