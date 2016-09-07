@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef MultiLevelSpaceMappingSolver_H
@@ -11,7 +10,7 @@
 #include "SpaceMappingSolver.H"
 #include <deque>
 
-using namespace fsi;
+namespace fsi {
 
 class MultiLevelSpaceMappingSolver : public Solver
 {
@@ -40,5 +39,7 @@ class MultiLevelSpaceMappingSolver : public Solver
         bool init;
         const bool synchronization;
 };
+
+} // namespace fsi
 
 #endif

@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #include "UserDefinedNodes.H"
 #include "fvCFD.H"
 

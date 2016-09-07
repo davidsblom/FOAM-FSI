@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #include "ClenshawCurtis.H"
 
 #include <stdexcept>
@@ -9,16 +13,13 @@ namespace fsi
 {
     namespace quadrature
     {
-        using namespace std;
-        using namespace boost::math::constants;
-
         template<typename precision>
         ClenshawCurtis<precision>::ClenshawCurtis( const size_t num_nodes )
             : IQuadrature<precision>( num_nodes )
         {
             if ( this->num_nodes < 2 )
             {
-                throw invalid_argument( "Clenshaw-Curtis quadrature requires at least two quadrature nodes." );
+                throw std::invalid_argument( "Clenshaw-Curtis quadrature requires at least two quadrature nodes." );
             }
 
             this->compute_nodes();
@@ -45,8 +46,10 @@ namespace fsi
 
             for ( size_t j = 0; j < this->num_nodes; j++ )
             {
-                this->nodes[j] = 0.5 * ( 1.0 - std::cos( j * pi<precision>() / (this->num_nodes - 1) ) );
+                this->nodes[j] = 0.5 * ( 1.0 - std::cos( j * boost::math::constants::pi<precision>() / (this->num_nodes - 1) ) );
             }
         }
-    }
-}
+
+} // namespace quadrature
+
+} // namespace fsi

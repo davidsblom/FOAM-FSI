@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "PostProcessing.H"
 
-using namespace fsi;
+namespace fsi {
 
 PostProcessing::PostProcessing(
     shared_ptr<MultiLevelFsiSolver> fsi,
@@ -163,3 +162,5 @@ void PostProcessing::setNumberOfImplicitStages( int k )
 
     assert( static_cast<int>( residualsStageList.size() ) == k );
 }
+
+} // namespace fsi

@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  *
  * Class
  *  Picard Integral Exponential Solver (PIES)
@@ -54,6 +53,6 @@ namespace sdc
             scalar rho;
             scalar delta;
     };
-}
+} // namespace sdc
 
 #include "PIES.tpp"

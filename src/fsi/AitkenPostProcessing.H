@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef AitkenPostProcessing_H
@@ -45,6 +44,6 @@ namespace fsi
 
             scalar aitkenFactor;
     };
-}
+} // namespace fsi
 
 #endif

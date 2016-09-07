@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #pragma once
@@ -13,7 +12,7 @@ namespace sdc
     class SDCFsiSolverInterface : public SDCSolver
     {
         public:
-            virtual ~SDCFsiSolverInterface(){}
+            virtual ~SDCFsiSolverInterface() {}
 
             virtual void prepareImplicitSolve(
                 bool corrector,
@@ -27,4 +26,4 @@ namespace sdc
 
             virtual void finalizeImplicitSolve( int /*k*/ ){}
     };
-}
+} // namespace sdc

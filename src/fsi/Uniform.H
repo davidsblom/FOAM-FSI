@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #pragma once
 
 #include "QuadratureInterface.H"
@@ -49,7 +53,9 @@ namespace fsi
 
                 // ! @}
         };
-    }
-}
+
+} // namespace quadrature
+
+} // namespace fsi
 
 #include "Uniform.tpp"

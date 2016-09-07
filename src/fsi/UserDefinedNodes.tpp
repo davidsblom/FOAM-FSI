@@ -1,9 +1,12 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #include "UserDefinedNodes.H"
 
 #include <stdexcept>
 #include <vector>
-using namespace std;
 
 #include "Polynomial.H"
 
@@ -30,5 +33,7 @@ namespace fsi
         {
             return RIGHT_IS_NODE;
         }
-    }
-}
+
+} // namespace quadrature
+
+} // namespace fsi

@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef AbsoluteConvergenceMeasure_H
@@ -35,6 +34,6 @@ namespace fsi
             scalar convergenceLimit;
             scalar normDiff;
     };
-}
+} // namespace fsi
 
 #endif

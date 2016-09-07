@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef FsiSolver_H
@@ -69,6 +68,6 @@ namespace fsi
             const int extrapolationOrder;
             std::deque<vector> previousSolutions;
     };
-}
+} // namespace fsi
 
 #endif

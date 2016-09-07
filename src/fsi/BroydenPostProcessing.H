@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef BroydenPostProcessing_H
@@ -51,6 +50,6 @@ namespace fsi
             matrix J;
             const scalar singularityLimit;
     };
-}
+} // namespace fsi
 
 #endif

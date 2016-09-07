@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "RelativeConvergenceMeasure.H"
@@ -72,4 +71,4 @@ namespace fsi
 
         Info << endl;
     }
-}
+} // namespace fsi

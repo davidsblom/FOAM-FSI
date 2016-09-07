@@ -12,6 +12,7 @@
 #include "gtest/gtest.h"
 
 using namespace tubeflow;
+using namespace fsi;
 
 class FsiLinearizedSolidSolverTest : public ::testing::Test
 {

@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #pragma once
@@ -63,4 +62,4 @@ namespace sdc
             std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
             fsi::matrix F, Fold, solStages;
     };
-}
+} // namespace sdc

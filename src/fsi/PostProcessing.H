@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef PostProcessing_H
@@ -25,7 +24,7 @@ namespace fsi
                 int reuseInformationStartingFromTimeIndex
                 );
 
-            virtual ~PostProcessing(){}
+            virtual ~PostProcessing() {}
 
             virtual void performPostProcessing(
                 const vector & x0,
@@ -83,6 +82,6 @@ namespace fsi
             unsigned int stageIndex;
             bool initStage_;
     };
-}
+} // namespace fsi
 
 #endif

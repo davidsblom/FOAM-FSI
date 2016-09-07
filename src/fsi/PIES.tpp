@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  *
  * This class implements the Picard Integral Exponential Solver as proposed
  * in D. Kushnir and V. Rokhlin, "A Highly Accurate Solver for Stiff Ordinary
@@ -321,4 +320,4 @@ namespace sdc
             nbNodes++;
         }
     }
-}
+} // namespace sdc

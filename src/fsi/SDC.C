@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "PstreamReduceOps.H"
@@ -512,4 +511,4 @@ namespace sdc
     {
         return this->k - 1;
     }
-}
+} // namespace sdc

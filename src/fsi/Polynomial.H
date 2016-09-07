@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #pragma once
 
 /*
@@ -6,8 +10,6 @@
  */
 
 #include <vector>
-using namespace std;
-
 
 namespace fsi
 {
@@ -36,7 +38,7 @@ namespace fsi
 
             public:
                 // ! @{
-                explicit Polynomial( size_t n );
+                explicit Polynomial( std::size_t n );
 
                 // ! @}
 
@@ -49,7 +51,7 @@ namespace fsi
                  *
                  * @returns order of the polynomial
                  */
-                size_t order() const;
+                std::size_t order() const;
 
                 /**
                  * Access coefficient @p i
@@ -62,7 +64,7 @@ namespace fsi
                  *   i.e. `i=0` corresponds to \\( c_n \\) while `i=n` corresponds to \\( c_0 \\).
                  *   See also Polynomial::c.
                  */
-                CoeffT & operator[]( const size_t i );
+                CoeffT & operator[]( const std::size_t i );
 
                 /**
                  * Differentiate this polynomial.
@@ -96,7 +98,7 @@ namespace fsi
                 template<typename xtype>
                 xtype evaluate( const xtype x ) const
                 {
-                    size_t n = this->order();
+                    std::size_t n = this->order();
                     xtype v = c[n];
 
                     for ( int j = n - 1; j >= 0; j-- )
@@ -120,7 +122,7 @@ namespace fsi
                  * @returns roots sorted with respect to their value
                  */
                 std::vector<CoeffT> roots(
-                    size_t num_iterations = 100,
+                    std::size_t num_iterations = 100,
                     CoeffT ztol = 1.0e-20
                     ) const;
 
@@ -134,11 +136,13 @@ namespace fsi
                  * @param[in] order desired order of the Legendre polynomial
                  * @returns Legendre polynomial of order @p order
                  */
-                static Polynomial<CoeffT> legendre( const size_t order );
+                static Polynomial<CoeffT> legendre( const std::size_t order );
 
                 // ! @}
         };
-    }
-}
+
+} // namespace quadrature
+
+} // namespace fsi
 
 #include "Polynomial.tpp"

@@ -1,14 +1,13 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include <math.h>
 
 #include "AitkenPostProcessing.H"
 
-using namespace fsi;
+namespace fsi {
 
 AitkenPostProcessing::AitkenPostProcessing(
     shared_ptr<MultiLevelFsiSolver> fsi,
@@ -128,3 +127,5 @@ void AitkenPostProcessing::performPostProcessing(
         assert( fsi->iter <= maxIter );
     }
 }
+
+} // namespace fsi

@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "BroydenPostProcessing.H"
 
-using namespace fsi;
+namespace fsi {
 
 BroydenPostProcessing::BroydenPostProcessing(
     shared_ptr<MultiLevelFsiSolver> fsi,
@@ -252,3 +251,5 @@ void BroydenPostProcessing::performPostProcessing(
     bool keepIterations = false;
     iterationsConverged( keepIterations );
 }
+
+} // namespace fsi

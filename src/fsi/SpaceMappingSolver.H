@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef SpaceMappingSolver_H
@@ -10,7 +9,7 @@
 #include "ImplicitMultiLevelFsiSolver.H"
 #include "SpaceMapping.H"
 
-using namespace fsi;
+namespace fsi {
 
 class SpaceMappingSolver : public ImplicitMultiLevelFsiSolver
 {
@@ -72,5 +71,7 @@ class SpaceMappingSolver : public ImplicitMultiLevelFsiSolver
         shared_ptr<ImplicitMultiLevelFsiSolver> coarseModel;
         shared_ptr<SpaceMapping> spaceMapping;
 };
+
+} // namespace fsi
 
 #endif

@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef ResidualRelativeConvergenceMeasure_H
@@ -37,6 +36,6 @@ namespace fsi
             scalar normFirstResidual;
             scalar normDiff;
     };
-}
+} // namespace fsi
 
 #endif

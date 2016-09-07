@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef ESDIRK_H
@@ -82,6 +81,6 @@ namespace sdc
             fsi::vector qold;
             int timeIndex;
     };
-}
+} // namespace sdc
 
 #endif

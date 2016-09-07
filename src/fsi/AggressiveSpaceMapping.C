@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "AggressiveSpaceMapping.H"
 
-using namespace fsi;
+namespace fsi {
 
 AggressiveSpaceMapping::AggressiveSpaceMapping(
     shared_ptr<SurrogateModel> fineModel,
@@ -204,3 +203,5 @@ void AggressiveSpaceMapping::performPostProcessing(
         fineResiduals.push_back( xk );
     }
 }
+
+} // namespace fsi

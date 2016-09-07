@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  *
  * Adaptive time stepping based on :
  * Soderlind and Wang, Adaptive time-stepping and computational stability,
@@ -85,6 +84,6 @@ namespace sdc
             scalar endTime;
             scalar t;
     };
-}
+} // namespace sdc
 
 #endif

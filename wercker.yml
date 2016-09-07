@@ -11,6 +11,11 @@ build:
                 git checkout .
                 git submodule update --init --recursive
         - script:
+            name: cpplint
+            code: |
+                git clone https://github.com/google/styleguide.git
+                styleguide/cpplint/cpplint.py --extensions=C,H,tpp --verbose=5 src/fsi/*H src/fsi/*C src/fsi/*tpp
+        - script:
             name: cppcheck
             code: |
                 (cd src/fsi && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)

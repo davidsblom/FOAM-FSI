@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef Solver_H
@@ -18,7 +17,7 @@ class Solver
             time()
         {}
 
-        virtual ~Solver(){}
+        virtual ~Solver() {}
 
         virtual void run() = 0;
 

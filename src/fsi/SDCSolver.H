@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #pragma once
@@ -14,7 +13,7 @@ namespace sdc
     class SDCSolver
     {
         public:
-            virtual ~SDCSolver(){}
+            virtual ~SDCSolver() {}
 
             virtual void evaluateFunction(
                 const int k,
@@ -80,4 +79,4 @@ namespace sdc
                 return true;
             }
     };
-}
+} // namespace sdc

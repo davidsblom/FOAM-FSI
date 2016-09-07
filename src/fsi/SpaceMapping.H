@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef SpaceMapping_H
@@ -12,7 +11,8 @@
 #include "SurrogateModel.H"
 #include "fvCFD.H"
 
-using namespace fsi;
+namespace fsi {
+
 using std::deque;
 
 class SpaceMapping
@@ -28,7 +28,7 @@ class SpaceMapping
             scalar singularityLimit
             );
 
-        virtual ~SpaceMapping(){}
+        virtual ~SpaceMapping() {}
 
         virtual void finalizeTimeStep();
 
@@ -75,5 +75,7 @@ class SpaceMapping
         deque<deque<deque<fsi::vector> > > coarseResidualsTimeList;
         deque<deque<deque<fsi::vector> > > fineResidualsTimeList;
 };
+
+} // namespace fsi
 
 #endif

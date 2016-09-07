@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #pragma once
 
 #include <cassert>
@@ -9,8 +13,6 @@ namespace fsi
 {
     namespace quadrature
     {
-        using namespace std;
-
         /**
          * Quadrature handler for Clenshaw-Curtis quadrature.
          *
@@ -54,7 +56,9 @@ namespace fsi
 
                 // ! @}
         };
-    }
-}
+
+} // namespace quadrature
+
+} // namespace fsi
 
 #include "ClenshawCurtis.tpp"

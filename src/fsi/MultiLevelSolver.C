@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "MultiLevelSolver.H"
@@ -152,4 +151,4 @@ namespace fsi
 
         rbfInterpToMesh->compute( couplingGridPositions, readPositions );
     }
-}
+} // namespace fsi

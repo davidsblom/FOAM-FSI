@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef TimeIntegrationScheme_H
@@ -14,7 +13,7 @@ namespace sdc
     class TimeIntegrationScheme
     {
         public:
-            virtual ~TimeIntegrationScheme(){}
+            virtual ~TimeIntegrationScheme() {}
 
             virtual void getSourceTerm(
                 const bool corrector,
@@ -44,6 +43,6 @@ namespace sdc
 
             virtual void run() = 0;
     };
-}
+} // namespace sdc
 
 #endif

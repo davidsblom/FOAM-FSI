@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef ImplicitMultiLevelFsiSolver_H
@@ -12,7 +11,7 @@
 #include "Solver.H"
 #include "SurrogateModel.H"
 
-using namespace fsi;
+namespace fsi {
 
 class ImplicitMultiLevelFsiSolver : public SurrogateModel, public Solver
 {
@@ -71,5 +70,7 @@ class ImplicitMultiLevelFsiSolver : public SurrogateModel, public Solver
         shared_ptr<PostProcessing> postProcessing;
         bool init;
 };
+
+} // namespace fsi
 
 #endif

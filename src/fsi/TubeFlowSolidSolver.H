@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef TubeFlowSolidSolver_H
@@ -9,14 +8,12 @@
 
 #include "BaseMultiLevelSolver.H"
 
-using namespace fsi;
-
 namespace tubeflow
 {
     /*
      * The solid solver for the flexible tube fluid-solid interaction test case
      */
-    class TubeFlowSolidSolver : public BaseMultiLevelSolver
+    class TubeFlowSolidSolver : public fsi::BaseMultiLevelSolver
     {
         public:
             TubeFlowSolidSolver(
@@ -32,9 +29,9 @@ namespace tubeflow
 
             virtual void finalizeTimeStep();
 
-            virtual void getReadPositions( matrix & readPositions );
+            virtual void getReadPositions( fsi::matrix & readPositions );
 
-            virtual void getWritePositions( matrix & writePositions );
+            virtual void getWritePositions( fsi::matrix & writePositions );
 
             virtual void initTimeStep();
 
@@ -43,8 +40,8 @@ namespace tubeflow
             virtual void resetSolution();
 
             virtual void solve(
-                const matrix & input,
-                matrix & output
+                const fsi::matrix & input,
+                fsi::matrix & output
                 );
 
             void calcGrid();
@@ -59,9 +56,9 @@ namespace tubeflow
             scalar p0;
             scalar rho;
             scalar dx;
-            matrix grid;
+            fsi::matrix grid;
     };
-}
+} // namespace tubeflow
 
 
 #endif

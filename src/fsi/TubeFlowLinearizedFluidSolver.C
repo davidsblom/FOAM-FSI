@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "TubeFlowLinearizedFluidSolver.H"
 
-using namespace tubeflow;
+namespace tubeflow {
 
 TubeFlowLinearizedFluidSolver::TubeFlowLinearizedFluidSolver(
     int N,
@@ -20,7 +19,7 @@ TubeFlowLinearizedFluidSolver::TubeFlowLinearizedFluidSolver(
     scalar dt,
     scalar L
     ) :
-    BaseMultiLevelSolver( N, 1, p0 ),
+    fsi::BaseMultiLevelSolver( N, 1, p0 ),
     p0( p0 ),
     r0( r0 ),
     u0( u0 ),
@@ -82,7 +81,7 @@ void TubeFlowLinearizedFluidSolver::factorizeMatrix()
 {
     // Initialize matrix A
 
-    matrix A( 2 * N, 2 * N );
+    fsi::matrix A( 2 * N, 2 * N );
     A.setZero();
 
     // Build A matrix
@@ -152,14 +151,14 @@ void TubeFlowLinearizedFluidSolver::finalizeTimeStep()
     init = false;
 }
 
-void TubeFlowLinearizedFluidSolver::getReadPositions( matrix & readPositions )
+void TubeFlowLinearizedFluidSolver::getReadPositions( fsi::matrix & readPositions )
 {
     calcGrid();
 
     readPositions = grid;
 }
 
-void TubeFlowLinearizedFluidSolver::getWritePositions( matrix & writePositions )
+void TubeFlowLinearizedFluidSolver::getWritePositions( fsi::matrix & writePositions )
 {
     calcGrid();
 
@@ -187,8 +186,8 @@ void TubeFlowLinearizedFluidSolver::resetSolution()
 {}
 
 void TubeFlowLinearizedFluidSolver::solve(
-    const matrix & input,
-    matrix & output
+    const fsi::matrix & input,
+    fsi::matrix & output
     )
 {
     assert( input.rows() == N );
@@ -263,3 +262,5 @@ void TubeFlowLinearizedFluidSolver::solve(
 
     data.col( 0 ) = p;
 }
+
+} // namespace tubeflow

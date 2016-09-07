@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #pragma once
@@ -11,9 +10,7 @@
 
 namespace tubeflow
 {
-    using namespace fsi;
-
-    class TubeFlowFluidSolver : public BaseMultiLevelSolver
+    class TubeFlowFluidSolver : public fsi::BaseMultiLevelSolver
     {
         public:
             TubeFlowFluidSolver(
@@ -58,9 +55,9 @@ namespace tubeflow
 
             virtual void finalizeTimeStep();
 
-            virtual void getReadPositions( matrix & readPositions );
+            virtual void getReadPositions( fsi::matrix & readPositions );
 
-            virtual void getWritePositions( matrix & writePositions );
+            virtual void getWritePositions( fsi::matrix & writePositions );
 
             virtual void initTimeStep();
 
@@ -69,8 +66,8 @@ namespace tubeflow
             virtual void resetSolution();
 
             virtual void solve(
-                const matrix & input,
-                matrix & output
+                const fsi::matrix & input,
+                fsi::matrix & output
                 );
 
             void calcGrid();
@@ -92,7 +89,7 @@ namespace tubeflow
                 const fsi::vector & un,
                 const fsi::vector & pn,
                 const fsi::vector & an,
-                matrix & J
+                fsi::matrix & J
                 );
 
             void evaluateResidual(
@@ -133,8 +130,8 @@ namespace tubeflow
             int nbRes;
             int nbJac;
 
-            matrix grid;
+            fsi::matrix grid;
 
             bool diffJacobian;
     };
-}
+} // namespace tubeflow

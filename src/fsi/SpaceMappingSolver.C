@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "SpaceMappingSolver.H"
 
-using namespace fsi;
+namespace fsi {
 
 SpaceMappingSolver::SpaceMappingSolver(
     shared_ptr<ImplicitMultiLevelFsiSolver> fineModel,
@@ -204,3 +203,5 @@ void SpaceMappingSolver::solveTimeStep()
     solve();
     finalizeTimeStep();
 }
+
+} // namespace fsi

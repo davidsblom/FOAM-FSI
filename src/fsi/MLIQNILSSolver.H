@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef MLIQNILSSolver_H
@@ -11,7 +10,7 @@
 #include "Solver.H"
 #include <deque>
 
-using namespace fsi;
+namespace fsi {
 
 class MLIQNILSSolver : public Solver
 {
@@ -38,5 +37,7 @@ class MLIQNILSSolver : public Solver
         bool init;
         bool synchronization;
 };
+
+} // namespace fsi
 
 #endif

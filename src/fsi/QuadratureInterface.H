@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #pragma once
 
 #include <cassert>
@@ -10,8 +14,6 @@ namespace fsi
 {
     namespace quadrature
     {
-        using namespace std;
-
         template<typename scalar>
         using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
@@ -317,7 +319,8 @@ namespace fsi
 
                 // ! @}
         };
-    }
-}
+} // namespace quadrature
+
+} // namespace fsi
 
 #include "QuadratureInterface.tpp"

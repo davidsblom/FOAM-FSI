@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef DataValues_H
@@ -32,6 +31,6 @@ namespace fsi
             matrix dataprev;
             matrix dataPreviousTimeStep;
     };
-}
+} // namespace fsi
 
 #endif

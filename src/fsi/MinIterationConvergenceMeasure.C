@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "fvCFD.H"
@@ -59,4 +58,4 @@ namespace fsi
 
         Info << endl;
     }
-}
+} // namespace fsi

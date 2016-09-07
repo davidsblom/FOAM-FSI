@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef MultiLevelFsiSolver_H
@@ -11,7 +10,7 @@
 #include "FsiSolver.H"
 #include "MultiLevelSolver.H"
 
-using namespace fsi;
+namespace fsi {
 
 class MultiLevelFsiSolver : public FsiSolver
 {
@@ -58,5 +57,7 @@ class MultiLevelFsiSolver : public FsiSolver
         bool useJacobian;
         int iterCurrentTimeStep;
 };
+
+} // namespace fsi
 
 #endif

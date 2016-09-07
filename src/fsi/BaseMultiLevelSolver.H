@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef BaseMultiLevelSolver_H
@@ -57,7 +56,7 @@ namespace fsi
                 assert( dim > 0 );
             }
 
-            virtual ~BaseMultiLevelSolver(){}
+            virtual ~BaseMultiLevelSolver() {}
 
             virtual void finalizeTimeStep() = 0;
 
@@ -91,6 +90,6 @@ namespace fsi
             int dim;
             DataValues couplingData;
     };
-}
+} // namespace fsi
 
 #endif

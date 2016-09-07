@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef ConvergenceMeasure_H
@@ -25,7 +24,7 @@ namespace fsi
                 suffices_( suffices )
             {}
 
-            virtual ~ConvergenceMeasure(){}
+            virtual ~ConvergenceMeasure() {}
 
             virtual void measure(
                 vector & oldValues,
@@ -48,6 +47,7 @@ namespace fsi
             bool isConvergence_;
             bool suffices_;
     };
-}
+
+} // namespace fsi
 
 #endif

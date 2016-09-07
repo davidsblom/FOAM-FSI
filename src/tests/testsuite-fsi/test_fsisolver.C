@@ -12,6 +12,7 @@
 #include "gtest/gtest.h"
 
 using namespace tubeflow;
+using namespace fsi;
 
 class FsiSolverTest : public ::testing::TestWithParam<bool>
 {

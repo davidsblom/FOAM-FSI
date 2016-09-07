@@ -1,13 +1,12 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "TubeFlowLinearizedSolidSolver.H"
 #include <boost/math/constants/constants.hpp>
 
-using namespace tubeflow;
+namespace tubeflow {
 
 TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     int N,
@@ -22,7 +21,7 @@ TubeFlowLinearizedSolidSolver::TubeFlowLinearizedSolidSolver(
     scalar T
     )
     :
-    BaseMultiLevelSolver( N, 1, boost::math::constants::pi<scalar>() * r0 * r0 ),
+    fsi::BaseMultiLevelSolver( N, 1, boost::math::constants::pi<scalar>() * r0 * r0 ),
     N( N ),
     timeOrder( 1 ),
     dt( dt ),
@@ -170,7 +169,7 @@ void TubeFlowLinearizedSolidSolver::factorizeMatrix()
 {
     // Construct matrix A
 
-    matrix A( 2 * N, 2 * N );
+    fsi::matrix A( 2 * N, 2 * N );
     A.setZero();
 
     // Build A matrix
@@ -212,7 +211,7 @@ void TubeFlowLinearizedSolidSolver::factorizeMatrix()
         }
     }
 
-    lu = std::shared_ptr<Eigen::FullPivLU<matrix> > ( new Eigen::FullPivLU<matrix>( A ) );
+    lu = std::shared_ptr<Eigen::FullPivLU<fsi::matrix> > ( new Eigen::FullPivLU<fsi::matrix>( A ) );
 }
 
 void TubeFlowLinearizedSolidSolver::finalizeTimeStep()
@@ -245,14 +244,14 @@ void TubeFlowLinearizedSolidSolver::finalizeTimeStep()
     init = false;
 }
 
-void TubeFlowLinearizedSolidSolver::getReadPositions( matrix & readPositions )
+void TubeFlowLinearizedSolidSolver::getReadPositions( fsi::matrix & readPositions )
 {
     calcGrid();
 
     readPositions = grid;
 }
 
-void TubeFlowLinearizedSolidSolver::getWritePositions( matrix & writePositions )
+void TubeFlowLinearizedSolidSolver::getWritePositions( fsi::matrix & writePositions )
 {
     calcGrid();
 
@@ -280,8 +279,8 @@ void TubeFlowLinearizedSolidSolver::resetSolution()
 {}
 
 void TubeFlowLinearizedSolidSolver::solve(
-    const matrix & input,
-    matrix & output
+    const fsi::matrix & input,
+    fsi::matrix & output
     )
 {
     assert( input.rows() == N );
@@ -362,3 +361,5 @@ void TubeFlowLinearizedSolidSolver::solveTimeStep()
     solve( p, a );
     finalizeTimeStep();
 }
+
+} // namespace tubeflow

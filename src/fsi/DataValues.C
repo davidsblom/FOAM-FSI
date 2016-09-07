@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "DataValues.H"
 
-using namespace fsi;
+namespace fsi {
 
 DataValues::DataValues()
     :
@@ -56,3 +55,5 @@ void DataValues::setDataOld( matrix & data )
         dataPreviousTimeStep.setZero();
     }
 }
+
+} // namespace fsi

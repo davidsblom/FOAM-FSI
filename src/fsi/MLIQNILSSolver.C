@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "MLIQNILSSolver.H"
 
-using namespace fsi;
+namespace fsi {
 
 MLIQNILSSolver::MLIQNILSSolver(
     shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
@@ -145,3 +144,5 @@ void MLIQNILSSolver::solveTimeStep()
     solve();
     finalizeTimeStep();
 }
+
+} // namespace fsi

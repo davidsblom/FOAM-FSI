@@ -21,6 +21,11 @@ using ::testing::Bool;
 using ::testing::Values;
 using ::testing::Combine;
 
+using rbf::RBFFunctionInterface;
+using rbf::RBFInterpolation;
+using rbf::RBFCoarsening;
+using rbf::TPSFunction;
+
 class ExplicitLinearSolidSolverTest : public TestWithParam< std::tr1::tuple<int, bool> >
 {
     protected:

@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "AndersonPostProcessing.H"
@@ -381,4 +380,4 @@ namespace fsi
             assert( fsi->iter <= maxIter );
         }
     }
-}
+} // namespace fsi

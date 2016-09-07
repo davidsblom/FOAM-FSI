@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #include <stdexcept>
 #include <vector>
 
@@ -9,15 +13,13 @@ namespace fsi
 {
     namespace quadrature
     {
-        using namespace std;
-
         template<typename precision>
         GaussLobatto<precision>::GaussLobatto( const size_t num_nodes )
             : IQuadrature<precision>( num_nodes )
         {
             if ( this->num_nodes < 2 )
             {
-                throw invalid_argument( "Gauss-Lobatto quadrature requires at least two quadrature nodes." );
+                throw std::invalid_argument( "Gauss-Lobatto quadrature requires at least two quadrature nodes." );
             }
 
             this->compute_nodes();
@@ -50,5 +52,7 @@ namespace fsi
             this->nodes.front() = 0.0;
             this->nodes.back() = 1.0;
         }
-    }
-}
+
+} // namespace quadrature
+
+} // namespace fsi

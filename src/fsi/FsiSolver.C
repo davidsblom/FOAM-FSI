@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "FsiSolver.H"
@@ -254,4 +253,4 @@ namespace fsi
         fluid->couplingData.data.setZero();
         solid->couplingData.data.setZero();
     }
-}
+} // namespace fsi

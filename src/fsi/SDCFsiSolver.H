@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #pragma once
@@ -88,4 +87,4 @@ namespace fsi
             std::deque<fsi::vector> xStagesPrevious;
             int extrapolationOrder;
     };
-}
+} // namespace fsi

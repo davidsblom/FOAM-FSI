@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef OutputSpaceMapping_H
@@ -52,6 +51,6 @@ namespace fsi
 
             const int order;
     };
-}
+} // namespace fsi
 
 #endif

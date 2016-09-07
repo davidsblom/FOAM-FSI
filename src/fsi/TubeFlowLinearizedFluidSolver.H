@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef TubeFlowLinearizedFluidSolver_H
@@ -9,11 +8,9 @@
 
 #include "BaseMultiLevelSolver.H"
 
-using namespace fsi;
-
 namespace tubeflow
 {
-    class TubeFlowLinearizedFluidSolver : public BaseMultiLevelSolver
+    class TubeFlowLinearizedFluidSolver : public fsi::BaseMultiLevelSolver
     {
         public:
             TubeFlowLinearizedFluidSolver(
@@ -33,9 +30,9 @@ namespace tubeflow
 
             virtual void finalizeTimeStep();
 
-            virtual void getReadPositions( matrix & readPositions );
+            virtual void getReadPositions( fsi::matrix & readPositions );
 
-            virtual void getWritePositions( matrix & writePositions );
+            virtual void getWritePositions( fsi::matrix & writePositions );
 
             virtual void initTimeStep();
 
@@ -44,8 +41,8 @@ namespace tubeflow
             virtual void resetSolution();
 
             virtual void solve(
-                const matrix & input,
-                matrix & output
+                const fsi::matrix & input,
+                fsi::matrix & output
                 );
 
             void factorizeMatrix();
@@ -72,7 +69,7 @@ namespace tubeflow
             scalar cmk;
             scalar alpha;
 
-            matrix grid;
+            fsi::matrix grid;
 
             // Fields
 
@@ -83,8 +80,8 @@ namespace tubeflow
             fsi::vector a;
             fsi::vector p;
 
-            Eigen::FullPivLU<matrix> lu;
+            Eigen::FullPivLU<fsi::matrix> lu;
     };
-}
+} // namespace tubeflow
 
 #endif

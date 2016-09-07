@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+ 
 #include "Polynomial.H"
 #include "fvCFD.H"
 

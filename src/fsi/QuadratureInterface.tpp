@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #include "QuadratureInterface.H"
 
 namespace fsi
@@ -110,5 +114,7 @@ namespace fsi
                 this->s_mat = s_mat2;
             }
         }
-    } // ::pfasst::quadrature
-}  // ::pfasst
+
+} // namespace quadrature
+
+}  // namespace fsi

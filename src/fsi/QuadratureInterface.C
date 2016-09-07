@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+ 
 #include "QuadratureInterface.H"
 #include "fvCFD.H"
 

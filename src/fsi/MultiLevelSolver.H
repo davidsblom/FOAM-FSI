@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef MultiLevelSolver_H
@@ -16,7 +15,7 @@
 #include "TPSFunction.H"
 
 using std::shared_ptr;
-using namespace rbf;
+using rbf::RBFCoarsening;
 
 namespace fsi
 {
@@ -64,6 +63,6 @@ namespace fsi
             const int level;
             int couplingGridSize;
     };
-}
+} // namespace fsi
 
 #endif

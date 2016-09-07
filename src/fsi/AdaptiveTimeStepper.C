@@ -1,13 +1,13 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ *   Copyright [2016] <David Blom>
  */
 
 #include "AdaptiveTimeStepper.H"
 #include "PstreamReduceOps.H"
 
-using namespace sdc;
+namespace sdc
+{
 
 AdaptiveTimeStepper::AdaptiveTimeStepper( bool enabled )
     :
@@ -201,3 +201,5 @@ void AdaptiveTimeStepper::setOrderEmbeddedMethod( int order )
 {
     k = order + 1;
 }
+
+} // namespace sdc

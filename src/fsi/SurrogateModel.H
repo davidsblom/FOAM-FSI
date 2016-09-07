@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef SurrogateModel_H
@@ -14,7 +13,7 @@ namespace fsi
     class SurrogateModel
     {
         public:
-            virtual ~SurrogateModel(){}
+            virtual ~SurrogateModel() {}
 
             virtual bool allConverged() = 0;
 
@@ -49,6 +48,6 @@ namespace fsi
 
             virtual void setUseJacobian( bool useJacobian ) = 0;
     };
-}
+} // namespace fsi
 
 #endif

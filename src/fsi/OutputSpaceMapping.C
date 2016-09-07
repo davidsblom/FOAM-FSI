@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "OutputSpaceMapping.H"
 
-using namespace fsi;
+namespace fsi {
 
 OutputSpaceMapping::OutputSpaceMapping(
     shared_ptr<SurrogateModel> fineModel,
@@ -395,3 +394,5 @@ void OutputSpaceMapping::performPostProcessing(
         }
     }
 }
+
+} // namespace fsi

@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef SDC_H
@@ -112,6 +111,6 @@ namespace sdc
             std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
             std::shared_ptr<sdc::DataStorage> data;
     };
-}
+} // namespace sdc
 
 #endif

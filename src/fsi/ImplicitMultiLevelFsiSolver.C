@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "ImplicitMultiLevelFsiSolver.H"
 
-using namespace fsi;
+namespace fsi {
 
 ImplicitMultiLevelFsiSolver::ImplicitMultiLevelFsiSolver(
     shared_ptr<MultiLevelFsiSolver> fsi,
@@ -206,3 +205,5 @@ void ImplicitMultiLevelFsiSolver::solveTimeStep()
     solve();
     finalizeTimeStep();
 }
+
+} // namespace fsi

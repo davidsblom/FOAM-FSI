@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "ESDIRK.H"
@@ -606,4 +605,4 @@ namespace sdc
     {
         return true;
     }
-}
+} // namespace sdc

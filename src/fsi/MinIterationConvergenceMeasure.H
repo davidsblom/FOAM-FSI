@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef MinIterationConvergenceMeasure_H
@@ -34,6 +33,6 @@ namespace fsi
             const int minimumIterationCount;
             int currentIteration;
     };
-}
+} // namespace fsi
 
 #endif

@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "ASMILS.H"
 
-using namespace fsi;
+namespace fsi {
 
 ASMILS::ASMILS(
     shared_ptr<SurrogateModel> fineModel,
@@ -236,3 +235,5 @@ void ASMILS::performPostProcessing(
         coarseResiduals.push_back( zk );
     }
 }
+
+} // namespace fsi

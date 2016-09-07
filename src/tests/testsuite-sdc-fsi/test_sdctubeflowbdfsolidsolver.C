@@ -19,6 +19,20 @@
 #include "AitkenPostProcessing.H"
 #include "AbsoluteConvergenceMeasure.H"
 
+using rbf::RBFFunctionInterface;
+using rbf::RBFInterpolation;
+using rbf::RBFCoarsening;
+using rbf::TPSFunction;
+using fsi::MultiLevelSolver;
+using fsi::ConvergenceMeasure;
+using fsi::RelativeConvergenceMeasure;
+using fsi::MinIterationConvergenceMeasure;
+using fsi::MultiLevelFsiSolver;
+using fsi::PostProcessing;
+using fsi::AndersonPostProcessing;
+using fsi::ResidualRelativeConvergenceMeasure;
+using fsi::AbsoluteConvergenceMeasure;
+
 TEST( SDCFsiBDFSolidTest, order )
 {
     scalar r0 = 0.2;

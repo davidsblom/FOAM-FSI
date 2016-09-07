@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "MultiLevelSpaceMappingSolver.H"
 
-using namespace fsi;
+namespace fsi {
 
 MultiLevelSpaceMappingSolver::MultiLevelSpaceMappingSolver(
     shared_ptr< std::deque<shared_ptr<SpaceMappingSolver> > > solvers,
@@ -122,3 +121,5 @@ void MultiLevelSpaceMappingSolver::solveTimeStep()
     solve();
     finalizeTimeStep();
 }
+
+} // namespace fsi

@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef TubeFlowLinearizedSolidSolver_H
@@ -11,11 +10,9 @@
 #include <deque>
 #include <vector>
 
-using namespace fsi;
-
 namespace tubeflow
 {
-    class TubeFlowLinearizedSolidSolver : public BaseMultiLevelSolver
+    class TubeFlowLinearizedSolidSolver : public fsi::BaseMultiLevelSolver
     {
         public:
             TubeFlowLinearizedSolidSolver(
@@ -49,9 +46,9 @@ namespace tubeflow
 
             virtual void finalizeTimeStep();
 
-            virtual void getReadPositions( matrix & readPositions );
+            virtual void getReadPositions( fsi::matrix & readPositions );
 
-            virtual void getWritePositions( matrix & writePositions );
+            virtual void getWritePositions( fsi::matrix & writePositions );
 
             virtual void initTimeStep();
 
@@ -60,8 +57,8 @@ namespace tubeflow
             virtual void resetSolution();
 
             virtual void solve(
-                const matrix & input,
-                matrix & output
+                const fsi::matrix & input,
+                fsi::matrix & output
                 );
 
             virtual void solve(
@@ -92,7 +89,7 @@ namespace tubeflow
             const scalar rho;
             const scalar T;
 
-            matrix grid;
+            fsi::matrix grid;
 
             // Fields
 
@@ -103,7 +100,7 @@ namespace tubeflow
             fsi::vector rhs;
             fsi::vector p;
 
-            std::shared_ptr<Eigen::FullPivLU<matrix> > lu;
+            std::shared_ptr<Eigen::FullPivLU<fsi::matrix> > lu;
 
             // Time discretization constants
             std::vector<scalar> alpha;
@@ -111,6 +108,6 @@ namespace tubeflow
             std::deque<fsi::vector> rStages;
             std::deque<fsi::vector> uStages;
     };
-}
+} // namespace tubeflow
 
 #endif

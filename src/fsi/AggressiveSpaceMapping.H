@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef AggressiveSpaceMapping_H
@@ -35,6 +34,6 @@ namespace fsi
                 bool residualCriterium
                 );
     };
-}
+} // namespace fsi
 
 #endif

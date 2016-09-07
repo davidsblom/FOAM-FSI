@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "DataStorage.H"
@@ -165,4 +164,4 @@ namespace sdc
         assert( not std::isnan( sol.norm() ) );
         solStages.row( substep ) = sol;
     }
-}
+} // namespace sdc

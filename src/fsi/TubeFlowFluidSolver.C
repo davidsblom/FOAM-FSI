@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "TubeFlowFluidSolver.H"
@@ -22,7 +21,7 @@ namespace tubeflow
         scalar rho
         )
         :
-        BaseMultiLevelSolver( N, 1, p0 ),
+        fsi::BaseMultiLevelSolver( N, 1, p0 ),
         a0( a0 ),
         u0( u0 ),
         p0( p0 ),
@@ -317,7 +316,7 @@ namespace tubeflow
         const fsi::vector & un,
         const fsi::vector & pn,
         const fsi::vector & an,
-        matrix & J
+        fsi::matrix & J
         )
     {
         if ( diffJacobian )
@@ -521,14 +520,14 @@ namespace tubeflow
         init = false;
     }
 
-    void TubeFlowFluidSolver::getWritePositions( matrix & writePositions )
+    void TubeFlowFluidSolver::getWritePositions( fsi::matrix & writePositions )
     {
         calcGrid();
 
         writePositions = grid;
     }
 
-    void TubeFlowFluidSolver::getReadPositions( matrix & readPositions )
+    void TubeFlowFluidSolver::getReadPositions( fsi::matrix & readPositions )
     {
         calcGrid();
 
@@ -589,8 +588,8 @@ namespace tubeflow
     {}
 
     void TubeFlowFluidSolver::solve(
-        const matrix & input,
-        matrix & output
+        const fsi::matrix & input,
+        fsi::matrix & output
         )
     {
         assert( input.rows() == N );
@@ -637,7 +636,7 @@ namespace tubeflow
 
         // Initialize variables
         fsi::vector R( 2 * N ), Rtry( 2 * N ), dx( 2 * N );
-        matrix J( 2 * N, 2 * N ), Jtry( 2 * N, 2 * N );
+        fsi::matrix J( 2 * N, 2 * N ), Jtry( 2 * N, 2 * N );
 
         // Evaluate the residual
         evaluateResidual( x, a, un, pn, an, R );
@@ -718,4 +717,4 @@ namespace tubeflow
         p = this->p;
         data.col( 0 ) = p;
     }
-}
+} // namespace tubeflow

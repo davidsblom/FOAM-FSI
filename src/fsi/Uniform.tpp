@@ -1,10 +1,12 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #include "Uniform.H"
 
 #include <stdexcept>
 #include <vector>
-using namespace std;
-
 
 namespace fsi
 {
@@ -16,7 +18,7 @@ namespace fsi
         {
             if ( this->num_nodes < 1 )
             {
-                throw invalid_argument( "Uniform quadrature requires at least one quadrature node." );
+                throw std::invalid_argument( "Uniform quadrature requires at least one quadrature node." );
             }
 
             this->compute_nodes();
@@ -45,5 +47,7 @@ namespace fsi
                 this->nodes[j] = precision( j + 1 ) / this->num_nodes;
             }
         }
-    }
-}
+
+} // namespace quadrature
+
+} // namespace fsi

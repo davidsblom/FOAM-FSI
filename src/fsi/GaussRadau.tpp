@@ -1,9 +1,12 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #include "GaussRadau.H"
 
 #include <stdexcept>
 #include <vector>
-using namespace std;
 
 #include "Polynomial.H"
 
@@ -17,7 +20,7 @@ namespace fsi
         {
             if ( this->num_nodes < 1 )
             {
-                throw invalid_argument( "Gauss-Radau quadrature requires at least one quadrature node." );
+                throw std::invalid_argument( "Gauss-Radau quadrature requires at least one quadrature node." );
             }
 
             this->compute_nodes();
@@ -57,5 +60,7 @@ namespace fsi
 
             this->nodes.back() = 1.0;
         }
-    }
-}
+
+} // namespace quadrature
+
+} // namespace fsi

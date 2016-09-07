@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "TubeFlowSolidSolver.H"
@@ -17,7 +16,7 @@ namespace tubeflow
         int N
         )
         :
-        BaseMultiLevelSolver( N, 1, a0 ),
+        fsi::BaseMultiLevelSolver( N, 1, a0 ),
         a0( a0 ),
         cmk( cmk ),
         p0( p0 ),
@@ -55,14 +54,14 @@ namespace tubeflow
         init = false;
     }
 
-    void TubeFlowSolidSolver::getWritePositions( matrix & writePositions )
+    void TubeFlowSolidSolver::getWritePositions( fsi::matrix & writePositions )
     {
         calcGrid();
 
         writePositions = grid;
     }
 
-    void TubeFlowSolidSolver::getReadPositions( matrix & readPositions )
+    void TubeFlowSolidSolver::getReadPositions( fsi::matrix & readPositions )
     {
         calcGrid();
 
@@ -85,8 +84,8 @@ namespace tubeflow
     {}
 
     void TubeFlowSolidSolver::solve(
-        const matrix & input,
-        matrix & output
+        const fsi::matrix & input,
+        fsi::matrix & output
         )
     {
         assert( input.rows() == N );
@@ -128,4 +127,4 @@ namespace tubeflow
 
         data.col( 0 ) = a;
     }
-}
+} // namespace tubeflow

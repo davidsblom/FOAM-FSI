@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #include "ClenshawCurtis.H"
 #include "fvCFD.H"
 

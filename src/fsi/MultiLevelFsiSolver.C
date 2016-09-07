@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "MultiLevelFsiSolver.H"
 
-using namespace fsi;
+namespace fsi {
 
 MultiLevelFsiSolver::MultiLevelFsiSolver(
     shared_ptr<MultiLevelSolver> fluidSolver,
@@ -337,3 +336,5 @@ void MultiLevelFsiSolver::setUseJacobian( bool useJacobian )
 {
     this->useJacobian = useJacobian;
 }
+
+} // namespace fsi

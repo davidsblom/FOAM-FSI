@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef ManifoldMapping_H
@@ -70,6 +69,6 @@ namespace fsi
             int sizeVar0;
             int sizeVar1;
     };
-}
+} // namespace fsi
 
 #endif

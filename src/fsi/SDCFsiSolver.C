@@ -1,10 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "SDCFsiSolver.H"
+
+namespace fsi {
 
 SDCFsiSolver::SDCFsiSolver(
     std::shared_ptr<sdc::SDCFsiSolverInterface> fluid,
@@ -288,3 +289,5 @@ bool SDCFsiSolver::isConverged()
 {
     return fluid->isConverged() && solid->isConverged();
 }
+
+} // namespace fsi

@@ -1,8 +1,11 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #pragma once
 
 #include "QuadratureInterface.H"
-
 
 namespace fsi
 {
@@ -25,7 +28,9 @@ namespace fsi
 
                 virtual bool right_is_node() const override;
         };
-    }
-}
+
+} // namespace quadrature
+
+} // namespace fsi
 
 #include "UserDefinedNodes.tpp"

@@ -1,12 +1,11 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #include "SpaceMapping.H"
 
-using namespace fsi;
+namespace fsi {
 
 SpaceMapping::SpaceMapping(
     shared_ptr<SurrogateModel> fineModel,
@@ -119,3 +118,5 @@ void SpaceMapping::performPostProcessing(
 {
     performPostProcessing( y, x0, xk, false );
 }
+
+} // namespace fsi

@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #include "Uniform.H"
 #include "fvCFD.H"
 

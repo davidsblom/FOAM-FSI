@@ -209,7 +209,7 @@ TEST_F( FluidSolverTest, jacobian )
     scalar p0 = 0;
 
     fsi::vector R( 2 * N ), x( 2 * N ), a( N ), un( N ), pn( N ), an( N );
-    matrix J( 2 * N, 2 * N );
+    fsi::matrix J( 2 * N, 2 * N );
     an.fill( a0 );
     pn.fill( p0 );
     un.fill( u0 );
@@ -225,7 +225,7 @@ TEST_F( FluidSolverTest, jacobian )
     residualFunctor functor( fluid, &a, &un, &pn, &an );
     Eigen::NumericalDiff<residualFunctor, Eigen::Central> numDiff( functor );
 
-    matrix Jnummdiff( 2 * N, 2 * N );
+    fsi::matrix Jnummdiff( 2 * N, 2 * N );
     Jnummdiff.setZero();
 
     numDiff.df( x, Jnummdiff );
