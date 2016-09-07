@@ -3,73 +3,65 @@
  * Copyright [2016] <David Blom>
  */
 
+#include <limits>
 #include "ResidualRelativeConvergenceMeasure.H"
 
-namespace fsi
-{
-    ResidualRelativeConvergenceMeasure::ResidualRelativeConvergenceMeasure(
-        int dataId,
-        bool suffices,
-        scalar convergenceLimit
-        )
-        :
-        ConvergenceMeasure( dataId, suffices ),
-        isFirstIteration( true ),
-        convergenceLimit( convergenceLimit ),
-        normFirstResidual( std::numeric_limits<scalar>::max() ),
-        normDiff( 0 )
-    {
-        assert( convergenceLimit > 0 );
-        assert( convergenceLimit < 1 );
+namespace fsi {
+ResidualRelativeConvergenceMeasure::ResidualRelativeConvergenceMeasure(int dataId,
+    bool suffices,
+    scalar convergenceLimit
+    )
+    :
+    ConvergenceMeasure(dataId, suffices),
+    isFirstIteration(true),
+    convergenceLimit(convergenceLimit),
+    normFirstResidual(std::numeric_limits<scalar>::max()),
+    normDiff(0) {
+    assert(convergenceLimit > 0);
+    assert(convergenceLimit < 1);
+}
+
+void ResidualRelativeConvergenceMeasure::measure(vector & oldValues,
+    vector & newValues
+    ) {
+    normDiff = (newValues - oldValues).norm();
+
+    if (isFirstIteration || normFirstResidual < SMALL) {
+        normFirstResidual = normDiff;
+        isFirstIteration = false;
     }
 
-    void ResidualRelativeConvergenceMeasure::measure(
-        vector & oldValues,
-        vector & newValues
-        )
-    {
-        normDiff = (newValues - oldValues).norm();
+    isConvergence_ = normDiff < normFirstResidual * convergenceLimit;
+}
 
-        if ( isFirstIteration || normFirstResidual < SMALL )
-        {
-            normFirstResidual = normDiff;
-            isFirstIteration = false;
-        }
+void ResidualRelativeConvergenceMeasure::newMeasurementSeries() {
+    isConvergence_ = false;
+    isFirstIteration = true;
+    normFirstResidual = std::numeric_limits<double>::max();
+}
 
-        isConvergence_ = normDiff < normFirstResidual * convergenceLimit;
-    }
+bool ResidualRelativeConvergenceMeasure::isConvergence() {
+    return isConvergence_;
+}
 
-    void ResidualRelativeConvergenceMeasure::newMeasurementSeries()
-    {
-        isConvergence_ = false;
-        isFirstIteration = true;
-        normFirstResidual = std::numeric_limits<double>::max();
-    }
+void ResidualRelativeConvergenceMeasure::printState() {
+    Info << "residual relative convergence measure: ";
+    Info << "two-norm diff = " << normDiff;
+    Info << ", limit = " << normFirstResidual * convergenceLimit;
+    Info << ", suffices = ";
 
-    bool ResidualRelativeConvergenceMeasure::isConvergence()
-    {
-        return isConvergence_;
-    }
+    if (suffices())
+        Info << "true";
+    else
+        Info << "false";
 
-    void ResidualRelativeConvergenceMeasure::printState()
-    {
-        Info << "residual relative convergence measure: ";
-        Info << "two-norm diff = " << normDiff;
-        Info << ", limit = " << normFirstResidual * convergenceLimit;
-        Info << ", suffices = ";
+    Info << ", conv = ";
 
-        if ( suffices() )
-            Info << "true";
-        else
-            Info << "false";
+    if (isConvergence_)
+        Info << "true";
+    else
+        Info << "false";
 
-        Info << ", conv = ";
-
-        if ( isConvergence_ )
-            Info << "true";
-        else
-            Info << "false";
-
-        Info << endl;
-    }
+    Info << endl;
+}
 } // namespace fsi

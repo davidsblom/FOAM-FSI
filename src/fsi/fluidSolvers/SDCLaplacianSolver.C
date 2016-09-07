@@ -9,16 +9,15 @@
 
 #include "SDCLaplacianSolver.H"
 
-SDCLaplacianSolver::SDCLaplacianSolver(
-    const string & name,
+SDCLaplacianSolver::SDCLaplacianSolver(const string & name,
     shared_ptr<argList> args,
     shared_ptr<Time> runTime
     )
     :
-    init( false ),
-    name( name ),
-    args( args ),
-    runTime( runTime ),
+    init(false),
+    name(name),
+    args(args),
+    runTime(runTime),
     mesh
     (
         Foam::IOobject
@@ -52,7 +51,7 @@ SDCLaplacianSolver::SDCLaplacianSolver(
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedScalar( "rhsT", dimTemperature / dimTime, 0 )
+        dimensionedScalar("rhsT", dimTemperature / dimTime, 0)
     ),
     transportProperties
     (
@@ -67,88 +66,75 @@ SDCLaplacianSolver::SDCLaplacianSolver(
     ),
     DT
     (
-        transportProperties.lookup( "DT" )
+        transportProperties.lookup("DT")
     ),
-    nNonOrthCorr( mesh.solutionDict().subDict( "SIMPLE" ).lookupOrDefault<int>( "nNonOrthogonalCorrectors", 0 ) ),
-    k( 0 ),
-    TStages()
-{
-    assert( args );
-    assert( runTime );
+    nNonOrthCorr(mesh.solutionDict().subDict("SIMPLE").lookupOrDefault<int>("nNonOrthogonalCorrectors", 0)),
+    k(0),
+    TStages() {
+    assert(args);
+    assert(runTime);
 }
 
 SDCLaplacianSolver::~SDCLaplacianSolver()
 {}
 
-void SDCLaplacianSolver::evaluateFunction(
-    const int,
+void SDCLaplacianSolver::evaluateFunction(const int,
     const fsi::vector & q,
     const scalar,
     fsi::vector & f
-    )
-{
-    for ( int i = 0; i < T.size(); i++ )
-        T[i] = q( i );
+    ) {
+    for (int i = 0; i < T.size(); i++)
+        T[i] = q(i);
 
-    volScalarField F = fvc::laplacian( DT, T );
+    volScalarField F = fvc::laplacian(DT, T);
 
-    for ( int i = 0; i < F.size(); i++ )
-        f( i ) = F[i];
+    for (int i = 0; i < F.size(); i++)
+        f(i) = F[i];
 }
 
-void SDCLaplacianSolver::finalizeTimeStep()
-{
-    assert( init );
+void SDCLaplacianSolver::finalizeTimeStep() {
+    assert(init);
 
     init = false;
 }
 
-int SDCLaplacianSolver::getDOF()
-{
+int SDCLaplacianSolver::getDOF() {
     return T.size();
 }
 
-void SDCLaplacianSolver::getSolution( fsi::vector & solution )
-{
-    for ( int i = 0; i < T.size(); i++ )
-        solution( i ) = T[i];
+void SDCLaplacianSolver::getSolution(fsi::vector & solution) {
+    for (int i = 0; i < T.size(); i++)
+        solution(i) = T[i];
 }
 
-void SDCLaplacianSolver::setSolution(
-    const fsi::vector & solution,
+void SDCLaplacianSolver::setSolution(const fsi::vector & solution,
     const fsi::vector &
-    )
-{
-    for ( int i = 0; i < T.size(); i++ )
-        T[i] = solution( i );
+    ) {
+    for (int i = 0; i < T.size(); i++)
+        T[i] = solution(i);
 }
 
-scalar SDCLaplacianSolver::getEndTime()
-{
+scalar SDCLaplacianSolver::getEndTime() {
     return runTime->endTime().value() - runTime->startTime().value();
 }
 
-scalar SDCLaplacianSolver::getTimeStep()
-{
+scalar SDCLaplacianSolver::getTimeStep() {
     return runTime->deltaT().value();
 }
 
-void SDCLaplacianSolver::nextTimeStep()
-{
-    if ( TStages.size() == static_cast<unsigned>(k) )
-        for ( int i = 0; i < k; i++ )
-            TStages.at( i ) = T;
+void SDCLaplacianSolver::nextTimeStep() {
+    if (TStages.size() == static_cast<unsigned>(k))
+        for (int i = 0; i < k; i++)
+            TStages.at(i) = T;
 }
 
-void SDCLaplacianSolver::initTimeStep()
-{
-    assert( !init );
+void SDCLaplacianSolver::initTimeStep() {
+    assert(!init);
 
     init = true;
 }
 
-bool SDCLaplacianSolver::isRunning()
-{
+bool SDCLaplacianSolver::isRunning() {
     runTime->write();
 
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
@@ -158,21 +144,18 @@ bool SDCLaplacianSolver::isRunning()
     return runTime->loop();
 }
 
-void SDCLaplacianSolver::setDeltaT( scalar dt )
-{
-    runTime->setDeltaT( dt );
+void SDCLaplacianSolver::setDeltaT(scalar dt) {
+    runTime->setDeltaT(dt);
 }
 
-void SDCLaplacianSolver::setNumberOfImplicitStages( int k )
-{
+void SDCLaplacianSolver::setNumberOfImplicitStages(int k) {
     this->k = k + 1;
 
-    for ( int i = 0; i < k + 1; i++ )
-        TStages.push_back( volScalarField( T ) );
+    for (int i = 0; i < k + 1; i++)
+        TStages.push_back(volScalarField(T));
 }
 
-void SDCLaplacianSolver::implicitSolve(
-    bool corrector,
+void SDCLaplacianSolver::implicitSolve(bool corrector,
     const int k,
     const int,
     const scalar,
@@ -181,39 +164,37 @@ void SDCLaplacianSolver::implicitSolve(
     const fsi::vector & rhs,
     fsi::vector & f,
     fsi::vector & result
-    )
-{
-    assert( init );
+    ) {
+    assert(init);
 
-    runTime->setDeltaT( dt );
+    runTime->setDeltaT(dt);
 
-    if ( corrector )
-        T = TStages.at( k + 1 );
+    if (corrector)
+        T = TStages.at(k + 1);
     else
         // predictor
-        T = TStages.at( k );
+        T = TStages.at(k);
 
-    for ( int i = 0; i < T.size(); i++ )
-        T.oldTime()[i] = qold( i );
+    for (int i = 0; i < T.size(); i++)
+        T.oldTime()[i] = qold(i);
 
-    for ( int i = 0; i < T.size(); i++ )
-        rhsT[i] = rhs( i );
+    for (int i = 0; i < T.size(); i++)
+        rhsT[i] = rhs(i);
 
-    for ( int nonOrth = 0; nonOrth <= nNonOrthCorr; nonOrth++ )
-    {
+    for (int nonOrth = 0; nonOrth <= nNonOrthCorr; nonOrth++) {
         solve
         (
-            fvm::ddt( T ) - fvm::laplacian( DT, T ) - rhsT / dt
+            fvm::ddt(T) - fvm::laplacian(DT, T) - rhsT / dt
         );
     }
 
-    TStages.at( k + 1 ) = T;
+    TStages.at(k + 1) = T;
 
-    for ( int i = 0; i < T.size(); i++ )
-        result( i ) = T[i];
+    for (int i = 0; i < T.size(); i++)
+        result(i) = T[i];
 
-    volScalarField F = fvc::laplacian( DT, T );
+    volScalarField F = fvc::laplacian(DT, T);
 
-    for ( int i = 0; i < F.size(); i++ )
-        f( i ) = F[i];
+    for (int i = 0; i < F.size(); i++)
+        f(i) = F[i];
 }

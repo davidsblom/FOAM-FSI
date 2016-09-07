@@ -7,11 +7,9 @@
 #include "gtest/gtest.h"
 #include <limits.h>
 
-int main(
-    int argc,
+int main(int argc,
     char ** argv
-    )
-{
-    ::testing::InitGoogleTest( &argc, argv );
+    ) {
+    ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

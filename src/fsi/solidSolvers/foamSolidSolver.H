@@ -23,11 +23,9 @@
 using namespace fsi;
 using std::shared_ptr;
 
-class foamSolidSolver : public BaseMultiLevelSolver
-{
+class foamSolidSolver : public BaseMultiLevelSolver {
     public:
-        foamSolidSolver(
-            const string & name,
+        foamSolidSolver(const string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );
@@ -36,26 +34,25 @@ class foamSolidSolver : public BaseMultiLevelSolver
 
         virtual void finalizeTimeStep();
 
-        virtual void getReadPositions( matrix & readPositions );
+        virtual void getReadPositions(matrix & readPositions);
 
-        virtual void getWritePositions( matrix & writePositions );
+        virtual void getWritePositions(matrix & writePositions);
 
         virtual void solve() = 0;
 
-        virtual void solve(
-            const matrix & input,
+        virtual void solve(const matrix & input,
             matrix & output
             );
 
-        void getDisplacementLocal( matrix & displacement );
+        void getDisplacementLocal(matrix & displacement);
 
-        void getReadPositionsLocal( matrix & readPositions );
+        void getReadPositionsLocal(matrix & readPositions);
 
-        void getWritePositionsLocal( matrix & writePositions );
+        void getWritePositionsLocal(matrix & writePositions);
 
         void run();
 
-        void setTractionLocal( const matrix & traction );
+        void setTractionLocal(const matrix & traction);
 
         string name;
         std::shared_ptr<argList> args;

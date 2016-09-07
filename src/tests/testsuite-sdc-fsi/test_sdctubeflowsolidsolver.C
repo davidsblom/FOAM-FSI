@@ -34,7 +34,7 @@ using fsi::AndersonPostProcessing;
 using fsi::ResidualRelativeConvergenceMeasure;
 using fsi::AbsoluteConvergenceMeasure;
 
-TEST( SDCSolidTest, order )
+TEST(SDCSolidTest, order)
 {
     scalar r0 = 0.2;
     scalar h = 1.0e-3;
@@ -52,57 +52,52 @@ TEST( SDCSolidTest, order )
     std::deque<std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> > solidSolvers;
     std::deque<int> nbTimeStepsList;
 
-    for ( int iComputation = 0; iComputation < nbComputations; iComputation++ )
-    {
-        int nbTimeSteps = 200 * std::pow( 2, iComputation );
+    for (int iComputation = 0; iComputation < nbComputations; iComputation++) {
+        int nbTimeSteps = 200 * std::pow(2, iComputation);
         scalar dt = T / nbTimeSteps;
 
-        std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> solid( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
-        solid->p.fill( p0 );
+        std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> solid(new tubeflow::SDCTubeFlowLinearizedSolidSolver(N, nu, rho_s, h, L, dt, G, E0, r0, T));
+        solid->p.fill(p0);
 
         int nbNodes = 2;
 
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >(new fsi::quadrature::Uniform<scalar>(nbNodes));
 
-        std::shared_ptr<sdc::SDC> sdc( new sdc::SDC( solid, quadrature, 1.0e-13, 10, 50 ) );
+        std::shared_ptr<sdc::SDC> sdc(new sdc::SDC(solid, quadrature, 1.0e-13, 10, 50));
 
         sdc->run();
-        ASSERT_TRUE( sdc->isConverged() );
+        ASSERT_TRUE(sdc->isConverged());
 
-        solidSolvers.push_back( solid );
-        nbTimeStepsList.push_back( nbTimeSteps );
+        solidSolvers.push_back(solid);
+        nbTimeStepsList.push_back(nbTimeSteps);
     }
 
     fsi::vector ref = solidSolvers.back()->r;
 
     std::deque<scalar> errors;
 
-    for ( int iComputation = 0; iComputation < nbComputations - 1; iComputation++ )
-    {
+    for (int iComputation = 0; iComputation < nbComputations - 1; iComputation++) {
         fsi::vector data;
 
-        data = solidSolvers.at( iComputation )->r;
+        data = solidSolvers.at(iComputation)->r;
 
         scalar error = (ref - data).norm() / data.norm();
         std::cout << "error = " << error << std::endl;
-        errors.push_back( error );
+        errors.push_back(error);
     }
 
-    for ( int iComputation = 0; iComputation < nbComputations - 2; iComputation++ )
-    {
-        scalar order = ( std::log10( errors.at( iComputation ) ) - std::log10( errors.at( iComputation + 1 ) ) ) / ( std::log10( nbTimeStepsList.at( iComputation + 1 ) ) - std::log10( nbTimeStepsList.at( iComputation ) ) );
+    for (int iComputation = 0; iComputation < nbComputations - 2; iComputation++) {
+        scalar order = (std::log10(errors.at(iComputation)) - std::log10(errors.at(iComputation + 1))) / (std::log10(nbTimeStepsList.at(iComputation + 1)) - std::log10(nbTimeStepsList.at(iComputation)));
         std::cout << "order = " << order << std::endl;
-        ASSERT_GE( order, 2 );
+        ASSERT_GE(order, 2);
     }
 }
 
 
-class SDCFsiSolidSolverTest : public ::testing::Test
-{
+class SDCFsiSolidSolverTest : public ::testing::Test {
     protected:
-        virtual void SetUp()
-        {
+        virtual void SetUp() {
             scalar r0 = 3.0e-3;
             scalar h = 3.0e-4;
             scalar L = 0.126;
@@ -119,7 +114,7 @@ class SDCFsiSolidSolverTest : public ::testing::Test
             scalar T = 1;
             scalar rho_f = 1060;
             scalar E = 490;
-            scalar cmk = std::sqrt( E * h / (2 * rho_f * r0) );
+            scalar cmk = std::sqrt(E * h / (2 * rho_f * r0));
 
             bool parallel = false;
             int extrapolation = 0;
@@ -136,90 +131,89 @@ class SDCFsiSolidSolverTest : public ::testing::Test
             scalar beta = 0.5;
             int minIter = 5;
 
-            std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
+            std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid(new tubeflow::SDCTubeFlowFluidSolver(a0, u0, p0, dt, cmk, N, L, T, rho_f));
 
             std::shared_ptr<fsi::BaseMultiLevelSolver> solid;
-            solid = std::shared_ptr<fsi::BaseMultiLevelSolver>( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
+            solid = std::shared_ptr<fsi::BaseMultiLevelSolver>(new tubeflow::SDCTubeFlowLinearizedSolidSolver(N, nu, rho_s, h, L, dt, G, E0, r0, T));
 
-            assert( solid );
+            assert(solid);
 
             shared_ptr<RBFFunctionInterface> rbfFunction;
             shared_ptr<RBFInterpolation> rbfInterpolator;
             shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
             shared_ptr<RBFCoarsening> rbfInterpToMesh;
 
-            rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
-            rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-            rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
+            rbfFunction = shared_ptr<RBFFunctionInterface>(new TPSFunction());
+            rbfInterpolator = shared_ptr<RBFInterpolation>(new RBFInterpolation(rbfFunction));
+            rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> (new RBFCoarsening(rbfInterpolator));
 
-            rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
-            rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-            rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
+            rbfFunction = shared_ptr<RBFFunctionInterface>(new TPSFunction());
+            rbfInterpolator = shared_ptr<RBFInterpolation>(new RBFInterpolation(rbfFunction));
+            rbfInterpToMesh = shared_ptr<RBFCoarsening> (new RBFCoarsening(rbfInterpolator));
 
-            shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+            shared_ptr<MultiLevelSolver> fluidSolver(new MultiLevelSolver(fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0));
 
-            rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
-            rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-            rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
+            rbfFunction = shared_ptr<RBFFunctionInterface>(new TPSFunction());
+            rbfInterpolator = shared_ptr<RBFInterpolation>(new RBFInterpolation(rbfFunction));
+            rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> (new RBFCoarsening(rbfInterpolator));
 
-            rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
-            rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-            rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
+            rbfFunction = shared_ptr<RBFFunctionInterface>(new TPSFunction());
+            rbfInterpolator = shared_ptr<RBFInterpolation>(new RBFInterpolation(rbfFunction));
+            rbfInterpToMesh = shared_ptr<RBFCoarsening> (new RBFCoarsening(rbfInterpolator));
 
-            shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
+            shared_ptr<MultiLevelSolver> solidSolver(new MultiLevelSolver(solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0));
 
             std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
-            convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
+            convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >(new std::list<std::shared_ptr<ConvergenceMeasure> > );
 
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, true, tol ) ) );
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+            convergenceMeasures->push_back(std::shared_ptr<ConvergenceMeasure>(new RelativeConvergenceMeasure(0, true, tol)));
+            convergenceMeasures->push_back(std::shared_ptr<ConvergenceMeasure>(new MinIterationConvergenceMeasure(0, false, minIter)));
 
-            shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
+            shared_ptr<MultiLevelFsiSolver> fsi(new MultiLevelFsiSolver(fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation));
 
-            shared_ptr<PostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
+            shared_ptr<PostProcessing> postProcessing(new AndersonPostProcessing(fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian));
 
-            std::shared_ptr<sdc::SDCFsiSolverInterface> sdcFluidSolver = std::dynamic_pointer_cast<sdc::SDCFsiSolverInterface>( fluid );
-            std::shared_ptr<sdc::SDCFsiSolverInterface> sdcSolidSolver = std::dynamic_pointer_cast<sdc::SDCFsiSolverInterface>( solid );
+            std::shared_ptr<sdc::SDCFsiSolverInterface> sdcFluidSolver = std::dynamic_pointer_cast<sdc::SDCFsiSolverInterface>(fluid);
+            std::shared_ptr<sdc::SDCFsiSolverInterface> sdcSolidSolver = std::dynamic_pointer_cast<sdc::SDCFsiSolverInterface>(solid);
 
-            assert( sdcFluidSolver );
-            assert( sdcSolidSolver );
+            assert(sdcFluidSolver);
+            assert(sdcSolidSolver);
 
-            std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation ) );
+            std::shared_ptr<fsi::SDCFsiSolver> fsiSolver(new fsi::SDCFsiSolver(sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation));
 
             int nbNodes = 3;
 
             std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+            quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >(new fsi::quadrature::GaussLobatto<scalar>(nbNodes));
 
-            sdc = std::shared_ptr<sdc::SDC> ( new sdc::SDC( fsiSolver, quadrature, 1.0e-15, 1, 250 ) );
+            sdc = std::shared_ptr<sdc::SDC> (new sdc::SDC(fsiSolver, quadrature, 1.0e-15, 1, 250));
         }
 
-        virtual void TearDown()
-        {
+        virtual void TearDown() {
             sdc.reset();
         }
 
         std::shared_ptr<sdc::SDC> sdc;
 };
 
-TEST_F( SDCFsiSolidSolverTest, object )
+TEST_F(SDCFsiSolidSolverTest, object)
 {
-    ASSERT_TRUE( true );
+    ASSERT_TRUE(true);
 }
 
-TEST_F( SDCFsiSolidSolverTest, timeStep )
+TEST_F(SDCFsiSolidSolverTest, timeStep)
 {
-    sdc->solveTimeStep( 0 );
-    ASSERT_TRUE( sdc->isConverged() );
+    sdc->solveTimeStep(0);
+    ASSERT_TRUE(sdc->isConverged());
 }
 
-TEST_F( SDCFsiSolidSolverTest, run )
+TEST_F(SDCFsiSolidSolverTest, run)
 {
     sdc->run();
-    ASSERT_TRUE( sdc->isConverged() );
+    ASSERT_TRUE(sdc->isConverged());
 }
 
-TEST( SDCFsiSolidTest, order )
+TEST(SDCFsiSolidTest, order)
 {
     scalar r0 = 3.0e-3;
     scalar h = 3.0e-4;
@@ -235,7 +229,7 @@ TEST( SDCFsiSolidTest, order )
     int N = 5;
     scalar T = 1;
     scalar rho_f = 1060;
-    scalar cmk = std::sqrt( E0 * h / (2 * rho_f * r0) );
+    scalar cmk = std::sqrt(E0 * h / (2 * rho_f * r0));
 
     bool parallel = false;
     int extrapolation = 0;
@@ -257,136 +251,129 @@ TEST( SDCFsiSolidTest, order )
     std::deque<std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> > solidSolvers;
     std::deque<int> nbTimeStepsList;
 
-    for ( int iComputation = 0; iComputation < nbComputations; iComputation++ )
-    {
-        int nbTimeSteps = 80 * std::pow( 2, iComputation );
+    for (int iComputation = 0; iComputation < nbComputations; iComputation++) {
+        int nbTimeSteps = 80 * std::pow(2, iComputation);
         std::cout << "nbTimeSteps = " << nbTimeSteps << std::endl;
         scalar dt = T / nbTimeSteps;
 
-        std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
-        std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> solid( new tubeflow::SDCTubeFlowLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T ) );
+        std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid(new tubeflow::SDCTubeFlowFluidSolver(a0, u0, p0, dt, cmk, N, L, T, rho_f));
+        std::shared_ptr<tubeflow::SDCTubeFlowLinearizedSolidSolver> solid(new tubeflow::SDCTubeFlowLinearizedSolidSolver(N, nu, rho_s, h, L, dt, G, E0, r0, T));
 
         shared_ptr<RBFFunctionInterface> rbfFunction;
         shared_ptr<RBFInterpolation> rbfInterpolator;
         shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
         shared_ptr<RBFCoarsening> rbfInterpToMesh;
 
-        rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
-        rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-        rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
+        rbfFunction = shared_ptr<RBFFunctionInterface>(new TPSFunction());
+        rbfInterpolator = shared_ptr<RBFInterpolation>(new RBFInterpolation(rbfFunction));
+        rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> (new RBFCoarsening(rbfInterpolator));
 
-        rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
-        rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-        rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
+        rbfFunction = shared_ptr<RBFFunctionInterface>(new TPSFunction());
+        rbfInterpolator = shared_ptr<RBFInterpolation>(new RBFInterpolation(rbfFunction));
+        rbfInterpToMesh = shared_ptr<RBFCoarsening> (new RBFCoarsening(rbfInterpolator));
 
-        shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+        shared_ptr<MultiLevelSolver> fluidSolver(new MultiLevelSolver(fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0));
 
-        rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
-        rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-        rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
+        rbfFunction = shared_ptr<RBFFunctionInterface>(new TPSFunction());
+        rbfInterpolator = shared_ptr<RBFInterpolation>(new RBFInterpolation(rbfFunction));
+        rbfInterpToCouplingMesh = shared_ptr<RBFCoarsening> (new RBFCoarsening(rbfInterpolator));
 
-        rbfFunction = shared_ptr<RBFFunctionInterface>( new TPSFunction() );
-        rbfInterpolator = shared_ptr<RBFInterpolation>( new RBFInterpolation( rbfFunction ) );
-        rbfInterpToMesh = shared_ptr<RBFCoarsening> ( new RBFCoarsening( rbfInterpolator ) );
+        rbfFunction = shared_ptr<RBFFunctionInterface>(new TPSFunction());
+        rbfInterpolator = shared_ptr<RBFInterpolation>(new RBFInterpolation(rbfFunction));
+        rbfInterpToMesh = shared_ptr<RBFCoarsening> (new RBFCoarsening(rbfInterpolator));
 
-        shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
+        shared_ptr<MultiLevelSolver> solidSolver(new MultiLevelSolver(solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0));
 
         std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
-        convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
+        convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >(new std::list<std::shared_ptr<ConvergenceMeasure> > );
 
-        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new ResidualRelativeConvergenceMeasure( 0, true, tol ) ) );
-        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new AbsoluteConvergenceMeasure( 0, true, 1.0e-14 ) ) );
-        convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
+        convergenceMeasures->push_back(std::shared_ptr<ConvergenceMeasure>(new ResidualRelativeConvergenceMeasure(0, true, tol)));
+        convergenceMeasures->push_back(std::shared_ptr<ConvergenceMeasure>(new AbsoluteConvergenceMeasure(0, true, 1.0e-14)));
+        convergenceMeasures->push_back(std::shared_ptr<ConvergenceMeasure>(new MinIterationConvergenceMeasure(0, false, minIter)));
 
-        shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
+        shared_ptr<MultiLevelFsiSolver> fsi(new MultiLevelFsiSolver(fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation));
 
-        shared_ptr<PostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
+        shared_ptr<PostProcessing> postProcessing(new AndersonPostProcessing(fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian));
 
-        std::shared_ptr<sdc::SDCFsiSolverInterface> sdcFluidSolver = std::dynamic_pointer_cast<sdc::SDCFsiSolverInterface>( fluid );
-        std::shared_ptr<sdc::SDCFsiSolverInterface> sdcSolidSolver = std::dynamic_pointer_cast<sdc::SDCFsiSolverInterface>( solid );
+        std::shared_ptr<sdc::SDCFsiSolverInterface> sdcFluidSolver = std::dynamic_pointer_cast<sdc::SDCFsiSolverInterface>(fluid);
+        std::shared_ptr<sdc::SDCFsiSolverInterface> sdcSolidSolver = std::dynamic_pointer_cast<sdc::SDCFsiSolverInterface>(solid);
 
-        assert( sdcFluidSolver );
-        assert( sdcSolidSolver );
+        assert(sdcFluidSolver);
+        assert(sdcSolidSolver);
 
-        std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation ) );
+        std::shared_ptr<fsi::SDCFsiSolver> fsiSolver(new fsi::SDCFsiSolver(sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation));
 
         int nbNodes = 3;
 
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >(new fsi::quadrature::GaussLobatto<scalar>(nbNodes));
 
-        std::shared_ptr<sdc::SDC> sdc( new sdc::SDC( fsiSolver, quadrature, 1.0e-12, 10, 50 ) );
+        std::shared_ptr<sdc::SDC> sdc(new sdc::SDC(fsiSolver, quadrature, 1.0e-12, 10, 50));
 
         sdc->run();
-        ASSERT_TRUE( sdc->isConverged() );
+        ASSERT_TRUE(sdc->isConverged());
 
-        fluidSolvers.push_back( fluid );
-        solidSolvers.push_back( solid );
-        nbTimeStepsList.push_back( nbTimeSteps );
+        fluidSolvers.push_back(fluid);
+        solidSolvers.push_back(solid);
+        nbTimeStepsList.push_back(nbTimeSteps);
     }
 
-    for ( int i = 0; i < 2; i++ )
-    {
+    for (int i = 0; i < 2; i++) {
         fsi::vector ref;
 
-        if ( i == 0 )
+        if (i == 0)
             ref = solidSolvers.back()->r;
         else
             ref = solidSolvers.back()->u;
 
         std::deque<scalar> errors;
 
-        for ( int iComputation = 0; iComputation < nbComputations - 1; iComputation++ )
-        {
+        for (int iComputation = 0; iComputation < nbComputations - 1; iComputation++) {
             fsi::vector data;
 
-            if ( i == 0 )
-                data = solidSolvers.at( iComputation )->r;
+            if (i == 0)
+                data = solidSolvers.at(iComputation)->r;
             else
-                data = solidSolvers.at( iComputation )->u;
+                data = solidSolvers.at(iComputation)->u;
 
             scalar error = (ref - data).norm() / data.norm();
             std::cout << "error = " << error << std::endl;
-            errors.push_back( error );
+            errors.push_back(error);
         }
 
-        for ( int iComputation = 0; iComputation < nbComputations - 2; iComputation++ )
-        {
-            scalar order = ( std::log10( errors.at( iComputation ) ) - std::log10( errors.at( iComputation + 1 ) ) ) / ( std::log10( nbTimeStepsList.at( iComputation + 1 ) ) - std::log10( nbTimeStepsList.at( iComputation ) ) );
+        for (int iComputation = 0; iComputation < nbComputations - 2; iComputation++) {
+            scalar order = (std::log10(errors.at(iComputation)) - std::log10(errors.at(iComputation + 1))) / (std::log10(nbTimeStepsList.at(iComputation + 1)) - std::log10(nbTimeStepsList.at(iComputation)));
             std::cout << "order = " << order << std::endl;
         }
     }
 
-    for ( int i = 0; i < 2; i++ )
-    {
+    for (int i = 0; i < 2; i++) {
         fsi::vector ref;
 
-        if ( i == 0 )
+        if (i == 0)
             ref = fluidSolvers.back()->u;
         else
             ref = fluidSolvers.back()->a;
 
         std::deque<scalar> errors;
 
-        for ( int iComputation = 0; iComputation < nbComputations - 1; iComputation++ )
-        {
+        for (int iComputation = 0; iComputation < nbComputations - 1; iComputation++) {
             fsi::vector data;
 
-            if ( i == 0 )
-                data = fluidSolvers.at( iComputation )->u;
+            if (i == 0)
+                data = fluidSolvers.at(iComputation)->u;
             else
-                data = fluidSolvers.at( iComputation )->a;
+                data = fluidSolvers.at(iComputation)->a;
 
             scalar error = (ref - data).norm() / data.norm();
             std::cout << "error = " << error << std::endl;
-            errors.push_back( error );
+            errors.push_back(error);
         }
 
-        for ( int iComputation = 0; iComputation < nbComputations - 2; iComputation++ )
-        {
-            scalar order = ( std::log10( errors.at( iComputation ) ) - std::log10( errors.at( iComputation + 1 ) ) ) / ( std::log10( nbTimeStepsList.at( iComputation + 1 ) ) - std::log10( nbTimeStepsList.at( iComputation ) ) );
+        for (int iComputation = 0; iComputation < nbComputations - 2; iComputation++) {
+            scalar order = (std::log10(errors.at(iComputation)) - std::log10(errors.at(iComputation + 1))) / (std::log10(nbTimeStepsList.at(iComputation + 1)) - std::log10(nbTimeStepsList.at(iComputation)));
             std::cout << "order = " << order << std::endl;
-            ASSERT_NEAR( order, 4, 0.3 );
+            ASSERT_NEAR(order, 4, 0.3);
         }
     }
 }

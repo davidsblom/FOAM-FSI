@@ -6,17 +6,16 @@
 #ifndef MultiLevelFsiSolver_H
 #define MultiLevelFsiSolver_H
 
+#include <memory>
+#include <list>
 #include "fvCFD.H"
 #include "FsiSolver.H"
 #include "MultiLevelSolver.H"
 
 namespace fsi {
-
-class MultiLevelFsiSolver : public FsiSolver
-{
+class MultiLevelFsiSolver : public FsiSolver {
     public:
-        MultiLevelFsiSolver(
-            shared_ptr<MultiLevelSolver> fluidSolver,
+        MultiLevelFsiSolver(shared_ptr<MultiLevelSolver> fluidSolver,
             shared_ptr<MultiLevelSolver> solidSolver,
             shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures,
             bool parallel,
@@ -25,8 +24,7 @@ class MultiLevelFsiSolver : public FsiSolver
 
         ~MultiLevelFsiSolver();
 
-        virtual void evaluate(
-            const fsi::vector & input,
+        virtual void evaluate(const fsi::vector & input,
             fsi::vector & output,
             fsi::vector & R
             );
@@ -35,19 +33,17 @@ class MultiLevelFsiSolver : public FsiSolver
 
         bool isConvergence();
 
-        bool isConvergence(
-            const fsi::vector & x,
+        bool isConvergence(const fsi::vector & x,
             const fsi::vector & xprev
             );
 
-        bool isConvergence( shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures );
+        bool isConvergence(shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures);
 
-        void setSurrogateData(
-            fsi::vector & xf,
+        void setSurrogateData(fsi::vector & xf,
             matrix & J
             );
 
-        void setUseJacobian( bool useJacobian );
+        void setUseJacobian(bool useJacobian);
 
         shared_ptr<MultiLevelSolver> fluidSolver;
         shared_ptr<MultiLevelSolver> solidSolver;
@@ -57,7 +53,6 @@ class MultiLevelFsiSolver : public FsiSolver
         bool useJacobian;
         int iterCurrentTimeStep;
 };
-
 } // namespace fsi
 
 #endif

@@ -9,33 +9,29 @@
 #include "ConvergenceMeasure.H"
 #include "fvCFD.H"
 
-namespace fsi
-{
-    class ResidualRelativeConvergenceMeasure : public ConvergenceMeasure
-    {
-        public:
-            ResidualRelativeConvergenceMeasure(
-                int dataId,
-                bool suffices,
-                scalar convergenceLimit
-                );
+namespace fsi {
+class ResidualRelativeConvergenceMeasure : public ConvergenceMeasure {
+    public:
+        ResidualRelativeConvergenceMeasure(int dataId,
+            bool suffices,
+            scalar convergenceLimit
+            );
 
-            virtual void measure(
-                vector & oldValues,
-                vector & newValues
-                );
+        virtual void measure(vector & oldValues,
+            vector & newValues
+            );
 
-            virtual void newMeasurementSeries();
+        virtual void newMeasurementSeries();
 
-            virtual bool isConvergence();
+        virtual bool isConvergence();
 
-            virtual void printState();
+        virtual void printState();
 
-            bool isFirstIteration;
-            scalar convergenceLimit;
-            scalar normFirstResidual;
-            scalar normDiff;
-    };
+        bool isFirstIteration;
+        scalar convergenceLimit;
+        scalar normFirstResidual;
+        scalar normDiff;
+};
 } // namespace fsi
 
 #endif

@@ -6,14 +6,13 @@
 
 #include "SteadyStateSolidSolver.H"
 
-SteadyStateSolidSolver::SteadyStateSolidSolver (
-    const std::string & name,
+SteadyStateSolidSolver::SteadyStateSolidSolver (const std::string & name,
     const std::shared_ptr<argList> & args,
     const std::shared_ptr<Time> & runTime
     )
     :
-    foamSolidSolver( name, args, runTime ),
-    gradU( fvc::grad( U ) ),
+    foamSolidSolver(name, args, runTime),
+    gradU(fvc::grad(U)),
     epsilon
     (
         IOobject
@@ -25,7 +24,7 @@ SteadyStateSolidSolver::SteadyStateSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
+        dimensionedSymmTensor("zero", dimless, symmTensor::zero)
     ),
     sigma
     (
@@ -38,31 +37,30 @@ SteadyStateSolidSolver::SteadyStateSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
+        dimensionedSymmTensor("zero", dimForce / dimArea, symmTensor::zero)
     ),
-    rheology( sigma, U ),
-    rho( rheology.rho() ),
-    mu( rheology.mu() ),
-    lambda( rheology.lambda() ),
-    muf( fvc::interpolate( mu, "mu" ) ),
-    lambdaf( fvc::interpolate( lambda, "lambda" ) ),
-    n( mesh.Sf() / mesh.magSf() ),
-    minIter( 0 ),
-    maxIter( 0 ),
-    absoluteTolerance( 0 ),
-    relativeTolerance( 0 ),
-    interpolator( nullptr )
+    rheology(sigma, U),
+    rho(rheology.rho()),
+    mu(rheology.mu()),
+    lambda(rheology.lambda()),
+    muf(fvc::interpolate(mu, "mu")),
+    lambdaf(fvc::interpolate(lambda, "lambda")),
+    n(mesh.Sf() / mesh.magSf()),
+    minIter(0),
+    maxIter(0),
+    absoluteTolerance(0),
+    relativeTolerance(0),
+    interpolator(nullptr)
 {}
 
-SteadyStateSolidSolver::SteadyStateSolidSolver (
-    const std::string & name,
+SteadyStateSolidSolver::SteadyStateSolidSolver (const std::string & name,
     const std::shared_ptr<argList> & args,
     const std::shared_ptr<Time> & runTime,
     const std::shared_ptr<rbf::RBFCoarsening> & interpolator
     )
     :
-    foamSolidSolver( name, args, runTime ),
-    gradU( fvc::grad( U ) ),
+    foamSolidSolver(name, args, runTime),
+    gradU(fvc::grad(U)),
     epsilon
     (
         IOobject
@@ -74,7 +72,7 @@ SteadyStateSolidSolver::SteadyStateSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
+        dimensionedSymmTensor("zero", dimless, symmTensor::zero)
     ),
     sigma
     (
@@ -87,43 +85,40 @@ SteadyStateSolidSolver::SteadyStateSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
+        dimensionedSymmTensor("zero", dimForce / dimArea, symmTensor::zero)
     ),
-    rheology( sigma, U ),
-    rho( rheology.rho() ),
-    mu( rheology.mu() ),
-    lambda( rheology.lambda() ),
-    muf( fvc::interpolate( mu, "mu" ) ),
-    lambdaf( fvc::interpolate( lambda, "lambda" ) ),
-    n( mesh.Sf() / mesh.magSf() ),
-    minIter( 0 ),
-    maxIter( 0 ),
-    absoluteTolerance( 0 ),
-    relativeTolerance( 0 ),
-    interpolator( interpolator )
+    rheology(sigma, U),
+    rho(rheology.rho()),
+    mu(rheology.mu()),
+    lambda(rheology.lambda()),
+    muf(fvc::interpolate(mu, "mu")),
+    lambdaf(fvc::interpolate(lambda, "lambda")),
+    n(mesh.Sf() / mesh.magSf()),
+    minIter(0),
+    maxIter(0),
+    absoluteTolerance(0),
+    relativeTolerance(0),
+    interpolator(interpolator)
 {}
 
 
 SteadyStateSolidSolver::~SteadyStateSolidSolver()
 {}
 
-void SteadyStateSolidSolver::calculateEpsilonSigma()
-{
+void SteadyStateSolidSolver::calculateEpsilonSigma() {
     // - Green finite strain tensor
-    epsilon = symm( gradU ) + 0.5 * symm( gradU & gradU.T() );
+    epsilon = symm(gradU) + 0.5 * symm(gradU & gradU.T());
 
     // - second Piola-Kirchhoff stress tensor
-    sigma = 2 * mu * epsilon + lambda * ( I * tr( epsilon ) );
+    sigma = 2 * mu * epsilon + lambda * (I * tr(epsilon));
 }
 
-void SteadyStateSolidSolver::initialize()
-{
+void SteadyStateSolidSolver::initialize() {
     readCouplingProperties();
 }
 
-void SteadyStateSolidSolver::initTimeStep()
-{
-    assert( !init );
+void SteadyStateSolidSolver::initTimeStep() {
+    assert(!init);
 
     timeIndex++;
     t = runTime->time().value();
@@ -133,23 +128,22 @@ void SteadyStateSolidSolver::initTimeStep()
     init = true;
 }
 
-bool SteadyStateSolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> solver )
-{
+bool SteadyStateSolidSolver::interpolateVolField(std::shared_ptr<BaseMultiLevelSolver> solver) {
     std::shared_ptr<SteadyStateSolidSolver> fineModel;
-    fineModel = std::dynamic_pointer_cast<SteadyStateSolidSolver>( solver );
+    fineModel = std::dynamic_pointer_cast<SteadyStateSolidSolver>(solver);
 
-    assert( fineModel );
+    assert(fineModel);
 
     // Interpolate the displacement of the fineMesh onto the own
     // mesh
 
     Info << "Mesh to mesh volume interpolation of field U for the solid domain" << endl;
 
-    const volVectorField & fieldSource = fineModel->mesh.lookupObject<volVectorField>( "U" );
+    const volVectorField & fieldSource = fineModel->mesh.lookupObject<volVectorField>("U");
 
     // Gather all the cell centers of the source
 
-    labelList cellCentresSourceSize( Pstream::nProcs(), 0 );
+    labelList cellCentresSourceSize(Pstream::nProcs(), 0);
 
     const Foam::vectorField & cellCentresSource = fineModel->mesh.cellCentres();
 
@@ -157,78 +151,76 @@ bool SteadyStateSolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevel
 
     // Reduce (gather, scatter) over procs
 
-    reduce( cellCentresSourceSize, sumOp<labelList>() );
+    reduce(cellCentresSourceSize, sumOp<labelList>());
 
-    assert( interpolator );
+    assert(interpolator);
 
-    if ( !interpolator->rbf->computed )
-    {
+    if (!interpolator->rbf->computed) {
         // Gather all the cell centers of the source
 
         const Foam::vectorField & cellCentresTarget = mesh.cellCentres();
 
-        vectorField globalControlPoints( sum( cellCentresSourceSize ), Foam::vector::zero );
+        vectorField globalControlPoints(sum(cellCentresSourceSize), Foam::vector::zero);
 
         label startIndex = 0;
 
-        for ( int i = 0; i < Pstream::myProcNo(); i++ )
+        for (int i = 0; i < Pstream::myProcNo(); i++)
             startIndex += cellCentresSourceSize[i];
 
-        for ( int i = 0; i < cellCentresSourceSize[Pstream::myProcNo()]; i++ )
+        for (int i = 0; i < cellCentresSourceSize[Pstream::myProcNo()]; i++)
             globalControlPoints[startIndex + i] = cellCentresSource[i];
 
-        reduce( globalControlPoints, sumOp<vectorField>() );
+        reduce(globalControlPoints, sumOp<vectorField>());
 
-        matrix positions( sum( cellCentresSourceSize ), 3 );
-        matrix positionsInterpolation( cellCentresTarget.size(), 3 );
+        matrix positions(sum(cellCentresSourceSize), 3);
+        matrix positionsInterpolation(cellCentresTarget.size(), 3);
 
-        for ( int i = 0; i < positions.rows(); i++ )
-            for ( int j = 0; j < positions.cols(); j++ )
-                positions( i, j ) = globalControlPoints[i][j];
+        for (int i = 0; i < positions.rows(); i++)
+            for (int j = 0; j < positions.cols(); j++)
+                positions(i, j) = globalControlPoints[i][j];
 
-        for ( int i = 0; i < positionsInterpolation.rows(); i++ )
-            for ( int j = 0; j < positionsInterpolation.cols(); j++ )
-                positionsInterpolation( i, j ) = cellCentresTarget[i][j];
+        for (int i = 0; i < positionsInterpolation.rows(); i++)
+            for (int j = 0; j < positionsInterpolation.cols(); j++)
+                positionsInterpolation(i, j) = cellCentresTarget[i][j];
 
-        interpolator->compute( positions, positionsInterpolation );
+        interpolator->compute(positions, positionsInterpolation);
     }
 
-    vectorField globalFieldSource( fineModel->mesh.globalData().nTotalCells(), Foam::vector::zero );
+    vectorField globalFieldSource(fineModel->mesh.globalData().nTotalCells(), Foam::vector::zero);
 
     label startIndex = 0;
 
-    for ( int i = 0; i < Pstream::myProcNo(); i++ )
+    for (int i = 0; i < Pstream::myProcNo(); i++)
         startIndex += cellCentresSourceSize[i];
 
-    for ( int i = 0; i < cellCentresSourceSize[Pstream::myProcNo()]; i++ )
+    for (int i = 0; i < cellCentresSourceSize[Pstream::myProcNo()]; i++)
         globalFieldSource[startIndex + i] = fieldSource[i];
 
-    reduce( globalFieldSource, sumOp<vectorField>() );
+    reduce(globalFieldSource, sumOp<vectorField>());
 
     // Initialize variables for interpolation
 
-    matrix values( globalFieldSource.size(), 3 );
+    matrix values(globalFieldSource.size(), 3);
     matrix valuesInterpolation;
 
-    for ( int i = 0; i < values.rows(); i++ )
-        for ( int j = 0; j < values.cols(); j++ )
-            values( i, j ) = globalFieldSource[i][j];
+    for (int i = 0; i < values.rows(); i++)
+        for (int j = 0; j < values.cols(); j++)
+            values(i, j) = globalFieldSource[i][j];
 
-    interpolator->interpolate( values, valuesInterpolation );
+    interpolator->interpolate(values, valuesInterpolation);
 
-    for ( int i = 0; i < valuesInterpolation.rows(); i++ )
-        for ( int j = 0; j < valuesInterpolation.cols(); j++ )
-            U[i][j] = valuesInterpolation( i, j );
+    for (int i = 0; i < valuesInterpolation.rows(); i++)
+        for (int j = 0; j < valuesInterpolation.cols(); j++)
+            U[i][j] = valuesInterpolation(i, j);
 
-    gradU = fvc::grad( U );
+    gradU = fvc::grad(U);
 
     calculateEpsilonSigma();
 
     return true;
 }
 
-bool SteadyStateSolidSolver::isRunning()
-{
+bool SteadyStateSolidSolver::isRunning() {
     runTime->write();
 
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
@@ -238,36 +230,34 @@ bool SteadyStateSolidSolver::isRunning()
     return runTime->loop();
 }
 
-void SteadyStateSolidSolver::readSolidMechanicsControls()
-{
+void SteadyStateSolidSolver::readSolidMechanicsControls() {
     const dictionary & stressControl =
-        mesh.solutionDict().subDict( "solidMechanics" );
+        mesh.solutionDict().subDict("solidMechanics");
 
-    minIter = readInt( stressControl.lookup( "minIter" ) );
-    maxIter = readInt( stressControl.lookup( "maxIter" ) );
-    absoluteTolerance = readScalar( stressControl.lookup( "tolerance" ) );
-    relativeTolerance = readScalar( stressControl.lookup( "relTol" ) );
+    minIter = readInt(stressControl.lookup("minIter"));
+    maxIter = readInt(stressControl.lookup("maxIter"));
+    absoluteTolerance = readScalar(stressControl.lookup("tolerance"));
+    relativeTolerance = readScalar(stressControl.lookup("relTol"));
 
     // Ensure that the absolute tolerance of the linear solver is less
     // than the used convergence tolerance for the non-linear system.
-    scalar linearTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
-    assert( linearTolerance < absoluteTolerance );
-    assert( relativeTolerance < 1 );
-    assert( absoluteTolerance > 0 );
-    assert( absoluteTolerance < 1 );
-    assert( minIter < maxIter );
-    assert( maxIter > 0 );
-    assert( minIter >= 0 );
+    scalar linearTolerance = readScalar(mesh.solutionDict().subDict("solvers").subDict("U").lookup("tolerance"));
+    assert(linearTolerance < absoluteTolerance);
+    assert(relativeTolerance < 1);
+    assert(absoluteTolerance > 0);
+    assert(absoluteTolerance < 1);
+    assert(minIter < maxIter);
+    assert(maxIter > 0);
+    assert(minIter >= 0);
 
-    if ( linearTolerance >= absoluteTolerance )
-        throw std::runtime_error( "The absolute tolerance for the linear solver (U) should be smaller than solidMechanics::absoluteTolerance in order to reach convergence of the non-linear system" );
+    if (linearTolerance >= absoluteTolerance)
+        throw std::runtime_error("The absolute tolerance for the linear solver (U) should be smaller than solidMechanics::absoluteTolerance in order to reach convergence of the non-linear system");
 }
 
 void SteadyStateSolidSolver::resetSolution()
 {}
 
-void SteadyStateSolidSolver::solve()
-{
+void SteadyStateSolidSolver::solve() {
     Info << "Solve solid domain" << endl;
 
     scalar iCorr = 0;
@@ -277,33 +267,32 @@ void SteadyStateSolidSolver::solve()
     lduMatrix::debug = 0;
     scalar convergenceTolerance = absoluteTolerance;
 
-    gradU = fvc::grad( U );
+    gradU = fvc::grad(U);
 
     calculateEpsilonSigma();
 
-    dimensionedVector gravity( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "gravity" ) );
+    dimensionedVector gravity(mesh.solutionDict().subDict("solidMechanics").lookup("gravity"));
 
-    for ( iCorr = 0; iCorr < maxIter; iCorr++ )
-    {
+    for (iCorr = 0; iCorr < maxIter; iCorr++) {
         U.storePrevIter();
 
         tmp<surfaceTensorField> shearGradU =
-            ( (I - n * n) & fvc::interpolate( gradU ) );
+            ((I - n * n) & fvc::interpolate(gradU));
 
         fvVectorMatrix UEqn
         (
-            -fvm::laplacian( 2 * muf + lambdaf, U, "laplacian(DU,U)" )
+            -fvm::laplacian(2 * muf + lambdaf, U, "laplacian(DU,U)")
             ==
             fvc::div(
                 mesh.magSf()
                 * (
-                    -(muf + lambdaf) * ( fvc::snGrad( U ) & (I - n * n) )
-                    + lambdaf * tr( shearGradU() & (I - n * n) ) * n
+                    -(muf + lambdaf) * (fvc::snGrad(U) & (I - n * n))
+                    + lambdaf * tr(shearGradU() & (I - n * n)) * n
                     + muf * (shearGradU() & n)
-                    + muf * ( n & fvc::interpolate( gradU & gradU.T() ) )
+                    + muf * (n & fvc::interpolate(gradU & gradU.T()))
                     + 0.5 * lambdaf
-                    * ( n * tr( fvc::interpolate( gradU & gradU.T() ) ) )
-                    + ( n & fvc::interpolate( sigma & gradU ) )
+                    * (n * tr(fvc::interpolate(gradU & gradU.T())))
+                    + (n & fvc::interpolate(sigma & gradU))
                     )
                 )
         );
@@ -316,23 +305,22 @@ void SteadyStateSolidSolver::solve()
 
         U.relax();
 
-        gradU = fvc::grad( U );
+        gradU = fvc::grad(U);
 
         calculateEpsilonSigma();
 
-        displacementResidual = gSumMag( U.internalField() - U.prevIter().internalField() ) / (gSumMag( U.internalField() ) + SMALL);
-        displacementResidual = max( displacementResidual, solverPerf.initialResidual() );
+        displacementResidual = gSumMag(U.internalField() - U.prevIter().internalField()) / (gSumMag(U.internalField()) + SMALL);
+        displacementResidual = max(displacementResidual, solverPerf.initialResidual());
 
-        if ( iCorr == 0 )
-        {
+        if (iCorr == 0) {
             initialResidual = displacementResidual;
-            convergenceTolerance = std::max( relativeTolerance * displacementResidual, absoluteTolerance );
-            assert( convergenceTolerance > 0 );
+            convergenceTolerance = std::max(relativeTolerance * displacementResidual, absoluteTolerance);
+            assert(convergenceTolerance > 0);
         }
 
         bool convergence = displacementResidual <= convergenceTolerance && iCorr >= minIter - 1;
 
-        if ( convergence )
+        if (convergence)
             break;
     }
 

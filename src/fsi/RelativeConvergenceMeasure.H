@@ -9,33 +9,29 @@
 #include "ConvergenceMeasure.H"
 #include "fvCFD.H"
 
-namespace fsi
-{
-    class RelativeConvergenceMeasure : public ConvergenceMeasure
-    {
-        public:
-            RelativeConvergenceMeasure(
-                int dataId,
-                bool suffices,
-                scalar convergenceLimit
-                );
+namespace fsi {
+class RelativeConvergenceMeasure : public ConvergenceMeasure {
+    public:
+        RelativeConvergenceMeasure(int dataId,
+            bool suffices,
+            scalar convergenceLimit
+            );
 
-            virtual void measure(
-                vector & oldValues,
-                vector & newValues
-                );
+        virtual void measure(vector & oldValues,
+            vector & newValues
+            );
 
-            virtual void newMeasurementSeries();
+        virtual void newMeasurementSeries();
 
-            virtual bool isConvergence();
+        virtual bool isConvergence();
 
-            virtual void printState();
+        virtual void printState();
 
-            scalar normDiff;
-            scalar norm;
-            const scalar convergenceLimit;
-            scalar epsilon;
-    };
+        scalar normDiff;
+        scalar norm;
+        const scalar convergenceLimit;
+        scalar epsilon;
+};
 } // namespace fsi
 
 #endif

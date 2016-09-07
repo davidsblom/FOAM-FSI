@@ -6,10 +6,8 @@
 #include "ClenshawCurtis.H"
 #include "fvCFD.H"
 
-namespace fsi
-{
-    namespace quadrature
-    {
-        template class ClenshawCurtis<scalar>;
-    }
+namespace fsi {
+namespace quadrature {
+template class ClenshawCurtis<scalar>;
+}
 }

@@ -10,57 +10,46 @@
 
 #include "Polynomial.H"
 
-namespace fsi
-{
-    namespace quadrature
-    {
-        template<typename precision>
-        GaussRadau<precision>::GaussRadau( const size_t num_nodes )
-            : IQuadrature<precision>( num_nodes )
-        {
-            if ( this->num_nodes < 1 )
-            {
-                throw std::invalid_argument( "Gauss-Radau quadrature requires at least one quadrature node." );
-            }
+namespace fsi {
+namespace quadrature {
+template<typename precision>
+GaussRadau<precision>::GaussRadau(const size_t num_nodes)
+    : IQuadrature<precision>(num_nodes) {
+    if (this->num_nodes < 1) {
+        throw std::invalid_argument("Gauss-Radau quadrature requires at least one quadrature node.");
+    }
 
-            this->compute_nodes();
-            this->compute_weights();
-        }
+    this->compute_nodes();
+    this->compute_weights();
+}
 
-        template<typename precision>
-        bool GaussRadau<precision>::left_is_node() const
-        {
-            return LEFT_IS_NODE;
-        }
+template<typename precision>
+bool GaussRadau<precision>::left_is_node() const {
+    return LEFT_IS_NODE;
+}
 
-        template<typename precision>
-        bool GaussRadau<precision>::right_is_node() const
-        {
-            return RIGHT_IS_NODE;
-        }
+template<typename precision>
+bool GaussRadau<precision>::right_is_node() const {
+    return RIGHT_IS_NODE;
+}
 
-        template<typename precision>
-        void GaussRadau<precision>::compute_nodes()
-        {
-            this->nodes = std::vector<precision>( this->num_nodes, precision( 0.0 ) );
-            auto l = Polynomial<precision>::legendre( this->num_nodes );
-            auto lm1 = Polynomial<precision>::legendre( this->num_nodes - 1 );
+template<typename precision>
+void GaussRadau<precision>::compute_nodes() {
+    this->nodes = std::vector<precision>(this->num_nodes, precision(0.0));
+    auto l = Polynomial<precision>::legendre(this->num_nodes);
+    auto lm1 = Polynomial<precision>::legendre(this->num_nodes - 1);
 
-            for ( size_t i = 0; i < this->num_nodes; i++ )
-            {
-                l[i] += lm1[i];
-            }
+    for (size_t i = 0; i < this->num_nodes; i++) {
+        l[i] += lm1[i];
+    }
 
-            auto roots = l.roots();
+    auto roots = l.roots();
 
-            for ( size_t j = 1; j < this->num_nodes; j++ )
-            {
-                this->nodes[j - 1] = 0.5 * (1.0 - roots[this->num_nodes - j]);
-            }
+    for (size_t j = 1; j < this->num_nodes; j++) {
+        this->nodes[j - 1] = 0.5 * (1.0 - roots[this->num_nodes - j]);
+    }
 
-            this->nodes.back() = 1.0;
-        }
-
-} // namespace quadrature
-
+    this->nodes.back() = 1.0;
+}
+}     // namespace quadrature
 } // namespace fsi

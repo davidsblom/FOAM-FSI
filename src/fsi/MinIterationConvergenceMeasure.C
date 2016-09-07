@@ -6,56 +6,48 @@
 #include "fvCFD.H"
 #include "MinIterationConvergenceMeasure.H"
 
-namespace fsi
-{
-    MinIterationConvergenceMeasure::MinIterationConvergenceMeasure(
-        int dataId,
-        bool suffices,
-        int minimumIterationCount
-        )
-        :
-        ConvergenceMeasure( dataId, suffices ),
-        minimumIterationCount( minimumIterationCount ),
-        currentIteration( 0 )
-    {
-        assert( minimumIterationCount >= 0 );
-    }
+namespace fsi {
+MinIterationConvergenceMeasure::MinIterationConvergenceMeasure(int dataId,
+    bool suffices,
+    int minimumIterationCount
+    )
+    :
+    ConvergenceMeasure(dataId, suffices),
+    minimumIterationCount(minimumIterationCount),
+    currentIteration(0) {
+    assert(minimumIterationCount >= 0);
+}
 
-    void MinIterationConvergenceMeasure::measure(
-        vector & /*oldValues*/,
-        vector & /*newValues*/
-        )
-    {
-        currentIteration++;
+void MinIterationConvergenceMeasure::measure(vector & /*oldValues*/,
+    vector &     /*newValues*/
+    ) {
+    currentIteration++;
 
-        isConvergence_ = minimumIterationCount <= currentIteration;
-    }
+    isConvergence_ = minimumIterationCount <= currentIteration;
+}
 
-    void MinIterationConvergenceMeasure::newMeasurementSeries()
-    {
-        currentIteration = 0;
-        isConvergence_ = false;
-    }
+void MinIterationConvergenceMeasure::newMeasurementSeries() {
+    currentIteration = 0;
+    isConvergence_ = false;
+}
 
-    bool MinIterationConvergenceMeasure::isConvergence()
-    {
-        return isConvergence_;
-    }
+bool MinIterationConvergenceMeasure::isConvergence() {
+    return isConvergence_;
+}
 
-    void MinIterationConvergenceMeasure::printState()
-    {
-        Info << "min iteration convergence measure: #it = "
-             << currentIteration
-             << " of "
-             << minimumIterationCount
-             << ", conv = ";
+void MinIterationConvergenceMeasure::printState() {
+    Info << "min iteration convergence measure: #it = "
+         << currentIteration
+         << " of "
+         << minimumIterationCount
+         << ", conv = ";
 
-        if ( isConvergence_ )
-            Info << "true";
+    if (isConvergence_)
+        Info << "true";
 
-        if ( !isConvergence_ )
-            Info << "false";
+    if (!isConvergence_)
+        Info << "false";
 
-        Info << endl;
-    }
+    Info << endl;
+}
 } // namespace fsi

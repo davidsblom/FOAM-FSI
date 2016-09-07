@@ -6,13 +6,12 @@
 
 #include "ElasticSolidSolver.H"
 
-ElasticSolidSolver::ElasticSolidSolver (
-    const string & name,
+ElasticSolidSolver::ElasticSolidSolver (const string & name,
     const std::shared_ptr<argList> & args,
     const std::shared_ptr<Time> & runTime
     )
     :
-    foamSolidSolver( name, args, runTime ),
+    foamSolidSolver(name, args, runTime),
     gradU
     (
         IOobject
@@ -24,7 +23,7 @@ ElasticSolidSolver::ElasticSolidSolver (
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedTensor( "zero", dimless, tensor::zero )
+        dimensionedTensor("zero", dimless, tensor::zero)
     ),
     snGradU
     (
@@ -37,7 +36,7 @@ ElasticSolidSolver::ElasticSolidSolver (
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedVector( "zero", dimless, Foam::vector::zero )
+        dimensionedVector("zero", dimless, Foam::vector::zero)
     ),
     V
     (
@@ -49,10 +48,10 @@ ElasticSolidSolver::ElasticSolidSolver (
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        fvc::ddt( U )
+        fvc::ddt(U)
     ),
-    gradV( fvc::ddt( gradU ) ),
-    snGradV( ( snGradU - snGradU.oldTime() ) / runTime->deltaT() ),
+    gradV(fvc::ddt(gradU)),
+    snGradV((snGradU - snGradU.oldTime()) / runTime->deltaT()),
     epsilon
     (
         IOobject
@@ -64,7 +63,7 @@ ElasticSolidSolver::ElasticSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
+        dimensionedSymmTensor("zero", dimless, symmTensor::zero)
     ),
     sigma
     (
@@ -77,7 +76,7 @@ ElasticSolidSolver::ElasticSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
+        dimensionedSymmTensor("zero", dimForce / dimArea, symmTensor::zero)
     ),
     divSigmaExp
     (
@@ -90,37 +89,35 @@ ElasticSolidSolver::ElasticSolidSolver (
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedVector( "zero", dimForce / dimVolume, Foam::vector::zero )
+        dimensionedVector("zero", dimForce / dimVolume, Foam::vector::zero)
     ),
-    rheology( sigma, U ),
-    rho( rheology.rho() ),
-    mu( rheology.mu() ),
-    lambda( rheology.lambda() ),
-    muf( rheology.muf() ),
-    lambdaf( rheology.lambdaf() ),
-    n( mesh.Sf() / mesh.magSf() ),
-    nCorr( readInt( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "nCorrectors" ) ) ),
-    convergenceTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "U" ) ) ),
-    divSigmaExpMethod( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "divSigmaExp" ) )
+    rheology(sigma, U),
+    rho(rheology.rho()),
+    mu(rheology.mu()),
+    lambda(rheology.lambda()),
+    muf(rheology.muf()),
+    lambdaf(rheology.lambdaf()),
+    n(mesh.Sf() / mesh.magSf()),
+    nCorr(readInt(mesh.solutionDict().subDict("solidMechanics").lookup("nCorrectors"))),
+    convergenceTolerance(readScalar(mesh.solutionDict().subDict("solidMechanics").lookup("U"))),
+    divSigmaExpMethod(mesh.solutionDict().subDict("solidMechanics").lookup("divSigmaExp"))
 {}
 
 ElasticSolidSolver::~ElasticSolidSolver()
 {}
 
-void ElasticSolidSolver::finalizeTimeStep()
-{
-    assert( init );
+void ElasticSolidSolver::finalizeTimeStep() {
+    assert(init);
 
-    V = fvc::ddt( U );
-    gradV = fvc::ddt( gradU );
-    snGradV = ( snGradU - snGradU.oldTime() ) / runTime->deltaT();
+    V = fvc::ddt(U);
+    gradV = fvc::ddt(gradU);
+    snGradV = (snGradU - snGradU.oldTime()) / runTime->deltaT();
 
     init = false;
 }
 
-void ElasticSolidSolver::initTimeStep()
-{
-    assert( !init );
+void ElasticSolidSolver::initTimeStep() {
+    assert(!init);
 
     timeIndex++;
     t = runTime->time().value();
@@ -132,8 +129,7 @@ void ElasticSolidSolver::initTimeStep()
     init = true;
 }
 
-bool ElasticSolidSolver::isRunning()
-{
+bool ElasticSolidSolver::isRunning() {
     runTime->write();
 
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
@@ -146,8 +142,7 @@ bool ElasticSolidSolver::isRunning()
 void ElasticSolidSolver::resetSolution()
 {}
 
-void ElasticSolidSolver::solve()
-{
+void ElasticSolidSolver::solve() {
     Info << "Solve solid domain" << endl;
 
     int iCorr = 0;
@@ -155,77 +150,63 @@ void ElasticSolidSolver::solve()
     scalar initialResidual = 1.0;
     lduMatrix::debug = 0;
 
-    do
-    {
+    do {
         U.storePrevIter();
 
-        if ( divSigmaExpMethod == "standard" )
-        {
+        if (divSigmaExpMethod == "standard") {
             divSigmaExp = fvc::div
                 (
-                mu * gradU.T() + lambda * ( I * tr( gradU ) ) - (mu + lambda) * gradU,
+                mu * gradU.T() + lambda * (I * tr(gradU)) - (mu + lambda) * gradU,
                 "div(sigma)"
                 );
-        }
-        else
-        if ( divSigmaExpMethod == "surface" )
-        {
+        }else if (divSigmaExpMethod == "surface") {
             divSigmaExp = fvc::div
                 (
-                muf * ( mesh.Sf() & fvc::interpolate( gradU.T() ) )
-                + lambdaf * ( mesh.Sf() & I * fvc::interpolate( tr( gradU ) ) )
-                - (muf + lambdaf) * ( mesh.Sf() & fvc::interpolate( gradU ) )
+                muf * (mesh.Sf() & fvc::interpolate(gradU.T()))
+                + lambdaf * (mesh.Sf() & I * fvc::interpolate(tr(gradU)))
+                - (muf + lambdaf) * (mesh.Sf() & fvc::interpolate(gradU))
                 );
-        }
-        else
-        if ( divSigmaExpMethod == "decompose" )
-        {
-            snGradU = fvc::snGrad( U );
+        }else if (divSigmaExpMethod == "decompose") {
+            snGradU = fvc::snGrad(U);
 
-            surfaceTensorField shearGradU = ( (I - n * n) & fvc::interpolate( gradU ) );
+            surfaceTensorField shearGradU = ((I - n * n) & fvc::interpolate(gradU));
 
             divSigmaExp = fvc::div
                 (
                 mesh.magSf() *
                 (
-                    -(muf + lambdaf) * ( snGradU & (I - n * n) )
-                    + lambdaf * tr( shearGradU & (I - n * n) ) * n
+                    -(muf + lambdaf) * (snGradU & (I - n * n))
+                    + lambdaf * tr(shearGradU & (I - n * n)) * n
                     + muf * (shearGradU & n)
                 )
                 );
-        }
-        else
-        if ( divSigmaExpMethod == "expLaplacian" )
-        {
+        }else if (divSigmaExpMethod == "expLaplacian") {
             divSigmaExp =
-                -fvc::laplacian( mu + lambda, U, "laplacian(DU,U)" )
-                + fvc::div( mu * gradU.T() + lambda * ( I * tr( gradU ) ), "div(sigma)" );
-        }
-        else
-        {
-            FatalErrorIn( args->executable() )
+                -fvc::laplacian(mu + lambda, U, "laplacian(DU,U)")
+                + fvc::div(mu * gradU.T() + lambda * (I * tr(gradU)), "div(sigma)");
+        }else {
+            FatalErrorIn(args->executable())
                 << "divSigmaExp method " << divSigmaExpMethod << " not found!" << endl;
         }
 
         // linear momentum equation
         fvVectorMatrix UEqn
         (
-            rho * fvm::d2dt2( U )
+            rho * fvm::d2dt2(U)
             ==
-            fvm::laplacian( 2 * muf + lambdaf, U, "laplacian(DU,U)" )
+            fvm::laplacian(2 * muf + lambdaf, U, "laplacian(DU,U)")
             + divSigmaExp
         );
 
         solverPerf = UEqn.solve();
 
-        if ( iCorr == 0 )
+        if (iCorr == 0)
             initialResidual = solverPerf.initialResidual();
 
         U.relax();
 
-        gradU = fvc::grad( U );
-    }
-    while
+        gradU = fvc::grad(U);
+    } while
     (
         iCorr++ == 0
         ||

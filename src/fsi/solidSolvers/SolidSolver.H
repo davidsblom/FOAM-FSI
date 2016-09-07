@@ -17,17 +17,14 @@
 using namespace fsi;
 using namespace rbf;
 
-class SolidSolver : public foamSolidSolver
-{
+class SolidSolver : public foamSolidSolver {
     public:
-        SolidSolver(
-            const string & name,
+        SolidSolver(const string & name,
             const std::shared_ptr<argList> & args,
             const std::shared_ptr<Time> & runTime
             );
 
-        SolidSolver(
-            const string & name,
+        SolidSolver(const string & name,
             const std::shared_ptr<argList> & args,
             const std::shared_ptr<Time> & runTime,
             const std::shared_ptr<rbf::RBFCoarsening> & interpolator
@@ -43,7 +40,7 @@ class SolidSolver : public foamSolidSolver
 
         virtual void solve();
 
-        virtual bool interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> fineModel );
+        virtual bool interpolateVolField(std::shared_ptr<BaseMultiLevelSolver> fineModel);
 
     protected:
         void calculateEpsilonSigma();

@@ -6,48 +6,42 @@
 #ifndef ConvergenceMeasure_H
 #define ConvergenceMeasure_H
 
-#include "BaseMultiLevelSolver.H"
 #include <iomanip>
+#include "BaseMultiLevelSolver.H"
 
-namespace fsi
-{
-    class ConvergenceMeasure
-    {
-        public:
-            ConvergenceMeasure(
-                int dataId,
-                bool suffices
-                )
-                :
-                dataId( dataId ),
-                isConvergence_( false ),
-                suffices_( suffices )
-            {}
+namespace fsi {
+class ConvergenceMeasure {
+    public:
+        ConvergenceMeasure(int dataId,
+            bool suffices
+            )
+            :
+            dataId(dataId),
+            isConvergence_(false),
+            suffices_(suffices)
+        {}
 
-            virtual ~ConvergenceMeasure() {}
+        virtual ~ConvergenceMeasure() {}
 
-            virtual void measure(
-                vector & oldValues,
-                vector & newValues
-                ) = 0;
+        virtual void measure(vector & oldValues,
+            vector & newValues
+            ) = 0;
 
-            virtual void newMeasurementSeries() = 0;
+        virtual void newMeasurementSeries() = 0;
 
-            virtual bool isConvergence() = 0;
+        virtual bool isConvergence() = 0;
 
-            virtual void printState() = 0;
+        virtual void printState() = 0;
 
-            virtual bool suffices()
-            {
-                return suffices_;
-            }
+        virtual bool suffices() {
+            return suffices_;
+        }
 
-            const int dataId;
+        const int dataId;
 
-            bool isConvergence_;
-            bool suffices_;
-    };
-
+        bool isConvergence_;
+        bool suffices_;
+};
 } // namespace fsi
 
 #endif

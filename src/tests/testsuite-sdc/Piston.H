@@ -26,11 +26,9 @@ using namespace sdc;
  * http://en.wikipedia.org/wiki/Legendre_polynomials
  */
 
-class Piston : public SDCSolver
-{
+class Piston : public SDCSolver {
     public:
-        Piston(
-            int nbTimeSteps,
+        Piston(int nbTimeSteps,
             scalar dt,
             scalar q0,
             scalar qdot0,
@@ -39,8 +37,7 @@ class Piston : public SDCSolver
             scalar omega
             );
 
-        Piston(
-            int nbTimeSteps,
+        Piston(int nbTimeSteps,
             scalar dt,
             scalar q0,
             scalar qdot0,
@@ -53,28 +50,25 @@ class Piston : public SDCSolver
 
         ~Piston();
 
-        scalar referenceSolution( scalar t );
+        scalar referenceSolution(scalar t);
 
         void run();
 
-        virtual void finalizeTimeStep(){}
+        virtual void finalizeTimeStep() {}
 
-        virtual void getSolution(
-            fsi::vector & solution,
+        virtual void getSolution(fsi::vector & solution,
             fsi::vector & f
             );
 
-        virtual void setSolution(
-            const fsi::vector & solution,
+        virtual void setSolution(const fsi::vector & solution,
             const fsi::vector & f
             );
 
         virtual scalar getEndTime();
 
-        virtual void initTimeStep(){}
+        virtual void initTimeStep() {}
 
-        virtual void implicitSolve(
-            bool corrector,
+        virtual void implicitSolve(bool corrector,
             const int k,
             const int kold,
             const scalar t,
@@ -89,19 +83,17 @@ class Piston : public SDCSolver
 
         virtual scalar getTimeStep();
 
-        virtual void evaluateFunction(
-            const int k,
+        virtual void evaluateFunction(const int k,
             const fsi::vector & q,
             const scalar t,
             fsi::vector & f
             );
 
-        virtual void setNumberOfImplicitStages( int k );
+        virtual void setNumberOfImplicitStages(int k);
 
         virtual void nextTimeStep();
 
-        virtual void getVariablesInfo(
-            std::deque<int> & dof,
+        virtual void getVariablesInfo(std::deque<int> & dof,
             std::deque<bool> & enabled,
             std::deque<std::string> & names
             );

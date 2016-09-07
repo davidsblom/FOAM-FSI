@@ -17,19 +17,16 @@
 
 using std::shared_ptr;
 
-class SDCLaplacianSolver : public sdc::SDCSolver
-{
+class SDCLaplacianSolver : public sdc::SDCSolver {
     public:
-        SDCLaplacianSolver(
-            const string & name,
+        SDCLaplacianSolver(const string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );
 
         virtual ~SDCLaplacianSolver();
 
-        virtual void evaluateFunction(
-            const int k,
+        virtual void evaluateFunction(const int k,
             const fsi::vector & q,
             const scalar t,
             fsi::vector & f
@@ -39,10 +36,9 @@ class SDCLaplacianSolver : public sdc::SDCSolver
 
         virtual int getDOF();
 
-        virtual void getSolution( fsi::vector & solution );
+        virtual void getSolution(fsi::vector & solution);
 
-        virtual void setSolution(
-            const fsi::vector & solution,
+        virtual void setSolution(const fsi::vector & solution,
             const fsi::vector & f
             );
 
@@ -56,12 +52,11 @@ class SDCLaplacianSolver : public sdc::SDCSolver
 
         virtual bool isRunning();
 
-        virtual void setDeltaT( scalar dt );
+        virtual void setDeltaT(scalar dt);
 
-        virtual void setNumberOfImplicitStages( int k );
+        virtual void setNumberOfImplicitStages(int k);
 
-        virtual void implicitSolve(
-            bool corrector,
+        virtual void implicitSolve(bool corrector,
             const int k,
             const int kold,
             const scalar t,

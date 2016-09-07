@@ -12,19 +12,16 @@
 
 using namespace sdc;
 
-class Cos : public SDCSolver
-{
+class Cos : public SDCSolver {
     public:
-        Cos(
-            int nbTimeSteps,
+        Cos(int nbTimeSteps,
             scalar dt,
             scalar endTime,
             scalar amplitude,
             scalar frequency
             );
 
-        virtual void evaluateFunction(
-            const int k,
+        virtual void evaluateFunction(const int k,
             const fsi::vector & q,
             const scalar t,
             fsi::vector & f
@@ -34,13 +31,11 @@ class Cos : public SDCSolver
 
         virtual int getDOF();
 
-        virtual void getSolution(
-            fsi::vector & solution,
+        virtual void getSolution(fsi::vector & solution,
             fsi::vector & f
             );
 
-        virtual void setSolution(
-            const fsi::vector & solution,
+        virtual void setSolution(const fsi::vector & solution,
             const fsi::vector & f
             );
 
@@ -52,10 +47,9 @@ class Cos : public SDCSolver
 
         virtual void initTimeStep();
 
-        virtual void setNumberOfImplicitStages( int k );
+        virtual void setNumberOfImplicitStages(int k);
 
-        virtual void implicitSolve(
-            bool corrector,
+        virtual void implicitSolve(bool corrector,
             const int k,
             const int kold,
             const scalar t,

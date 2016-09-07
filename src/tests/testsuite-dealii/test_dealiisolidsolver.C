@@ -12,7 +12,7 @@
 #include "GaussLobatto.H"
 #include "Uniform.H"
 
-TEST( dealiiSolidSolver, sdc )
+TEST(dealiiSolidSolver, sdc)
 {
     using namespace dealiifsi;
     using namespace fsi;
@@ -28,7 +28,7 @@ TEST( dealiiSolidSolver, sdc )
     double nu = 0.4;
     double E = 1.4e6;
 
-    std::shared_ptr<sdc::SDCSolver> solver( new dealiiSolidSolver<2> ( time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ) );
+    std::shared_ptr<sdc::SDCSolver> solver(new dealiiSolidSolver<2> (time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines));
 
     int nbNodes = 2;
     scalar tol = 1.0e-13;
@@ -36,14 +36,14 @@ TEST( dealiiSolidSolver, sdc )
     int maxSweeps = 25;
 
     std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >(new fsi::quadrature::GaussRadau<scalar>(nbNodes));
 
-    sdc::SDC timeIntegrator( solver, quadrature, tol, minSweeps, maxSweeps );
+    sdc::SDC timeIntegrator(solver, quadrature, tol, minSweeps, maxSweeps);
     timeIntegrator.run();
-    ASSERT_TRUE( timeIntegrator.isConverged() );
+    ASSERT_TRUE(timeIntegrator.isConverged());
 }
 
-TEST( dealiiSolidSolver, gaussLobatto )
+TEST(dealiiSolidSolver, gaussLobatto)
 {
     using namespace dealiifsi;
     using namespace fsi;
@@ -59,7 +59,7 @@ TEST( dealiiSolidSolver, gaussLobatto )
     double nu = 0.4;
     double E = 1.4e6;
 
-    std::shared_ptr<sdc::SDCSolver> solver( new dealiiSolidSolver<2> ( time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ) );
+    std::shared_ptr<sdc::SDCSolver> solver(new dealiiSolidSolver<2> (time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines));
 
     int nbNodes = 2;
     scalar tol = 1.0e-13;
@@ -67,14 +67,14 @@ TEST( dealiiSolidSolver, gaussLobatto )
     int maxSweeps = 25;
 
     std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >(new fsi::quadrature::GaussLobatto<scalar>(nbNodes));
 
-    sdc::SDC timeIntegrator( solver, quadrature, tol, minSweeps, maxSweeps );
+    sdc::SDC timeIntegrator(solver, quadrature, tol, minSweeps, maxSweeps);
     timeIntegrator.run();
-    ASSERT_TRUE( timeIntegrator.isConverged() );
+    ASSERT_TRUE(timeIntegrator.isConverged());
 }
 
-TEST( dealiiSolidSolver, sdc_3 )
+TEST(dealiiSolidSolver, sdc_3)
 {
     using namespace dealiifsi;
     using namespace fsi;
@@ -90,7 +90,7 @@ TEST( dealiiSolidSolver, sdc_3 )
     double nu = 0.4;
     double E = 1.4e6;
 
-    std::shared_ptr<sdc::SDCSolver> solver( new dealiiSolidSolver<2> ( time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ) );
+    std::shared_ptr<sdc::SDCSolver> solver(new dealiiSolidSolver<2> (time_step, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines));
 
     int nbNodes = 3;
     scalar tol = 1.0e-10;
@@ -98,14 +98,14 @@ TEST( dealiiSolidSolver, sdc_3 )
     int maxSweeps = 100;
 
     std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+    quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >(new fsi::quadrature::GaussRadau<scalar>(nbNodes));
 
-    sdc::SDC timeIntegrator( solver, quadrature, tol, minSweeps, maxSweeps );
+    sdc::SDC timeIntegrator(solver, quadrature, tol, minSweeps, maxSweeps);
     timeIntegrator.run();
-    ASSERT_TRUE( timeIntegrator.isConverged() );
+    ASSERT_TRUE(timeIntegrator.isConverged());
 }
 
-TEST( dealiiSolidSolver, sdc_order )
+TEST(dealiiSolidSolver, sdc_order)
 {
     using namespace dealiifsi;
     using namespace fsi;
@@ -123,13 +123,12 @@ TEST( dealiiSolidSolver, sdc_order )
 
     unsigned int nbComputations = 4;
 
-    std::vector<double> solution_l2_norm( nbComputations );
+    std::vector<double> solution_l2_norm(nbComputations);
 
-    for ( unsigned int i = 0; i < nbComputations; ++i )
-    {
-        double dt = time_step / std::pow( 2, i );
+    for (unsigned int i = 0; i < nbComputations; ++i) {
+        double dt = time_step / std::pow(2, i);
 
-        std::shared_ptr<sdc::SDCSolver> solver( new dealiiSolidSolver<2> ( dt, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ) );
+        std::shared_ptr<sdc::SDCSolver> solver(new dealiiSolidSolver<2> (dt, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines));
 
         int nbNodes = 2;
         scalar tol = 1.0e-10;
@@ -137,46 +136,44 @@ TEST( dealiiSolidSolver, sdc_order )
         int maxSweeps = 100;
 
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussRadau<scalar>( nbNodes ) );
+        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >(new fsi::quadrature::GaussRadau<scalar>(nbNodes));
 
-        sdc::SDC timeIntegrator( solver, quadrature, tol, minSweeps, maxSweeps );
+        sdc::SDC timeIntegrator(solver, quadrature, tol, minSweeps, maxSweeps);
         timeIntegrator.run();
-        ASSERT_TRUE( timeIntegrator.isConverged() );
+        ASSERT_TRUE(timeIntegrator.isConverged());
 
-        std::shared_ptr<dealiiSolidSolver<2> > elasticSolver = std::dynamic_pointer_cast<dealiiSolidSolver<2> > ( solver );
-        fsi::vector solution( elasticSolver->getDOF() ), f( elasticSolver->getDOF() );
-        elasticSolver->getSolution( solution, f );
+        std::shared_ptr<dealiiSolidSolver<2> > elasticSolver = std::dynamic_pointer_cast<dealiiSolidSolver<2> > (solver);
+        fsi::vector solution(elasticSolver->getDOF()), f(elasticSolver->getDOF());
+        elasticSolver->getSolution(solution, f);
 
         solution_l2_norm[i] = solution.norm();
     }
 
-    std::vector<double> error( nbComputations - 1 );
+    std::vector<double> error(nbComputations - 1);
 
-    for ( unsigned int i = 0; i < solution_l2_norm.size(); ++i )
+    for (unsigned int i = 0; i < solution_l2_norm.size(); ++i)
         std::cout << "l2norm = " << solution_l2_norm[i] << std::endl;
 
-    for ( unsigned int i = 0; i < error.size(); ++i )
-    {
-        error[i] = std::abs( solution_l2_norm[i] - solution_l2_norm[nbComputations - 1] ) / std::abs( solution_l2_norm[nbComputations - 1] );
+    for (unsigned int i = 0; i < error.size(); ++i) {
+        error[i] = std::abs(solution_l2_norm[i] - solution_l2_norm[nbComputations - 1]) / std::abs(solution_l2_norm[nbComputations - 1]);
 
         std::cout << "error = " << error[i] << std::endl;
     }
 
-    std::vector<double> order( nbComputations - 2 );
+    std::vector<double> order(nbComputations - 2);
 
-    for ( unsigned int i = 0; i < order.size(); ++i )
-    {
-        double dti = time_step / std::pow( 2, i );
-        double dtinew = time_step / std::pow( 2, i + 1 );
-        order[i] = std::log10( error[i + 1] ) - std::log10( error[i] );
-        order[i] /= std::log10( dtinew ) - std::log10( dti );
+    for (unsigned int i = 0; i < order.size(); ++i) {
+        double dti = time_step / std::pow(2, i);
+        double dtinew = time_step / std::pow(2, i + 1);
+        order[i] = std::log10(error[i + 1]) - std::log10(error[i]);
+        order[i] /= std::log10(dtinew) - std::log10(dti);
         std::cout << "order = " << order[i] << std::endl;
 
-        ASSERT_GE( order[i], 3 );
+        ASSERT_GE(order[i], 3);
     }
 }
 
-TEST( dealiiSolidSolver, uniform_order )
+TEST(dealiiSolidSolver, uniform_order)
 {
     using namespace dealiifsi;
     using namespace fsi;
@@ -194,13 +191,12 @@ TEST( dealiiSolidSolver, uniform_order )
 
     unsigned int nbComputations = 4;
 
-    std::vector<double> solution_l2_norm( nbComputations );
+    std::vector<double> solution_l2_norm(nbComputations);
 
-    for ( unsigned int i = 0; i < nbComputations; ++i )
-    {
-        double dt = time_step / std::pow( 2, i );
+    for (unsigned int i = 0; i < nbComputations; ++i) {
+        double dt = time_step / std::pow(2, i);
 
-        std::shared_ptr<sdc::SDCSolver> solver( new dealiiSolidSolver<2> ( dt, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ) );
+        std::shared_ptr<sdc::SDCSolver> solver(new dealiiSolidSolver<2> (dt, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines));
 
         int nbNodes = 2;
         scalar tol = 1.0e-10;
@@ -208,46 +204,44 @@ TEST( dealiiSolidSolver, uniform_order )
         int maxSweeps = 100;
 
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >(new fsi::quadrature::Uniform<scalar>(nbNodes));
 
-        sdc::SDC timeIntegrator( solver, quadrature, tol, minSweeps, maxSweeps );
+        sdc::SDC timeIntegrator(solver, quadrature, tol, minSweeps, maxSweeps);
         timeIntegrator.run();
-        ASSERT_TRUE( timeIntegrator.isConverged() );
+        ASSERT_TRUE(timeIntegrator.isConverged());
 
-        std::shared_ptr<dealiiSolidSolver<2> > elasticSolver = std::dynamic_pointer_cast<dealiiSolidSolver<2> > ( solver );
-        fsi::vector solution( elasticSolver->getDOF() ), f( elasticSolver->getDOF() );
-        elasticSolver->getSolution( solution, f );
+        std::shared_ptr<dealiiSolidSolver<2> > elasticSolver = std::dynamic_pointer_cast<dealiiSolidSolver<2> > (solver);
+        fsi::vector solution(elasticSolver->getDOF()), f(elasticSolver->getDOF());
+        elasticSolver->getSolution(solution, f);
 
         solution_l2_norm[i] = solution.norm();
     }
 
-    std::vector<double> error( nbComputations - 1 );
+    std::vector<double> error(nbComputations - 1);
 
-    for ( unsigned int i = 0; i < solution_l2_norm.size(); ++i )
+    for (unsigned int i = 0; i < solution_l2_norm.size(); ++i)
         std::cout << "l2norm = " << solution_l2_norm[i] << std::endl;
 
-    for ( unsigned int i = 0; i < error.size(); ++i )
-    {
-        error[i] = std::abs( solution_l2_norm[i] - solution_l2_norm[nbComputations - 1] ) / std::abs( solution_l2_norm[nbComputations - 1] );
+    for (unsigned int i = 0; i < error.size(); ++i) {
+        error[i] = std::abs(solution_l2_norm[i] - solution_l2_norm[nbComputations - 1]) / std::abs(solution_l2_norm[nbComputations - 1]);
 
         std::cout << "error = " << error[i] << std::endl;
     }
 
-    std::vector<double> order( nbComputations - 2 );
+    std::vector<double> order(nbComputations - 2);
 
-    for ( unsigned int i = 0; i < order.size(); ++i )
-    {
-        double dti = time_step / std::pow( 2, i );
-        double dtinew = time_step / std::pow( 2, i + 1 );
-        order[i] = std::log10( error[i + 1] ) - std::log10( error[i] );
-        order[i] /= std::log10( dtinew ) - std::log10( dti );
+    for (unsigned int i = 0; i < order.size(); ++i) {
+        double dti = time_step / std::pow(2, i);
+        double dtinew = time_step / std::pow(2, i + 1);
+        order[i] = std::log10(error[i + 1]) - std::log10(error[i]);
+        order[i] /= std::log10(dtinew) - std::log10(dti);
         std::cout << "order = " << order[i] << std::endl;
 
-        ASSERT_GE( order[i], 2 );
+        ASSERT_GE(order[i], 2);
     }
 }
 
-TEST( dealiiSolidSolver, gauss_lobatto_order )
+TEST(dealiiSolidSolver, gauss_lobatto_order)
 {
     using namespace dealiifsi;
     using namespace fsi;
@@ -265,13 +259,12 @@ TEST( dealiiSolidSolver, gauss_lobatto_order )
 
     unsigned int nbComputations = 4;
 
-    std::vector<double> solution_l2_norm( nbComputations );
+    std::vector<double> solution_l2_norm(nbComputations);
 
-    for ( unsigned int i = 0; i < nbComputations; ++i )
-    {
-        double dt = time_step / std::pow( 2, i );
+    for (unsigned int i = 0; i < nbComputations; ++i) {
+        double dt = time_step / std::pow(2, i);
 
-        std::shared_ptr<sdc::SDCSolver> solver( new dealiiSolidSolver<2> ( dt, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines ) );
+        std::shared_ptr<sdc::SDCSolver> solver(new dealiiSolidSolver<2> (dt, final_time, theta, degree, gravity, distributed_load, rho, E, nu, n_global_refines));
 
         int nbNodes = 2;
         scalar tol = 1.0e-10;
@@ -279,41 +272,39 @@ TEST( dealiiSolidSolver, gauss_lobatto_order )
         int maxSweeps = 100;
 
         std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::GaussLobatto<scalar>( nbNodes ) );
+        quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >(new fsi::quadrature::GaussLobatto<scalar>(nbNodes));
 
-        sdc::SDC timeIntegrator( solver, quadrature, tol, minSweeps, maxSweeps );
+        sdc::SDC timeIntegrator(solver, quadrature, tol, minSweeps, maxSweeps);
         timeIntegrator.run();
-        ASSERT_TRUE( timeIntegrator.isConverged() );
+        ASSERT_TRUE(timeIntegrator.isConverged());
 
-        std::shared_ptr<dealiiSolidSolver<2> > elasticSolver = std::dynamic_pointer_cast<dealiiSolidSolver<2> > ( solver );
-        fsi::vector solution( elasticSolver->getDOF() ), f( elasticSolver->getDOF() );
-        elasticSolver->getSolution( solution, f );
+        std::shared_ptr<dealiiSolidSolver<2> > elasticSolver = std::dynamic_pointer_cast<dealiiSolidSolver<2> > (solver);
+        fsi::vector solution(elasticSolver->getDOF()), f(elasticSolver->getDOF());
+        elasticSolver->getSolution(solution, f);
 
         solution_l2_norm[i] = solution.norm();
     }
 
-    std::vector<double> error( nbComputations - 1 );
+    std::vector<double> error(nbComputations - 1);
 
-    for ( unsigned int i = 0; i < solution_l2_norm.size(); ++i )
+    for (unsigned int i = 0; i < solution_l2_norm.size(); ++i)
         std::cout << "l2norm = " << solution_l2_norm[i] << std::endl;
 
-    for ( unsigned int i = 0; i < error.size(); ++i )
-    {
-        error[i] = std::abs( solution_l2_norm[i] - solution_l2_norm[nbComputations - 1] ) / std::abs( solution_l2_norm[nbComputations - 1] );
+    for (unsigned int i = 0; i < error.size(); ++i) {
+        error[i] = std::abs(solution_l2_norm[i] - solution_l2_norm[nbComputations - 1]) / std::abs(solution_l2_norm[nbComputations - 1]);
 
         std::cout << "error = " << error[i] << std::endl;
     }
 
-    std::vector<double> order( nbComputations - 2 );
+    std::vector<double> order(nbComputations - 2);
 
-    for ( unsigned int i = 0; i < order.size(); ++i )
-    {
-        double dti = time_step / std::pow( 2, i );
-        double dtinew = time_step / std::pow( 2, i + 1 );
-        order[i] = std::log10( error[i + 1] ) - std::log10( error[i] );
-        order[i] /= std::log10( dtinew ) - std::log10( dti );
+    for (unsigned int i = 0; i < order.size(); ++i) {
+        double dti = time_step / std::pow(2, i);
+        double dtinew = time_step / std::pow(2, i + 1);
+        order[i] = std::log10(error[i + 1]) - std::log10(error[i]);
+        order[i] /= std::log10(dtinew) - std::log10(dti);
         std::cout << "order = " << order[i] << std::endl;
 
-        ASSERT_GE( order[i], 2 );
+        ASSERT_GE(order[i], 2);
     }
 }

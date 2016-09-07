@@ -26,17 +26,16 @@ using namespace std;
 using namespace fsi;
 using namespace tubeflow;
 
-int main()
-{
+int main() {
     // List of solvers
     deque<std::string> fsiSolvers;
 
-    fsiSolvers.push_back( "QN" );
-    fsiSolvers.push_back( "Anderson" );
-    fsiSolvers.push_back( "ML-IQN-ILS" );
-    fsiSolvers.push_back( "MM" );
-    fsiSolvers.push_back( "OSM" );
-    fsiSolvers.push_back( "ASM" );
+    fsiSolvers.push_back("QN");
+    fsiSolvers.push_back("Anderson");
+    fsiSolvers.push_back("ML-IQN-ILS");
+    fsiSolvers.push_back("MM");
+    fsiSolvers.push_back("OSM");
+    fsiSolvers.push_back("ASM");
 
     // fsiSolvers.push_back( "ASM-ILS" );
 
@@ -45,24 +44,17 @@ int main()
     bool parallelCoupling = false;
     int nbParallel = 1;
 
-    if ( parallelCoupling )
+    if (parallelCoupling)
         nbParallel = 2;
 
-    for ( int iCoarse = 0; iCoarse < 3; iCoarse++ )
-    {
-        for ( int iParallel = 0; iParallel < nbParallel; iParallel++ )
-        {
-            for ( int iReuse = 0; iReuse < 2; iReuse++ )
-            {
-                for ( int nbLevels = 2; nbLevels < 3; nbLevels++ )
-                {
-                    for ( int iOrder = 0; iOrder < 3; iOrder++ )
-                    {
-                        for ( unsigned i = 0; i < fsiSolvers.size(); i++ )
-                        {
-                            for ( int iTol = 0; iTol < nbTol; iTol++ )
-                            {
-                                std::string fsiSolver = fsiSolvers.at( i );
+    for (int iCoarse = 0; iCoarse < 3; iCoarse++) {
+        for (int iParallel = 0; iParallel < nbParallel; iParallel++) {
+            for (int iReuse = 0; iReuse < 2; iReuse++) {
+                for (int nbLevels = 2; nbLevels < 3; nbLevels++) {
+                    for (int iOrder = 0; iOrder < 3; iOrder++) {
+                        for (unsigned i = 0; i < fsiSolvers.size(); i++) {
+                            for (int iTol = 0; iTol < nbTol; iTol++) {
+                                std::string fsiSolver = fsiSolvers.at(i);
 
                                 // Physical settings
                                 scalar r0 = 0.2;
@@ -75,7 +67,7 @@ int main()
                                 scalar rho = 1.225;
                                 scalar E = 490;
                                 scalar h = 1.0e-3;
-                                scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
+                                scalar cmk = std::sqrt(E * h / (2 * rho * r0));
 
                                 // scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
                                 // scalar kappa = c0 / u0;
@@ -95,59 +87,58 @@ int main()
                                 bool updateJacobian = false;
 
                                 // Grid settings
-                                int N = pow( 10, 3 );
+                                int N = pow(10, 3);
                                 int couplingGridSize = N;
 
                                 int nbReuse = 0;
 
-                                if ( iReuse == 1 )
+                                if (iReuse == 1)
                                     nbReuse = 4;
 
-                                if ( iReuse == 2 )
+                                if (iReuse == 2)
                                     nbReuse = 24;
 
-                                if ( iReuse == 3 )
+                                if (iReuse == 3)
                                     nbReuse = 12;
 
-                                if ( iReuse == 4 )
+                                if (iReuse == 4)
                                     nbReuse = 16;
 
-                                if ( iReuse == 5 )
+                                if (iReuse == 5)
                                     nbReuse = 20;
 
-                                if ( iReuse == 6 )
-                                {
+                                if (iReuse == 6) {
                                     nbReuse = 0;
                                     updateJacobian = true;
                                 }
 
                                 parallel = false;
 
-                                if ( iParallel == 1 )
+                                if (iParallel == 1)
                                     parallel = true;
 
-                                if ( (fsiSolver == "QN" || fsiSolver == "Anderson") && nbLevels == 3 )
+                                if ((fsiSolver == "QN" || fsiSolver == "Anderson") && nbLevels == 3)
                                     continue;
 
-                                if ( (fsiSolver == "QN" || fsiSolver == "Anderson") && iTol > 0 )
+                                if ((fsiSolver == "QN" || fsiSolver == "Anderson") && iTol > 0)
                                     continue;
 
-                                if ( (fsiSolver != "OSM" && iOrder == 1) || (fsiSolver != "OSM" && iOrder == 2) )
+                                if ((fsiSolver != "OSM" && iOrder == 1) || (fsiSolver != "OSM" && iOrder == 2))
                                     continue;
 
-                                std::string label = fsiSolver + "_" + to_string( nbReuse ) + "_" + to_string( parallel );
-                                label += "_" + to_string( nbLevels ) + "_" + to_string( iCoarse );
-                                label += "_iTolCoarse_" + to_string( iTol );
+                                std::string label = fsiSolver + "_" + to_string(nbReuse) + "_" + to_string(parallel);
+                                label += "_" + to_string(nbLevels) + "_" + to_string(iCoarse);
+                                label += "_iTolCoarse_" + to_string(iTol);
 
-                                if ( fsiSolver == "OSM" )
-                                    label += "_" + to_string( iOrder );
+                                if (fsiSolver == "OSM")
+                                    label += "_" + to_string(iOrder);
 
-                                if ( updateJacobian )
-                                    label += "_" + to_string( updateJacobian );
+                                if (updateJacobian)
+                                    label += "_" + to_string(updateJacobian);
 
-                                ifstream ifile( label + ".log" );
+                                ifstream ifile(label + ".log");
 
-                                if ( ifile )
+                                if (ifile)
                                     continue;  // log file exists;
 
                                 // Create shared pointers to solvers
@@ -166,61 +157,60 @@ int main()
                                 shared_ptr<Solver> solver;
                                 shared_ptr<ImplicitMultiLevelFsiSolver> fineModel;
 
-                                models = shared_ptr< deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > ( new deque<shared_ptr<ImplicitMultiLevelFsiSolver> > () );
-                                solvers = shared_ptr< deque<shared_ptr<SpaceMappingSolver> > > ( new deque<shared_ptr<SpaceMappingSolver> >() );
+                                models = shared_ptr< deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > (new deque<shared_ptr<ImplicitMultiLevelFsiSolver> > ());
+                                solvers = shared_ptr< deque<shared_ptr<SpaceMappingSolver> > > (new deque<shared_ptr<SpaceMappingSolver> >());
 
-                                if ( fsiSolver == "MM" || fsiSolver == "OSM" || fsiSolver == "ASM" || fsiSolver == "ML-IQN-ILS" || fsiSolver == "ASM-ILS" )
-                                {
+                                if (fsiSolver == "MM" || fsiSolver == "OSM" || fsiSolver == "ASM" || fsiSolver == "ML-IQN-ILS" || fsiSolver == "ASM-ILS") {
                                     tol = 1.0e-6;
                                     N = couplingGridSize;
 
-                                    fineModelFluid = shared_ptr<TubeFlowFluidSolver> ( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
-                                    fineModelSolid = shared_ptr<TubeFlowSolidSolver> ( new TubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
+                                    fineModelFluid = shared_ptr<TubeFlowFluidSolver> (new TubeFlowFluidSolver(a0, u0, p0, dt, cmk, N, L, T, rho));
+                                    fineModelSolid = shared_ptr<TubeFlowSolidSolver> (new TubeFlowSolidSolver(a0, cmk, p0, rho, L, N));
 
                                     shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
                                     shared_ptr<rbf::RBFInterpolation> rbfInterpolator;
                                     shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
                                     shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;
 
-                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-                                    rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+                                    rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-                                    rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+                                    rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-                                    multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fineModelFluid, fineModelFluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, nbLevels - 1 ) );
+                                    multiLevelFluidSolver = shared_ptr<MultiLevelSolver> (new MultiLevelSolver(fineModelFluid, fineModelFluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, nbLevels - 1));
 
-                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-                                    rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+                                    rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-                                    rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+                                    rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-                                    multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fineModelSolid, fineModelSolid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, nbLevels - 1 ) );
+                                    multiLevelSolidSolver = shared_ptr<MultiLevelSolver> (new MultiLevelSolver(fineModelSolid, fineModelSolid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, nbLevels - 1));
 
                                     // Convergence measures
-                                    convergenceMeasures = shared_ptr<list<shared_ptr<ConvergenceMeasure> > >( new list<shared_ptr<ConvergenceMeasure> > );
+                                    convergenceMeasures = shared_ptr<list<shared_ptr<ConvergenceMeasure> > >(new list<shared_ptr<ConvergenceMeasure> > );
 
-                                    convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
-                                    convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, tol ) ) );
+                                    convergenceMeasures->push_back(shared_ptr<ConvergenceMeasure> (new MinIterationConvergenceMeasure(0, false, minIter)));
+                                    convergenceMeasures->push_back(shared_ptr<ConvergenceMeasure> (new RelativeConvergenceMeasure(0, false, tol)));
 
-                                    if ( parallel )
-                                        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, tol ) ) );
+                                    if (parallel)
+                                        convergenceMeasures->push_back(shared_ptr<ConvergenceMeasure> (new RelativeConvergenceMeasure(1, false, tol)));
 
-                                    multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
+                                    multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> (new MultiLevelFsiSolver(multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation));
 
                                     int maxUsedIterations = fineModelSolid->data.rows() * fineModelSolid->data.cols();
 
-                                    if ( parallel )
+                                    if (parallel)
                                         maxUsedIterations += fineModelFluid->data.rows() * fineModelFluid->data.cols();
 
-                                    postProcessing = shared_ptr<PostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
+                                    postProcessing = shared_ptr<PostProcessing> (new AndersonPostProcessing(multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian));
 
-                                    fineModel = shared_ptr<ImplicitMultiLevelFsiSolver> ( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
+                                    fineModel = shared_ptr<ImplicitMultiLevelFsiSolver> (new ImplicitMultiLevelFsiSolver(multiLevelFsiSolver, postProcessing));
 
                                     solid.reset();
                                     multiLevelFluidSolver.reset();
@@ -229,76 +219,71 @@ int main()
                                     multiLevelFsiSolver.reset();
                                     postProcessing.reset();
 
-                                    for ( int level = 0; level < nbLevels - 1; level++ )
-                                    {
-                                        if ( level == 0 && iCoarse == 0 )
-                                        {
-                                            tol = std::pow( 10, -iTol - 1 );
+                                    for (int level = 0; level < nbLevels - 1; level++) {
+                                        if (level == 0 && iCoarse == 0) {
+                                            tol = std::pow(10, -iTol - 1);
                                             N = couplingGridSize / 10;
                                         }
 
-                                        if ( level == 0 && iCoarse == 1 )
-                                        {
-                                            tol = std::pow( 10, -iTol - 1 );
+                                        if (level == 0 && iCoarse == 1) {
+                                            tol = std::pow(10, -iTol - 1);
                                             N = couplingGridSize / 20;
                                         }
 
-                                        if ( level == 0 && iCoarse == 2 )
-                                        {
-                                            tol = std::pow( 10, -iTol - 1 );
+                                        if (level == 0 && iCoarse == 2) {
+                                            tol = std::pow(10, -iTol - 1);
                                             N = couplingGridSize / 50;
                                         }
 
-                                        if ( level == 1 )
-                                        {
+                                        if (level == 1) {
                                             tol = 1.0e-6;
                                             N = couplingGridSize;
                                         }
 
-                                        fluid = shared_ptr<TubeFlowFluidSolver> ( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
-                                        solid = shared_ptr<TubeFlowSolidSolver> ( new TubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
+                                        fluid = shared_ptr<TubeFlowFluidSolver> (new TubeFlowFluidSolver(a0, u0, p0, dt, cmk, N, L, T, rho));
+                                        solid = shared_ptr<TubeFlowSolidSolver> (new TubeFlowSolidSolver(a0, cmk, p0, rho, L, N));
 
-                                        rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-                                        rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-                                        rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+                                        rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+                                        rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+                                        rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-                                        rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-                                        rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-                                        rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+                                        rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+                                        rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+                                        rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-                                        multiLevelFluidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( fluid, fineModelFluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, level ) );
+                                        multiLevelFluidSolver = shared_ptr<MultiLevelSolver> (new MultiLevelSolver(fluid, fineModelFluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, level));
 
-                                        rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-                                        rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-                                        rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+                                        rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+                                        rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+                                        rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-                                        rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-                                        rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-                                        rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+                                        rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+                                        rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+                                        rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-                                        multiLevelSolidSolver = shared_ptr<MultiLevelSolver> ( new MultiLevelSolver( solid, fineModelSolid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, level ) );
+                                        multiLevelSolidSolver = shared_ptr<MultiLevelSolver> (new MultiLevelSolver(solid, fineModelSolid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, level));
 
                                         // Convergence measures
-                                        convergenceMeasures = shared_ptr<list<shared_ptr<ConvergenceMeasure> > >( new list<shared_ptr<ConvergenceMeasure> > );
+                                        convergenceMeasures = shared_ptr<list<shared_ptr<ConvergenceMeasure> > >(new list<shared_ptr<ConvergenceMeasure> > );
 
-                                        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
-                                        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, tol ) ) );
+                                        convergenceMeasures->push_back(shared_ptr<ConvergenceMeasure> (new MinIterationConvergenceMeasure(0, false, minIter)));
+                                        convergenceMeasures->push_back(shared_ptr<ConvergenceMeasure> (new RelativeConvergenceMeasure(0, false, tol)));
 
-                                        if ( parallel )
-                                            convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, tol ) ) );
+                                        if (parallel)
+                                            convergenceMeasures->push_back(shared_ptr<ConvergenceMeasure> (new RelativeConvergenceMeasure(1, false, tol)));
 
-                                        multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation ) );
+                                        multiLevelFsiSolver = shared_ptr<MultiLevelFsiSolver> (new MultiLevelFsiSolver(multiLevelFluidSolver, multiLevelSolidSolver, convergenceMeasures, parallel, extrapolation));
 
                                         int maxUsedIterations = solid->data.rows() * solid->data.cols();
 
-                                        if ( parallel )
+                                        if (parallel)
                                             maxUsedIterations += fluid->data.rows() * fluid->data.cols();
 
-                                        postProcessing = shared_ptr<PostProcessing> ( new AndersonPostProcessing( multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
+                                        postProcessing = shared_ptr<PostProcessing> (new AndersonPostProcessing(multiLevelFsiSolver, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian));
 
-                                        shared_ptr<ImplicitMultiLevelFsiSolver> implicitMultiLevelFsiSolver( new ImplicitMultiLevelFsiSolver( multiLevelFsiSolver, postProcessing ) );
+                                        shared_ptr<ImplicitMultiLevelFsiSolver> implicitMultiLevelFsiSolver(new ImplicitMultiLevelFsiSolver(multiLevelFsiSolver, postProcessing));
 
-                                        models->push_back( implicitMultiLevelFsiSolver );
+                                        models->push_back(implicitMultiLevelFsiSolver);
 
                                         solid.reset();
                                         multiLevelFluidSolver.reset();
@@ -309,127 +294,121 @@ int main()
                                         implicitMultiLevelFsiSolver.reset();
                                     }
 
-                                    models->push_back( fineModel );
+                                    models->push_back(fineModel);
 
-                                    assert( static_cast<int>( models->size() ) == nbLevels );
+                                    assert(static_cast<int>(models->size()) == nbLevels);
 
-                                    if ( fsiSolver == "MM" || fsiSolver == "OSM" || fsiSolver == "ASM" || fsiSolver == "ASM-ILS" )
-                                    {
-                                        for ( int level = 0; level < nbLevels - 1; level++ )
-                                        {
+                                    if (fsiSolver == "MM" || fsiSolver == "OSM" || fsiSolver == "ASM" || fsiSolver == "ASM-ILS") {
+                                        for (int level = 0; level < nbLevels - 1; level++) {
                                             shared_ptr<ImplicitMultiLevelFsiSolver> fineModel;
                                             shared_ptr<ImplicitMultiLevelFsiSolver> coarseModel;
 
-                                            fineModel = models->at( level + 1 );
+                                            fineModel = models->at(level + 1);
 
-                                            if ( level == 0 )
-                                                coarseModel = models->at( level );
+                                            if (level == 0)
+                                                coarseModel = models->at(level);
 
-                                            if ( level > 0 )
-                                                coarseModel = solvers->at( level - 1 );
+                                            if (level > 0)
+                                                coarseModel = solvers->at(level - 1);
 
                                             shared_ptr<SpaceMapping> spaceMapping;
 
-                                            if ( fsiSolver == "MM" )
-                                                spaceMapping = shared_ptr<SpaceMapping> ( new ManifoldMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian ) );
+                                            if (fsiSolver == "MM")
+                                                spaceMapping = shared_ptr<SpaceMapping> (new ManifoldMapping(fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, updateJacobian));
 
-                                            if ( fsiSolver == "OSM" )
-                                                spaceMapping = shared_ptr<SpaceMapping> ( new OutputSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, iOrder ) );
+                                            if (fsiSolver == "OSM")
+                                                spaceMapping = shared_ptr<SpaceMapping> (new OutputSpaceMapping(fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, iOrder));
 
-                                            if ( fsiSolver == "ASM" )
-                                                spaceMapping = shared_ptr<SpaceMapping> ( new AggressiveSpaceMapping( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit ) );
+                                            if (fsiSolver == "ASM")
+                                                spaceMapping = shared_ptr<SpaceMapping> (new AggressiveSpaceMapping(fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit));
 
-                                            if ( fsiSolver == "ASM-ILS" )
-                                                spaceMapping = shared_ptr<SpaceMapping> ( new ASMILS( fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, beta ) );
+                                            if (fsiSolver == "ASM-ILS")
+                                                spaceMapping = shared_ptr<SpaceMapping> (new ASMILS(fineModel, coarseModel, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex, singularityLimit, beta));
 
-                                            shared_ptr<SpaceMappingSolver > spaceMappingSolver( new SpaceMappingSolver( fineModel, coarseModel, spaceMapping ) );
+                                            shared_ptr<SpaceMappingSolver > spaceMappingSolver(new SpaceMappingSolver(fineModel, coarseModel, spaceMapping));
 
-                                            solvers->push_back( spaceMappingSolver );
+                                            solvers->push_back(spaceMappingSolver);
 
                                             spaceMapping.reset();
                                             spaceMappingSolver.reset();
                                         }
 
-                                        assert( static_cast<int>( solvers->size() ) == nbLevels - 1 );
+                                        assert(static_cast<int>(solvers->size()) == nbLevels - 1);
                                     }
                                 }
 
-                                if ( fsiSolver == "QN" || fsiSolver == "Anderson" )
-                                {
-                                    assert( !fsi );
+                                if (fsiSolver == "QN" || fsiSolver == "Anderson") {
+                                    assert(!fsi);
 
                                     tol = 1.0e-6;
                                     N = couplingGridSize;
 
-                                    fluid = shared_ptr<TubeFlowFluidSolver> ( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
-                                    solid = shared_ptr<TubeFlowSolidSolver> ( new TubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
+                                    fluid = shared_ptr<TubeFlowFluidSolver> (new TubeFlowFluidSolver(a0, u0, p0, dt, cmk, N, L, T, rho));
+                                    solid = shared_ptr<TubeFlowSolidSolver> (new TubeFlowSolidSolver(a0, cmk, p0, rho, L, N));
 
                                     shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
                                     shared_ptr<rbf::RBFInterpolation> rbfInterpolator;
                                     shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
                                     shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;
 
-                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-                                    rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+                                    rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-                                    rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+                                    rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-                                    shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+                                    shared_ptr<MultiLevelSolver> fluidSolver(new MultiLevelSolver(fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0));
 
-                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-                                    rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+                                    rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-                                    rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+                                    rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+                                    rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+                                    rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-                                    shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
+                                    shared_ptr<MultiLevelSolver> solidSolver(new MultiLevelSolver(solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0));
 
                                     // Convergence measures
-                                    convergenceMeasures = shared_ptr<list<shared_ptr<ConvergenceMeasure> > >( new list<shared_ptr<ConvergenceMeasure> > );
+                                    convergenceMeasures = shared_ptr<list<shared_ptr<ConvergenceMeasure> > >(new list<shared_ptr<ConvergenceMeasure> > );
 
-                                    convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
-                                    convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 0, false, tol ) ) );
+                                    convergenceMeasures->push_back(shared_ptr<ConvergenceMeasure> (new MinIterationConvergenceMeasure(0, false, minIter)));
+                                    convergenceMeasures->push_back(shared_ptr<ConvergenceMeasure> (new RelativeConvergenceMeasure(0, false, tol)));
 
-                                    if ( parallel )
-                                        convergenceMeasures->push_back( shared_ptr<ConvergenceMeasure> ( new RelativeConvergenceMeasure( 1, false, tol ) ) );
+                                    if (parallel)
+                                        convergenceMeasures->push_back(shared_ptr<ConvergenceMeasure> (new RelativeConvergenceMeasure(1, false, tol)));
 
                                     int maxUsedIterations = solid->data.rows() * solid->data.cols();
 
-                                    if ( parallel )
+                                    if (parallel)
                                         maxUsedIterations += fluid->data.rows() * fluid->data.cols();
 
-                                    fsi = shared_ptr<MultiLevelFsiSolver>( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
+                                    fsi = shared_ptr<MultiLevelFsiSolver>(new MultiLevelFsiSolver(fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation));
 
-                                    if ( fsiSolver == "Anderson" )
-                                        postProcessing = shared_ptr<PostProcessing> ( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
+                                    if (fsiSolver == "Anderson")
+                                        postProcessing = shared_ptr<PostProcessing> (new AndersonPostProcessing(fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian));
 
-                                    if ( fsiSolver == "QN" )
-                                        postProcessing = shared_ptr<PostProcessing> ( new BroydenPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex ) );
+                                    if (fsiSolver == "QN")
+                                        postProcessing = shared_ptr<PostProcessing> (new BroydenPostProcessing(fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex));
 
-                                    solver = shared_ptr<Solver>( new ImplicitMultiLevelFsiSolver( fsi, postProcessing ) );
+                                    solver = shared_ptr<Solver>(new ImplicitMultiLevelFsiSolver(fsi, postProcessing));
                                 }
 
-                                if ( fsiSolver == "RPM" || fsiSolver == "MM" || fsiSolver == "OSM" || fsiSolver == "ASM" || fsiSolver == "ASM-ILS" )
-                                    solver = shared_ptr<Solver> ( new MultiLevelSpaceMappingSolver( solvers, models, true ) );
+                                if (fsiSolver == "RPM" || fsiSolver == "MM" || fsiSolver == "OSM" || fsiSolver == "ASM" || fsiSolver == "ASM-ILS")
+                                    solver = shared_ptr<Solver> (new MultiLevelSpaceMappingSolver(solvers, models, true));
 
-                                if ( fsiSolver == "ML-IQN-ILS" )
-                                    solver = shared_ptr<Solver> ( new MLIQNILSSolver( models, true ) );
+                                if (fsiSolver == "ML-IQN-ILS")
+                                    solver = shared_ptr<Solver> (new MLIQNILSSolver(models, true));
 
-                                try
-                                {
+                                try{
                                     solver->run();
-                                }
-                                catch ( ... )
-                                {
+                                }catch (...) {
                                     continue;
                                 }
-                                ofstream logFile( label + ".log" );
-                                assert( logFile.is_open() );
+                                ofstream logFile(label + ".log");
+                                assert(logFile.is_open());
 
                                 logFile << "label = " << label << endl;
                                 logFile << "nbLevels = " << nbLevels << endl;
@@ -440,20 +419,18 @@ int main()
                                 logFile << "nbTimeSteps = " << fluid->timeIndex << endl;
                                 logFile << "updateJacobian = " << updateJacobian << endl;
                                 logFile << "iTol = " << iTol << endl;
-                                logFile << "tol coarse model = " << std::pow( 10, -iTol - 1 ) << endl;
+                                logFile << "tol coarse model = " << std::pow(10, -iTol - 1) << endl;
 
-                                if ( fsiSolver == "QN" || fsiSolver == "Anderson" )
+                                if (fsiSolver == "QN" || fsiSolver == "Anderson")
                                     logFile << "nbIter = " << fsi->nbIter << endl;
 
-                                if ( fsiSolver == "OSM" )
+                                if (fsiSolver == "OSM")
                                     logFile << "order = " << iOrder << endl;
 
-                                if ( fsiSolver == "RPM" || fsiSolver == "MM" || fsiSolver == "OSM" || fsiSolver == "ML-IQN-ILS" || fsiSolver == "ASM" || fsiSolver == "ASM-ILS" )
-                                {
+                                if (fsiSolver == "RPM" || fsiSolver == "MM" || fsiSolver == "OSM" || fsiSolver == "ML-IQN-ILS" || fsiSolver == "ASM" || fsiSolver == "ASM-ILS") {
                                     int level = 0;
 
-                                    for ( std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it )
-                                    {
+                                    for (std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> >::iterator it = models->begin(); it != models->end(); ++it) {
                                         shared_ptr<ImplicitMultiLevelFsiSolver> model = *it;
                                         logFile << "level " << level << " nbIter = " << model->fsi->nbIter << endl;
                                         logFile << "level " << level << " N = " << model->fsi->fluid->data.rows() << endl;

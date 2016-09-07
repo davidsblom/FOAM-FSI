@@ -8,13 +8,11 @@
 #include <limits.h>
 #include "El.hpp"
 
-int main(
-    int argc,
+int main(int argc,
     char ** argv
-    )
-{
+    ) {
     El::Initialize();
-    ::testing::InitGoogleTest( &argc, argv );
+    ::testing::InitGoogleTest(&argc, argv);
     int result = RUN_ALL_TESTS();
     El::Finalize();
     return result;

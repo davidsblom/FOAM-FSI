@@ -17,11 +17,9 @@
 using namespace fsi;
 using std::shared_ptr;
 
-class SDCDynamicMeshFluidSolver : public SDCFluidSolver
-{
+class SDCDynamicMeshFluidSolver : public SDCFluidSolver {
     public:
-        SDCDynamicMeshFluidSolver(
-            const std::string & name,
+        SDCDynamicMeshFluidSolver(const std::string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );
@@ -30,8 +28,7 @@ class SDCDynamicMeshFluidSolver : public SDCFluidSolver
 
         virtual void resetSolution();
 
-        virtual void evaluateFunction(
-            const int k,
+        virtual void evaluateFunction(const int k,
             const fsi::vector & q,
             const scalar t,
             fsi::vector & f
@@ -39,18 +36,15 @@ class SDCDynamicMeshFluidSolver : public SDCFluidSolver
 
         virtual int getDOF();
 
-        virtual void getSolution(
-            fsi::vector & solution,
+        virtual void getSolution(fsi::vector & solution,
             fsi::vector & f
             );
 
-        virtual void setSolution(
-            const fsi::vector & solution,
+        virtual void setSolution(const fsi::vector & solution,
             const fsi::vector & f
             );
 
-        virtual void implicitSolve(
-            bool corrector,
+        virtual void implicitSolve(bool corrector,
             const int k,
             const int kold,
             const scalar t,
@@ -61,8 +55,7 @@ class SDCDynamicMeshFluidSolver : public SDCFluidSolver
             fsi::vector & result
             );
 
-        virtual void prepareImplicitSolve(
-            bool corrector,
+        virtual void prepareImplicitSolve(bool corrector,
             const int k,
             const int kold,
             const scalar t,
@@ -71,12 +64,11 @@ class SDCDynamicMeshFluidSolver : public SDCFluidSolver
             const fsi::vector & rhs
             );
 
-        virtual void setNumberOfImplicitStages( int k );
+        virtual void setNumberOfImplicitStages(int k);
 
         virtual void nextTimeStep();
 
-        virtual void getVariablesInfo(
-            std::deque<int> & dof,
+        virtual void getVariablesInfo(std::deque<int> & dof,
             std::deque<bool> & enabled,
             std::deque<std::string> & names
             );
@@ -85,7 +77,7 @@ class SDCDynamicMeshFluidSolver : public SDCFluidSolver
 
         virtual void solve();
 
-        virtual void getTractionLocal( matrix & traction );
+        virtual void getTractionLocal(matrix & traction);
 
     private:
         void createFields();

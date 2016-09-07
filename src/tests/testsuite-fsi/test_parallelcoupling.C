@@ -23,11 +23,9 @@ using ::testing::Bool;
 using ::testing::Values;
 using ::testing::Combine;
 
-class parallelCouplingParametrizedTest : public TestWithParam<int>
-{
+class parallelCouplingParametrizedTest : public TestWithParam<int>{
     protected:
-        virtual void SetUp()
-        {
+        virtual void SetUp() {
             // Physical settings
             scalar r0 = 0.2;
             scalar a0 = M_PI * r0 * r0;
@@ -41,8 +39,8 @@ class parallelCouplingParametrizedTest : public TestWithParam<int>
             scalar rho = 1.225;
             scalar E = 490;
             scalar h = 1.0e-3;
-            scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
-            scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
+            scalar cmk = std::sqrt(E * h / (2 * rho * r0));
+            scalar c0 = std::sqrt(cmk * cmk - p0 / (2 * rho));
             scalar kappa = c0 / u0;
             scalar tau = u0 * dt / L;
 
@@ -63,55 +61,54 @@ class parallelCouplingParametrizedTest : public TestWithParam<int>
             int extrapolation = 0;
             int minIter = 1;
 
-            ASSERT_NEAR( tau, 0.01, 1.0e-13 );
-            ASSERT_NEAR( kappa, 10, 1.0e-13 );
-            ASSERT_TRUE( dx > 0 );
+            ASSERT_NEAR(tau, 0.01, 1.0e-13);
+            ASSERT_NEAR(kappa, 10, 1.0e-13);
+            ASSERT_TRUE(dx > 0);
 
-            fluid = shared_ptr<TubeFlowFluidSolver> ( new TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho ) );
-            shared_ptr<TubeFlowSolidSolver> solid( new TubeFlowSolidSolver( a0, cmk, p0, rho, L, N ) );
+            fluid = shared_ptr<TubeFlowFluidSolver> (new TubeFlowFluidSolver(a0, u0, p0, dt, cmk, N, L, T, rho));
+            shared_ptr<TubeFlowSolidSolver> solid(new TubeFlowSolidSolver(a0, cmk, p0, rho, L, N));
 
             shared_ptr<rbf::RBFFunctionInterface> rbfFunction;
             shared_ptr<rbf::RBFInterpolation> rbfInterpolator;
             shared_ptr<rbf::RBFCoarsening> rbfInterpToCouplingMesh;
             shared_ptr<rbf::RBFCoarsening> rbfInterpToMesh;
 
-            rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-            rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-            rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+            rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+            rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+            rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-            rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-            rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-            rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+            rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+            rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+            rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-            shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 ) );
+            shared_ptr<MultiLevelSolver> fluidSolver(new MultiLevelSolver(fluid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0));
 
-            rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-            rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-            rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+            rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+            rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+            rbfInterpToCouplingMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-            rbfFunction = shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
-            rbfInterpolator = shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
-            rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
+            rbfFunction = shared_ptr<rbf::RBFFunctionInterface>(new rbf::TPSFunction());
+            rbfInterpolator = shared_ptr<rbf::RBFInterpolation>(new rbf::RBFInterpolation(rbfFunction));
+            rbfInterpToMesh = shared_ptr<rbf::RBFCoarsening> (new rbf::RBFCoarsening(rbfInterpolator));
 
-            shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 ) );
+            shared_ptr<MultiLevelSolver> solidSolver(new MultiLevelSolver(solid, fluid, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0));
 
             // Convergence measures
             std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
-            convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
+            convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >(new std::list<std::shared_ptr<ConvergenceMeasure> > );
 
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new MinIterationConvergenceMeasure( 0, false, minIter ) ) );
-            convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 0, false, tol ) ) );
+            convergenceMeasures->push_back(std::shared_ptr<ConvergenceMeasure>(new MinIterationConvergenceMeasure(0, false, minIter)));
+            convergenceMeasures->push_back(std::shared_ptr<ConvergenceMeasure>(new RelativeConvergenceMeasure(0, false, tol)));
 
-            if ( parallel )
-                convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new RelativeConvergenceMeasure( 1, false, tol ) ) );
+            if (parallel)
+                convergenceMeasures->push_back(std::shared_ptr<ConvergenceMeasure>(new RelativeConvergenceMeasure(1, false, tol)));
 
-            shared_ptr<MultiLevelFsiSolver> fsi( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
-            shared_ptr<AndersonPostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
-            solver = new ImplicitMultiLevelFsiSolver( fsi, postProcessing );
+            shared_ptr<MultiLevelFsiSolver> fsi(new MultiLevelFsiSolver(fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation));
+            shared_ptr<AndersonPostProcessing> postProcessing(new AndersonPostProcessing(fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian));
+            solver = new ImplicitMultiLevelFsiSolver(fsi, postProcessing);
         }
 
-        virtual void TearDown()
-        {
+        virtual void TearDown() {
             delete solver;
         }
 
@@ -119,83 +116,76 @@ class parallelCouplingParametrizedTest : public TestWithParam<int>
         std::shared_ptr<TubeFlowFluidSolver> fluid;
 };
 
-INSTANTIATE_TEST_CASE_P( parallelCoupling, parallelCouplingParametrizedTest, Values( 5, 100 ) );
+INSTANTIATE_TEST_CASE_P(parallelCoupling, parallelCouplingParametrizedTest, Values(5, 100));
 
-TEST_P( parallelCouplingParametrizedTest, timeStep )
+TEST_P(parallelCouplingParametrizedTest, timeStep)
 {
     int N = GetParam();
 
     solver->solveTimeStep();
 
-    ASSERT_TRUE( solver->fsi->allConverged );
-    ASSERT_TRUE( solver->fsi->fluid->isRunning() );
+    ASSERT_TRUE(solver->fsi->allConverged);
+    ASSERT_TRUE(solver->fsi->fluid->isRunning());
 
-    if ( N == 5 )
-    {
-        ASSERT_LE( solver->fsi->nbIter, 12 );
-        ASSERT_LE( fluid->nbRes, 60 );
-        ASSERT_LE( fluid->nbJac, 36 );
+    if (N == 5) {
+        ASSERT_LE(solver->fsi->nbIter, 12);
+        ASSERT_LE(fluid->nbRes, 60);
+        ASSERT_LE(fluid->nbJac, 36);
     }
 
-    if ( N == 100 )
-    {
-        ASSERT_LE( solver->fsi->nbIter, 20 );
-        ASSERT_LE( fluid->nbRes, 100 );
-        ASSERT_LE( fluid->nbJac, 60 );
+    if (N == 100) {
+        ASSERT_LE(solver->fsi->nbIter, 20);
+        ASSERT_LE(fluid->nbRes, 100);
+        ASSERT_LE(fluid->nbJac, 60);
     }
 }
 
-TEST_P( parallelCouplingParametrizedTest, timeSteps )
+TEST_P(parallelCouplingParametrizedTest, timeSteps)
 {
     int N = GetParam();
 
     solver->solveTimeStep();
 
-    if ( N == 100 )
-    {
-        ASSERT_LE( fluid->nbRes, 100 );
-        ASSERT_LE( fluid->nbJac, 60 );
+    if (N == 100) {
+        ASSERT_LE(fluid->nbRes, 100);
+        ASSERT_LE(fluid->nbJac, 60);
     }
 
     solver->solveTimeStep();
 
-    if ( N == 100 )
-    {
-        ASSERT_LE( fluid->nbRes, 215 );
-        ASSERT_LE( fluid->nbJac, 129 );
+    if (N == 100) {
+        ASSERT_LE(fluid->nbRes, 215);
+        ASSERT_LE(fluid->nbJac, 129);
     }
 
     solver->solveTimeStep();
 
-    if ( N == 100 )
-    {
-        ASSERT_LE( fluid->nbRes, 335 );
-        ASSERT_LE( fluid->nbJac, 201 );
+    if (N == 100) {
+        ASSERT_LE(fluid->nbRes, 335);
+        ASSERT_LE(fluid->nbJac, 201);
     }
 
     solver->solveTimeStep();
 
-    if ( N == 100 )
-    {
-        ASSERT_LE( fluid->nbRes, 474 );
-        ASSERT_LE( fluid->nbJac, 285 );
+    if (N == 100) {
+        ASSERT_LE(fluid->nbRes, 474);
+        ASSERT_LE(fluid->nbJac, 285);
     }
 
     solver->solveTimeStep();
 
-    if ( N == 100 )
-    {
-        ASSERT_LE( fluid->nbRes, 593 );
-        ASSERT_LE( fluid->nbJac, 357 );
+    if (N == 100) {
+        ASSERT_LE(fluid->nbRes, 593);
+        ASSERT_LE(fluid->nbJac, 357);
     }
 
     solver->solveTimeStep();
 }
 
-TEST_P( parallelCouplingParametrizedTest, run )
+TEST_P(parallelCouplingParametrizedTest, run)
 {
     solver->run();
 
-    ASSERT_TRUE( solver->fsi->allConverged );
-    ASSERT_FALSE( solver->fsi->fluid->isRunning() );
+    ASSERT_TRUE(solver->fsi->allConverged);
+    ASSERT_FALSE(solver->fsi->fluid->isRunning());
 }
