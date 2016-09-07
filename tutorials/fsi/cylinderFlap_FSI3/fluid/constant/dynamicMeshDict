@@ -47,7 +47,7 @@ UnitCoarsening
 AdaptiveCoarsening
 {
     tol 1e-3;
-    reselectionTol 1e-2;
+    reselectionTol 1e-3;
     minPoints 100;
-    maxPoints 500;
+    maxPoints 1000;
 }

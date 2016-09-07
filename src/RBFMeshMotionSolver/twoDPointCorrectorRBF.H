@@ -51,7 +51,7 @@ namespace Foam
             // Constructors
 
             // - Construct from components
-            twoDPointCorrectorRBF( const polyMesh & mesh );
+            explicit twoDPointCorrectorRBF( const polyMesh & mesh );
 
 
             // Destructor

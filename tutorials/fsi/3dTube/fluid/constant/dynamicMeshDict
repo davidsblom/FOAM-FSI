@@ -16,13 +16,33 @@ FoamFile
 
 dynamicFvMesh dynamicMotionSolverFvMesh;
 
-solver RBFMeshMotionSolver;
+solver ElRBFMeshMotionSolver;
 
 movingPatches ( wall );
 
-staticPatches ( );
+staticPatches ( outlet inlet );
 
-fixedPatches ( outlet inlet );
+coarseningStrategy NoCoarsening;
+
+interpolation
+{
+  function TPS;
+}
+
+UnitCoarsening
+{
+    tol 1e-3;
+    minPoints 100;
+    maxPoints 500;
+}
+
+AdaptiveCoarsening
+{
+    tol 1e-3;
+    reselectionTol 1e-2;
+    minPoints 100;
+    maxPoints 500;
+}
 
 coarsening
 {
