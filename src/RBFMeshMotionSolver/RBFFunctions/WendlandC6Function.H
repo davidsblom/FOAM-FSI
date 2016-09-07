@@ -9,19 +9,17 @@
 
 #include "RBFFunctionInterface.H"
 
-namespace rbf
-{
-    class WendlandC6Function : public RBFFunctionInterface
-    {
-        public:
-            explicit WendlandC6Function( scalar radius );
+namespace rbf {
+class WendlandC6Function : public RBFFunctionInterface {
+    public:
+        explicit WendlandC6Function(scalar radius);
 
-            virtual ~WendlandC6Function();
+        virtual ~WendlandC6Function();
 
-            virtual scalar evaluate( scalar value );
+        virtual scalar evaluate(scalar value);
 
-            scalar radius;
-    };
+        scalar radius;
+};
 }
 
 #endif

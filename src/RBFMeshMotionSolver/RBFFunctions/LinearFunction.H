@@ -9,17 +9,15 @@
 
 #include "RBFFunctionInterface.H"
 
-namespace rbf
-{
-    class LinearFunction : public RBFFunctionInterface
-    {
-        public:
-            LinearFunction();
+namespace rbf {
+class LinearFunction : public RBFFunctionInterface {
+    public:
+        LinearFunction();
 
-            virtual ~LinearFunction();
+        virtual ~LinearFunction();
 
-            virtual scalar evaluate( scalar value );
-    };
+        virtual scalar evaluate(scalar value);
+};
 }
 
 #endif

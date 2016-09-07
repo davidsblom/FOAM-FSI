@@ -14,7 +14,8 @@ build:
             name: cpplint
             code: |
                 git clone https://github.com/google/styleguide.git
-                styleguide/cpplint/cpplint.py --extensions=C,H,tpp --verbose=5 src/fsi/*H src/fsi/*C src/fsi/*tpp
+                styleguide/cpplint/cpplint.py --extensions=C,H,tpp --verbose=4 src/fsi/*H src/fsi/*C src/fsi/*tpp
+                styleguide/cpplint/cpplint.py --extensions=C,H,tpp --verbose=4 src/RBFMeshMotionSolver/*H src/RBFMeshMotionSolver/*C
         - script:
             name: cppcheck
             code: |

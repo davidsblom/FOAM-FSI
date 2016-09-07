@@ -9,17 +9,15 @@
 
 #include "RBFFunctionInterface.H"
 
-namespace rbf
-{
-    class TPSFunction : public RBFFunctionInterface
-    {
-        public:
-            TPSFunction();
+namespace rbf {
+class TPSFunction : public RBFFunctionInterface {
+    public:
+        TPSFunction();
 
-            virtual ~TPSFunction();
+        virtual ~TPSFunction();
 
-            virtual scalar evaluate( scalar value );
-    };
+        virtual scalar evaluate(scalar value);
+};
 }
 
 #endif
