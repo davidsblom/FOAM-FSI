@@ -11,6 +11,13 @@ build:
                 git checkout .
                 git submodule update --init --recursive
         - script:
+            name: cppcheck
+            code: |
+                (cd src/fsi && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+                (cd src/RBFMeshMotionSolver && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+                (cd src/tests && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+                (cd applications && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+        - script:
             name: initialize dependencies
             code: |
                 # foam-extend
@@ -116,13 +123,6 @@ build:
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-dealii
         - script:
-            name: cppcheck
-            code: |
-                (cd src/fsi && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
-                (cd src/RBFMeshMotionSolver && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
-                (cd src/tests && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
-                (cd applications && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
-        - script:
             name: tutorials
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
@@ -139,6 +139,13 @@ debug:
             code: |
                 git checkout .
                 git submodule update --init --recursive
+        - script:
+            name: cppcheck
+            code: |
+                (cd src/fsi && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+                (cd src/RBFMeshMotionSolver -j `nproc` && cppcheck --error-exitcode=1 --enable=performance,portability .)
+                (cd src/tests && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+                (cd applications && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
         - script:
             name: initialize dependencies
             code: |
@@ -211,13 +218,6 @@ debug:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && wmake all
-        - script:
-            name: cppcheck
-            code: |
-                (cd src/fsi && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
-                (cd src/RBFMeshMotionSolver -j `nproc` && cppcheck --error-exitcode=1 --enable=performance,portability .)
-                (cd src/tests && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
-                (cd applications && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
         - script:
             name: cleanup
             code: rm -rf * .git* .travis.yml .uncrustify.cfg
