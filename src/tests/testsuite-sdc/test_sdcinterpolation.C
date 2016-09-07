@@ -188,7 +188,7 @@ TEST(SDC, polynomialInterpolationGaussLobatto)
 
     for (auto node : nodes) {
         scalar ref = std::sin(node);
-        scalar error = abs(interp(i, 0) - ref) / abs(ref + SMALL);
+        scalar error = abs(interp(i, 0) - ref);
         ASSERT_LE(error, 1.0e-10);
         i++;
     }
