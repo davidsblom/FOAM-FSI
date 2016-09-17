@@ -1,22 +1,19 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef SpaceMappingSolver_H
 #define SpaceMappingSolver_H
 
+#include <memory>
 #include "ImplicitMultiLevelFsiSolver.H"
 #include "SpaceMapping.H"
 
-using namespace fsi;
-
-class SpaceMappingSolver : public ImplicitMultiLevelFsiSolver
-{
+namespace fsi {
+class SpaceMappingSolver : public ImplicitMultiLevelFsiSolver {
     public:
-        SpaceMappingSolver(
-            shared_ptr<ImplicitMultiLevelFsiSolver> fineModel,
+        SpaceMappingSolver(shared_ptr<ImplicitMultiLevelFsiSolver> fineModel,
             shared_ptr<ImplicitMultiLevelFsiSolver> coarseModel,
             shared_ptr<SpaceMapping> spaceMapping
             );
@@ -25,38 +22,33 @@ class SpaceMappingSolver : public ImplicitMultiLevelFsiSolver
 
         virtual bool allConverged();
 
-        virtual void evaluate(
-            const fsi::vector & x,
+        virtual void evaluate(const fsi::vector & x,
             fsi::vector & output,
             fsi::vector & R
             );
 
         virtual bool isConvergence();
 
-        virtual bool isConvergence(
-            const fsi::vector & x,
+        virtual bool isConvergence(const fsi::vector & x,
             const fsi::vector & xprev
             );
 
-        virtual void optimize(
-            const fsi::vector & x0,
+        virtual void optimize(const fsi::vector & x0,
             fsi::vector & xk
             );
 
-        virtual void optimize(
-            const fsi::vector & y,
+        virtual void optimize(const fsi::vector & y,
             const fsi::vector & x0,
             fsi::vector & xk
             );
 
         virtual void run();
 
-        virtual void setSurrogateData(
-            fsi::vector & xf,
+        virtual void setSurrogateData(fsi::vector & xf,
             matrix & J
             );
 
-        virtual void setUseJacobian( bool useJacobian );
+        virtual void setUseJacobian(bool useJacobian);
 
         void finalizeTimeStep();
 
@@ -72,5 +64,6 @@ class SpaceMappingSolver : public ImplicitMultiLevelFsiSolver
         shared_ptr<ImplicitMultiLevelFsiSolver> coarseModel;
         shared_ptr<SpaceMapping> spaceMapping;
 };
+} // namespace fsi
 
 #endif

@@ -1,116 +1,108 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef TubeFlowLinearizedSolidSolver_H
 #define TubeFlowLinearizedSolidSolver_H
 
-#include "BaseMultiLevelSolver.H"
 #include <deque>
 #include <vector>
+#include <memory>
+#include "BaseMultiLevelSolver.H"
 
-using namespace fsi;
+namespace tubeflow {
+class TubeFlowLinearizedSolidSolver : public fsi::BaseMultiLevelSolver {
+    public:
+        TubeFlowLinearizedSolidSolver(int N,
+            scalar nu,
+            scalar rho,
+            scalar h,
+            scalar L,
+            scalar dt,
+            scalar G,
+            scalar E0,
+            scalar r0,
+            scalar T
+            );
 
-namespace tubeflow
-{
-    class TubeFlowLinearizedSolidSolver : public BaseMultiLevelSolver
-    {
-        public:
-            TubeFlowLinearizedSolidSolver(
-                int N,
-                scalar nu,
-                scalar rho,
-                scalar h,
-                scalar L,
-                scalar dt,
-                scalar G,
-                scalar E0,
-                scalar r0,
-                scalar T
-                );
+        TubeFlowLinearizedSolidSolver(int N,
+            scalar nu,
+            scalar rho,
+            scalar h,
+            scalar L,
+            scalar dt,
+            scalar G,
+            scalar E0,
+            scalar r0,
+            scalar T,
+            int timeOrder
+            );
 
-            TubeFlowLinearizedSolidSolver(
-                int N,
-                scalar nu,
-                scalar rho,
-                scalar h,
-                scalar L,
-                scalar dt,
-                scalar G,
-                scalar E0,
-                scalar r0,
-                scalar T,
-                int timeOrder
-                );
+        virtual ~TubeFlowLinearizedSolidSolver();
 
-            virtual ~TubeFlowLinearizedSolidSolver();
+        virtual void finalizeTimeStep();
 
-            virtual void finalizeTimeStep();
+        virtual void getReadPositions(fsi::matrix & readPositions);
 
-            virtual void getReadPositions( matrix & readPositions );
+        virtual void getWritePositions(fsi::matrix & writePositions);
 
-            virtual void getWritePositions( matrix & writePositions );
+        virtual void initTimeStep();
 
-            virtual void initTimeStep();
+        virtual bool isRunning();
 
-            virtual bool isRunning();
+        virtual void resetSolution();
 
-            virtual void resetSolution();
+        virtual void solve(const fsi::matrix & input,
+            fsi::matrix & output
+            );
 
-            virtual void solve(
-                const matrix & input,
-                matrix & output
-                );
+        virtual void solve(const fsi::vector & p,
+            fsi::vector & a
+            );
 
-            virtual void solve(
-                const fsi::vector & p,
-                fsi::vector & a
-                );
+        void factorizeMatrix();
 
-            void factorizeMatrix();
+        void calcGrid();
 
-            void calcGrid();
+        void run();
 
-            void run();
+        void solveTimeStep();
 
-            void solveTimeStep();
+        // Constants
 
-            // Constants
+        const int N;
+        const int timeOrder;
+        scalar dt;
+        const scalar r0;
+        const scalar kappa;
+        const scalar dx;
+        const scalar G;
+        const scalar E0;
+        const scalar nu;
+        const scalar h;
+        const scalar rho;
+        const scalar T;
 
-            const int N;
-            const int timeOrder;
-            scalar dt;
-            const scalar r0;
-            const scalar kappa;
-            const scalar dx;
-            const scalar G;
-            const scalar E0;
-            const scalar nu;
-            const scalar h;
-            const scalar rho;
-            const scalar T;
+        fsi::matrix grid;
 
-            matrix grid;
+        // Fields
 
-            // Fields
+        fsi::vector un;
+        fsi::vector rn;
+        fsi::vector u;
+        fsi::vector r;
+        fsi::vector rhs;
+        fsi::vector p;
 
-            fsi::vector un;
-            fsi::vector rn;
-            fsi::vector u;
-            fsi::vector r;
-            fsi::vector rhs;
-            fsi::vector p;
+        std::shared_ptr<Eigen::FullPivLU<fsi::matrix> > lu;
 
-            std::shared_ptr<Eigen::FullPivLU<matrix> > lu;
-
-            // Time discretization constants
-            std::vector<scalar> alpha;
-            scalar beta;
-            std::deque<fsi::vector> rStages;
-            std::deque<fsi::vector> uStages;
-    };
-}
+        // Time discretization constants
+        std::vector<scalar> alpha;
+        scalar beta;
+        std::deque<fsi::vector> rStages;
+        std::deque<fsi::vector> uStages;
+};
+} // namespace tubeflow
 
 #endif

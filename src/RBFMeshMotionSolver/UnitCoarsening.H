@@ -1,42 +1,43 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #pragma once
 
+#include <memory>
+#include <vector>
 #include "Coarsener.H"
 #include "ElRBFInterpolation.H"
 
-namespace rbf
-{
-    class UnitCoarsening : public Coarsener
-    {
-        public:
-            UnitCoarsening(
-                double tol,
-                int minPoints,
-                int maxPoints
-                );
+namespace rbf {
+class UnitCoarsening : public Coarsener {
+    public:
+        UnitCoarsening(double tol,
+            int minPoints,
+            int maxPoints
+            );
 
-            ~UnitCoarsening();
+        ~UnitCoarsening();
 
-            void compute(
-                std::shared_ptr<RBFFunctionInterface> rbfFunction,
-                std::unique_ptr<ElDistVector> positions,
-                std::unique_ptr<ElDistVector> positionsInterpolation
-                );
+        void compute(std::shared_ptr<RBFFunctionInterface> rbfFunction,
+            std::unique_ptr<ElDistVector> positions,
+            std::unique_ptr<ElDistVector> positionsInterpolation
+            );
 
-            bool initialized();
+        bool initialized();
 
-            std::unique_ptr<ElDistVector> interpolate( const std::unique_ptr<ElDistVector> & values );
+        std::unique_ptr<ElDistVector> interpolate(const std::unique_ptr<ElDistVector> & values);
 
-        private:
-            void selectData(
-                const std::unique_ptr<ElDistVector> & data,
-                std::unique_ptr<ElDistVector> & selection
-                );
+    private:
+        void selectData(const std::unique_ptr<ElDistVector> & data,
+            std::unique_ptr<ElDistVector> & selection
+            );
 
-            const double tol;
-            const int minPoints;
-            const int maxPoints;
-            ElRBFInterpolation rbf;
-            std::vector<size_t> selectedPositions;
-    };
-}
+        const double tol;
+        const int minPoints;
+        const int maxPoints;
+        ElRBFInterpolation rbf;
+        std::vector<size_t> selectedPositions;
+};
+}  // namespace rbf

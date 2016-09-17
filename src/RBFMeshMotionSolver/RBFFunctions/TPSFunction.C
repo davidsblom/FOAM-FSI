@@ -6,19 +6,17 @@
 
 #include "TPSFunction.H"
 
-namespace rbf
-{
-    TPSFunction::TPSFunction()
-    {}
+namespace rbf {
+TPSFunction::TPSFunction()
+{}
 
-    TPSFunction::~TPSFunction()
-    {}
+TPSFunction::~TPSFunction()
+{}
 
-    scalar TPSFunction::evaluate( scalar value )
-    {
-        if ( value > 0 )
-            return std::log( value ) * value * value;
+scalar TPSFunction::evaluate(scalar value) {
+    if (value > 0)
+        return std::log(value) * value * value;
 
-        return 0L;
-    }
+    return 0L;
+}
 }

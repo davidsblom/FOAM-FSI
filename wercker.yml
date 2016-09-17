@@ -11,6 +11,12 @@ build:
                 git checkout .
                 git submodule update --init --recursive
         - script:
+            name: cpplint
+            code: |
+                git clone https://github.com/google/styleguide.git
+                styleguide/cpplint/cpplint.py --extensions=C,H,tpp --verbose=4 src/fsi/*H src/fsi/*C src/fsi/*tpp
+                styleguide/cpplint/cpplint.py --extensions=C,H,tpp --verbose=4 src/RBFMeshMotionSolver/*H src/RBFMeshMotionSolver/*C
+        - script:
             name: cppcheck
             code: |
                 (cd src/fsi && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)

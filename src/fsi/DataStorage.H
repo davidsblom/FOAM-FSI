@@ -1,66 +1,59 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #pragma once
 
+#include <memory>
+#include <vector>
 #include "SDCSolver.H"
 #include "QuadratureInterface.H"
 
-namespace sdc
-{
-    class DataStorage
-    {
-        public:
-            DataStorage(
-                std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >,
-                int N
-                );
+namespace sdc {
+class DataStorage {
+    public:
+        DataStorage(std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >,
+            int N
+            );
 
-            ~DataStorage();
+        ~DataStorage();
 
-            const fsi::matrix & getFunctions() const;
+        const fsi::matrix & getFunctions() const;
 
-            const fsi::matrix & getOldFunctions() const;
+        const fsi::matrix & getOldFunctions() const;
 
-            const fsi::matrix & getSolutions() const;
+        const fsi::matrix & getSolutions() const;
 
-            void copyFunctions();
+        void copyFunctions();
 
-            const fsi::matrix integrate(
-                const std::vector<scalar> & nodes,
-                scalar dt
-                ) const;
+        const fsi::matrix integrate(const std::vector<scalar> & nodes,
+            scalar dt
+            ) const;
 
-            const fsi::matrix interpolate(
-                const fsi::matrix functions,
-                const std::vector<scalar> & nodes
-                ) const;
+        const fsi::matrix interpolate(const fsi::matrix functions,
+            const std::vector<scalar> & nodes
+            ) const;
 
-            const fsi::vector getFunction( int substep ) const;
+        const fsi::vector getFunction(int substep) const;
 
-            const fsi::vector getSolution( int substep ) const;
+        const fsi::vector getSolution(int substep) const;
 
-            const fsi::vector getLastSolution() const;
+        const fsi::vector getLastSolution() const;
 
-            void initialize(
-                int k,
-                int N
-                );
+        void initialize(int k,
+            int N
+            );
 
-            void storeFunction(
-                const fsi::vector & f,
-                int substep
-                );
+        void storeFunction(const fsi::vector & f,
+            int substep
+            );
 
-            void storeSolution(
-                const fsi::vector & sol,
-                int substep
-                );
+        void storeSolution(const fsi::vector & sol,
+            int substep
+            );
 
-            std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-            fsi::matrix F, Fold, solStages;
-    };
-}
+        std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
+        fsi::matrix F, Fold, solStages;
+};
+} // namespace sdc

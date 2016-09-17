@@ -1,48 +1,43 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #pragma once
 
-#include <memory>
 #include <El.hpp>
+#include <memory>
 #include "RBFFunctionInterface.H"
 
-namespace rbf
-{
-    typedef El::DistMatrix<double, El::VR, El::STAR> ElDistVector;
+namespace rbf {
+typedef El::DistMatrix<double, El::VR, El::STAR> ElDistVector;
 
-    class ElRBFInterpolation
-    {
-        public:
-            explicit ElRBFInterpolation();
+class ElRBFInterpolation {
+    public:
+        ElRBFInterpolation();
 
-            explicit ElRBFInterpolation(
-                std::shared_ptr<RBFFunctionInterface> rbfFunction,
-                std::unique_ptr<ElDistVector> positions,
-                std::unique_ptr<ElDistVector> positionsInterpolation
-                );
+        explicit ElRBFInterpolation(std::shared_ptr<RBFFunctionInterface> rbfFunction,
+            std::unique_ptr<ElDistVector> positions,
+            std::unique_ptr<ElDistVector> positionsInterpolation
+            );
 
-            ~ElRBFInterpolation();
+        ~ElRBFInterpolation();
 
-            void compute(
-                std::shared_ptr<RBFFunctionInterface> rbfFunction,
-                std::unique_ptr<ElDistVector> positions,
-                std::unique_ptr<ElDistVector> positionsInterpolation
-                );
+        void compute(std::shared_ptr<RBFFunctionInterface> rbfFunction,
+            std::unique_ptr<ElDistVector> positions,
+            std::unique_ptr<ElDistVector> positionsInterpolation
+            );
 
-            bool initialized();
+        bool initialized();
 
-            std::unique_ptr<ElDistVector> interpolate( const std::unique_ptr<ElDistVector> & values );
+        std::unique_ptr<ElDistVector> interpolate(const std::unique_ptr<ElDistVector> & values);
 
-        private:
-            std::unique_ptr<El::DistMatrix<double> > H;
-            std::unique_ptr<El::DistMatrix<double> > Phi;
+    private:
+        std::unique_ptr<El::DistMatrix<double> > H;
+        std::unique_ptr<El::DistMatrix<double> > Phi;
 
-            El::DistMatrix<double> HCopy;
-            El::DistMatrix<double, El::MD, El::STAR> dSub;
-            El::DistPermutation p;
-    };
-}
+        El::DistMatrix<double> HCopy;
+        El::DistMatrix<double, El::MD, El::STAR> dSub;
+        El::DistPermutation p;
+};
+}  // namespace rbf

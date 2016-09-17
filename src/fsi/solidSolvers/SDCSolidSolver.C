@@ -6,14 +6,13 @@
 
 #include "SDCSolidSolver.H"
 
-SDCSolidSolver::SDCSolidSolver (
-    const std::string & name,
+SDCSolidSolver::SDCSolidSolver (const std::string & name,
     const std::shared_ptr<argList> & args,
     const std::shared_ptr<Time> & runTime
     )
     :
-    foamSolidSolver( name, args, runTime ),
-    gradU( fvc::grad( U ) ),
+    foamSolidSolver(name, args, runTime),
+    gradU(fvc::grad(U)),
     epsilon
     (
         IOobject
@@ -25,7 +24,7 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
+        dimensionedSymmTensor("zero", dimless, symmTensor::zero)
     ),
     sigma
     (
@@ -38,15 +37,15 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
+        dimensionedSymmTensor("zero", dimForce / dimArea, symmTensor::zero)
     ),
-    rheology( sigma, U ),
-    rho( rheology.rho() ),
-    mu( rheology.mu() ),
-    lambda( rheology.lambda() ),
-    muf( fvc::interpolate( mu, "mu" ) ),
-    lambdaf( fvc::interpolate( lambda, "lambda" ) ),
-    n( mesh.Sf() / mesh.magSf() ),
+    rheology(sigma, U),
+    rho(rheology.rho()),
+    mu(rheology.mu()),
+    lambda(rheology.lambda()),
+    muf(fvc::interpolate(mu, "mu")),
+    lambdaf(fvc::interpolate(lambda, "lambda")),
+    n(mesh.Sf() / mesh.magSf()),
     V
     (
         IOobject
@@ -57,15 +56,15 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        fvc::ddt( U )
+        fvc::ddt(U)
     ),
-    minIter( readInt( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "minIter" ) ) ),
-    maxIter( readInt( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "maxIter" ) ) ),
-    absoluteTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "tolerance" ) ) ),
-    relativeTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "relTol" ) ) ),
-    interpolator( nullptr ),
-    k( 0 ),
-    indexk( 0 ),
+    minIter(readInt(mesh.solutionDict().subDict("solidMechanics").lookup("minIter"))),
+    maxIter(readInt(mesh.solutionDict().subDict("solidMechanics").lookup("maxIter"))),
+    absoluteTolerance(readScalar(mesh.solutionDict().subDict("solidMechanics").lookup("tolerance"))),
+    relativeTolerance(readScalar(mesh.solutionDict().subDict("solidMechanics").lookup("relTol"))),
+    interpolator(nullptr),
+    k(0),
+    indexk(0),
     UStages(),
     VStages(),
     rhsU
@@ -79,7 +78,7 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedVector( "rhsU", dimLength, Foam::vector::zero )
+        dimensionedVector("rhsU", dimLength, Foam::vector::zero)
     ),
     rhsV
     (
@@ -92,7 +91,7 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedVector( "rhsV", dimVelocity, Foam::vector::zero )
+        dimensionedVector("rhsV", dimVelocity, Foam::vector::zero)
     ),
     UF
     (
@@ -105,7 +104,7 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedVector( "UF", dimLength / dimTime, Foam::vector::zero )
+        dimensionedVector("UF", dimLength / dimTime, Foam::vector::zero)
     ),
     VF
     (
@@ -118,30 +117,28 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedVector( "VF", dimVelocity / dimTime, Foam::vector::zero )
-    )
-{
-    const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>( "fvSchemes" );
-    const dictionary & ddtSchemes = fvSchemes.subDict( "ddtSchemes" );
+        dimensionedVector("VF", dimVelocity / dimTime, Foam::vector::zero)
+    ) {
+    const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>("fvSchemes");
+    const dictionary & ddtSchemes = fvSchemes.subDict("ddtSchemes");
     word ddtScheme;
 
-    if ( ddtSchemes.found( "ddt(U)" ) )
-        ddtScheme = word( ddtSchemes.lookup( "ddt(U)" ) );
+    if (ddtSchemes.found("ddt(U)"))
+        ddtScheme = word(ddtSchemes.lookup("ddt(U)"));
     else
-        ddtScheme = word( ddtSchemes.lookup( "default" ) );
+        ddtScheme = word(ddtSchemes.lookup("default"));
 
-    assert( ddtScheme == "bdf1" );
+    assert(ddtScheme == "bdf1");
 }
 
-SDCSolidSolver::SDCSolidSolver (
-    const std::string & name,
+SDCSolidSolver::SDCSolidSolver (const std::string & name,
     const std::shared_ptr<argList> & args,
     const std::shared_ptr<Time> & runTime,
     const std::shared_ptr<rbf::RBFCoarsening> & interpolator
     )
     :
-    foamSolidSolver( name, args, runTime ),
-    gradU( fvc::grad( U ) ),
+    foamSolidSolver(name, args, runTime),
+    gradU(fvc::grad(U)),
     epsilon
     (
         IOobject
@@ -153,7 +150,7 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedSymmTensor( "zero", dimless, symmTensor::zero )
+        dimensionedSymmTensor("zero", dimless, symmTensor::zero)
     ),
     sigma
     (
@@ -166,15 +163,15 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedSymmTensor( "zero", dimForce / dimArea, symmTensor::zero )
+        dimensionedSymmTensor("zero", dimForce / dimArea, symmTensor::zero)
     ),
-    rheology( sigma, U ),
-    rho( rheology.rho() ),
-    mu( rheology.mu() ),
-    lambda( rheology.lambda() ),
-    muf( fvc::interpolate( mu, "mu" ) ),
-    lambdaf( fvc::interpolate( lambda, "lambda" ) ),
-    n( mesh.Sf() / mesh.magSf() ),
+    rheology(sigma, U),
+    rho(rheology.rho()),
+    mu(rheology.mu()),
+    lambda(rheology.lambda()),
+    muf(fvc::interpolate(mu, "mu")),
+    lambdaf(fvc::interpolate(lambda, "lambda")),
+    n(mesh.Sf() / mesh.magSf()),
     V
     (
         IOobject
@@ -185,15 +182,15 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        fvc::ddt( U )
+        fvc::ddt(U)
     ),
-    minIter( readInt( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "minIter" ) ) ),
-    maxIter( readInt( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "maxIter" ) ) ),
-    absoluteTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "tolerance" ) ) ),
-    relativeTolerance( readScalar( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "relTol" ) ) ),
-    interpolator( interpolator ),
-    k( 0 ),
-    indexk( 0 ),
+    minIter(readInt(mesh.solutionDict().subDict("solidMechanics").lookup("minIter"))),
+    maxIter(readInt(mesh.solutionDict().subDict("solidMechanics").lookup("maxIter"))),
+    absoluteTolerance(readScalar(mesh.solutionDict().subDict("solidMechanics").lookup("tolerance"))),
+    relativeTolerance(readScalar(mesh.solutionDict().subDict("solidMechanics").lookup("relTol"))),
+    interpolator(interpolator),
+    k(0),
+    indexk(0),
     UStages(),
     VStages(),
     rhsU
@@ -207,7 +204,7 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedVector( "rhsU", dimLength, Foam::vector::zero )
+        dimensionedVector("rhsU", dimLength, Foam::vector::zero)
     ),
     rhsV
     (
@@ -220,7 +217,7 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedVector( "rhsV", dimVelocity, Foam::vector::zero )
+        dimensionedVector("rhsV", dimVelocity, Foam::vector::zero)
     ),
     UF
     (
@@ -233,7 +230,7 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedVector( "UF", dimLength / dimTime, Foam::vector::zero )
+        dimensionedVector("UF", dimLength / dimTime, Foam::vector::zero)
     ),
     VF
     (
@@ -246,64 +243,59 @@ SDCSolidSolver::SDCSolidSolver (
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedVector( "VF", dimVelocity / dimTime, Foam::vector::zero )
-    )
-{
-    const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>( "fvSchemes" );
-    const dictionary & ddtSchemes = fvSchemes.subDict( "ddtSchemes" );
+        dimensionedVector("VF", dimVelocity / dimTime, Foam::vector::zero)
+    ) {
+    const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>("fvSchemes");
+    const dictionary & ddtSchemes = fvSchemes.subDict("ddtSchemes");
     word ddtScheme;
 
-    if ( ddtSchemes.found( "ddt(U)" ) )
-        ddtScheme = word( ddtSchemes.lookup( "ddt(U)" ) );
+    if (ddtSchemes.found("ddt(U)"))
+        ddtScheme = word(ddtSchemes.lookup("ddt(U)"));
     else
-        ddtScheme = word( ddtSchemes.lookup( "default" ) );
+        ddtScheme = word(ddtSchemes.lookup("default"));
 
-    assert( ddtScheme == "bdf1" );
+    assert(ddtScheme == "bdf1");
 }
 
 SDCSolidSolver::~SDCSolidSolver()
 {}
 
-void SDCSolidSolver::calculateEpsilonSigma()
-{
+void SDCSolidSolver::calculateEpsilonSigma() {
     // - Green finite strain tensor
-    epsilon = symm( gradU ) + 0.5 * symm( gradU & gradU.T() );
+    epsilon = symm(gradU) + 0.5 * symm(gradU & gradU.T());
 
     // - second Piola-Kirchhoff stress tensor
-    sigma = 2 * mu * epsilon + lambda * ( I * tr( epsilon ) );
+    sigma = 2 * mu * epsilon + lambda * (I * tr(epsilon));
 }
 
-void SDCSolidSolver::initialize()
-{
+void SDCSolidSolver::initialize() {
     readCouplingProperties();
 }
 
-void SDCSolidSolver::initTimeStep()
-{
-    assert( !init );
+void SDCSolidSolver::initTimeStep() {
+    assert(!init);
 
     readSolidMechanicsControls();
 
     init = true;
 }
 
-bool SDCSolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> solver )
-{
+bool SDCSolidSolver::interpolateVolField(std::shared_ptr<BaseMultiLevelSolver> solver) {
     std::shared_ptr<SDCSolidSolver> fineModel;
-    fineModel = std::dynamic_pointer_cast<SDCSolidSolver>( solver );
+    fineModel = std::dynamic_pointer_cast<SDCSolidSolver>(solver);
 
-    assert( fineModel );
+    assert(fineModel);
 
     // Interpolate the displacement of the fineMesh onto the own
     // mesh
 
     Info << "Mesh to mesh volume interpolation of field U for the solid domain" << endl;
 
-    const volVectorField & fieldSource = fineModel->mesh.lookupObject<volVectorField>( "U" );
+    const volVectorField & fieldSource = fineModel->mesh.lookupObject<volVectorField>("U");
 
     // Gather all the cell centers of the source
 
-    labelList cellCentresSourceSize( Pstream::nProcs(), 0 );
+    labelList cellCentresSourceSize(Pstream::nProcs(), 0);
 
     const Foam::vectorField & cellCentresSource = fineModel->mesh.cellCentres();
 
@@ -311,103 +303,99 @@ bool SDCSolidSolver::interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> 
 
     // Reduce (gather, scatter) over procs
 
-    reduce( cellCentresSourceSize, sumOp<labelList>() );
+    reduce(cellCentresSourceSize, sumOp<labelList>());
 
-    assert( interpolator );
+    assert(interpolator);
 
-    if ( !interpolator->rbf->computed )
-    {
+    if (!interpolator->rbf->computed) {
         // Gather all the cell centers of the source
 
         const Foam::vectorField & cellCentresTarget = mesh.cellCentres();
 
-        vectorField globalControlPoints( sum( cellCentresSourceSize ), Foam::vector::zero );
+        vectorField globalControlPoints(sum(cellCentresSourceSize), Foam::vector::zero);
 
         label startIndex = 0;
 
-        for ( int i = 0; i < Pstream::myProcNo(); i++ )
+        for (int i = 0; i < Pstream::myProcNo(); i++)
             startIndex += cellCentresSourceSize[i];
 
-        for ( int i = 0; i < cellCentresSourceSize[Pstream::myProcNo()]; i++ )
+        for (int i = 0; i < cellCentresSourceSize[Pstream::myProcNo()]; i++)
             globalControlPoints[startIndex + i] = cellCentresSource[i];
 
-        reduce( globalControlPoints, sumOp<vectorField>() );
+        reduce(globalControlPoints, sumOp<vectorField>());
 
-        matrix positions( sum( cellCentresSourceSize ), 3 );
-        matrix positionsInterpolation( cellCentresTarget.size(), 3 );
+        matrix positions(sum(cellCentresSourceSize), 3);
+        matrix positionsInterpolation(cellCentresTarget.size(), 3);
 
-        for ( int i = 0; i < positions.rows(); i++ )
-            for ( int j = 0; j < positions.cols(); j++ )
-                positions( i, j ) = globalControlPoints[i][j];
+        for (int i = 0; i < positions.rows(); i++)
+            for (int j = 0; j < positions.cols(); j++)
+                positions(i, j) = globalControlPoints[i][j];
 
-        for ( int i = 0; i < positionsInterpolation.rows(); i++ )
-            for ( int j = 0; j < positionsInterpolation.cols(); j++ )
-                positionsInterpolation( i, j ) = cellCentresTarget[i][j];
+        for (int i = 0; i < positionsInterpolation.rows(); i++)
+            for (int j = 0; j < positionsInterpolation.cols(); j++)
+                positionsInterpolation(i, j) = cellCentresTarget[i][j];
 
-        interpolator->compute( positions, positionsInterpolation );
+        interpolator->compute(positions, positionsInterpolation);
     }
 
-    vectorField globalFieldSource( fineModel->mesh.globalData().nTotalCells(), Foam::vector::zero );
+    vectorField globalFieldSource(fineModel->mesh.globalData().nTotalCells(), Foam::vector::zero);
 
     label startIndex = 0;
 
-    for ( int i = 0; i < Pstream::myProcNo(); i++ )
+    for (int i = 0; i < Pstream::myProcNo(); i++)
         startIndex += cellCentresSourceSize[i];
 
-    for ( int i = 0; i < cellCentresSourceSize[Pstream::myProcNo()]; i++ )
+    for (int i = 0; i < cellCentresSourceSize[Pstream::myProcNo()]; i++)
         globalFieldSource[startIndex + i] = fieldSource[i];
 
-    reduce( globalFieldSource, sumOp<vectorField>() );
+    reduce(globalFieldSource, sumOp<vectorField>());
 
     // Initialize variables for interpolation
 
-    matrix values( globalFieldSource.size(), 3 );
+    matrix values(globalFieldSource.size(), 3);
     matrix valuesInterpolation;
 
-    for ( int i = 0; i < values.rows(); i++ )
-        for ( int j = 0; j < values.cols(); j++ )
-            values( i, j ) = globalFieldSource[i][j];
+    for (int i = 0; i < values.rows(); i++)
+        for (int j = 0; j < values.cols(); j++)
+            values(i, j) = globalFieldSource[i][j];
 
-    interpolator->interpolate( values, valuesInterpolation );
+    interpolator->interpolate(values, valuesInterpolation);
 
-    for ( int i = 0; i < valuesInterpolation.rows(); i++ )
-        for ( int j = 0; j < valuesInterpolation.cols(); j++ )
-            U[i][j] = valuesInterpolation( i, j );
+    for (int i = 0; i < valuesInterpolation.rows(); i++)
+        for (int j = 0; j < valuesInterpolation.cols(); j++)
+            U[i][j] = valuesInterpolation(i, j);
 
-    gradU = fvc::grad( U );
+    gradU = fvc::grad(U);
 
     calculateEpsilonSigma();
 
     return true;
 }
 
-bool SDCSolidSolver::isRunning()
-{
+bool SDCSolidSolver::isRunning() {
     return runTime->run();
 }
 
-void SDCSolidSolver::readSolidMechanicsControls()
-{
+void SDCSolidSolver::readSolidMechanicsControls() {
     // Ensure that the absolute tolerance of the linear solver is less
     // than the used convergence tolerance for the non-linear system.
-    scalar linearTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
-    assert( linearTolerance < absoluteTolerance );
-    assert( relativeTolerance < 1 );
-    assert( absoluteTolerance > 0 );
-    assert( absoluteTolerance < 1 );
-    assert( minIter < maxIter );
-    assert( maxIter > 0 );
-    assert( minIter >= 0 );
+    scalar linearTolerance = readScalar(mesh.solutionDict().subDict("solvers").subDict("U").lookup("tolerance"));
+    assert(linearTolerance < absoluteTolerance);
+    assert(relativeTolerance < 1);
+    assert(absoluteTolerance > 0);
+    assert(absoluteTolerance < 1);
+    assert(minIter < maxIter);
+    assert(maxIter > 0);
+    assert(minIter >= 0);
 
-    if ( linearTolerance >= absoluteTolerance )
-        throw std::runtime_error( "The absolute tolerance for the linear solver (U) should be smaller than solidMechanics::absoluteTolerance in order to reach convergence of the non-linear system" );
+    if (linearTolerance >= absoluteTolerance)
+        throw std::runtime_error("The absolute tolerance for the linear solver (U) should be smaller than solidMechanics::absoluteTolerance in order to reach convergence of the non-linear system");
 }
 
 void SDCSolidSolver::resetSolution()
 {}
 
-void SDCSolidSolver::solve()
-{
+void SDCSolidSolver::solve() {
     Info << "Solve solid domain" << endl;
 
     label iCorr = 0;
@@ -417,37 +405,36 @@ void SDCSolidSolver::solve()
     lduMatrix::debug = 0;
     scalar convergenceTolerance = absoluteTolerance;
 
-    gradU = fvc::grad( U );
+    gradU = fvc::grad(U);
 
     calculateEpsilonSigma();
 
-    dimensionedVector gravity( mesh.solutionDict().subDict( "solidMechanics" ).lookup( "gravity" ) );
+    dimensionedVector gravity(mesh.solutionDict().subDict("solidMechanics").lookup("gravity"));
 
     dimensionedScalar deltaT = runTime->deltaT();
 
-    for ( iCorr = 0; iCorr < maxIter; iCorr++ )
-    {
+    for (iCorr = 0; iCorr < maxIter; iCorr++) {
         U.storePrevIter();
         V.storePrevIter();
 
-        surfaceTensorField shearGradU = ( (I - n * n) & fvc::interpolate( gradU ) );
+        surfaceTensorField shearGradU = ((I - n * n) & fvc::interpolate(gradU));
 
         fvVectorMatrix UEqn
         (
-            fvm::ddt( U )
+            fvm::ddt(U)
             ==
             deltaT / rho * (
-                fvm::laplacian( 2 * muf + lambdaf, U, "laplacian(DU,U)" )
+                fvm::laplacian(2 * muf + lambdaf, U, "laplacian(DU,U)")
                 + fvc::div(
                     mesh.magSf()
                     * (
-                        -(muf + lambdaf) * ( fvc::snGrad( U ) & (I - n * n) )
-                        + lambdaf * tr( shearGradU & (I - n * n) ) * n
+                        -(muf + lambdaf) * (fvc::snGrad(U) & (I - n * n))
+                        + lambdaf * tr(shearGradU & (I - n * n)) * n
                         + muf * (shearGradU & n)
-                        + muf * ( n & fvc::interpolate( gradU & gradU.T() ) )
+                        + muf * (n & fvc::interpolate(gradU & gradU.T()))
                         + 0.5 * lambdaf
-                        * ( n * tr( fvc::interpolate( gradU & gradU.T() ) ) )
-                        + ( n & fvc::interpolate( sigma & gradU ) )
+                        * (n * tr(fvc::interpolate(gradU & gradU.T())))
+                        + (n & fvc::interpolate(sigma & gradU))
                         )
                     )
                 )
@@ -464,22 +451,22 @@ void SDCSolidSolver::solve()
 
         U.relax();
 
-        gradU = fvc::grad( U );
-        shearGradU = ( (I - n * n) & fvc::interpolate( gradU ) );
+        gradU = fvc::grad(U);
+        shearGradU = ((I - n * n) & fvc::interpolate(gradU));
         calculateEpsilonSigma();
 
         V = deltaT / rho * (
-            fvc::laplacian( 2 * muf + lambdaf, U, "laplacian(DU,U)" )
+            fvc::laplacian(2 * muf + lambdaf, U, "laplacian(DU,U)")
             + fvc::div(
                 mesh.magSf()
                 * (
-                    -(muf + lambdaf) * ( fvc::snGrad( U ) & (I - n * n) )
-                    + lambdaf * tr( shearGradU & (I - n * n) ) * n
+                    -(muf + lambdaf) * (fvc::snGrad(U) & (I - n * n))
+                    + lambdaf * tr(shearGradU & (I - n * n)) * n
                     + muf * (shearGradU & n)
-                    + muf * ( n & fvc::interpolate( gradU & gradU.T() ) )
+                    + muf * (n & fvc::interpolate(gradU & gradU.T()))
                     + 0.5 * lambdaf
-                    * ( n * tr( fvc::interpolate( gradU & gradU.T() ) ) )
-                    + ( n & fvc::interpolate( sigma & gradU ) )
+                    * (n * tr(fvc::interpolate(gradU & gradU.T())))
+                    + (n & fvc::interpolate(sigma & gradU))
                     )
                 )
             )
@@ -488,18 +475,18 @@ void SDCSolidSolver::solve()
             + deltaT * gravity
         ;
 
-        volVectorField residualField = -fvc::ddt( U ) + deltaT / rho * (
-            fvc::laplacian( 2 * muf + lambdaf, U, "laplacian(DU,U)" )
+        volVectorField residualField = -fvc::ddt(U) + deltaT / rho * (
+            fvc::laplacian(2 * muf + lambdaf, U, "laplacian(DU,U)")
             + fvc::div(
                 mesh.magSf()
                 * (
-                    -(muf + lambdaf) * ( fvc::snGrad( U ) & (I - n * n) )
-                    + lambdaf * tr( shearGradU & (I - n * n) ) * n
+                    -(muf + lambdaf) * (fvc::snGrad(U) & (I - n * n))
+                    + lambdaf * tr(shearGradU & (I - n * n)) * n
                     + muf * (shearGradU & n)
-                    + muf * ( n & fvc::interpolate( gradU & gradU.T() ) )
+                    + muf * (n & fvc::interpolate(gradU & gradU.T()))
                     + 0.5 * lambdaf
-                    * ( n * tr( fvc::interpolate( gradU & gradU.T() ) ) )
-                    + ( n & fvc::interpolate( sigma & gradU ) )
+                    * (n * tr(fvc::interpolate(gradU & gradU.T())))
+                    + (n & fvc::interpolate(sigma & gradU))
                     )
                 )
             )
@@ -507,20 +494,19 @@ void SDCSolidSolver::solve()
             + rhsV
             + rhsU / deltaT
             + deltaT * gravity;
-        tmp<scalarField> magResU = mag( residualField.internalField() );
-        residual = std::sqrt( gSumSqr( magResU ) / ( mesh.globalData().nTotalCells() * mesh.nGeometricD() ) );
+        tmp<scalarField> magResU = mag(residualField.internalField());
+        residual = std::sqrt(gSumSqr(magResU) / (mesh.globalData().nTotalCells() * mesh.nGeometricD()));
 
-        if ( iCorr == 0 )
-        {
+        if (iCorr == 0) {
             initialResidual = residual;
-            convergenceTolerance = std::max( relativeTolerance * residual, absoluteTolerance );
-            assert( convergenceTolerance > 0 );
-            assert( convergenceTolerance < 1 );
+            convergenceTolerance = std::max(relativeTolerance * residual, absoluteTolerance);
+            assert(convergenceTolerance > 0);
+            assert(convergenceTolerance < 1);
         }
 
         bool convergence = residual <= convergenceTolerance && iCorr >= minIter - 1;
 
-        if ( convergence )
+        if (convergence)
             break;
     }
 
@@ -533,61 +519,56 @@ void SDCSolidSolver::solve()
 
     // -------------------------------------------------------------------------
 
-    UStages.at( indexk + 1 ) = U;
-    VStages.at( indexk + 1 ) = V;
+    UStages.at(indexk + 1) = U;
+    VStages.at(indexk + 1) = V;
 
-    surfaceTensorField shearGradU = ( (I - n * n) & fvc::interpolate( gradU ) );
+    surfaceTensorField shearGradU = ((I - n * n) & fvc::interpolate(gradU));
     UF = V;
     VF = 1.0 / rho * (
-        fvc::laplacian( 2 * muf + lambdaf, U, "laplacian(DU,U)" )
+        fvc::laplacian(2 * muf + lambdaf, U, "laplacian(DU,U)")
         + fvc::div(
             mesh.magSf()
             * (
-                -(muf + lambdaf) * ( fvc::snGrad( U ) & (I - n * n) )
-                + lambdaf * tr( shearGradU & (I - n * n) ) * n
+                -(muf + lambdaf) * (fvc::snGrad(U) & (I - n * n))
+                + lambdaf * tr(shearGradU & (I - n * n)) * n
                 + muf * (shearGradU & n)
-                + muf * ( n & fvc::interpolate( gradU & gradU.T() ) )
+                + muf * (n & fvc::interpolate(gradU & gradU.T()))
                 + 0.5 * lambdaf
-                * ( n * tr( fvc::interpolate( gradU & gradU.T() ) ) )
-                + ( n & fvc::interpolate( sigma & gradU ) )
+                * (n * tr(fvc::interpolate(gradU & gradU.T())))
+                + (n & fvc::interpolate(sigma & gradU))
                 )
             )
         )
         + gravity;
 }
 
-void SDCSolidSolver::evaluateFunction(
-    const int,
+void SDCSolidSolver::evaluateFunction(const int,
     const fsi::vector &,
     const scalar,
     fsi::vector & f
-    )
-{
+    ) {
     int index = 0;
 
-    forAll( UF.internalField(), i )
+    forAll(UF.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            f( index ) = UF.internalField()[i][j];
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
+            f(index) = UF.internalField()[i][j];
             index++;
         }
     }
 
-    forAll( VF.internalField(), i )
+    forAll(VF.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            f( index ) = VF.internalField()[i][j];
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
+            f(index) = VF.internalField()[i][j];
             index++;
         }
     }
 
-    assert( index == f.rows() );
+    assert(index == f.rows());
 }
 
-void SDCSolidSolver::finalizeTimeStep()
-{
+void SDCSolidSolver::finalizeTimeStep() {
     foamSolidSolver::finalizeTimeStep();
 
     runTime->writeNow();
@@ -597,21 +578,18 @@ void SDCSolidSolver::finalizeTimeStep()
          << endl << endl;
 }
 
-int SDCSolidSolver::getDOF()
-{
+int SDCSolidSolver::getDOF() {
     int index = 0;
-    forAll( U.internalField(), i )
+    forAll(U.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
             index++;
         }
     }
 
-    forAll( V.internalField(), i )
+    forAll(V.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
             index++;
         }
     }
@@ -619,142 +597,123 @@ int SDCSolidSolver::getDOF()
     return index;
 }
 
-void SDCSolidSolver::getSolution(
-    fsi::vector & solution,
+void SDCSolidSolver::getSolution(fsi::vector & solution,
     fsi::vector & f
-    )
-{
+    ) {
     int index = 0;
 
-    forAll( U.internalField(), i )
+    forAll(U.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            solution( index ) = U.internalField()[i][j];
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
+            solution(index) = U.internalField()[i][j];
             index++;
         }
     }
 
-    forAll( V.internalField(), i )
+    forAll(V.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            solution( index ) = V.internalField()[i][j];
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
+            solution(index) = V.internalField()[i][j];
             index++;
         }
     }
 
-    assert( index == solution.rows() );
+    assert(index == solution.rows());
 
     index = 0;
 
-    forAll( UF.internalField(), i )
+    forAll(UF.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            f( index ) = UF.internalField()[i][j];
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
+            f(index) = UF.internalField()[i][j];
             index++;
         }
     }
 
-    forAll( VF.internalField(), i )
+    forAll(VF.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            f( index ) = VF.internalField()[i][j];
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
+            f(index) = VF.internalField()[i][j];
             index++;
         }
     }
 
-    assert( index == f.rows() );
+    assert(index == f.rows());
 }
 
-void SDCSolidSolver::setSolution(
-    const fsi::vector & solution,
+void SDCSolidSolver::setSolution(const fsi::vector & solution,
     const fsi::vector &
-    )
-{
+    ) {
     int index = 0;
 
-    forAll( U.internalField(), i )
+    forAll(U.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            U.internalField()[i][j] = solution( index );
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
+            U.internalField()[i][j] = solution(index);
             index++;
         }
     }
 
-    forAll( V.internalField(), i )
+    forAll(V.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            V.internalField()[i][j] = solution( index );
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
+            V.internalField()[i][j] = solution(index);
             index++;
         }
     }
 
-    assert( index == solution.rows() );
+    assert(index == solution.rows());
 }
 
-scalar SDCSolidSolver::getEndTime()
-{
+scalar SDCSolidSolver::getEndTime() {
     return runTime->endTime().value();
 }
 
-scalar SDCSolidSolver::getTimeStep()
-{
+scalar SDCSolidSolver::getTimeStep() {
     return runTime->deltaT().value();
 }
 
-void SDCSolidSolver::nextTimeStep()
-{
+void SDCSolidSolver::nextTimeStep() {
     timeIndex++;
 
-    if ( runTime->timeIndex() != timeIndex )
+    if (runTime->timeIndex() != timeIndex)
         (*runTime)++;
 
-    assert( runTime->timeIndex() == timeIndex );
+    assert(runTime->timeIndex() == timeIndex);
 
-    for ( int i = 0; i < k; i++ )
-    {
-        UStages.at( i ) = U;
-        VStages.at( i ) = V;
+    for (int i = 0; i < k; i++) {
+        UStages.at(i) = U;
+        VStages.at(i) = V;
     }
 }
 
-void SDCSolidSolver::setNumberOfImplicitStages( int k )
-{
+void SDCSolidSolver::setNumberOfImplicitStages(int k) {
     this->k = k + 1;
 
     UStages.clear();
     VStages.clear();
 
-    for ( int i = 0; i < k + 1; i++ )
-    {
-        UStages.push_back( volVectorField( U ) );
-        VStages.push_back( volVectorField( V ) );
+    for (int i = 0; i < k + 1; i++) {
+        UStages.push_back(volVectorField(U));
+        VStages.push_back(volVectorField(V));
     }
 }
 
-void SDCSolidSolver::prepareImplicitSolve(
-    bool corrector,
+void SDCSolidSolver::prepareImplicitSolve(bool corrector,
     const int k,
     const int kold,
     const scalar t,
     const scalar dt,
     const fsi::vector &,
     const fsi::vector & rhs
-    )
-{
-    runTime->setDeltaT( dt );
-    runTime->setTime( t, runTime->timeIndex() );
+    ) {
+    runTime->setDeltaT(dt);
+    runTime->setTime(t, runTime->timeIndex());
     indexk = k;
 
-    if ( corrector )
-    {
-        U = UStages.at( k + 1 );
-        V = VStages.at( k + 1 );
+    if (corrector) {
+        U = UStages.at(k + 1);
+        V = VStages.at(k + 1);
     }
 
     U.oldTime() = UStages[kold];
@@ -762,29 +721,26 @@ void SDCSolidSolver::prepareImplicitSolve(
 
     int index = 0;
 
-    forAll( rhsU.internalField(), i )
+    forAll(rhsU.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            rhsU.internalField()[i][j] = rhs( index );
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
+            rhsU.internalField()[i][j] = rhs(index);
             index++;
         }
     }
 
-    forAll( rhsV.internalField(), i )
+    forAll(rhsV.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            rhsV.internalField()[i][j] = rhs( index );
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
+            rhsV.internalField()[i][j] = rhs(index);
             index++;
         }
     }
 
-    assert( index == rhs.rows() );
+    assert(index == rhs.rows());
 }
 
-void SDCSolidSolver::implicitSolve(
-    bool corrector,
+void SDCSolidSolver::implicitSolve(bool corrector,
     const int k,
     const int kold,
     const scalar t,
@@ -793,46 +749,40 @@ void SDCSolidSolver::implicitSolve(
     const fsi::vector & rhs,
     fsi::vector & f,
     fsi::vector & result
-    )
-{
-    prepareImplicitSolve( corrector, k, kold, t, dt, qold, rhs );
+    ) {
+    prepareImplicitSolve(corrector, k, kold, t, dt, qold, rhs);
 
     solve();
 
-    getSolution( result, f );
+    getSolution(result, f);
 }
 
-scalar SDCSolidSolver::getStartTime()
-{
+scalar SDCSolidSolver::getStartTime() {
     return runTime->startTime().value();
 }
 
-void SDCSolidSolver::getVariablesInfo(
-    std::deque<int> & dof,
+void SDCSolidSolver::getVariablesInfo(std::deque<int> & dof,
     std::deque<bool> & enabled,
     std::deque<std::string> & names
-    )
-{
-    dof.push_back( 0 );
-    dof.push_back( 0 );
-    enabled.push_back( true );
-    enabled.push_back( true );
-    names.push_back( "solid U" );
-    names.push_back( "solid V" );
+    ) {
+    dof.push_back(0);
+    dof.push_back(0);
+    enabled.push_back(true);
+    enabled.push_back(true);
+    names.push_back("solid U");
+    names.push_back("solid V");
 
-    forAll( U.internalField(), i )
+    forAll(U.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            dof.at( 0 ) += 1;
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
+            dof.at(0) += 1;
         }
     }
 
-    forAll( V.internalField(), i )
+    forAll(V.internalField(), i)
     {
-        for ( int j = 0; j < mesh.nGeometricD(); j++ )
-        {
-            dof.at( 1 ) += 1;
+        for (int j = 0; j < mesh.nGeometricD(); j++) {
+            dof.at(1) += 1;
         }
     }
 }

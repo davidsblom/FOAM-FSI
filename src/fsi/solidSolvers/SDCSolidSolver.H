@@ -18,17 +18,14 @@
 using namespace fsi;
 using namespace rbf;
 
-class SDCSolidSolver : public foamSolidSolver, public sdc::SDCFsiSolverInterface
-{
+class SDCSolidSolver : public foamSolidSolver, public sdc::SDCFsiSolverInterface {
     public:
-        SDCSolidSolver(
-            const std::string & name,
+        SDCSolidSolver(const std::string & name,
             const std::shared_ptr<argList> & args,
             const std::shared_ptr<Time> & runTime
             );
 
-        SDCSolidSolver(
-            const std::string & name,
+        SDCSolidSolver(const std::string & name,
             const std::shared_ptr<argList> & args,
             const std::shared_ptr<Time> & runTime,
             const std::shared_ptr<rbf::RBFCoarsening> & interpolator
@@ -44,10 +41,9 @@ class SDCSolidSolver : public foamSolidSolver, public sdc::SDCFsiSolverInterface
 
         virtual void solve();
 
-        virtual bool interpolateVolField( std::shared_ptr<BaseMultiLevelSolver> fineModel );
+        virtual bool interpolateVolField(std::shared_ptr<BaseMultiLevelSolver> fineModel);
 
-        virtual void evaluateFunction(
-            const int k,
+        virtual void evaluateFunction(const int k,
             const fsi::vector & q,
             const scalar t,
             fsi::vector & f
@@ -57,13 +53,11 @@ class SDCSolidSolver : public foamSolidSolver, public sdc::SDCFsiSolverInterface
 
         virtual int getDOF();
 
-        virtual void getSolution(
-            fsi::vector & solution,
+        virtual void getSolution(fsi::vector & solution,
             fsi::vector & f
             );
 
-        virtual void setSolution(
-            const fsi::vector & solution,
+        virtual void setSolution(const fsi::vector & solution,
             const fsi::vector & f
             );
 
@@ -73,10 +67,9 @@ class SDCSolidSolver : public foamSolidSolver, public sdc::SDCFsiSolverInterface
 
         virtual void nextTimeStep();
 
-        virtual void setNumberOfImplicitStages( int k );
+        virtual void setNumberOfImplicitStages(int k);
 
-        virtual void implicitSolve(
-            bool corrector,
+        virtual void implicitSolve(bool corrector,
             const int k,
             const int kold,
             const scalar t,
@@ -87,8 +80,7 @@ class SDCSolidSolver : public foamSolidSolver, public sdc::SDCFsiSolverInterface
             fsi::vector & result
             );
 
-        virtual void prepareImplicitSolve(
-            bool corrector,
+        virtual void prepareImplicitSolve(bool corrector,
             const int k,
             const int kold,
             const scalar t,
@@ -99,8 +91,7 @@ class SDCSolidSolver : public foamSolidSolver, public sdc::SDCFsiSolverInterface
 
         virtual scalar getStartTime();
 
-        virtual void getVariablesInfo(
-            std::deque<int> & dof,
+        virtual void getVariablesInfo(std::deque<int> & dof,
             std::deque<bool> & enabled,
             std::deque<std::string> & names
             );

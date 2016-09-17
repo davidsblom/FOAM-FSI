@@ -1,12 +1,13 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef RBFMeshMotionSolver_H
 #define RBFMeshMotionSolver_H
 
+#include <assert.h>
+#include <memory>
 #include "motionSolver.H"
 #include "polyMesh.H"
 #include "addToRunTimeSelectionTable.H"
@@ -18,81 +19,76 @@
 #include "WendlandC4Function.H"
 #include "WendlandC6Function.H"
 #include "twoDPointCorrectorRBF.H"
-#include <memory>
-#include <assert.h>
 #include "TimeIntegrationScheme.H"
 
-namespace Foam
-{
-    class RBFMeshMotionSolver : public motionSolver
-    {
-        protected:
-            // Disallow default bitwise copy construct
-            RBFMeshMotionSolver( const RBFMeshMotionSolver & );
+namespace Foam {
+class RBFMeshMotionSolver : public motionSolver {
+    protected:
+        // Disallow default bitwise copy construct
+        RBFMeshMotionSolver(const RBFMeshMotionSolver &);
 
-            // Disallow default bitwise assignment
-            void operator=( const RBFMeshMotionSolver & );
+        // Disallow default bitwise assignment
+        void operator=(const RBFMeshMotionSolver &);
 
-            Field<vectorField> motionCenters;
+        Field<vectorField> motionCenters;
 
-            wordList staticPatches;
-            labelList staticPatchIDs;
-            wordList movingPatches;
-            labelList movingPatchIDs;
-            wordList fixedPatches;
-            labelList fixedPatchIDs;
+        wordList staticPatches;
+        labelList staticPatchIDs;
+        wordList movingPatches;
+        labelList movingPatchIDs;
+        wordList fixedPatches;
+        labelList fixedPatchIDs;
 
-            pointField newPoints;
+        pointField newPoints;
 
-            std::shared_ptr<rbf::RBFCoarsening> rbf;
+        std::shared_ptr<rbf::RBFCoarsening> rbf;
 
-            labelList nbGlobalFaceCenters;
-            labelList nbGlobalMovingFaceCenters;
-            labelList nbGlobalStaticFaceCenters;
-            labelList nbGlobalFixedFaceCenters;
+        labelList nbGlobalFaceCenters;
+        labelList nbGlobalMovingFaceCenters;
+        labelList nbGlobalStaticFaceCenters;
+        labelList nbGlobalFixedFaceCenters;
 
-            List<labelList> globalMovingPointsLabelList;
+        List<labelList> globalMovingPointsLabelList;
 
-            // 2d corrector
-            twoDPointCorrectorRBF twoDCorrector;
-            int nbPoints;
-            bool faceCellCenters;
-            bool cpu;
+        // 2d corrector
+        twoDPointCorrectorRBF twoDCorrector;
+        int nbPoints;
+        bool faceCellCenters;
+        bool cpu;
 
-        public:
-            // Runtime type information
-            TypeName( "RBFMeshMotionSolver" );
+    public:
+        // Runtime type information
+        TypeName("RBFMeshMotionSolver");
 
-            // Constructors
+        // Constructors
 
-            // Construct from polyMesh
-            RBFMeshMotionSolver(
-                const polyMesh & mesh,
-                Istream & msData
-                );
+        // Construct from polyMesh
+        RBFMeshMotionSolver(const polyMesh & mesh,
+            Istream & msData
+            );
 
-            // Destructor
-            virtual ~RBFMeshMotionSolver();
+        // Destructor
+        virtual ~RBFMeshMotionSolver();
 
-            // Set the motion of every boundary patch, where m is equal to number of patches and with non-empty vectorFields for moving patches.
-            // The motion is defined at the face centers of the boundary patch.
-            void setMotion( const Field<vectorField> & motion );
+        // Set the motion of every boundary patch, where m is equal to number of patches and with non-empty vectorFields for moving patches.
+        // The motion is defined at the face centers of the boundary patch.
+        void setMotion(const Field<vectorField> & motion);
 
-            // Return point location obtained from the current motion field
-            virtual tmp<pointField> curPoints() const;
+        // Return point location obtained from the current motion field
+        virtual tmp<pointField> curPoints() const;
 
-            // Solve for motion
-            virtual void solve();
+        // Solve for motion
+        virtual void solve();
 
-            // Update the mesh corresponding to given map
-            virtual void updateMesh( const mapPolyMesh & );
+        // Update the mesh corresponding to given map
+        virtual void updateMesh(const mapPolyMesh &);
 
-            std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
+        std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
 
-            bool corrector;
-            int k;
-            int sweep;
-    };
-}
+        bool corrector;
+        int k;
+        int sweep;
+};
+}  // namespace Foam
 
 #endif

@@ -1,56 +1,51 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef BroydenPostProcessing_H
 #define BroydenPostProcessing_H
 
+#include <math.h>
+#include <memory>
 #include "PostProcessing.H"
 
-namespace fsi
-{
-    class BroydenPostProcessing : public PostProcessing
-    {
-        public:
-            BroydenPostProcessing(
-                shared_ptr<MultiLevelFsiSolver> fsi,
-                int maxIter,
-                scalar initialRelaxation,
-                int maxUsedIterations,
-                int nbReuse,
-                scalar singularityLimit,
-                int reuseInformationStartingFromTimeIndex
-                );
+namespace fsi {
+class BroydenPostProcessing : public PostProcessing {
+    public:
+        BroydenPostProcessing(shared_ptr<MultiLevelFsiSolver> fsi,
+            int maxIter,
+            scalar initialRelaxation,
+            int maxUsedIterations,
+            int nbReuse,
+            scalar singularityLimit,
+            int reuseInformationStartingFromTimeIndex
+            );
 
-            virtual ~BroydenPostProcessing();
+        virtual ~BroydenPostProcessing();
 
-            virtual void finalizeStage();
+        virtual void finalizeStage();
 
-            virtual void finalizeTimeStep();
+        virtual void finalizeTimeStep();
 
-            void performPostProcessing(
-                const vector & x0,
-                vector & xk
-                );
+        void performPostProcessing(const vector & x0,
+            vector & xk
+            );
 
-            void performPostProcessing(
-                const vector & y,
-                const vector & x0,
-                vector & xk
-                );
+        void performPostProcessing(const vector & y,
+            const vector & x0,
+            vector & xk
+            );
 
-            void performPostProcessing(
-                const vector & y,
-                const vector & x0,
-                vector & xk,
-                bool residualCriterium
-                );
+        void performPostProcessing(const vector & y,
+            const vector & x0,
+            vector & xk,
+            bool residualCriterium
+            );
 
-            matrix J;
-            const scalar singularityLimit;
-    };
-}
+        matrix J;
+        const scalar singularityLimit;
+};
+} // namespace fsi
 
 #endif

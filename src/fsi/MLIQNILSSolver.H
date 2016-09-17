@@ -1,23 +1,21 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef MLIQNILSSolver_H
 #define MLIQNILSSolver_H
 
+#include <deque>
+#include <memory>
 #include "ImplicitMultiLevelFsiSolver.H"
 #include "Solver.H"
-#include <deque>
 
-using namespace fsi;
 
-class MLIQNILSSolver : public Solver
-{
+namespace fsi {
+class MLIQNILSSolver : public Solver {
     public:
-        MLIQNILSSolver(
-            shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
+        MLIQNILSSolver(shared_ptr< std::deque<shared_ptr<ImplicitMultiLevelFsiSolver> > > models,
             bool synchronization
             );
 
@@ -38,5 +36,6 @@ class MLIQNILSSolver : public Solver
         bool init;
         bool synchronization;
 };
+} // namespace fsi
 
 #endif

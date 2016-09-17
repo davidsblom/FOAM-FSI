@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef Solver_H
@@ -10,20 +9,18 @@
 #include <ctime>
 #include "DataValues.H"
 
-class Solver
-{
+class Solver {
     public:
         Solver()
             :
             time()
         {}
 
-        virtual ~Solver(){}
+        virtual ~Solver() {}
 
         virtual void run() = 0;
 
-        virtual scalar timeElapsed()
-        {
+        virtual scalar timeElapsed() {
             time = std::clock() - time;
             return static_cast<scalar>(time) / CLOCKS_PER_SEC;
         }

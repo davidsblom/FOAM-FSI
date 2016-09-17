@@ -21,26 +21,24 @@
 using namespace fsi;
 using std::shared_ptr;
 
-class FluidSolver : public foamFluidSolver
-{
+class FluidSolver : public foamFluidSolver {
     public:
-        FluidSolver(
-            const string & name,
+        FluidSolver(const string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );
 
         virtual ~FluidSolver();
 
-        virtual void getAcousticsDensityLocal( matrix & data );
+        virtual void getAcousticsDensityLocal(matrix & data);
 
-        virtual void getAcousticsVelocityLocal( matrix & data );
+        virtual void getAcousticsVelocityLocal(matrix & data);
 
-        virtual void getAcousticsPressureLocal( matrix & data );
+        virtual void getAcousticsPressureLocal(matrix & data);
 
-        virtual void getTractionLocal( matrix & traction );
+        virtual void getTractionLocal(matrix & traction);
 
-        virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
+        virtual void getWritePositionsLocalAcoustics(matrix & writePositions);
 
         virtual void initTimeStep();
 

@@ -1,25 +1,22 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef SpaceMapping_H
 #define SpaceMapping_H
 
+#include <memory>
 #include <deque>
-
 #include "SurrogateModel.H"
 #include "fvCFD.H"
 
-using namespace fsi;
+namespace fsi {
 using std::deque;
 
-class SpaceMapping
-{
+class SpaceMapping {
     public:
-        SpaceMapping(
-            shared_ptr<SurrogateModel> fineModel,
+        SpaceMapping(shared_ptr<SurrogateModel> fineModel,
             shared_ptr<SurrogateModel> coarseModel,
             int maxIter,
             int maxUsedIterations,
@@ -28,31 +25,27 @@ class SpaceMapping
             scalar singularityLimit
             );
 
-        virtual ~SpaceMapping(){}
+        virtual ~SpaceMapping() {}
 
         virtual void finalizeTimeStep();
 
-        virtual bool isConvergence(
-            const fsi::vector & xk,
+        virtual bool isConvergence(const fsi::vector & xk,
             const fsi::vector & xkprev,
             bool residualCriterium
             );
 
         virtual void iterationsConverged();
 
-        virtual void performPostProcessing(
+        virtual void performPostProcessing(const fsi::vector & x0,
+            fsi::vector & xk
+            );
+
+        virtual void performPostProcessing(const fsi::vector & y,
             const fsi::vector & x0,
             fsi::vector & xk
             );
 
-        virtual void performPostProcessing(
-            const fsi::vector & y,
-            const fsi::vector & x0,
-            fsi::vector & xk
-            );
-
-        virtual void performPostProcessing(
-            const fsi::vector & y,
+        virtual void performPostProcessing(const fsi::vector & y,
             const fsi::vector & x0,
             fsi::vector & xk,
             bool residualCriterium
@@ -75,5 +68,6 @@ class SpaceMapping
         deque<deque<deque<fsi::vector> > > coarseResidualsTimeList;
         deque<deque<deque<fsi::vector> > > fineResidualsTimeList;
 };
+} // namespace fsi
 
 #endif

@@ -1,39 +1,37 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
+#include <memory>
+#include <list>
 #include "MultiLevelFsiSolver.H"
 
-using namespace fsi;
-
-MultiLevelFsiSolver::MultiLevelFsiSolver(
-    shared_ptr<MultiLevelSolver> fluidSolver,
+namespace fsi {
+MultiLevelFsiSolver::MultiLevelFsiSolver(shared_ptr<MultiLevelSolver> fluidSolver,
     shared_ptr<MultiLevelSolver> solidSolver,
     shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures,
     bool parallel,
     int extrapolationOrder
     )
     :
-    FsiSolver( fluidSolver->solver, solidSolver->solver, convergenceMeasures, parallel, extrapolationOrder ),
-    fluidSolver( fluidSolver ),
-    solidSolver( solidSolver ),
+    FsiSolver(fluidSolver->solver, solidSolver->solver, convergenceMeasures, parallel, extrapolationOrder),
+    fluidSolver(fluidSolver),
+    solidSolver(solidSolver),
     xf(),
     J(),
-    useJacobian( false ),
-    iterCurrentTimeStep( 0 )
-{
-    assert( this->fluid );
-    assert( this->solid );
-    assert( fluidSolver );
-    assert( solidSolver );
-    assert( this->convergenceMeasures );
-    assert( fluidSolver->couplingGridSize > 0 );
-    assert( convergenceMeasures->size() > 0 );
-    assert( fluidSolver->level == solidSolver->level );
-    assert( fluidSolver->participantId == 0 );
-    assert( solidSolver->participantId == 1 );
+    useJacobian(false),
+    iterCurrentTimeStep(0) {
+    assert(this->fluid);
+    assert(this->solid);
+    assert(fluidSolver);
+    assert(solidSolver);
+    assert(this->convergenceMeasures);
+    assert(fluidSolver->couplingGridSize > 0);
+    assert(convergenceMeasures->size() > 0);
+    assert(fluidSolver->level == solidSolver->level);
+    assert(fluidSolver->participantId == 0);
+    assert(solidSolver->participantId == 1);
 
     fluidSolver->updateInterpolationMatrices();
     solidSolver->updateInterpolationMatrices();
@@ -42,97 +40,91 @@ MultiLevelFsiSolver::MultiLevelFsiSolver(
 
     matrix solidtmp, fluidtmp;
 
-    solidSolver->rbfInterpToCouplingMesh->interpolate( solid->data, solidtmp );
-    fluidSolver->rbfInterpToCouplingMesh->interpolate( fluid->data, fluidtmp );
+    solidSolver->rbfInterpToCouplingMesh->interpolate(solid->data, solidtmp);
+    fluidSolver->rbfInterpToCouplingMesh->interpolate(fluid->data, fluidtmp);
 
-    assert( solidtmp.rows() == solidSolver->couplingGridSize );
-    assert( solidtmp.cols() == solid->dim );
-    assert( fluidtmp.rows() == fluidSolver->couplingGridSize );
-    assert( fluidtmp.cols() == fluid->dim );
+    assert(solidtmp.rows() == solidSolver->couplingGridSize);
+    assert(solidtmp.cols() == solid->dim);
+    assert(fluidtmp.rows() == fluidSolver->couplingGridSize);
+    assert(fluidtmp.cols() == fluid->dim);
 
     // Initialize control variable x
-    if ( parallel )
-    {
-        x.resize( solidtmp.rows() * solidtmp.cols() + fluidtmp.rows() * fluidtmp.cols() );
+    if (parallel) {
+        x.resize(solidtmp.rows() * solidtmp.cols() + fluidtmp.rows() * fluidtmp.cols());
 
-        x.head( solidtmp.rows() * solidtmp.cols() ) = Eigen::Map<fsi::vector>( solidtmp.data(), solidtmp.rows() * solidtmp.cols() );
-        x.tail( fluidtmp.rows() * fluidtmp.cols() ) = Eigen::Map<fsi::vector>( fluidtmp.data(), fluidtmp.rows() * fluidtmp.cols() );
+        x.head(solidtmp.rows() * solidtmp.cols()) = Eigen::Map<fsi::vector>(solidtmp.data(), solidtmp.rows() * solidtmp.cols());
+        x.tail(fluidtmp.rows() * fluidtmp.cols()) = Eigen::Map<fsi::vector>(fluidtmp.data(), fluidtmp.rows() * fluidtmp.cols());
     }
 
-    if ( !parallel )
-        x = Eigen::Map<fsi::vector>( solidtmp.data(), solidtmp.rows() * solidtmp.cols() );
+    if (!parallel)
+        x = Eigen::Map<fsi::vector>(solidtmp.data(), solidtmp.rows() * solidtmp.cols());
 
     // Save initial solution for extrapolation
     previousSolutions.clear();
-    previousSolutions.push_front( x );
+    previousSolutions.push_front(x);
 
-    assert( previousSolutions.size() == 1 );
+    assert(previousSolutions.size() == 1);
 }
 
 MultiLevelFsiSolver::~MultiLevelFsiSolver()
 {}
 
-void MultiLevelFsiSolver::evaluate(
-    const fsi::vector & input,
+void MultiLevelFsiSolver::evaluate(const fsi::vector & input,
     fsi::vector & output,
     fsi::vector & R
-    )
-{
-    assert( init );
-    assert( fluidSolver->solver->init );
-    assert( solidSolver->solver->init );
-    assert( input.rows() == R.rows() );
-    assert( input.rows() == solidSolver->couplingGridSize * solid->dim || input.rows() == solidSolver->couplingGridSize * solid->dim + fluidSolver->couplingGridSize * fluid->dim );
-    assert( output.rows() == input.rows() );
+    ) {
+    assert(init);
+    assert(fluidSolver->solver->init);
+    assert(solidSolver->solver->init);
+    assert(input.rows() == R.rows());
+    assert(input.rows() == solidSolver->couplingGridSize * solid->dim || input.rows() == solidSolver->couplingGridSize * solid->dim + fluidSolver->couplingGridSize * fluid->dim);
+    assert(output.rows() == input.rows());
 
     Info << endl << "Time = " << fluidSolver->solver->t << ", iteration = " << iter + 1 << ", level = " << fluidSolver->level << endl;
 
     // Reset solution of fluid and solid solver to solution of previous time step
-    if ( iterCurrentTimeStep < 3 )
-    {
+    if (iterCurrentTimeStep < 3) {
         fluidSolver->solver->resetSolution();
         solidSolver->solver->resetSolution();
     }
 
-    matrix a = Eigen::Map<const matrix> ( input.head( solidSolver->couplingGridSize * solid->dim ).data(), solidSolver->couplingGridSize, solid->dim );
+    matrix a = Eigen::Map<const matrix> (input.head(solidSolver->couplingGridSize * solid->dim).data(), solidSolver->couplingGridSize, solid->dim);
 
-    if ( !parallel )
-    {
-        assert( input.rows() == solidSolver->couplingGridSize * solid->dim );
+    if (!parallel) {
+        assert(input.rows() == solidSolver->couplingGridSize * solid->dim);
 
         // Initialize variables
-        matrix p( fluidSolver->couplingGridSize, fluid->dim ), aout( solidSolver->couplingGridSize, solid->dim );
+        matrix p(fluidSolver->couplingGridSize, fluid->dim), aout(solidSolver->couplingGridSize, solid->dim);
 
-        fluidSolver->solve( a, p );
-        solidSolver->solve( p, aout );
+        fluidSolver->solve(a, p);
+        solidSolver->solve(p, aout);
 
-        output = Eigen::Map<fsi::vector> ( aout.data(), aout.rows() * aout.cols() );
+        output = Eigen::Map<fsi::vector> (aout.data(), aout.rows() * aout.cols());
 
-        fluid->couplingData.setDataOld( fluid->couplingData.data );
-        fluid->couplingData.setData( p );
-        solid->couplingData.setDataOld( a );
-        solid->couplingData.setData( aout );
+        fluid->couplingData.setDataOld(fluid->couplingData.data);
+        fluid->couplingData.setData(p);
+        solid->couplingData.setDataOld(a);
+        solid->couplingData.setData(aout);
     }
 
-    if ( parallel )
-    {
-        assert( input.rows() == solidSolver->couplingGridSize * solid->dim + fluidSolver->couplingGridSize * fluid->dim );
+    if (parallel) {
+        assert(input.rows() == solidSolver->couplingGridSize * solid->dim + fluidSolver->couplingGridSize * fluid->dim);
 
         // Initialize variables
-        matrix p( fluidSolver->couplingGridSize, fluid->dim ), pout( fluidSolver->couplingGridSize, fluid->dim ), aout( solidSolver->couplingGridSize, solid->dim );
+        matrix p(fluidSolver->couplingGridSize, fluid->dim), pout(fluidSolver->couplingGridSize, fluid->dim), aout(solidSolver->couplingGridSize, solid->dim);
 
-        p = Eigen::Map<const matrix> ( input.tail( fluidSolver->couplingGridSize * fluid->dim ).data(), fluidSolver->couplingGridSize, fluid->dim );
+        p = Eigen::Map<const matrix> (input.tail(fluidSolver->couplingGridSize * fluid->dim).data(), fluidSolver->couplingGridSize, fluid->dim);
 
-        fluidSolver->solve( a, pout );
-        solidSolver->solve( p, aout );
+        fluidSolver->solve(a, pout);
+        solidSolver->solve(p, aout);
 
-        output.head( solidSolver->couplingGridSize * solid->dim ) = Eigen::Map<fsi::vector> ( aout.data(), aout.rows() * aout.cols() );
-        output.tail( fluidSolver->couplingGridSize * fluid->dim ) = Eigen::Map<fsi::vector> ( pout.data(), pout.rows() * pout.cols() );
+        output.head(solidSolver->couplingGridSize * solid->dim) = Eigen::Map<fsi::vector> (aout.data(), aout.rows() * aout.cols());
+        output.tail(fluidSolver->couplingGridSize * fluid->dim) = Eigen::Map<fsi::vector> (pout.data(), pout.rows() * pout.cols());
 
-        fluid->couplingData.setDataOld( p );
-        fluid->couplingData.setData( pout );
-        solid->couplingData.setDataOld( a );
-        solid->couplingData.setData( aout );
+        fluid->couplingData.setDataOld(p);
+        fluid->couplingData.setData(pout);
+        solid->couplingData.setDataOld(a);
+        solid->couplingData.setData(aout);
     }
 
     // Calculate residual
@@ -145,11 +137,10 @@ void MultiLevelFsiSolver::evaluate(
 
     x = input;
 
-    if ( useJacobian )
-    {
-        assert( x.rows() == xf.rows() );
-        assert( x.rows() == J.rows() );
-        assert( J.rows() == J.cols() );
+    if (useJacobian) {
+        assert(x.rows() == xf.rows());
+        assert(x.rows() == J.rows());
+        assert(J.rows() == J.cols());
 
         Info << "Output space mapping: include Jacobian information in the residual function" << endl;
 
@@ -157,166 +148,149 @@ void MultiLevelFsiSolver::evaluate(
     }
 }
 
-void MultiLevelFsiSolver::initTimeStep()
-{
-    assert( !init );
+void MultiLevelFsiSolver::initTimeStep() {
+    assert(!init);
 
     iterCurrentTimeStep = 0;
 
     FsiSolver::initTimeStep();
 }
 
-bool MultiLevelFsiSolver::isConvergence()
-{
-    assert( init );
-    assert( convergenceMeasures->size() > 0 );
+bool MultiLevelFsiSolver::isConvergence() {
+    assert(init);
+    assert(convergenceMeasures->size() > 0);
 
-    for ( auto && measure : *convergenceMeasures )
-    {
+    for (auto && measure : *convergenceMeasures) {
         // Initialize variables
         fsi::vector oldValues, newValues, valuesPreviousTimeStep;
 
-        assert( measure->dataId == 0 || measure->dataId == 1 );
+        assert(measure->dataId == 0 || measure->dataId == 1);
 
         // Subtract initial values
-        if ( measure->dataId == 0 )
-        {
-            oldValues = Eigen::Map<fsi::vector> ( solid->couplingData.dataprev.data(), solid->couplingData.dataprev.rows() * solid->couplingData.dataprev.cols() );
-            newValues = Eigen::Map<fsi::vector> ( solid->couplingData.data.data(), solid->couplingData.data.rows() * solid->couplingData.dataprev.cols() );
+        if (measure->dataId == 0) {
+            oldValues = Eigen::Map<fsi::vector> (solid->couplingData.dataprev.data(), solid->couplingData.dataprev.rows() * solid->couplingData.dataprev.cols());
+            newValues = Eigen::Map<fsi::vector> (solid->couplingData.data.data(), solid->couplingData.data.rows() * solid->couplingData.dataprev.cols());
 
-            valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( solid->couplingData.dataPreviousTimeStep.data(), solid->couplingData.dataPreviousTimeStep.rows() * solid->couplingData.dataPreviousTimeStep.cols() );
+            valuesPreviousTimeStep = Eigen::Map<fsi::vector> (solid->couplingData.dataPreviousTimeStep.data(), solid->couplingData.dataPreviousTimeStep.rows() * solid->couplingData.dataPreviousTimeStep.cols());
 
-            if ( solid->substractInitialValue )
-                valuesPreviousTimeStep.fill( solid->initialValue );
+            if (solid->substractInitialValue)
+                valuesPreviousTimeStep.fill(solid->initialValue);
         }
 
-        if ( measure->dataId == 1 )
-        {
-            oldValues = Eigen::Map<fsi::vector> ( fluid->couplingData.dataprev.data(), fluid->couplingData.dataprev.rows() * fluid->couplingData.dataprev.cols() );
-            newValues = Eigen::Map<fsi::vector> ( fluid->couplingData.data.data(), fluid->couplingData.data.rows() * fluid->couplingData.dataprev.cols() );
+        if (measure->dataId == 1) {
+            oldValues = Eigen::Map<fsi::vector> (fluid->couplingData.dataprev.data(), fluid->couplingData.dataprev.rows() * fluid->couplingData.dataprev.cols());
+            newValues = Eigen::Map<fsi::vector> (fluid->couplingData.data.data(), fluid->couplingData.data.rows() * fluid->couplingData.dataprev.cols());
 
-            valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( fluid->couplingData.dataPreviousTimeStep.data(), fluid->couplingData.dataPreviousTimeStep.rows() * fluid->couplingData.dataPreviousTimeStep.cols() );
+            valuesPreviousTimeStep = Eigen::Map<fsi::vector> (fluid->couplingData.dataPreviousTimeStep.data(), fluid->couplingData.dataPreviousTimeStep.rows() * fluid->couplingData.dataPreviousTimeStep.cols());
 
-            if ( fluid->substractInitialValue )
-                valuesPreviousTimeStep.fill( fluid->initialValue );
+            if (fluid->substractInitialValue)
+                valuesPreviousTimeStep.fill(fluid->initialValue);
         }
 
         oldValues -= valuesPreviousTimeStep;
         newValues -= valuesPreviousTimeStep;
 
         // Measure convergence
-        measure->measure( oldValues, newValues );
+        measure->measure(oldValues, newValues);
     }
 
-    return isConvergence( convergenceMeasures );
+    return isConvergence(convergenceMeasures);
 }
 
-bool MultiLevelFsiSolver::isConvergence(
-    const fsi::vector & x,
+bool MultiLevelFsiSolver::isConvergence(const fsi::vector & x,
     const fsi::vector & xprev
-    )
-{
-    assert( init );
-    assert( convergenceMeasures->size() > 0 );
-    assert( x.rows() == xprev.rows() );
-    assert( x.rows() == solidSolver->couplingGridSize * solid->dim || x.rows() == solidSolver->couplingGridSize * solid->dim + fluidSolver->couplingGridSize * fluid->dim );
-    assert( fluid->t > 0 );
+    ) {
+    assert(init);
+    assert(convergenceMeasures->size() > 0);
+    assert(x.rows() == xprev.rows());
+    assert(x.rows() == solidSolver->couplingGridSize * solid->dim || x.rows() == solidSolver->couplingGridSize * solid->dim + fluidSolver->couplingGridSize * fluid->dim);
+    assert(fluid->t > 0);
 
-    for ( auto && measure : *convergenceMeasures )
-    {
+    for (auto && measure : *convergenceMeasures) {
         // Initialize variables
         fsi::vector oldValues, newValues, valuesPreviousTimeStep;
 
         // Subtract initial values
-        if ( measure->dataId == 0 )
-        {
-            oldValues = xprev.head( solidSolver->couplingGridSize * solid->dim );
-            newValues = x.head( solidSolver->couplingGridSize * solid->dim );
+        if (measure->dataId == 0) {
+            oldValues = xprev.head(solidSolver->couplingGridSize * solid->dim);
+            newValues = x.head(solidSolver->couplingGridSize * solid->dim);
 
-            valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( solid->couplingData.dataPreviousTimeStep.data(), solid->couplingData.dataPreviousTimeStep.rows() * solid->couplingData.dataPreviousTimeStep.cols() );
+            valuesPreviousTimeStep = Eigen::Map<fsi::vector> (solid->couplingData.dataPreviousTimeStep.data(), solid->couplingData.dataPreviousTimeStep.rows() * solid->couplingData.dataPreviousTimeStep.cols());
 
-            if ( solid->substractInitialValue )
-                valuesPreviousTimeStep.fill( solid->initialValue );
+            if (solid->substractInitialValue)
+                valuesPreviousTimeStep.fill(solid->initialValue);
         }
 
-        if ( measure->dataId == 1 )
-        {
-            valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( fluid->couplingData.dataPreviousTimeStep.data(), fluid->couplingData.dataPreviousTimeStep.rows() * fluid->couplingData.dataPreviousTimeStep.cols() );
+        if (measure->dataId == 1) {
+            valuesPreviousTimeStep = Eigen::Map<fsi::vector> (fluid->couplingData.dataPreviousTimeStep.data(), fluid->couplingData.dataPreviousTimeStep.rows() * fluid->couplingData.dataPreviousTimeStep.cols());
 
-            if ( parallel )
-            {
-                assert( xprev.rows() == fluidSolver->couplingGridSize * fluid->dim + solidSolver->couplingGridSize * solid->dim );
+            if (parallel) {
+                assert(xprev.rows() == fluidSolver->couplingGridSize * fluid->dim + solidSolver->couplingGridSize * solid->dim);
 
-                oldValues = xprev.tail( fluidSolver->couplingGridSize * fluid->dim );
-                newValues = x.tail( fluidSolver->couplingGridSize * fluid->dim );
+                oldValues = xprev.tail(fluidSolver->couplingGridSize * fluid->dim);
+                newValues = x.tail(fluidSolver->couplingGridSize * fluid->dim);
             }
 
-            if ( !parallel )
-            {
-                oldValues = Eigen::Map<fsi::vector> ( fluid->couplingData.dataprev.data(), fluid->couplingData.dataprev.rows() * fluid->couplingData.dataprev.cols() );
-                newValues = Eigen::Map<fsi::vector> ( fluid->couplingData.data.data(), fluid->couplingData.data.rows() * fluid->couplingData.dataprev.cols() );
+            if (!parallel) {
+                oldValues = Eigen::Map<fsi::vector> (fluid->couplingData.dataprev.data(), fluid->couplingData.dataprev.rows() * fluid->couplingData.dataprev.cols());
+                newValues = Eigen::Map<fsi::vector> (fluid->couplingData.data.data(), fluid->couplingData.data.rows() * fluid->couplingData.dataprev.cols());
             }
 
-            if ( fluid->substractInitialValue )
-                valuesPreviousTimeStep.fill( fluid->initialValue );
+            if (fluid->substractInitialValue)
+                valuesPreviousTimeStep.fill(fluid->initialValue);
         }
 
         oldValues -= valuesPreviousTimeStep;
         newValues -= valuesPreviousTimeStep;
 
         // Measure convergence
-        measure->measure( oldValues, newValues );
+        measure->measure(oldValues, newValues);
     }
 
-    return isConvergence( convergenceMeasures );
+    return isConvergence(convergenceMeasures);
 }
 
-bool MultiLevelFsiSolver::isConvergence( shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures )
-{
+bool MultiLevelFsiSolver::isConvergence(shared_ptr< std::list<shared_ptr<ConvergenceMeasure> > > convergenceMeasures) {
     allConverged = true;
     bool oneSufficesData0 = false;
     bool oneSufficesData1 = false;
     bool hasData0 = false;
     bool hasData1 = false;
 
-    for ( auto && measure : *convergenceMeasures )
-    {
+    for (auto && measure : *convergenceMeasures) {
         // Print state
         measure->printState();
 
-        if ( not measure->isConvergence() )
+        if (not measure->isConvergence())
             allConverged = false;
 
-        if ( measure->dataId == 0 )
+        if (measure->dataId == 0)
             hasData0 = true;
 
-        if ( measure->dataId == 1 )
+        if (measure->dataId == 1)
             hasData1 = true;
 
-        if ( measure->dataId == 0 && measure->isConvergence() && measure->suffices() )
+        if (measure->dataId == 0 && measure->isConvergence() && measure->suffices())
             oneSufficesData0 = true;
 
-        if ( measure->dataId == 1 && measure->isConvergence() && measure->suffices() )
+        if (measure->dataId == 1 && measure->isConvergence() && measure->suffices())
             oneSufficesData1 = true;
     }
 
-    if ( not hasData0 )
+    if (not hasData0)
         oneSufficesData0 = true;
 
-    if ( not hasData1 )
+    if (not hasData1)
         oneSufficesData1 = true;
 
-    if ( allConverged )
+    if (allConverged) {
         Info << "All converged" << endl;
-    else
-    if ( oneSufficesData0 && oneSufficesData1 )
-    {
+    } else if (oneSufficesData0 && oneSufficesData1) {
         Info << "Sufficient measure converged" << endl;
         allConverged = true;
     }
 
-    if ( allConverged )
-    {
+    if (allConverged) {
         fluid->couplingData.dataprev.setZero();
         solid->couplingData.dataprev.setZero();
     }
@@ -324,16 +298,14 @@ bool MultiLevelFsiSolver::isConvergence( shared_ptr< std::list<shared_ptr<Conver
     return allConverged;
 }
 
-void MultiLevelFsiSolver::setSurrogateData(
-    fsi::vector & xf,
+void MultiLevelFsiSolver::setSurrogateData(fsi::vector & xf,
     matrix & J
-    )
-{
+    ) {
     this->xf = xf;
     this->J = J;
 }
 
-void MultiLevelFsiSolver::setUseJacobian( bool useJacobian )
-{
+void MultiLevelFsiSolver::setUseJacobian(bool useJacobian) {
     this->useJacobian = useJacobian;
 }
+} // namespace fsi

@@ -1,15 +1,14 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
+#include <memory>
+#include <algorithm>
 #include "BroydenPostProcessing.H"
 
-using namespace fsi;
-
-BroydenPostProcessing::BroydenPostProcessing(
-    shared_ptr<MultiLevelFsiSolver> fsi,
+namespace fsi {
+BroydenPostProcessing::BroydenPostProcessing(shared_ptr<MultiLevelFsiSolver> fsi,
     int maxIter,
     scalar initialRelaxation,
     int maxUsedIterations,
@@ -18,19 +17,17 @@ BroydenPostProcessing::BroydenPostProcessing(
     int reuseInformationStartingFromTimeIndex
     )
     :
-    PostProcessing( fsi, initialRelaxation, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex ),
+    PostProcessing(fsi, initialRelaxation, maxIter, maxUsedIterations, nbReuse, reuseInformationStartingFromTimeIndex),
     J(),
-    singularityLimit( singularityLimit )
-{
-    assert( singularityLimit > 0 );
-    assert( singularityLimit < 1 );
+    singularityLimit(singularityLimit) {
+    assert(singularityLimit > 0);
+    assert(singularityLimit < 1);
 }
 
 BroydenPostProcessing::~BroydenPostProcessing()
 {}
 
-void BroydenPostProcessing::finalizeStage()
-{
+void BroydenPostProcessing::finalizeStage() {
     PostProcessing::finalizeStage();
 
     // not implemented yet;
@@ -39,14 +36,13 @@ void BroydenPostProcessing::finalizeStage()
     // and information from previous stages
 }
 
-void BroydenPostProcessing::finalizeTimeStep()
-{
-    assert( sols.size() == 0 );
+void BroydenPostProcessing::finalizeTimeStep() {
+    assert(sols.size() == 0);
 
     PostProcessing::finalizeTimeStep();
 
-    assert( residualsList.size() == 0 );
-    assert( solsList.size() == 0 );
+    assert(residualsList.size() == 0);
+    assert(solsList.size() == 0);
 
     Info << "Broyden post processing: rebuild Jacobian with information from " << nbReuse << " previous time steps" << endl;
 
@@ -54,38 +50,34 @@ void BroydenPostProcessing::finalizeTimeStep()
 
     // Determine the number of columns of the V and W matrices
     int nbCols = residuals.size() - 1;
-    nbCols = std::max( nbCols, 0 );
+    nbCols = std::max(nbCols, 0);
 
     // Include information from previous time steps
-    for ( unsigned i = 0; i < solsTimeList.size(); i++ )
-        for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
-            for ( unsigned k = 0; k < solsTimeList.at( i ).at( j ).size(); k++ )
-                nbCols += solsTimeList.at( i ).at( j ).at( k ).size() - 1;
+    for (unsigned i = 0; i < solsTimeList.size(); i++)
+        for (unsigned j = 0; j < solsTimeList.at(i).size(); j++)
+            for (unsigned k = 0; k < solsTimeList.at(i).at(j).size(); k++)
+                nbCols += solsTimeList.at(i).at(j).at(k).size() - 1;
 
-    J = -fsi::matrix::Identity( J.rows(), J.cols() );
+    J = -fsi::matrix::Identity(J.rows(), J.cols());
 
     int colIndex = 0;
 
     // Include information from previous time steps
-    for ( unsigned i = residualsTimeList.size(); i-- > 0; )
-    {
-        for ( unsigned j = residualsTimeList.at( i ).size(); j-- > 0; )
-        {
-            for ( unsigned k = residualsTimeList.at( i ).at( j ).size(); k-- > 0; )
-            {
-                for ( unsigned l = residualsTimeList.at( i ).at( j ).at( k ).size() - 1; l-- > 0; )
-                {
-                    assert( residualsTimeList.at( i ).at( j ).at( k ).size() >= 2 );
-                    assert( residualsTimeList.at( i ).size() == solsTimeList.at( i ).size() );
-                    assert( residualsTimeList.at( i ).at( j ).size() == solsTimeList.at( i ).at( j ).size() );
-                    assert( residualsTimeList.at( i ).at( j ).at( k ).size() == solsTimeList.at( i ).at( j ).at( k ).size() );
+    for (unsigned i = residualsTimeList.size(); i-- > 0; ) {
+        for (unsigned j = residualsTimeList.at(i).size(); j-- > 0; ) {
+            for (unsigned k = residualsTimeList.at(i).at(j).size(); k-- > 0; ) {
+                for (unsigned l = residualsTimeList.at(i).at(j).at(k).size() - 1; l-- > 0; ) {
+                    assert(residualsTimeList.at(i).at(j).at(k).size() >= 2);
+                    assert(residualsTimeList.at(i).size() == solsTimeList.at(i).size());
+                    assert(residualsTimeList.at(i).at(j).size() == solsTimeList.at(i).at(j).size());
+                    assert(residualsTimeList.at(i).at(j).at(k).size() == solsTimeList.at(i).at(j).at(k).size());
 
                     colIndex++;
 
-                    fsi::vector dx = solsTimeList.at( i ).at( j ).at( k ).at( l + 1 ) - solsTimeList.at( i ).at( j ).at( k ).at( l );
-                    fsi::vector dR = residualsTimeList.at( i ).at( j ).at( k ).at( l + 1 ) - residualsTimeList.at( i ).at( j ).at( k ).at( l );
+                    fsi::vector dx = solsTimeList.at(i).at(j).at(k).at(l + 1) - solsTimeList.at(i).at(j).at(k).at(l);
+                    fsi::vector dR = residualsTimeList.at(i).at(j).at(k).at(l + 1) - residualsTimeList.at(i).at(j).at(k).at(l);
 
-                    if ( dx.norm() < singularityLimit )
+                    if (dx.norm() < singularityLimit)
                         continue;
 
                     // Sherman–Morrison formula
@@ -95,40 +87,34 @@ void BroydenPostProcessing::finalizeTimeStep()
         }
     }
 
-    assert( colIndex == nbCols );
+    assert(colIndex == nbCols);
 }
 
-void BroydenPostProcessing::performPostProcessing(
-    const vector & x0,
+void BroydenPostProcessing::performPostProcessing(const vector & x0,
     vector & xk
-    )
-{
-    vector y( x0.rows() );
+    ) {
+    vector y(x0.rows());
     y.setZero();
-    performPostProcessing( y, x0, xk, true );
+    performPostProcessing(y, x0, xk, true);
 }
 
-void BroydenPostProcessing::performPostProcessing(
-    const vector & y,
+void BroydenPostProcessing::performPostProcessing(const vector & y,
     const vector & x0,
     vector & xk
-    )
-{
-    performPostProcessing( y, x0, xk, false );
+    ) {
+    performPostProcessing(y, x0, xk, false);
 }
 
-void BroydenPostProcessing::performPostProcessing(
-    const vector & y,
+void BroydenPostProcessing::performPostProcessing(const vector & y,
     const vector & x0,
     vector & xk,
     bool residualCriterium
-    )
-{
-    assert( xk.rows() > 0 );
-    assert( fsi->fluid->init );
-    assert( fsi->solid->init );
-    assert( y.rows() == x0.rows() );
-    assert( y.rows() == xk.rows() );
+    ) {
+    assert(xk.rows() > 0);
+    assert(fsi->fluid->init);
+    assert(fsi->solid->init);
+    assert(y.rows() == x0.rows());
+    assert(y.rows() == xk.rows());
 
     // Initialize variables
     vector xkprev = x0;
@@ -138,66 +124,61 @@ void BroydenPostProcessing::performPostProcessing(
     sols.clear();
 
     // Fsi evaluation
-    vector output( xk.rows() ), R( xk.rows() );
+    vector output(xk.rows()), R(xk.rows());
     output.setZero();
     R.setZero();
 
-    fsi->evaluate( x0, output, R );
+    fsi->evaluate(x0, output, R);
 
-    assert( x0.rows() == output.rows() );
-    assert( x0.rows() == R.rows() );
+    assert(x0.rows() == output.rows());
+    assert(x0.rows() == R.rows());
 
     // Save output and residual
-    residuals.push_back( R );
-    sols.push_back( x0 );
+    residuals.push_back(R);
+    sols.push_back(x0);
 
     // Check convergence criteria
-    if ( isConvergence( output, output + y - R, residualCriterium ) )
-    {
+    if (isConvergence(output, output + y - R, residualCriterium)) {
         bool keepIterations = residualCriterium;
-        iterationsConverged( keepIterations );
+        iterationsConverged(keepIterations);
         return;
     }
 
-    if ( J.cols() != R.rows() || J.rows() != R.rows() )
-        J = -fsi::matrix::Identity( R.rows(), R.rows() );
+    if (J.cols() != R.rows() || J.rows() != R.rows())
+        J = -fsi::matrix::Identity(R.rows(), R.rows());
 
-    for ( int iter = 0; iter < maxIter - 1; iter++ )
-    {
+    for (int iter = 0; iter < maxIter - 1; iter++) {
         xkprev = xk;
 
         // Determine the number of columns of the V and W matrices
         int nbCols = residuals.size() - 1;
-        nbCols = std::max( nbCols, 0 );
+        nbCols = std::max(nbCols, 0);
 
         // Include information from previous optimization solves
-        for ( unsigned i = 0; i < solsList.size(); i++ )
-            nbCols += solsList.at( i ).size() - 1;
+        for (unsigned i = 0; i < solsList.size(); i++)
+            nbCols += solsList.at(i).size() - 1;
 
         // Include information from previous stages
-        for ( unsigned i = 0; i < solsStageList.size(); i++ )
-        {
-            for ( unsigned j = 0; j < solsStageList.at( i ).size(); j++ )
-            {
-                if ( j > stageIndex )
+        for (unsigned i = 0; i < solsStageList.size(); i++) {
+            for (unsigned j = 0; j < solsStageList.at(i).size(); j++) {
+                if (j > stageIndex)
                     continue;
 
-                nbCols += solsStageList.at( i ).at( j ).size() - 1;
+                nbCols += solsStageList.at(i).at(j).size() - 1;
             }
         }
 
         // Include information from previous time steps
-        for ( unsigned i = 0; i < solsTimeList.size(); i++ )
-            for ( unsigned j = 0; j < solsTimeList.at( i ).size(); j++ )
-                for ( unsigned k = 0; k < solsTimeList.at( i ).at( j ).size(); k++ )
-                    nbCols += solsTimeList.at( i ).at( j ).at( k ).size() - 1;
+        for (unsigned i = 0; i < solsTimeList.size(); i++)
+            for (unsigned j = 0; j < solsTimeList.at(i).size(); j++)
+                for (unsigned k = 0; k < solsTimeList.at(i).at(j).size(); k++)
+                    nbCols += solsTimeList.at(i).at(j).at(k).size() - 1;
 
-        int nbColsCurrentTimeStep = std::max( static_cast<int>(sols.size() - 1), 0 );
+        int nbColsCurrentTimeStep = std::max(static_cast<int>(sols.size() - 1), 0);
 
-        assert( nbCols >= 0 );
+        assert(nbCols >= 0);
 
-        if ( nbCols == 0 )
-        {
+        if (nbCols == 0) {
             // Use fixed under relaxation to startup the IQNILS algorithm
 
             Info << "Fixed relaxation post processing with factor " << initialRelaxation << endl;
@@ -206,17 +187,15 @@ void BroydenPostProcessing::performPostProcessing(
             xk += initialRelaxation * (R - y);
         }
 
-        if ( nbCols > 0 )
-        {
+        if (nbCols > 0) {
             Info << "Broyden post processing with " << nbCols << " cols for the Jacobian" << endl;
 
-            if ( nbColsCurrentTimeStep )
-            {
+            if (nbColsCurrentTimeStep) {
                 fsi::vector dx, dR;
-                dx = sols.at( sols.size() - 1 ) - sols.at( sols.size() - 2 );
-                dR = residuals.at( residuals.size() - 1 ) - residuals.at( residuals.size() - 2 );
+                dx = sols.at(sols.size() - 1) - sols.at(sols.size() - 2);
+                dR = residuals.at(residuals.size() - 1) - residuals.at(residuals.size() - 2);
 
-                if ( dx.norm() >= singularityLimit )
+                if (dx.norm() >= singularityLimit)
                     J += (dx - J * dR) / (dx.transpose() * J * dR) * (dx.transpose() * J);
             }
 
@@ -224,31 +203,31 @@ void BroydenPostProcessing::performPostProcessing(
         }
 
         // Fsi evaluation
-        fsi->evaluate( xk, output, R );
+        fsi->evaluate(xk, output, R);
 
-        assert( x0.rows() == output.rows() );
-        assert( x0.rows() == R.rows() );
+        assert(x0.rows() == output.rows());
+        assert(x0.rows() == R.rows());
 
         // Save output and residual
-        residuals.push_back( R );
-        sols.push_back( xk );
+        residuals.push_back(R);
+        sols.push_back(xk);
 
         // Check convergence criteria
-        if ( isConvergence( output, output + y - R, residualCriterium ) )
-        {
+        if (isConvergence(output, output + y - R, residualCriterium)) {
             bool keepIterations = residualCriterium;
-            iterationsConverged( keepIterations );
+            iterationsConverged(keepIterations);
             break;
         }
 
-        assert( sols.size() == residuals.size() );
-        assert( sols.at( 0 ).rows() == residuals.at( 0 ).rows() );
-        assert( fsi->iter <= maxIter );
+        assert(sols.size() == residuals.size());
+        assert(sols.at(0).rows() == residuals.at(0).rows());
+        assert(fsi->iter <= maxIter);
     }
 
     // Do not save the iteration vectors since the scheme did not converge
     // A large number of those vectors do not contain any information which
     // can speedup subsequent optimizations
     bool keepIterations = false;
-    iterationsConverged( keepIterations );
+    iterationsConverged(keepIterations);
 }
+} // namespace fsi

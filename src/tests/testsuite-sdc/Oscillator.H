@@ -13,11 +13,9 @@
 
 using namespace sdc;
 
-class Oscillator : public SDCSolver
-{
+class Oscillator : public SDCSolver {
     public:
-        Oscillator(
-            int nbTimeSteps,
+        Oscillator(int nbTimeSteps,
             scalar dt,
             fsi::vector q0,
             scalar amplitude,
@@ -26,8 +24,7 @@ class Oscillator : public SDCSolver
             scalar k
             );
 
-        virtual void evaluateFunction(
-            const int k,
+        virtual void evaluateFunction(const int k,
             const fsi::vector & q,
             const scalar t,
             fsi::vector & f
@@ -37,13 +34,11 @@ class Oscillator : public SDCSolver
 
         virtual int getDOF();
 
-        virtual void getSolution(
-            fsi::vector & solution,
+        virtual void getSolution(fsi::vector & solution,
             fsi::vector & f
             );
 
-        virtual void setSolution(
-            const fsi::vector & solution,
+        virtual void setSolution(const fsi::vector & solution,
             const fsi::vector & f
             );
 
@@ -55,10 +50,9 @@ class Oscillator : public SDCSolver
 
         virtual void initTimeStep();
 
-        virtual void setNumberOfImplicitStages( int k );
+        virtual void setNumberOfImplicitStages(int k);
 
-        virtual void implicitSolve(
-            bool corrector,
+        virtual void implicitSolve(bool corrector,
             const int k,
             const int kold,
             const scalar t,

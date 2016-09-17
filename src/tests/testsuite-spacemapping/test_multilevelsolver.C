@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 
 using namespace tubeflow;
+using fsi::matrix;
 
 class MultiLevelSolverTest : public::testing::Test
 {
@@ -51,7 +52,7 @@ protected:
         rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
         rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
 
-        fluidSolver = new MultiLevelSolver( fluid, fluidFine, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 );
+        fluidSolver = new fsi::MultiLevelSolver( fluid, fluidFine, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 );
 
         rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
         rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
@@ -61,7 +62,7 @@ protected:
         rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
         rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
 
-        fluidFineSolver = new MultiLevelSolver( fluidFine, fluidFine, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 );
+        fluidFineSolver = new fsi::MultiLevelSolver( fluidFine, fluidFine, rbfInterpToCouplingMesh, rbfInterpToMesh, 0, 0 );
 
         rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
         rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
@@ -71,7 +72,7 @@ protected:
         rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
         rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
 
-        solidSolver = new MultiLevelSolver( solid, solidFine, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 );
+        solidSolver = new fsi::MultiLevelSolver( solid, solidFine, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 );
 
         rbfFunction = std::shared_ptr<rbf::RBFFunctionInterface>( new rbf::TPSFunction() );
         rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
@@ -81,7 +82,7 @@ protected:
         rbfInterpolator = std::shared_ptr<rbf::RBFInterpolation>( new rbf::RBFInterpolation( rbfFunction ) );
         rbfInterpToMesh = std::shared_ptr<rbf::RBFCoarsening> ( new rbf::RBFCoarsening( rbfInterpolator ) );
 
-        solidFineSolver = new MultiLevelSolver( solidFine, solidFine, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 );
+        solidFineSolver = new fsi::MultiLevelSolver( solidFine, solidFine, rbfInterpToCouplingMesh, rbfInterpToMesh, 1, 0 );
     }
 
     virtual void TearDown()
@@ -100,10 +101,10 @@ protected:
     shared_ptr<TubeFlowFluidSolver> fluidFine;
     shared_ptr<TubeFlowSolidSolver> solid;
     shared_ptr<TubeFlowSolidSolver> solidFine;
-    MultiLevelSolver * fluidSolver;
-    MultiLevelSolver * fluidFineSolver;
-    MultiLevelSolver * solidSolver;
-    MultiLevelSolver * solidFineSolver;
+    fsi::MultiLevelSolver * fluidSolver;
+    fsi::MultiLevelSolver * fluidFineSolver;
+    fsi::MultiLevelSolver * solidSolver;
+    fsi::MultiLevelSolver * solidFineSolver;
 };
 
 TEST_F( MultiLevelSolverTest, object )

@@ -1,33 +1,30 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #pragma once
 
+#include <memory>
 #include "Coarsener.H"
 
-namespace rbf
-{
-    class NoCoarsening : public Coarsener
-    {
-        public:
-            explicit NoCoarsening();
+namespace rbf {
+class NoCoarsening : public Coarsener {
+    public:
+        NoCoarsening();
 
-            ~NoCoarsening();
+        ~NoCoarsening();
 
-            void compute(
-                std::shared_ptr<RBFFunctionInterface> rbfFunction,
-                std::unique_ptr<ElDistVector> positions,
-                std::unique_ptr<ElDistVector> positionsInterpolation
-                );
+        void compute(std::shared_ptr<RBFFunctionInterface> rbfFunction,
+            std::unique_ptr<ElDistVector> positions,
+            std::unique_ptr<ElDistVector> positionsInterpolation
+            );
 
-            bool initialized();
+        bool initialized();
 
-            std::unique_ptr<ElDistVector> interpolate( const std::unique_ptr<ElDistVector> & values );
+        std::unique_ptr<ElDistVector> interpolate(const std::unique_ptr<ElDistVector> & values);
 
-        private:
-            std::unique_ptr<ElRBFInterpolation> rbf;
-    };
-}
+    private:
+        std::unique_ptr<ElRBFInterpolation> rbf;
+};
+}  // namespace rbf

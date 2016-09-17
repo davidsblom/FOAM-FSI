@@ -9,11 +9,9 @@
 
 using namespace tubeflow;
 
-class TubeFlowLinearizedFluidSolverTest : public ::testing::Test
-{
+class TubeFlowLinearizedFluidSolverTest : public ::testing::Test {
     protected:
-        virtual void SetUp()
-        {
+        virtual void SetUp() {
             scalar p0 = 0;
             scalar r0 = 0.2;
             scalar u0 = 0.1;
@@ -25,11 +23,10 @@ class TubeFlowLinearizedFluidSolverTest : public ::testing::Test
             scalar E = 490;
             int N = 5;
 
-            fluid = new tubeflow::TubeFlowLinearizedFluidSolver( N, p0, r0, u0, rho, E, h, T, dt, L );
+            fluid = new tubeflow::TubeFlowLinearizedFluidSolver(N, p0, r0, u0, rho, E, h, T, dt, L);
         }
 
-        virtual void TearDown()
-        {
+        virtual void TearDown() {
             delete fluid;
             fluid = NULL;
         }
@@ -37,23 +34,23 @@ class TubeFlowLinearizedFluidSolverTest : public ::testing::Test
         TubeFlowLinearizedFluidSolver * fluid;
 };
 
-TEST_F( TubeFlowLinearizedFluidSolverTest, object )
+TEST_F(TubeFlowLinearizedFluidSolverTest, object)
 {
-    ASSERT_TRUE( true );
+    ASSERT_TRUE(true);
 }
 
-TEST_F( TubeFlowLinearizedFluidSolverTest, solve )
+TEST_F(TubeFlowLinearizedFluidSolverTest, solve)
 {
     fluid->initTimeStep();
 
     // Initialize variables
     int N = 5;
-    fsi::vector p( N ), a( N );
+    fsi::vector p(N), a(N);
     p.setZero();
     scalar r0 = 0.2;
     scalar a0 = M_PI * r0 * r0;
-    a.fill( a0 );
+    a.fill(a0);
 
-    fluid->solve( a, p );
+    fluid->solve(a, p);
     fluid->finalizeTimeStep();
 }

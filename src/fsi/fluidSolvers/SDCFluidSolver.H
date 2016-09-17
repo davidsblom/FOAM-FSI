@@ -24,26 +24,24 @@
 using namespace fsi;
 using std::shared_ptr;
 
-class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
-{
+class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface {
     public:
-        SDCFluidSolver(
-            const std::string & name,
+        SDCFluidSolver(const std::string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );
 
         virtual ~SDCFluidSolver();
 
-        virtual void getAcousticsDensityLocal( matrix & data );
+        virtual void getAcousticsDensityLocal(matrix & data);
 
-        virtual void getAcousticsVelocityLocal( matrix & data );
+        virtual void getAcousticsVelocityLocal(matrix & data);
 
-        virtual void getAcousticsPressureLocal( matrix & data );
+        virtual void getAcousticsPressureLocal(matrix & data);
 
-        virtual void getTractionLocal( matrix & traction );
+        virtual void getTractionLocal(matrix & traction);
 
-        virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
+        virtual void getWritePositionsLocalAcoustics(matrix & writePositions);
 
         virtual void initTimeStep();
 
@@ -53,8 +51,7 @@ class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
 
         virtual void solve();
 
-        virtual void evaluateFunction(
-            const int k,
+        virtual void evaluateFunction(const int k,
             const fsi::vector & q,
             const scalar t,
             fsi::vector & f
@@ -64,13 +61,11 @@ class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
 
         virtual int getDOF();
 
-        virtual void getSolution(
-            fsi::vector & solution,
+        virtual void getSolution(fsi::vector & solution,
             fsi::vector & f
             );
 
-        virtual void setSolution(
-            const fsi::vector & solution,
+        virtual void setSolution(const fsi::vector & solution,
             const fsi::vector & f
             );
 
@@ -80,8 +75,7 @@ class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
 
         virtual scalar getStartTime();
 
-        virtual void implicitSolve(
-            bool corrector,
+        virtual void implicitSolve(bool corrector,
             const int k,
             const int kold,
             const scalar t,
@@ -92,8 +86,7 @@ class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
             fsi::vector & result
             );
 
-        void prepareImplicitSolve(
-            bool corrector,
+        void prepareImplicitSolve(bool corrector,
             const int k,
             const int kold,
             const scalar t,
@@ -102,14 +95,13 @@ class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
             const fsi::vector & rhs
             );
 
-        virtual void setDeltaT( scalar dt );
+        virtual void setDeltaT(scalar dt);
 
-        virtual void setNumberOfImplicitStages( int k );
+        virtual void setNumberOfImplicitStages(int k);
 
         virtual void nextTimeStep();
 
-        virtual void getVariablesInfo(
-            std::deque<int> & dof,
+        virtual void getVariablesInfo(std::deque<int> & dof,
             std::deque<bool> & enabled,
             std::deque<std::string> & names
             );

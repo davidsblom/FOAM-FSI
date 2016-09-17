@@ -13,11 +13,9 @@
 
 using namespace fsi;
 
-class ElasticSolidSolver : public foamSolidSolver
-{
+class ElasticSolidSolver : public foamSolidSolver {
     public:
-        ElasticSolidSolver(
-            const string & name,
+        ElasticSolidSolver(const string & name,
             const std::shared_ptr<argList> & args,
             const std::shared_ptr<Time> & runTime
             );

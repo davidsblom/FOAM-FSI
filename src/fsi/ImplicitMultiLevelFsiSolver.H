@@ -1,24 +1,21 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef ImplicitMultiLevelFsiSolver_H
 #define ImplicitMultiLevelFsiSolver_H
 
+#include <memory>
 #include "PostProcessing.H"
 #include "MultiLevelFsiSolver.H"
 #include "Solver.H"
 #include "SurrogateModel.H"
 
-using namespace fsi;
-
-class ImplicitMultiLevelFsiSolver : public SurrogateModel, public Solver
-{
+namespace fsi {
+class ImplicitMultiLevelFsiSolver : public SurrogateModel, public Solver {
     public:
-        ImplicitMultiLevelFsiSolver(
-            shared_ptr<MultiLevelFsiSolver> fsi,
+        ImplicitMultiLevelFsiSolver(shared_ptr<MultiLevelFsiSolver> fsi,
             shared_ptr<PostProcessing> postProcessing
             );
 
@@ -26,38 +23,33 @@ class ImplicitMultiLevelFsiSolver : public SurrogateModel, public Solver
 
         virtual bool allConverged();
 
-        virtual void evaluate(
-            const fsi::vector & x,
+        virtual void evaluate(const fsi::vector & x,
             fsi::vector & output,
             fsi::vector & R
             );
 
         virtual bool isConvergence();
 
-        virtual bool isConvergence(
-            const fsi::vector & x,
+        virtual bool isConvergence(const fsi::vector & x,
             const fsi::vector & xprev
             );
 
-        virtual void optimize(
-            const fsi::vector & x0,
+        virtual void optimize(const fsi::vector & x0,
             fsi::vector & xk
             );
 
-        virtual void optimize(
-            const fsi::vector & y,
+        virtual void optimize(const fsi::vector & y,
             const fsi::vector & x0,
             fsi::vector & xk
             );
 
         virtual void run();
 
-        virtual void setSurrogateData(
-            fsi::vector & xf,
+        virtual void setSurrogateData(fsi::vector & xf,
             matrix & J
             );
 
-        virtual void setUseJacobian( bool useJacobian );
+        virtual void setUseJacobian(bool useJacobian);
 
         void finalizeTimeStep();
 
@@ -71,5 +63,6 @@ class ImplicitMultiLevelFsiSolver : public SurrogateModel, public Solver
         shared_ptr<PostProcessing> postProcessing;
         bool init;
 };
+} // namespace fsi
 
 #endif

@@ -6,16 +6,14 @@
 
 #include "LinearFunction.H"
 
-namespace rbf
-{
-    LinearFunction::LinearFunction()
-    {}
+namespace rbf {
+LinearFunction::LinearFunction()
+{}
 
-    LinearFunction::~LinearFunction()
-    {}
+LinearFunction::~LinearFunction()
+{}
 
-    scalar LinearFunction::evaluate( scalar value )
-    {
-        return value;
-    }
+scalar LinearFunction::evaluate(scalar value) {
+    return value;
+}
 }

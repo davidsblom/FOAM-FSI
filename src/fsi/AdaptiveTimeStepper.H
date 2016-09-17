@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  *
  * Adaptive time stepping based on :
  * Soderlind and Wang, Adaptive time-stepping and computational stability,
@@ -11,80 +10,74 @@
 #ifndef AdaptiveTimeStepper_H
 #define AdaptiveTimeStepper_H
 
-#include <memory>
 #include <assert.h>
 #include <math.h>
+#include <memory>
+#include <string>
 #include "BaseMultiLevelSolver.H"
 #include "fvCFD.H"
 
-namespace sdc
-{
-    class AdaptiveTimeStepper
-    {
-        public:
-            explicit AdaptiveTimeStepper( bool enabled );
+namespace sdc {
+class AdaptiveTimeStepper {
+    public:
+        explicit AdaptiveTimeStepper(bool enabled);
 
-            AdaptiveTimeStepper(
-                bool enabled,
-                const std::string & filter,
-                scalar tol,
-                scalar safetyFactor
-                );
+        AdaptiveTimeStepper(bool enabled,
+            const std::string & filter,
+            scalar tol,
+            scalar safetyFactor
+            );
 
-            ~AdaptiveTimeStepper();
+        ~AdaptiveTimeStepper();
 
-            bool determineNewTimeStep(
-                const fsi::vector & errorEstimate,
-                const fsi::vector & solution,
-                const scalar computedTimeStep,
-                scalar & newTimeStep
-                );
+        bool determineNewTimeStep(const fsi::vector & errorEstimate,
+            const fsi::vector & solution,
+            const scalar computedTimeStep,
+            scalar & newTimeStep
+            );
 
-            bool determineNewTimeStep(
-                const scalar errorEstimate,
-                const scalar computedTimeStep,
-                scalar & newTimeStep
-                );
+        bool determineNewTimeStep(const scalar errorEstimate,
+            const scalar computedTimeStep,
+            scalar & newTimeStep
+            );
 
-            scalar elementary( const scalar c1 );
+        scalar elementary(const scalar c1);
 
-            scalar h211b(
-                const scalar c1,
-                const scalar c0,
-                const scalar rho
-                );
+        scalar h211b(const scalar c1,
+            const scalar c0,
+            const scalar rho
+            );
 
-            bool isAccepted() const;
+        bool isAccepted() const;
 
-            bool isEnabled() const;
+        bool isEnabled() const;
 
-            bool isPreviousStepAccepted() const;
+        bool isPreviousStepAccepted() const;
 
-            static scalar limit( const scalar u );
+        static scalar limit(const scalar u);
 
-            scalar pi42(
-                const scalar c1,
-                const scalar c0
-                );
+        scalar pi42(const scalar c1,
+            const scalar c0
+            );
 
-            void setEndTime( scalar endTime );
+        void setEndTime(scalar endTime);
 
-            void setOrderEmbeddedMethod( int order );
+        void setOrderEmbeddedMethod(int order);
 
-        private:
-            const bool enabled;
-            const std::string filter;
-            const scalar tol;
-            const scalar safetyFactor;
-            int k;
-            scalar cerrold;
-            scalar rhoold;
-            int timeStepIndex;
-            bool accepted;
-            bool previousTimeStepRejected;
-            scalar endTime;
-            scalar t;
-    };
-}
+    private:
+        const bool enabled;
+        const std::string filter;
+        const scalar tol;
+        const scalar safetyFactor;
+        int k;
+        scalar cerrold;
+        scalar rhoold;
+        int timeStepIndex;
+        bool accepted;
+        bool previousTimeStepRejected;
+        scalar endTime;
+        scalar t;
+};
+} // namespace sdc
 
 #endif

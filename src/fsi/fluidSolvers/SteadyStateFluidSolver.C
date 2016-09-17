@@ -9,13 +9,12 @@
 
 #include "SteadyStateFluidSolver.H"
 
-SteadyStateFluidSolver::SteadyStateFluidSolver(
-    const std::string & name,
+SteadyStateFluidSolver::SteadyStateFluidSolver(const std::string & name,
     std::shared_ptr<argList> args,
     std::shared_ptr<Time> runTime
     )
     :
-    foamFluidSolver( name, args, runTime ),
+    foamFluidSolver(name, args, runTime),
     transportProperties
     (
         IOobject
@@ -27,8 +26,8 @@ SteadyStateFluidSolver::SteadyStateFluidSolver(
             IOobject::NO_WRITE
         )
     ),
-    nu( transportProperties.lookup( "nu" ) ),
-    rho( transportProperties.lookup( "rho" ) ),
+    nu(transportProperties.lookup("nu")),
+    rho(transportProperties.lookup("rho")),
     p
     (
         IOobject
@@ -63,7 +62,7 @@ SteadyStateFluidSolver::SteadyStateFluidSolver(
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
-        linearInterpolate( U ) & mesh.Sf()
+        linearInterpolate(U) & mesh.Sf()
     ),
     AU
     (
@@ -93,53 +92,52 @@ SteadyStateFluidSolver::SteadyStateFluidSolver(
         U.dimensions() / runTime->deltaT().dimensions(),
         zeroGradientFvPatchVectorField::typeName
     ),
-    nCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nCorrectors" ) ) ),
-    nNonOrthCorr( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "nNonOrthogonalCorrectors" ) ) ),
-    minIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "minIter" ) ) ),
-    maxIter( readInt( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "maxIter" ) ) ),
-    absoluteTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "tolerance" ) ) ),
-    relativeTolerance( readScalar( mesh.solutionDict().subDict( "PIMPLE" ).lookup( "relTol" ) ) ),
-    sumLocalContErr( 0 ),
-    globalContErr( 0 ),
-    cumulativeContErr( 0 ),
-    pRefCell( 0 ),
-    pRefValue( 0.0 ),
-    laminarTransport( U, phi ),
-    turbulence( autoPtr<incompressible::turbulenceModel>
+    nCorr(readInt(mesh.solutionDict().subDict("PIMPLE").lookup("nCorrectors"))),
+    nNonOrthCorr(readInt(mesh.solutionDict().subDict("PIMPLE").lookup("nNonOrthogonalCorrectors"))),
+    minIter(readInt(mesh.solutionDict().subDict("PIMPLE").lookup("minIter"))),
+    maxIter(readInt(mesh.solutionDict().subDict("PIMPLE").lookup("maxIter"))),
+    absoluteTolerance(readScalar(mesh.solutionDict().subDict("PIMPLE").lookup("tolerance"))),
+    relativeTolerance(readScalar(mesh.solutionDict().subDict("PIMPLE").lookup("relTol"))),
+    sumLocalContErr(0),
+    globalContErr(0),
+    cumulativeContErr(0),
+    pRefCell(0),
+    pRefValue(0.0),
+    laminarTransport(U, phi),
+    turbulence(autoPtr<incompressible::turbulenceModel>
         (
-            incompressible::turbulenceModel::New( U, phi, laminarTransport )
-        ) ),
-    CoNum( 0 ),
-    meanCoNum( 0 ),
-    velMag( 0 ),
-    turbulenceSwitch( true )
-{
-    assert( absoluteTolerance < 1 );
-    assert( absoluteTolerance > 0 );
-    assert( nCorr > 0 );
-    assert( maxIter >= 1 );
-    assert( nNonOrthCorr >= 0 );
-    assert( relativeTolerance < 1 );
-    assert( minIter <= maxIter );
-    assert( minIter >= 0 );
+            incompressible::turbulenceModel::New(U, phi, laminarTransport)
+        )),
+    CoNum(0),
+    meanCoNum(0),
+    velMag(0),
+    turbulenceSwitch(true) {
+    assert(absoluteTolerance < 1);
+    assert(absoluteTolerance > 0);
+    assert(nCorr > 0);
+    assert(maxIter >= 1);
+    assert(nNonOrthCorr >= 0);
+    assert(relativeTolerance < 1);
+    assert(minIter <= maxIter);
+    assert(minIter >= 0);
 
     // Ensure that the absolute tolerance of the linear solver is less than the
     // used convergence tolerance for the non-linear system.
-    scalar absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "U" ).lookup( "tolerance" ) );
-    assert( absTolerance < absoluteTolerance );
+    scalar absTolerance = readScalar(mesh.solutionDict().subDict("solvers").subDict("U").lookup("tolerance"));
+    assert(absTolerance < absoluteTolerance);
 
-    if ( absTolerance >= absoluteTolerance )
-        throw std::runtime_error( "The absolute tolerance for the linear solver of the momentum equation (U) should be smaller than PIMPLE::absoluteTolerance in order to reach convergence of the non-linear system" );
+    if (absTolerance >= absoluteTolerance)
+        throw std::runtime_error("The absolute tolerance for the linear solver of the momentum equation (U) should be smaller than PIMPLE::absoluteTolerance in order to reach convergence of the non-linear system");
 
-    absTolerance = readScalar( mesh.solutionDict().subDict( "solvers" ).subDict( "p" ).lookup( "tolerance" ) );
-    assert( absTolerance < absoluteTolerance );
+    absTolerance = readScalar(mesh.solutionDict().subDict("solvers").subDict("p").lookup("tolerance"));
+    assert(absTolerance < absoluteTolerance);
 
-    if ( absTolerance >= absoluteTolerance )
-        throw std::runtime_error( "The absolute tolerance for the linear solver of the Poisson equation (p) should be smaller than PIMPLE::absoluteTolerance in order to reach convergence of the non-linear system" );
+    if (absTolerance >= absoluteTolerance)
+        throw std::runtime_error("The absolute tolerance for the linear solver of the Poisson equation (p) should be smaller than PIMPLE::absoluteTolerance in order to reach convergence of the non-linear system");
 
     checkTimeDiscretisationScheme();
 
-    setRefCell( p, mesh.solutionDict().subDict( "PIMPLE" ), pRefCell, pRefValue );
+    setRefCell(p, mesh.solutionDict().subDict("PIMPLE"), pRefCell, pRefValue);
 
     {
         IOdictionary dict
@@ -154,11 +152,10 @@ SteadyStateFluidSolver::SteadyStateFluidSolver(
             )
         );
 
-        if ( word( dict.lookup( "simulationType" ) ) == "laminar" )
+        if (word(dict.lookup("simulationType")) == "laminar")
             turbulenceSwitch = false;
 
-        if ( word( dict.lookup( "simulationType" ) ) == "RASModel" )
-        {
+        if (word(dict.lookup("simulationType")) == "RASModel") {
             IOdictionary dict
             (
                 IOobject
@@ -171,14 +168,14 @@ SteadyStateFluidSolver::SteadyStateFluidSolver(
                 )
             );
 
-            if ( word( dict.lookup( "RASModel" ) ) == "laminar" )
+            if (word(dict.lookup("RASModel")) == "laminar")
                 turbulenceSwitch = false;
         }
     }
 
     Info << "Turbulence ";
 
-    if ( turbulenceSwitch )
+    if (turbulenceSwitch)
         Info << "enabled";
     else
         Info << "disabled";
@@ -189,41 +186,38 @@ SteadyStateFluidSolver::SteadyStateFluidSolver(
 SteadyStateFluidSolver::~SteadyStateFluidSolver()
 {}
 
-void SteadyStateFluidSolver::checkTimeDiscretisationScheme()
-{
-    const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>( "fvSchemes" );
-    const dictionary & ddtSchemes = fvSchemes.subDict( "ddtSchemes" );
+void SteadyStateFluidSolver::checkTimeDiscretisationScheme() {
+    const IOdictionary & fvSchemes = mesh.lookupObject<IOdictionary>("fvSchemes");
+    const dictionary & ddtSchemes = fvSchemes.subDict("ddtSchemes");
     word ddtScheme;
 
-    if ( ddtSchemes.found( "ddt(U)" ) )
-        ddtScheme = word( ddtSchemes.lookup( "ddt(U)" ) );
+    if (ddtSchemes.found("ddt(U)"))
+        ddtScheme = word(ddtSchemes.lookup("ddt(U)"));
     else
-        ddtScheme = word( ddtSchemes.lookup( "default" ) );
+        ddtScheme = word(ddtSchemes.lookup("default"));
 
-    if ( ddtScheme != word( "steadyState" ) )
-    {
-        FatalErrorIn( "checkTimeDiscretisationScheme: " )
+    if (ddtScheme != word("steadyState")) {
+        FatalErrorIn("checkTimeDiscretisationScheme: ")
             << " ddt(U) scheme is currently set to " << ddtScheme
             << ". This solver only works with ddt(U) scheme = steadyState."
-            << abort( FatalError );
+            << abort(FatalError);
     }
 
-    forAll( U.boundaryField().types(), i )
+    forAll(U.boundaryField().types(), i)
     {
-        assert( U.boundaryField().types()[i] != "movingWallVelocity" );
-        assert( U.boundaryField().types()[i] != "SDCMovingWallVelocity" );
+        assert(U.boundaryField().types()[i] != "movingWallVelocity");
+        assert(U.boundaryField().types()[i] != "SDCMovingWallVelocity");
     }
 }
 
-void SteadyStateFluidSolver::continuityErrs()
-{
-    tmp<volScalarField> contErr = fvc::div( phi );
+void SteadyStateFluidSolver::continuityErrs() {
+    tmp<volScalarField> contErr = fvc::div(phi);
 
     sumLocalContErr = runTime->deltaT().value() *
-        mag( contErr() ) ().weightedAverage( mesh.V() ).value();
+        mag(contErr()) ().weightedAverage(mesh.V()).value();
 
     globalContErr = runTime->deltaT().value() *
-        contErr->weightedAverage( mesh.V() ).value();
+        contErr->weightedAverage(mesh.V()).value();
 
     cumulativeContErr += globalContErr;
 
@@ -233,22 +227,20 @@ void SteadyStateFluidSolver::continuityErrs()
          << endl;
 }
 
-void SteadyStateFluidSolver::courantNo()
-{
-    if ( mesh.nInternalFaces() )
-    {
-        tmp<surfaceScalarField> magPhi = mag( phi );
+void SteadyStateFluidSolver::courantNo() {
+    if (mesh.nInternalFaces()) {
+        tmp<surfaceScalarField> magPhi = mag(phi);
 
         surfaceScalarField SfUfbyDelta =
             mesh.surfaceInterpolation::deltaCoeffs() * magPhi();
 
-        CoNum = max( SfUfbyDelta / mesh.magSf() )
+        CoNum = max(SfUfbyDelta / mesh.magSf())
             .value() * runTime->deltaT().value();
 
-        meanCoNum = ( sum( SfUfbyDelta ) / sum( mesh.magSf() ) )
+        meanCoNum = (sum(SfUfbyDelta) / sum(mesh.magSf()))
             .value() * runTime->deltaT().value();
 
-        velMag = max( magPhi() / mesh.magSf() ).value();
+        velMag = max(magPhi() / mesh.magSf()).value();
     }
 
     Info << "Courant Number mean: " << meanCoNum
@@ -257,18 +249,17 @@ void SteadyStateFluidSolver::courantNo()
          << endl;
 }
 
-scalar SteadyStateFluidSolver::evaluateMomentumResidual()
-{
-    tmp<volVectorField> residual = fvc::div( phi, U ) + fvc::grad( p );
+scalar SteadyStateFluidSolver::evaluateMomentumResidual() {
+    tmp<volVectorField> residual = fvc::div(phi, U) + fvc::grad(p);
 
-    if ( turbulenceSwitch )
-        residual() += turbulence->divDevReff( U ) & U;
+    if (turbulenceSwitch)
+        residual() += turbulence->divDevReff(U) & U;
     else
-        residual() += -fvc::laplacian( nu, U );
+        residual() += -fvc::laplacian(nu, U);
 
-    scalarField magResU = mag( residual->internalField() );
-    scalar momentumResidual = std::sqrt( gSumSqr( magResU ) / mesh.globalData().nTotalCells() );
-    scalar rmsU = std::sqrt( gSumSqr( mag( U.internalField() ) ) / mesh.globalData().nTotalCells() );
+    scalarField magResU = mag(residual->internalField());
+    scalar momentumResidual = std::sqrt(gSumSqr(magResU) / mesh.globalData().nTotalCells());
+    scalar rmsU = std::sqrt(gSumSqr(mag(U.internalField())) / mesh.globalData().nTotalCells());
     rmsU /= runTime->deltaT().value();
 
     // Scale the residual by the root mean square of the velocity field
@@ -277,35 +268,31 @@ scalar SteadyStateFluidSolver::evaluateMomentumResidual()
     return momentumResidual;
 }
 
-void SteadyStateFluidSolver::getAcousticsDensityLocal( matrix & )
-{
-    assert( false );
+void SteadyStateFluidSolver::getAcousticsDensityLocal(matrix &) {
+    assert(false);
 }
 
-void SteadyStateFluidSolver::getAcousticsVelocityLocal( matrix & )
-{
-    assert( false );
+void SteadyStateFluidSolver::getAcousticsVelocityLocal(matrix &) {
+    assert(false);
 }
 
-void SteadyStateFluidSolver::getAcousticsPressureLocal( matrix & )
-{
-    assert( false );
+void SteadyStateFluidSolver::getAcousticsPressureLocal(matrix &) {
+    assert(false);
 }
 
-void SteadyStateFluidSolver::getTractionLocal( matrix & traction )
-{
+void SteadyStateFluidSolver::getTractionLocal(matrix & traction) {
     int size = 0;
 
-    forAll( movingPatchIDs, patchI )
+    forAll(movingPatchIDs, patchI)
     {
         size += mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
     }
 
-    vectorField tractionField( size, Foam::vector::zero );
+    vectorField tractionField(size, Foam::vector::zero);
 
     int offset = 0;
 
-    forAll( movingPatchIDs, patchI )
+    forAll(movingPatchIDs, patchI)
     {
         int size = mesh.boundaryMesh()[movingPatchIDs[patchI]].faceCentres().size();
 
@@ -314,7 +301,7 @@ void SteadyStateFluidSolver::getTractionLocal( matrix & traction )
             + rho.value() * p.boundaryField()[movingPatchIDs[patchI]]
             * mesh.boundary()[movingPatchIDs[patchI]].nf();
 
-        forAll( tractionFieldPatchI(), i )
+        forAll(tractionFieldPatchI(), i)
         {
             tractionField[i + offset] = tractionFieldPatchI()[i];
         }
@@ -322,23 +309,21 @@ void SteadyStateFluidSolver::getTractionLocal( matrix & traction )
         offset += size;
     }
 
-    assert( tractionField.size() == nGlobalCenters[Pstream::myProcNo()] );
+    assert(tractionField.size() == nGlobalCenters[Pstream::myProcNo()]);
 
-    traction.resize( tractionField.size(), mesh.nGeometricD() );
+    traction.resize(tractionField.size(), mesh.nGeometricD());
 
-    for ( int i = 0; i < traction.rows(); i++ )
-        for ( int j = 0; j < traction.cols(); j++ )
-            traction( i, j ) = tractionField[i][j];
+    for (int i = 0; i < traction.rows(); i++)
+        for (int j = 0; j < traction.cols(); j++)
+            traction(i, j) = tractionField[i][j];
 }
 
-void SteadyStateFluidSolver::getWritePositionsLocalAcoustics( matrix & )
-{
-    assert( false );
+void SteadyStateFluidSolver::getWritePositionsLocalAcoustics(matrix &) {
+    assert(false);
 }
 
-void SteadyStateFluidSolver::initTimeStep()
-{
-    assert( !init );
+void SteadyStateFluidSolver::initTimeStep() {
+    assert(!init);
 
     timeIndex++;
     t = runTime->time().value();
@@ -350,8 +335,7 @@ void SteadyStateFluidSolver::initTimeStep()
     init = true;
 }
 
-bool SteadyStateFluidSolver::isRunning()
-{
+bool SteadyStateFluidSolver::isRunning() {
     Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
          << "  ClockTime = " << runTime->elapsedClockTime() << " s"
          << endl << endl;
@@ -362,8 +346,7 @@ bool SteadyStateFluidSolver::isRunning()
 void SteadyStateFluidSolver::resetSolution()
 {}
 
-void SteadyStateFluidSolver::solve()
-{
+void SteadyStateFluidSolver::solve() {
     Info << "Solve fluid domain" << endl;
 
     mesh.update();
@@ -371,19 +354,18 @@ void SteadyStateFluidSolver::solve()
     scalar convergenceTolerance = absoluteTolerance;
 
     // --- PIMPLE loop
-    for ( label oCorr = 0; oCorr < maxIter; oCorr++ )
-    {
+    for (label oCorr = 0; oCorr < maxIter; oCorr++) {
         U.storePrevIter();
 
         fvVectorMatrix UEqn
         (
-            fvm::div( phi, U )
+            fvm::div(phi, U)
         );
 
-        if ( turbulenceSwitch )
-            UEqn += turbulence->divDevReff( U );
+        if (turbulenceSwitch)
+            UEqn += turbulence->divDevReff(U);
         else
-            UEqn += -fvm::laplacian( nu, U );
+            UEqn += -fvm::laplacian(nu, U);
 
         {
             // To ensure S0 and B0 are thrown out of memory
@@ -399,18 +381,18 @@ void SteadyStateFluidSolver::solve()
 
             UEqn.relax();
 
-            Foam::solve( UEqn == -fvc::grad( p ) );
+            Foam::solve(UEqn == -fvc::grad(p));
 
             // Reset equation to ensure relaxation parameter is not causing problems for time order
             UEqn =
                 (
-                fvm::div( phi, U )
+                fvm::div(phi, U)
                 );
 
-            if ( turbulenceSwitch )
-                UEqn += turbulence->divDevReff( U );
+            if (turbulenceSwitch)
+                UEqn += turbulence->divDevReff(U);
             else
-                UEqn += -fvm::laplacian( nu, U );
+                UEqn += -fvm::laplacian(nu, U);
 
             UEqn.source() = S0;
             UEqn.boundaryCoeffs() = B0;
@@ -427,8 +409,7 @@ void SteadyStateFluidSolver::solve()
         scalar tol = 1.0e-2;
 
         // --- PISO loop
-        for ( int corr = 0; corr < nCorr; corr++ )
-        {
+        for (int corr = 0; corr < nCorr; corr++) {
             p.storePrevIter();
 
             HU = UEqn.H();
@@ -436,12 +417,11 @@ void SteadyStateFluidSolver::solve()
             U = HU / AU;
 
             {
-                phi = ( fvc::interpolate( HU ) / fvc::interpolate( AU ) ) & mesh.Sf();
+                phi = (fvc::interpolate(HU) / fvc::interpolate(AU)) & mesh.Sf();
 
-                forAll( phi.boundaryField(), patchI )
+                forAll(phi.boundaryField(), patchI)
                 {
-                    if ( !phi.boundaryField()[patchI].coupled() )
-                    {
+                    if (!phi.boundaryField()[patchI].coupled()) {
                         phi.boundaryField()[patchI] =
                             (
                             U.boundaryField()[patchI]
@@ -451,45 +431,42 @@ void SteadyStateFluidSolver::solve()
                 }
             }
 
-            for ( int nonOrth = 0; nonOrth <= nNonOrthCorr; nonOrth++ )
-            {
+            for (int nonOrth = 0; nonOrth <= nNonOrthCorr; nonOrth++) {
                 fvScalarMatrix pEqn
                 (
-                    fvm::laplacian( 1.0 / fvc::interpolate( AU ), p, "laplacian((1|A(U)),p)" ) == fvc::div( phi )
+                    fvm::laplacian(1.0 / fvc::interpolate(AU), p, "laplacian((1|A(U)),p)") == fvc::div(phi)
                 );
 
-                pEqn.setReference( pRefCell, pRefValue );
+                pEqn.setReference(pRefCell, pRefValue);
 
                 pressureResidual = pEqn.solve().initialResidual();
 
-                if ( corr == 0 && nonOrth == 0 )
+                if (corr == 0 && nonOrth == 0)
                     initResidual = pressureResidual;
-                else
-                if ( nonOrth == 0 )
+                else if (nonOrth == 0)
                     currResidual = pressureResidual;
 
-                if ( nonOrth == nNonOrthCorr )
-                {
+                if (nonOrth == nNonOrthCorr) {
                     phi -= pEqn.flux();
                 }
             }
 
             p.relax();
 
-            U -= (1.0 / AU) * fvc::grad( p );
+            U -= (1.0 / AU) * fvc::grad(p);
             U.correctBoundaryConditions();
 
-            if ( currResidual < std::max( tol * initResidual, scalar( 1.0e-15 ) ) )
+            if (currResidual < std::max(tol * initResidual, scalar(1.0e-15)))
                 break;
         }
 
-        if ( turbulenceSwitch )
+        if (turbulenceSwitch)
             turbulence->correct();
 
         scalar momentumResidual = evaluateMomentumResidual();
 
-        if ( oCorr == 0 )
-            convergenceTolerance = std::max( relativeTolerance * momentumResidual, absoluteTolerance );
+        if (oCorr == 0)
+            convergenceTolerance = std::max(relativeTolerance * momentumResidual, absoluteTolerance);
 
         bool convergence = momentumResidual <= convergenceTolerance && oCorr >= minIter - 1;
 
@@ -498,14 +475,14 @@ void SteadyStateFluidSolver::solve()
         Info << ", iteration = " << oCorr + 1;
         Info << ", convergence = ";
 
-        if ( convergence )
+        if (convergence)
             Info << "true";
         else
             Info << "false";
 
         Info << endl;
 
-        if ( convergence )
+        if (convergence)
             break;
     }
 

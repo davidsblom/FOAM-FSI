@@ -1,4 +1,8 @@
 
+/*
+ * Copyright [2016] <David Blom>
+ */
+
 #ifndef VERSION_H
 #define VERSION_H
 

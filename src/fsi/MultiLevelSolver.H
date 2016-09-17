@@ -1,7 +1,6 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
 #ifndef MultiLevelSolver_H
@@ -16,54 +15,47 @@
 #include "TPSFunction.H"
 
 using std::shared_ptr;
-using namespace rbf;
+using rbf::RBFCoarsening;
 
-namespace fsi
-{
-    class MultiLevelSolver
-    {
-        public:
-            MultiLevelSolver(
-                shared_ptr<BaseMultiLevelSolver> solver,
-                shared_ptr<BaseMultiLevelSolver> couplingGridSolver,
-                int participantId,
-                int level
-                );
+namespace fsi {
+class MultiLevelSolver {
+    public:
+        MultiLevelSolver(shared_ptr<BaseMultiLevelSolver> solver,
+            shared_ptr<BaseMultiLevelSolver> couplingGridSolver,
+            int participantId,
+            int level
+            );
 
-            MultiLevelSolver(
-                shared_ptr<BaseMultiLevelSolver> solver,
-                shared_ptr<BaseMultiLevelSolver> couplingGridSolver,
-                shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh,
-                shared_ptr<RBFCoarsening> rbfInterpToMesh,
-                int participantId,
-                int level
-                );
+        MultiLevelSolver(shared_ptr<BaseMultiLevelSolver> solver,
+            shared_ptr<BaseMultiLevelSolver> couplingGridSolver,
+            shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh,
+            shared_ptr<RBFCoarsening> rbfInterpToMesh,
+            int participantId,
+            int level
+            );
 
-            void interpToCouplingMesh(
-                matrix & data,
-                matrix & dataInterpolated
-                );
+        void interpToCouplingMesh(matrix & data,
+            matrix & dataInterpolated
+            );
 
-            void interpToMesh(
-                matrix & data,
-                matrix & dataInterpolated
-                );
+        void interpToMesh(matrix & data,
+            matrix & dataInterpolated
+            );
 
-            void solve(
-                matrix & input,
-                matrix & outputInterpolated
-                );
+        void solve(matrix & input,
+            matrix & outputInterpolated
+            );
 
-            void updateInterpolationMatrices();
+        void updateInterpolationMatrices();
 
-            shared_ptr<BaseMultiLevelSolver> solver;
-            shared_ptr<BaseMultiLevelSolver> couplingGridSolver;
-            shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
-            shared_ptr<RBFCoarsening> rbfInterpToMesh;
-            const int participantId;
-            const int level;
-            int couplingGridSize;
-    };
-}
+        shared_ptr<BaseMultiLevelSolver> solver;
+        shared_ptr<BaseMultiLevelSolver> couplingGridSolver;
+        shared_ptr<RBFCoarsening> rbfInterpToCouplingMesh;
+        shared_ptr<RBFCoarsening> rbfInterpToMesh;
+        const int participantId;
+        const int level;
+        int couplingGridSize;
+};
+} // namespace fsi
 
 #endif

@@ -6,7 +6,6 @@
 
 #include "dealiiSolidSolver.H"
 
-namespace fsi
-{
-    template class dealiiSolidSolver<2>;
+namespace fsi {
+template class dealiiSolidSolver<2>;
 }

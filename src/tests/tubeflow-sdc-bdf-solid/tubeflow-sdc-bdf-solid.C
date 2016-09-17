@@ -21,19 +21,30 @@
 #include "Uniform.H"
 #include "AdaptiveTimeStepper.H"
 
-int main()
-{
+using rbf::RBFFunctionInterface;
+using rbf::RBFInterpolation;
+using rbf::RBFCoarsening;
+using rbf::TPSFunction;
+using fsi::MultiLevelSolver;
+using fsi::ConvergenceMeasure;
+using fsi::RelativeConvergenceMeasure;
+using fsi::MinIterationConvergenceMeasure;
+using fsi::MultiLevelFsiSolver;
+using fsi::PostProcessing;
+using fsi::AndersonPostProcessing;
+using fsi::ResidualRelativeConvergenceMeasure;
+using fsi::AbsoluteConvergenceMeasure;
+
+int main() {
     int nbComputations = 6;
     int nbNodes = 5;
 
     #pragma omp parallel for collapse(2), schedule(dynamic,1)
 
-    for ( int iNodes = 0; iNodes < nbNodes; iNodes++ )
-    {
-        for ( int iComputation = 0; iComputation < nbComputations; iComputation++ )
-        {
+    for (int iNodes = 0; iNodes < nbNodes; iNodes++) {
+        for (int iComputation = 0; iComputation < nbComputations; iComputation++) {
             unsigned int nbNodes = iNodes + 1;
-            unsigned int nbTimeSteps = std::pow( 2, iComputation );
+            unsigned int nbTimeSteps = std::pow(2, iComputation);
 
             std::shared_ptr<sdc::TimeIntegrationScheme> timeIntegrationScheme;
             std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> fluid;
@@ -54,7 +65,7 @@ int main()
                 scalar G = 490;
                 scalar h = 1.0e-3;
                 scalar nu = 0.5;
-                scalar cmk = std::sqrt( E0 * h / (2 * rho_f * r0) );
+                scalar cmk = std::sqrt(E0 * h / (2 * rho_f * r0));
 
                 int N = 250;
                 bool parallel = false;
@@ -74,43 +85,43 @@ int main()
 
                 int timeOrder = 1;
 
-                if ( nbNodes > 1 )
+                if (nbNodes > 1)
                     timeOrder = 2;
 
-                fluid = std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> ( new tubeflow::SDCTubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho_f ) );
-                solid = std::shared_ptr<tubeflow::SDCTubeFlowBDFLinearizedSolidSolver>( new tubeflow::SDCTubeFlowBDFLinearizedSolidSolver( N, nu, rho_s, h, L, dt, G, E0, r0, T, timeOrder ) );
+                fluid = std::shared_ptr<tubeflow::SDCTubeFlowFluidSolver> (new tubeflow::SDCTubeFlowFluidSolver(a0, u0, p0, dt, cmk, N, L, T, rho_f));
+                solid = std::shared_ptr<tubeflow::SDCTubeFlowBDFLinearizedSolidSolver>(new tubeflow::SDCTubeFlowBDFLinearizedSolidSolver(N, nu, rho_s, h, L, dt, G, E0, r0, T, timeOrder));
 
-                shared_ptr<MultiLevelSolver> fluidSolver( new MultiLevelSolver( fluid, fluid, 0, 0 ) );
-                shared_ptr<MultiLevelSolver> solidSolver( new MultiLevelSolver( solid, fluid, 1, 0 ) );
+                shared_ptr<MultiLevelSolver> fluidSolver(new MultiLevelSolver(fluid, fluid, 0, 0));
+                shared_ptr<MultiLevelSolver> solidSolver(new MultiLevelSolver(solid, fluid, 1, 0));
 
                 std::shared_ptr< std::list<std::shared_ptr<ConvergenceMeasure> > > convergenceMeasures;
-                convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >( new std::list<std::shared_ptr<ConvergenceMeasure> > );
+                convergenceMeasures = std::shared_ptr<std::list<std::shared_ptr<ConvergenceMeasure> > >(new std::list<std::shared_ptr<ConvergenceMeasure> > );
 
-                convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new ResidualRelativeConvergenceMeasure( 0, true, tol ) ) );
-                convergenceMeasures->push_back( std::shared_ptr<ConvergenceMeasure>( new AbsoluteConvergenceMeasure( 0, true, 0.1 * absoluteTol ) ) );
+                convergenceMeasures->push_back(std::shared_ptr<ConvergenceMeasure>(new ResidualRelativeConvergenceMeasure(0, true, tol)));
+                convergenceMeasures->push_back(std::shared_ptr<ConvergenceMeasure>(new AbsoluteConvergenceMeasure(0, true, 0.1 * absoluteTol)));
 
-                fsi = shared_ptr<MultiLevelFsiSolver> ( new MultiLevelFsiSolver( fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation ) );
+                fsi = shared_ptr<MultiLevelFsiSolver> (new MultiLevelFsiSolver(fluidSolver, solidSolver, convergenceMeasures, parallel, extrapolation));
 
-                shared_ptr<PostProcessing> postProcessing( new AndersonPostProcessing( fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian ) );
+                shared_ptr<PostProcessing> postProcessing(new AndersonPostProcessing(fsi, maxIter, initialRelaxation, maxUsedIterations, nbReuse, singularityLimit, reuseInformationStartingFromTimeIndex, scaling, beta, updateJacobian));
 
-                std::shared_ptr<sdc::SDCFsiSolverInterface> sdcFluidSolver = std::dynamic_pointer_cast<sdc::SDCFsiSolverInterface>( fluid );
-                std::shared_ptr<sdc::SDCFsiSolverInterface> sdcSolidSolver = std::dynamic_pointer_cast<sdc::SDCFsiSolverInterface>( solid );
+                std::shared_ptr<sdc::SDCFsiSolverInterface> sdcFluidSolver = std::dynamic_pointer_cast<sdc::SDCFsiSolverInterface>(fluid);
+                std::shared_ptr<sdc::SDCFsiSolverInterface> sdcSolidSolver = std::dynamic_pointer_cast<sdc::SDCFsiSolverInterface>(solid);
 
-                assert( sdcFluidSolver );
-                assert( sdcSolidSolver );
+                assert(sdcFluidSolver);
+                assert(sdcSolidSolver);
 
-                std::shared_ptr<fsi::SDCFsiSolver> fsiSolver( new fsi::SDCFsiSolver( sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation ) );
+                std::shared_ptr<fsi::SDCFsiSolver> fsiSolver(new fsi::SDCFsiSolver(sdcFluidSolver, sdcSolidSolver, postProcessing, extrapolation));
 
                 std::shared_ptr<fsi::quadrature::IQuadrature<scalar> > quadrature;
-                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >( new fsi::quadrature::Uniform<scalar>( nbNodes ) );
+                quadrature = std::shared_ptr<fsi::quadrature::IQuadrature<scalar> >(new fsi::quadrature::Uniform<scalar>(nbNodes));
 
-                timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> ( new sdc::SDC( fsiSolver, quadrature, absoluteTol, nbNodes, 50 ) );
+                timeIntegrationScheme = std::shared_ptr<sdc::TimeIntegrationScheme> (new sdc::SDC(fsiSolver, quadrature, absoluteTol, nbNodes, 50));
             }
 
-            assert( timeIntegrationScheme );
-            assert( fluid );
-            assert( solid );
-            assert( fsi );
+            assert(timeIntegrationScheme);
+            assert(fluid);
+            assert(solid);
+            assert(fsi);
 
             std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
             start = std::chrono::high_resolution_clock::now();
@@ -122,15 +133,15 @@ int main()
             std::chrono::duration<double> elapsed_seconds = end - start;
 
             std::string label = "IDC_BDF";
-            label += "_nbNodes_" + std::to_string( nbNodes );
-            label += "_nbTimeSteps_" + std::to_string( nbTimeSteps );
+            label += "_nbNodes_" + std::to_string(nbNodes);
+            label += "_nbTimeSteps_" + std::to_string(nbTimeSteps);
 
-            ofstream log_file( label + ".log" );
-            ofstream data_fluid_u( label + "_data_fluid_u.log" );
-            ofstream data_fluid_a( label + "_data_fluid_a.log" );
-            ofstream data_fluid_p( label + "_data_fluid_p.log" );
-            ofstream data_solid_u( label + "_data_solid_u.log" );
-            ofstream data_solid_r( label + "_data_solid_r.log" );
+            ofstream log_file(label + ".log");
+            ofstream data_fluid_u(label + "_data_fluid_u.log");
+            ofstream data_fluid_a(label + "_data_fluid_a.log");
+            ofstream data_fluid_p(label + "_data_fluid_p.log");
+            ofstream data_solid_u(label + "_data_solid_u.log");
+            ofstream data_solid_r(label + "_data_solid_r.log");
 
             log_file << "label = " << label << std::endl;
             log_file << "nbNodes = " << nbNodes << std::endl;
@@ -138,11 +149,11 @@ int main()
             log_file << "nbIterations = " << fsi->nbIter << std::endl;
             log_file << "timing = " << elapsed_seconds.count() << std::endl;
 
-            data_fluid_u << std::setprecision( 20 ) << fluid->u << std::endl;
-            data_fluid_a << std::setprecision( 20 ) << fluid->a << std::endl;
-            data_fluid_p << std::setprecision( 20 ) << fluid->p << std::endl;
-            data_solid_u << std::setprecision( 20 ) << solid->u << std::endl;
-            data_solid_r << std::setprecision( 20 ) << solid->r << std::endl;
+            data_fluid_u << std::setprecision(20) << fluid->u << std::endl;
+            data_fluid_a << std::setprecision(20) << fluid->a << std::endl;
+            data_fluid_p << std::setprecision(20) << fluid->p << std::endl;
+            data_solid_u << std::setprecision(20) << solid->u << std::endl;
+            data_solid_r << std::setprecision(20) << solid->r << std::endl;
 
             log_file.close();
             data_fluid_u.close();

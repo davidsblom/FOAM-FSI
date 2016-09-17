@@ -1,151 +1,138 @@
 
 /*
- * Author
- *   David Blom, TU Delft. All rights reserved.
+ * Copyright [2016] <David Blom>
  */
 
+#include <memory>
+#include <string>
+#include <deque>
 #include "SDCFsiSolver.H"
 
-SDCFsiSolver::SDCFsiSolver(
-    std::shared_ptr<sdc::SDCFsiSolverInterface> fluid,
+namespace fsi {
+SDCFsiSolver::SDCFsiSolver(std::shared_ptr<sdc::SDCFsiSolverInterface> fluid,
     std::shared_ptr<sdc::SDCFsiSolverInterface> solid,
     std::shared_ptr<PostProcessing> postProcessing,
     int extrapolationOrder
     )
     :
-    fluid( fluid ),
-    solid( solid ),
-    postProcessing( postProcessing ),
-    dofFluid( fluid->getDOF() ),
-    dofSolid( solid->getDOF() ),
-    k( 0 ),
+    fluid(fluid),
+    solid(solid),
+    postProcessing(postProcessing),
+    dofFluid(fluid->getDOF()),
+    dofSolid(solid->getDOF()),
+    k(0),
     xStages(),
-    extrapolationOrder( extrapolationOrder )
-{
-    assert( fluid );
-    assert( solid );
-    assert( postProcessing );
-    assert( dofFluid > 0 );
-    assert( dofSolid >= 0 );
-    assert( extrapolationOrder >= 0 );
-    assert( extrapolationOrder <= 2 );
+    extrapolationOrder(extrapolationOrder) {
+    assert(fluid);
+    assert(solid);
+    assert(postProcessing);
+    assert(dofFluid > 0);
+    assert(dofSolid >= 0);
+    assert(extrapolationOrder >= 0);
+    assert(extrapolationOrder <= 2);
 }
 
 SDCFsiSolver::~SDCFsiSolver()
 {}
 
-void SDCFsiSolver::evaluateFunction(
-    const int k,
+void SDCFsiSolver::evaluateFunction(const int k,
     const fsi::vector & q,
     const scalar t,
     fsi::vector & f
-    )
-{
-    fsi::vector fFluid( dofFluid ), fSolid( dofSolid );
+    ) {
+    fsi::vector fFluid(dofFluid), fSolid(dofSolid);
 
-    Eigen::Map<const fsi::vector> qFluid( q.data(), dofFluid );
-    Eigen::Map<const fsi::vector> qSolid( q.data() + dofFluid, dofSolid );
+    Eigen::Map<const fsi::vector> qFluid(q.data(), dofFluid);
+    Eigen::Map<const fsi::vector> qSolid(q.data() + dofFluid, dofSolid);
 
-    fluid->evaluateFunction( k, qFluid, t, fFluid );
-    solid->evaluateFunction( k, qSolid, t, fSolid );
+    fluid->evaluateFunction(k, qFluid, t, fFluid);
+    solid->evaluateFunction(k, qSolid, t, fSolid);
 
-    f.head( dofFluid ) = fFluid;
-    f.tail( dofSolid ) = fSolid;
+    f.head(dofFluid) = fFluid;
+    f.tail(dofSolid) = fSolid;
 }
 
-void SDCFsiSolver::finalizeTimeStep()
-{
-    for ( unsigned int i = 0; i < xStages.size() - 1; i++ )
-        xStagesPrevious.push_front( xStages[i] );
+void SDCFsiSolver::finalizeTimeStep() {
+    for (unsigned int i = 0; i < xStages.size() - 1; i++)
+        xStagesPrevious.push_front(xStages[i]);
 
     // Only save solutions of three time steps
-    while ( xStagesPrevious.size() > 3 )
+    while (xStagesPrevious.size() > 3)
         xStagesPrevious.pop_back();
 
     postProcessing->fsi->finalizeTimeStep();
     postProcessing->finalizeTimeStep();
 }
 
-int SDCFsiSolver::getDOF()
-{
+int SDCFsiSolver::getDOF() {
     return dofFluid + dofSolid;
 }
 
-void SDCFsiSolver::getSolution(
-    fsi::vector & solution,
+void SDCFsiSolver::getSolution(fsi::vector & solution,
     fsi::vector & f
-    )
-{
-    assert( dofFluid > 0 );
-    assert( dofSolid >= 0 );
-    assert( dofFluid + dofSolid == solution.rows() );
-    assert( solution.rows() == f.rows() );
+    ) {
+    assert(dofFluid > 0);
+    assert(dofSolid >= 0);
+    assert(dofFluid + dofSolid == solution.rows());
+    assert(solution.rows() == f.rows());
 
-    fsi::vector solFluid( dofFluid ), solSolid( dofSolid ), fFluid( dofFluid ), fSolid( dofSolid );
-    fluid->getSolution( solFluid, fFluid );
-    solid->getSolution( solSolid, fSolid );
+    fsi::vector solFluid(dofFluid), solSolid(dofSolid), fFluid(dofFluid), fSolid(dofSolid);
+    fluid->getSolution(solFluid, fFluid);
+    solid->getSolution(solSolid, fSolid);
 
-    solution.head( dofFluid ) = solFluid;
-    solution.tail( dofSolid ) = solSolid;
-    f.head( dofFluid ) = fFluid;
-    f.tail( dofSolid ) = fSolid;
+    solution.head(dofFluid) = solFluid;
+    solution.tail(dofSolid) = solSolid;
+    f.head(dofFluid) = fFluid;
+    f.tail(dofSolid) = fSolid;
 }
 
-void SDCFsiSolver::setSolution(
-    const fsi::vector & solution,
+void SDCFsiSolver::setSolution(const fsi::vector & solution,
     const fsi::vector & f
-    )
-{
-    Eigen::Map<const fsi::vector> solFluid( solution.data(), dofFluid );
-    Eigen::Map<const fsi::vector> solSolid( solution.data() + dofFluid, dofSolid );
+    ) {
+    Eigen::Map<const fsi::vector> solFluid(solution.data(), dofFluid);
+    Eigen::Map<const fsi::vector> solSolid(solution.data() + dofFluid, dofSolid);
 
-    Eigen::Map<const fsi::vector> fFluid( f.data(), dofFluid );
-    Eigen::Map<const fsi::vector> fSolid( f.data() + dofFluid, dofSolid );
+    Eigen::Map<const fsi::vector> fFluid(f.data(), dofFluid);
+    Eigen::Map<const fsi::vector> fSolid(f.data() + dofFluid, dofSolid);
 
-    fluid->setSolution( solFluid, fFluid );
-    solid->setSolution( solSolid, fSolid );
+    fluid->setSolution(solFluid, fFluid);
+    solid->setSolution(solSolid, fSolid);
 }
 
-scalar SDCFsiSolver::getEndTime()
-{
+scalar SDCFsiSolver::getEndTime() {
     return fluid->getEndTime();
 }
 
-scalar SDCFsiSolver::getTimeStep()
-{
+scalar SDCFsiSolver::getTimeStep() {
     return fluid->getTimeStep();
 }
 
-void SDCFsiSolver::nextTimeStep()
-{
+void SDCFsiSolver::nextTimeStep() {
     fluid->nextTimeStep();
     solid->nextTimeStep();
 
-    for ( int i = 0; i < k; i++ )
-        xStages.at( i ) = postProcessing->fsi->x;
+    for (int i = 0; i < k; i++)
+        xStages.at(i) = postProcessing->fsi->x;
 }
 
-void SDCFsiSolver::initTimeStep()
-{
+void SDCFsiSolver::initTimeStep() {
     postProcessing->fsi->initTimeStep();
 }
 
-void SDCFsiSolver::setNumberOfImplicitStages( int k )
-{
+void SDCFsiSolver::setNumberOfImplicitStages(int k) {
     this->k = k + 1;
 
-    fluid->setNumberOfImplicitStages( k );
-    solid->setNumberOfImplicitStages( k );
-    postProcessing->setNumberOfImplicitStages( k );
+    fluid->setNumberOfImplicitStages(k);
+    solid->setNumberOfImplicitStages(k);
+    postProcessing->setNumberOfImplicitStages(k);
 
     xStages.clear();
 
-    for ( int i = 0; i < k + 1; i++ )
-        xStages.push_back( postProcessing->fsi->x );
+    for (int i = 0; i < k + 1; i++)
+        xStages.push_back(postProcessing->fsi->x);
 }
 
-void SDCFsiSolver::implicitSolve(
-    bool corrector,
+void SDCFsiSolver::implicitSolve(bool corrector,
     const int k,
     const int kold,
     const scalar t,
@@ -154,16 +141,15 @@ void SDCFsiSolver::implicitSolve(
     const fsi::vector & rhs,
     fsi::vector & f,
     fsi::vector & result
-    )
-{
-    Eigen::Map<const fsi::vector> qoldFluid( qold.data(), dofFluid );
-    Eigen::Map<const fsi::vector> qoldSolid( qold.data() + dofFluid, dofSolid );
+    ) {
+    Eigen::Map<const fsi::vector> qoldFluid(qold.data(), dofFluid);
+    Eigen::Map<const fsi::vector> qoldSolid(qold.data() + dofFluid, dofSolid);
 
-    Eigen::Map<const fsi::vector> rhsFluid( rhs.data(), dofFluid );
-    Eigen::Map<const fsi::vector> rhsSolid( rhs.data() + dofFluid, dofSolid );
+    Eigen::Map<const fsi::vector> rhsFluid(rhs.data(), dofFluid);
+    Eigen::Map<const fsi::vector> rhsSolid(rhs.data() + dofFluid, dofSolid);
 
-    fluid->prepareImplicitSolve( corrector, k, kold, t, dt, qoldFluid, rhsFluid );
-    solid->prepareImplicitSolve( corrector, k, kold, t, dt, qoldSolid, rhsSolid );
+    fluid->prepareImplicitSolve(corrector, k, kold, t, dt, qoldFluid, rhsFluid);
+    solid->prepareImplicitSolve(corrector, k, kold, t, dt, qoldSolid, rhsSolid);
 
     // Perform FSI iterations to solve the coupled problem
 
@@ -172,18 +158,16 @@ void SDCFsiSolver::implicitSolve(
     // Initial solution
     fsi::vector x0;
 
-    if ( corrector )
-        x0 = xStages.at( k + 1 );
+    if (corrector)
+        x0 = xStages.at(k + 1);
     else
-        x0 = xStages.at( kold );
+        x0 = xStages.at(kold);
 
-    if ( !corrector && extrapolationOrder > 0 )
-    {
+    if (!corrector && extrapolationOrder > 0) {
         bool firstOrderExtrapolation = false, secondOrderExtrapolation = false;
         fsi::vector xprev, xprevprev, xprevprevprev;
 
-        if ( k == 1 && xStagesPrevious.empty() )
-        {
+        if (k == 1 && xStagesPrevious.empty()) {
             xprev = xStages[k];
             xprevprev = xStages[k - 1];
 
@@ -191,8 +175,7 @@ void SDCFsiSolver::implicitSolve(
             secondOrderExtrapolation = false;
         }
 
-        if ( extrapolationOrder == 2 && k == 0 && xStagesPrevious.size() >= 2 )
-        {
+        if (extrapolationOrder == 2 && k == 0 && xStagesPrevious.size() >= 2) {
             xprev = xStages[k];
             xprevprev = xStagesPrevious[0];
             xprevprevprev = xStagesPrevious[1];
@@ -201,8 +184,7 @@ void SDCFsiSolver::implicitSolve(
             firstOrderExtrapolation = false;
         }
 
-        if ( extrapolationOrder == 2 && k == 1 && xStagesPrevious.size() >= 1 )
-        {
+        if (extrapolationOrder == 2 && k == 1 && xStagesPrevious.size() >= 1) {
             xprev = xStages[k];
             xprevprev = xStages[k - 1];
             xprevprevprev = xStagesPrevious[0];
@@ -211,8 +193,7 @@ void SDCFsiSolver::implicitSolve(
             firstOrderExtrapolation = false;
         }
 
-        if ( extrapolationOrder == 2 && k >= 2 )
-        {
+        if (extrapolationOrder == 2 && k >= 2) {
             xprev = xStages[k];
             xprevprev = xStages[k - 1];
             xprevprevprev = xStages[k - 2];
@@ -221,70 +202,63 @@ void SDCFsiSolver::implicitSolve(
             firstOrderExtrapolation = false;
         }
 
-        if ( firstOrderExtrapolation )
-        {
+        if (firstOrderExtrapolation) {
             Info << "SDC time integration: perform first order extrapolation of interface displacement and/or traction" << endl;
             x0 = 2.0 * xprev - xprevprev;
         }
 
-        if ( secondOrderExtrapolation )
-        {
+        if (secondOrderExtrapolation) {
             Info << "SDC time integration: perform second order extrapolation of interface displacement and/or traction" << endl;
             x0 = 2.5 * xprev - 2.0 * xprevprev + 0.5 * xprevprevprev;
         }
     }
 
-    postProcessing->initStage( k );
-    postProcessing->performPostProcessing( x0, postProcessing->fsi->x );
+    postProcessing->initStage(k);
+    postProcessing->performPostProcessing(x0, postProcessing->fsi->x);
     postProcessing->finalizeStage();
 
-    getSolution( result, f );
-    evaluateFunction( k, result, t, f );
+    getSolution(result, f);
+    evaluateFunction(k, result, t, f);
 
-    xStages.at( k + 1 ) = postProcessing->fsi->x;
+    xStages.at(k + 1) = postProcessing->fsi->x;
 
-    fluid->finalizeImplicitSolve( k );
-    solid->finalizeImplicitSolve( k );
+    fluid->finalizeImplicitSolve(k);
+    solid->finalizeImplicitSolve(k);
 }
 
-scalar SDCFsiSolver::getStartTime()
-{
+scalar SDCFsiSolver::getStartTime() {
     return fluid->getStartTime();
 }
 
-void SDCFsiSolver::getVariablesInfo(
-    std::deque<int> & dof,
+void SDCFsiSolver::getVariablesInfo(std::deque<int> & dof,
     std::deque<bool> & enabled,
     std::deque<std::string> & names
-    )
-{
+    ) {
     std::deque<int> dofFluid, dofSolid;
     std::deque<bool> enabledFluid, enabledSolid;
     std::deque<std::string> namesFluid, namesSolid;
-    fluid->getVariablesInfo( dofFluid, enabledFluid, namesFluid );
-    solid->getVariablesInfo( dofSolid, enabledSolid, namesSolid );
+    fluid->getVariablesInfo(dofFluid, enabledFluid, namesFluid);
+    solid->getVariablesInfo(dofSolid, enabledSolid, namesSolid);
 
-    assert( dofFluid.size() == enabledFluid.size() );
-    assert( dofFluid.size() == namesFluid.size() );
-    assert( dofSolid.size() == enabledSolid.size() );
-    assert( dofSolid.size() == namesSolid.size() );
+    assert(dofFluid.size() == enabledFluid.size());
+    assert(dofFluid.size() == namesFluid.size());
+    assert(dofSolid.size() == enabledSolid.size());
+    assert(dofSolid.size() == namesSolid.size());
 
-    for ( unsigned int i = 0; i < dofFluid.size(); i++ )
-    {
-        dof.push_back( dofFluid.at( i ) );
-        enabled.push_back( enabledFluid.at( i ) );
-        names.push_back( namesFluid.at( i ) );
+    for (unsigned int i = 0; i < dofFluid.size(); i++) {
+        dof.push_back(dofFluid.at(i));
+        enabled.push_back(enabledFluid.at(i));
+        names.push_back(namesFluid.at(i));
     }
 
-    for ( unsigned int i = 0; i < dofSolid.size(); i++ )
-    {
-        dof.push_back( dofSolid.at( i ) );
-        enabled.push_back( enabledSolid.at( i ) );
-        names.push_back( namesSolid.at( i ) );
+    for (unsigned int i = 0; i < dofSolid.size(); i++) {
+        dof.push_back(dofSolid.at(i));
+        enabled.push_back(enabledSolid.at(i));
+        names.push_back(namesSolid.at(i));
     }
 }
 
-bool SDCFsiSolver::isConverged()
-{
+bool SDCFsiSolver::isConverged() {
     return fluid->isConverged() && solid->isConverged();
 }
+} // namespace fsi

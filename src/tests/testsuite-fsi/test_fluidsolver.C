@@ -12,11 +12,9 @@
 
 using namespace tubeflow;
 
-class FluidSolverTest : public ::testing::Test
-{
+class FluidSolverTest : public ::testing::Test {
     protected:
-        virtual void SetUp()
-        {
+        virtual void SetUp() {
             scalar r0 = 0.2;
             scalar a0 = M_PI * r0 * r0;
             scalar u0 = 0.1;
@@ -29,20 +27,19 @@ class FluidSolverTest : public ::testing::Test
             scalar rho = 1.225;
             scalar E = 490;
             scalar h = 1.0e-3;
-            scalar cmk = std::sqrt( E * h / (2 * rho * r0) );
-            scalar c0 = std::sqrt( cmk * cmk - p0 / (2 * rho) );
+            scalar cmk = std::sqrt(E * h / (2 * rho * r0));
+            scalar c0 = std::sqrt(cmk * cmk - p0 / (2 * rho));
             scalar kappa = c0 / u0;
             scalar tau = u0 * dt / L;
 
-            ASSERT_NEAR( tau, 0.01, 1.0e-13 );
-            ASSERT_NEAR( kappa, 10, 1.0e-13 );
-            ASSERT_TRUE( dx > 0 );
+            ASSERT_NEAR(tau, 0.01, 1.0e-13);
+            ASSERT_NEAR(kappa, 10, 1.0e-13);
+            ASSERT_TRUE(dx > 0);
 
-            fluid = new tubeflow::TubeFlowFluidSolver( a0, u0, p0, dt, cmk, N, L, T, rho );
+            fluid = new tubeflow::TubeFlowFluidSolver(a0, u0, p0, dt, cmk, N, L, T, rho);
         }
 
-        virtual void TearDown()
-        {
+        virtual void TearDown() {
             delete fluid;
             fluid = NULL;
         }
@@ -50,53 +47,53 @@ class FluidSolverTest : public ::testing::Test
         TubeFlowFluidSolver * fluid;
 };
 
-TEST_F( FluidSolverTest, object )
+TEST_F(FluidSolverTest, object)
 {
-    ASSERT_TRUE( true );
+    ASSERT_TRUE(true);
 }
 
-TEST_F( FluidSolverTest, tau )
+TEST_F(FluidSolverTest, tau)
 {
-    ASSERT_NEAR( fluid->tau, 0.01, 1.0e-14 );
+    ASSERT_NEAR(fluid->tau, 0.01, 1.0e-14);
 }
 
-TEST_F( FluidSolverTest, alpha )
+TEST_F(FluidSolverTest, alpha)
 {
-    ASSERT_NEAR( fluid->alpha, 0.05983986006, 1.0e-11 );
+    ASSERT_NEAR(fluid->alpha, 0.05983986006, 1.0e-11);
 }
 
-TEST_F( FluidSolverTest, dx )
+TEST_F(FluidSolverTest, dx)
 {
-    ASSERT_NEAR( fluid->dx, 0.2, 1.0e-14 );
+    ASSERT_NEAR(fluid->dx, 0.2, 1.0e-14);
 }
 
-TEST_F( FluidSolverTest, cmk )
+TEST_F(FluidSolverTest, cmk)
 {
-    ASSERT_NEAR( fluid->cmk, 1, 1.0e-14 );
+    ASSERT_NEAR(fluid->cmk, 1, 1.0e-14);
 }
 
-TEST_F( FluidSolverTest, rho )
+TEST_F(FluidSolverTest, rho)
 {
-    ASSERT_NEAR( fluid->rho, 1.225, 1.0e-14 );
+    ASSERT_NEAR(fluid->rho, 1.225, 1.0e-14);
 }
 
-TEST_F( FluidSolverTest, inletVelocityBoundaryCondition )
+TEST_F(FluidSolverTest, inletVelocityBoundaryCondition)
 {
     fluid->init = true;
 
     scalar u_in = fluid->evaluateInletVelocityBoundaryCondition();
 
-    ASSERT_NEAR( u_in, 0.1, 1.0e-14 );
+    ASSERT_NEAR(u_in, 0.1, 1.0e-14);
 
     fluid->init = false;
     fluid->initTimeStep();
 
     u_in = fluid->evaluateInletVelocityBoundaryCondition();
 
-    ASSERT_NEAR( u_in, 0.10000986635, 1.0e-11 );
+    ASSERT_NEAR(u_in, 0.10000986635, 1.0e-11);
 }
 
-TEST_F( FluidSolverTest, residual )
+TEST_F(FluidSolverTest, residual)
 {
     fluid->initTimeStep();
 
@@ -106,26 +103,25 @@ TEST_F( FluidSolverTest, residual )
     scalar u0 = 0.1;
     scalar p0 = 0;
 
-    fsi::vector R( 2 * N ), x( 2 * N ), a( N ), un( N ), pn( N ), an( N );
-    an.fill( a0 );
-    pn.fill( p0 );
-    un.fill( u0 );
+    fsi::vector R(2 * N), x(2 * N), a(N), un(N), pn(N), an(N);
+    an.fill(a0);
+    pn.fill(p0);
+    un.fill(u0);
     a = an;
-    x.head( N ) = un;
-    x.tail( N ) = pn;
+    x.head(N) = un;
+    x.tail(N) = pn;
     R.setZero();
 
     // specify un, pn, a, and an by hand
 
-    fluid->evaluateResidual( x, a, un, pn, an, R );
+    fluid->evaluateResidual(x, a, un, pn, an, R);
 
-    ASSERT_NEAR( R.norm(), 9.86635786e-06, 1.0e-10 );
+    ASSERT_NEAR(R.norm(), 9.86635786e-06, 1.0e-10);
 }
 
 // Generic functor
 template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic>
-struct Functor
-{
+struct Functor {
     typedef _Scalar Scalar;
     enum {
         InputsAtCompileTime = NX,
@@ -139,42 +135,36 @@ struct Functor
 
     Functor()
         :
-        m_inputs( InputsAtCompileTime ),
-        m_values( ValuesAtCompileTime )
+        m_inputs(InputsAtCompileTime),
+        m_values(ValuesAtCompileTime)
     {}
 
-    Functor(
-        int inputs,
+    Functor(int inputs,
         int values
         )
         :
-        m_inputs( inputs ),
-        m_values( values )
+        m_inputs(inputs),
+        m_values(values)
     {}
 
-    int inputs() const
-    {
+    int inputs() const {
         return m_inputs;
     }
 
-    int values() const
-    {
+    int values() const {
         return m_values;
     }
 };
 
-struct residualFunctor : Functor<scalar>
-{
-    residualFunctor(
-        TubeFlowFluidSolver * fluid,
+struct residualFunctor : Functor<scalar>{
+    residualFunctor(TubeFlowFluidSolver * fluid,
         fsi::vector * a,
         fsi::vector * un,
         fsi::vector * pn,
         fsi::vector * an
         )
         :
-        Functor<scalar>( 2 * fluid->N, 2 * fluid->N )
-    {
+        Functor<scalar>(2 * fluid->N, 2 * fluid->N) {
         this->fluid = fluid;
         this->a = a;
         this->un = un;
@@ -182,12 +172,10 @@ struct residualFunctor : Functor<scalar>
         this->an = an;
     }
 
-    int operator()(
-        fsi::vector & x,
+    int operator()(fsi::vector & x,
         fsi::vector & fvec
-        ) const
-    {
-        fluid->evaluateResidual( x, *a, *un, *pn, *an, fvec );
+        ) const {
+        fluid->evaluateResidual(x, *a, *un, *pn, *an, fvec);
         return 0;
     }
 
@@ -198,7 +186,7 @@ struct residualFunctor : Functor<scalar>
     fsi::vector * an;
 };
 
-TEST_F( FluidSolverTest, jacobian )
+TEST_F(FluidSolverTest, jacobian)
 {
     fluid->initTimeStep();
 
@@ -208,31 +196,31 @@ TEST_F( FluidSolverTest, jacobian )
     scalar u0 = 0.1;
     scalar p0 = 0;
 
-    fsi::vector R( 2 * N ), x( 2 * N ), a( N ), un( N ), pn( N ), an( N );
-    matrix J( 2 * N, 2 * N );
-    an.fill( a0 );
-    pn.fill( p0 );
-    un.fill( u0 );
+    fsi::vector R(2 * N), x(2 * N), a(N), un(N), pn(N), an(N);
+    fsi::matrix J(2 * N, 2 * N);
+    an.fill(a0);
+    pn.fill(p0);
+    un.fill(u0);
     a = an;
-    x.head( N ) = un;
-    x.tail( N ) = pn;
+    x.head(N) = un;
+    x.tail(N) = pn;
     R.setZero();
 
-    fluid->evaluateJacobian( x, a, un, pn, an, J );
+    fluid->evaluateJacobian(x, a, un, pn, an, J);
 
     scalar normJ = J.norm();
 
-    residualFunctor functor( fluid, &a, &un, &pn, &an );
-    Eigen::NumericalDiff<residualFunctor, Eigen::Central> numDiff( functor );
+    residualFunctor functor(fluid, &a, &un, &pn, &an);
+    Eigen::NumericalDiff<residualFunctor, Eigen::Central> numDiff(functor);
 
-    matrix Jnummdiff( 2 * N, 2 * N );
+    fsi::matrix Jnummdiff(2 * N, 2 * N);
     Jnummdiff.setZero();
 
-    numDiff.df( x, Jnummdiff );
+    numDiff.df(x, Jnummdiff);
 
-    ASSERT_NEAR( normJ, Jnummdiff.norm(), 1.0e-8 );
+    ASSERT_NEAR(normJ, Jnummdiff.norm(), 1.0e-8);
 
-    for ( int i = 0; i < J.rows(); i++ )
-        for ( int j = 0; j < J.cols(); j++ )
-            ASSERT_NEAR( J( i, j ), Jnummdiff( i, j ), 1.0e-7 );
+    for (int i = 0; i < J.rows(); i++)
+        for (int j = 0; j < J.cols(); j++)
+            ASSERT_NEAR(J(i, j), Jnummdiff(i, j), 1.0e-7);
 }
