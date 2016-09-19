@@ -130,6 +130,11 @@ Prerequisites
 
 gcc 4.8 or higher due to C++11 features. The gfortran compiler is used for the
 compilation of the deal.II library, and is therefore also needed.
+`openblas` is required by the libelemental library. On Ubuntu, you can install
+openblas like this:
+```
+sudo apt-get install libopenblas-dev
+```
 
 OS: Currently only Linux based distributions are supported, patches for other
 operating systems are welcome.
