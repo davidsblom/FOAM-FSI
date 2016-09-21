@@ -1,5 +1,9 @@
 c++WARN     = -Wall -Wextra -Werror
 
+ifndef MKL_LIB
+    MKL_LIB=-lopenblas
+endif
+
 EXE_INC = -std=c++11 \
     -isystem ../../thirdParty/eigen \
     -I../../fsi/lnInclude \
@@ -21,6 +25,7 @@ EXE_INC = -std=c++11 \
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \
@@ -47,6 +52,7 @@ endif
 ifeq ($(WM_COMPILE_OPTION), Debug)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -L../../thirdParty/gtest \
     -lgtest \
     -ldynamicFvMesh \

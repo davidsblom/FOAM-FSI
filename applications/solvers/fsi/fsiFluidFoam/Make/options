@@ -4,7 +4,12 @@ ifndef PRECICE_ROOT
     PRECICE_ROOT=../../../../src/thirdParty/precice
 endif
 
-EXE_INC = -std=c++11 \
+ifndef MKL_LIB
+    MKL_LIB=-lopenblas
+endif
+
+EXE_INC = -std=c++11 -fext-numeric-literals \
+    -isystem ../../../../src/thirdParty/elemental/install/include \
     -I../../../../src/fsi/lnInclude \
     -isystem ../../../../src/thirdParty/eigen \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
@@ -24,11 +29,12 @@ EXE_INC = -std=c++11 \
     -I../../../../src/RBFMeshMotionSolver/lnInclude/ \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
-    -isystem ../../../../src/thirdParty/yaml-cpp/include
+    -isystem ../../../../src/thirdParty/yaml-cpp/install/include
 
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
@@ -54,6 +60,7 @@ endif
 ifeq ($(WM_COMPILE_OPTION), Debug)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \

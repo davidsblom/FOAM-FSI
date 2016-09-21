@@ -20,7 +20,7 @@ class PreciceSolidSolver : public Solver
 {
 public:
 
-  PreciceSolidSolver( shared_ptr<foamSolidSolver> solver );
+  explicit PreciceSolidSolver( shared_ptr<foamSolidSolver> solver );
 
   virtual ~PreciceSolidSolver();
 

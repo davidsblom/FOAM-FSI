@@ -35,14 +35,16 @@ uncrustify.cfg
 runTests.sh
 src/thirdParty/boost*
 src/thirdParty/gtest*
+src/thirdParty/googletest*
 src/thirdParty/yaml-cpp*
 src/thirdParty/scons*
 src/thirdParty/dealii*
 src/thirdParty/petsc*
 src/thirdParty/metis*
 src/thirdParty/parmetis*
-src/thirdParty/ateles*
-src/thirdParty/seeder*
+src/thirdParty/ateles
+src/thirdParty/harvester
+src/thirdParty/seeder
 
 # Case files
 boundary

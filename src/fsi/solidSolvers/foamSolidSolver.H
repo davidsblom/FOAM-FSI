@@ -18,6 +18,7 @@
 #include <time.h>
 #include <deque>
 #include <unordered_map>
+#include <vector>
 
 using namespace fsi;
 using std::shared_ptr;
@@ -26,7 +27,7 @@ class foamSolidSolver : public BaseMultiLevelSolver
 {
     public:
         foamSolidSolver(
-            string name,
+            const string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );

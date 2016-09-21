@@ -28,11 +28,11 @@ runApplication decomposePar
 cd -
 
 cd solid
-mpirun -np $NB_SOLID_CORES fsiSolidFoam -parallel > log.fsiSolidFoam 2>&1 &
+mpirun -np $NB_SOLID_CORES --allow-run-as-root fsiSolidFoam -parallel > log.fsiSolidFoam 2>&1 &
 cd -
 
 cd fluid
-mpirun -np $NB_FLUID_CORES fsiFluidFoam -parallel > log.fsiFluidFoam 2>&1
+mpirun -np $NB_FLUID_CORES --allow-run-as-root fsiFluidFoam -parallel > log.fsiFluidFoam 2>&1
 
 wait
 

@@ -20,11 +20,11 @@ namespace sdc
         public:
             ESDIRK(
                 std::shared_ptr<SDCSolver> solver,
-                std::string method,
+                const std::string & method,
                 std::shared_ptr<AdaptiveTimeStepper> adaptiveTimeStepper
                 );
 
-            explicit ESDIRK( std::string method );
+            explicit ESDIRK( const std::string & method );
 
             ~ESDIRK();
 
@@ -54,7 +54,7 @@ namespace sdc
                 const fsi::vector & result
                 );
 
-            virtual void outputResidual( std::string name );
+            virtual void outputResidual( const std::string & name );
 
             virtual bool isConverged();
 
@@ -71,7 +71,7 @@ namespace sdc
             int N;
 
         private:
-            void initializeButcherTableau( std::string method );
+            void initializeButcherTableau( const std::string & method );
 
             // Store function in memory in case the source term is requested
             // by the solver. This functionality is used by the moving wall

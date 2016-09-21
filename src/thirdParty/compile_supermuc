@@ -1,19 +1,21 @@
 #!/bin/bash
 
-set -e
-set -x
+set -euox pipefail
 
 METIS_VERSION=5.1.0
 PARMETIS_VERSION=4.0.3
-PETSC_VERSION=3.6.3
+PETSC_VERSION=3.6.4
 DEALII_VERSION=8.3.0
-BOOST_VERSION=1_55_0
-BOOST_VERSION_DOT=1.55.0
+BOOST_VERSION=1_61_0
+BOOST_VERSION_DOT=1.61.0
 export PETSC_ARCH=x86_64
 
 rm -rf boost boost_${BOOST_VERSION}
 tar jxf boost_${BOOST_VERSION}.tar.bz2
-ln -s boost_${BOOST_VERSION} boost
+ln -s boost_1_61_0 boost
+sed -i "s/string const/std::string const/" ./boost/boost/rational.hpp
+cd boost && ./bootstrap.sh --with-libraries=log,program_options && ./b2 -j $WM_NCOMPPROCS
+cp stage/lib/* $FOAM_LIBBIN/ && cd ..
 
 rm -rf metis metis-${METIS_VERSION}
 
@@ -58,7 +60,7 @@ cd petsc-${PETSC_VERSION}
 
 export PETSC_DIR=`pwd`
 
-./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --with-debugging=0 --with-blas-lapack-dir=$MKL_LIBDIR
+./config/configure.py --with-shared=1 --with-x=0 --with-mpi=1 --with-debugging=0 --with-blas-lapack-dir=$MKL_LIBDIR --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif90
 
 make
 
@@ -100,47 +102,46 @@ cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
 
 # gtest
 
-GTEST_VERSION=1.7.0
+GTEST_VERSION=1.8.0
 
 rm -rf gtest-${GTEST_VERSION}
 
-unzip gtest-${GTEST_VERSION}
+tar -zxf gtest-${GTEST_VERSION}.tar.gz
 
-ln -s gtest-${GTEST_VERSION} gtest
+ln -s googletest-release-${GTEST_VERSION} gtest
 
-cd gtest-${GTEST_VERSION}
+cd gtest
 
-cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CC_COMPILER=gcc
+mkdir build install && cd build
+
+cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CC_COMPILER=gcc -D CMAKE_INSTALL_PREFIX=`pwd`/../install ..
 
 make
+make install
 
-cd ../
+cd ../..
+
+cp gtest/install/lib/lib* ${FOAM_LIBBIN}/
 
 # precice
 
-BOOST_VERSION=1_55_0
-BOOST_VERSION_DOT=1.55.0
-
-if [ ! -d "boost_${BOOST_VERSION}" ]; then
-    tar jxf boost_${BOOST_VERSION}.tar.bz2
-fi
-
 # Set environment variables necessary for building preCICE
 
-export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
-export PRECICE_BOOST_ROOT=${BOOST_ROOT}
+# Set environment variables necessary for building preCICE
 export PRECICE_MPI_LIB=mpi
 export PRECICE_MPI_LIB_PATH=${MPI_BASE}/lib64
 export PRECICE_MPI_INC_PATH=${MPI_BASE}/include64
-export CPLUS_INCLUDE_PATH=`pwd`/eigen
+export CPLUS_INCLUDE_PATH=`pwd`/eigen:`pwd`/boost
+export LIBRARY_PATH=$FOAM_LIBBIN
+export LD_LIBRARY_PATH=$FOAM_LIBBIN
+export PETSC_DIR=`pwd`/petsc
+export PETSC_ARCH=x86_64
 
 cd precice
 python tools/python_scripts/insert_mpi_header.py
-scons -j $WM_NCOMPPROCS build=release python=off petsc=on platform=supermuc compiler=mpicxx
-scons -j $WM_NCOMPPROCS build=release python=off petsc=on platform=supermuc compiler=mpicxx solib
+scons -j $WM_NCOMPPROCS build=release python=off petsc=on platform=supermuc compiler=mpicxx solib Symlink
 
 cp build/last/libprecice.so ${FOAM_LIBBIN}/
-cp build/last/binprecice ${FOAM_APPBIN}/
 
 cd ..
 
@@ -161,12 +162,38 @@ cd $BOOST_ROOT
 cd ../yaml-cpp
 
 rm -rf build
-mkdir build
+mkdir build install
 
 cd build
 
-CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
+CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} -DCMAKE_INSTALL_PREFIX=`pwd`/../install ..
 
 make -j $WM_NCOMPPROCS
+make install
+cd .. && rm -rf build && cd ..
 
-cp libyaml-cpp* ${FOAM_LIBBIN}/
+rm -f yaml-cpp
+ln -s yaml-cpp-release-0.5.3 yaml-cpp
+
+cp yaml-cpp/install/lib/libyaml-cpp* ${FOAM_LIBBIN}/
+
+# compile elemental
+
+cd elemental
+mkdir -p build install && cd build
+
+cmake \
+    -D CMAKE_INSTALL_PREFIX=`pwd`/../install \
+    -D INSTALL_PYTHON_PACKAGE=OFF \
+    -D CMAKE_BUILD_TYPE=Release \
+    -D EL_DISABLE_PARMETIS=TRUE \
+    -D CMAKE_CXX_COMPILER=g++ \
+    -D CMAKE_C_COMPILER=gcc \
+    -D CMAKE_Fortran_COMPILER=gfortran \
+    -D EL_DISABLE_SCALAPACK=TRUE \
+    -D MATH_LIBS="$MKL_LIB" \
+    ..
+
+make -j $WM_NCOMPPROCS
+make install
+cp ../install/lib64/*.so* $FOAM_LIBBIN/

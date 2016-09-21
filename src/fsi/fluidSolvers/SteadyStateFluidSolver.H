@@ -25,7 +25,7 @@ class SteadyStateFluidSolver : public foamFluidSolver
 {
     public:
         SteadyStateFluidSolver(
-            std::string name,
+            const std::string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );

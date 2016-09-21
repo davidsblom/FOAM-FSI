@@ -1,58 +1,33 @@
 #!/bin/bash
 
-set -e
-
-# Ensure the script is executed in this directory
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-cd $DIR
-
-# Assume that preCICE has been built before, and boost is already downloaded.
+set -euox pipefail
 
 VERSION=0.5.3
-BOOST_VERSION=1_55_0
-BOOST_VERSION_DOT=1.55.0
-
-# Download Boost
-if [ ! -d "boost_${BOOST_VERSION}" ]; then
-    wget -O boost_${BOOST_VERSION}.tar.bz2 http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION_DOT}/boost_${BOOST_VERSION}.tar.bz2
-    tar jxf boost_${BOOST_VERSION}.tar.bz2
-    rm -f boost_${BOOST_VERSION}.tar.bz2
-fi
-
-rm -f boost
-ln -s boost_${BOOST_VERSION} boost
 
 if [ ! -e "yaml-cpp-release-${VERSION}" ]; then
 
-    rm -rf yaml-cpp*
+    wget https://github.com/jbeder/yaml-cpp/archive/release-0.5.3.tar.gz -O - | tar xz
 
-    rm -rf yaml-cpp-${VERSION}*
+    ln -s yaml-cpp-release-0.5.3 yaml-cpp
 
-    wget -O yaml-cpp-${VERSION}.tar.gz https://github.com/jbeder/yaml-cpp/archive/release-${VERSION}.tar.gz
+    export BOOST_ROOT=`pwd`/boost
 
-    tar -zxvf yaml-cpp-${VERSION}.tar.gz
-    rm -f yaml-cpp-${VERSION}.tar.gz
+    cd yaml-cpp && mkdir -p build install && cd build
 
-    export BOOST_ROOT=`pwd`/boost_${BOOST_VERSION}
-    echo $BOOST_ROOT
-    cd $BOOST_ROOT
+    CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON \
+        -DBoost_NO_BOOST_CMAKE=TRUE \
+        -DBoost_NO_SYSTEM_PATHS=TRUE \
+        -DBOOST_ROOT=${BOOST_ROOT} \
+        -DCMAKE_INSTALL_PREFIX=`pwd`/../install \
+        ..
 
-    cd ../yaml-cpp-release-${VERSION}
+    make -j `nproc`
+    make test
+    make install
 
-    mkdir build
-
-    cd build
-
-    CC=gcc CXX=g++ cmake -DBUILD_SHARED_LIBS=ON -DBoost_NO_BOOST_CMAKE=TRUE -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_ROOT=${BOOST_ROOT} ..
-
-    make -j $WM_NCOMPPROCS
-
-    cd ../..
+    cd .. && rm -rf build && cd ..
 
 fi
 
-rm -f yaml-cpp
-ln -s yaml-cpp-release-${VERSION} yaml-cpp
-
 mkdir -p ${FOAM_LIBBIN}
-cp yaml-cpp-release-${VERSION}/build/libyaml-cpp* ${FOAM_LIBBIN}/
+cp yaml-cpp/install/lib/libyaml-cpp* ${FOAM_LIBBIN}/

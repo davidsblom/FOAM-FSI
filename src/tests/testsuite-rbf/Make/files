@@ -1,5 +1,9 @@
 tests.C
 test_rbfcoarsening.C
 test_rbfinterpolation.C
+test_elrbfinterpolation.C
+test_nocoarsener.C
+test_unitcoarsening.C
+test_adaptivecoarsening.C
 
 EXE = $(FOAM_APPBIN)/testsuite-rbf

@@ -4,8 +4,11 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+#include "dynamicLabelList.H"
+#include "PstreamReduceOps.H"
 #include "RBFMeshMotionSolver.H"
 #include <unordered_map>
+#include <vector>
 
 using namespace Foam;
 
@@ -20,7 +23,7 @@ addToRunTimeSelectionTable
 
 RBFMeshMotionSolver::RBFMeshMotionSolver(
     const polyMesh & mesh,
-    Istream & msData
+    Istream &
     )
     :
     motionSolver( mesh ),
@@ -32,7 +35,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     fixedPatches( lookup( "fixedPatches" ) ),
     fixedPatchIDs( fixedPatches.size() ),
     newPoints( mesh.points().size(), vector::zero ),
-    rbf( false ),
+    rbf( nullptr ),
     nbGlobalFaceCenters( Pstream::nProcs(), 0 ),
     nbGlobalMovingFaceCenters( Pstream::nProcs(), 0 ),
     nbGlobalStaticFaceCenters( Pstream::nProcs(), 0 ),
@@ -42,7 +45,7 @@ RBFMeshMotionSolver::RBFMeshMotionSolver(
     nbPoints( 0 ),
     faceCellCenters( true ),
     cpu( false ),
-    timeIntegrationScheme( false ),
+    timeIntegrationScheme( nullptr ),
     corrector( false ),
     k( 0 ),
     sweep( 0 )

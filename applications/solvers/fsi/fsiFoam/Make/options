@@ -1,6 +1,10 @@
 c++WARN     = -Wall -Wextra -Werror -Wno-literal-suffix
 
-EXE_INC = -std=c++11 \
+ifndef MKL_LIB
+    MKL_LIB=-lopenblas
+endif
+
+EXE_INC = -std=c++11 -fext-numeric-literals \
     -isystem ../../../../src/fsi/lnInclude \
     -I ../../../../src/fsi \
     -isystem ../../../../src/thirdParty/eigen \
@@ -17,7 +21,7 @@ EXE_INC = -std=c++11 \
     -isystem $(LIB_SRC)/meshTools/lnInclude \
     -isystem $(LIB_SRC)/sampling/lnInclude \
     -isystem $(LIB_SRC)/solidModels/lnInclude \
-    -isystem ../../../../src/thirdParty/yaml-cpp/include \
+    -isystem ../../../../src/thirdParty/yaml-cpp/install/include \
     -isystem ../../../../src/RBFMeshMotionSolver/lnInclude/ \
     $(WM_DECOMP_INC) \
     -isystem ../../../../src/thirdParty/boost \
@@ -28,11 +32,13 @@ EXE_INC = -std=c++11 \
     -isystem ../../../../src/thirdParty/dealii/bundled/umfpack/UMFPACK/Include \
     -isystem ../../../../src/thirdParty/dealii/bundled/umfpack/AMD/Include \
     -isystem ../../../../src/thirdParty/petsc/include \
-    -isystem ../../../../src/thirdParty/petsc/x86_64/include
+    -isystem ../../../../src/thirdParty/petsc/x86_64/include \
+    -isystem ../../../../src/thirdParty/elemental/install/include
 
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
@@ -57,6 +63,7 @@ endif
 ifeq ($(WM_COMPILE_OPTION), Debug)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \

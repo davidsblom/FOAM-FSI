@@ -36,7 +36,7 @@ namespace fsi
 
             public:
                 // ! @{
-                Polynomial( size_t n );
+                explicit Polynomial( size_t n );
 
                 // ! @}
 

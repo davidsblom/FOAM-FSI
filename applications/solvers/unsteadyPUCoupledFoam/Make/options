@@ -1,5 +1,9 @@
 c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor -Wunused-local-typedefs
 
+ifndef MKL_LIB
+    MKL_LIB=-lopenblas
+endif
+
 EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/turbulenceModels \
     -I$(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
@@ -7,11 +11,13 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/VectorN/lnInclude \
-    -I../../../src/thirdParty/yaml-cpp/include \
-    -I../../../src/thirdParty/boost
+    -isystem ../../../src/thirdParty/yaml-cpp/install/include \
+    -isystem ../../../src/thirdParty/boost
 
+ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
@@ -35,3 +41,33 @@ EXE_LIBS = \
     -lspecie \
     -lcompressibleRASModels \
     -ldeal_II
+endif
+
+ifeq ($(WM_COMPILE_OPTION), Debug)
+EXE_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -ldynamicMesh \
+    -lmeshTools \
+    -lfiniteVolume \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModel \
+    -lincompressibleRASModels \
+    -lincompressibleLESModels \
+    -llduSolvers \
+    -lfvSchemes \
+    -lboundaryConditions \
+    -lsolidModels \
+    -lsampling \
+    -llagrangian \
+    -lyaml-cpp \
+    -lRBFMeshMotionSolver \
+    -lfsi \
+    -ltetFiniteElement \
+    -lbasicThermophysicalModels \
+    -lspecie \
+    -lcompressibleRASModels \
+    -ldeal_II.g
+endif

@@ -4,12 +4,14 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+#include "PstreamReduceOps.H"
 #include "SDC.H"
 #include "GaussRadau.H"
 #include "GaussRadau.H"
 #include "GaussLobatto.H"
 #include "Uniform.H"
 #include "ClenshawCurtis.H"
+#include <numeric>
 
 namespace sdc
 {
@@ -473,7 +475,7 @@ namespace sdc
         this->timeIndex = timeIndex;
     }
 
-    void SDC::outputResidual( std::string name )
+    void SDC::outputResidual( const std::string & name )
     {
         fsi::matrix residual = dt * ( qmat * data->getFunctions() );
 

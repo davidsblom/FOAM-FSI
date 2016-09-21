@@ -18,7 +18,7 @@ class PreciceFluidSolver : public Solver
 {
 public:
 
-  PreciceFluidSolver( shared_ptr<foamFluidSolver> solver );
+  explicit PreciceFluidSolver( shared_ptr<foamFluidSolver> solver );
 
   virtual ~PreciceFluidSolver();
 

@@ -4,10 +4,11 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+#include "ElRBFMeshMotionSolver.H"
 #include "foamFluidSolver.H"
 
 foamFluidSolver::foamFluidSolver(
-    std::string name,
+    const std::string & name,
     shared_ptr<argList> args,
     shared_ptr<Time> runTime
     )
@@ -349,13 +350,28 @@ void foamFluidSolver::getWritePositionsLocal( matrix & writePositions )
 
 void foamFluidSolver::moveMesh()
 {
-    RBFMeshMotionSolver & motionSolver =
-        const_cast<RBFMeshMotionSolver &>
-        (
-        mesh.lookupObject<RBFMeshMotionSolver>( "dynamicMeshDict" )
-        );
+    bool elRBFSolver = mesh.objectRegistry::foundObject<ElRBFMeshMotionSolver>( "dynamicMeshDict" );
 
-    motionSolver.setMotion( movingPatchesDispl - movingPatchesDisplOld );
+    if ( elRBFSolver )
+    {
+        ElRBFMeshMotionSolver & motionSolver =
+            const_cast<ElRBFMeshMotionSolver &>
+            (
+            mesh.lookupObject<ElRBFMeshMotionSolver>( "dynamicMeshDict" )
+            );
+
+        motionSolver.setMotion( movingPatchesDispl - movingPatchesDisplOld );
+    }
+    else
+    {
+        RBFMeshMotionSolver & motionSolver =
+            const_cast<RBFMeshMotionSolver &>
+            (
+            mesh.lookupObject<RBFMeshMotionSolver>( "dynamicMeshDict" )
+            );
+
+        motionSolver.setMotion( movingPatchesDispl - movingPatchesDisplOld );
+    }
 }
 
 void foamFluidSolver::setDisplacementLocal( const matrix & displacement )

@@ -17,6 +17,7 @@
 #include "twoDPointCorrectorRBF.H"
 #include <time.h>
 #include <unordered_map>
+#include <vector>
 
 using namespace fsi;
 using std::shared_ptr;
@@ -25,7 +26,7 @@ class foamFluidSolver : public BaseMultiLevelSolver
 {
     public:
         foamFluidSolver(
-            std::string name,
+            const std::string & name,
             shared_ptr<argList> args,
             shared_ptr<Time> runTime
             );

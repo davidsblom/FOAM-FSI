@@ -6,12 +6,16 @@
 
 #include "gtest/gtest.h"
 #include <limits.h>
+#include "El.hpp"
 
 int main(
     int argc,
     char ** argv
     )
 {
+    El::Initialize();
     ::testing::InitGoogleTest( &argc, argv );
-    return RUN_ALL_TESTS();
+    int result = RUN_ALL_TESTS();
+    El::Finalize();
+    return result;
 }

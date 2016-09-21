@@ -11,6 +11,13 @@ build:
                 git checkout .
                 git submodule update --init --recursive
         - script:
+            name: cppcheck
+            code: |
+                (cd src/fsi && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+                (cd src/RBFMeshMotionSolver && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+                (cd src/tests && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+                (cd applications && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+        - script:
             name: initialize dependencies
             code: |
                 # foam-extend
@@ -20,40 +27,34 @@ build:
 
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
-                ln -s /home/boost_1_55_0 boost
+                ln -s /home/boost_1_61_0 boost
+                cp boost/stage/lib/* $FOAM_LIBBIN/
 
                 # petsc
-                mkdir -p petsc
-                (cd petsc && ln -s /usr/include/petsc include)
+                ln -s /home/petsc-3.6.4 petsc
+                cp petsc/x86_64/lib/lib* ${FOAM_LIBBIN}/
 
                 # deal.II
                 ln -s /home/dealii-8.4.1 dealii
                 cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
 
                 # googletest
-                ln -s /home/googletest-release-1.7.0 gtest
+                ln -s /home/googletest-release-1.8.0 gtest
+                cp gtest/install/lib/lib* ${FOAM_LIBBIN}/
 
                 # yaml-cpp
                 ln -s /home/yaml-cpp-release-0.5.3 yaml-cpp
-                cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
+                cp yaml-cpp/install/lib/libyaml-cpp* ${FOAM_LIBBIN}/
+        - script:
+            name: elemental
+            code: |
+                cd src/thirdParty
+                ./compile_elemental
         - script:
             name: precice
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-
-                cd src/thirdParty
-
-                export BOOST_ROOT=`pwd`/boost
-                export PRECICE_BOOST_ROOT=${BOOST_ROOT}
-                export PRECICE_MPI_LIB=mpi
-                export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
-                export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-                export CPLUS_INCLUDE_PATH=`pwd`/eigen
-
-                cd precice
-                scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
-                cp build/release-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
-                rm -rf build/*
+                cd src/thirdParty && ./compile_precice
         - script:
             name: boundary conditions
             code: |
@@ -80,10 +81,11 @@ build:
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmake libso src/RBFMeshMotionSolver
         - script:
-            name: FSI solvers
+            name: solvers
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd applications/solvers/fsi && wmake all
+                cd ../ && wmake unsteadyPUCoupledFoam
         - script:
             name: test app
             code: |
@@ -104,6 +106,7 @@ build:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-rbf
+                mpirun -np 4 --allow-run-as-root testsuite-rbf
         - script:
             name: testsuite-spacemapping
             code: |
@@ -119,13 +122,6 @@ build:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-dealii
-        - script:
-            name: cppcheck
-            code: |
-                (cd src/fsi && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
-                (cd src/RBFMeshMotionSolver && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
-                (cd src/tests && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
-                (cd applications && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
         - script:
             name: tutorials
             code: |
@@ -144,49 +140,48 @@ debug:
                 git checkout .
                 git submodule update --init --recursive
         - script:
+            name: cppcheck
+            code: |
+                (cd src/fsi && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+                (cd src/RBFMeshMotionSolver -j `nproc` && cppcheck --error-exitcode=1 --enable=performance,portability .)
+                (cd src/tests && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+                (cd applications && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
+        - script:
             name: initialize dependencies
             code: |
                 # foam-extend
                 cd /home
-                tar xf foam-extend-3.2.tar.gz
+                tar xf foam-extend-3.2.tar.gz && rm foam-extend-3.2.tar.gz
                 source foam-extend-3.2/etc/prefs.sh && source foam-extend-3.2/etc/bashrc
 
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
-                ln -s /home/boost_1_55_0 boost
+                ln -s /home/boost_1_61_0 boost
+                cp boost/stage/lib/* $FOAM_LIBBIN/
 
                 # petsc
-                mkdir -p petsc
-                (cd petsc && ln -s /usr/include/petsc include)
+                ln -s /home/petsc-3.6.4 petsc
+                cp petsc/x86_64/lib/lib* ${FOAM_LIBBIN}/
 
                 # deal.II
                 ln -s /home/dealii-8.4.1 dealii
                 cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
 
                 # googletest
-                ln -s /home/googletest-release-1.7.0 gtest
+                ln -s /home/googletest-release-1.8.0 gtest
+                cp gtest/install/lib/lib* ${FOAM_LIBBIN}/
 
                 # yaml-cpp
                 ln -s /home/yaml-cpp-release-0.5.3 yaml-cpp
-                cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
+                cp yaml-cpp/install/lib/libyaml-cpp* ${FOAM_LIBBIN}/
+        - script:
+            name: elemental
+            code: cd src/thirdParty && ./compile_elemental
         - script:
             name: precice
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-
-                cd src/thirdParty
-
-                export BOOST_ROOT=`pwd`/boost
-                export PRECICE_BOOST_ROOT=${BOOST_ROOT}
-                export PRECICE_MPI_LIB=mpi
-                export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
-                export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-                export CPLUS_INCLUDE_PATH=`pwd`/eigen
-
-                cd precice
-                scons -j $WM_NCOMPPROCS build=debug python=off petsc=off compiler=mpicxx solib
-                cp build/debug-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
-                rm -rf build/*
+                cd src/thirdParty && ./compile_precice
         - script:
             name: boundary conditions
             code: |
@@ -213,22 +208,16 @@ debug:
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmake libso src/RBFMeshMotionSolver
         - script:
-            name: FSI solvers
+            name: solvers
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd applications/solvers/fsi && wmake all
+                cd ../ && wmake unsteadyPUCoupledFoam
         - script:
             name: test app
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && wmake all
-        - script:
-            name: cppcheck
-            code: |
-                (cd src/fsi && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
-                (cd src/RBFMeshMotionSolver -j `nproc` && cppcheck --error-exitcode=1 --enable=performance,portability .)
-                (cd src/tests && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
-                (cd applications && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
         - script:
             name: cleanup
             code: rm -rf * .git* .travis.yml .uncrustify.cfg
@@ -251,40 +240,32 @@ ubuntu:
 
                 # boost
                 cd $WERCKER_SOURCE_DIR/src/thirdParty
-                ln -s /home/boost_1_55_0 boost
+                ln -s /home/boost_1_61_0 boost
+                cp boost/stage/lib/* $FOAM_LIBBIN/
 
                 # petsc
-                mkdir -p petsc
-                (cd petsc && ln -s /usr/include/petsc include)
+                ln -s /home/petsc-3.6.4 petsc
+                cp petsc/x86_64/lib/lib* ${FOAM_LIBBIN}/
 
                 # deal.II
                 ln -s /home/dealii-8.4.1 dealii
                 cp dealii/bin/lib/libdeal* ${FOAM_LIBBIN}/
 
                 # googletest
-                ln -s /home/googletest-release-1.7.0 gtest
+                ln -s /home/googletest-release-1.8.0 gtest
+                cp gtest/install/lib/lib* ${FOAM_LIBBIN}/
 
                 # yaml-cpp
                 ln -s /home/yaml-cpp-release-0.5.3 yaml-cpp
-                cp yaml-cpp/build/libyaml-cpp* ${FOAM_LIBBIN}/
+                cp yaml-cpp/install/lib/libyaml-cpp* ${FOAM_LIBBIN}/
+        - script:
+            name: elemental
+            code: cd src/thirdParty && ./compile_elemental
         - script:
             name: precice
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
-
-                cd src/thirdParty
-
-                export BOOST_ROOT=`pwd`/boost
-                export PRECICE_BOOST_ROOT=${BOOST_ROOT}
-                export PRECICE_MPI_LIB=mpi
-                export PRECICE_MPI_LIB_PATH="`mpicc --showme:libdirs`"
-                export PRECICE_MPI_INC_PATH="`mpicc --showme:incdirs`"
-                export CPLUS_INCLUDE_PATH=`pwd`/eigen
-
-                cd precice
-                scons -j $WM_NCOMPPROCS build=release python=off petsc=off compiler=mpicxx solib
-                cp build/release-nopetsc-nopython/libprecice.* ${FOAM_LIBBIN}/
-                rm -rf build/*
+                cd src/thirdParty && ./compile_precice
         - script:
             name: boundary conditions
             code: |
@@ -311,10 +292,11 @@ ubuntu:
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 wmake libso src/RBFMeshMotionSolver
         - script:
-            name: FSI solvers
+            name: solvers
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd applications/solvers/fsi && wmake all
+                cd ../ && wmake unsteadyPUCoupledFoam
         - script:
             name: test app
             code: |
@@ -335,6 +317,7 @@ ubuntu:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-rbf
+                mpirun -np 4 --allow-run-as-root testsuite-rbf
         - script:
             name: testsuite-spacemapping
             code: |
@@ -350,6 +333,11 @@ ubuntu:
             code: |
                 (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
                 cd src/tests && python runTests.py testsuite-dealii
+        - script:
+            name: tutorials
+            code: |
+                (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
+                cd src/tests/tutorials && python testsuite.py
         - script:
             name: cleanup
             code: rm -rf * .git* .travis.yml .uncrustify.cfg

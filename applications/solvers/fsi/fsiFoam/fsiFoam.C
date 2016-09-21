@@ -10,6 +10,7 @@
 #include <memory>
 #include <yaml-cpp/yaml.h>
 
+#include "El.hpp"
 #include "dealiiSolidSolver.H"
 #include "version.H"
 #include "ASMILS.H"
@@ -64,7 +65,7 @@ void setConvergenceMeasures(
     );
 
 std::shared_ptr<rbf::RBFInterpolation> createRBFInterpolator(
-    std::string interpolationFunction,
+    const std::string & interpolationFunction,
     scalar radius,
     bool cpu
     );
@@ -130,7 +131,7 @@ void setConvergenceMeasures(
 }
 
 std::shared_ptr<rbf::RBFInterpolation> createRBFInterpolator(
-    std::string interpolationFunction,
+    const std::string & interpolationFunction,
     scalar radius,
     bool cpu,
     bool polynomialTerm
@@ -180,6 +181,8 @@ int main(
         ) );
 
     std::shared_ptr<dealii::Utilities::MPI::MPI_InitFinalize> mpi_initialization;
+
+    El::Initialize();
 
     // Load computation settings
 
@@ -881,6 +884,8 @@ int main(
 
     label tmp = Pstream::myProcNo();
     reduce( tmp, sumOp<label>() );
+
+    El::Finalize();
 
     return (0);
 }

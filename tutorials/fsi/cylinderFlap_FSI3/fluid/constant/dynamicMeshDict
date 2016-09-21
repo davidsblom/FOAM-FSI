@@ -24,28 +24,30 @@ FoamFile
 
 dynamicFvMesh dynamicMotionSolverFvMesh;
 
-solver RBFMeshMotionSolver;
+solver ElRBFMeshMotionSolver;
 
 movingPatches ( plate );
 
-staticPatches ( );
+staticPatches ( cylinder outlet inlet top bottom );
 
-fixedPatches ( cylinder outlet inlet top bottom );
-
-coarsening
-{
-  enabled false;
-  tol 1.0e-3;
-  minPoints 10;
-  maxPoints 2000;
-  livePointSelection true;
-  tolLivePointSelection 1.0e-2;
-  exportSelectedPoints false;
-}
+coarseningStrategy AdaptiveCoarsening;
 
 interpolation
 {
   function TPS;
 }
 
-faceCellCenters false;
+UnitCoarsening
+{
+    tol 1e-3;
+    minPoints 100;
+    maxPoints 500;
+}
+
+AdaptiveCoarsening
+{
+    tol 1e-3;
+    reselectionTol 1e-2;
+    minPoints 100;
+    maxPoints 500;
+}

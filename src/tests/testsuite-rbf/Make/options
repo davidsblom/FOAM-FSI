@@ -1,6 +1,11 @@
 c++WARN     = -Wall -Wextra -Werror -Wno-literal-suffix
 
-EXE_INC = -std=c++11 \
+ifndef MKL_LIB
+    MKL_LIB=-lopenblas
+endif
+
+EXE_INC = -std=c++11 -fext-numeric-literals\
+    -isystem ../../thirdParty/elemental/install/include \
     -I ../../fsi \
     -I ../../fsi/lnInclude \
     -I ../../fsi/solidSolvers \
@@ -16,7 +21,7 @@ EXE_INC = -std=c++11 \
     -isystem $(LIB_SRC)/turbulenceModels/incompressible/RAS/RASModel \
     -isystem ../../thirdParty/eigen \
     -isystem ../../thirdParty/boost \
-    -isystem ../../thirdParty/gtest/include \
+    -isystem ../../thirdParty/gtest/install/include \
     $(WM_DECOMP_INC) \
     -I ../../RBFMeshMotionSolver/lnInclude/ \
     -isystem $(LIB_SRC)/meshTools/lnInclude \
@@ -32,7 +37,7 @@ EXE_INC = -std=c++11 \
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -L../../thirdParty/gtest \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -lgtest \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
@@ -58,7 +63,7 @@ endif
 ifeq ($(WM_COMPILE_OPTION), Debug)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -L../../thirdParty/gtest \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -lgtest \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \

@@ -1,7 +1,8 @@
 c++WARN     = -Wall -Wextra -Werror -Wno-literal-suffix
 
-EXE_INC = -std=c++11 \
+EXE_INC = -std=c++11 -fext-numeric-literals \
     -isystem ../thirdParty/eigen \
+    -isystem ../thirdParty/elemental/install/include \
     -isystem $(LIB_SRC)/finiteVolume/lnInclude \
     -isystem $(LIB_SRC)/dynamicMesh/dynamicFvMesh/lnInclude \
     -isystem $(LIB_SRC)/dynamicMesh/dynamicMesh/lnInclude \

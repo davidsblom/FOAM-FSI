@@ -1,34 +1,29 @@
 #!/bin/bash
 
-set -e
+set -euox pipefail
 
-# Ensure the script is executed in this directory
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-cd $DIR
+if [ ! -d "googletest-release-1.8.0" ]; then
 
-VERSION=1.7.0
+    wget https://github.com/google/googletest/archive/release-1.8.0.tar.gz -O - | tar xz
 
-if [ ! -d "gtest-${VERSION}" ]; then
+    cd googletest-release-1.8.0
 
-    rm -rf gtest-${VERSION}*
+    mkdir -p build install && cd build
 
-    wget -O gtest-${VERSION}.zip http://googletest.googlecode.com/files/gtest-${VERSION}.zip
+    cmake \
+        -DCMAKE_CXX_COMPILER=g++ \
+        -DCMAKE_CC_COMPILER=gcc \
+        -D CMAKE_INSTALL_PREFIX=`pwd`/../install \
+        ..
 
-    unzip gtest-${VERSION}
+    make -j `nproc`
+    make test
+    make install
 
-    cd gtest-${VERSION}
-
-    cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CC_COMPILER=gcc
-
-    make -j $WM_NCOMPPROCS
-
-    cd ../
-
-    rm -rf gtest
-
-    rm -rf gtest-${VERSION}.zip
+    cd .. && rm -rf build && cd ..
 
 fi
 
 rm -f gtest
-ln -s gtest-${VERSION} gtest
+ln -s googletest-release-1.8.0 gtest
+cp gtest/install/lib/lib* ${FOAM_LIBBIN}/

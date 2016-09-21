@@ -1,5 +1,9 @@
 c++WARN     = -Wall -Wextra -Werror
 
+ifndef MKL_LIB
+    MKL_LIB=-lopenblas
+endif
+
 EXE_INC = -std=c++11 \
     -I../../../../src/fsi \
     -I../../../../src/fsi/lnInclude \
@@ -17,7 +21,7 @@ EXE_INC = -std=c++11 \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/solidModels/lnInclude \
-    -isystem ../../../../src/thirdParty/yaml-cpp/include \
+    -isystem ../../../../src/thirdParty/yaml-cpp/install/include \
     -I../../../../src/RBFMeshMotionSolver/lnInclude/ \
     $(WM_DECOMP_INC) \
     -I$(LIB_SRC)/tetFiniteElement/lnInclude \
@@ -27,6 +31,7 @@ EXE_INC = -std=c++11 \
 ifeq ($(WM_COMPILE_OPTION), Opt)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
@@ -51,6 +56,7 @@ endif
 ifeq ($(WM_COMPILE_OPTION), Debug)
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
+    $(MKL_LIB) -lpmrrr -lEl -lElSuiteSparse \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
     -ldynamicMesh \
