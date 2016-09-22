@@ -35,15 +35,17 @@ solvers
 
 PIMPLE
 {
-    nCorrectors 5;
+    nCorrectors 10;
     nNonOrthogonalCorrectors 0;
     tolerance 1.0e-13;
     relTol 1.0e-5;
-    maxIter 20;
+    maxIter 30;
     minIter 1;
+    pisoTol 1.0e-2;
 }
 
 relaxationFactors
 {
   U 0.9;
+  p 0.9;
 }
