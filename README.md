@@ -134,6 +134,8 @@ compilation of the deal.II library, and is therefore also needed.
 OS: Currently only Linux based distributions are supported, patches for other
 operating systems are welcome.
 
+list of needed packages: scons, openblas (libopenblas-dev on Ubuntu)
+
 Test suite
 -----------
 
