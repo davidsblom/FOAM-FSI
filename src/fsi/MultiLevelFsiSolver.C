@@ -186,8 +186,8 @@ bool MultiLevelFsiSolver::isConvergence()
 
             valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( solid->couplingData.dataPreviousTimeStep.data(), solid->couplingData.dataPreviousTimeStep.rows() * solid->couplingData.dataPreviousTimeStep.cols() );
 
-            if ( solid->substractInitialValue )
-                valuesPreviousTimeStep.fill( solid->initialValue );
+            // if ( solid->substractInitialValue )
+            //     valuesPreviousTimeStep.fill( solid->initialValue );
         }
 
         if ( measure->dataId == 1 )
@@ -197,12 +197,12 @@ bool MultiLevelFsiSolver::isConvergence()
 
             valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( fluid->couplingData.dataPreviousTimeStep.data(), fluid->couplingData.dataPreviousTimeStep.rows() * fluid->couplingData.dataPreviousTimeStep.cols() );
 
-            if ( fluid->substractInitialValue )
-                valuesPreviousTimeStep.fill( fluid->initialValue );
+            // if ( fluid->substractInitialValue )
+            //     valuesPreviousTimeStep.fill( fluid->initialValue );
         }
 
-        oldValues -= valuesPreviousTimeStep;
-        newValues -= valuesPreviousTimeStep;
+        // oldValues -= valuesPreviousTimeStep;
+        // newValues -= valuesPreviousTimeStep;
 
         // Measure convergence
         measure->measure( oldValues, newValues );
@@ -235,8 +235,8 @@ bool MultiLevelFsiSolver::isConvergence(
 
             valuesPreviousTimeStep = Eigen::Map<fsi::vector> ( solid->couplingData.dataPreviousTimeStep.data(), solid->couplingData.dataPreviousTimeStep.rows() * solid->couplingData.dataPreviousTimeStep.cols() );
 
-            if ( solid->substractInitialValue )
-                valuesPreviousTimeStep.fill( solid->initialValue );
+            // if ( solid->substractInitialValue )
+            //     valuesPreviousTimeStep.fill( solid->initialValue );
         }
 
         if ( measure->dataId == 1 )
@@ -257,12 +257,12 @@ bool MultiLevelFsiSolver::isConvergence(
                 newValues = Eigen::Map<fsi::vector> ( fluid->couplingData.data.data(), fluid->couplingData.data.rows() * fluid->couplingData.dataprev.cols() );
             }
 
-            if ( fluid->substractInitialValue )
-                valuesPreviousTimeStep.fill( fluid->initialValue );
+            // if ( fluid->substractInitialValue )
+            //     valuesPreviousTimeStep.fill( fluid->initialValue );
         }
 
-        oldValues -= valuesPreviousTimeStep;
-        newValues -= valuesPreviousTimeStep;
+        // oldValues -= valuesPreviousTimeStep;
+        // newValues -= valuesPreviousTimeStep;
 
         // Measure convergence
         measure->measure( oldValues, newValues );

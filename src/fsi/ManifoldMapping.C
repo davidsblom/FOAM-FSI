@@ -92,6 +92,7 @@ void ManifoldMapping::determineScalingFactors( const vector & output )
 
     if ( fsi )
         scaling = fsi->fsi->parallel;
+    scaling = false;
 
     if ( scaling && timeIndex <= reuseInformationStartingFromTimeIndex )
     {
@@ -205,17 +206,6 @@ void ManifoldMapping::performPostProcessing(
         int nbCols = std::min( k, n );
         int nbColsCurrentTimeStep = nbCols;
 
-        // Include information from previous optimization cycles
-
-        for ( auto && fineResiduals : fineResidualsList )
-            nbCols += fineResiduals.size() - 1;
-
-        // Include information from previous time steps
-
-        for ( auto && fineResidualsList : fineResidualsTimeList )
-            for ( auto && fineResiduals : fineResidualsList )
-                nbCols += fineResiduals.size() - 1;
-
         nbCols = std::min( nbCols, n );
         nbCols = std::min( nbCols, maxUsedIterations );
         nbColsCurrentTimeStep = std::min( nbCols, nbColsCurrentTimeStep );
@@ -254,46 +244,13 @@ void ManifoldMapping::performPostProcessing(
 
             for ( int i = 0; i < nbColsCurrentTimeStep; i++ )
             {
-                DeltaF.col( i ) = fineResiduals.back() - fineResiduals.at( k - 1 - i );
-                DeltaC.col( i ) = coarseResiduals.back() - coarseResiduals.at( k - 1 - i );
+                // DeltaF.col( i ) = fineResiduals.back() - fineResiduals.at( k - 1 - i );
+                // DeltaC.col( i ) = coarseResiduals.back() - coarseResiduals.at( k - 1 - i );
+
+                DeltaF.col( i ) = fineResiduals.at( k - i ) - fineResiduals.at( k - 1 - i );
+                DeltaC.col( i ) = coarseResiduals.at( k - i ) - coarseResiduals.at( k - 1 - i );
+
                 colIndex++;
-            }
-
-            // Include information from previous optimization cycles
-
-            for ( unsigned i = 0; i < fineResidualsList.size(); i++ )
-            {
-                assert( fineResidualsList.at( i ).size() >= 2 );
-
-                for ( unsigned j = 0; j < fineResidualsList.at( i ).size() - 1; j++ )
-                {
-                    if ( colIndex >= DeltaF.cols() )
-                        continue;
-
-                    DeltaF.col( colIndex ) = fineResidualsList.at( i ).back() - fineResidualsList.at( i ).at( fineResidualsList.at( i ).size() - 2 - j );
-                    DeltaC.col( colIndex ) = coarseResidualsList.at( i ).back() - coarseResidualsList.at( i ).at( coarseResidualsList.at( i ).size() - 2 - j );
-                    colIndex++;
-                }
-            }
-
-            // Include information from previous time steps
-
-            for ( unsigned i = 0; i < fineResidualsTimeList.size(); i++ )
-            {
-                for ( unsigned j = 0; j < fineResidualsTimeList.at( i ).size(); j++ )
-                {
-                    assert( fineResidualsTimeList.at( i ).at( j ).size() >= 2 );
-
-                    for ( unsigned k = 0; k < fineResidualsTimeList.at( i ).at( j ).size() - 1; k++ )
-                    {
-                        if ( colIndex >= DeltaF.cols() )
-                            continue;
-
-                        DeltaF.col( colIndex ) = fineResidualsTimeList.at( i ).at( j ).back() - fineResidualsTimeList.at( i ).at( j ).at( fineResidualsTimeList.at( i ).at( j ).size() - 2 - k );
-                        DeltaC.col( colIndex ) = coarseResidualsTimeList.at( i ).at( j ).back() - coarseResidualsTimeList.at( i ).at( j ).at( coarseResidualsTimeList.at( i ).at( j ).size() - 2 - k );
-                        colIndex++;
-                    }
-                }
             }
 
             assert( colIndex == nbCols );
@@ -324,10 +281,10 @@ void ManifoldMapping::performPostProcessing(
             matrix pseudoSigma_F = svd_F.singularValues().asDiagonal();
 
             for ( int i = 0; i < pseudoSigma_F.cols(); i++ )
-                if ( pseudoSigma_F( i, i ) > singularityLimit )
+                // if ( pseudoSigma_F( i, i ) > singularityLimit )
                     pseudoSigma_F( i, i ) = 1.0 / pseudoSigma_F( i, i );
-                else
-                    pseudoSigma_F( i, i ) = 0;
+                // else
+                //     pseudoSigma_F( i, i ) = 0;
 
             matrix pseudoDeltaF = svd_F.matrixV() * pseudoSigma_F * svd_F.matrixU().transpose();
 

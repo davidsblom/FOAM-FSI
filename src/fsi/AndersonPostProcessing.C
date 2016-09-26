@@ -120,6 +120,8 @@ namespace fsi
         const vector & y,
         const vector & x0,
         vector & xk
+        // std::cout << "positions = \n" << positions << std::endl;
+        // std::cout << "positionsInterpolation = \n" << positionsInterpolation << std::endl;
         )
     {
         performPostProcessing( y, x0, xk, false );
@@ -157,6 +159,8 @@ namespace fsi
         sols.clear();
         vector yk = y;
         matrix J;
+
+        // std::cout << "yk = \n" << yk << std::endl;
 
         // Fsi evaluation
         vector output( xk.rows() ), R( xk.rows() );
@@ -196,17 +200,6 @@ namespace fsi
             int nbCols = residuals.size() - 1;
             nbCols = std::max( nbCols, 0 );
 
-            // Include information from previous stages
-            for ( unsigned i = solsStageList.size(); i-- > 0; )
-                for ( auto && sols : solsStageList.at( i ) )
-                    nbCols += sols.size() - 1;
-
-            // Include information from previous time steps
-            for ( auto && solsStageList : solsTimeList )
-                for ( auto && solsStage : solsStageList )
-                    for ( auto && sols : solsStage )
-                        nbCols += sols.size() - 1;
-
             nbCols = std::min( static_cast<int>( xk.rows() ), nbCols );
             nbCols = std::min( nbCols, maxUsedIterations );
 
@@ -240,49 +233,6 @@ namespace fsi
                     V.col( i ) = residuals.at( i ) - residuals.at( i + 1 );
                     W.col( i ) = sols.at( i ) - sols.at( i + 1 );
                     colIndex++;
-                }
-
-                // Include information from previous stages
-
-                for ( unsigned i = residualsStageList.size(); i-- > 0; )
-                {
-                    for ( unsigned j = 0; j < residualsStageList.at( i ).size(); j++ )
-                    {
-                        assert( residualsStageList.at( i ).at( j ).size() >= 2 );
-
-                        for ( unsigned k = 0; k < residualsStageList.at( i ).at( j ).size() - 1; k++ )
-                        {
-                            if ( colIndex >= V.cols() )
-                                continue;
-
-                            V.col( colIndex ) = residualsStageList.at( i ).at( j ).at( k ) - residualsStageList.at( i ).at( j ).at( k + 1 );
-                            W.col( colIndex ) = solsStageList.at( i ).at( j ).at( k ) - solsStageList.at( i ).at( j ).at( k + 1 );
-                            colIndex++;
-                        }
-                    }
-                }
-
-                // Include information from previous time steps
-
-                for ( unsigned i = 0; i < residualsTimeList.size(); i++ )
-                {
-                    for ( unsigned j = residualsTimeList.at( i ).size(); j-- > 0; )
-                    {
-                        for ( unsigned k = 0; k < residualsTimeList.at( i ).at( j ).size(); k++ )
-                        {
-                            assert( residualsTimeList.at( i ).at( j ).at( k ).size() >= 2 );
-
-                            for ( unsigned l = 0; l < residualsTimeList.at( i ).at( j ).at( k ).size() - 1; l++ )
-                            {
-                                if ( colIndex >= V.cols() )
-                                    continue;
-
-                                V.col( colIndex ) = residualsTimeList.at( i ).at( j ).at( k ).at( l ) - residualsTimeList.at( i ).at( j ).at( k ).at( l + 1 );
-                                W.col( colIndex ) = solsTimeList.at( i ).at( j ).at( k ).at( l ) - solsTimeList.at( i ).at( j ).at( k ).at( l + 1 );
-                                colIndex++;
-                            }
-                        }
-                    }
                 }
 
                 assert( colIndex == nbCols );
@@ -330,8 +280,11 @@ namespace fsi
 
                 if ( !updateJacobian )
                 {
-                    vector c = svd.matrixV() * ( singularValues_inv.asDiagonal() * ( svd.matrixU().transpose() * (yk - R) ) );
+                    vector c = V.householderQr().solve( yk - R );
+                    // vector c = svd.matrixV() * ( singularValues_inv.asDiagonal() * ( svd.matrixU().transpose() * (yk - R) ) );
                     dx = beta * (R - yk) + W * c + beta * V * c;
+
+                    // std::cout << "dx = \n" << W * c + beta * V * c << std::endl;
                 }
 
                 // Update solution x
@@ -347,6 +300,10 @@ namespace fsi
 
             // Fsi evaluation
             fsi->evaluate( xk, output, R );
+
+            // std::cout << "xk = \n" << xk << std::endl;
+
+            // std::cout << "xk = \n" << xk << std::endl;
 
             assert( x0.rows() == output.rows() );
             assert( x0.rows() == R.rows() );

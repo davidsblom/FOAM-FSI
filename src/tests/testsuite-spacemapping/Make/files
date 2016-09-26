@@ -4,6 +4,7 @@ test_asmils.C
 test_manifoldmapping.C
 test_manifoldmappinglinearizedfsisolver.C
 test_manifoldmappingsolver.C
+test_manifoldmappingsolver2.C
 test_mliqnilssolver.C
 test_multilevelaggressivespacemappingsolver.C
 test_multilevelasmils.C
