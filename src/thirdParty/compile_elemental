@@ -12,8 +12,8 @@ cmake \
     -D INSTALL_PYTHON_PACKAGE=OFF \
     -D CMAKE_BUILD_TYPE=Release \
     -D EL_DISABLE_PARMETIS=TRUE \
-    -D CMAKE_CXX_COMPILER=g++ \
-    -D CMAKE_C_COMPILER=gcc \
+    -D CMAKE_CXX_COMPILER=mpicxx \
+    -D CMAKE_C_COMPILER=mpicc \
     -D CMAKE_Fortran_COMPILER=gfortran \
     -D EL_DISABLE_SCALAPACK=TRUE \
     -D MATH_LIBS="-L/usr/lib -lopenblas" \
@@ -25,8 +25,8 @@ cmake \
     -D INSTALL_PYTHON_PACKAGE=OFF \
     -D CMAKE_BUILD_TYPE=Debug \
     -D EL_DISABLE_PARMETIS=TRUE \
-    -D CMAKE_CXX_COMPILER=g++ \
-    -D CMAKE_C_COMPILER=gcc \
+    -D CMAKE_CXX_COMPILER=mpicxx \
+    -D CMAKE_C_COMPILER=mpicc \
     -D CMAKE_Fortran_COMPILER=gfortran \
     -D EL_DISABLE_SCALAPACK=TRUE \
     -D MATH_LIBS="-L/usr/lib -lopenblas" \
