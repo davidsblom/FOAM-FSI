@@ -108,7 +108,10 @@ int SDCLaplacianSolver::getDOF()
     return T.size();
 }
 
-void SDCLaplacianSolver::getSolution( fsi::vector & solution )
+void SDCLaplacianSolver::getSolution(
+    fsi::vector & solution,
+    fsi::vector &
+    )
 {
     for ( int i = 0; i < T.size(); i++ )
         solution( i ) = T[i];
@@ -145,22 +148,6 @@ void SDCLaplacianSolver::initTimeStep()
     assert( !init );
 
     init = true;
-}
-
-bool SDCLaplacianSolver::isRunning()
-{
-    runTime->write();
-
-    Info << "ExecutionTime = " << runTime->elapsedCpuTime() << " s"
-         << "  ClockTime = " << runTime->elapsedClockTime() << " s"
-         << endl << endl;
-
-    return runTime->loop();
-}
-
-void SDCLaplacianSolver::setDeltaT( scalar dt )
-{
-    runTime->setDeltaT( dt );
 }
 
 void SDCLaplacianSolver::setNumberOfImplicitStages( int k )

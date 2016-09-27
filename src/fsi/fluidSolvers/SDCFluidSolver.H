@@ -35,62 +35,56 @@ class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
 
         virtual ~SDCFluidSolver();
 
-        virtual void getAcousticsDensityLocal( matrix & data );
+        virtual void getAcousticsVelocityLocal( matrix & data ) override;
 
-        virtual void getAcousticsVelocityLocal( matrix & data );
+        virtual void getAcousticsPressureLocal( matrix & data ) override;
 
-        virtual void getAcousticsPressureLocal( matrix & data );
+        virtual void getAcousticsDensityLocal( matrix & data ) override;
 
-        virtual void getAcousticsDensityGradientLocal( matrix & data );
+        virtual void getTractionLocal( matrix & traction ) override;
 
-        virtual void getAcousticsVelocityGradientLocal( matrix & data );
+        virtual void getWritePositionsLocalAcoustics( matrix & writePositions ) override;
 
-        virtual void getAcousticsPressureGradientLocal( matrix & data );
+        virtual void initTimeStep() override;
 
-        virtual void setAcousticsData(
-            const matrix & pressure,
-            const matrix & temperature,
-            const matrix & velocity
-            );
+        virtual bool isRunning() override;
 
-        virtual void getTractionLocal( matrix & traction );
+        virtual void resetSolution() override;
 
-        virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
+        virtual void setAcousticsTemperatureGradient( const matrix & temperatureGradient ) override;
 
-        virtual void initTimeStep();
+        virtual void setAcousticsPressureGradient( const matrix & pressureGradient ) override;
 
-        virtual bool isRunning();
+        virtual void setAcousticsVelocityGradient( const matrix & velocityGradient ) override;
 
-        virtual void resetSolution();
-
-        virtual void solve();
+        virtual void solve() override;
 
         virtual void evaluateFunction(
             const int k,
             const fsi::vector & q,
             const scalar t,
             fsi::vector & f
-            );
+            ) override;
 
-        virtual void finalizeTimeStep();
+        virtual void finalizeTimeStep() override;
 
-        virtual int getDOF();
+        virtual int getDOF() override;
 
         virtual void getSolution(
             fsi::vector & solution,
             fsi::vector & f
-            );
+            ) override;
 
         virtual void setSolution(
             const fsi::vector & solution,
             const fsi::vector & f
-            );
+            ) override;
 
-        virtual scalar getEndTime();
+        virtual scalar getEndTime() override;
 
-        virtual scalar getTimeStep();
+        virtual scalar getTimeStep() override;
 
-        virtual scalar getStartTime();
+        virtual scalar getStartTime() override;
 
         virtual void implicitSolve(
             bool corrector,
@@ -102,7 +96,7 @@ class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
             const fsi::vector & rhs,
             fsi::vector & f,
             fsi::vector & result
-            );
+            ) override;
 
         void prepareImplicitSolve(
             bool corrector,
@@ -112,19 +106,19 @@ class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
             const scalar dt,
             const fsi::vector & qold,
             const fsi::vector & rhs
-            );
+            ) override;
 
         virtual void setDeltaT( scalar dt );
 
-        virtual void setNumberOfImplicitStages( int k );
+        virtual void setNumberOfImplicitStages( int k ) override;
 
-        virtual void nextTimeStep();
+        virtual void nextTimeStep() override;
 
         virtual void getVariablesInfo(
             std::deque<int> & dof,
             std::deque<bool> & enabled,
             std::deque<std::string> & names
-            );
+            ) override;
 
     protected:
         void continuityErrs();

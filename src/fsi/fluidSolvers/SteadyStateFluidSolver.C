@@ -295,26 +295,17 @@ void SteadyStateFluidSolver::getAcousticsPressureLocal( matrix & )
     assert( false );
 }
 
-void SteadyStateFluidSolver::getAcousticsDensityGradientLocal( matrix & )
+void SteadyStateFluidSolver::setAcousticsTemperatureGradient( const matrix & )
 {
     assert( false );
 }
 
-void SteadyStateFluidSolver::getAcousticsVelocityGradientLocal( matrix & )
+void SteadyStateFluidSolver::setAcousticsPressureGradient( const matrix & )
 {
     assert( false );
 }
 
-void SteadyStateFluidSolver::getAcousticsPressureGradientLocal( matrix & )
-{
-    assert( false );
-}
-
-void SteadyStateFluidSolver::setAcousticsData(
-    const matrix &,
-    const matrix &,
-    const matrix &
-    )
+void SteadyStateFluidSolver::setAcousticsVelocityGradient( const matrix & )
 {
     assert( false );
 }

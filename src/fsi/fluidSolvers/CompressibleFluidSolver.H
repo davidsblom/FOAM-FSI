@@ -32,37 +32,31 @@ class CompressibleFluidSolver : public foamFluidSolver
 
         virtual ~CompressibleFluidSolver();
 
-        virtual void getAcousticsDensityLocal( matrix & data );
+        void getAcousticsDensityLocal( matrix & data ) override;
 
-        virtual void getAcousticsVelocityLocal( matrix & data );
+        void getAcousticsVelocityLocal( matrix & data )  override;
 
-        virtual void getAcousticsPressureLocal( matrix & data );
+        void getAcousticsPressureLocal( matrix & data ) override;
 
-        virtual void getAcousticsDensityGradientLocal( matrix & data );
+        void getTractionLocal( matrix & traction ) override;
 
-        virtual void getAcousticsVelocityGradientLocal( matrix & data );
+        void getWritePositionsLocalAcoustics( matrix & writePositions ) override;
 
-        virtual void getAcousticsPressureGradientLocal( matrix & data );
+        void initTimeStep() override;
 
-        virtual void getTractionLocal( matrix & traction );
+        bool isRunning() override;
 
-        virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
+        void resetSolution() override;
 
-        virtual void initTimeStep();
+        void setAcousticsTemperatureGradient( const matrix & temperatureGradient ) override;
 
-        virtual bool isRunning();
+        void setAcousticsPressureGradient( const matrix & pressureGradient ) override;
 
-        virtual void resetSolution();
+        void setAcousticsVelocityGradient( const matrix & velocityGradient ) override;
 
-        virtual void setAcousticsData(
-            const matrix & pressure,
-            const matrix & temperature,
-            const matrix & velocity
-            );
+        void solve() override;
 
-        virtual void solve();
-
-        virtual void finalizeTimeStep();
+        void finalizeTimeStep() override;
 
     protected:
         void continuityErrs();

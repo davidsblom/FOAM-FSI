@@ -28,26 +28,26 @@ class SDCDynamicMeshFluidSolver : public SDCFluidSolver
 
         virtual ~SDCDynamicMeshFluidSolver();
 
-        virtual void resetSolution();
+        virtual void resetSolution() override;
 
         virtual void evaluateFunction(
             const int k,
             const fsi::vector & q,
             const scalar t,
             fsi::vector & f
-            );
+            ) override;
 
-        virtual int getDOF();
+        virtual int getDOF() override;
 
         virtual void getSolution(
             fsi::vector & solution,
             fsi::vector & f
-            );
+            ) override;
 
         virtual void setSolution(
             const fsi::vector & solution,
             const fsi::vector & f
-            );
+            ) override;
 
         virtual void implicitSolve(
             bool corrector,
@@ -59,7 +59,7 @@ class SDCDynamicMeshFluidSolver : public SDCFluidSolver
             const fsi::vector & rhs,
             fsi::vector & f,
             fsi::vector & result
-            );
+            ) override;
 
         virtual void prepareImplicitSolve(
             bool corrector,
@@ -69,23 +69,23 @@ class SDCDynamicMeshFluidSolver : public SDCFluidSolver
             const scalar dt,
             const fsi::vector & qold,
             const fsi::vector & rhs
-            );
+            ) override;
 
-        virtual void setNumberOfImplicitStages( int k );
+        virtual void setNumberOfImplicitStages( int k ) override;
 
-        virtual void nextTimeStep();
+        virtual void nextTimeStep() override;
 
         virtual void getVariablesInfo(
             std::deque<int> & dof,
             std::deque<bool> & enabled,
             std::deque<std::string> & names
-            );
+            ) override;
 
-        virtual bool isConverged();
+        virtual bool isConverged() override;
 
-        virtual void solve();
+        virtual void solve() override;
 
-        virtual void getTractionLocal( matrix & traction );
+        virtual void getTractionLocal( matrix & traction ) override;
 
     private:
         void createFields();

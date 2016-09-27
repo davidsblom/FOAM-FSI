@@ -9,7 +9,7 @@ scalar ic_pressure_gauss ( scalar x, scalar y, scalar z)
     scalar pressure = 100000;
     //scalar d = ( x - 1 * x - 1 ) + y * y + z * z;
     scalar d = (x+1)*(x+1) + y * y + z * z;
-    return pressure + 100 * std::exp ( -d / 0.2 * std::log( 2 ) );
+    return pressure + 50 * std::exp ( -d / 0.1 * std::log( 2 ) );
 }
 
 int main(

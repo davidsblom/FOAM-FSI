@@ -25,19 +25,18 @@ Class
     Foam::acousticsTemperatureFvPatchScalarField
 
 Description
-    Foam::acousticsTemperatureFvPatchScalarField
+    Total temperature boundary condition.  The snGrad is set to zero to stop
+    back-diffusion
 
 SourceFiles
     acousticsTemperatureFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef acousticsTemperatureFvPatchScalarFields_H
-#define acousticsTemperatureFvPatchScalarFields_H
+#ifndef acousticsTemperatureFvPatchScalarField_H
+#define acousticsTemperatureFvPatchScalarField_H
 
-#include "fvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
-#include "Switch.H"
+#include "fixedValueFvPatchFields.H"
 #include "scalarIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -51,10 +50,8 @@ namespace Foam
 
 class acousticsTemperatureFvPatchScalarField
 :
-    public fixedGradientFvPatchScalarField
+    public fixedValueFvPatchScalarField
 {
-    // Private data
-
 
 public:
 
@@ -79,8 +76,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given acousticsTemperatureFvPatchScalarField onto
-        //  a new patch
+        //- Construct by mapping given acousticsTemperatureFvPatchScalarField
+        //  onto a new patch
         acousticsTemperatureFvPatchScalarField
         (
             const acousticsTemperatureFvPatchScalarField&,
@@ -126,8 +123,42 @@ public:
 
     // Member functions
 
-        //- Update the coefficients associated with the patch field
-        virtual void updateCoeffs();
+        // Access
+
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchScalarField&,
+                const labelList&
+            );
+
+
+        // Evaluation functions
+
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
+
+            //- Return patch-normal gradient: set to zero
+            virtual tmp<scalarField> snGrad() const;
+
+            //- Return the matrix diagonal coefficients corresponding to the
+            //  evaluation of the gradient of this patchField
+            // Removed gradient contribution
+            virtual tmp<scalarField> gradientInternalCoeffs() const;
+
+            //- Return the matrix source coefficients corresponding to the
+            //  evaluation of the gradient of this patchField
+            virtual tmp<scalarField> gradientBoundaryCoeffs() const;
+
 
         //- Write
         virtual void write(Ostream&) const;

@@ -19,9 +19,9 @@
 printRuntimeInfo = false
 outputname= 'mesh'
 comment = 'mesh'
-minlevel = 4
+minlevel = 6
 folder = 'mesh/'
-level = 4
+level = minlevel
 --debug = {debugMode=true, debugFiles=true, debugMesh='debug/'}
 bounding_cube = { origin = {-4.0, -4.0, -4.0}, length = 8.0 }
 eps=bounding_cube.length/2^(level+1)

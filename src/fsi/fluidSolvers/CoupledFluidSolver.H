@@ -31,35 +31,29 @@ class CoupledFluidSolver : public foamFluidSolver
 
         virtual ~CoupledFluidSolver();
 
-        virtual void getAcousticsDensityLocal( matrix & data );
+        virtual void getAcousticsVelocityLocal( matrix & data ) override;
 
-        virtual void getAcousticsVelocityLocal( matrix & data );
+        virtual void getAcousticsPressureLocal( matrix & data ) override;
 
-        virtual void getAcousticsPressureLocal( matrix & data );
+        virtual void getAcousticsDensityLocal( matrix & data ) override;
 
-        virtual void getAcousticsDensityGradientLocal( matrix & data );
+        virtual void getTractionLocal( matrix & traction ) override;
 
-        virtual void getAcousticsVelocityGradientLocal( matrix & data );
+        virtual void getWritePositionsLocalAcoustics( matrix & writePositions ) override;
 
-        virtual void getAcousticsPressureGradientLocal( matrix & data );
+        virtual void initTimeStep() override;
 
-        virtual void setAcousticsData(
-            const matrix & pressure,
-            const matrix & temperature,
-            const matrix & velocity
-            );
+        virtual bool isRunning() override;
 
-        virtual void getTractionLocal( matrix & traction );
+        virtual void resetSolution() override;
 
-        virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
+        virtual void solve() override;
 
-        virtual void initTimeStep();
+        virtual void setAcousticsTemperatureGradient( const matrix & temperatureGradient ) override;
 
-        virtual bool isRunning();
+        virtual void setAcousticsPressureGradient( const matrix & pressureGradient ) override;
 
-        virtual void resetSolution();
-
-        virtual void solve();
+        virtual void setAcousticsVelocityGradient( const matrix & velocityGradient ) override;
 
     protected:
         void checkTotalVolume();

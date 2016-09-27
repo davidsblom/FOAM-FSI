@@ -32,13 +32,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef acousticsVelocityFvPatchVectorFields_H
-#define acousticsVelocityFvPatchVectorFields_H
+#ifndef acousticsVelocityFvPatchVectorField_H
+#define acousticsVelocityFvPatchVectorField_H
 
 #include "fvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
-#include "Switch.H"
-#include "scalarIOList.H"
+#include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,15 +46,13 @@ namespace Foam
     typedef IOList<vector> vectorIOList;
 
 /*---------------------------------------------------------------------------*\
-                   Class acousticsVelocityFvPatch Declaration
+                 Class acousticsVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class acousticsVelocityFvPatchVectorField
 :
-    public fixedGradientFvPatchField<vector>
+    public fixedValueFvPatchVectorField
 {
-    // Private data
-
 
 public:
 
@@ -81,8 +77,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given acousticsVelocityFvPatchVectorField onto
-        //  a new patch
+        //- Construct by mapping given acousticsVelocityFvPatchVectorField
+        //  onto a new patch
         acousticsVelocityFvPatchVectorField
         (
             const acousticsVelocityFvPatchVectorField&,
@@ -124,6 +120,7 @@ public:
                 new acousticsVelocityFvPatchVectorField(*this, iF)
             );
         }
+
 
 
     // Member functions

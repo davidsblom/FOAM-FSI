@@ -24,10 +24,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "acousticsTemperatureFvPatchScalarField.H"
+#include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -37,24 +37,8 @@ Foam::acousticsTemperatureFvPatchScalarField::acousticsTemperatureFvPatchScalarF
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedGradientFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF)
 {}
-
-
-Foam::acousticsTemperatureFvPatchScalarField::acousticsTemperatureFvPatchScalarField
-(
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    const dictionary&
-)
-:
-    fixedGradientFvPatchScalarField(p, iF)
-{
-
-        fvPatchField<scalar>::operator=(patchInternalField());
-        gradient() = 0.0;
-
-}
 
 
 Foam::acousticsTemperatureFvPatchScalarField::acousticsTemperatureFvPatchScalarField
@@ -65,30 +49,65 @@ Foam::acousticsTemperatureFvPatchScalarField::acousticsTemperatureFvPatchScalarF
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedGradientFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
 {}
 
 
 Foam::acousticsTemperatureFvPatchScalarField::acousticsTemperatureFvPatchScalarField
 (
-    const acousticsTemperatureFvPatchScalarField& ptf
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const dictionary& dict
 )
 :
-    fixedGradientFvPatchScalarField(ptf)
+    fixedValueFvPatchScalarField(p, iF)
+{
+    fvPatchScalarField::operator=
+    (
+        scalarField("value", dict, p.size())
+    );
+}
+
+
+Foam::acousticsTemperatureFvPatchScalarField::acousticsTemperatureFvPatchScalarField
+(
+    const acousticsTemperatureFvPatchScalarField& tppsf
+)
+:
+    fixedValueFvPatchScalarField(tppsf)
 {}
 
 
 Foam::acousticsTemperatureFvPatchScalarField::acousticsTemperatureFvPatchScalarField
 (
-    const acousticsTemperatureFvPatchScalarField& ptf,
+    const acousticsTemperatureFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedGradientFvPatchScalarField(ptf, iF)
+    fixedValueFvPatchScalarField(tppsf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::acousticsTemperatureFvPatchScalarField::autoMap
+(
+    const fvPatchFieldMapper& m
+)
+{
+    fixedValueFvPatchScalarField::autoMap(m);
+}
+
+
+void Foam::acousticsTemperatureFvPatchScalarField::rmap
+(
+    const fvPatchScalarField& ptf,
+    const labelList& addr
+)
+{
+    fixedValueFvPatchScalarField::rmap(ptf, addr);
+}
+
 
 void Foam::acousticsTemperatureFvPatchScalarField::updateCoeffs()
 {
@@ -99,17 +118,52 @@ void Foam::acousticsTemperatureFvPatchScalarField::updateCoeffs()
 
     const scalarIOList& temperature = db().time().lookupObject<scalarIOList>("temperatureAcoustics");
 
-    gradient() = temperature;
+    scalarField T ( patch().Cf().size(), scalar(0) );
+    T = temperature;
 
-    fixedGradientFvPatchScalarField::updateCoeffs();
+    operator==
+    (
+        this->patchInternalField() + T/this->patch().deltaCoeffs()
+    );
+
+    fixedValueFvPatchScalarField::updateCoeffs();
+}
+
+
+Foam::tmp<Foam::scalarField>
+Foam::acousticsTemperatureFvPatchScalarField::snGrad() const
+{
+    return tmp<scalarField>
+    (
+        new scalarField(this->size(), 0.0)
+    );
+}
+
+
+Foam::tmp<Foam::scalarField>
+Foam::acousticsTemperatureFvPatchScalarField::gradientInternalCoeffs() const
+{
+    return tmp<scalarField>
+    (
+        new scalarField(this->size(), 0.0)
+    );
+}
+
+
+Foam::tmp<Foam::scalarField>
+Foam::acousticsTemperatureFvPatchScalarField::gradientBoundaryCoeffs() const
+{
+    return tmp<scalarField>
+    (
+        new scalarField(this->size(), 0.0)
+    );
 }
 
 
 void Foam::acousticsTemperatureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-
-    gradient().writeEntry("gradient", os);
+    writeEntry("value", os);
 }
 
 

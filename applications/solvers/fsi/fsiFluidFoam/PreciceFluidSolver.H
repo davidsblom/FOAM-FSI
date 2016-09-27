@@ -30,7 +30,15 @@ public:
 
   void readDataAcoustics();
 
+  void readDataAcousticsTemperatureGradient();
+
+  void readDataAcousticsPressureGradient();
+
+  void readDataAcousticsVelocityGradient();
+
   void setReadPositions();
+
+  void setReadPositionsAcoustics();
 
   void setWritePositions();
 
@@ -46,18 +54,15 @@ public:
 
   void writeAcousticsVelocity();
 
-  void writeAcousticsDensityGradient();
-
-  void writeAcousticsPressureGradient();
-
-  void writeAcousticsVelocityGradient();
-
   shared_ptr<foamFluidSolver> solver;
   shared_ptr<precice::SolverInterface> precice;
 
   Eigen::VectorXi idsReadPositions;
   Eigen::VectorXi idsWritePositions;
   Eigen::VectorXi idsWritePositionsAcoustics;
+
+  const std::string FLUID_ACOUSTICS_WRITE;
+  const std::string FLUID_ACOUSTICS_READ;
 };
 
 #endif

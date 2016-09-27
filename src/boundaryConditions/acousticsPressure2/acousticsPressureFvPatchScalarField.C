@@ -24,10 +24,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "acousticsPressureFvPatchScalarField.H"
+#include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -37,24 +37,8 @@ Foam::acousticsPressureFvPatchScalarField::acousticsPressureFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedGradientFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF)
 {}
-
-
-Foam::acousticsPressureFvPatchScalarField::acousticsPressureFvPatchScalarField
-(
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    const dictionary&
-)
-:
-    fixedGradientFvPatchScalarField(p, iF)
-{
-
-        fvPatchField<scalar>::operator=(patchInternalField());
-        gradient() = 0.0;
-
-}
 
 
 Foam::acousticsPressureFvPatchScalarField::acousticsPressureFvPatchScalarField
@@ -65,30 +49,65 @@ Foam::acousticsPressureFvPatchScalarField::acousticsPressureFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedGradientFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
 {}
 
 
 Foam::acousticsPressureFvPatchScalarField::acousticsPressureFvPatchScalarField
 (
-    const acousticsPressureFvPatchScalarField& ptf
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const dictionary& dict
 )
 :
-    fixedGradientFvPatchScalarField(ptf)
+    fixedValueFvPatchScalarField(p, iF)
+{
+    fvPatchScalarField::operator=
+    (
+        scalarField("value", dict, p.size())
+    );
+}
+
+
+Foam::acousticsPressureFvPatchScalarField::acousticsPressureFvPatchScalarField
+(
+    const acousticsPressureFvPatchScalarField& tppsf
+)
+:
+    fixedValueFvPatchScalarField(tppsf)
 {}
 
 
 Foam::acousticsPressureFvPatchScalarField::acousticsPressureFvPatchScalarField
 (
-    const acousticsPressureFvPatchScalarField& ptf,
+    const acousticsPressureFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedGradientFvPatchScalarField(ptf, iF)
+    fixedValueFvPatchScalarField(tppsf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::acousticsPressureFvPatchScalarField::autoMap
+(
+    const fvPatchFieldMapper& m
+)
+{
+    fixedValueFvPatchScalarField::autoMap(m);
+}
+
+
+void Foam::acousticsPressureFvPatchScalarField::rmap
+(
+    const fvPatchScalarField& ptf,
+    const labelList& addr
+)
+{
+    fixedValueFvPatchScalarField::rmap(ptf, addr);
+}
+
 
 void Foam::acousticsPressureFvPatchScalarField::updateCoeffs()
 {
@@ -99,17 +118,52 @@ void Foam::acousticsPressureFvPatchScalarField::updateCoeffs()
 
     const scalarIOList& pressure = db().time().lookupObject<scalarIOList>("pressureAcoustics");
 
-    gradient() = pressure;
+    scalarField p ( patch().Cf().size(), scalar(0) );
+    p = pressure;
 
-    fixedGradientFvPatchScalarField::updateCoeffs();
+    operator==
+    (
+        this->patchInternalField() + p/this->patch().deltaCoeffs()
+    );
+
+    fixedValueFvPatchScalarField::updateCoeffs();
+}
+
+
+Foam::tmp<Foam::scalarField>
+Foam::acousticsPressureFvPatchScalarField::snGrad() const
+{
+    return tmp<scalarField>
+    (
+        new scalarField(this->size(), 0.0)
+    );
+}
+
+
+Foam::tmp<Foam::scalarField>
+Foam::acousticsPressureFvPatchScalarField::gradientInternalCoeffs() const
+{
+    return tmp<scalarField>
+    (
+        new scalarField(this->size(), 0.0)
+    );
+}
+
+
+Foam::tmp<Foam::scalarField>
+Foam::acousticsPressureFvPatchScalarField::gradientBoundaryCoeffs() const
+{
+    return tmp<scalarField>
+    (
+        new scalarField(this->size(), 0.0)
+    );
 }
 
 
 void Foam::acousticsPressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-
-    gradient().writeEntry("gradient", os);
+    writeEntry("value", os);
 }
 
 

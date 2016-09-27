@@ -178,26 +178,17 @@ void CoupledFluidSolver::getAcousticsPressureLocal( matrix & )
     assert( false );
 }
 
-void CoupledFluidSolver::getAcousticsPressureGradientLocal( matrix & )
+void CoupledFluidSolver::setAcousticsTemperatureGradient( const matrix & )
 {
     assert( false );
 }
 
-void CoupledFluidSolver::getAcousticsDensityGradientLocal( matrix & )
+void CoupledFluidSolver::setAcousticsPressureGradient( const matrix & )
 {
     assert( false );
 }
 
-void CoupledFluidSolver::getAcousticsVelocityGradientLocal( matrix & )
-{
-    assert( false );
-}
-
-void CoupledFluidSolver::setAcousticsData(
-    const matrix &,
-    const matrix &,
-    const matrix &
-    )
+void CoupledFluidSolver::setAcousticsVelocityGradient( const matrix & )
 {
     assert( false );
 }
