@@ -4,7 +4,7 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $DIR
 
-set -euox pipefail
+set -ex
 
 pwdstring=`pwd`
 prefLocation=$WM_PROJECT_DIR/etc/prefs.sh

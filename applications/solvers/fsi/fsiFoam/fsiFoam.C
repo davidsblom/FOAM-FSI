@@ -252,7 +252,7 @@ int main(
         std::string algorithm = config["multi-level-acceleration"]["algorithm"].as<std::string>();
 
         assert( !config["coupling-scheme-implicit"] );
-        assert( solidSolver == "nonlinear-elastic-solver" );
+        assert( solidSolver == "nonlinear-elastic-solver" || solidSolver == "steady-state-nonlinear-elastic-solver" );
         assert( algorithm == "manifold-mapping" || algorithm == "output-space-mapping" || algorithm == "ML-IQN-ILS" || algorithm == "aggressive-space-mapping" || algorithm == "ASM-ILS" );
 
         int nbLevels = config["multi-level-acceleration"]["levels"].size();
@@ -334,6 +334,9 @@ int main(
         if ( fluidSolver == "pimple-solver" )
             fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
+        if ( fluidSolver == "steady-state-pimple-solver" )
+            fluid = std::shared_ptr<foamFluidSolver> ( new SteadyStateFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
+
         if ( fluidSolver == "compressible-solver" )
             fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( Foam::fvMesh::defaultRegion, args, runTime ) );
 
@@ -344,6 +347,15 @@ int main(
             std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false ) );
 
             solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid-level-" + std::to_string( level ), args, runTime, interpolator ) );
+        }
+
+        if ( solidSolver == "steady-state-nonlinear-elastic-solver" )
+        {
+            std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu, polynomialTerm );
+
+            std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false ) );
+
+            solid = std::shared_ptr<foamSolidSolver> ( new SteadyStateSolidSolver( "solid-level-" + std::to_string( level ), args, runTime, interpolator ) );
         }
 
         // Convergence measures
@@ -424,6 +436,9 @@ int main(
             if ( fluidSolver == "pimple-solver" )
                 fluid = std::shared_ptr<foamFluidSolver> ( new FluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
 
+            if ( fluidSolver == "steady-state-pimple-solver" )
+                fluid = std::shared_ptr<foamFluidSolver> ( new SteadyStateFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
+
             if ( fluidSolver == "compressible-solver" )
                 fluid = std::shared_ptr<foamFluidSolver> ( new CompressibleFluidSolver( "fluid-level-" + std::to_string( level ), args, runTime ) );
 
@@ -434,6 +449,15 @@ int main(
                 std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false ) );
 
                 solid = std::shared_ptr<foamSolidSolver> ( new SolidSolver( "solid-level-" + std::to_string( level ), args, runTime, interpolator ) );
+            }
+
+            if ( solidSolver == "steady-state-nonlinear-elastic-solver" )
+            {
+                std::shared_ptr<rbf::RBFInterpolation> rbfInterpolator = createRBFInterpolator( interpolationFunction, radius, cpu, polynomialTerm );
+
+                std::shared_ptr<rbf::RBFCoarsening> interpolator( new rbf::RBFCoarsening( rbfInterpolator, coarsening, livePointSelection, false, coarseningTol, tolLivePointSelection, coarseningMinPoints, coarseningMaxPoints, false ) );
+
+                solid = std::shared_ptr<foamSolidSolver> ( new SteadyStateSolidSolver( "solid-level-" + std::to_string( level ), args, runTime, interpolator ) );
             }
 
             // Convergence measures

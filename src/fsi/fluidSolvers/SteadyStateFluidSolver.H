@@ -92,6 +92,7 @@ class SteadyStateFluidSolver : public foamFluidSolver
         int maxIter;
         scalar absoluteTolerance;
         scalar relativeTolerance;
+        scalar pisoTolerance;
 
         // Continuity errors
         scalar sumLocalContErr;
