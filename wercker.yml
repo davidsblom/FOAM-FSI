@@ -48,9 +48,7 @@ build:
         - script:
             name: elemental
             code: |
-                apt-get clean
-                apt-get update
-                apt-get install -y libgfortran-4.9-dev
+                export GFORTRAN_LIB=/usr/lib/gcc/x86_64-linux-gnu/6
                 cd src/thirdParty
                 ./compile_elemental
         - script:
