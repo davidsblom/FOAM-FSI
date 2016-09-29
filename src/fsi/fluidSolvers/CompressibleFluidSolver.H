@@ -14,6 +14,12 @@
 #include "basicPsiThermo.H"
 #include "compressible/RAS/lnInclude/RASModel.H"
 #include "fvBlockMatrix.H"
+#include "scalarIOList.H"
+
+namespace Foam
+{
+    typedef IOList<vector> vectorIOList;
+}
 
 class CompressibleFluidSolver : public foamFluidSolver
 {
@@ -26,25 +32,45 @@ class CompressibleFluidSolver : public foamFluidSolver
 
         virtual ~CompressibleFluidSolver();
 
-        virtual void getAcousticsDensityLocal( matrix & data );
+        void getAcousticsDensityLocal( matrix & data ) override;
 
-        virtual void getAcousticsVelocityLocal( matrix & data );
+        void getAcousticsTemperatureLocal( matrix & data ) override;
 
-        virtual void getAcousticsPressureLocal( matrix & data );
+        void getAcousticsVelocityLocal( matrix & data )  override;
 
-        virtual void getTractionLocal( matrix & traction );
+        void getAcousticsPressureLocal( matrix & data ) override;
 
-        virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
+        void getAcousticsTemperatureGradientLocal( matrix & data ) override;
 
-        virtual void initTimeStep();
+        void getAcousticsVelocityGradientLocal( matrix & data )  override;
 
-        virtual bool isRunning();
+        void getAcousticsPressureGradientLocal( matrix & data ) override;
 
-        virtual void resetSolution();
+        void getTractionLocal( matrix & traction ) override;
 
-        virtual void solve();
+        void getWritePositionsLocalAcoustics( matrix & writePositions ) override;
 
-        virtual void finalizeTimeStep();
+        void initTimeStep() override;
+
+        bool isRunning() override;
+
+        void resetSolution() override;
+
+        void setAcousticsTemperatureGradient( const matrix & temperatureGradient ) override;
+
+        void setAcousticsPressureGradient( const matrix & pressureGradient ) override;
+
+        void setAcousticsVelocityGradient( const matrix & velocityGradient ) override;
+
+        void setAcousticsTemperature( const matrix & temperature ) override;
+
+        void setAcousticsPressure( const matrix & pressure ) override;
+
+        void setAcousticsVelocity( const matrix & velocity ) override;
+
+        void solve() override;
+
+        void finalizeTimeStep() override;
 
     protected:
         void continuityErrs();
@@ -77,6 +103,10 @@ class CompressibleFluidSolver : public foamFluidSolver
 
         word acousticsPatchName;
         label acousticsPatchID;
+
+        scalarIOList pressureAcousticsBC;
+        scalarIOList temperatureAcousticsBC;
+        vectorIOList velocityAcousticsBC;
 };
 
 #endif

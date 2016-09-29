@@ -10,6 +10,11 @@
 #include "CompressibleFluidSolver.H"
 #include <chrono>
 
+namespace Foam
+{
+    defineTemplateTypeNameAndDebugWithName( vectorIOList, "vectorList", 0 );
+}
+
 CompressibleFluidSolver::CompressibleFluidSolver(
     const string & name,
     shared_ptr<argList> args,
@@ -115,8 +120,27 @@ CompressibleFluidSolver::CompressibleFluidSolver(
     convergenceTolerance( readScalar( mesh.solutionDict().subDict( "blockSolver" ).lookup( "convergenceTolerance" ) ) ),
     nOuterCorr( readLabel( mesh.solutionDict().subDict( "blockSolver" ).lookup( "nOuterCorrectors" ) ) ),
     acousticsPatchName( couplingProperties.lookup( "acousticsPatch" ) ),
-    acousticsPatchID( mesh.boundaryMesh().findPatchID( acousticsPatchName ) )
+    acousticsPatchID( mesh.boundaryMesh().findPatchID( acousticsPatchName ) ),
+    pressureAcousticsBC( IOobject( "pressureAcoustics", runTime->timeName(), *runTime ), mesh.boundaryMesh()[acousticsPatchID].size() ),
+    temperatureAcousticsBC( IOobject( "temperatureAcoustics", runTime->timeName(), *runTime ), mesh.boundaryMesh()[acousticsPatchID].size() ),
+    velocityAcousticsBC( IOobject( "velocityAcoustics", runTime->timeName(), *runTime ), mesh.boundaryMesh()[acousticsPatchID].size() )
 {
+    forAll( pressureAcousticsBC, i )
+    {
+        pressureAcousticsBC[i] = 0;
+    }
+
+    forAll( temperatureAcousticsBC, i )
+    {
+        temperatureAcousticsBC[i] = 0;
+    }
+
+    forAll( temperatureAcousticsBC, i )
+    {
+        for ( int j = 0; j < 3; j++ )
+            velocityAcousticsBC[i][j] = 0;
+    }
+
     assert( nOuterCorr > 0 );
     assert( convergenceTolerance < 1 );
     assert( convergenceTolerance > 0 );
@@ -172,6 +196,14 @@ void CompressibleFluidSolver::getAcousticsDensityLocal( matrix & data )
         data( i, 0 ) = rho.boundaryField()[acousticsPatchID][i];
 }
 
+void CompressibleFluidSolver::getAcousticsTemperatureLocal( matrix & data )
+{
+    data.resize( T.boundaryField()[acousticsPatchID].size(), 1 );
+
+    for ( int i = 0; i < data.rows(); i++ )
+        data( i, 0 ) = T.boundaryField()[acousticsPatchID][i];
+}
+
 void CompressibleFluidSolver::getAcousticsVelocityLocal( matrix & data )
 {
     data.resize( U.boundaryField()[acousticsPatchID].size(), mesh.nGeometricD() );
@@ -179,6 +211,78 @@ void CompressibleFluidSolver::getAcousticsVelocityLocal( matrix & data )
     for ( int i = 0; i < data.rows(); i++ )
         for ( int j = 0; j < data.cols(); j++ )
             data( i, j ) = U.boundaryField()[acousticsPatchID][i][j];
+}
+
+void CompressibleFluidSolver::getAcousticsTemperatureGradientLocal( matrix & data )
+{
+    scalarField gradient = T.boundaryField()[acousticsPatchID].snGrad();
+
+    data.resize( gradient.size(), 1 );
+
+    for ( int i = 0; i < data.rows(); i++ )
+        data( i, 0 ) = gradient[i];
+}
+
+void CompressibleFluidSolver::getAcousticsPressureGradientLocal( matrix & data )
+{
+    scalarField gradient = p.boundaryField()[acousticsPatchID].snGrad();
+
+    data.resize( gradient.size(), 1 );
+
+    for ( int i = 0; i < data.rows(); i++ )
+        data( i, 0 ) = gradient[i];
+}
+
+void CompressibleFluidSolver::getAcousticsVelocityGradientLocal( matrix & data )
+{
+    vectorField gradient = U.boundaryField()[acousticsPatchID].snGrad();
+
+    data.resize( gradient.size(), mesh.nGeometricD() );
+
+    for ( int i = 0; i < data.rows(); i++ )
+        for ( int j = 0; j < data.cols(); j++ )
+            data( i, j ) = gradient[i][j];
+}
+
+void CompressibleFluidSolver::setAcousticsTemperatureGradient( const matrix & temperatureGradient )
+{
+    assert( temperatureGradient.rows() == temperatureAcousticsBC.size() );
+
+    for ( int i = 0; i < temperatureGradient.rows(); i++ )
+        temperatureAcousticsBC[i] = temperatureGradient( i, 0 );
+}
+
+void CompressibleFluidSolver::setAcousticsPressureGradient( const matrix & pressureGradient )
+{
+    assert( pressureGradient.rows() == pressureAcousticsBC.size() );
+
+    for ( int i = 0; i < pressureGradient.rows(); i++ )
+        pressureAcousticsBC[i] = pressureGradient( i, 0 );
+}
+
+void CompressibleFluidSolver::setAcousticsVelocityGradient( const matrix & velocityGradient )
+{
+    assert( velocityGradient.rows() == velocityAcousticsBC.size() );
+    assert( velocityGradient.cols() == mesh.nGeometricD() );
+
+    for ( int i = 0; i < velocityGradient.rows(); i++ )
+        for ( int j = 0; j < velocityGradient.cols(); j++ )
+            velocityAcousticsBC[i][j] = velocityGradient( i, j );
+}
+
+void CompressibleFluidSolver::setAcousticsTemperature( const matrix & temperature )
+{
+    setAcousticsTemperatureGradient( temperature );
+}
+
+void CompressibleFluidSolver::setAcousticsPressure( const matrix & pressure )
+{
+    setAcousticsPressureGradient( pressure );
+}
+
+void CompressibleFluidSolver::setAcousticsVelocity( const matrix & velocity )
+{
+    setAcousticsVelocityGradient( velocity );
 }
 
 void CompressibleFluidSolver::getTractionLocal( matrix & traction )
@@ -255,25 +359,13 @@ bool CompressibleFluidSolver::isRunning()
 }
 
 void CompressibleFluidSolver::resetSolution()
-{
-    // U == U.oldTime();
-    // p == p.oldTime();
-    // phi == phi.oldTime();
-    // h == h.oldTime();
-    // rho == rho.oldTime();
-}
+{}
 
 void CompressibleFluidSolver::solve()
 {
     Info << "Solve fluid domain" << endl;
 
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
     mesh.update();
-    end = std::chrono::system_clock::now();
-
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    Info << "timing mesh deformation = " << elapsed_seconds.count() << "s" << endl;
 
     int oCorr;
 

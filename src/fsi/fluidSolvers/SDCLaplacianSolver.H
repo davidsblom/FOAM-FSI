@@ -33,32 +33,31 @@ class SDCLaplacianSolver : public sdc::SDCSolver
             const fsi::vector & q,
             const scalar t,
             fsi::vector & f
-            );
+            ) override;
 
-        virtual void finalizeTimeStep();
+        virtual void finalizeTimeStep() override;
 
-        virtual int getDOF();
+        virtual int getDOF() override;
 
-        virtual void getSolution( fsi::vector & solution );
+        virtual void getSolution(
+            fsi::vector & solution,
+            fsi::vector & f
+            ) override;
 
         virtual void setSolution(
             const fsi::vector & solution,
             const fsi::vector & f
-            );
+            ) override;
 
-        virtual scalar getEndTime();
+        virtual scalar getEndTime() override;
 
-        virtual scalar getTimeStep();
+        virtual scalar getTimeStep() override;
 
-        virtual void nextTimeStep();
+        virtual void nextTimeStep() override;
 
-        virtual void initTimeStep();
+        virtual void initTimeStep() override;
 
-        virtual bool isRunning();
-
-        virtual void setDeltaT( scalar dt );
-
-        virtual void setNumberOfImplicitStages( int k );
+        virtual void setNumberOfImplicitStages( int k ) override;
 
         virtual void implicitSolve(
             bool corrector,
@@ -70,7 +69,7 @@ class SDCLaplacianSolver : public sdc::SDCSolver
             const fsi::vector & rhs,
             fsi::vector & f,
             fsi::vector & result
-            );
+            ) override;
 
     private:
         bool init;

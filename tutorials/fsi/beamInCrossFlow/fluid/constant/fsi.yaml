@@ -1,3 +1,4 @@
+participant: Fluid_Solver
 time-integration-scheme: bdf
 adaptive-time-stepping:
   enabled: false

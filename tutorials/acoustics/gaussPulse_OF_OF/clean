@@ -1,0 +1,23 @@
+#!/bin/bash
+
+killall -q -9 fsiFluidFoam
+
+set -e
+
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+
+cd fluid_A
+rm -rf 0 precice_output
+cp -r 0.org 0
+rm -f *.foam iterResidualFile constant/polyMesh/boundary .*.address *.txt *.log
+cleanCase
+rm -rf vtk*
+cd -
+
+cd fluid_B
+rm -rf 0 precice_output
+cp -r 0.org 0
+rm -f *.foam iterResidualFile constant/polyMesh/boundary .*.address *.txt *.log
+cleanCase
+rm -rf vtk*
+cd -

@@ -1,0 +1,70 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.3.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//thermoType
+//{
+//    type            hePsiThermo;
+//    mixture         pureMixture;
+//    transport       const;
+//    thermo          hConst;
+//    equationOfState perfectGas;
+//    specie          specie;
+//    energy          sensibleEnthalpy;
+//}
+
+//mixture
+//{
+//    specie
+//    {
+//        nMoles      1;
+//        molWeight   8314.4621;
+//    }
+//    thermodynamics
+//    {
+//        Cp          3.5;
+//        Hf          0;
+//    }
+//    transport
+//    {
+//        mu          1.0e-3; // mu = rho * nu. rho = 1.0
+//        Pr          1;
+//    }
+//}
+
+//thermoType      ePsiThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>;
+
+thermoType hPsiThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>;
+
+// cp = 1036.0
+// gamma = 1.4
+// p = 100000.
+// rho = 1.225
+// cv = cp / gamma = 740.0
+// Rspecific = cp - cv = 296.0, specific gas constant
+// T = p / ( rho * Rspecific ) = 275.78599007170436
+// R = 8314.51 N m / kmol K
+// M = R / Rspecific = 28.089560810810813
+// mu = 0.
+// Pr = 1.
+
+// name, nMoles, mol weight, CP, Hf, mu, Pr;
+mixture         gas 1.0 28.089560810810813 1036.0 0 0 1.0;
+
+//mixture         normalisedGas 1 11640.3 2.5 0 0 1;
+
+
+// ************************************************************************* //

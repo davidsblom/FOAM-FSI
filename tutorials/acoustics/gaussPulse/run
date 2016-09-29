@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -e
+
+./clean
+
+cd initialSolutionGaussPulse
+wmake
+cd -
+
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+cp fluid/constant/preCICE.xml ateles/precice.xml
+
+cd fluid
+mkdir vtk-openfoam
+touch fluid.foam
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+# runApplication initialSolutionGaussPulse
+runApplication decomposePar
+fsiFluidFoam &> log.fsiFluidFoam &
+cd -
+
+cd ateles
+mkdir restart mesh harvester vtk-ateles
+runApplication seeder
+ateles &> log.ateles &
+cd -
+
+wait

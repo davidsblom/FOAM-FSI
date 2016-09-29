@@ -324,12 +324,62 @@ void SDCFluidSolver::getAcousticsDensityLocal( matrix & )
     assert( false );
 }
 
+void SDCFluidSolver::getAcousticsTemperatureLocal( matrix & )
+{
+    assert( false );
+}
+
 void SDCFluidSolver::getAcousticsVelocityLocal( matrix & )
 {
     assert( false );
 }
 
 void SDCFluidSolver::getAcousticsPressureLocal( matrix & )
+{
+    assert( false );
+}
+
+void SDCFluidSolver::getAcousticsTemperatureGradientLocal( matrix & )
+{
+    assert( false );
+}
+
+void SDCFluidSolver::getAcousticsVelocityGradientLocal( matrix & )
+{
+    assert( false );
+}
+
+void SDCFluidSolver::getAcousticsPressureGradientLocal( matrix & )
+{
+    assert( false );
+}
+
+void SDCFluidSolver::setAcousticsTemperatureGradient( const matrix & )
+{
+    assert( false );
+}
+
+void SDCFluidSolver::setAcousticsPressureGradient( const matrix & )
+{
+    assert( false );
+}
+
+void SDCFluidSolver::setAcousticsVelocityGradient( const matrix & )
+{
+    assert( false );
+}
+
+void SDCFluidSolver::setAcousticsTemperature( const matrix & )
+{
+    assert( false );
+}
+
+void SDCFluidSolver::setAcousticsPressure( const matrix & )
+{
+    assert( false );
+}
+
+void SDCFluidSolver::setAcousticsVelocity( const matrix & )
 {
     assert( false );
 }

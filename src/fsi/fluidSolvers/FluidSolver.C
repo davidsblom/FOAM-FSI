@@ -306,12 +306,62 @@ void FluidSolver::getAcousticsDensityLocal( matrix & )
     assert( false );
 }
 
+void FluidSolver::getAcousticsTemperatureLocal( matrix & )
+{
+    assert( false );
+}
+
 void FluidSolver::getAcousticsVelocityLocal( matrix & )
 {
     assert( false );
 }
 
 void FluidSolver::getAcousticsPressureLocal( matrix & )
+{
+    assert( false );
+}
+
+void FluidSolver::getAcousticsTemperatureGradientLocal( matrix & )
+{
+    assert( false );
+}
+
+void FluidSolver::getAcousticsVelocityGradientLocal( matrix & )
+{
+    assert( false );
+}
+
+void FluidSolver::getAcousticsPressureGradientLocal( matrix & )
+{
+    assert( false );
+}
+
+void FluidSolver::setAcousticsTemperatureGradient( const matrix & )
+{
+    assert( false );
+}
+
+void FluidSolver::setAcousticsPressureGradient( const matrix & )
+{
+    assert( false );
+}
+
+void FluidSolver::setAcousticsVelocityGradient( const matrix & )
+{
+    assert( false );
+}
+
+void FluidSolver::setAcousticsTemperature( const matrix & )
+{
+    assert( false );
+}
+
+void FluidSolver::setAcousticsPressure( const matrix & )
+{
+    assert( false );
+}
+
+void FluidSolver::setAcousticsVelocity( const matrix & )
 {
     assert( false );
 }

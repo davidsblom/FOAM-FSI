@@ -285,12 +285,62 @@ void SteadyStateFluidSolver::getAcousticsDensityLocal( matrix & )
     assert( false );
 }
 
+void SteadyStateFluidSolver::getAcousticsTemperatureLocal( matrix & )
+{
+    assert( false );
+}
+
 void SteadyStateFluidSolver::getAcousticsVelocityLocal( matrix & )
 {
     assert( false );
 }
 
 void SteadyStateFluidSolver::getAcousticsPressureLocal( matrix & )
+{
+    assert( false );
+}
+
+void SteadyStateFluidSolver::getAcousticsTemperatureGradientLocal( matrix & )
+{
+    assert( false );
+}
+
+void SteadyStateFluidSolver::getAcousticsVelocityGradientLocal( matrix & )
+{
+    assert( false );
+}
+
+void SteadyStateFluidSolver::getAcousticsPressureGradientLocal( matrix & )
+{
+    assert( false );
+}
+
+void SteadyStateFluidSolver::setAcousticsTemperatureGradient( const matrix & )
+{
+    assert( false );
+}
+
+void SteadyStateFluidSolver::setAcousticsPressureGradient( const matrix & )
+{
+    assert( false );
+}
+
+void SteadyStateFluidSolver::setAcousticsVelocityGradient( const matrix & )
+{
+    assert( false );
+}
+
+void SteadyStateFluidSolver::setAcousticsTemperature( const matrix & )
+{
+    assert( false );
+}
+
+void SteadyStateFluidSolver::setAcousticsPressure( const matrix & )
+{
+    assert( false );
+}
+
+void SteadyStateFluidSolver::setAcousticsVelocity( const matrix & )
 {
     assert( false );
 }

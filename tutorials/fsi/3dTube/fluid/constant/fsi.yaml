@@ -2,6 +2,8 @@
 # coupled-pressure-velocity-solver, compressible-solver, and steady-state-pimple-solver.
 fluid-solver: pimple-solver
 
+participant: Fluid_Solver
+
 # Choose the solid solver: nonlinear-elastic-solver, linear-elastic-solver or
 # steady-state-nonlinear-elastic-solver
 solid-solver: nonlinear-elastic-solver

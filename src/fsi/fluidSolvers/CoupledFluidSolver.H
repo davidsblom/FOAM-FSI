@@ -31,23 +31,43 @@ class CoupledFluidSolver : public foamFluidSolver
 
         virtual ~CoupledFluidSolver();
 
-        virtual void getAcousticsDensityLocal( matrix & data );
+        void getAcousticsDensityLocal( matrix & data ) override;
 
-        virtual void getAcousticsVelocityLocal( matrix & data );
+        void getAcousticsTemperatureLocal( matrix & data ) override;
 
-        virtual void getAcousticsPressureLocal( matrix & data );
+        void getAcousticsVelocityLocal( matrix & data )  override;
 
-        virtual void getTractionLocal( matrix & traction );
+        void getAcousticsPressureLocal( matrix & data ) override;
 
-        virtual void getWritePositionsLocalAcoustics( matrix & writePositions );
+        void getAcousticsTemperatureGradientLocal( matrix & data ) override;
 
-        virtual void initTimeStep();
+        void getAcousticsVelocityGradientLocal( matrix & data )  override;
 
-        virtual bool isRunning();
+        void getAcousticsPressureGradientLocal( matrix & data ) override;
 
-        virtual void resetSolution();
+        virtual void getTractionLocal( matrix & traction ) override;
 
-        virtual void solve();
+        virtual void getWritePositionsLocalAcoustics( matrix & writePositions ) override;
+
+        virtual void initTimeStep() override;
+
+        virtual bool isRunning() override;
+
+        virtual void resetSolution() override;
+
+        virtual void solve() override;
+
+        virtual void setAcousticsTemperatureGradient( const matrix & temperatureGradient ) override;
+
+        virtual void setAcousticsPressureGradient( const matrix & pressureGradient ) override;
+
+        virtual void setAcousticsVelocityGradient( const matrix & velocityGradient ) override;
+
+        virtual void setAcousticsTemperature( const matrix & temperatureGradient ) override;
+
+        virtual void setAcousticsPressure( const matrix & pressureGradient ) override;
+
+        virtual void setAcousticsVelocity( const matrix & velocityGradient ) override;
 
     protected:
         void checkTotalVolume();
