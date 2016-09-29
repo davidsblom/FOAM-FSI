@@ -18,7 +18,7 @@ class PreciceFluidSolver : public Solver
 {
 public:
 
-  explicit PreciceFluidSolver( shared_ptr<foamFluidSolver> solver );
+  explicit PreciceFluidSolver( shared_ptr<foamFluidSolver> solver, const std::string & participant );
 
   virtual ~PreciceFluidSolver();
 
@@ -29,6 +29,12 @@ public:
   void readData( matrix & data );
 
   void readDataAcoustics();
+
+  void readDataAcousticsTemperature();
+
+  void readDataAcousticsPressure();
+
+  void readDataAcousticsVelocity();
 
   void readDataAcousticsTemperatureGradient();
 
@@ -54,6 +60,14 @@ public:
 
   void writeAcousticsVelocity();
 
+  void writeAcousticsTemperature();
+
+  void writeAcousticsTemperatureGradient();
+
+  void writeAcousticsPressureGradient();
+
+  void writeAcousticsVelocityGradient();
+
   shared_ptr<foamFluidSolver> solver;
   shared_ptr<precice::SolverInterface> precice;
 
@@ -61,8 +75,10 @@ public:
   Eigen::VectorXi idsWritePositions;
   Eigen::VectorXi idsWritePositionsAcoustics;
 
-  const std::string FLUID_ACOUSTICS_WRITE;
-  const std::string FLUID_ACOUSTICS_READ;
+  std::string FLUID_ACOUSTICS_WRITE;
+  std::string FLUID_ACOUSTICS_READ;
+
+  const std::string participant;
 };
 
 #endif

@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -e
+
+./clean
+
+cd initialSolutionGaussPulse
+wmake
+cd -
+
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+cp fluid_A/constant/preCICE.xml fluid_B/constant/preCICE.xml
+
+cd fluid_A
+mkdir vtk
+touch fluid_A.foam
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication initialSolutionGaussPulse
+runApplication decomposePar
+fsiFluidFoam &> log.fsiFluidFoam &
+cd -
+
+cd fluid_B
+mkdir vtk
+touch fluid_B.foam
+runApplication blockMesh
+runApplication renumberMesh -overwrite
+runApplication checkMesh
+runApplication initialSolutionGaussPulse
+runApplication decomposePar
+fsiFluidFoam &> log.fsiFluidFoam &
+cd -
+
+wait

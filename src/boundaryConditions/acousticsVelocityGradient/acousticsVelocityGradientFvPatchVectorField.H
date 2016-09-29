@@ -22,21 +22,23 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::acousticsVelocityFvPatchVectorField
+    Foam::acousticsVelocityGradientFvPatchVectorField
 
 Description
-    Foam::acousticsVelocityFvPatchVectorField
+    Foam::acousticsVelocityGradientFvPatchVectorField
 
 SourceFiles
-    acousticsVelocityFvPatchVectorField.C
+    acousticsVelocityGradientFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef acousticsVelocityFvPatchVectorField_H
-#define acousticsVelocityFvPatchVectorField_H
+#ifndef acousticsVelocityGradientFvPatchVectorFields_H
+#define acousticsVelocityGradientFvPatchVectorFields_H
 
 #include "fvPatchFields.H"
-#include "fixedValueFvPatchFields.H"
+#include "fixedGradientFvPatchFields.H"
+#include "Switch.H"
+#include "scalarIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,51 +48,53 @@ namespace Foam
     typedef IOList<vector> vectorIOList;
 
 /*---------------------------------------------------------------------------*\
-                 Class acousticsVelocityFvPatch Declaration
+                   Class acousticsVelocityGradientFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class acousticsVelocityFvPatchVectorField
+class acousticsVelocityGradientFvPatchVectorField
 :
-    public fixedValueFvPatchVectorField
+    public fixedGradientFvPatchField<vector>
 {
+    // Private data
+
 
 public:
 
     //- Runtime type information
-    TypeName("acousticsVelocity");
+    TypeName("acousticsVelocityGradient");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        acousticsVelocityFvPatchVectorField
+        acousticsVelocityGradientFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        acousticsVelocityFvPatchVectorField
+        acousticsVelocityGradientFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given acousticsVelocityFvPatchVectorField
-        //  onto a new patch
-        acousticsVelocityFvPatchVectorField
+        //- Construct by mapping given acousticsVelocityGradientFvPatchVectorField onto
+        //  a new patch
+        acousticsVelocityGradientFvPatchVectorField
         (
-            const acousticsVelocityFvPatchVectorField&,
+            const acousticsVelocityGradientFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        acousticsVelocityFvPatchVectorField
+        acousticsVelocityGradientFvPatchVectorField
         (
-            const acousticsVelocityFvPatchVectorField&
+            const acousticsVelocityGradientFvPatchVectorField&
         );
 
         //- Construct and return a clone
@@ -98,14 +102,14 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new acousticsVelocityFvPatchVectorField(*this)
+                new acousticsVelocityGradientFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        acousticsVelocityFvPatchVectorField
+        acousticsVelocityGradientFvPatchVectorField
         (
-            const acousticsVelocityFvPatchVectorField&,
+            const acousticsVelocityGradientFvPatchVectorField&,
             const DimensionedField<vector, volMesh>&
         );
 
@@ -117,10 +121,9 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new acousticsVelocityFvPatchVectorField(*this, iF)
+                new acousticsVelocityGradientFvPatchVectorField(*this, iF)
             );
         }
-
 
 
     // Member functions

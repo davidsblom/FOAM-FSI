@@ -13,7 +13,8 @@ r          = 296.0
 -- flow state
 dens = 1.225
 press = 100000
-velocityX = 0.0
+-- velocityX = 0.0
+velocityX = -100.0
 velocityY = 0.0
 velocityZ = 0.0
 -- numerical parameter
@@ -22,18 +23,24 @@ dt = 1e-5
 tmax = 1.0
 
 function ic_pressure_gauss (x,y,z)
-    d= (x+1*x+1)+y*y+z*z
+    d= ((x+1)*(x+1))+y*y+z*z
     return( press + 50* math.exp(-d/0.1*math.log(2)) )
+end
+
+function ic_density_gauss (x,y,z)
+    d= ((x-1)*(x-1))+y*y+z*z
+    return( dens + 0.1* math.exp(-d/0.1*math.log(2)) )
 end
 
 sim_control = {
              time_control = {
                   min = 0,
-                  max = {iter=100}, --tmax, -- final simulation time
+                  max = tmax, -- final simulation time
                   interval = {iter = 10}, -- final simulation time
                 }
 }
 
+ply_sampling = { nlevels = 2 }
 
 tracking = {
   {
@@ -43,7 +50,23 @@ tracking = {
     variable = {'density','pressure','temperature'},
     time_control = {min = 0, max = tmax, interval = {iter=1}},
     output = { format = 'vtk'},
-  }
+},
+{
+  label = 'temperature',
+  folder = './harvester/',
+    shape = {
+        kind = 'canoND',
+        object = {
+            { origin = { 0.0, -2.0, -2.0 },
+              vec = {{ 0.0, 4.0, 0.0 }, {0.0, 0.0, 4.0}},
+              segments = {200, 200}
+            }
+        },
+    },
+  variable = {'temperature','grad_temp'},
+  time_control = {min = 0, max = tmax, interval = {iter=1}},
+  output = { format = 'asciiSpatial', use_get_point = true},
+}
 }
 
 -- table for preCICE
@@ -104,6 +127,16 @@ variable = {
      operation = {
        kind = 'gradient',
        input_varname = 'velocity',
+     }
+  },
+  {
+     name = 'T',
+     ncomponents = 1,
+     vartype = 'operation',
+     operation = {
+       kind = 'extract',
+       input_varindex = {1},
+       input_varname = 'temperature',
      }
   },
   -- {
@@ -185,7 +218,7 @@ variable = {
      operation = {
        kind = 'extract',
        input_varname = 'grad_velocity',
-       input_varindex = {8}
+       input_varindex = {7}
      }
   },
   {
@@ -298,11 +331,11 @@ scheme = {
     steps = 2,
     -- how to control the timestep
     control = {
---      name = 'cfl',   -- the name of the timestep control mechanism
---      cfl  = 0.2,     -- Courant�Friedrichs�Lewy number
---      cfl_visc  = 0.2,     -- Courant�Friedrichs�Lewy number
-      name = 'fixed',
-      dt = dt
+     name = 'cfl',   -- the name of the timestep control mechanism
+     cfl  = 0.8,     -- Courant�Friedrichs�Lewy number
+     cfl_visc  = 0.8,     -- Courant�Friedrichs�Lewy number
+    --   name = 'fixed',
+    --   dt = dt
     },
   },
 }
@@ -316,9 +349,10 @@ projection = {
 -- This is a very simple example to define constant boundary condtions.
 -- Transport velocity of the pulse in x direction.
 initial_condition = {
-  density = dens,
- pressure = press,
-  -- pressure = ic_pressure_gauss,
+  density = ic_density_gauss,
+  -- density = dens,
+ -- pressure = press,
+  pressure = press,
   velocityX = velocityX,
   velocityY = velocityY,
   velocityZ = velocityZ,
@@ -352,8 +386,13 @@ boundary_condition = {
   ,
   {
     label = 'wall_4',
-    kind = 'outflow',
-    pressure = press,
+    -- kind = 'outflow',
+    kind = 'inflow',
+    velocityX = velocityX,
+    velocityY = 0.0,
+    velocityZ = 0.0,
+    -- pressure = press,
+    density = dens
   }
   ,
   {

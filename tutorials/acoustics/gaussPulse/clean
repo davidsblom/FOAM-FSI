@@ -11,9 +11,9 @@ rm -rf 0 precice_output
 cp -r 0.org 0
 rm -f *.foam iterResidualFile constant/polyMesh/boundary .*.address *.txt *.log
 cleanCase
-rm -rf vtk
+rm -rf vtk*
 cd -
 
 cd ateles
 rm -rf log.* timing.res .*.address *.txt *.xml restart harvester *.pyc timing* *.log precice_output mesh
-rm -rf vtk
+rm -rf vtk*

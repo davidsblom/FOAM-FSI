@@ -13,19 +13,20 @@ cd -
 cp fluid/constant/preCICE.xml ateles/precice.xml
 
 cd fluid
+mkdir vtk-openfoam
 touch fluid.foam
 runApplication blockMesh
 runApplication renumberMesh -overwrite
 runApplication checkMesh
-runApplication initialSolutionGaussPulse
+# runApplication initialSolutionGaussPulse
 runApplication decomposePar
-mpirun -np 2 fsiFluidFoam -parallel &> log.fsiFluidFoam &
+fsiFluidFoam &> log.fsiFluidFoam &
 cd -
 
 cd ateles
-mkdir restart mesh
+mkdir restart mesh harvester vtk-ateles
 runApplication seeder
-mpirun -np 2 ateles &> log.ateles &
+ateles &> log.ateles &
 cd -
 
 wait

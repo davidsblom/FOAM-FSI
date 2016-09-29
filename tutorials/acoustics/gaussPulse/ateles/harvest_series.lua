@@ -3,7 +3,7 @@ require 'ateles_harvester'
 logging = {level = 10}
 
 -- Set the restart data to harvest.
-restart.read = 'restart/ateles_header_1.000E-03.lua'
+restart.read = 'restart/ateles_header_20.000E-06.lua'
 
 -- Subsampling
 ply_sampling = { nlevels = 1 }

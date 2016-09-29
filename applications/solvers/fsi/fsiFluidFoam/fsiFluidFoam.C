@@ -43,8 +43,10 @@ int main(
     YAML::Node config = YAML::LoadFile( filename );
 
     assert( config["fluid-solver"] );
+    assert( config["participant"] );
 
     std::string fluidSolver = config["fluid-solver"].as<std::string>();
+    std::string participant = config["participant"].as<std::string>();
 
     assert( fluidSolver == "coupled-pressure-velocity-solver" || fluidSolver == "pimple-solver" || fluidSolver == "compressible-solver" || fluidSolver == "steady-state-pimple-solver" );
 
@@ -64,7 +66,7 @@ int main(
 
     assert( fluid );
 
-    PreciceFluidSolver solver( fluid );
+    PreciceFluidSolver solver( fluid, participant );
 
     solver.run();
 

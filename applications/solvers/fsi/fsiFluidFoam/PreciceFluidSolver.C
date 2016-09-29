@@ -8,16 +8,29 @@
 
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> matrixRowMajor;
 
-PreciceFluidSolver::PreciceFluidSolver( shared_ptr<foamFluidSolver> solver )
+PreciceFluidSolver::PreciceFluidSolver(
+    shared_ptr<foamFluidSolver> solver,
+    const std::string & participant
+    )
     :
     solver( solver ),
-    precice( shared_ptr<precice::SolverInterface> ( new precice::SolverInterface( "Fluid_Solver", Pstream::myProcNo(), Pstream::nProcs() ) ) ),
+    precice( shared_ptr<precice::SolverInterface> ( new precice::SolverInterface( participant, Pstream::myProcNo(), Pstream::nProcs() ) ) ),
     idsReadPositions(),
     idsWritePositions(),
     FLUID_ACOUSTICS_WRITE( "Fluid_Acoustics" ),
-    FLUID_ACOUSTICS_READ( "Fluid_Acoustics" )
+    FLUID_ACOUSTICS_READ( "Fluid_Acoustics" ),
+    participant( participant )
 {
     assert( solver );
+    assert( participant == "Fluid_Solver" || participant == "Fluid_Solver_A" || participant == "Fluid_Solver_B" );
+
+    if ( participant == "Fluid_Solver_A" )
+        FLUID_ACOUSTICS_WRITE = "Fluid_Acoustics_A";
+
+    if ( participant == "Fluid_Solver_B" )
+        FLUID_ACOUSTICS_WRITE = "Fluid_Acoustics_B";
+
+    FLUID_ACOUSTICS_READ = FLUID_ACOUSTICS_WRITE;
 
     init();
 }
@@ -80,9 +93,58 @@ void PreciceFluidSolver::readData( matrix & data )
 
 void PreciceFluidSolver::readDataAcoustics()
 {
-    readDataAcousticsTemperatureGradient();
-    readDataAcousticsPressureGradient();
-    readDataAcousticsVelocityGradient();
+    if ( participant == "Fluid_Solver_A" )
+    {
+        readDataAcousticsTemperature();
+        readDataAcousticsPressure();
+        readDataAcousticsVelocity();
+    }
+
+    if ( participant == "Fluid_Solver_B" )
+    {
+        readDataAcousticsTemperatureGradient();
+        readDataAcousticsPressureGradient();
+        readDataAcousticsVelocityGradient();
+    }
+}
+
+void PreciceFluidSolver::writeDataAcoustics()
+{
+    if ( participant == "Fluid_Solver_B" )
+    {
+        writeAcousticsDensity();
+        writeAcousticsPressure();
+        writeAcousticsVelocity();
+        writeAcousticsTemperature();
+    }
+
+    if ( participant == "Fluid_Solver_A" )
+    {
+        writeAcousticsPressureGradient();
+        writeAcousticsVelocityGradient();
+        writeAcousticsTemperatureGradient();
+    }
+}
+
+void PreciceFluidSolver::readDataAcousticsTemperature()
+{
+    if ( !precice->hasMesh( FLUID_ACOUSTICS_READ ) )
+        return;
+
+    const int meshId = precice->getMeshID( FLUID_ACOUSTICS_READ );
+
+    if ( !precice->hasData( "Acoustics_Temperature", meshId ) )
+        return;
+
+    const int dataId = precice->getDataID( "Acoustics_Temperature", meshId );
+
+    matrixRowMajor dataRowMajor( idsWritePositionsAcoustics.size(), 1 );
+
+    if ( dataRowMajor.rows() > 0 )
+        precice->readBlockScalarData( dataId, idsWritePositionsAcoustics.rows(), idsWritePositionsAcoustics.data(), dataRowMajor.data() );
+
+    matrix data = dataRowMajor.cast<scalar>();
+    solver->setAcousticsTemperature( data );
 }
 
 void PreciceFluidSolver::readDataAcousticsTemperatureGradient()
@@ -92,16 +154,39 @@ void PreciceFluidSolver::readDataAcousticsTemperatureGradient()
 
     const int meshId = precice->getMeshID( FLUID_ACOUSTICS_READ );
 
+    if ( !precice->hasData( "Acoustics_Temperature_Gradient", meshId ) )
+        return;
+
+    const int dataId = precice->getDataID( "Acoustics_Temperature_Gradient", meshId );
+
     matrixRowMajor dataRowMajor( idsWritePositionsAcoustics.size(), 1 );
 
-    if ( dataRowMajor.rows() > 0 && precice->hasData( "Acoustics_Temperature_Gradient", meshId ) )
-    {
-        const int dataId = precice->getDataID( "Acoustics_Temperature_Gradient", meshId );
+    if ( dataRowMajor.rows() > 0 )
         precice->readBlockScalarData( dataId, idsWritePositionsAcoustics.rows(), idsWritePositionsAcoustics.data(), dataRowMajor.data() );
-    }
 
     matrix data = dataRowMajor.cast<scalar>();
     solver->setAcousticsTemperatureGradient( data );
+}
+
+void PreciceFluidSolver::readDataAcousticsPressure()
+{
+    if ( !precice->hasMesh( FLUID_ACOUSTICS_READ ) )
+        return;
+
+    const int meshId = precice->getMeshID( FLUID_ACOUSTICS_READ );
+
+    if ( !precice->hasData( "Acoustics_Pressure", meshId ) )
+        return;
+
+    const int dataId = precice->getDataID( "Acoustics_Pressure", meshId );
+
+    matrixRowMajor dataRowMajor( idsWritePositionsAcoustics.size(), 1 );
+
+    if ( dataRowMajor.rows() > 0 )
+        precice->readBlockScalarData( dataId, idsWritePositionsAcoustics.rows(), idsWritePositionsAcoustics.data(), dataRowMajor.data() );
+
+    matrix data = dataRowMajor.cast<scalar>();
+    solver->setAcousticsPressure( data );
 }
 
 void PreciceFluidSolver::readDataAcousticsPressureGradient()
@@ -111,16 +196,58 @@ void PreciceFluidSolver::readDataAcousticsPressureGradient()
 
     const int meshId = precice->getMeshID( FLUID_ACOUSTICS_READ );
 
+    if ( !precice->hasData( "Acoustics_Pressure_Gradient", meshId ) )
+        return;
+
+    const int dataId = precice->getDataID( "Acoustics_Pressure_Gradient", meshId );
+
     matrixRowMajor dataRowMajor( idsWritePositionsAcoustics.size(), 1 );
 
-    if ( dataRowMajor.rows() > 0 && precice->hasData( "Acoustics_Pressure_Gradient", meshId ) )
-    {
-        const int dataId = precice->getDataID( "Acoustics_Pressure_Gradient", meshId );
+    if ( dataRowMajor.rows() > 0 )
         precice->readBlockScalarData( dataId, idsWritePositionsAcoustics.rows(), idsWritePositionsAcoustics.data(), dataRowMajor.data() );
-    }
 
     matrix data = dataRowMajor.cast<scalar>();
     solver->setAcousticsPressureGradient( data );
+}
+
+void PreciceFluidSolver::readDataAcousticsVelocity()
+{
+    if ( !precice->hasMesh( FLUID_ACOUSTICS_READ ) )
+        return;
+
+    const int meshId = precice->getMeshID( FLUID_ACOUSTICS_READ );
+
+    matrixRowMajor dataRowMajor( idsWritePositionsAcoustics.size(), precice->getDimensions() );
+
+    if ( dataRowMajor.rows() > 0 && precice->hasData( "Acoustics_Velocity_X", meshId ) )
+    {
+        const int dataId = precice->getDataID( "Acoustics_Velocity_X", meshId );
+        matrixRowMajor dataX( dataRowMajor.rows(), 1 );
+        precice->readBlockScalarData( dataId, idsWritePositionsAcoustics.rows(), idsWritePositionsAcoustics.data(), dataX.data() );
+        dataRowMajor.col( 0 ) = dataX;
+    }
+
+    if ( dataRowMajor.rows() > 0 && precice->hasData( "Acoustics_Velocity_Y", meshId ) )
+    {
+        const int dataId = precice->getDataID( "Acoustics_Velocity_Y", meshId );
+        matrixRowMajor dataY( dataRowMajor.rows(), 1 );
+        precice->readBlockScalarData( dataId, idsWritePositionsAcoustics.rows(), idsWritePositionsAcoustics.data(), dataY.data() );
+        dataRowMajor.col( 1 ) = dataY;
+    }
+
+    if ( dataRowMajor.rows() > 0 && precice->hasData( "Acoustics_Velocity_Z", meshId ) )
+    {
+        const int dataId = precice->getDataID( "Acoustics_Velocity_Z", meshId );
+        matrixRowMajor dataZ( dataRowMajor.rows(), 1 );
+        precice->readBlockScalarData( dataId, idsWritePositionsAcoustics.rows(), idsWritePositionsAcoustics.data(), dataZ.data() );
+        dataRowMajor.col( 2 ) = dataZ;
+    }
+
+    if ( precice->hasData( "Acoustics_Velocity_X", meshId ) && precice->hasData( "Acoustics_Velocity_Y", meshId ) )
+    {
+        matrix data = dataRowMajor.cast<scalar>();
+        solver->setAcousticsVelocity( data );
+    }
 }
 
 void PreciceFluidSolver::readDataAcousticsVelocityGradient()
@@ -156,8 +283,11 @@ void PreciceFluidSolver::readDataAcousticsVelocityGradient()
         dataRowMajor.col( 2 ) = dataZ;
     }
 
-    matrix data = dataRowMajor.cast<scalar>();
-    solver->setAcousticsVelocityGradient( data );
+    if ( precice->hasData( "Acoustics_Velocity_X_Gradient", meshId ) && precice->hasData( "Acoustics_Velocity_Y_Gradient", meshId ) )
+    {
+        matrix data = dataRowMajor.cast<scalar>();
+        solver->setAcousticsVelocityGradient( data );
+    }
 }
 
 void PreciceFluidSolver::run()
@@ -373,6 +503,72 @@ void PreciceFluidSolver::writeAcousticsPressure()
     }
 }
 
+void PreciceFluidSolver::writeAcousticsPressureGradient()
+{
+    if ( !precice->hasMesh( FLUID_ACOUSTICS_WRITE ) )
+        return;
+
+    const int meshId = precice->getMeshID( FLUID_ACOUSTICS_WRITE );
+
+    if ( !precice->hasData( "Acoustics_Pressure_Gradient", meshId ) )
+        return;
+
+    const int dataId = precice->getDataID( "Acoustics_Pressure_Gradient", meshId );
+
+    matrix data;
+    solver->getAcousticsPressureGradientLocal( data );
+
+    if ( data.rows() > 0 )
+    {
+        matrixRowMajor dataRowMajor = data.cast<double>();
+        precice->writeBlockScalarData( dataId, data.rows(), idsWritePositionsAcoustics.data(), dataRowMajor.data() );
+    }
+}
+
+void PreciceFluidSolver::writeAcousticsTemperature()
+{
+    if ( !precice->hasMesh( FLUID_ACOUSTICS_WRITE ) )
+        return;
+
+    const int meshId = precice->getMeshID( FLUID_ACOUSTICS_WRITE );
+
+    if ( !precice->hasData( "Acoustics_Temperature", meshId ) )
+        return;
+
+    const int dataId = precice->getDataID( "Acoustics_Temperature", meshId );
+
+    matrix data;
+    solver->getAcousticsTemperatureLocal( data );
+
+    if ( data.rows() > 0 )
+    {
+        matrixRowMajor dataRowMajor = data.cast<double>();
+        precice->writeBlockScalarData( dataId, data.rows(), idsWritePositionsAcoustics.data(), dataRowMajor.data() );
+    }
+}
+
+void PreciceFluidSolver::writeAcousticsTemperatureGradient()
+{
+    if ( !precice->hasMesh( FLUID_ACOUSTICS_WRITE ) )
+        return;
+
+    const int meshId = precice->getMeshID( FLUID_ACOUSTICS_WRITE );
+
+    if ( !precice->hasData( "Acoustics_Temperature_Gradient", meshId ) )
+        return;
+
+    const int dataId = precice->getDataID( "Acoustics_Temperature_Gradient", meshId );
+
+    matrix data;
+    solver->getAcousticsTemperatureGradientLocal( data );
+
+    if ( data.rows() > 0 )
+    {
+        matrixRowMajor dataRowMajor = data.cast<double>();
+        precice->writeBlockScalarData( dataId, data.rows(), idsWritePositionsAcoustics.data(), dataRowMajor.data() );
+    }
+}
+
 void PreciceFluidSolver::writeAcousticsVelocity()
 {
     if ( !precice->hasMesh( FLUID_ACOUSTICS_WRITE ) )
@@ -405,9 +601,34 @@ void PreciceFluidSolver::writeAcousticsVelocity()
     }
 }
 
-void PreciceFluidSolver::writeDataAcoustics()
+void PreciceFluidSolver::writeAcousticsVelocityGradient()
 {
-    writeAcousticsPressure();
-    writeAcousticsDensity();
-    writeAcousticsVelocity();
+    if ( !precice->hasMesh( FLUID_ACOUSTICS_WRITE ) )
+        return;
+
+    const int meshId = precice->getMeshID( FLUID_ACOUSTICS_WRITE );
+
+    matrix data;
+    solver->getAcousticsVelocityGradientLocal( data );
+
+    if ( data.rows() > 0 && precice->hasData( "Acoustics_Velocity_X_Gradient", meshId ) )
+    {
+        const int dataId = precice->getDataID( "Acoustics_Velocity_X_Gradient", meshId );
+        matrixRowMajor dataRowMajor = data.col( 0 ).cast<double>();
+        precice->writeBlockScalarData( dataId, data.rows(), idsWritePositionsAcoustics.data(), dataRowMajor.data() );
+    }
+
+    if ( data.rows() > 0 && precice->hasData( "Acoustics_Velocity_Y_Gradient", meshId ) )
+    {
+        const int dataId = precice->getDataID( "Acoustics_Velocity_Y_Gradient", meshId );
+        matrixRowMajor dataRowMajor = data.col( 1 ).cast<double>();
+        precice->writeBlockScalarData( dataId, data.rows(), idsWritePositionsAcoustics.data(), dataRowMajor.data() );
+    }
+
+    if ( data.rows() > 0 && precice->hasData( "Acoustics_Velocity_Z_Gradient", meshId ) )
+    {
+        const int dataId = precice->getDataID( "Acoustics_Velocity_Z_Gradient", meshId );
+        matrixRowMajor dataRowMajor = data.col( 2 ).cast<double>();
+        precice->writeBlockScalarData( dataId, data.rows(), idsWritePositionsAcoustics.data(), dataRowMajor.data() );
+    }
 }

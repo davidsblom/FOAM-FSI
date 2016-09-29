@@ -23,76 +23,74 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "acousticsVelocityFvPatchVectorField.H"
-#include "addToRunTimeSelectionTable.H"
+#include "acousticsVelocityGradientFvPatchVectorField.H"
+#include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "fvcMeshPhi.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-acousticsVelocityFvPatchVectorField::acousticsVelocityFvPatchVectorField
+Foam::acousticsVelocityGradientFvPatchVectorField::acousticsVelocityGradientFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedValueFvPatchVectorField(p, iF)
+    fixedGradientFvPatchVectorField(p, iF)
 {}
 
 
-acousticsVelocityFvPatchVectorField::acousticsVelocityFvPatchVectorField
+Foam::acousticsVelocityGradientFvPatchVectorField::acousticsVelocityGradientFvPatchVectorField
 (
-    const acousticsVelocityFvPatchVectorField& ptf,
+    const fvPatch& p,
+    const DimensionedField<vector, volMesh>& iF,
+    const dictionary&
+)
+:
+    fixedGradientFvPatchVectorField(p, iF)
+{
+
+        fvPatchField<vector>::operator=(patchInternalField());
+        gradient() = Foam::vector::zero;
+
+}
+
+
+Foam::acousticsVelocityGradientFvPatchVectorField::acousticsVelocityGradientFvPatchVectorField
+(
+    const acousticsVelocityGradientFvPatchVectorField& ptf,
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchVectorField(ptf, p, iF, mapper)
+    fixedGradientFvPatchVectorField(ptf, p, iF, mapper)
 {}
 
 
-acousticsVelocityFvPatchVectorField::acousticsVelocityFvPatchVectorField
+Foam::acousticsVelocityGradientFvPatchVectorField::acousticsVelocityGradientFvPatchVectorField
 (
-    const fvPatch& p,
-    const DimensionedField<vector, volMesh>& iF,
-    const dictionary& dict
+    const acousticsVelocityGradientFvPatchVectorField& ptf
 )
 :
-    fixedValueFvPatchVectorField(p, iF)
-{
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
-}
-
-
-acousticsVelocityFvPatchVectorField::acousticsVelocityFvPatchVectorField
-(
-    const acousticsVelocityFvPatchVectorField& pivpvf
-)
-:
-    fixedValueFvPatchVectorField(pivpvf)
+    fixedGradientFvPatchVectorField(ptf)
 {}
 
 
-acousticsVelocityFvPatchVectorField::acousticsVelocityFvPatchVectorField
+Foam::acousticsVelocityGradientFvPatchVectorField::acousticsVelocityGradientFvPatchVectorField
 (
-    const acousticsVelocityFvPatchVectorField& pivpvf,
+    const acousticsVelocityGradientFvPatchVectorField& ptf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedValueFvPatchVectorField(pivpvf, iF)
+    fixedGradientFvPatchVectorField(ptf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void acousticsVelocityFvPatchVectorField::updateCoeffs()
+void Foam::acousticsVelocityGradientFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -101,35 +99,29 @@ void acousticsVelocityFvPatchVectorField::updateCoeffs()
 
     const vectorIOList& velocity = db().time().lookupObject<vectorIOList>("velocityAcoustics");
 
-    vectorField U ( patch().Cf().size(), Foam::vector::zero );
-    U = velocity;
+    gradient() = velocity;
 
-    operator==
-    (
-        this->patchInternalField() + U/this->patch().deltaCoeffs()
-    );
-
-    fixedValueFvPatchVectorField::updateCoeffs();
+    fixedGradientFvPatchVectorField::updateCoeffs();
 }
 
 
-void acousticsVelocityFvPatchVectorField::write(Ostream& os) const
+void Foam::acousticsVelocityGradientFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    writeEntry("value", os);
+
+    gradient().writeEntry("gradient", os);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    acousticsVelocityFvPatchVectorField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        acousticsVelocityGradientFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //

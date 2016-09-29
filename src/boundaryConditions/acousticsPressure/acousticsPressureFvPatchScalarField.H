@@ -24,20 +24,15 @@ License
 Class
     Foam::acousticsPressureFvPatchScalarField
 
-Description
-    Foam::acousticsPressureFvPatchScalarField
-
 SourceFiles
     acousticsPressureFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef acousticsPressureFvPatchScalarFields_H
-#define acousticsPressureFvPatchScalarFields_H
+#ifndef acousticsPressureFvPatchScalarField_H
+#define acousticsPressureFvPatchScalarField_H
 
-#include "fvPatchFields.H"
-#include "fixedGradientFvPatchFields.H"
-#include "Switch.H"
+#include "fixedValueFvPatchFields.H"
 #include "scalarIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -51,10 +46,8 @@ namespace Foam
 
 class acousticsPressureFvPatchScalarField
 :
-    public fixedGradientFvPatchScalarField
+    public fixedValueFvPatchScalarField
 {
-    // Private data
-
 
 public:
 
@@ -79,8 +72,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given acousticsPressureFvPatchScalarField onto
-        //  a new patch
+        //- Construct by mapping given acousticsPressureFvPatchScalarField
+        //  onto a new patch
         acousticsPressureFvPatchScalarField
         (
             const acousticsPressureFvPatchScalarField&,
@@ -126,8 +119,30 @@ public:
 
     // Member functions
 
-        //- Update the coefficients associated with the patch field
-        virtual void updateCoeffs();
+        // Access
+
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchScalarField&,
+                const labelList&
+            );
+
+
+        // Evaluation functions
+
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
+
 
         //- Write
         virtual void write(Ostream&) const;

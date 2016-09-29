@@ -22,21 +22,22 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::acousticsTemperatureFvPatchScalarField
+    Foam::acousticsPressureGradientFvPatchScalarField
 
 Description
-    Total temperature boundary condition.  The snGrad is set to zero to stop
-    back-diffusion
+    Foam::acousticsPressureGradientFvPatchScalarField
 
 SourceFiles
-    acousticsTemperatureFvPatchScalarField.C
+    acousticsPressureGradientFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef acousticsTemperatureFvPatchScalarField_H
-#define acousticsTemperatureFvPatchScalarField_H
+#ifndef acousticsPressureGradientFvPatchScalarFields_H
+#define acousticsPressureGradientFvPatchScalarFields_H
 
-#include "fixedValueFvPatchFields.H"
+#include "fvPatchFields.H"
+#include "fixedGradientFvPatchFields.H"
+#include "Switch.H"
 #include "scalarIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -45,51 +46,53 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class acousticsTemperatureFvPatch Declaration
+                   Class acousticsPressureGradientFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class acousticsTemperatureFvPatchScalarField
+class acousticsPressureGradientFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public fixedGradientFvPatchScalarField
 {
+    // Private data
+
 
 public:
 
     //- Runtime type information
-    TypeName("acousticsTemperature");
+    TypeName("acousticsPressureGradient");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        acousticsTemperatureFvPatchScalarField
+        acousticsPressureGradientFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        acousticsTemperatureFvPatchScalarField
+        acousticsPressureGradientFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given acousticsTemperatureFvPatchScalarField
-        //  onto a new patch
-        acousticsTemperatureFvPatchScalarField
+        //- Construct by mapping given acousticsPressureGradientFvPatchScalarField onto
+        //  a new patch
+        acousticsPressureGradientFvPatchScalarField
         (
-            const acousticsTemperatureFvPatchScalarField&,
+            const acousticsPressureGradientFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        acousticsTemperatureFvPatchScalarField
+        acousticsPressureGradientFvPatchScalarField
         (
-            const acousticsTemperatureFvPatchScalarField&
+            const acousticsPressureGradientFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -97,14 +100,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new acousticsTemperatureFvPatchScalarField(*this)
+                new acousticsPressureGradientFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        acousticsTemperatureFvPatchScalarField
+        acousticsPressureGradientFvPatchScalarField
         (
-            const acousticsTemperatureFvPatchScalarField&,
+            const acousticsPressureGradientFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -116,49 +119,15 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new acousticsTemperatureFvPatchScalarField(*this, iF)
+                new acousticsPressureGradientFvPatchScalarField(*this, iF)
             );
         }
 
 
     // Member functions
 
-        // Access
-
-
-        // Mapping functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper&
-            );
-
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchScalarField&,
-                const labelList&
-            );
-
-
-        // Evaluation functions
-
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
-
-            //- Return patch-normal gradient: set to zero
-            virtual tmp<scalarField> snGrad() const;
-
-            //- Return the matrix diagonal coefficients corresponding to the
-            //  evaluation of the gradient of this patchField
-            // Removed gradient contribution
-            virtual tmp<scalarField> gradientInternalCoeffs() const;
-
-            //- Return the matrix source coefficients corresponding to the
-            //  evaluation of the gradient of this patchField
-            virtual tmp<scalarField> gradientBoundaryCoeffs() const;
-
+        //- Update the coefficients associated with the patch field
+        virtual void updateCoeffs();
 
         //- Write
         virtual void write(Ostream&) const;

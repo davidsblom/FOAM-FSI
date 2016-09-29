@@ -32,29 +32,43 @@ class SteadyStateFluidSolver : public foamFluidSolver
 
         virtual ~SteadyStateFluidSolver();
 
-        virtual void getAcousticsVelocityLocal( matrix & data ) override;
+        void getAcousticsDensityLocal( matrix & data ) override;
 
-        virtual void getAcousticsPressureLocal( matrix & data ) override;
+        void getAcousticsTemperatureLocal( matrix & data ) override;
 
-        virtual void getAcousticsDensityLocal( matrix & data ) override;
+        void getAcousticsVelocityLocal( matrix & data )  override;
 
-        virtual void getTractionLocal( matrix & traction ) override;
+        void getAcousticsPressureLocal( matrix & data ) override;
 
-        virtual void getWritePositionsLocalAcoustics( matrix & writePositions ) override;
+        void getAcousticsTemperatureGradientLocal( matrix & data ) override;
 
-        virtual void initTimeStep() override;
+        void getAcousticsVelocityGradientLocal( matrix & data )  override;
 
-        virtual bool isRunning() override;
+        void getAcousticsPressureGradientLocal( matrix & data ) override;
 
-        virtual void resetSolution() override;
+        void getTractionLocal( matrix & traction ) override;
 
-        virtual void setAcousticsTemperatureGradient( const matrix & temperatureGradient ) override;
+        void getWritePositionsLocalAcoustics( matrix & writePositions ) override;
 
-        virtual void setAcousticsPressureGradient( const matrix & pressureGradient ) override;
+        void initTimeStep() override;
 
-        virtual void setAcousticsVelocityGradient( const matrix & velocityGradient ) override;
+        bool isRunning() override;
 
-        virtual void solve() override;
+        void resetSolution() override;
+
+        void setAcousticsTemperatureGradient( const matrix & temperatureGradient ) override;
+
+        void setAcousticsPressureGradient( const matrix & pressureGradient ) override;
+
+        void setAcousticsVelocityGradient( const matrix & velocityGradient ) override;
+
+        void setAcousticsTemperature( const matrix & temperatureGradient ) override;
+
+        void setAcousticsPressure( const matrix & pressureGradient ) override;
+
+        void setAcousticsVelocity( const matrix & velocityGradient ) override;
+
+        void solve() override;
 
     private:
         void checkTimeDiscretisationScheme();

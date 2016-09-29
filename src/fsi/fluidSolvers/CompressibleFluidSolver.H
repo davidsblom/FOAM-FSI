@@ -34,9 +34,17 @@ class CompressibleFluidSolver : public foamFluidSolver
 
         void getAcousticsDensityLocal( matrix & data ) override;
 
+        void getAcousticsTemperatureLocal( matrix & data ) override;
+
         void getAcousticsVelocityLocal( matrix & data )  override;
 
         void getAcousticsPressureLocal( matrix & data ) override;
+
+        void getAcousticsTemperatureGradientLocal( matrix & data ) override;
+
+        void getAcousticsVelocityGradientLocal( matrix & data )  override;
+
+        void getAcousticsPressureGradientLocal( matrix & data ) override;
 
         void getTractionLocal( matrix & traction ) override;
 
@@ -53,6 +61,12 @@ class CompressibleFluidSolver : public foamFluidSolver
         void setAcousticsPressureGradient( const matrix & pressureGradient ) override;
 
         void setAcousticsVelocityGradient( const matrix & velocityGradient ) override;
+
+        void setAcousticsTemperature( const matrix & temperature ) override;
+
+        void setAcousticsPressure( const matrix & pressure ) override;
+
+        void setAcousticsVelocity( const matrix & velocity ) override;
 
         void solve() override;
 

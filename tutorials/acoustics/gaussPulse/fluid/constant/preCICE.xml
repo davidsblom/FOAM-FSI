@@ -58,8 +58,9 @@
          <read-data mesh="Fluid_Acoustics" name="Acoustics_Pressure_Gradient"/>
 
          <mapping:nearest-neighbor direction="read" from="Ateles_Acoustics" to="Fluid_Acoustics" constraint="consistent" timing="initial"/>
+         <!-- <mapping:rbf-thin-plate-splines direction="read" from="Ateles_Acoustics" to="Fluid_Acoustics" constraint="consistent" timing="initial" x-dead="true"/> -->
 
-         <export:vtk timestep-interval="1" directory="vtk" normals="0"/>
+         <export:vtk timestep-interval="1" directory="vtk-openfoam" normals="0"/>
 
          <!-- <master:mpi-single /> -->
        </participant>
@@ -80,9 +81,10 @@
          <read-data name="Acoustics_Velocity_Z" mesh="Ateles_Acoustics"/>
          <read-data name="Acoustics_Pressure" mesh="Ateles_Acoustics"/>
 
-         <export:vtk timestep-interval="1" directory="vtk" normals="0"/>
+         <export:vtk timestep-interval="1" directory="vtk-ateles" normals="0"/>
 
          <mapping:nearest-neighbor direction="read" from="Fluid_Acoustics" to="Ateles_Acoustics" constraint="consistent" timing="initial"/>
+         <!-- <mapping:rbf-thin-plate-splines direction="read" from="Fluid_Acoustics" to="Ateles_Acoustics" constraint="consistent" timing="initial" x-dead="true"/> -->
 
          <!-- <master:mpi-single /> -->
        </participant>
@@ -91,7 +93,7 @@
 
       <coupling-scheme:serial-explicit>
         <participants first="Ateles" second="Fluid_Solver" />
-        <max-timesteps value="900"/>
+        <max-timesteps value="500"/>
         <timestep-length value="1e-5"/>
         <exchange data="Acoustics_Temperature_Gradient" to="Fluid_Solver" from="Ateles" mesh="Ateles_Acoustics" initialize="no"/>
         <exchange data="Acoustics_Velocity_X_Gradient" to="Fluid_Solver" from="Ateles" mesh="Ateles_Acoustics" initialize="no"/>

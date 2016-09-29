@@ -35,11 +35,19 @@ class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
 
         virtual ~SDCFluidSolver();
 
-        virtual void getAcousticsVelocityLocal( matrix & data ) override;
+        void getAcousticsDensityLocal( matrix & data ) override;
 
-        virtual void getAcousticsPressureLocal( matrix & data ) override;
+        void getAcousticsTemperatureLocal( matrix & data ) override;
 
-        virtual void getAcousticsDensityLocal( matrix & data ) override;
+        void getAcousticsVelocityLocal( matrix & data )  override;
+
+        void getAcousticsPressureLocal( matrix & data ) override;
+
+        void getAcousticsTemperatureGradientLocal( matrix & data ) override;
+
+        void getAcousticsVelocityGradientLocal( matrix & data )  override;
+
+        void getAcousticsPressureGradientLocal( matrix & data ) override;
 
         virtual void getTractionLocal( matrix & traction ) override;
 
@@ -56,6 +64,12 @@ class SDCFluidSolver : public foamFluidSolver, public sdc::SDCFsiSolverInterface
         virtual void setAcousticsPressureGradient( const matrix & pressureGradient ) override;
 
         virtual void setAcousticsVelocityGradient( const matrix & velocityGradient ) override;
+
+        virtual void setAcousticsTemperature( const matrix & temperatureGradient ) override;
+
+        virtual void setAcousticsPressure( const matrix & pressureGradient ) override;
+
+        virtual void setAcousticsVelocity( const matrix & velocityGradient ) override;
 
         virtual void solve() override;
 

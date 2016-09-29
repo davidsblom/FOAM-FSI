@@ -19,7 +19,7 @@
 printRuntimeInfo = false
 outputname= 'mesh'
 comment = 'mesh'
-minlevel = 6
+minlevel = 5
 folder = 'mesh/'
 level = minlevel
 --debug = {debugMode=true, debugFiles=true, debugMesh='debug/'}
