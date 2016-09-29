@@ -48,8 +48,27 @@ build:
         - script:
             name: elemental
             code: |
-                cd src/thirdParty
-                ./compile_elemental
+                (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
+                cd src/thirdParty/elemental
+                mkdir -p build install && cd build
+
+                cmake \
+                    -D CMAKE_INSTALL_PREFIX=`pwd`/../install \
+                    -D INSTALL_PYTHON_PACKAGE=OFF \
+                    -D CMAKE_BUILD_TYPE=Release \
+                    -D EL_DISABLE_PARMETIS=TRUE \
+                    -D CMAKE_CXX_COMPILER=mpicxx \
+                    -D CMAKE_C_COMPILER=mpicc \
+                    -D CMAKE_Fortran_COMPILER=mpif90 \
+                    -D EL_DISABLE_SCALAPACK=TRUE \
+                    -D GFORTRAN_LIB=/usr/lib/gcc/x86_64-linux-gnu/6 \
+                    ..
+
+                make -j `nproc`
+                make install
+                cd ..
+                cp install/lib/*.so* $FOAM_LIBBIN/
+                rm -rf build
         - script:
             name: precice
             code: |
@@ -176,7 +195,28 @@ debug:
                 cp yaml-cpp/install/lib/libyaml-cpp* ${FOAM_LIBBIN}/
         - script:
             name: elemental
-            code: cd src/thirdParty && ./compile_elemental
+            code: |
+                (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
+                cd src/thirdParty/elemental
+                mkdir -p build install && cd build
+
+                cmake \
+                    -D CMAKE_INSTALL_PREFIX=`pwd`/../install \
+                    -D INSTALL_PYTHON_PACKAGE=OFF \
+                    -D CMAKE_BUILD_TYPE=Debug \
+                    -D EL_DISABLE_PARMETIS=TRUE \
+                    -D CMAKE_CXX_COMPILER=mpicxx \
+                    -D CMAKE_C_COMPILER=mpicc \
+                    -D CMAKE_Fortran_COMPILER=mpif90 \
+                    -D EL_DISABLE_SCALAPACK=TRUE \
+                    -D GFORTRAN_LIB=/usr/lib/gcc/x86_64-linux-gnu/6 \
+                    ..
+
+                make -j `nproc`
+                make install
+                cd ..
+                cp install/lib/*.so* $FOAM_LIBBIN/
+                rm -rf build
         - script:
             name: precice
             code: |
@@ -260,7 +300,28 @@ ubuntu:
                 cp yaml-cpp/install/lib/libyaml-cpp* ${FOAM_LIBBIN}/
         - script:
             name: elemental
-            code: cd src/thirdParty && ./compile_elemental
+            code: |
+                (cd /home/foam-extend-3.2 && source etc/prefs.sh && source etc/bashrc)
+                cd src/thirdParty/elemental
+                mkdir -p build install && cd build
+
+                cmake \
+                    -D CMAKE_INSTALL_PREFIX=`pwd`/../install \
+                    -D INSTALL_PYTHON_PACKAGE=OFF \
+                    -D CMAKE_BUILD_TYPE=Release \
+                    -D EL_DISABLE_PARMETIS=TRUE \
+                    -D CMAKE_CXX_COMPILER=mpicxx \
+                    -D CMAKE_C_COMPILER=mpicc \
+                    -D CMAKE_Fortran_COMPILER=mpif90 \
+                    -D EL_DISABLE_SCALAPACK=TRUE \
+                    -D GFORTRAN_LIB=/usr/lib/gcc/x86_64-linux-gnu/5 \
+                    ..
+
+                make -j `nproc`
+                make install
+                cd ..
+                cp install/lib/*.so* $FOAM_LIBBIN/
+                rm -rf build
         - script:
             name: precice
             code: |

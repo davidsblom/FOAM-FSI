@@ -14,9 +14,8 @@ cmake \
     -D EL_DISABLE_PARMETIS=TRUE \
     -D CMAKE_CXX_COMPILER=mpicxx \
     -D CMAKE_C_COMPILER=mpicc \
-    -D CMAKE_Fortran_COMPILER=gfortran \
+    -D CMAKE_Fortran_COMPILER=mpif90 \
     -D EL_DISABLE_SCALAPACK=TRUE \
-    -D MATH_LIBS="-L/usr/lib -lopenblas" \
     ..
 elif [ "$WM_COMPILE_OPTION" = "Debug" ]
 then
@@ -27,9 +26,8 @@ cmake \
     -D EL_DISABLE_PARMETIS=TRUE \
     -D CMAKE_CXX_COMPILER=mpicxx \
     -D CMAKE_C_COMPILER=mpicc \
-    -D CMAKE_Fortran_COMPILER=gfortran \
+    -D CMAKE_Fortran_COMPILER=mpif90 \
     -D EL_DISABLE_SCALAPACK=TRUE \
-    -D MATH_LIBS="-L/usr/lib -lopenblas" \
     ..
 fi
 
