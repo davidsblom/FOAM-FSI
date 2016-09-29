@@ -36,7 +36,7 @@ boundaryField
     west
     {
         type            acousticsPressureGradient;
-        gradient 0;
+        gradient 10;
         value 100000;
     }
     north

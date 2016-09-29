@@ -17,7 +17,7 @@ FoamFile
 
 dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform (-100 0 0);
+internalField   uniform (100 0 0);
 
 boundaryField
 {
@@ -32,7 +32,7 @@ boundaryField
     east
     {
         type            acousticsVelocity;
-        value (-100 0 0);
+        value (100 0 0);
     }
     west
     {

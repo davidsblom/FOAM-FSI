@@ -89,7 +89,7 @@
 
       <m2n:sockets exchange-directory="../" from="Fluid_Solver_A" to="Fluid_Solver_B" distribution-type="gather-scatter"/>
 
-      <coupling-scheme:serial-explicit>
+      <coupling-scheme:serial-implicit>
         <participants first="Fluid_Solver_A" second="Fluid_Solver_B" />
         <max-timesteps value="500"/>
         <timestep-length value="1e-5"/>
@@ -104,7 +104,19 @@
         <exchange data="Acoustics_Velocity_Y" from="Fluid_Solver_B" to="Fluid_Solver_A" mesh="Fluid_Acoustics_B" initialize="yes"/>
         <exchange data="Acoustics_Velocity_Z" from="Fluid_Solver_B" to="Fluid_Solver_A" mesh="Fluid_Acoustics_B" initialize="yes"/>
         <exchange data="Acoustics_Pressure" from="Fluid_Solver_B" to="Fluid_Solver_A" mesh="Fluid_Acoustics_B" initialize="yes"/>
-      </coupling-scheme:serial-explicit>
+
+        <relative-convergence-measure limit="1.0e-3" data="Acoustics_Temperature_Gradient" mesh="Fluid_Acoustics_A" suffices="0" />
+        <relative-convergence-measure limit="1.0e-3" data="Acoustics_Velocity_X_Gradient" mesh="Fluid_Acoustics_A" suffices="0" />
+        <relative-convergence-measure limit="1.0e-3" data="Acoustics_Velocity_Y_Gradient" mesh="Fluid_Acoustics_A" suffices="0" />
+        <relative-convergence-measure limit="1.0e-3" data="Acoustics_Velocity_Z_Gradient" mesh="Fluid_Acoustics_A" suffices="0" />
+        <relative-convergence-measure limit="1.0e-3" data="Acoustics_Pressure_Gradient" mesh="Fluid_Acoustics_A" suffices="0" />
+
+        <relative-convergence-measure limit="1.0e-3" data="Acoustics_Temperature" mesh="Fluid_Acoustics_B" suffices="0" />
+        <relative-convergence-measure limit="1.0e-3" data="Acoustics_Velocity_X" mesh="Fluid_Acoustics_B" suffices="0" />
+        <relative-convergence-measure limit="1.0e-3" data="Acoustics_Pressure" mesh="Fluid_Acoustics_B" suffices="0" />
+
+        <max-iterations value="10" />
+    </coupling-scheme:serial-implicit>
 
    </solver-interface>
 

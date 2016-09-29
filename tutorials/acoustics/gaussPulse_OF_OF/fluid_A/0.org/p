@@ -32,8 +32,7 @@ boundaryField
     east
     {
         type            acousticsPressure;
-        value 100000;
-        // type            zeroGradient;
+        value           100000;
     }
     west
     {
