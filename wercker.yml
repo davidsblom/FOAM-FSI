@@ -48,6 +48,7 @@ build:
         - script:
             name: elemental
             code: |
+                apt-get install -y libgfortran-4.9-dev
                 cd src/thirdParty
                 ./compile_elemental
         - script:
