@@ -61,7 +61,7 @@ build:
                     -D CMAKE_C_COMPILER=mpicc \
                     -D CMAKE_Fortran_COMPILER=mpif90 \
                     -D EL_DISABLE_SCALAPACK=TRUE \
-                    -D GFORTRAN_LIB=/usr/lib/gcc/x86_64-linux-gnu/6
+                    -D GFORTRAN_LIB=/usr/lib/gcc/x86_64-linux-gnu/6 \
                     ..
 
                 make -j `nproc`
@@ -209,7 +209,7 @@ debug:
                     -D CMAKE_C_COMPILER=mpicc \
                     -D CMAKE_Fortran_COMPILER=mpif90 \
                     -D EL_DISABLE_SCALAPACK=TRUE \
-                    -D GFORTRAN_LIB=/usr/lib/gcc/x86_64-linux-gnu/6
+                    -D GFORTRAN_LIB=/usr/lib/gcc/x86_64-linux-gnu/6 \
                     ..
 
                 make -j `nproc`
@@ -314,7 +314,7 @@ ubuntu:
                     -D CMAKE_C_COMPILER=mpicc \
                     -D CMAKE_Fortran_COMPILER=mpif90 \
                     -D EL_DISABLE_SCALAPACK=TRUE \
-                    -D GFORTRAN_LIB=/usr/lib/gcc/x86_64-linux-gnu/5
+                    -D GFORTRAN_LIB=/usr/lib/gcc/x86_64-linux-gnu/5 \
                     ..
 
                 make -j `nproc`
