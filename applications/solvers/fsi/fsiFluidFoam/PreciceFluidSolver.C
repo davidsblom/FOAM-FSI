@@ -517,6 +517,7 @@ void PreciceFluidSolver::writeAcousticsPressureGradient()
 
     matrix data;
     solver->getAcousticsPressureGradientLocal( data );
+    data *= -1.0;
 
     if ( data.rows() > 0 )
     {
@@ -561,6 +562,7 @@ void PreciceFluidSolver::writeAcousticsTemperatureGradient()
 
     matrix data;
     solver->getAcousticsTemperatureGradientLocal( data );
+    data *= -1.0;
 
     if ( data.rows() > 0 )
     {
@@ -610,6 +612,7 @@ void PreciceFluidSolver::writeAcousticsVelocityGradient()
 
     matrix data;
     solver->getAcousticsVelocityGradientLocal( data );
+    data *= -1.0;
 
     if ( data.rows() > 0 && precice->hasData( "Acoustics_Velocity_X_Gradient", meshId ) )
     {
