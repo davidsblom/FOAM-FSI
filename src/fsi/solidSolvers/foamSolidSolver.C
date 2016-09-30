@@ -41,6 +41,18 @@ foamSolidSolver::foamSolidSolver (
         ),
         mesh
     ),
+    Uinit
+    (
+        IOobject
+        (
+            "U",
+            runTime->timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh
+    ),
     couplingProperties
     (
         IOobject
@@ -84,6 +96,10 @@ foamSolidSolver::foamSolidSolver (
 
     assert( readLabel( runTime->controlDict().lookup( "writePrecision" ) ) >= 12 );
     timeIndex = runTime->timeIndex();
+
+    U.oldTime();
+    U.oldTime().oldTime();
+    U.oldTime().oldTime().oldTime();
 }
 
 foamSolidSolver::~foamSolidSolver()
@@ -125,7 +141,7 @@ void foamSolidSolver::getDisplacementLocal( matrix & displacementLocal )
         types
     );
 
-    pointInterpolation.interpolate( U, pointU );
+    pointInterpolation.interpolate( U - Uinit, pointU );
 
     assert( globalMovingPoints.size() == globalMovingPointLabels.size() );
 
@@ -208,7 +224,7 @@ void foamSolidSolver::getReadPositionsLocal( matrix & readPositions )
 
         for ( int i = 0; i < faceCentres.size(); i++ )
             for ( int j = 0; j < readPositions.cols(); j++ )
-                readPositions( i + offset, j ) = faceCentres[i][j];
+                readPositions( i + offset, j ) = faceCentres[i][j] + Uinit.boundaryField()[movingPatchIDs[patchId]][i][j];
 
         offset += faceCentres.size();
     }
@@ -339,6 +355,31 @@ void foamSolidSolver::getWritePositions( matrix & writePositions )
         }
     }
 
+    // Add initial displacement Uinit
+    pointMesh pMesh( mesh );
+
+    wordList types
+    (
+        pMesh.boundary().size(),
+        calculatedFvPatchVectorField::typeName
+    );
+
+    pointVectorField pointU
+    (
+        IOobject
+        (
+            "pointU",
+            runTime->timeName(),
+            mesh
+        ),
+        pMesh,
+        dimensionedVector( "zero", dimLength, Foam::vector::zero ),
+        types
+    );
+
+    leastSquaresVolPointInterpolation pointInterpolation( mesh );
+    pointInterpolation.interpolate( Uinit, pointU );
+
     vectorField positionsField( globalMovingPoints.size(), Foam::vector::zero );
 
     for ( auto point : globalMovingPoints )
@@ -352,7 +393,7 @@ void foamSolidSolver::getWritePositions( matrix & writePositions )
 
             for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
-                positionsField[point.second["global-id"]][j] = mesh.points()[point.second["mesh-index"]][j];
+                positionsField[point.second["global-id"]][j] = mesh.points()[point.second["mesh-index"]][j] + pointU[point.second["mesh-index"]][j];
             }
         }
     }
@@ -385,6 +426,31 @@ void foamSolidSolver::getWritePositionsLocal( matrix & writePositionsLocal )
 
     writePositionsLocal.resize( N, mesh.nGeometricD() );
 
+    // Add initial displacement Uinit
+    pointMesh pMesh( mesh );
+
+    wordList types
+    (
+        pMesh.boundary().size(),
+        calculatedFvPatchVectorField::typeName
+    );
+
+    pointVectorField pointU
+    (
+        IOobject
+        (
+            "pointU",
+            runTime->timeName(),
+            mesh
+        ),
+        pMesh,
+        dimensionedVector( "zero", dimLength, Foam::vector::zero ),
+        types
+    );
+
+    leastSquaresVolPointInterpolation pointInterpolation( mesh );
+    pointInterpolation.interpolate( Uinit, pointU );
+
     for ( auto && point : globalMovingPoints )
     {
         assert( point.second.find( "local-point" ) != point.second.end() );
@@ -396,7 +462,7 @@ void foamSolidSolver::getWritePositionsLocal( matrix & writePositionsLocal )
 
             for ( int j = 0; j < mesh.nGeometricD(); j++ )
             {
-                writePositionsLocal( point.second["local-id-unique"], j ) = mesh.points()[point.second["mesh-index"]][j];
+                writePositionsLocal( point.second["local-id-unique"], j ) = mesh.points()[point.second["mesh-index"]][j] + pointU[point.second["mesh-index"]][j];
             }
         }
     }
@@ -510,7 +576,7 @@ void foamSolidSolver::solve(
         types
     );
 
-    pointInterpolation.interpolate( U, pointU );
+    pointInterpolation.interpolate( U - Uinit, pointU );
 
     assert( globalMovingPoints.size() == globalMovingPointLabels.size() );
 

@@ -70,6 +70,7 @@ class foamSolidSolver : public BaseMultiLevelSolver
 
         // Fields
         volVectorField U;
+        volVectorField Uinit;
 
         // Dictionaries
         IOdictionary couplingProperties;
