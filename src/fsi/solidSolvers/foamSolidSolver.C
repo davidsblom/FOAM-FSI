@@ -169,6 +169,60 @@ void foamSolidSolver::getDisplacementLocal( matrix & displacementLocal )
     }
 }
 
+void foamSolidSolver::getDisplacementLocalInit( matrix & displacementLocal )
+{
+    leastSquaresVolPointInterpolation pointInterpolation( mesh );
+
+    // Create point mesh
+    pointMesh pMesh( mesh );
+
+    wordList types
+    (
+        pMesh.boundary().size(),
+        calculatedFvPatchVectorField::typeName
+    );
+
+    pointVectorField pointU
+    (
+        IOobject
+        (
+            "pointU",
+            runTime->timeName(),
+            mesh
+        ),
+        pMesh,
+        dimensionedVector( "zero", dimLength, Foam::vector::zero ),
+        types
+    );
+
+    pointInterpolation.interpolate( U.oldTime() - U.oldTime().oldTime(), pointU );
+
+    assert( globalMovingPoints.size() == globalMovingPointLabels.size() );
+
+    unsigned int N = 0;
+
+    for ( unsigned i = 0; i < globalMovingPoints.size(); i++ )
+        if ( globalMovingPoints[globalMovingPointLabels[i]]["local-point"] == true )
+            N++;
+
+    displacementLocal.resize( N, mesh.nGeometricD() );
+
+    for ( auto point : globalMovingPoints )
+    {
+        bool localPoint = point.second["local-point"];
+
+        if ( localPoint )
+        {
+            int localId = point.second["local-id"];
+
+            for ( int j = 0; j < mesh.nGeometricD(); j++ )
+            {
+                displacementLocal( point.second["local-id-unique"], j ) = pointU[movingPointLabels[localId]][j];
+            }
+        }
+    }
+}
+
 void foamSolidSolver::getReadPositions( matrix & readPositions )
 {
     int size = 0;

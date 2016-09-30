@@ -40,6 +40,9 @@ void PreciceFluidSolver::init()
     setWritePositions();
     setWritePositionsAcoustics();
 
+    matrix output;
+    solver->getTractionLocal( output );
+    writeData( output );
     writeDataAcoustics();
 
     precice->initialize();

@@ -38,7 +38,15 @@ void PreciceSolidSolver::init()
     setReadPositions();
     setWritePositions();
 
+    matrix output;
+    solver->getDisplacementLocalInit( output );
+    writeData( output );
+
     precice->initialize();
+
+    precice->fulfilledAction( precice::constants::actionWriteInitialData() );
+
+    precice->initializeData();
 }
 
 void PreciceSolidSolver::readData( matrix & data )

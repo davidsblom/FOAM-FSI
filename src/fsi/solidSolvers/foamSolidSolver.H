@@ -49,6 +49,8 @@ class foamSolidSolver : public BaseMultiLevelSolver
 
         void getDisplacementLocal( matrix & displacement );
 
+        void getDisplacementLocalInit( matrix & displacement );
+
         void getReadPositionsLocal( matrix & readPositions );
 
         void getWritePositionsLocal( matrix & writePositions );
