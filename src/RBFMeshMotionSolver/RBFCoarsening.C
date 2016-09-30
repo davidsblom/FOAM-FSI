@@ -4,8 +4,10 @@
  *   David Blom, TU Delft. All rights reserved.
  */
 
+#include <unordered_map>
 #include "RBFCoarsening.H"
 #include "WendlandC2Function.H"
+#include "TPSFunction.H"
 
 namespace rbf
 {
@@ -261,6 +263,8 @@ namespace rbf
             rbf::vector errorList( positions.rows() );
             selectedPositions.resize( 2 );
 
+            std::unordered_map<int, bool> positionsMap;
+
             if ( livePointSelection )
             {
                 // Select the point with the largest displacment
@@ -307,6 +311,9 @@ namespace rbf
             // Add second point
             selectedPositions( 1 ) = maxRadiusIndex;
 
+            positionsMap[selectedPositions( 0 )] = true;
+            positionsMap[selectedPositions( 1 )] = true;
+
             assert( selectedPositions( 0 ) != selectedPositions( 1 ) );
             assert( positions.rows() >= selectedPositions.rows() );
 
@@ -336,6 +343,7 @@ namespace rbf
                 }
 
                 // Perform the RBF interpolation.
+                std::unique_ptr<RBFInterpolation> rbfCoarse( new RBFInterpolation( rbf->rbfFunction, rbf->polynomialTerm, rbf->cpu ) );
                 rbfCoarse->interpolate( positionsCoarse, positionsInterpolationCoarse, valuesCoarse, valuesInterpolationCoarse );
 
                 // Evaluate the error
@@ -344,12 +352,18 @@ namespace rbf
 
                 // Select the point with the largest error which is not already selected.
                 int index = -1;
-                scalar largestError = errorList.maxCoeff( &index );
+                scalar largestError = -1;
 
-                // Additional function to check whether the largestError = 0 (<SMALL) and do select next consecutive point
-                if ( largestError < SMALL )
+                for ( int i = 0; i < errorList.rows(); i++ )
                 {
-                    index = selectedPositions.rows();
+                    bool alreadySelected = positionsMap.find( i ) != positionsMap.end();
+                    bool largerError = errorList( i ) > largestError;
+
+                    if ( !alreadySelected && largerError )
+                    {
+                        index = i;
+                        largestError = errorList( i );
+                    }
                 }
 
                 int index2 = -1;
@@ -400,12 +414,16 @@ namespace rbf
                 selectedPositions( selectedPositions.rows() - 1 ) = index;
                 counter++;
 
+                positionsMap[index] = true;
+
                 // Add second point if possible
                 if ( twoPointSelection && index2 >= 0 && index != index2 )
                 {
                     selectedPositions.conservativeResize( selectedPositions.rows() + 1 );
                     selectedPositions( selectedPositions.rows() - 1 ) = index2;
                     counter++;
+
+                    positionsMap[index2] = true;
                 }
             }
 
