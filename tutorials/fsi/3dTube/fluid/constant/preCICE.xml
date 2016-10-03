@@ -27,10 +27,8 @@
             <use-mesh name="Fluid_Nodes" provide="yes" />
             <use-mesh name="Fluid_CellCenters" provide="yes" />
             <use-mesh name="Structure_Nodes" from="Structure_Solver" />
-            <use-mesh name="Structure_CellCenters" from="Structure_Solver" />
             <write-data mesh="Fluid_CellCenters" name="Stresses" />
             <read-data mesh="Fluid_Nodes" name="Displacements" />
-            <mapping:nearest-neighbor direction="write" from="Fluid_CellCenters" to="Structure_CellCenters" constraint="conservative" timing="initial"/>
             <mapping:nearest-neighbor direction="read" from="Structure_Nodes" to="Fluid_Nodes" constraint="consistent" timing="initial"/>
             <master:mpi-single />
         </participant>
@@ -38,12 +36,14 @@
         <participant name="Structure_Solver">
             <use-mesh name="Structure_Nodes" provide="yes"/>
             <use-mesh name="Structure_CellCenters" provide="yes"/>
+            <use-mesh name="Fluid_CellCenters" from="Fluid_Solver"/>
             <write-data mesh="Structure_Nodes" name="Displacements" />
             <read-data mesh="Structure_CellCenters" name="Stresses" />
+            <mapping:nearest-neighbor direction="read" from="Fluid_CellCenters" to="Structure_CellCenters" constraint="consistent" timing="initial"/>
             <master:mpi-single />
         </participant>
 
-        <m2n:sockets exchange-directory="../" from="Fluid_Solver" to="Structure_Solver" />
+        <m2n:sockets exchange-directory="../" from="Fluid_Solver" to="Structure_Solver" distribution-type="gather-scatter" />
         <!-- OSX: <m2n:sockets network="lo0" exchange-directory="../" from="Fluid_Solver" to="Structure_Solver" />-->
         <!-- supermuc: <m2n:sockets network="ib0" exchange-directory="../" from="Fluid_Solver" to="Structure_Solver" />-->
 
@@ -51,8 +51,8 @@
             <timestep-length value="1.0e-4" />
             <max-timesteps value="100" />
             <participants first="Fluid_Solver" second="Structure_Solver" />
-            <exchange data="Stresses" from="Fluid_Solver" mesh="Structure_CellCenters" to="Structure_Solver" />
-            <exchange data="Displacements" from="Structure_Solver" mesh="Structure_Nodes" to="Fluid_Solver" />
+            <exchange data="Stresses" from="Fluid_Solver" mesh="Fluid_CellCenters" to="Structure_Solver" />
+            <exchange data="Displacements" from="Structure_Solver" mesh="Structure_Nodes" to="Fluid_Solver" initialize="yes"/>
             <relative-convergence-measure limit="1.0e-3" data="Displacements" mesh="Structure_Nodes" suffices="0" />
             <max-iterations value="200" />
             <extrapolation-order value="2" />
