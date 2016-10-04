@@ -162,7 +162,7 @@ debug:
             name: cppcheck
             code: |
                 (cd src/fsi && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
-                (cd src/RBFMeshMotionSolver -j `nproc` && cppcheck --error-exitcode=1 --enable=performance,portability .)
+                (cd src/RBFMeshMotionSolver && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
                 (cd src/tests && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
                 (cd applications && cppcheck -j `nproc` --error-exitcode=1 --enable=performance,portability .)
         - script:
