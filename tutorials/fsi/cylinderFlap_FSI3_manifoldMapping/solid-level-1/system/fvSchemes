@@ -27,20 +27,17 @@ d2dt2Schemes
 
 gradSchemes
 {
-    default         none;
-    grad(U)         extendedLeastSquares 0;
+    default         extendedLeastSquares 0;
 }
 
 divSchemes
 {
-    default         none;
-    div(sigma)      Gauss linear;
+    default         Gauss linear;
 }
 
 laplacianSchemes
 {
-    default             none;
-    laplacian(DU,U)     Gauss linear corrected;
+    default             Gauss linear corrected;
 }
 
 snGradSchemes
