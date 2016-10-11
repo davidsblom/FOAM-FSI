@@ -131,6 +131,10 @@ Prerequisites
 gcc 4.8 or higher due to C++11 features. The gfortran compiler is used for the
 compilation of the deal.II library, and is therefore also needed.
 
+MPI: in case the OpenMPI library is used, at least version 1.10 is required
+by elemental. Note that foam-extend also needs to be compiled with the same
+version.
+
 OS: Currently only Linux based distributions are supported, patches for other
 operating systems are welcome.
 
