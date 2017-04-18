@@ -19,6 +19,25 @@ namespace tubeflow
         scalar E0,
         scalar r0,
         scalar p0,
+        scalar T,
+        std::shared_ptr<sdc::DataStorage> dataStorage
+        )
+        :
+        TubeFlowExplicitLinearSolidSolver( N, nu, rho, h, L, dt, G, E0, r0, p0, T, dataStorage ),
+        k( 0 )
+    {}
+
+    SDCTubeFlowExplicitLinearSolidSolver::SDCTubeFlowExplicitLinearSolidSolver(
+        int N,
+        scalar nu,
+        scalar rho,
+        scalar h,
+        scalar L,
+        scalar dt,
+        scalar G,
+        scalar E0,
+        scalar r0,
+        scalar p0,
         scalar T
         )
         :
@@ -77,6 +96,7 @@ namespace tubeflow
         {
             uStages.at( i ) = u;
             rStages.at( i ) = r;
+            pStages.at( i ) = p;
         }
     }
 
@@ -91,11 +111,13 @@ namespace tubeflow
 
         uStages.clear();
         rStages.clear();
+        pStages.clear();
 
         for ( int i = 0; i < k + 1; i++ )
         {
             uStages.push_back( u );
             rStages.push_back( r );
+            pStages.push_back( p );
         }
     }
 
@@ -134,6 +156,8 @@ namespace tubeflow
     {
         this->dt = dt;
         this->t = t;
+        TubeFlowExplicitLinearSolidSolver::k = k;
+        TubeFlowExplicitLinearSolidSolver::corrector = corrector;
 
         if ( corrector )
         {
@@ -157,6 +181,7 @@ namespace tubeflow
     {
         uStages.at( k + 1 ) = u;
         rStages.at( k + 1 ) = r;
+        pStages.at( k + 1 ) = p;
     }
 
     void SDCTubeFlowExplicitLinearSolidSolver::getVariablesInfo(

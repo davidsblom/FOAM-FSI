@@ -39,6 +39,12 @@ namespace sdc
                 const std::vector<scalar> & nodes
                 ) const;
 
+            const fsi::matrix interpolate(
+                const fsi::matrix functions,
+                const std::vector<scalar> & from,
+                const std::vector<scalar> & to
+            ) const;
+
             const fsi::vector getFunction( int substep ) const;
 
             const fsi::vector getSolution( int substep ) const;

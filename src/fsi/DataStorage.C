@@ -89,6 +89,18 @@ namespace sdc
         return q_matrix * functions;
     }
 
+    const fsi::matrix DataStorage::interpolate(
+        const fsi::matrix functions,
+        const std::vector<scalar> & from,
+        const std::vector<scalar> & to
+        ) const
+    {
+        std::vector<scalar> quadratureNodes = quadrature->get_nodes();
+        fsi::quadrature::Matrix<scalar> q_matrix = compute_interpolation_matrix( from, to );
+
+        return q_matrix * functions;
+    }
+
     void DataStorage::copyFunctions()
     {
         Fold = F;

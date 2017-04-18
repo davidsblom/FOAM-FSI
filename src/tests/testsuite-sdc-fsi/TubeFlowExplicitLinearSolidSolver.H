@@ -7,6 +7,8 @@
 #pragma once
 
 #include "BaseMultiLevelSolver.H"
+#include <deque>
+#include "DataStorage.H"
 
 using namespace fsi;
 
@@ -27,6 +29,21 @@ namespace tubeflow
                 scalar r0,
                 scalar p0,
                 scalar T
+                );
+
+            TubeFlowExplicitLinearSolidSolver(
+                int N,
+                scalar nu,
+                scalar rho,
+                scalar h,
+                scalar L,
+                scalar dt,
+                scalar G,
+                scalar E0,
+                scalar r0,
+                scalar p0,
+                scalar T,
+                std::shared_ptr<sdc::DataStorage> dataStorage
                 );
 
             virtual ~TubeFlowExplicitLinearSolidSolver();
@@ -86,5 +103,10 @@ namespace tubeflow
             fsi::vector rhs;
             fsi::vector p;
             fsi::vector pn;
+
+            std::deque<fsi::vector> pStages;
+            int k;
+            bool corrector;
+            std::shared_ptr<sdc::DataStorage> dataStorage;
     };
 }
