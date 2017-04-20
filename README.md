@@ -130,6 +130,11 @@ Prerequisites
 
 gcc 4.8 or higher due to C++11 features. The gfortran compiler is used for the
 compilation of the deal.II library, and is therefore also needed.
+`openblas` is required by the libelemental library. On Ubuntu, you can install
+openblas like this:
+```
+sudo apt-get install libopenblas-dev
+```
 
 MPI: in case the OpenMPI library is used, at least version 1.10 is required
 by the linear algebra package elemental. Note that foam-extend also needs to 
